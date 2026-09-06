@@ -1,0 +1,36 @@
+id: workflow:ingestion-interpretation
+label: Ingestion and interpretation lifecycle
+rationale:
+- adr: adr:0003
+  section: Decision
+  summary: Each document version is parsed once; interpretation runs read the persisted artifact and a failed page
+    yields a partial run, never a negative assertion (sections 5, 86, 108.3).
+source_docs:
+- F0001/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+- planning-mds/architecture/master-blueprint.md
+related_nodes:
+- capability:parse-once-content-artifact
+- capability:semantic-interpretation-run
+- entity:content-artifact
+- entity:semantic-interpretation-run
+states:
+- id: state:ingestion-interpretation:received
+  label: Received
+  transitions_to:
+  - state:ingestion-interpretation:parsed
+  - state:ingestion-interpretation:failed
+- id: state:ingestion-interpretation:parsed
+  label: Parsed once
+  transitions_to:
+  - state:ingestion-interpretation:interpreted
+  - state:ingestion-interpretation:partial
+- id: state:ingestion-interpretation:partial
+  label: Partially interpreted
+  transitions_to:
+  - state:ingestion-interpretation:interpreted
+- id: state:ingestion-interpretation:interpreted
+  label: Interpreted
+  transitions_to: []
+- id: state:ingestion-interpretation:failed
+  label: Failed
+  transitions_to: []

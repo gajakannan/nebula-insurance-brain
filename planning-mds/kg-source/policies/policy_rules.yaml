@@ -1,0 +1,59 @@
+policy_rules:
+- id: policy_rule:content-artifact-read
+  label: content_artifact:read
+  resource: content_artifact
+  action: read
+  allowed_roles:
+  - role:tenant-member
+  - role:service-principal
+  related_nodes:
+  - capability:authorization-enforcement
+  - endpoint:content-artifact-get
+  source_docs:
+  - planning-mds/security/policies/policy.csv
+- id: policy_rule:review-task-read
+  label: review_task:read
+  resource: review_task
+  action: read
+  allowed_roles:
+  - role:tenant-member
+  - role:reviewer
+  related_nodes:
+  - capability:authorization-enforcement
+  - endpoint:review-item-get
+  source_docs:
+  - planning-mds/security/policies/policy.csv
+- id: policy_rule:review-task-annotate
+  label: review_task:annotate
+  resource: review_task
+  action: annotate
+  allowed_roles:
+  - role:reviewer
+  related_nodes:
+  - capability:evidence-review-round-trip
+  - endpoint:label-studio-webhook
+  source_docs:
+  - planning-mds/security/policies/policy.csv
+- id: policy_rule:fact-slot-read
+  label: fact_slot:read
+  resource: fact_slot
+  action: read
+  allowed_roles:
+  - role:tenant-member
+  - role:service-principal
+  related_nodes:
+  - capability:authorization-enforcement
+  - endpoint:fact-get
+  source_docs:
+  - planning-mds/security/policies/policy.csv
+- id: policy_rule:fact-slot-commit
+  label: fact_slot:commit
+  resource: fact_slot
+  action: commit
+  allowed_roles:
+  - role:service-principal
+  related_nodes:
+  - capability:bitemporal-canonical-commit
+  - endpoint:fact-commit
+  source_docs:
+  - planning-mds/security/policies/policy.csv

@@ -1,0 +1,356 @@
+openapi: 3.1.0
+info:
+  title: Nebula Insurance Brain API
+  description: >-
+    Semantic API for Nebula Insurance Brain. This revision covers F0001: the health endpoint and the
+    proof-scope reads, the Label Studio webhook receiver, and the canonical commit endpoint. Every
+    protected path verifies credentials before any storage read, hydrates resource attributes
+    server-side, evaluates policy through the Casbin adapter, and audits the decision. Denials are
+    reported as 404 so resource existence is never disclosed (master blueprint sections 66, 118.2).
+  version: 0.1.0
+  contact:
+    name: Nebula Insurance Brain
+servers:
+  - url: http://localhost:8080
+    description: Local development (docker-compose)
+security:
+  - bearerAuth: []
+tags:
+  - name: Health
+    description: Liveness and build identity
+  - name: Content
+    description: Parse-once content artifacts (F0001-S0003)
+  - name: Reviews
+    description: Review items and the Label Studio round trip (F0001-S0004)
+  - name: Facts
+    description: FactSlots and bitemporal canonical fact versions (F0001-S0005)
+paths:
+  /health:
+    get:
+      summary: Liveness and build identity
+      description: No credentials required. Performs no I/O.
+      operationId: getHealth
+      tags: [Health]
+      security: []
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /content/{artifactId}:
+    get:
+      summary: Get a content artifact manifest
+      operationId: getContentArtifact
+      tags: [Content]
+      parameters:
+        - $ref: "#/components/parameters/ArtifactId"
+      responses:
+        "200":
+          description: Manifest of the accepted artifact
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/content-artifact-manifest.schema.json"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /reviews/{reviewItemId}:
+    get:
+      summary: Get a review item with its external task reference and decision
+      operationId: getReviewItem
+      tags: [Reviews]
+      parameters:
+        - name: reviewItemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Review item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewItem"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /reviews/webhooks/label-studio:
+    post:
+      summary: Receive a Label Studio annotation event
+      description: >-
+        Authenticated by a shared secret header, not a user bearer token. The raw payload is
+        persisted with its sha256 before translation; redelivery is a no-op; a decision against a
+        superseded assertion version is recorded as stale and not applied (F0001-S0004).
+      operationId: receiveLabelStudioWebhook
+      tags: [Reviews]
+      security:
+        - webhookSecret: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LabelStudioAnnotationEvent"
+      responses:
+        "200":
+          description: Event processed, duplicate, or stale
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookReceipt"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+  /facts/{factSlotId}:
+    get:
+      summary: Resolve the canonical fact version at a valid-time and recorded-time coordinate
+      operationId: getFact
+      tags: [Facts]
+      parameters:
+        - name: factSlotId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: validAsOf
+          in: query
+          required: false
+          description: Valid-time coordinate; defaults to now
+          schema:
+            type: string
+            format: date-time
+        - name: knownAsOf
+          in: query
+          required: false
+          description: Recorded-time coordinate; defaults to now
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: The single version whose valid and recorded ranges contain both coordinates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FactVersion"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /facts/{factSlotId}/commits:
+    post:
+      summary: Propose a canonical commit for a FactSlot
+      description: Executes master blueprint section 109.2 in one transaction (F0001-S0005).
+      operationId: commitFact
+      tags: [Facts]
+      parameters:
+        - name: factSlotId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/canonical-commit-request.schema.json"
+      responses:
+        "201":
+          description: Committed
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/canonical-commit-response.schema.json"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: authentik OIDC access token; issuer and audience verified before any storage read
+    webhookSecret:
+      type: apiKey
+      in: header
+      name: X-Brain-Webhook-Secret
+  parameters:
+    ArtifactId:
+      name: artifactId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Validation failure
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Unauthenticated:
+      description: Credential verification failed; reason code recorded in the audit event only
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Forbidden:
+      description: Reserved for webhook mapping failures; user denials are reported as 404
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    NotFound:
+      description: Absent or not authorized (indistinguishable)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Conflict:
+      description: Stale expected version or concurrent commit
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+    Unprocessable:
+      description: Event cannot be mapped to a review item or reviewer principal
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+  schemas:
+    ProblemDetails:
+      type: object
+      description: >-
+        RFC 9457 problem details with a stable machine code and a traceId extension member. Mirrors
+        planning-mds/schemas/problem-details.schema.json; the framework contract validator requires the
+        definition inline. Denials never carry a detail that discloses resource existence.
+      additionalProperties: false
+      required: [type, title, status, code, traceId]
+      properties:
+        type: { type: string, format: uri-reference }
+        title: { type: string }
+        status: { type: integer, minimum: 400, maximum: 599 }
+        detail: { type: string }
+        instance: { type: string, format: uri-reference }
+        code: { type: string, pattern: "^[a-z][a-z0-9_]*$" }
+        traceId: { type: string, minLength: 1 }
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [status, git_sha, versions]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        git_sha:
+          type: string
+        versions:
+          type: object
+          additionalProperties:
+            type: string
+    ReviewItem:
+      type: object
+      additionalProperties: false
+      required: [id, type, status, assertion_id, assertion_version, tenant_id, knowledge_base_id, created_at]
+      properties:
+        id: { type: string, format: uuid }
+        type:
+          type: string
+          enum: [LOW_CONFIDENCE_ASSERTION, EXTRACTION_CORRECTION, PROVENANCE_CORRECTION, ENTITY_CORRECTION, RELATIONSHIP_CORRECTION]
+        status:
+          type: string
+          enum: [open, task_created, decided, stale]
+        assertion_id: { type: string, format: uuid }
+        assertion_version: { type: integer, minimum: 1 }
+        tenant_id: { type: string, format: uuid }
+        knowledge_base_id: { type: string, format: uuid }
+        external_task:
+          type: object
+          additionalProperties: false
+          properties:
+            project_id: { type: string }
+            task_id: { type: string }
+            created_at: { type: string, format: date-time }
+        decision:
+          $ref: "../schemas/review-decision.schema.json"
+        created_at: { type: string, format: date-time }
+    LabelStudioAnnotationEvent:
+      type: object
+      description: Raw Label Studio webhook payload; persisted verbatim with its sha256 before translation
+      additionalProperties: true
+      required: [action, task, annotation]
+      properties:
+        action: { type: string }
+        task: { type: object }
+        annotation: { type: object }
+    WebhookReceipt:
+      type: object
+      additionalProperties: false
+      required: [duplicate, stale]
+      properties:
+        decision_id: { type: string, format: uuid }
+        duplicate: { type: boolean }
+        stale: { type: boolean }
+    FactVersion:
+      type: object
+      additionalProperties: false
+      required: [id, fact_slot_id, value, valid, recorded, canonical_accepted_at, commit_id]
+      properties:
+        id: { type: string, format: uuid }
+        fact_slot_id: { type: string, format: uuid }
+        value: { type: object }
+        valid:
+          $ref: "#/components/schemas/TimeRange"
+        recorded:
+          $ref: "#/components/schemas/TimeRange"
+        change_reason:
+          type: [string, "null"]
+          enum: [superseded, corrected, retracted, expired, invalidated, merged, split, null]
+        evidence_refs:
+          type: array
+          items: { type: string, format: uuid }
+        commit_id: { type: string, format: uuid }
+        canonical_accepted_at: { type: string, format: date-time }
+    TimeRange:
+      type: object
+      additionalProperties: false
+      required: [start, end]
+      properties:
+        start: { type: string, format: date-time }
+        end: { type: [string, "null"], format: date-time }

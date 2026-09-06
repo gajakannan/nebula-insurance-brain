@@ -1,0 +1,27 @@
+roles:
+- id: role:tenant-member
+  label: TenantMember
+  notes: Verified user principal with a current membership in a tenant and knowledge base; reads content artifacts,
+    review tasks, and facts in that scope.
+  source_docs:
+  - F0001/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  related_nodes:
+  - entity:principal
+- id: role:reviewer
+  label: Reviewer
+  notes: Verified user principal bound to Label Studio; may annotate review tasks in scope; annotation is not canonical
+    approval (section 111.2).
+  source_docs:
+  - F0001/F0001-S0004-proof-label-studio-review-round-trip.md
+  - F0001/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  related_nodes:
+  - entity:principal
+  - entity:review-decision
+- id: role:service-principal
+  label: ServicePrincipal
+  notes: Worker identity for ingestion and the commit proof; commits facts in the fixture scope; never annotates.
+  source_docs:
+  - F0001/F0001-S0005-proof-bitemporal-commit.md
+  - F0001/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  related_nodes:
+  - entity:principal

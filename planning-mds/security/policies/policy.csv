@@ -1,0 +1,17 @@
+# Casbin ABAC policy — Nebula Insurance Brain, F0001 proof scope.
+# Format: p, role, resource, action, condition
+#
+# Structural tenancy is resolved BEFORE policy evaluation: the request subject carries the
+# membership matched to the resource's tenant, so `r.sub.knowledge_base_id` is the grant for
+# that tenant, never a client-supplied value. Every decision is audited with the policy hash.
+# The policy_rule nodes under planning-mds/kg-source/policies/ mirror these pairs; the KG
+# drift check (scripts/kg/validate.py --check-drift) fails when they diverge.
+#
+p, TenantMember, content_artifact, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, TenantMember, review_task, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, TenantMember, fact_slot, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, Reviewer, review_task, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, Reviewer, review_task, annotate, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, ServicePrincipal, content_artifact, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, ServicePrincipal, fact_slot, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, ServicePrincipal, fact_slot, commit, r.obj.knowledge_base_id == r.sub.knowledge_base_id

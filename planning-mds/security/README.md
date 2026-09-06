@@ -19,7 +19,7 @@
 | `data-protection.md` | Pending | Required; author from section 110 (classification, derivation propagation, retention, deletion, restore) |
 | `secrets-management.md` | Pending | Required; model-provider keys, Label Studio tokens, database credentials, authentik client secrets |
 | `owasp-top-10-results.md` | Pending | Required; first results land with the first DAST run in a feature evidence package |
-| `policies/` | Pending | Casbin model and policy files plus the parity fixtures shared with the CRM reference |
+| `policies/` | Seeded (F0001 Phase B) | `model.conf` and `policy.csv` for the F0001 proof scope (TenantMember, Reviewer, ServicePrincipal over content_artifact, review_task, fact_slot); mirrored by `kg-source/policies/policy_rules.yaml`; parity fixtures arrive with F0002 |
 | `reviews/security-review-YYYY-MM-DD.md` | Pending | Dated review outputs per feature run |
 
 ## Non-negotiables carried into every feature

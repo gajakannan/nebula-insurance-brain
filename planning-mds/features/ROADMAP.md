@@ -21,7 +21,7 @@ This document is the working prioritization view for feature sequencing. The tab
 <!-- generated:begin roadmap:now -->
 | Feature | Status | Why Now | Validation Gate |
 |---------|--------|---------|-----------------|
-| [F0001 — Repository and engineering foundation](./F0001-repository-and-engineering-foundation/README.md) | Planned | Everything downstream needs the repository, toolchain, CI, and the four pre-build contract proofs from master blueprint section 115.4 (parse, reinterpret, and evidence; Label Studio round trip; bitemporal commit; access and hosting) recorded before any contract is frozen. | Four section 115.4 proofs recorded with results in ADRs; product lifecycle gates green; PostgreSQL with pgvector and AGE, Docling, and Label Studio start locally from docker-compose. |
+| [F0001 — Repository and engineering foundation](./F0001-repository-and-engineering-foundation/README.md) | Active | Plan approved 2026-09-06 (Phase A at G3, Phase B at G5, plan run 2026-09-06-cdb5d8cb): assembly plan, contracts, schemas, policy, ADR-0054 and ADR-0055 in place. Everything downstream needs the runtime roots, the pinned dependency stack, and the four section 115.4 proofs recorded before any contract is frozen. | Four section 115.4 proofs recorded with results in ADRs; product lifecycle gates green; PostgreSQL with pgvector and AGE, Docling, and Label Studio start locally from docker-compose. |
 <!-- generated:end roadmap:now -->
 
 ## Next

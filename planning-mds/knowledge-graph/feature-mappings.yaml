@@ -4,10 +4,6 @@ coverage_note: Feature mappings are compiled from planning-mds/kg-source/feature
   explicit coverage exclusions until implementation exists.
 coverage:
   excluded_features:
-    - id: feature:F0001
-      path: planning-mds/features/F0001-repository-and-engineering-foundation
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0002
       path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -256,10 +252,188 @@ coverage:
       path: planning-mds/features/F0063-future-dsl
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
-features: []
+features:
+  - status: architecture-complete
+    id: feature:F0001
+    path: planning-mds/features/F0001-repository-and-engineering-foundation
+    affects:
+      - capability:authorization-enforcement
+      - capability:backup-and-restore
+      - capability:bitemporal-canonical-commit
+      - capability:credential-verification-and-principal-resolution
+      - capability:evidence-review-round-trip
+      - capability:local-dependency-stack
+      - capability:local-inference-service
+      - capability:parse-once-content-artifact
+      - capability:runtime-roots-and-toolchain
+      - capability:semantic-interpretation-run
+      - endpoint:content-artifact-get
+      - endpoint:fact-commit
+      - endpoint:fact-get
+      - endpoint:health
+      - endpoint:label-studio-webhook
+      - endpoint:review-item-get
+      - entity:assertion
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:content-artifact
+      - entity:fact-slot
+      - entity:outbox-event
+      - entity:principal
+      - entity:review-decision
+      - entity:review-item
+      - entity:semantic-interpretation-run
+      - workflow:canonical-commit
+      - workflow:human-review
+      - workflow:ingestion-interpretation
+    enforced_by_policy:
+      - policy_rule:content-artifact-read
+      - policy_rule:fact-slot-commit
+      - policy_rule:fact-slot-read
+      - policy_rule:review-task-annotate
+      - policy_rule:review-task-read
+    governed_by:
+      - adr:0001
+      - adr:0003
+      - adr:0004
+      - adr:0007
+      - adr:0008
+      - adr:0009
+      - adr:0010
+      - adr:0016
+      - adr:0034
+      - adr:0035
+      - adr:0037
+      - adr:0040
+      - adr:0041
+      - adr:0044
+      - adr:0049
+      - adr:0050
+      - adr:0054
+      - adr:0055
+    notes:
+      - 'Phase A drafted 2026-09-06 in plan run 2026-09-06-cdb5d8cb: seven stories (toolchain, containers,
+        four section 115.4 proofs, contract settlement). coverage_excluded stays until Phase B binds capabilities.'
+      - 'Phase B approved 2026-09-06: coverage_excluded removed; ten capabilities, ten entities, three
+        workflows, six endpoints, six schemas, three roles, five policy rules declared; code bindings
+        are authored at feature G7 once source exists.'
+    restricted_to_role:
+      - role:reviewer
+      - role:service-principal
+      - role:tenant-member
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:canonical-commit-request
+      - schema:canonical-commit-response
+      - schema:content-artifact-manifest
+      - schema:interpretation-result
+      - schema:problem-details
+      - schema:review-decision
 rules:
   - Mappings must reference canonical IDs declared in canonical-nodes.yaml.
   - Product Manager owns feature and story mapping freshness.
   - Architect owns corrections to canonical shared semantics.
   - If a target feature or story is not mapped here, prompts must fall back to the current file-centric
     read pattern.
+stories:
+  - id: story:F0001-S0001
+    feature: feature:F0001
+    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md
+    affects:
+      - capability:runtime-roots-and-toolchain
+      - endpoint:health
+    governed_by:
+      - adr:0054
+    uses_schema:
+      - schema:problem-details
+  - id: story:F0001-S0002
+    feature: feature:F0001
+    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md
+    affects:
+      - capability:local-dependency-stack
+      - capability:local-inference-service
+    governed_by:
+      - adr:0054
+      - adr:0055
+  - id: story:F0001-S0003
+    feature: feature:F0001
+    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+    affects:
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+      - entity:assertion
+      - entity:content-artifact
+      - entity:semantic-interpretation-run
+      - workflow:ingestion-interpretation
+    governed_by:
+      - adr:0003
+      - adr:0004
+      - adr:0016
+      - adr:0035
+      - adr:0040
+      - adr:0055
+    uses_schema:
+      - schema:content-artifact-manifest
+      - schema:interpretation-result
+  - id: story:F0001-S0004
+    feature: feature:F0001
+    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+    affects:
+      - capability:evidence-review-round-trip
+      - endpoint:label-studio-webhook
+      - endpoint:review-item-get
+      - entity:review-decision
+      - entity:review-item
+      - workflow:human-review
+    governed_by:
+      - adr:0034
+      - adr:0037
+      - adr:0044
+    uses_schema:
+      - schema:review-decision
+  - id: story:F0001-S0005
+    feature: feature:F0001
+    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+    affects:
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+      - endpoint:fact-get
+      - entity:canonical-fact-version
+      - entity:fact-slot
+      - entity:outbox-event
+      - workflow:canonical-commit
+    governed_by:
+      - adr:0007
+      - adr:0008
+      - adr:0009
+      - adr:0041
+    uses_schema:
+      - schema:canonical-commit-request
+      - schema:canonical-commit-response
+  - id: story:F0001-S0006
+    feature: feature:F0001
+    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+    affects:
+      - capability:authorization-enforcement
+      - capability:backup-and-restore
+      - capability:credential-verification-and-principal-resolution
+      - endpoint:content-artifact-get
+      - endpoint:fact-get
+      - endpoint:review-item-get
+      - entity:audit-event
+      - entity:principal
+    governed_by:
+      - adr:0049
+      - adr:0050
+  - id: story:F0001-S0007
+    feature: feature:F0001
+    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md
+    affects:
+      - capability:local-dependency-stack
+    governed_by:
+      - adr:0040
+      - adr:0041
+      - adr:0044
+      - adr:0049
+      - adr:0050

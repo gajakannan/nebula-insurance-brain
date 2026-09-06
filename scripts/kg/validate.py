@@ -419,20 +419,12 @@ def parse_casbin_role_map(
     return role_map
 
 
+# nebula-insurance-brain: role slug -> policy.csv role name (product-owned; the framework copy carried the CRM roles).
 ROLE_SLUG_TO_CSV = {
-    "distribution-user": "DistributionUser",
-    "distribution-manager": "DistributionManager",
-    "underwriter": "Underwriter",
-    "relationship-manager": "RelationshipManager",
-    "program-manager": "ProgramManager",
-    "admin": "Admin",
-    "broker-user": "BrokerUser",
-    "coordinator": "Coordinator",
-    "compliance-quality-lead": "ComplianceQualityLead",
-    "configuration-steward": "ConfigurationSteward",
-    "mga-user": "MgaUser",
-    "operations-manager": "OperationsManager",
-    "external-user": "ExternalUser",
+    "tenant-member": "TenantMember",
+    "reviewer": "Reviewer",
+    "service-principal": "ServicePrincipal",
+    "security-admin": "SecurityAdmin",
 }
 
 

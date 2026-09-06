@@ -9,6 +9,7 @@
 
 **Date:** 2026-09-05 (record created from the master blueprint baseline)
 **Deciders:** Pending; becomes Accepted only when the stated tests, owners, and release gates are satisfied (master blueprint section 106 decision posture)
+**Settled by:** F0001-S0004 (Label Studio review round trip with lineage); results recorded by F0001-S0007 (F0001 Phase B, 2026-09-06)
 **Source:** `planning-mds/architecture/master-blueprint.md` section 116
 
 ## Context

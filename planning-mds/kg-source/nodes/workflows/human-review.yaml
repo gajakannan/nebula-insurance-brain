@@ -1,0 +1,31 @@
+id: workflow:human-review
+label: Human review round trip
+rationale:
+- adr: adr:0034
+  section: Boundary
+  summary: Nebula creates the task and owns the decision; Label Studio presents it; a stale assertion version re-tasks
+    instead of applying (sections 75, 111.1).
+source_docs:
+- F0001/F0001-S0004-proof-label-studio-review-round-trip.md
+- planning-mds/architecture/master-blueprint.md
+related_nodes:
+- capability:evidence-review-round-trip
+- entity:review-item
+- entity:review-decision
+states:
+- id: state:human-review:open
+  label: Open
+  transitions_to:
+  - state:human-review:task-created
+- id: state:human-review:task-created
+  label: Label Studio task created
+  transitions_to:
+  - state:human-review:decided
+  - state:human-review:stale
+- id: state:human-review:stale
+  label: Stale assertion version
+  transitions_to:
+  - state:human-review:task-created
+- id: state:human-review:decided
+  label: Decided
+  transitions_to: []

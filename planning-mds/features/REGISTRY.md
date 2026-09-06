@@ -14,6 +14,7 @@ The feature tables below are generated fenced regions compiled from `planning-md
 <!-- generated:begin registry:active -->
 | Feature ID | Name | Status | Phase | Folder |
 |------------|------|--------|-------|--------|
+| F0001 | Repository and engineering foundation | Active | Pre-build | `F0001-repository-and-engineering-foundation/` |
 <!-- generated:end registry:active -->
 
 ## Retired Features
@@ -30,7 +31,6 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:planned -->
 | Feature ID | Name | Status | Phase | Folder |
 |------------|------|--------|-------|--------|
-| F0001 | Repository and engineering foundation | Planned | Pre-build | `F0001-repository-and-engineering-foundation/` |
 | F0002 | Tenancy-aware domain kernel + verified stable principal and scope contracts | Planned | v0.1A | `F0002-tenancy-aware-domain-kernel-and-principal-contracts/` |
 | F0003 | PostgreSQL persistence | Planned | v0.1A | `F0003-postgresql-persistence/` |
 | F0004 | Content artifact model | Planned | v0.1A | `F0004-content-artifact-model/` |

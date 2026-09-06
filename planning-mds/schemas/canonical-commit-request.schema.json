@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/canonical-commit-request.schema.json",
+  "title": "CanonicalCommitRequest",
+  "description": "Proposal for one canonical fact commit (master blueprint section 109.2; F0001-S0005).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["value", "valid_from", "evidence_refs", "source_received_at", "artifact_created_at", "assertion_created_at", "idempotency_key"],
+  "properties": {
+    "value": { "type": "object" },
+    "valid_from": { "type": "string", "format": "date-time" },
+    "valid_to": { "type": ["string", "null"], "format": "date-time" },
+    "change_reason": { "type": ["string", "null"], "enum": ["superseded", "corrected", "retracted", "expired", "invalidated", "merged", "split", null] },
+    "evidence_refs": { "type": "array", "minItems": 1, "items": { "type": "string", "format": "uuid" } },
+    "review_decision_id": { "type": ["string", "null"], "format": "uuid" },
+    "source_received_at": { "type": "string", "format": "date-time" },
+    "artifact_created_at": { "type": "string", "format": "date-time" },
+    "assertion_created_at": { "type": "string", "format": "date-time" },
+    "expected_current_version_id": { "type": ["string", "null"], "format": "uuid" },
+    "idempotency_key": { "type": "string", "minLength": 8, "maxLength": 128 }
+  }
+}

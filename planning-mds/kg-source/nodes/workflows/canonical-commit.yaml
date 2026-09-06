@@ -1,0 +1,36 @@
+id: workflow:canonical-commit
+label: Canonical commit lifecycle
+rationale:
+- adr: adr:0008
+  section: Decision
+  summary: Authorize, lock, validate ranges, split intervals, commit facts with audit and outbox in one transaction,
+    then project idempotently (sections 109.2, 109.3).
+source_docs:
+- F0001/F0001-S0005-proof-bitemporal-commit.md
+- F0001/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+- planning-mds/architecture/master-blueprint.md
+related_nodes:
+- capability:bitemporal-canonical-commit
+- capability:authorization-enforcement
+- entity:canonical-fact-version
+- entity:outbox-event
+states:
+- id: state:canonical-commit:proposed
+  label: Proposed
+  transitions_to:
+  - state:canonical-commit:authorized
+  - state:canonical-commit:rejected
+- id: state:canonical-commit:authorized
+  label: Authorized
+  transitions_to:
+  - state:canonical-commit:committed
+- id: state:canonical-commit:committed
+  label: Committed
+  transitions_to:
+  - state:canonical-commit:projected
+- id: state:canonical-commit:projected
+  label: Projected
+  transitions_to: []
+- id: state:canonical-commit:rejected
+  label: Rejected
+  transitions_to: []

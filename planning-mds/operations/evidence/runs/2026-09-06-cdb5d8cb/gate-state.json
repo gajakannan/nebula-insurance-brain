@@ -1,0 +1,80 @@
+{
+  "action": "plan",
+  "contract_version": "2026-07-11",
+  "run_id": "2026-09-06-cdb5d8cb",
+  "schema_version": 1,
+  "stages": {
+    "G1": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "status": "completed"
+    },
+    "G2": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "status": "completed"
+    },
+    "G3": {
+      "attestations": [
+        {
+          "actor": "gajakannan",
+          "checkpoint_id": "approve-phase-a",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "3951ffdf5936667e92ef808ed4bc7d2f45fcc1ed531075c92fcd1590a552b9a6"
+            }
+          ],
+          "note": "Phase A approved by the operator after the local-model clarification (Phi-4-mini-instruct on vLLM, aligned with CRM ADR-035)",
+          "role": "product-manager",
+          "timestamp": "2026-09-06T00:30:33-04:00"
+        }
+      ],
+      "completed_operations": [
+        "checkpoint:approve-phase-a"
+      ],
+      "pending_checkpoint": null,
+      "status": "completed"
+    },
+    "G4": {
+      "attestations": [],
+      "completed_operations": [
+        "kg-compile",
+        "kg-check-drift"
+      ],
+      "pending_checkpoint": null,
+      "status": "completed"
+    },
+    "G5": {
+      "attestations": [
+        {
+          "actor": "gajakannan",
+          "checkpoint_id": "approve-phase-b",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "6b2336370b6fb5fda31d9c13790f9d2db163956fa75f7e4ec6b158084df77805"
+            }
+          ],
+          "note": "Phase B approved by the operator on first presentation",
+          "role": "architect",
+          "timestamp": "2026-09-06T00:47:32-04:00"
+        }
+      ],
+      "completed_operations": [
+        "validate-stories",
+        "generate-story-index",
+        "validate-trackers",
+        "kg-write-coverage",
+        "kg-check-drift-exit",
+        "kg-check-reproducible",
+        "validate-templates",
+        "checkpoint:approve-phase-b"
+      ],
+      "pending_checkpoint": null,
+      "status": "completed"
+    }
+  }
+}

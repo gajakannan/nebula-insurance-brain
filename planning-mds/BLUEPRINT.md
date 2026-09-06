@@ -119,7 +119,7 @@ Locked unless changed by an accepted ADR (master blueprint section 3).
 - Frontend: React, TypeScript, Vite, React Router, TanStack Query, Zustand, React Hook Form, AJV with JSON Schema 2020-12, shadcn/ui, Tailwind CSS, TanStack Table, Cytoscape.js (v0.2), react-i18next
 - AuthN: authentik OIDC. AuthZ: native Casbin adapter behind an AuthorizationService with typed resource scopes. Session transport: same-origin BFF with server-held tokens is the proposed direction (ADR-0051, open)
 - Semantic interchange: JSON Schema 2020-12, JSON-LD, RDF and N-Triples, OWL, RDFS, SKOS, OKF, YAML, JSONL (authoring and interchange only, never runtime truth)
-- Deploy: Docker + docker-compose for local development; target host, PostgreSQL extension build, and model-provider data policy are open decisions (section 117.1)
+- Deploy: Docker + docker-compose for local development; the production host is an open decision (section 117.1). Clarification decisions recorded at F0001 G1 (2026-09-06): PostgreSQL 18 is the pinned major for the pgvector and Apache AGE build (fallback 17 only on build failure); Label Studio Community, self-hosted; the F0001 proofs use `microsoft/Phi-4-mini-instruct` served by vLLM as an OpenAI-compatible service on the host GPU (the local profile the CRM validated in nebula-insurance-crm ADR-035; 4,096-token context, bearer auth, no prompt persistence) and run in local Docker Compose
 - Testing: pytest for `engine/` and `neuron/` (unit, integration, evaluation against the Golden Corpus). Frontend stack proposed as Vitest + Playwright + axe following the CRM baseline, to be confirmed in Phase B. Cross-cutting scans per the framework evidence contract (dependency, secrets, SAST, DAST)
 
 ### 2.2 Contract locations
@@ -183,13 +183,29 @@ Vision: master blueprint sections 0 and 103. Non-goals: section 2 and the v0.1 e
 
 Derived per feature from section 1.2 of this document; persona files land in `examples/personas/` and feature PRDs.
 
+Engineering personas established by F0001 Phase A (2026-09-06):
+
+- Dana the Platform Engineer — `examples/personas/platform-engineer.md`
+- Mateo the Document Intelligence Engineer — `examples/personas/document-intelligence-engineer.md`
+- Ingrid the Persistence Engineer — `examples/personas/persistence-engineer.md`
+- Rosa the Business Reviewer — `examples/personas/business-reviewer.md`
+
+End-user personas (underwriters, analysts, stewards) are authored with the first user-facing features (F0021 to F0023).
+
 ### 3.3 Epics & Features
 
 The epic inventory is the master blueprint section 95 roadmap (F0001 to F0063), sequenced per section 115.3. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. All 63 features are seeded below as reserved identifiers, staged per section 115.3 (v0.1 stages, then v0.2A, v0.2B, v0.3, and v0.4+). Story links are appended by the plan action as each feature is planned.
 
 **Pre-build (Now)**
 
-- [F0001 — Repository and engineering foundation](features/F0001-repository-and-engineering-foundation/README.md) - Planned
+- [F0001 — Repository and engineering foundation](features/F0001-repository-and-engineering-foundation/README.md) - Plan approved 2026-09-06 (Phase A and B); ready for the feature action
+  - [F0001-S0001](features/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md) - Not Started
+  - [F0001-S0002](features/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md) - Not Started
+  - [F0001-S0003](features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md) - Not Started
+  - [F0001-S0004](features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md) - Not Started
+  - [F0001-S0005](features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) - Not Started
+  - [F0001-S0006](features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) - Not Started
+  - [F0001-S0007](features/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) - Not Started
 
 **v0.1A (Next)**
 
@@ -276,7 +292,7 @@ The epic inventory is the master blueprint section 95 roadmap (F0001 to F0063), 
 
 ### 3.4 MVP User Stories
 
-Authored per feature in `features/F####-{slug}/F####-S####-{slug}.md`. The v0.1 acceptance questions in sections 86 and 87 are the minimum story set for F0024 and F0025.
+Authored per feature in `features/F####-{slug}/F####-S####-{slug}.md`. The v0.1 acceptance questions in sections 86 and 87 are the minimum story set for F0024 and F0025. F0001 carries seven stories: toolchain skeleton, local containers and dependency matrix, the four section 115.4 proofs, and contract settlement (see section 3.3).
 
 ### 3.5 Screen Specifications
 
@@ -317,12 +333,20 @@ Performance, availability, scalability, and security targets are proposed gates 
 - `architecture/master-blueprint.md` — full baseline
 - `architecture/decisions/` — ADR-0001 to ADR-0053 (Accepted baseline and Proposed)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
-- `security/` — AuthX contract and pending security artifacts
+- `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
+- `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
+- `api/brain-api.yaml` — OpenAPI 3.1 (F0001 scope: health, protected reads, webhook, commit)
+- `schemas/*.schema.json` — shared JSON Schemas (manifest, interpretation result, review decision, commit request and response, problem details)
+- `security/policies/` — Casbin model and policy; `security/` — AuthX contract and pending security artifacts
 - `testing/evaluation-strategy.md` — Golden Corpus, metrics, regression suites, release gates
+
+### 4.9 F0001 Phase B (2026-09-06)
+
+Assembly plan: `features/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
 
 ### 4.8 Open decisions
 
-Section 117.1 lists the decisions the implementation team still owes: source-authority owner, tenant and knowledge-base identity scope, host and extension build, Docling-Graph pin, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior.
+Section 117.1 lists the decisions the implementation team still owes: source-authority owner, tenant and knowledge-base identity scope, host and extension build, Docling-Graph pin, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18), the Label Studio edition (Community), and the proof model policy (self-hosted); the production host, the Docling-Graph pin, and the corpus source remain open.
 
 ---
 

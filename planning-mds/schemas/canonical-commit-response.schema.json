@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/canonical-commit-response.schema.json",
+  "title": "CanonicalCommitResponse",
+  "description": "Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["commit_id", "fact_version_ids", "canonical_accepted_at"],
+  "properties": {
+    "commit_id": { "type": "string", "format": "uuid" },
+    "fact_version_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "format": "uuid" } },
+    "canonical_accepted_at": { "type": "string", "format": "date-time" }
+  }
+}

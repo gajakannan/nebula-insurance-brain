@@ -1,18 +1,181 @@
 id: feature:F0001
 name: Repository and engineering foundation
 path: planning-mds/features/F0001-repository-and-engineering-foundation
-status: planned
-registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
+status: architecture-complete
+registry_section: Active
 phase: Pre-build
 roadmap_section: Now
 roadmap_order: 1
-rationale: Everything downstream needs the repository, toolchain, CI, and the four pre-build contract proofs from
-  master blueprint section 115.4 (parse, reinterpret, and evidence; Label Studio round trip; bitemporal commit;
-  access and hosting) recorded before any contract is frozen.
+rationale: 'Plan approved 2026-09-06 (Phase A at G3, Phase B at G5, plan run 2026-09-06-cdb5d8cb): assembly plan,
+  contracts, schemas, policy, ADR-0054 and ADR-0055 in place. Everything downstream needs the runtime roots, the
+  pinned dependency stack, and the four section 115.4 proofs recorded before any contract is frozen.'
 validation_gate: Four section 115.4 proofs recorded with results in ADRs; product lifecycle gates green; PostgreSQL
   with pgvector and AGE, Docling, and Label Studio start locally from docker-compose.
 governed_by:
 - adr:0001
+- adr:0003
+- adr:0004
+- adr:0007
+- adr:0008
+- adr:0009
+- adr:0010
+- adr:0016
+- adr:0034
+- adr:0035
+- adr:0037
+- adr:0040
+- adr:0041
+- adr:0044
+- adr:0049
+- adr:0050
+- adr:0054
+- adr:0055
+story_mappings:
+- id: story:F0001-S0001
+  path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md
+  affects:
+  - capability:runtime-roots-and-toolchain
+  - endpoint:health
+  governed_by:
+  - adr:0054
+  uses_schema:
+  - schema:problem-details
+- id: story:F0001-S0002
+  path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md
+  affects:
+  - capability:local-dependency-stack
+  - capability:local-inference-service
+  governed_by:
+  - adr:0054
+  - adr:0055
+- id: story:F0001-S0003
+  path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+  affects:
+  - capability:parse-once-content-artifact
+  - capability:semantic-interpretation-run
+  - entity:content-artifact
+  - entity:semantic-interpretation-run
+  - entity:assertion
+  - workflow:ingestion-interpretation
+  governed_by:
+  - adr:0003
+  - adr:0004
+  - adr:0016
+  - adr:0035
+  - adr:0040
+  - adr:0055
+  uses_schema:
+  - schema:content-artifact-manifest
+  - schema:interpretation-result
+- id: story:F0001-S0004
+  path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+  affects:
+  - capability:evidence-review-round-trip
+  - entity:review-item
+  - entity:review-decision
+  - workflow:human-review
+  - endpoint:label-studio-webhook
+  - endpoint:review-item-get
+  governed_by:
+  - adr:0034
+  - adr:0037
+  - adr:0044
+  uses_schema:
+  - schema:review-decision
+- id: story:F0001-S0005
+  path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  affects:
+  - capability:bitemporal-canonical-commit
+  - entity:fact-slot
+  - entity:canonical-fact-version
+  - entity:outbox-event
+  - workflow:canonical-commit
+  - endpoint:fact-get
+  - endpoint:fact-commit
+  governed_by:
+  - adr:0007
+  - adr:0008
+  - adr:0009
+  - adr:0041
+  uses_schema:
+  - schema:canonical-commit-request
+  - schema:canonical-commit-response
+- id: story:F0001-S0006
+  path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  affects:
+  - capability:credential-verification-and-principal-resolution
+  - capability:authorization-enforcement
+  - capability:backup-and-restore
+  - entity:principal
+  - entity:audit-event
+  - endpoint:content-artifact-get
+  - endpoint:review-item-get
+  - endpoint:fact-get
+  governed_by:
+  - adr:0049
+  - adr:0050
+- id: story:F0001-S0007
+  path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md
+  affects:
+  - capability:local-dependency-stack
+  governed_by:
+  - adr:0040
+  - adr:0041
+  - adr:0044
+  - adr:0049
+  - adr:0050
+notes:
+- 'Phase A drafted 2026-09-06 in plan run 2026-09-06-cdb5d8cb: seven stories (toolchain, containers, four section
+  115.4 proofs, contract settlement). coverage_excluded stays until Phase B binds capabilities.'
+- 'Phase B approved 2026-09-06: coverage_excluded removed; ten capabilities, ten entities, three workflows, six
+  endpoints, six schemas, three roles, five policy rules declared; code bindings are authored at feature G7 once
+  source exists.'
+affects:
+- capability:runtime-roots-and-toolchain
+- capability:local-dependency-stack
+- capability:local-inference-service
+- capability:parse-once-content-artifact
+- capability:semantic-interpretation-run
+- capability:evidence-review-round-trip
+- capability:bitemporal-canonical-commit
+- capability:credential-verification-and-principal-resolution
+- capability:authorization-enforcement
+- capability:backup-and-restore
+- entity:content-artifact
+- entity:semantic-interpretation-run
+- entity:assertion
+- entity:review-item
+- entity:review-decision
+- entity:fact-slot
+- entity:canonical-fact-version
+- entity:outbox-event
+- entity:principal
+- entity:audit-event
+- workflow:ingestion-interpretation
+- workflow:human-review
+- workflow:canonical-commit
+- endpoint:health
+- endpoint:content-artifact-get
+- endpoint:review-item-get
+- endpoint:label-studio-webhook
+- endpoint:fact-get
+- endpoint:fact-commit
+uses_api_contract:
+- api:brain-api
+uses_schema:
+- schema:content-artifact-manifest
+- schema:interpretation-result
+- schema:review-decision
+- schema:canonical-commit-request
+- schema:canonical-commit-response
+- schema:problem-details
+restricted_to_role:
+- role:tenant-member
+- role:reviewer
+- role:service-principal
+enforced_by_policy:
+- policy_rule:content-artifact-read
+- policy_rule:review-task-read
+- policy_rule:review-task-annotate
+- policy_rule:fact-slot-read
+- policy_rule:fact-slot-commit

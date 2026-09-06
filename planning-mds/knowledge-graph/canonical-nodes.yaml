@@ -163,3 +163,569 @@ adrs:
   - id: adr:0053
     label: Permission-Safe Retrieval and Historical Access
     path: planning-mds/architecture/decisions/ADR-0053-permission-safe-retrieval-and-historical-access.md
+  - id: adr:0054
+    label: Repository Layout, Runtime Roots, and Local Development Topology
+    path: planning-mds/architecture/decisions/ADR-0054-repository-layout-runtime-roots-and-local-topology.md
+    related_nodes:
+      - capability:local-dependency-stack
+      - capability:runtime-roots-and-toolchain
+  - id: adr:0055
+    label: Local Inference Profile — Phi-4-mini-instruct on vLLM
+    path: planning-mds/architecture/decisions/ADR-0055-local-inference-profile-phi-4-mini-on-vllm.md
+    related_nodes:
+      - capability:local-inference-service
+      - capability:semantic-interpretation-run
+api_contracts:
+  - id: api:brain-api
+    label: Nebula Insurance Brain API
+    path: planning-mds/api/brain-api.yaml
+    related_nodes:
+      - endpoint:content-artifact-get
+      - endpoint:fact-commit
+      - endpoint:fact-get
+      - endpoint:health
+      - endpoint:label-studio-webhook
+      - endpoint:review-item-get
+capabilities:
+  - id: capability:authorization-enforcement
+    label: Authorization enforcement
+    notes: Native Casbin adapter over typed, server-hydrated resource attributes with structural tenancy
+      resolved first; every decision audited with policy hash, grant revision, and reason code; denials
+      never disclose existence.
+    related_nodes:
+      - adr:0050
+      - entity:audit-event
+      - policy_rule:content-artifact-read
+      - policy_rule:fact-slot-commit
+      - policy_rule:fact-slot-read
+      - policy_rule:review-task-annotate
+      - policy_rule:review-task-read
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:backup-and-restore
+    label: Backup and restore
+    notes: Timed backup of relational state, content objects, artifact manifests, and review evidence,
+      restored to a fresh stack with every citation verified (section 114.3).
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - capability:parse-once-content-artifact
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:bitemporal-canonical-commit
+    label: Bitemporal canonical commit
+    notes: Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals,
+      explicit change reasons, and facts plus audit plus outbox in one transaction (ADR-0007, ADR-0008,
+      ADR-0009).
+    related_nodes:
+      - endpoint:fact-commit
+      - endpoint:fact-get
+      - entity:canonical-fact-version
+      - entity:fact-slot
+      - entity:outbox-event
+      - schema:canonical-commit-request
+      - schema:canonical-commit-response
+      - workflow:canonical-commit
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:credential-verification-and-principal-resolution
+    label: Credential verification and principal resolution
+    notes: OIDC token verification (issuer, audience, signature, expiry) before any storage read; verified
+      (issuer, subject) mapped to a stable internal principal with current memberships.
+    related_nodes:
+      - adr:0049
+      - entity:principal
+      - role:reviewer
+      - role:service-principal
+      - role:tenant-member
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:evidence-review-round-trip
+    label: Evidence review round trip
+    notes: ReviewItem routing to a Label Studio task, secured webhook receipt with payload hashing, duplicate
+      and stale rejection, and a governed ReviewDecision with correction lineage (ADR-0034, ADR-0037).
+    related_nodes:
+      - endpoint:label-studio-webhook
+      - endpoint:review-item-get
+      - entity:review-decision
+      - entity:review-item
+      - schema:review-decision
+      - workflow:human-review
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:local-dependency-stack
+    label: Local dependency stack
+    notes: 'Docker Compose stack: PostgreSQL 18 with pgvector, AGE, btree_gist; MinIO content store; Label
+      Studio Community; authentik; pinned dependency matrix.'
+    related_nodes:
+      - adr:0054
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:local-inference-service
+    label: Local inference service
+    notes: vLLM OpenAI-compatible service on the host GPU serving microsoft/Phi-4-mini-instruct with a
+      4,096-token context; client-side context enforcement; no identity data sent to the model (ADR-0055).
+    related_nodes:
+      - adr:0055
+      - capability:semantic-interpretation-run
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:parse-once-content-artifact
+    label: Parse-once content artifact
+    notes: Docling converts each document version once into an immutable bundle with the native DoclingDocument
+      JSON, normalized projections, and a hashed manifest; reinterpretation never re-parses.
+    related_nodes:
+      - adr:0003
+      - adr:0004
+      - entity:content-artifact
+      - schema:content-artifact-manifest
+      - workflow:ingestion-interpretation
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:runtime-roots-and-toolchain
+    label: Runtime roots and toolchain
+    notes: engine/ and neuron/ uv workspaces, FastAPI application factory with /health, Alembic, lint
+      and type configuration, CI wiring (ADR-0054).
+    related_nodes:
+      - adr:0054
+      - endpoint:health
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:semantic-interpretation-run
+    label: Semantic interpretation run
+    notes: Docling-Graph extraction over persisted content producing a provider-neutral InterpretationResult
+      with evidence bindings of declared precision, run configuration, and counters proving zero conversion
+      calls.
+    related_nodes:
+      - adr:0016
+      - adr:0035
+      - entity:assertion
+      - entity:semantic-interpretation-run
+      - schema:interpretation-result
+      - workflow:ingestion-interpretation
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
+endpoints:
+  - id: endpoint:content-artifact-get
+    label: GET /content/{artifactId}
+    method: GET
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:parse-once-content-artifact
+    resource: content_artifact
+    route: /content/{artifactId}
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+  - id: endpoint:fact-commit
+    label: POST /facts/{factSlotId}/commits
+    method: POST
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+    resource: fact_slot
+    route: /facts/{factSlotId}/commits
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+  - id: endpoint:fact-get
+    label: GET /facts/{factSlotId}
+    method: GET
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+    resource: fact_slot
+    route: /facts/{factSlotId}
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+  - id: endpoint:health
+    label: GET /health
+    method: GET
+    related_nodes:
+      - capability:runtime-roots-and-toolchain
+    route: /health
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+  - id: endpoint:label-studio-webhook
+    label: POST /reviews/webhooks/label-studio
+    method: POST
+    related_nodes:
+      - capability:evidence-review-round-trip
+    resource: review_task
+    route: /reviews/webhooks/label-studio
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+  - id: endpoint:review-item-get
+    label: GET /reviews/{reviewItemId}
+    method: GET
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:evidence-review-round-trip
+    resource: review_task
+    route: /reviews/{reviewItemId}
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+entities:
+  - id: entity:assertion
+    label: Assertion
+    notes: What a source, system, model, or person claims, with evidence bindings and interpretation basis;
+      never truth by itself; versioned so review decisions can detect staleness.
+    related_entities:
+      - entity:review-decision
+      - entity:semantic-interpretation-run
+    related_nodes:
+      - capability:semantic-interpretation-run
+      - entity:review-item
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+  - id: entity:audit-event
+    label: Audit event
+    notes: 'Append-only record of authorization decisions, commits, and review decisions: actor and delegate,
+      resource, action, decision, reason code, policy hash, grant revision, trace id.'
+    related_entities:
+      - entity:principal
+    related_nodes:
+      - capability:authorization-enforcement
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  - id: entity:canonical-fact-version
+    label: Canonical fact version
+    notes: Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references,
+      commit id, and the four separately stored timestamps; overlap prevented by a two-range GiST exclusion.
+    related_entities:
+      - entity:fact-slot
+      - entity:outbox-event
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+      - schema:canonical-commit-response
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:content-artifact
+    label: Content artifact
+    notes: 'Immutable parse-once bundle for one document version: docling-document.json, normalized.md,
+      blocks.jsonl, tables.jsonl, layout.jsonl, manifest.json with per-file sha256 and execution record.'
+    related_entities:
+      - entity:semantic-interpretation-run
+    related_nodes:
+      - capability:parse-once-content-artifact
+      - schema:content-artifact-manifest
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+  - id: entity:fact-slot
+    label: Fact slot
+    notes: Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit
+      of a coverage); the parent of bitemporal fact versions.
+    related_entities:
+      - entity:canonical-fact-version
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:outbox-event
+    label: Outbox event
+    notes: Transactional outbox row written with every canonical commit and consumed idempotently by projectors;
+      carries commit id and processed watermark.
+    related_entities:
+      - entity:canonical-fact-version
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:principal
+    label: Principal
+    notes: Verified identity (user, service, or agent) mapped from (issuer, subject) to a stable internal
+      id, with current memberships per tenant and knowledge base and a grant revision.
+    related_entities:
+      - entity:audit-event
+    related_nodes:
+      - capability:credential-verification-and-principal-resolution
+      - role:reviewer
+      - role:service-principal
+      - role:tenant-member
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  - id: entity:review-decision
+    label: Review decision
+    notes: Governed outcome of a review (ACCEPT, CORRECT, REJECT) bound to a verified reviewer principal,
+      the payload hash, and the assertion version; corrections append a new assertion linked to the original.
+    related_entities:
+      - entity:assertion
+      - entity:principal
+      - entity:review-item
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - schema:review-decision
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+  - id: entity:review-item
+    label: Review item
+    notes: Nebula-owned unit of human adjudication for a low-confidence or corrected assertion; carries
+      the assertion version and the external Label Studio task reference.
+    related_entities:
+      - entity:assertion
+      - entity:review-decision
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - workflow:human-review
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+  - id: entity:semantic-interpretation-run
+    label: Semantic interpretation run
+    notes: Versioned execution of an extraction profile over a content artifact; records run configuration,
+      counters, status (complete, partial, failed), and the external provenance ledger.
+    related_entities:
+      - entity:assertion
+      - entity:content-artifact
+    related_nodes:
+      - capability:semantic-interpretation-run
+      - schema:interpretation-result
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+policy_rules:
+  - id: policy_rule:content-artifact-read
+    label: content_artifact:read
+    action: read
+    allowed_roles:
+      - role:service-principal
+      - role:tenant-member
+    related_nodes:
+      - capability:authorization-enforcement
+      - endpoint:content-artifact-get
+    resource: content_artifact
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:fact-slot-commit
+    label: fact_slot:commit
+    action: commit
+    allowed_roles:
+      - role:service-principal
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+    resource: fact_slot
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:fact-slot-read
+    label: fact_slot:read
+    action: read
+    allowed_roles:
+      - role:service-principal
+      - role:tenant-member
+    related_nodes:
+      - capability:authorization-enforcement
+      - endpoint:fact-get
+    resource: fact_slot
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:review-task-annotate
+    label: review_task:annotate
+    action: annotate
+    allowed_roles:
+      - role:reviewer
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - endpoint:label-studio-webhook
+    resource: review_task
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:review-task-read
+    label: review_task:read
+    action: read
+    allowed_roles:
+      - role:reviewer
+      - role:tenant-member
+    related_nodes:
+      - capability:authorization-enforcement
+      - endpoint:review-item-get
+    resource: review_task
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+roles:
+  - id: role:reviewer
+    label: Reviewer
+    notes: Verified user principal bound to Label Studio; may annotate review tasks in scope; annotation
+      is not canonical approval (section 111.2).
+    related_nodes:
+      - entity:principal
+      - entity:review-decision
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  - id: role:service-principal
+    label: ServicePrincipal
+    notes: Worker identity for ingestion and the commit proof; commits facts in the fixture scope; never
+      annotates.
+    related_nodes:
+      - entity:principal
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  - id: role:tenant-member
+    label: TenantMember
+    notes: Verified user principal with a current membership in a tenant and knowledge base; reads content
+      artifacts, review tasks, and facts in that scope.
+    related_nodes:
+      - entity:principal
+    source_docs:
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+schemas:
+  - id: schema:canonical-commit-request
+    label: CanonicalCommitRequest
+    path: planning-mds/schemas/canonical-commit-request.schema.json
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+  - id: schema:canonical-commit-response
+    label: CanonicalCommitResponse
+    path: planning-mds/schemas/canonical-commit-response.schema.json
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+  - id: schema:content-artifact-manifest
+    label: ContentArtifactManifest
+    path: planning-mds/schemas/content-artifact-manifest.schema.json
+    related_nodes:
+      - capability:parse-once-content-artifact
+      - entity:content-artifact
+  - id: schema:interpretation-result
+    label: InterpretationResult
+    path: planning-mds/schemas/interpretation-result.schema.json
+    related_nodes:
+      - capability:semantic-interpretation-run
+      - entity:semantic-interpretation-run
+  - id: schema:problem-details
+    label: ProblemDetails
+    path: planning-mds/schemas/problem-details.schema.json
+    related_nodes:
+      - api:brain-api
+      - capability:runtime-roots-and-toolchain
+  - id: schema:review-decision
+    label: ReviewDecision
+    path: planning-mds/schemas/review-decision.schema.json
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - entity:review-decision
+workflows:
+  - id: workflow:canonical-commit
+    label: Canonical commit lifecycle
+    rationale:
+      - adr: adr:0008
+        section: Decision
+        summary: Authorize, lock, validate ranges, split intervals, commit facts with audit and outbox
+          in one transaction, then project idempotently (sections 109.2, 109.3).
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+      - entity:canonical-fact-version
+      - entity:outbox-event
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+    states:
+      - id: state:canonical-commit:proposed
+        label: Proposed
+        transitions_to:
+          - state:canonical-commit:authorized
+          - state:canonical-commit:rejected
+      - id: state:canonical-commit:authorized
+        label: Authorized
+        transitions_to:
+          - state:canonical-commit:committed
+      - id: state:canonical-commit:committed
+        label: Committed
+        transitions_to:
+          - state:canonical-commit:projected
+      - id: state:canonical-commit:projected
+        label: Projected
+        transitions_to: []
+      - id: state:canonical-commit:rejected
+        label: Rejected
+        transitions_to: []
+  - id: workflow:human-review
+    label: Human review round trip
+    rationale:
+      - adr: adr:0034
+        section: Boundary
+        summary: Nebula creates the task and owns the decision; Label Studio presents it; a stale assertion
+          version re-tasks instead of applying (sections 75, 111.1).
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - entity:review-decision
+      - entity:review-item
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+    states:
+      - id: state:human-review:open
+        label: Open
+        transitions_to:
+          - state:human-review:task-created
+      - id: state:human-review:task-created
+        label: Label Studio task created
+        transitions_to:
+          - state:human-review:decided
+          - state:human-review:stale
+      - id: state:human-review:stale
+        label: Stale assertion version
+        transitions_to:
+          - state:human-review:task-created
+      - id: state:human-review:decided
+        label: Decided
+        transitions_to: []
+  - id: workflow:ingestion-interpretation
+    label: Ingestion and interpretation lifecycle
+    rationale:
+      - adr: adr:0003
+        section: Decision
+        summary: Each document version is parsed once; interpretation runs read the persisted artifact
+          and a failed page yields a partial run, never a negative assertion (sections 5, 86, 108.3).
+    related_nodes:
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+      - entity:content-artifact
+      - entity:semantic-interpretation-run
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+    states:
+      - id: state:ingestion-interpretation:received
+        label: Received
+        transitions_to:
+          - state:ingestion-interpretation:parsed
+          - state:ingestion-interpretation:failed
+      - id: state:ingestion-interpretation:parsed
+        label: Parsed once
+        transitions_to:
+          - state:ingestion-interpretation:interpreted
+          - state:ingestion-interpretation:partial
+      - id: state:ingestion-interpretation:partial
+        label: Partially interpreted
+        transitions_to:
+          - state:ingestion-interpretation:interpreted
+      - id: state:ingestion-interpretation:interpreted
+        label: Interpreted
+        transitions_to: []
+      - id: state:ingestion-interpretation:failed
+        label: Failed
+        transitions_to: []

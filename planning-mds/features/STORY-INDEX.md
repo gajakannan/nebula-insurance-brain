@@ -2,7 +2,21 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 0
+**Total Stories:** 7
+
+---
+
+## F0001 — Repository and engineering foundation
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0001-S0001](./F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md) | Runtime roots and toolchain skeleton | Critical | Infrastructure | Dana the Platform Engineer |
+| [F0001-S0002](./F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md) | Local runtime containers and dependency matrix | Critical | Infrastructure | Dana the Platform Engineer |
+| [F0001-S0003](./F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md) | Proof: parse once, reinterpret twice, evidence resolves | High | Infrastructure | Mateo the Document Intelligence Engineer |
+| [F0001-S0004](./F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md) | Proof: Label Studio review round trip with lineage | High | Infrastructure | Rosa the Business Reviewer |
+| [F0001-S0005](./F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) | Proof: bitemporal commit under retroactive and concurrent change | High | Infrastructure | Ingrid the Persistence Engineer |
+| [F0001-S0006](./F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) | Proof: access boundaries, extension build, and restore | High | Infrastructure | Dana the Platform Engineer |
+| [F0001-S0007](./F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) | Record proof outcomes and settle the pre-build contracts | High | Infrastructure | Dana the Platform Engineer |
 
 ---
 
@@ -10,6 +24,7 @@ Auto-generated index of all user stories across feature folders.
 
 | Phase | Count |
 |-------|-------|
+| Infrastructure | 7 |
 
 ---
 
@@ -17,6 +32,8 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
+| Critical | 2 |
+| High | 5 |
 
 ---
 

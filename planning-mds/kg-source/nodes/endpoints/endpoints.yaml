@@ -1,0 +1,58 @@
+endpoints:
+- id: endpoint:health
+  label: GET /health
+  method: GET
+  route: /health
+  related_nodes:
+  - capability:runtime-roots-and-toolchain
+  source_docs:
+  - planning-mds/api/brain-api.yaml
+- id: endpoint:content-artifact-get
+  label: GET /content/{artifactId}
+  method: GET
+  route: /content/{artifactId}
+  resource: content_artifact
+  related_nodes:
+  - capability:parse-once-content-artifact
+  - capability:authorization-enforcement
+  source_docs:
+  - planning-mds/api/brain-api.yaml
+- id: endpoint:review-item-get
+  label: GET /reviews/{reviewItemId}
+  method: GET
+  route: /reviews/{reviewItemId}
+  resource: review_task
+  related_nodes:
+  - capability:evidence-review-round-trip
+  - capability:authorization-enforcement
+  source_docs:
+  - planning-mds/api/brain-api.yaml
+- id: endpoint:label-studio-webhook
+  label: POST /reviews/webhooks/label-studio
+  method: POST
+  route: /reviews/webhooks/label-studio
+  resource: review_task
+  related_nodes:
+  - capability:evidence-review-round-trip
+  source_docs:
+  - planning-mds/api/brain-api.yaml
+- id: endpoint:fact-get
+  label: GET /facts/{factSlotId}
+  method: GET
+  route: /facts/{factSlotId}
+  resource: fact_slot
+  related_nodes:
+  - capability:bitemporal-canonical-commit
+  - capability:authorization-enforcement
+  source_docs:
+  - planning-mds/api/brain-api.yaml
+- id: endpoint:fact-commit
+  label: POST /facts/{factSlotId}/commits
+  method: POST
+  route: /facts/{factSlotId}/commits
+  resource: fact_slot
+  related_nodes:
+  - capability:bitemporal-canonical-commit
+  - capability:authorization-enforcement
+  source_docs:
+  - planning-mds/api/brain-api.yaml

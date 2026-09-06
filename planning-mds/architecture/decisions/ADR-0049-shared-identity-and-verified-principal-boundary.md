@@ -9,6 +9,7 @@
 
 **Date:** 2026-09-05 (record created from the master blueprint baseline)
 **Deciders:** Pending; Architecture and Security roles confirm during Phase B of the first AuthX-bearing feature
+**Settled by:** F0001-S0006 (access boundaries, extension build, and restore); results recorded by F0001-S0007 (F0001 Phase B, 2026-09-06)
 **Source:** `planning-mds/architecture/master-blueprint.md` section 122
 
 ## Context
