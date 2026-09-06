@@ -1,0 +1,85 @@
+version: 1
+# Product-local lifecycle for nebula-insurance-brain (framework CONSUMER-CONTRACT §6).
+# Distinct from the framework's own lifecycle-stage.yaml. Gate commands are
+# product-root-relative and run from this repo (scripts/run-lifecycle-gates.py,
+# locally or in .github/workflows/ci-gates.yml). The framework's
+# agents/scripts/run-lifecycle-gates.py executes commands from the framework
+# root and does not expand {PRODUCT_ROOT}, so it is not used for product gates.
+current_stage: framework-bootstrap
+release_posture:
+  mode: planning-baseline
+  summary: >
+    Bootstrapped on 2026-09-05 from the master architecture blueprint through the
+    nebula-agents init action (run 2026-09-05-6823e66e, framework commit 4eaf7b3).
+    No runtime code yet. Feature-level truth lives in planning-mds/features/REGISTRY.md
+    and ROADMAP.md, compiled from planning-mds/kg-source/features/**.
+stages:
+  framework-bootstrap:
+    description: Planning tree scaffolded; the knowledge graph compiles from shards and is reproducible; no runtime yet.
+    required_gates:
+      - knowledge_graph_sync
+      - kg_reproducibility
+  planning:
+    description: Planning artifacts are being authored; implementation may still be placeholder.
+    required_gates:
+      - knowledge_graph_sync
+      - kg_reproducibility
+  implementation:
+    description: Runtime artifacts exist in engine/, experience/, or neuron/ and implementation quality gates run.
+    required_gates:
+      - knowledge_graph_sync
+      - kg_reproducibility
+      - symbol_index_sync
+      - inline_decisions_check
+  release-readiness:
+    description: Release hardening with strict quality and security gate evidence.
+    required_gates:
+      - knowledge_graph_sync
+      - kg_reproducibility
+      - symbol_index_sync
+      - inline_decisions_check
+      - kg_orphan_check
+      - kg_coverage_gap_check
+gates:
+  knowledge_graph_sync:
+    description: Validate knowledge-graph integrity (IDs, references, paths, feature coverage, code-index bindings, coverage-report freshness).
+    command:
+      - python3
+      - scripts/kg/validate.py
+  kg_reproducibility:
+    description: Committed compiled projections and tracker regions equal compile(source); shards valid; .gitattributes matches the generated-paths manifest.
+    command:
+      - python3
+      - scripts/kg/validate.py
+      - --check-reproducible
+  symbol_index_sync:
+    description: Validate symbol-index.yaml is in sync with code-index bindings.
+    command:
+      - python3
+      - scripts/kg/validate.py
+      - --check-symbols
+  inline_decisions_check:
+    description: Validate inline decision markers resolve to files, nodes, symbols, and ADRs.
+    command:
+      - python3
+      - scripts/kg/validate.py
+      - --check-decisions
+  kg_orphan_check:
+    description: |
+      Warn on canonical nodes with no incoming refs and no code-index binding
+      (ontology orphans), and report symbol-level dead-code candidates at high
+      confidence. Cleanup gate run at release readiness; raw source remains
+      authoritative.
+    command:
+      - python3
+      - scripts/kg/validate.py
+      - --check-orphans
+  kg_coverage_gap_check:
+    description: |
+      Warn on invocations from files outside code-index.yaml bindings that
+      target bound symbols (reads unbound-but-referenced.yaml). Default
+      severity is warn; switch to --coverage-gaps-as-errors to enforce.
+    command:
+      - python3
+      - scripts/kg/validate.py
+      - --check-coverage-gaps

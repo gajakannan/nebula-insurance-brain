@@ -1,0 +1,46 @@
+# nebula-insurance-brain
+
+Nebula Insurance Brain — a continuously evolving enterprise semantic system for commercial Property & Casualty insurance. It ingests documents once, preserves evidence, separates what sources claim from what the enterprise accepts, and exposes governed bitemporal knowledge through 360 views, search, graph, APIs, agents, and conversation.
+
+## Status
+
+Planning baseline. No runtime code yet. The architecture baseline is `planning-mds/architecture/master-blueprint.md`; the framework entry point is `planning-mds/BLUEPRINT.md`.
+
+## How this repo is built
+
+This product is driven by the sibling [`nebula-agents`](https://github.com/gajakannan/nebula-agents) framework. Sessions run inside `nebula-agents/` with this repository as `{PRODUCT_ROOT}`:
+
+```bash
+export NEBULA_PRODUCT_ROOT=/absolute/path/to/nebula-insurance-brain
+cd ../nebula-agents
+python3 agents/scripts/run-gate.py --action init --list
+```
+
+The framework pin and the layout convention are recorded in `planning-mds/BLUEPRINT.md` section 0.
+
+## Layout
+
+| Path | Purpose | Owning role |
+| --- | --- | --- |
+| `planning-mds/` | Blueprint, features, architecture, ADRs, kg-source, evidence | product-manager, architect |
+| `engine/` | Python backend: FastAPI API, worker, semantic kernel packages, Alembic migrations | backend-developer |
+| `neuron/` | Python AI runtime: Docling ingestion, extraction, interpretation, conversation, learning, MCP tools | ai-engineer |
+| `experience/` | React and TypeScript web app | frontend-developer |
+| `ontology/`, `profiles/`, `schemas/`, `knowledge-packs/` | Authored semantic assets compiled into the runtime | architect |
+| `integrations/label-studio/` | Label Studio project templates, task mappers, webhook contracts | backend-developer |
+| `golden-corpus/` | Version-controlled evaluation fixtures | quality-engineer |
+| `scripts/kg/` | Knowledge-graph toolchain (product-owned copy of the framework tooling) | architect |
+
+Full tree: `planning-mds/architecture/master-blueprint.md` section 77.
+
+## Knowledge graph
+
+`planning-mds/kg-source/**` is authored; `planning-mds/knowledge-graph/*.yaml` and the REGISTRY and ROADMAP tables are compiled by `scripts/kg/compile.py`. Activate the local reproducibility hook once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+## License
+
+See [LICENSE](LICENSE).

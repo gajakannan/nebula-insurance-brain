@@ -1,0 +1,84 @@
+# Environment
+.env*
+!.env.example
+!experience/.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.coverage
+coverage.xml
+htmlcov/
+
+# Node / React
+node_modules/
+.pnpm-store/
+**/.pnpm-store/
+.vite/
+experience/dist/
+experience/coverage/
+playwright-report/
+test-results/
+
+# .NET build output from the optional C# symbol extractor
+scripts/kg/csharp-symbols/bin/
+scripts/kg/csharp-symbols/obj/
+
+# KG workstate and caches (scripts/kg/workstate.py, symbols.py)
+.kg-state/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+# Evidence logs are audit artifacts — un-ignore them
+!planning-mds/operations/evidence/**/*.log
+
+# Docker
+docker-compose.override.yml
+
+# Local content store and uploaded documents (runtime state, never committed)
+content/
+
+# Security reports
+security-reports/
+
+# Test runner output — ephemeral, never commit (repo-wide)
+**/test-results/
+**/coverage/
+
+# Durable evidence artifacts are committed even when general test/coverage outputs are ignored.
+!planning-mds/operations/evidence/runs/**/artifacts/
+!planning-mds/operations/evidence/runs/**/artifacts/test-results/
+!planning-mds/operations/evidence/runs/**/artifacts/coverage/
+!planning-mds/operations/evidence/runs/**/artifacts/security/
+!planning-mds/operations/evidence/runs/**/artifacts/diffs/
+!planning-mds/operations/evidence/runs/**/artifacts/screenshots/
+!planning-mds/operations/evidence/runs/**/artifacts/**/*.txt
+!planning-mds/operations/evidence/runs/**/artifacts/**/*.log
+!planning-mds/operations/evidence/runs/**/artifacts/**/*.json
+!planning-mds/operations/evidence/runs/**/artifacts/**/*.xml
+!planning-mds/operations/evidence/runs/**/artifacts/**/*.sarif
+!planning-mds/operations/evidence/runs/**/artifacts/**/*.png
+
+# Private plans
+_private-plans/**

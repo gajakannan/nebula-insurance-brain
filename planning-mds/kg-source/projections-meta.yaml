@@ -1,0 +1,18 @@
+canonical-nodes.yaml:
+  version: 1
+  status: generated
+  coverage_note: Canonical solution nodes are compiled from role-owned shards under planning-mds/kg-source/. Coverage starts empty for Nebula Insurance Brain and grows as features complete Phase B (plan action G4) and G7 reconciliation.
+code-index.yaml:
+  version: 1
+  status: generated
+  coverage_note: Stable solution node IDs are bound to engine/, neuron/, and experience/ paths as features ship so agents can route into implementation without broad repository scans. Bindings are retrieval hints; source files remain authoritative.
+feature-mappings.yaml:
+  version: 1
+  status: generated
+  coverage_note: Feature mappings are compiled from planning-mds/kg-source/features/**. Planned scopes stay explicit coverage exclusions until implementation exists.
+  rules:
+    - Mappings must reference canonical IDs declared in canonical-nodes.yaml.
+    - Product Manager owns feature and story mapping freshness.
+    - Architect owns corrections to canonical shared semantics.
+    - If a target feature or story is not mapped here, prompts must fall back to the current file-centric
+      read pattern.

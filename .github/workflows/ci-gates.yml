@@ -1,0 +1,51 @@
+# Stage-scoped CI gates for nebula-insurance-brain.
+#
+# Job 1 runs the product-local gates declared in lifecycle-stage.yaml for the current
+# lifecycle stage; it needs only this repo. Job 2 runs the framework-owned planning
+# validators (trackers, feature evidence) against this repo with the sibling framework
+# checked out at the commit pinned in planning-mds/BLUEPRINT.md section 0.
+# The knowledge-graph reproducibility gate lives in kg-reproducibility.yml.
+name: CI Gates (Stage-Scoped)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  product-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml jsonschema
+      - name: Show configured lifecycle stages
+        run: python3 scripts/run-lifecycle-gates.py --list
+      - name: Run required gates for the current lifecycle stage
+        run: python3 scripts/run-lifecycle-gates.py
+
+  framework-validators:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: product
+      - uses: actions/checkout@v4
+        with:
+          repository: gajakannan/nebula-agents
+          ref: 4eaf7b3abef84687f6fda622c61a95d378a50888
+          path: framework
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r framework/agents/scripts/requirements.txt
+      - name: Tracker and story validation
+        working-directory: framework
+        run: python3 agents/product-manager/scripts/validate-trackers.py --product-root ../product
+      - name: Feature evidence validation (registry-wide)
+        working-directory: framework
+        run: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root ../product
