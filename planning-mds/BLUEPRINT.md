@@ -30,11 +30,11 @@ IMPORTANT RULES:
 
 ### Framework binding
 
-- Framework: `nebula-agents` pinned at commit `4eaf7b3abef84687f6fda622c61a95d378a50888` (2026-08-30). Advance the pin deliberately and record the new commit here.
+- Framework: `nebula-agents` pinned at commit `c218bf1776f509a30f71967a1ee79879caa9a000` (2026-09-07). Advance the pin deliberately, in step with `.github/workflows/ci-gates.yml`, and record the new commit here.
 - Session setup: export `NEBULA_PRODUCT_ROOT=<absolute path to this repo>` before running any framework script. The framework default points at the CRM repo, not this one.
 - Layout convention: `engine/`, `experience/`, `neuron/` runtime roots (section 2.3). Path-class extensions for the additional roots are declared in section 2.4 and registered in `operations/evidence/README.md` at init.
 - Local guidance: [agent instructions](../docs/agent-instructions.md) and [plan review checklist](../docs/plan-review-checklist.md), declared in `../.nebula-project.yaml`, supplement this blueprint without changing its authority.
-- Extension rollout: the working-tree integration requires a newer framework revision than the pin above. Publish that revision and update this pin and `.github/workflows/ci-gates.yml` together before rollout; see [adoption status](../docs/framework-adoption.md).
+- Extension rollout: complete. The pinned revision carries `agents/scripts/project_checks.py` and `agents/scripts/project_context.py`, so the checks declared in `../.nebula-project.yaml` execute at the framework's `plan-review` extension point; see [adoption status](../docs/framework-adoption.md).
 
 ### Tracker Governance (Mandatory)
 
