@@ -1,6 +1,6 @@
 # Feature Registry
 
-**Next Available Feature Number:** F0064
+**Next Available Feature Number:** F0065
 
 **Planning Views:**
 - Roadmap sequencing (`Now / Next / Later`): `planning-mds/features/ROADMAP.md`
@@ -93,6 +93,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | F0061 | Advanced retrieval | Planned | v0.4+ | `F0061-advanced-retrieval/` |
 | F0062 | Advanced reasoners | Planned | v0.4+ | `F0062-advanced-reasoners/` |
 | F0063 | Future DSL | Planned | v0.4+ | `F0063-future-dsl/` |
+| F0064 | Repository instructions and planning-check adoption | Planned | Repository Tooling | `F0064-repository-instructions-and-planning-check-adoption/` |
 <!-- generated:end registry:planned -->
 
 ## Archived Features

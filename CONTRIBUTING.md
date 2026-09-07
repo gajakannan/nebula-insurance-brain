@@ -1,81 +1,53 @@
 # Contributing
 
-Thanks for contributing to this project.
+Read [README.md](README.md), [the blueprint](planning-mds/BLUEPRINT.md), and [local agent instructions](docs/agent-instructions.md). Keep product requirements and validation scripts in this repository. Generic framework changes belong in the sibling `nebula-agents` repository.
 
-## 1) Before You Start
+## Install planning tooling
 
-1. Read `README.md`.
-2. Read `BOUNDARY-POLICY.md`.
-3. Confirm whether your change is:
-   - framework-generic (`agents/`, docs), or
-   - solution-specific (`{PRODUCT_ROOT}/planning-mds/`).
-
-## 2) Contribution Flow
-
-1. Open an issue describing the problem or proposal.
-2. Create a branch for the change.
-3. Submit a PR linked to the issue.
-4. Ensure validations pass before requesting review.
-
-## 3) Required Checks
-
-Run at minimum:
+From `nebula-insurance-brain/`, use Python 3.12 or newer:
 
 ```bash
-python3 -m pip install -r agents/scripts/requirements.txt
-python3 agents/scripts/run-lifecycle-gates.py
+python3 -m venv .venv
+.venv/bin/python -m pip install -e '.[test]'
+git config core.hooksPath .githooks
+git config merge.ours.driver true
 ```
 
-To inspect configured lifecycle stages and required gates:
+These are the planning-tool dependencies; the future application runtime requires the Python version specified in the blueprint.
+
+## Product checks
 
 ```bash
-python3 agents/scripts/run-lifecycle-gates.py --list
+.venv/bin/python scripts/run-lifecycle-gates.py
+.venv/bin/python scripts/validation/validate_plan_readiness.py --plan-scope project --target project
+.venv/bin/python -m pytest scripts/validation/tests
 ```
 
-Lifecycle stage and gate definitions are declared in `lifecycle-stage.yaml`.
+The copied KG tooling suite is separate: `.venv/bin/python -m pytest scripts/kg/tests`. Existing failures in framework-specific lookup fixtures are tracked in the adoption plan and do not represent completed runtime features.
 
-If your change touches scripts:
+For framework checks, set the product identity and run from the sibling framework:
 
 ```bash
-python3 -m py_compile $(rg --files agents scripts planning-mds | rg '\.py$')
+export NEBULA_PRODUCT_ROOT="$(pwd)"
+cd ../nebula-agents
+python3 agents/product-manager/scripts/validate-trackers.py --product-root "$NEBULA_PRODUCT_ROOT"
+python3 agents/product-manager/scripts/validate-stories.py --product-root "$NEBULA_PRODUCT_ROOT"
+python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root "$NEBULA_PRODUCT_ROOT"
 ```
 
-## 4) Boundary Rules
+With the project-extension framework revision installed, load the local instruction text before action work:
 
-- Do not add solution-specific entities or terminology to `agents/`.
-- Use standard example entities (`customers` and `orders`) in framework examples.
-- Place project-specific requirements and examples in `{PRODUCT_ROOT}/planning-mds/`.
+```bash
+python3 agents/scripts/project_context.py --product-root "$NEBULA_PRODUCT_ROOT" --action plan-review
+python3 agents/scripts/run-gate.py --product-root "$NEBULA_PRODUCT_ROOT" --action plan-review --plan-scope feature --target F0001 --list
+```
 
-## 5) Vendor-Neutral Language Policy
+Use the normal action procedure and run ID for gate execution. A paused checkpoint is not an approval, and a structural validator pass is not a readiness judgment.
 
-- Core framework docs should use orchestrator-neutral language.
-- Avoid making the framework dependent on a single runtime vendor.
-- Vendor-specific integrations are acceptable when explicitly scoped (for example AI provider examples).
+## Changes and Git
 
-## 6) Proposing New Agents or Actions
-
-For new agent roles:
-1. Add `agents/<role>/SKILL.md`.
-2. Add supporting `references/`, `scripts/`, or `assets/` as needed.
-3. Add role references in role/action index docs.
-
-For new actions:
-1. Add `agents/actions/<action>.md`.
-2. Define flow, prerequisites, inputs, outputs, and gates.
-3. Update `agents/actions/README.md`.
-
-## 7) Review Expectations
-
-PRs should include:
-- clear scope and rationale
-- changed file list
-- validation results
-- any follow-up tasks
-
-Keep changes focused and avoid unrelated edits in the same PR.
-
-## 8) Branch and Commit Conventions
-
-- Branch names should be descriptive and scoped (for example: `docs/vendor-neutral-language`, `fix/dockerignore-security`).
-- Use small, focused commits by concern (docs, templates, actions, scripts).
-- Prefer Conventional Commit style for clarity (for example: `docs: add orchestration I/O matrix`, `chore: tighten dockerignore exclusions`).
+- Work on a descriptive branch and keep the diff focused.
+- Edit authored KG shards, then regenerate projections and trackers. Follow `planning-mds/features/TRACKER-GOVERNANCE.md`.
+- Include scope, validation results, and outstanding findings with a change.
+- Run Git from this repository, or use `git -C nebula-insurance-brain ...` from the parent workspace. The parent `nebula/` folder contains several independent repositories.
+- New files appear under `git status --short --untracked-files=all`. Plain `git diff` only shows tracked changes; review new files before explicitly staging them.

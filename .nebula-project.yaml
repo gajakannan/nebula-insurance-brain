@@ -1,0 +1,32 @@
+version: 1
+instructions:
+  - path: docs/agent-instructions.md
+  - path: docs/plan-review-checklist.md
+    actions: [plan-review]
+checks:
+  - id: plan-readiness
+    action: plan-review
+    stage: PR2
+    event: before_stage_complete
+    argv:
+      - python3
+      - "{PRODUCT_ROOT}/scripts/validation/validate_plan_readiness.py"
+      - --product-root
+      - "{PRODUCT_ROOT}"
+      - --plan-scope
+      - "{PLAN_SCOPE}"
+      - --target
+      - "{TARGET}"
+    cwd: product
+    timeout_seconds: 60
+    inputs:
+      - planning-mds/BLUEPRINT.md
+      - planning-mds/architecture/*.md
+      - planning-mds/architecture/decisions/*.md
+      - planning-mds/security/*.md
+      - planning-mds/api/**/*
+      - planning-mds/schemas/**/*
+      - planning-mds/features/**/*.md
+      - docs/agent-instructions.md
+      - docs/plan-review-checklist.md
+      - scripts/validation/**/*.py
