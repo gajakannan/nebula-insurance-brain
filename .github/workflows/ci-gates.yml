@@ -22,7 +22,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pyyaml jsonschema
+      - run: python -m pip install -e '.[test]'
+      - name: Local planning validator regression tests
+        run: python -m pytest -q scripts/validation/tests
+      - name: Local planning readiness (structural checks only)
+        run: python scripts/validation/validate_plan_readiness.py --plan-scope project --target project
       - name: Show configured lifecycle stages
         run: python3 scripts/run-lifecycle-gates.py --list
       - name: Run required gates for the current lifecycle stage
@@ -49,3 +53,32 @@ jobs:
       - name: Feature evidence validation (registry-wide)
         working-directory: framework
         run: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root ../product
+      # Rollout prerequisite: publish the generic extension change, then advance
+      # the ref above AND BLUEPRINT.md together. Fail closed at an older pin.
+      - name: Require project-extension support at the pinned framework revision
+        shell: bash
+        run: |
+          if [[ ! -f framework/agents/scripts/project_checks.py ]]; then
+            echo "::error::The pinned framework predates project extensions. Publish the extension change and update the framework ref and BLUEPRINT.md together."
+            exit 1
+          fi
+      - name: Resolve product instructions and manifest
+        working-directory: framework
+        run: python3 agents/scripts/project_context.py --product-root ../product --action plan-review --json
+      - name: Run declared project checks through the shared executor
+        id: project_checks
+        working-directory: framework
+        shell: bash
+        run: |
+          project_check_run_id="$(date -u +%F)-$(python3 -c 'import secrets; print(secrets.token_hex(4))')"
+          echo "run_id=$project_check_run_id" >> "$GITHUB_OUTPUT"
+          python3 agents/scripts/project_checks.py --product-root ../product \
+            --action plan-review --plan-scope project --target project \
+            --run-id "$project_check_run_id"
+      - name: Preserve project-check evidence, including failures
+        if: ${{ always() && steps.project_checks.outputs.run_id != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-check-evidence
+          path: product/planning-mds/operations/evidence/runs/${{ steps.project_checks.outputs.run_id }}/
+          if-no-files-found: ignore

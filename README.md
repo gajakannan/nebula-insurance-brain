@@ -18,6 +18,10 @@ python3 agents/scripts/run-gate.py --action init --list
 
 The framework pin and the layout convention are recorded in `planning-mds/BLUEPRINT.md` section 0.
 
+Repo-specific agent guidance and planning checks live in [`.nebula-project.yaml`](.nebula-project.yaml), [agent instructions](docs/agent-instructions.md), and [the review checklist](docs/plan-review-checklist.md). See [CONTRIBUTING.md](CONTRIBUTING.md) for local validation and [adoption status](docs/framework-adoption.md) for the required framework release/pin coordination.
+
+Open this repository directly for Git/source control. The parent `nebula/` is a collection of independent repositories, not their Git root. Editors supporting VS Code workspace files can open [nebula.code-workspace](nebula.code-workspace) to show both Brain and the sibling framework as separate repositories.
+
 ## Layout
 
 | Path | Purpose | Owning role |
