@@ -362,13 +362,13 @@ Performance, availability, scalability, and security targets are proposed gates 
 - `security/policies/` — Casbin model and policy; `security/` — AuthX contract and pending security artifacts
 - `testing/evaluation-strategy.md` — Golden Corpus, metrics, regression suites, release gates
 
-### 4.9 F0001 Phase B (2026-09-06)
-
-Assembly plan: `features/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
-
 ### 4.8 Open decisions
 
 Section 117.1 lists the decisions the implementation team still owes: source-authority owner, tenant and knowledge-base identity scope, host and extension build, Docling-Graph pin, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18), the Label Studio edition (Community), and the proof model policy (self-hosted); the production host, the Docling-Graph pin, and the corpus source remain open.
+
+### 4.9 F0001 Phase B (2026-09-06)
+
+Assembly plan: `features/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
 
 ---
 
