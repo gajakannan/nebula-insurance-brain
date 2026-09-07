@@ -51,3 +51,7 @@ Use the normal action procedure and run ID for gate execution. A paused checkpoi
 - Include scope, validation results, and outstanding findings with a change.
 - Run Git from this repository, or use `git -C nebula-insurance-brain ...` from the parent workspace. The parent `nebula/` folder contains several independent repositories.
 - New files appear under `git status --short --untracked-files=all`. Plain `git diff` only shows tracked changes; review new files before explicitly staging them.
+
+## Explain semantic changes with examples
+
+Start with the [worked GL case](planning-mds/examples/neurosymbolic-gl/README.md). Each new or changed concept needs a glossary definition, worked and boundary examples, and links to its owning contract and story in the [coverage map](planning-mds/examples/README.md). Label delivery phase and synthetic versus observed output. Run `python3 scripts/validation/validate_semantic_examples.py` for the structured teaching artifacts. Runtime delivery adds a verified reproduction command and independently expected outcomes; documentation fixtures stay outside the frozen holdout.

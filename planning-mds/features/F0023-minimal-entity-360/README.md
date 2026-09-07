@@ -20,3 +20,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Assessment and example integration
+
+Provide the host Entity 360 surface for F0065 S0005: assessment outcome, selected guideline/version, time basis, comparison and evidence/review links, with distinct loading/error/unknown/conflict states. F0065 owns the extension and depends on this base view; do not introduce the reverse dependency.
+
+See the [example coverage map](../../examples/README.md) and [F0065](../F0065-grounded-gl-guideline-assessment/README.md).

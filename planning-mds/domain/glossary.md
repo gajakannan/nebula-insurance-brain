@@ -209,3 +209,22 @@ The following terms are specific to the Nebula Insurance Brain domain and must n
 - Docling-Graph
 - Label Studio
 - Insurance Brain
+
+## Neurosymbolic assessment vocabulary (F0065)
+
+These definitions accompany the [worked example](../examples/neurosymbolic-gl/README.md) and [assessment contract](../features/F0065-grounded-gl-guideline-assessment/assessment-contract.md). They describe planned v0.1 behavior; later concepts carry their release phase in the [coverage map](../examples/README.md).
+
+| Term | Meaning in the Brain | Concrete example / boundary | Owning feature |
+|---|---|---|---|
+| Neurosymbolic processing | Neural interpretation and explicit symbolic representations/rules participate in one governed workflow | EX-GL-001: model extracts the limit; accepted typed facts feed a deterministic rule | F0015/F0016/F0018/F0065 |
+| Concept | A versioned definition of a kind of thing, distinct from an instance | insurance.coverage defines the kind; EX-COV-001 identifies one coverage | F0012/F0013 |
+| Guideline rule version | Immutable, reviewed operation with scoped inputs, authority, and effective/release context | EX-RULE-001-v1 compares a USD each-occurrence amount to a fictional minimum; no arbitrary logic strings | F0065 S0001 |
+| Assessment record | Immutable result of applying a selected rule to exact accepted inputs at a snapshot | EX-ASSESS-001 is BELOW_GUIDELINE; it does not reject the policy or become canonical automatically | F0065 S0002/S0003 |
+| Semantic snapshot | A consistent read basis for selected valid/known coordinates and versioned inputs | A concurrent endorsement cannot mix old and new inputs in one assessment | F0020/F0065 S0004 |
+| Extraction confidence | A signal about one model interpretation, distinct from evidence quality, authority, or approval | CASE-05: 0.99 confidence in a wrong amount still needs correction | F0006/F0016/F0022 |
+| Assessment outcome | MEETS_GUIDELINE, BELOW_GUIDELINE, UNKNOWN, CONFLICT, or NOT_APPLICABLE under the bounded contract | Missing input is UNKNOWN; denied access is an error, not a revealing gap outcome | F0065 S0002 |
+| Embedding | Model-produced numeric representation for retrieval, versioned separately from its source | EX-FUTURE-001: a similar aggregate-limit passage cannot supply an each-occurrence fact | F0033, v0.2A |
+| Normative constraint | An obligation with authority, condition, requirement, and valid period, distinct from observed facts | EX-FUTURE-003: an issuance deadline does not establish that issuance occurred | F0052, v0.3 |
+| Hypothetical scenario | A base snapshot plus explicit assumption overrides with isolated results | EX-FUTURE-004: an assumed higher limit does not overwrite the policy fact | F0053, v0.3 |
+
+Existing Assertion, FactSlot, Canonical Fact Version, Derivation, and Review Decision definitions are illustrated by the source-to-fact and temporal sections of EX-GL-001. Every changed or new concept must link a worked/boundary example and owning story/contract before its plan is considered ready.

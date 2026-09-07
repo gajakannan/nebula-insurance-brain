@@ -19,7 +19,7 @@ spec.loader.exec_module(validator)
 @pytest.fixture
 def product(tmp_path):
     root = tmp_path / "brain"
-    for path in ["docs/agent-instructions.md", "docs/plan-review-checklist.md", "planning-mds/BLUEPRINT.md", "planning-mds/features/REGISTRY.md"]:
+    for path in ["docs/agent-instructions.md", "docs/plan-review-checklist.md", "planning-mds/BLUEPRINT.md", "planning-mds/features/REGISTRY.md", "planning-mds/examples/README.md"]:
         dest = root / path
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / path, dest)
@@ -62,6 +62,15 @@ def test_project_and_feature_set_scopes(product):
 def test_missing_governing_source_fails(product):
     (product / "planning-mds/architecture/decisions/ADR-0010-provenance-is-mandatory.md").unlink()
     assert run(product, product, "--plan-scope", "feature", "--target", "F0001")[0] == 1
+
+
+def test_examples_review_rule_is_required(product):
+    checklist = product / "docs/plan-review-checklist.md"
+    checklist.write_text("\n".join(line for line in checklist.read_text().splitlines()
+                                   if not line.startswith("| BRAIN-EXAMPLES |")))
+    rc, result = run(product, product, "--plan-scope", "feature", "--target", "F0001")
+    assert rc == 1
+    assert any("BRAIN-EXAMPLES" in finding["message"] for finding in result["findings"])
 
 
 def test_validation_does_not_mutate_plans(product):

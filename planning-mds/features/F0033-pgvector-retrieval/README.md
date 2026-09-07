@@ -20,3 +20,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Assessment and example integration
+
+F0065 already combines neural interpretation and symbolic rule evaluation in v0.1. This feature retains v0.2A vector retrieval scope: source/model/version-linked embeddings rank candidate evidence without defining facts or assessment confidence. See EX-FUTURE-001.
+
+See the [example coverage map](../../examples/README.md) and [F0065](../F0065-grounded-gl-guideline-assessment/README.md).

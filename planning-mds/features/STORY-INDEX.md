@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 7
+**Total Stories:** 13
 
 ---
 
@@ -20,11 +20,25 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0065 — Grounded GL guideline assessment
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0065-S0001](./F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md) | Versioned guideline rule | High | v0.1B | domain steward responsible for GL guidelines |
+| [F0065-S0002](./F0065-grounded-gl-guideline-assessment/F0065-S0002-evaluate-accepted-facts.md) | Evaluate accepted facts | High | v0.1B | GL underwriter inspecting a coverage limit |
+| [F0065-S0003](./F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md) | Preserve assessment lineage | High | v0.1B | reviewer auditing a guideline assessment |
+| [F0065-S0004](./F0065-grounded-gl-guideline-assessment/F0065-S0004-temporal-reassessment.md) | Temporal reassessment | High | v0.1B | GL underwriter reviewing a late endorsement |
+| [F0065-S0005](./F0065-grounded-gl-guideline-assessment/F0065-S0005-explain-assessment-in-entity-360.md) | Explain assessment in Entity 360 | High | v0.1B | GL underwriter using Entity 360 |
+| [F0065-S0006](./F0065-grounded-gl-guideline-assessment/F0065-S0006-reproducible-worked-examples.md) | Reproducible worked examples | High | v0.1B | new contributor reviewing the semantic architecture |
+
+---
+
 ## Summary by Phase
 
 | Phase | Count |
 |-------|-------|
 | Infrastructure | 7 |
+| v0.1B | 6 |
 
 ---
 
@@ -33,7 +47,7 @@ Auto-generated index of all user stories across feature folders.
 | Priority | Count |
 |----------|-------|
 | Critical | 2 |
-| High | 5 |
+| High | 11 |
 
 ---
 

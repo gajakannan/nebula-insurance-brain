@@ -1,13 +1,13 @@
 # Feature Registry
 
-**Next Available Feature Number:** F0065
+**Next Available Feature Number:** F0066
 
 **Planning Views:**
 - Roadmap sequencing (`Now / Next / Later`): `planning-mds/features/ROADMAP.md`
 - Story rollup index: `planning-mds/features/STORY-INDEX.md`
 - Governance contract: `planning-mds/features/TRACKER-GOVERNANCE.md`
 
-The feature tables below are generated fenced regions compiled from `planning-mds/kg-source/features/**` by `scripts/kg/compile.py` (via `tracker_gen.py`). Edit the feature shards, never the tables. The epic inventory for this product is master blueprint section 95 (F0001 to F0063); features enter this registry as their shards are seeded and planned.
+The feature tables below are generated fenced regions compiled from `planning-mds/kg-source/features/**` by `scripts/kg/compile.py` (via `tracker_gen.py`). Edit the feature shards, never the tables. The epic inventory for this product is master blueprint sections 95 and 124 (original F0001 to F0063 plus F0065; F0064 tracks repository tooling); features enter this registry as their shards are seeded and planned.
 
 ## Active Features
 
@@ -94,6 +94,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | F0062 | Advanced reasoners | Planned | v0.4+ | `F0062-advanced-reasoners/` |
 | F0063 | Future DSL | Planned | v0.4+ | `F0063-future-dsl/` |
 | F0064 | Repository instructions and planning-check adoption | Planned | Repository Tooling | `F0064-repository-instructions-and-planning-check-adoption/` |
+| F0065 | Grounded GL guideline assessment | Planned | v0.1B | `F0065-grounded-gl-guideline-assessment/` |
 <!-- generated:end registry:planned -->
 
 ## Archived Features

@@ -1,0 +1,282 @@
+{
+  "example_id": "EX-GL-001",
+  "synthetic": true,
+  "status": "illustrative-not-executed",
+  "phase": "v0.1B",
+  "schema_ref": "../../schemas/semantic-example.schema.json",
+  "feature_ref": "../../features/F0065-grounded-gl-guideline-assessment/PRD.md",
+  "concepts": [
+    {
+      "id": "insurance.coverage",
+      "label": "Coverage",
+      "kind": "concept"
+    }
+  ],
+  "entities": [
+    {
+      "id": "EX-COV-001",
+      "concept_ref": "insurance.coverage",
+      "policy_term_id": "EX-POL-001/2026",
+      "label": "Example GL coverage"
+    }
+  ],
+  "slots": [
+    {
+      "id": "EX-SLOT-001",
+      "subject_ref": "EX-COV-001",
+      "predicate": "hasLimitAmount",
+      "basis": "EachOccurrence",
+      "currency": "USD"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "EX-EV-001",
+      "source_ref": "source-package.md#policy-declarations",
+      "artifact_id": "EX-ARTIFACT-001",
+      "precision": "illustrative_excerpt",
+      "quote": "Each-occurrence limit: USD 500,000.00."
+    },
+    {
+      "id": "EX-EV-002",
+      "source_ref": "source-package.md#endorsement",
+      "artifact_id": "EX-ARTIFACT-002",
+      "precision": "illustrative_excerpt",
+      "quote": "USD 2,000,000.00 effective July 1, 2026 at 00:00 UTC."
+    },
+    {
+      "id": "EX-EV-003",
+      "source_ref": "source-package.md#fictional-guideline",
+      "artifact_id": "EX-ARTIFACT-003",
+      "precision": "illustrative_excerpt",
+      "quote": "at least USD 1,000,000.00"
+    }
+  ],
+  "runs": [
+    {
+      "id": "EX-RUN-001",
+      "profile": "example-gl-limits/v1",
+      "ontology_release": "example-insurance/v1",
+      "model": "illustrative-model-output-not-executed",
+      "artifact_id": "EX-ARTIFACT-001"
+    },
+    {
+      "id": "EX-RUN-002",
+      "profile": "example-gl-limits/v1",
+      "ontology_release": "example-insurance/v1",
+      "model": "illustrative-model-output-not-executed",
+      "artifact_id": "EX-ARTIFACT-002"
+    }
+  ],
+  "assertions": [
+    {
+      "id": "EX-A-001",
+      "subject_ref": "EX-COV-001",
+      "run_ref": "EX-RUN-001",
+      "evidence_ref": "EX-EV-001",
+      "predicate": "hasLimitAmount",
+      "amount": "500000.00",
+      "basis": "EachOccurrence",
+      "currency": "USD",
+      "mode": "ASSERTED",
+      "origin": "DOCUMENT_INTERPRETATION",
+      "interpretation_basis": "EXPLICIT",
+      "model_confidence": 0.94
+    },
+    {
+      "id": "EX-A-002",
+      "subject_ref": "EX-COV-001",
+      "run_ref": "EX-RUN-002",
+      "evidence_ref": "EX-EV-002",
+      "predicate": "hasLimitAmount",
+      "amount": "2000000.00",
+      "basis": "EachOccurrence",
+      "currency": "USD",
+      "mode": "ASSERTED",
+      "origin": "DOCUMENT_INTERPRETATION",
+      "interpretation_basis": "EXPLICIT",
+      "model_confidence": 0.94
+    }
+  ],
+  "reviews": [
+    {
+      "id": "EX-REVIEW-001",
+      "assertion_ref": "EX-A-001",
+      "decision": "ACCEPT_SOURCE_READING",
+      "actor_id": "EX-REVIEWER-001"
+    },
+    {
+      "id": "EX-REVIEW-002",
+      "assertion_ref": "EX-A-002",
+      "decision": "ACCEPT_SOURCE_READING",
+      "actor_id": "EX-REVIEWER-001"
+    }
+  ],
+  "commits": [
+    {
+      "id": "EX-COMMIT-001",
+      "assertion_ref": "EX-A-001",
+      "review_ref": "EX-REVIEW-001",
+      "actor_id": "EX-COMMITTER-001",
+      "accepted_at": "2026-01-03T12:00:00Z",
+      "authority_ref": "example-source-resolution/v1"
+    },
+    {
+      "id": "EX-COMMIT-002",
+      "assertion_ref": "EX-A-002",
+      "review_ref": "EX-REVIEW-002",
+      "actor_id": "EX-COMMITTER-001",
+      "accepted_at": "2026-07-10T12:00:00Z",
+      "authority_ref": "example-source-resolution/v1"
+    }
+  ],
+  "facts": [
+    {
+      "id": "EX-F-001",
+      "slot_ref": "EX-SLOT-001",
+      "assertion_ref": "EX-A-001",
+      "commit_ref": "EX-COMMIT-001",
+      "amount": "500000.00",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2027-01-01T00:00:00Z",
+      "recorded_from": "2026-01-03T12:00:00Z",
+      "recorded_to": "2026-07-10T12:00:00Z"
+    },
+    {
+      "id": "EX-F-002",
+      "slot_ref": "EX-SLOT-001",
+      "assertion_ref": "EX-A-001",
+      "commit_ref": "EX-COMMIT-002",
+      "amount": "500000.00",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-07-01T00:00:00Z",
+      "recorded_from": "2026-07-10T12:00:00Z",
+      "recorded_to": null
+    },
+    {
+      "id": "EX-F-003",
+      "slot_ref": "EX-SLOT-001",
+      "assertion_ref": "EX-A-002",
+      "commit_ref": "EX-COMMIT-002",
+      "amount": "2000000.00",
+      "valid_from": "2026-07-01T00:00:00Z",
+      "valid_to": "2027-01-01T00:00:00Z",
+      "recorded_from": "2026-07-10T12:00:00Z",
+      "recorded_to": null
+    }
+  ],
+  "rules": [
+    {
+      "id": "EX-RULE-001-v1",
+      "rule_id": "EX-RULE-001",
+      "version": 1,
+      "ontology_release": "example-insurance/v1",
+      "evidence_ref": "EX-EV-003",
+      "authority_ref": "Example GL Guideline Steward",
+      "tenant_id": "EX-TENANT-001",
+      "knowledge_base_id": "EX-KB-001",
+      "subject_ref": "EX-COV-001",
+      "operation": "money_gte_minimum",
+      "basis": "EachOccurrence",
+      "currency": "USD",
+      "minimum": "1000000.00",
+      "released_at": "2026-01-02T12:00:00Z",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2027-01-01T00:00:00Z"
+    }
+  ],
+  "assessments": [
+    {
+      "id": "EX-ASSESS-001",
+      "subject_ref": "EX-COV-001",
+      "fact_ref": "EX-F-001",
+      "rule_ref": "EX-RULE-001-v1",
+      "tenant_id": "EX-TENANT-001",
+      "knowledge_base_id": "EX-KB-001",
+      "outcome": "BELOW_GUIDELINE",
+      "valid_as_of": "2026-02-01T00:00:00Z",
+      "known_as_of": "2026-02-02T00:00:00Z",
+      "created_at": "2026-07-11T15:00:00Z",
+      "semantic_snapshot": "EX-SNAPSHOT-2026-02-02",
+      "ontology_release": "example-insurance/v1",
+      "evaluator_version": "illustrative-bounded-evaluator/v1",
+      "actor_id": "EX-UNDERWRITER-001",
+      "audit_ref": "EX-AUDIT-001",
+      "comparison": {
+        "amount": "500000.00",
+        "minimum": "1000000.00",
+        "currency": "USD",
+        "operation": "money_gte_minimum"
+      }
+    },
+    {
+      "id": "EX-ASSESS-002",
+      "subject_ref": "EX-COV-001",
+      "fact_ref": "EX-F-001",
+      "rule_ref": "EX-RULE-001-v1",
+      "tenant_id": "EX-TENANT-001",
+      "knowledge_base_id": "EX-KB-001",
+      "outcome": "BELOW_GUIDELINE",
+      "valid_as_of": "2026-07-05T00:00:00Z",
+      "known_as_of": "2026-07-08T00:00:00Z",
+      "created_at": "2026-07-11T15:00:00Z",
+      "semantic_snapshot": "EX-SNAPSHOT-2026-07-08",
+      "ontology_release": "example-insurance/v1",
+      "evaluator_version": "illustrative-bounded-evaluator/v1",
+      "actor_id": "EX-UNDERWRITER-001",
+      "audit_ref": "EX-AUDIT-002",
+      "comparison": {
+        "amount": "500000.00",
+        "minimum": "1000000.00",
+        "currency": "USD",
+        "operation": "money_gte_minimum"
+      }
+    },
+    {
+      "id": "EX-ASSESS-003",
+      "subject_ref": "EX-COV-001",
+      "fact_ref": "EX-F-003",
+      "rule_ref": "EX-RULE-001-v1",
+      "tenant_id": "EX-TENANT-001",
+      "knowledge_base_id": "EX-KB-001",
+      "outcome": "MEETS_GUIDELINE",
+      "valid_as_of": "2026-07-05T00:00:00Z",
+      "known_as_of": "2026-07-11T00:00:00Z",
+      "created_at": "2026-07-11T15:00:00Z",
+      "semantic_snapshot": "EX-SNAPSHOT-2026-07-11",
+      "ontology_release": "example-insurance/v1",
+      "evaluator_version": "illustrative-bounded-evaluator/v1",
+      "actor_id": "EX-UNDERWRITER-001",
+      "audit_ref": "EX-AUDIT-003",
+      "comparison": {
+        "amount": "2000000.00",
+        "minimum": "1000000.00",
+        "currency": "USD",
+        "operation": "money_gte_minimum"
+      }
+    },
+    {
+      "id": "EX-ASSESS-004",
+      "subject_ref": "EX-COV-001",
+      "fact_ref": "EX-F-002",
+      "rule_ref": "EX-RULE-001-v1",
+      "tenant_id": "EX-TENANT-001",
+      "knowledge_base_id": "EX-KB-001",
+      "outcome": "BELOW_GUIDELINE",
+      "valid_as_of": "2026-06-30T00:00:00Z",
+      "known_as_of": "2026-07-11T00:00:00Z",
+      "created_at": "2026-07-11T15:00:00Z",
+      "semantic_snapshot": "EX-SNAPSHOT-2026-07-11",
+      "ontology_release": "example-insurance/v1",
+      "evaluator_version": "illustrative-bounded-evaluator/v1",
+      "actor_id": "EX-UNDERWRITER-001",
+      "audit_ref": "EX-AUDIT-004",
+      "comparison": {
+        "amount": "500000.00",
+        "minimum": "1000000.00",
+        "currency": "USD",
+        "operation": "money_gte_minimum"
+      }
+    }
+  ]
+}

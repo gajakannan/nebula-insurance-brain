@@ -9,12 +9,17 @@ coverage_excluded:
 phase: v0.4+
 roadmap_section: Later
 roadmap_order: 39
-rationale: Derived facts point at exact input versions so a retroactive change invalidates dependents automatically
-  (sections 55, 56).
+rationale: Automatic propagation across persisted derived canonical facts invalidates and recomputes dependencies
+  after input changes; it extends the lineage introduced by F0065 without being a prerequisite for its on-demand
+  v0.1 assessments (sections 55, 56, 124).
 depends_on:
 - feature:F0001
 - id: feature:F0008
   provenance: inferred
   confidence: 0.7
+- id: feature:F0065
+  provenance: explicit
+  confidence: 1.0
 governed_by:
 - adr:0026
+- adr:0056

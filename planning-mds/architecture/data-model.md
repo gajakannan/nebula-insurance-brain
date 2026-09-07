@@ -4,7 +4,7 @@
 
 PostgreSQL is the authoritative runtime store (ADR-0002). Graph and vector stores are projections (ADR-0022, ADR-0023). Semantics of the tables below are defined in the master blueprint: canonical world model (section 12), FactSlot (section 13), bitemporal facts (sections 14 to 16), provenance (section 17), content versus evidence identity (section 18), and flexible schema representation (section 20). Every authoritative row carries `tenant_id` and `knowledge_base_id` (ADR-0030) and audit fields (`created_at`, `recorded_at`, actor).
 
-The sections below are reproduced verbatim from the master blueprint so implementers have one file to read; when they diverge, the master blueprint plus accepted ADRs win until this document is promoted by a Phase B decision.
+The baseline sections below are reproduced from the master blueprint so implementers have one file to read; when they diverge, the master blueprint plus accepted ADRs win until this document is promoted by a Phase B decision. The F0065 addition below is explicitly a proposed feature contract rather than an existing runtime schema.
 
 ## Core PostgreSQL Tables (master blueprint section 78)
 
@@ -162,6 +162,19 @@ manifest JSON
 ```
 
 Original source binary is retained separately.
+
+## Bounded v0.1B assessment records (F0065)
+
+Master blueprint section 124 adds two proposed record types alongside the canonical kernel:
+
+| Record | Purpose and authority boundary | Exact references |
+|---|---|---|
+| GuidelineRuleVersion | Reviewed immutable rule release, scoped by tenant/KB, policy/coverage, basis, currency, authority, effective interval, and release time | Rule/source/authority and ontology release |
+| AssessmentRecord | Immutable on-demand evaluation at an explicit snapshot; outside canonical facts and separate from business approval | Subject, input fact versions, rule version, valid/known coordinates, comparison or gap/conflict context, evidence/derivation lineage, evaluator version, actor, and audit |
+
+Current permissions govern both records and the complete relevant input/evidence lineage. Reassessment creates a new record; a saved historical result is not returned as a new current result. General dependency propagation remains F0056.
+
+The [assessment contract](../features/F0065-grounded-gl-guideline-assessment/assessment-contract.md) defines semantics and proof obligations. Runtime DTOs, OpenAPI bindings, and persistence migrations must be settled against the proven upstream kernel in the [assembly plan](../features/F0065-grounded-gl-guideline-assessment/feature-assembly-plan.md). The [synthetic records](../examples/neurosymbolic-gl/records.json) use an educational schema and must not be imported as authoritative production data.
 
 ## Example Manifest (master blueprint section 81)
 

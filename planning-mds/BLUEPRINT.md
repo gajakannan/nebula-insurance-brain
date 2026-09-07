@@ -82,6 +82,7 @@ Semantic kernel (sections 12 to 18, 78):
 - Entity, EntityType, EntityAlias
 - FactSlot, FactSlotQualifier, CanonicalFactVersion, CanonicalRelationshipVersion, CanonicalFactChange
 - Derivation, DerivationInput
+- GuidelineRuleVersion, AssessmentRecord (F0065 bounded v0.1B assessment; proposed contract in its feature folder)
 - ReviewItem, ReviewDecision, ReviewExternalTask (Label Studio)
 - LearningCandidate, LearningEvidence, KnowledgeGap
 - Conversation, ConversationTurn, ConversationContext, ConversationKnowledgeArtifact
@@ -95,6 +96,7 @@ Insurance core for the v0.1 GL slice (sections 23, 24, 86):
 ### 1.4 Critical workflows (baseline)
 
 Ingestion and interpretation: Source Document → Parse Once (Docling) → Content Artifact → Classify → Extraction Profile → Assertions → Confidence/Review Policy → Deterministic Entity Resolution → Canonical Commit → FactSlots + Bitemporal Facts → Entity 360 (section 86)
+Guideline assessment (v0.1B, F0065): accepted qualified facts + selected reviewed rule release + explicit time/snapshot → deterministic comparison → immutable assessment with exact lineage → authorized Entity 360 explanation (master blueprint section 124).
 Human review: Assertion → ReviewItem → Label Studio Task → Human Annotation → ReviewDecision → corrected assertion or canonical commit → Golden Corpus (sections 75, 85)
 Endorsement supersession: Original fact → Endorsement (valid-time effective, recorded-time received) → superseded canonical version with both timelines queryable (sections 14 to 16, 87)
 Knowledge promotion (v0.2): Conversation or learning candidate → validate and score → retain, review, or promote (sections 30 to 44)
@@ -196,7 +198,7 @@ End-user personas (underwriters, analysts, stewards) are authored with the first
 
 ### 3.3 Epics & Features
 
-The epic inventory is the master blueprint section 95 roadmap (F0001 to F0063), sequenced per section 115.3. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. All 63 features are seeded below as reserved identifiers, staged per section 115.3 (v0.1 stages, then v0.2A, v0.2B, v0.3, and v0.4+). Story links are appended by the plan action as each feature is planned.
+The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065), sequenced per sections 115.3 and 124. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. Story links are appended by the plan action as each feature is planned.
 
 **Pre-build (Now)**
 
@@ -236,6 +238,13 @@ The epic inventory is the master blueprint section 95 roadmap (F0001 to F0063), 
 - [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned
 - [F0022 — Document 360 + Label Studio evidence review integration + parent/classification and reviewer authority](features/F0022-document-360-and-label-studio-evidence-review/README.md) - Planned
 - [F0023 — Minimal Entity 360](features/F0023-minimal-entity-360/README.md) - Planned
+- [F0065 — Grounded GL guideline assessment](features/F0065-grounded-gl-guideline-assessment/README.md) - Planned (six stories and draft contracts authored; review and implementation pending)
+  - [F0065-S0001](features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md) - Not Started
+  - [F0065-S0002](features/F0065-grounded-gl-guideline-assessment/F0065-S0002-evaluate-accepted-facts.md) - Not Started
+  - [F0065-S0003](features/F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md) - Not Started
+  - [F0065-S0004](features/F0065-grounded-gl-guideline-assessment/F0065-S0004-temporal-reassessment.md) - Not Started
+  - [F0065-S0005](features/F0065-grounded-gl-guideline-assessment/F0065-S0005-explain-assessment-in-entity-360.md) - Not Started
+  - [F0065-S0006](features/F0065-grounded-gl-guideline-assessment/F0065-S0006-reproducible-worked-examples.md) - Not Started
 - [F0024 — GL vertical slice](features/F0024-gl-vertical-slice/README.md) - Planned
 - [F0025 — Endorsement bitemporal slice](features/F0025-endorsement-bitemporal-slice/README.md) - Planned
 
@@ -296,9 +305,13 @@ The epic inventory is the master blueprint section 95 roadmap (F0001 to F0063), 
 
 Authored per feature in `features/F####-{slug}/F####-S####-{slug}.md`. The v0.1 acceptance questions in sections 86 and 87 are the minimum story set for F0024 and F0025. F0001 carries seven stories: toolchain skeleton, local containers and dependency matrix, the four section 115.4 proofs, and contract settlement (see section 3.3).
 
+### 3.4.1 Examples as acceptance artifacts
+
+Every new or changed semantic concept needs a definition, worked example, boundary case, and owning feature/story/contract links. Start with [EX-GL-001](examples/neurosymbolic-gl/README.md) and the [coverage map](examples/README.md). Structured examples validate against declared local schemas; runtime stories must later reproduce observed outcomes. Synthetic examples, observed proof evidence, and independent frozen evaluation data remain explicitly distinguished. F0065 carries six unstarted stories; its drafted examples do not constitute runtime delivery.
+
 ### 3.5 Screen Specifications
 
-Minimal Entity 360 and Document 360 (sections 70, 71) and the constrained chat surface (section 72) are the v0.1 screens; specs land in `screens/` during Phase A of their features.
+Minimal Entity 360 and Document 360 (sections 70, 71) and the constrained chat surface (section 72) are the v0.1 screens; specs land in `screens/` during Phase A of their features. F0065 S0005 extends Entity 360 with the bounded guideline assessment panel specified in its PRD; it introduces no standalone workbench.
 
 ---
 
@@ -333,12 +346,12 @@ Performance, availability, scalability, and security targets are proposed gates 
 ### 4.7 Architecture Artifacts
 
 - `architecture/master-blueprint.md` — full baseline
-- `architecture/decisions/` — ADR-0001 to ADR-0053 (Accepted baseline and Proposed)
+- `architecture/decisions/` — ADR-0001 to ADR-0056 (Accepted baseline and Proposed; ADR-0056 records the bounded v0.1 assessment)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
 - `api/brain-api.yaml` — OpenAPI 3.1 (F0001 scope: health, protected reads, webhook, commit)
-- `schemas/*.schema.json` — shared JSON Schemas (manifest, interpretation result, review decision, commit request and response, problem details)
+- `schemas/*.schema.json` — shared JSON Schemas (manifest, interpretation result, review decision, commit request and response, problem details); `semantic-example.schema.json` is explicitly an educational fixture contract, not a runtime DTO
 - `security/policies/` — Casbin model and policy; `security/` — AuthX contract and pending security artifacts
 - `testing/evaluation-strategy.md` — Golden Corpus, metrics, regression suites, release gates
 
@@ -354,14 +367,14 @@ Section 117.1 lists the decisions the implementation team still owes: source-aut
 
 ## 5) Phase C — Implementation Plan (locked order)
 
-Sequence per master blueprint section 115.3; identifiers F0001 to F0063 are preserved from section 95.
+Sequence per master blueprint sections 115.3 and 124; original identifiers F0001 to F0063 are preserved. F0065 is the bounded v0.1 assessment addition; F0064 is repository tooling.
 
 1. Pre-build contract proofs as stories of F0001: parse, reinterpret, and evidence; Label Studio review round trip; bitemporal commit; access and hosting (section 115.4)
 2. v0.1A — F0002 to F0017: typed domain contracts, durable ingestion, immutable evidence, assertion extraction
-3. v0.1B — F0018 to F0025: authorized canonical commits, GL limits, temporal endorsement, human review, minimal 360 views
-4. v0.1C — F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, frozen evaluation, constrained policy question
+3. v0.1B — F0018 to F0023 establish authorized commits, temporal reads, evidence review, and minimal 360 views; F0065 adds bounded on-demand GL guideline assessment; F0024/F0025 prove real interpretation-to-assessment and temporal reassessment end to end
+4. v0.1C — F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases
 5. v0.2A — F0033 to F0040 and F0044 to F0047; v0.2B — F0027 to F0032 and F0041 to F0043
-6. v0.3 and later — F0048 onward
+6. v0.3 and later — F0048 to F0063: full process, generalized reasoning, automatic derivation propagation, decision replay, and advanced semantics; F0065 is already in v0.1B
 
 Baseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations even though the full Execution Gate and Decision Ledger come later (section 89).
 

@@ -25,11 +25,13 @@ stages:
     required_gates:
       - knowledge_graph_sync
       - kg_reproducibility
+      - semantic_examples
   implementation:
     description: Runtime artifacts exist in engine/, experience/, or neuron/ and implementation quality gates run.
     required_gates:
       - knowledge_graph_sync
       - kg_reproducibility
+      - semantic_examples
       - symbol_index_sync
       - inline_decisions_check
   release-readiness:
@@ -37,11 +39,17 @@ stages:
     required_gates:
       - knowledge_graph_sync
       - kg_reproducibility
+      - semantic_examples
       - symbol_index_sync
       - inline_decisions_check
       - kg_orphan_check
       - kg_coverage_gap_check
 gates:
+  semantic_examples:
+    description: Validate educational example schemas, identities, source excerpts, and planning references; runtime reasoning is a separate feature gate.
+    command:
+      - python3
+      - scripts/validation/validate_semantic_examples.py
   knowledge_graph_sync:
     description: Validate knowledge-graph integrity (IDs, references, paths, feature coverage, code-index bindings, coverage-report freshness).
     command:

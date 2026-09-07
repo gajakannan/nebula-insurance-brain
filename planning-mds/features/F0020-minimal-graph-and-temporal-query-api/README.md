@@ -20,3 +20,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Assessment and example integration
+
+Expose a consistent authorized canonical snapshot for F0065, including explicit valid/known coordinates and permitted completeness/conflict context. F0065 owns its assessment service contract; this query feature does not depend on the assessment UI.
+
+See the [example coverage map](../../examples/README.md) and [F0065](../F0065-grounded-gl-guideline-assessment/README.md).

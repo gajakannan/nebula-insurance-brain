@@ -1,0 +1,660 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/semantic-example.schema.json",
+  "title": "EX-GL-001 educational timeline bundle",
+  "description": "Synthetic evaluated-path teaching records only; not a production API, rule engine, or schema for UNKNOWN/CONFLICT results. Boundary outcomes are specified in cases.md and the assessment contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "example_id",
+    "synthetic",
+    "status",
+    "phase",
+    "schema_ref",
+    "feature_ref",
+    "concepts",
+    "entities",
+    "slots",
+    "evidence",
+    "runs",
+    "assertions",
+    "reviews",
+    "commits",
+    "facts",
+    "rules",
+    "assessments"
+  ],
+  "properties": {
+    "example_id": {
+      "const": "EX-GL-001"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "status": {
+      "const": "illustrative-not-executed"
+    },
+    "phase": {
+      "const": "v0.1B"
+    },
+    "schema_ref": {
+      "const": "../../schemas/semantic-example.schema.json"
+    },
+    "feature_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "concepts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/concept"
+      }
+    },
+    "entities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/entity"
+      }
+    },
+    "slots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/slot"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "runs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/run"
+      }
+    },
+    "assertions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/assertion"
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/review"
+      }
+    },
+    "commits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/commit"
+      }
+    },
+    "facts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/fact"
+      }
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/rule"
+      }
+    },
+    "assessments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/assessment"
+      }
+    }
+  },
+  "$defs": {
+    "concept": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "const": "concept"
+        }
+      }
+    },
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "concept_ref",
+        "policy_term_id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "concept_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_term_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subject_ref",
+        "predicate",
+        "basis",
+        "currency"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicate": {
+          "const": "hasLimitAmount"
+        },
+        "basis": {
+          "const": "EachOccurrence"
+        },
+        "currency": {
+          "const": "USD"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_ref",
+        "artifact_id",
+        "precision",
+        "quote"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "precision": {
+          "const": "illustrative_excerpt"
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "profile",
+        "ontology_release",
+        "model",
+        "artifact_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ontology_release": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "const": "illustrative-model-output-not-executed"
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subject_ref",
+        "run_ref",
+        "evidence_ref",
+        "predicate",
+        "amount",
+        "basis",
+        "currency",
+        "mode",
+        "origin",
+        "interpretation_basis",
+        "model_confidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicate": {
+          "const": "hasLimitAmount"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "basis": {
+          "const": "EachOccurrence"
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "mode": {
+          "const": "ASSERTED"
+        },
+        "origin": {
+          "const": "DOCUMENT_INTERPRETATION"
+        },
+        "interpretation_basis": {
+          "enum": [
+            "EXPLICIT",
+            "INFERRED",
+            "AMBIGUOUS"
+          ]
+        },
+        "model_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "assertion_ref",
+        "decision",
+        "actor_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assertion_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "const": "ACCEPT_SOURCE_READING"
+        },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "commit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "assertion_ref",
+        "review_ref",
+        "actor_id",
+        "accepted_at",
+        "authority_ref"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assertion_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accepted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authority_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slot_ref",
+        "assertion_ref",
+        "commit_ref",
+        "amount",
+        "valid_from",
+        "valid_to",
+        "recorded_from",
+        "recorded_to"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "slot_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assertion_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "rule_id",
+        "version",
+        "ontology_release",
+        "evidence_ref",
+        "authority_ref",
+        "tenant_id",
+        "knowledge_base_id",
+        "subject_ref",
+        "operation",
+        "basis",
+        "currency",
+        "minimum",
+        "released_at",
+        "valid_from",
+        "valid_to"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ontology_release": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation": {
+          "const": "money_gte_minimum"
+        },
+        "basis": {
+          "const": "EachOccurrence"
+        },
+        "currency": {
+          "const": "USD"
+        },
+        "minimum": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+        },
+        "released_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_to": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subject_ref",
+        "fact_ref",
+        "rule_ref",
+        "tenant_id",
+        "knowledge_base_id",
+        "outcome",
+        "valid_as_of",
+        "known_as_of",
+        "created_at",
+        "semantic_snapshot",
+        "ontology_release",
+        "evaluator_version",
+        "actor_id",
+        "audit_ref",
+        "comparison"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fact_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rule_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tenant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "enum": [
+            "MEETS_GUIDELINE",
+            "BELOW_GUIDELINE"
+          ]
+        },
+        "valid_as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "known_as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "semantic_snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ontology_release": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evaluator_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "actor_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "audit_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "comparison": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "amount",
+            "minimum",
+            "currency",
+            "operation"
+          ],
+          "properties": {
+            "amount": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+            },
+            "minimum": {
+              "type": "string",
+              "pattern": "^(0|[1-9][0-9]*)\\.[0-9]{2}$"
+            },
+            "currency": {
+              "const": "USD"
+            },
+            "operation": {
+              "const": "money_gte_minimum"
+            }
+          }
+        }
+      }
+    }
+  }
+}

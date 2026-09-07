@@ -5,7 +5,7 @@ All solution-specific planning for Nebula Insurance Brain lives here. Generic ro
 ## Entry points
 
 - `BLUEPRINT.md` — framework entry point: process, product context, platform baseline, phase status
-- `architecture/master-blueprint.md` — the full architecture baseline (123 sections); referenced by section number everywhere else
+- `architecture/master-blueprint.md` — the full architecture baseline (through section 124); referenced by section number everywhere else
 - `features/REGISTRY.md` and `features/ROADMAP.md` — generated from `kg-source/features/**` (created by init, populated when the feature shards are seeded)
 
 ## Where the master blueprint sections landed
@@ -33,3 +33,7 @@ Everything else in the master blueprint remains authoritative in place until a f
 ## Rule of thumb
 
 If it is project-specific, it belongs here. Agents never embed it directly.
+
+## Learn the semantic model
+
+Start with the [worked GL example](examples/neurosymbolic-gl/README.md), then follow the [concept coverage map](examples/README.md) and [glossary](domain/glossary.md). Master blueprint section 124 and F0065 define the bounded v0.1 neurosymbolic assessment; illustrative records are distinguished from future observed runtime evidence.

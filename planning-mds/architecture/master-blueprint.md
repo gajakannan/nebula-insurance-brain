@@ -2308,7 +2308,7 @@ Recompute
 Publish corrected derived version
 ```
 
-Schema support exists before reasoning ships.
+Schema support exists before generalized reasoning ships. F0065 uses immutable snapshot-bound assessments and on-demand recomputation in v0.1B; automatic propagation through derived canonical facts remains F0056 (section 124).
 
 ---
 
@@ -3609,7 +3609,7 @@ No document reparse.
 
 v0.1 proves the semantic kernel, the evidence chain, and the minimal human-correction loop, not the entire Brain.
 
-Two semantic vertical slices plus one shared review/evaluation capability.
+Two semantic vertical slices plus shared review/evaluation and the bounded F0065 guideline assessment. The GL slice demonstrates model interpretation through accepted facts to a traceable comparison; the endorsement slice demonstrates how that assessment changes across valid/known coordinates (section 124).
 
 The v0.1 human-review objective is intentionally narrow:
 
@@ -3698,6 +3698,10 @@ review/correction path through Label Studio when intentionally seeded with a low
 
 ---
 
+## v0.1B guideline assessment acceptance (F0065/F0024)
+
+Extend the extracted/accepted applicable limit with a selected, reviewed guideline release. Demonstrate neural interpretation → evidence review/canonical acceptance → exact comparison → assessment with rule and fact lineage. Use the synthetic [EX-GL-001](../examples/neurosymbolic-gl/README.md); its fictional minimum is not a universal insurance rule. An unaccepted assertion or missing input cannot produce a guessed comparison.
+
 # 87. v0.1 Slice 2 — Bitemporal Endorsement
 
 ```text
@@ -3722,6 +3726,10 @@ What did the Brain know June 5? $2M
 
 ---
 
+## v0.1B assessment history acceptance (F0065/F0025)
+
+Reassess the same valid period before and after a late endorsement is accepted. Show the applicable fact and rule versions, preserve earlier assessment records, and distinguish current permission checks from historical knowledge. The section 124 example gives exact expected coordinates and outcomes.
+
 # 88. v0.1 Foundation Hooks
 
 Implement schema hooks for later evolution:
@@ -3741,7 +3749,7 @@ AGE projection IDs
 Embedding abstraction
 ```
 
-Full features need not ship in v0.1.
+Generalized features need not ship in v0.1. The v0.1B scope includes F0065 bounded on-demand guideline assessment with exact input/rule lineage (section 124); automatic dependency propagation remains F0056.
 
 The first release also implements `CredentialVerifier`, `PrincipalResolver`, `ResourceScopeResolver`, `AuthorizationService`, `EvidenceAccessService`, and minimum authorization-decision audit. Include tested parent/classification conjunction, current grant revision, stable reviewer identity, and the selected session transport. These are concrete behavior requirements, not empty schema placeholders; full agent delegation administration can follow when background/agent operations are introduced.
 
@@ -3758,7 +3766,7 @@ Ontology Workbench
 full probabilistic ER
 full conflict engine
 advanced/generalized review workbenches beyond the Label Studio evidence-correction path
-reasoning engine
+general reasoning engine (bounded F0065 guideline assessment is included)
 decision ledger
 execution gate
 Qdrant
@@ -3821,9 +3829,11 @@ process reconciliation UI
 
 # 92. v0.4 — Reasoning and Decisions
 
+Build on the bounded assessment identities and lineage introduced by F0065 in v0.1B (section 124).
+
 ```text
-native ontology inference
-business rule engine
+generalized native ontology inference
+business rule composition and broader supported constructs
 derived knowledge
 dependency invalidation
 decision ledger
@@ -3898,6 +3908,7 @@ F0020 Minimal graph/temporal query API
 F0021 Native React semantic shell + OIDC/session contract and safe re-auth behavior
 F0022 Document 360 + Label Studio evidence review integration + parent/classification and reviewer authority
 F0023 Minimal Entity 360
+F0065 Grounded GL guideline assessment (bounded neurosymbolic workflow)
 F0024 GL vertical slice
 F0025 Endorsement bitemporal slice
 F0026 v0.1 hardening + Label Studio Golden Corpus workflow + AuthX negative tests and policy parity
@@ -4888,6 +4899,8 @@ The following are proposed pilot gates, not measured performance claims. Numeric
 | --- | --- |
 | Extraction reuse | Reinterpretation canary adds a field with zero physical conversion/OCR calls |
 | Typed fact correctness | Critical accepted facts include value, unit/currency, qualifier, policy scope, and source support |
+| Bounded assessment | F0065 exact-decimal, boundary, lineage, temporal, rule-version, and current-access cases pass; F0024 proves real neural interpretation through canonical acceptance to assessment; extraction metrics are reported separately |
+| Semantic examples | Definitions, worked/boundary examples, owning contracts/stories, and delivery phase are linked; structured examples validate and implemented stories supply actual reproduction evidence |
 | Evidence fidelity | All displayed citations in the release suite resolve to the correct immutable source and declared precision |
 | Temporal integrity | All designed retroactive, interval-split, concurrent-commit, and recorded-time cases pass |
 | Review integrity | Duplicate and stale review cases preserve lineage and cannot bypass approval policy |
@@ -4903,17 +4916,17 @@ Passing a finite security test suite is a release gate, not proof that every pos
 
 ## 115.3 Revised sequencing proposal
 
-Preserve the existing F0001–F0063 identifiers. Add acceptance criteria to existing epics and split milestones rather than renumbering the backlog.
+Preserve the existing F0001–F0063 identifiers. F0064 separately tracks repository tooling. Add F0065 for the user-authorized bounded v0.1B assessment (section 124), with integration criteria in F0024/F0025/F0026; do not renumber the backlog.
 
 | Stage | Scope | Existing roadmap mapping |
 | --- | --- | --- |
 | Pre-build contract proofs | Docling reuse, Label Studio round trip, temporal mutation, authorization/deployment compatibility | F0001–F0005, F0008, F0009, F0022 |
 | v0.1A | Typed domain contracts, durable ingestion, immutable evidence, assertion extraction | F0002–F0017 |
-| v0.1B | Authorized canonical commits, source resolution minimum, GL limits, temporal endorsement, human review | F0018–F0025 |
-| v0.1C | Recovery, deletion/revocation minimum, audit, frozen evaluation, constrained policy question | F0026 and narrow acceptance coverage from F0036–F0039 |
+| v0.1B | Authorized canonical commits, source resolution minimum, GL limits, temporal endorsement, human review, bounded neurosymbolic guideline assessment | F0018–F0023 → F0065 → F0024/F0025 integration |
+| v0.1C | Recovery, deletion/revocation minimum, audit, independent frozen evaluation, constrained policy question, assessment challenge suite | F0026 including F0065 cases, and narrow acceptance coverage from F0036–F0039 |
 | v0.2A | Governed hybrid retrieval, chat with document/entity/data, projection operations | F0033–F0040, F0044–F0047 |
 | v0.2B | Broader resolution, ontology/profile release workflows, candidate learning and targeted enrichment | F0027–F0032, F0041–F0043 |
-| v0.3+ | Full process execution, decision replay product, advanced reasoning and skills | F0048 onward |
+| v0.3+ | Full process execution, decision replay product, generalized reasoning and skills | F0048–F0063; bounded assessment already ships as F0065 |
 
 Baseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations. The later full Execution Gate and Decision Ledger can remain separate capabilities. Deferring them must not defer ordinary application security or the audit chain needed by the first review loop.
 
@@ -5259,3 +5272,26 @@ Repository root for all CRM links below is pinned to commit `47375571b19e3f917c1
 | A15 | [Local Compose](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/docker-compose.yml) and [Vite configuration](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/vite.config.ts) | Development boundary and Neuron ingress assumptions |
 | A16 | [OIDC 3.4.1 User serialization](https://github.com/authts/oidc-client-ts/blob/e4c730cd0e73a607bbc706f74893930ff9694c1a/src/User.ts) and [UserManager storage](https://github.com/authts/oidc-client-ts/blob/e4c730cd0e73a607bbc706f74893930ff9694c1a/src/UserManager.ts) | Primary upstream source confirms serialization at the CRM's locked dependency version |
 
+# 124. Bounded Neurosymbolic Assessment and Worked Examples
+
+**Scope amendment:** Authorized 2026-09-07. F0065 adds a bounded GL guideline assessment in v0.1B; F0024/F0025 integrate it and F0026 qualifies it. This revises the original general reasoning exclusion without claiming that a runtime or formal architecture signoff already exists. [ADR-0056](decisions/ADR-0056-bounded-neurosymbolic-assessment.md) remains Proposed until its proofs are recorded.
+
+## 124.1 Neural interpretation and symbolic evaluation
+
+The ontology and extraction profile guide neural interpretation of immutable content into candidate assertions. Governed source resolution and canonical acceptance produce qualified, bitemporal facts. A reviewed, versioned rule then compares the applicable each-occurrence amount with a specified minimum. An immutable assessment stores exact input facts, rule/ontology/evaluator versions, time/snapshot, evidence lineage, actor, and audit reference. The assessment is separate from canonical facts and business approval.
+
+The first supported operation is an exact-decimal minimum comparison with matching currency, coverage, term, and basis. Outcomes distinguish meets/below guideline, unknown, conflict, and not applicable. Access errors and invalid/unsupported rule definitions are separate errors. Free-form logic strings, arbitrary executable rules, autonomous learning, rule chaining, and general OWL/Datalog reasoning remain later scope. A neural model's extraction supplies the neural component; pgvector retrieval remains F0033 in v0.2A.
+
+## 124.2 Snapshot and access contract
+
+Resolve a consistent fact snapshot at explicit valid/known coordinates and pin a rule version available at that known time and effective at that valid time. Current requests resolve and echo their snapshot once; each new request recomputes. A change produces a new assessment without rewriting prior records or returning a historical record as current. F0056 later adds automatic dependency propagation for persisted derived canonical facts. F0055 generalizes reasoning over the same identities and lineage.
+
+Current permissions govern every read, including history. Require permission to the subject, rule, and complete relevant fact/evidence lineage before exposing an assessment. Entity visibility alone does not grant derived-result visibility. The [F0065 contract](../features/F0065-grounded-gl-guideline-assessment/assessment-contract.md) defines the outcome ordering, source/rule authority, idempotency, and proof obligations; the [assembly plan](../features/F0065-grounded-gl-guideline-assessment/feature-assembly-plan.md) assigns owners and upstream dependencies.
+
+## 124.3 Examples are deliverables
+
+Use [EX-GL-001](../examples/neurosymbolic-gl/README.md) as a continuing synthetic policy/endorsement case. Follow one set of identifiers through source evidence, model assertion, review, canonical commit, qualified FactSlot, temporal fact versions, rule, and assessment. The fictional minimum is teaching data, not an insurance-wide requirement. Challenge cases cover wrong high-confidence extraction, missing/explicit-negative/conflicting inputs, basis/currency mismatch, late endorsement, retraction, changed rules, concurrency, and revoked access.
+
+Each introduced/changed concept requires a glossary definition, worked example, boundary example, and owning feature/story/contract links. The [examples index](../examples/README.md) is the coverage map. Structured artifacts declare a local schema and pass planning checks. Runtime stories provide actual reproduction commands and compare observed output to independently authored expected outcomes. Label illustrative outputs, runtime evidence, future phases, and synthetic provenance explicitly. Documentation/development examples stay outside the frozen holdout.
+
+F0026 reports model extraction quality independently from deterministic rule correctness and end-to-end assessment quality. A schema check or a mocked extraction is not proof of neurosymbolic processing. The full general reasoner, dependency propagation, decision ledger, scenario engine, and learned rule promotion retain their own milestones.

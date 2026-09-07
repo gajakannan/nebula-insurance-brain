@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CHECK_ID = "plan-readiness"
 FEATURE = re.compile(r"F\d{4}")
 CHECKLIST_COLUMNS = ["Rule ID", "Owner", "Criterion", "Governing source", "Planning evidence to inspect"]
-RULES = {"BRAIN-SCOPE", "BRAIN-AUTHORITY", "BRAIN-EVIDENCE", "BRAIN-PARSE-ONCE", "BRAIN-TEMPORAL", "BRAIN-AUTHORIZATION", "BRAIN-BUILDABILITY"}
+RULES = {"BRAIN-SCOPE", "BRAIN-AUTHORITY", "BRAIN-EVIDENCE", "BRAIN-PARSE-ONCE", "BRAIN-TEMPORAL", "BRAIN-AUTHORIZATION", "BRAIN-BUILDABILITY", "BRAIN-EXAMPLES"}
 
 
 def local_path(root: Path, value: str) -> Path:

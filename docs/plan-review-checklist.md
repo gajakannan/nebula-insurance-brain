@@ -13,6 +13,7 @@ For each target, record each applicable rule's outcome and a feature-specific pl
 | BRAIN-TEMPORAL | architect | Changes preserve the valid-time and recorded-time contract. | planning-mds/architecture/decisions/ADR-0007-full-bitemporality.md | Target persistence requirements and planned tests; or an explicit scope exclusion |
 | BRAIN-AUTHORIZATION | security | Protected reads and writes establish identity and enforce resource scope. | planning-mds/security/authorization-review.md | Target permission requirements and negative test plan; or an explicit scope exclusion |
 | BRAIN-BUILDABILITY | code-reviewer | Ownership, prerequisites, interfaces, and planned validation let implementation begin without invented rules. | planning-mds/features/TRACKER-GOVERNANCE.md | Target stories, dependencies, planning artifacts, and required signoff roles |
+| BRAIN-EXAMPLES | architect | Each introduced/changed semantic concept has a definition, worked example, boundary example, and owning feature/story/contract links; structured examples validate, phases/provenance are labeled, and runtime reproduction/holdout separation are planned. | planning-mds/examples/README.md | Target example coverage, schema/reference checks, story acceptance, and actual reproduction evidence when implemented; or an explicit no-semantic-change rationale |
 
 ## Evidence boundary
 

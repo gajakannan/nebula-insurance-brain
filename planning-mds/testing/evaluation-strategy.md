@@ -46,3 +46,11 @@ The required carryover tests for identity verification, policy parity, parent an
 ## Framework evidence contract
 
 Every feature run records `test-plan.md`, `test-execution-report.md`, and `coverage-report.md` under `operations/evidence/runs/{RUN_ID}/`. The coverage floor and the four required security scan classes come from the framework action policy, not from this document.
+
+## v0.1 bounded neurosymbolic assessment (F0065)
+
+F0024 must run actual neural interpretation through evidence review/canonical acceptance and the bounded rule; a mocked model or hand-authored expected assessment alone is insufficient. F0025 checks the exact temporal coordinates after correction and late endorsement. F0026 maps [EX-GL-001 CASE-01–19](../examples/neurosymbolic-gl/cases.md) to observed runtime evidence, including decimal boundaries, unsupported rules, absent/unaccepted inputs, conflicts, basis/currency mismatch, idempotency, concurrency, changed rule releases, and derived-result revocation.
+
+Report model extraction correctness and severe errors separately from deterministic rule correctness, abstention, review workload, end-to-end result accuracy, latency, and cost. Expected outcomes are authored independently of the evaluator. Quality thresholds, sample sizes, corpus licensing, and named reviewers must be settled before the v0.1 release gate.
+
+Worked examples are development/documentation fixtures and remain outside the frozen holdout. Require definition/example/boundary/contract/story links for new concepts, local schema/reference validation for structured examples, and actual runnable reproduction instructions when the corresponding runtime ships. A structural example check supplies no measured model performance or runtime proof.

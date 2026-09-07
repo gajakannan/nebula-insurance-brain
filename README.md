@@ -48,3 +48,7 @@ git config core.hooksPath .githooks
 ## License
 
 See [LICENSE](LICENSE).
+
+## Start with an example
+
+Read [EX-GL-001: from policy evidence to guideline assessment](planning-mds/examples/neurosymbolic-gl/README.md) and the [concept coverage map](planning-mds/examples/README.md). The v0.1 roadmap now includes [F0065](planning-mds/features/F0065-grounded-gl-guideline-assessment/README.md), a bounded neurosymbolic assessment with six planned stories. All example outputs are synthetic; the repository remains a planning baseline with no runtime implementation.

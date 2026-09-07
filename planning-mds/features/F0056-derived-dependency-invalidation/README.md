@@ -6,7 +6,7 @@
 
 ## Overview
 
-Derived facts point at exact input versions so a retroactive change invalidates dependents automatically (sections 55, 56).
+Automatic propagation across persisted derived canonical facts invalidates and recomputes dependencies after input changes; it extends the lineage introduced by F0065 without being a prerequisite for its on-demand v0.1 assessments (sections 55, 56, 124).
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0026](../../architecture/decisions/ADR-0026-derived-facts-have-dependency-lineage.md). Likely predecessors (inferred, confirm at Phase B): F0008.
 
@@ -20,3 +20,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Scope amendment and required story acceptance (2026-09-07)
+
+- F0065 recomputes each requested assessment from an explicit snapshot and retains prior records as history.
+- F0056 owns dependency discovery, affected-interval invalidation, cascading recomputation, and publication for persisted derived canonical facts.
+- Preserve exact input/rule versions and current permission propagation. Historical assessments must not be silently rewritten by the generalized engine.
+
+Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../../examples/neurosymbolic-gl/cases.md), and [F0065](../F0065-grounded-gl-guideline-assessment/README.md). These requirements must be carried into this feature's PRD/stories when planned; runtime and feature status remain Planned.
