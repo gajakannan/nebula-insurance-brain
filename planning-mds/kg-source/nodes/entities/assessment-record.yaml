@@ -1,0 +1,26 @@
+id: entity:assessment-record
+label: Assessment record
+notes: Append-only result of applying one guideline rule version to exact canonical inputs at explicit valid and
+  known coordinates. Records outcome and reason codes from the closed vocabulary MEETS_GUIDELINE, BELOW_GUIDELINE,
+  UNKNOWN, CONFLICT, NOT_APPLICABLE, plus input fact-version IDs, rule and ontology releases, evaluator version,
+  semantic snapshot, acting principal, audit reference, evidence and derivation links, and the typed comparison
+  when one was performed. Tenant/knowledge-base scoped and stored outside the canonical fact plane; it is never
+  promoted to a canonical fact and is not a policy approval. Authorization failures and invalid definitions are
+  errors, not recorded outcomes.
+source_docs:
+- F0065/assessment-contract.md
+- F0065/F0065-S0003-preserve-assessment-lineage.md
+- F0065/F0065-S0004-temporal-reassessment.md
+- planning-mds/architecture/decisions/ADR-0026-derived-facts-have-dependency-lineage.md
+related_nodes:
+- capability:grounded-gl-guideline-assessment
+- capability:authorization-enforcement
+- workflow:guideline-assessment
+- adr:0026
+- adr:0056
+related_entities:
+- entity:guideline-rule-version
+- entity:canonical-fact-version
+- entity:assertion
+- entity:audit-event
+- entity:principal

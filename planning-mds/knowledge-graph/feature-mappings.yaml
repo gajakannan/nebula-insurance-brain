@@ -339,6 +339,9 @@ features:
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment
     affects:
       - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
+      - entity:guideline-rule-version
+      - workflow:guideline-assessment
     depends_on:
       - feature:F0001
       - feature:F0002
@@ -368,12 +371,18 @@ features:
       - adr:0026
       - adr:0056
     notes:
-      - Draft planning bindings authored 2026-09-07 under user authorization; no completed Phase A/B gates
-        or runtime bindings claimed.
+      - Endpoint, policy_rule, and runtime DTO schema nodes are deliberately not declared. brain-api.yaml
+        has no assessment path, policy.csv has no assessment resource/action pair (declaring one would
+        fail the Casbin drift check), and no assessment request/result schema file exists. All three are
+        open decisions in the assembly plan and bind in the implementation run that authors them.
       - Fractional roadmap order places F0065 after the F0023 base view and before F0024 integration without
         renumbering existing entries.
       - Only the UI story requires F0021–F0023; the evaluator requires the canonical kernel and temporal
         reads.
+      - Ontology bound at plan run 2026-09-07-38aed4ad (G4, PHASE=A+B, FEATURE_MODE=existing). Planning
+        bindings only; no runtime exists and no story has started.
+    uses_schema:
+      - schema:semantic-example
 rules:
   - Mappings must reference canonical IDs declared in canonical-nodes.yaml.
   - Product Manager owns feature and story mapping freshness.
@@ -486,6 +495,7 @@ stories:
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
     affects:
       - capability:grounded-gl-guideline-assessment
+      - entity:guideline-rule-version
     governed_by:
       - adr:0056
   - id: story:F0065-S0002
@@ -493,6 +503,10 @@ stories:
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0002-evaluate-accepted-facts.md
     affects:
       - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
+      - entity:canonical-fact-version
+      - entity:guideline-rule-version
+      - workflow:guideline-assessment
     governed_by:
       - adr:0056
   - id: story:F0065-S0003
@@ -500,6 +514,9 @@ stories:
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md
     affects:
       - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
+      - entity:audit-event
+      - workflow:guideline-assessment
     governed_by:
       - adr:0056
   - id: story:F0065-S0004
@@ -507,6 +524,8 @@ stories:
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0004-temporal-reassessment.md
     affects:
       - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
+      - entity:canonical-fact-version
     governed_by:
       - adr:0056
   - id: story:F0065-S0005
@@ -514,6 +533,7 @@ stories:
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0005-explain-assessment-in-entity-360.md
     affects:
       - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
     governed_by:
       - adr:0056
   - id: story:F0065-S0006
@@ -523,3 +543,5 @@ stories:
       - capability:grounded-gl-guideline-assessment
     governed_by:
       - adr:0056
+    uses_schema:
+      - schema:semantic-example

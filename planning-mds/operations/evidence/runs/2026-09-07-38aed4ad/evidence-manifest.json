@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "feature_id": "F0065",
+  "feature_slug": "grounded-gl-guideline-assessment",
+  "run_id": "2026-09-07-38aed4ad",
+  "status": "draft",
+  "recorded_on": "2026-09-07",
+  "contract_version": "2026-07-11",
+  "contract_effective_date": "2026-07-11",
+  "feature_path_at_run_start": "planning-mds/features/F0065-grounded-gl-guideline-assessment",
+  "feature_path_at_closeout": null,
+  "feature_state": "Planned",
+  "rerun_of": null,
+  "changed_paths": [
+    "planning-mds/features/F0065-grounded-gl-guideline-assessment/acceptance-criteria-checklist.md",
+    "planning-mds/examples/personas/gl-underwriter.md",
+    "planning-mds/examples/personas/domain-steward.md",
+    "planning-mds/BLUEPRINT.md",
+    "planning-mds/kg-source/features/F0065.yaml",
+    "planning-mds/kg-source/nodes/capabilities/grounded-gl-guideline-assessment.yaml",
+    "planning-mds/kg-source/nodes/entities/assessment-record.yaml",
+    "planning-mds/kg-source/nodes/entities/guideline-rule-version.yaml",
+    "planning-mds/kg-source/nodes/workflows/guideline-assessment.yaml",
+    "planning-mds/kg-source/nodes/schemas/schemas.yaml",
+    "planning-mds/knowledge-graph/canonical-nodes.yaml",
+    "planning-mds/knowledge-graph/feature-mappings.yaml",
+    "planning-mds/knowledge-graph/coverage-report.yaml"
+  ],
+  "scm": {
+    "base_ref": "main",
+    "head_ref": null,
+    "diff_artifact": null,
+    "note": "Plan run on a detached HEAD working tree; no feature branch. Changes are unstaged in the product working tree."
+  },
+  "runtime_bearing": false,
+  "deployment_config_changed": false,
+  "frontend_in_scope": false,
+  "security_sensitive_scope": false,
+  "required_roles": [
+    "Product Manager",
+    "Architect"
+  ],
+  "gate_results": {
+    "G1_clarification": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "gate-decisions.md"
+    },
+    "G2_tracker_sync": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "gate-decisions.md"
+    },
+    "G3_phase_a_approval": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "gate-decisions.md",
+      "checkpoint": "approve-phase-a",
+      "produces": "phase-a-approved",
+      "attested_by": "gajakannan",
+      "attested_role": "product-manager",
+      "attested_at": "2026-09-07T15:55:33-04:00",
+      "evidence_sha256": "da5f624e811667dea9662837ac7f7f8e605c0c2c587da75eecb48a733b3c4c54",
+      "note": "user approved explicitly; token recorded in gate-decisions.md and attested through run-gate.py"
+    },
+    "G4_ontology_sync": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "commands.log"
+    },
+    "G5_phase_b_exit": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "gate-decisions.md",
+      "checkpoint": "approve-phase-b",
+      "produces": "phase-b-approved",
+      "attested_by": "gajakannan",
+      "attested_role": "architect",
+      "attested_at": "2026-09-07T15:55:38-04:00",
+      "evidence_sha256": "da5f624e811667dea9662837ac7f7f8e605c0c2c587da75eecb48a733b3c4c54",
+      "note": "all seven exit-validation operations exited 0; user approved explicitly; token recorded in gate-decisions.md and attested through run-gate.py"
+    }
+  },
+  "files": {
+    "readme": "README.md",
+    "action_context": "action-context.md",
+    "artifact_trace": "artifact-trace.md",
+    "gate_decisions": "gate-decisions.md",
+    "commands_log": "commands.log",
+    "lifecycle_gates_log": "lifecycle-gates.log",
+    "gate_state": "gate-state.json"
+  },
+  "role_results": {},
+  "token_usage": {
+    "artifact": "token-usage.json",
+    "agent_tool": null,
+    "turns": null,
+    "context_tokens": null,
+    "uncached_input_tokens": null,
+    "cached_input_tokens": null,
+    "cache_creation_input_tokens": null,
+    "cache_creation_1h_input_tokens": null,
+    "cache_creation_5m_input_tokens": null,
+    "output_tokens": null,
+    "cache_hit_ratio": null,
+    "compactions": null
+  },
+  "security_scans": {
+    "dependency": {},
+    "secrets": {},
+    "sast": {},
+    "dast": {}
+  },
+  "omissions": [
+    {
+      "artifact": "feature evidence package at FEATURE_INDEX_ROOT",
+      "reason": "plan is scope: base-run-only; creating one during plan is forbidden by the action spec"
+    },
+    {
+      "artifact": "endpoint: nodes for the assessment surface",
+      "reason": "brain-api.yaml declares no assessment path; runtime OpenAPI is an open decision in the assembly plan"
+    },
+    {
+      "artifact": "policy_rule: nodes for assessment access",
+      "reason": "validate.py --check-drift errors on a policy_rule with no matching policy.csv pair; the permission mapping is an open decision"
+    },
+    {
+      "artifact": "runtime DTO schema: nodes",
+      "reason": "the schema kind requires an existing path; no assessment request/result schema file exists"
+    },
+    {
+      "artifact": "role: nodes for GL underwriter and domain steward",
+      "reason": "persona files exist, but neither has a grant structure in policy.csv; a role node would imply authorization that does not exist"
+    }
+  ],
+  "waivers": {},
+  "global_evidence_refs": {},
+  "run_scope": "base-run-only",
+  "run_status": "complete",
+  "run_status_note": "All five plan gates closed; gate-state.json reports every stage completed with no pending checkpoint. F0065 remains status 'planned' and every story remains Not Started \u2014 this run bound the ontology and completed the planning package, it did not start implementation."
+}

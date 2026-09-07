@@ -1,0 +1,21 @@
+id: entity:guideline-rule-version
+label: Guideline rule version
+notes: Immutable reviewed release of one bounded guideline. Carries rule identity, version, ontology release,
+  guideline source and approved authority references, tenant/knowledge-base scope, effective interval, coverage
+  type, limit basis, currency, the single v0.1 operation money_gte_minimum, and an exact decimal minimum. A changed
+  minimum produces a new release; installation is a separately authorized administrative act with an audit record.
+  Selection is verified against known_as_of and valid_as_of, so a later release is never applied to an earlier
+  question.
+source_docs:
+- F0065/assessment-contract.md
+- F0065/F0065-S0001-versioned-guideline-rule.md
+- planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md
+related_nodes:
+- capability:grounded-gl-guideline-assessment
+- capability:authorization-enforcement
+- workflow:guideline-assessment
+- adr:0056
+related_entities:
+- entity:assessment-record
+- entity:audit-event
+- entity:principal

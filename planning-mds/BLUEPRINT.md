@@ -194,7 +194,14 @@ Engineering personas established by F0001 Phase A (2026-09-06):
 - Ingrid the Persistence Engineer — `examples/personas/persistence-engineer.md`
 - Rosa the Business Reviewer — `examples/personas/business-reviewer.md`
 
-End-user personas (underwriters, analysts, stewards) are authored with the first user-facing features (F0021 to F0023).
+End-user personas established by F0065 Phase A (2026-09-07), ahead of F0021 to F0023, because F0065 was
+planned first and its stories are written against them:
+
+- Priya the GL Underwriter — `examples/personas/gl-underwriter.md`
+- Sameer the Domain Steward — `examples/personas/domain-steward.md`
+
+Remaining end-user personas (analysts, and any further steward or governance roles) are authored with the
+first user-facing features, F0021 to F0023.
 
 ### 3.3 Epics & Features
 
