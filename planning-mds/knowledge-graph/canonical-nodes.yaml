@@ -263,12 +263,22 @@ capabilities:
   - id: capability:grounded-gl-guideline-assessment
     label: Grounded GL guideline assessment
     notes: Proposed v0.1B bounded on-demand comparison; planned, not implemented. Exact canonical input/rule
-      versions, temporal snapshot, evidence lineage, and current authorization.
+      versions, temporal snapshot, evidence lineage, and current authorization. The single operation is
+      money_gte_minimum over accepted canonical facts; outcomes are a closed set and authorization failures
+      are errors outside it. Runtime endpoints, permission mapping, and DTO schemas are open decisions
+      in the assembly plan and are deliberately not bound here.
     related_nodes:
+      - adr:0026
       - adr:0056
       - capability:authorization-enforcement
       - capability:bitemporal-canonical-commit
       - capability:semantic-interpretation-run
+      - entity:assessment-record
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:guideline-rule-version
+      - schema:semantic-example
+      - workflow:guideline-assessment
     source_docs:
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0006-reproducible-worked-examples.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/PRD.md
@@ -405,6 +415,32 @@ entities:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+  - id: entity:assessment-record
+    label: Assessment record
+    notes: Append-only result of applying one guideline rule version to exact canonical inputs at explicit
+      valid and known coordinates. Records outcome and reason codes from the closed vocabulary MEETS_GUIDELINE,
+      BELOW_GUIDELINE, UNKNOWN, CONFLICT, NOT_APPLICABLE, plus input fact-version IDs, rule and ontology
+      releases, evaluator version, semantic snapshot, acting principal, audit reference, evidence and
+      derivation links, and the typed comparison when one was performed. Tenant/knowledge-base scoped
+      and stored outside the canonical fact plane; it is never promoted to a canonical fact and is not
+      a policy approval. Authorization failures and invalid definitions are errors, not recorded outcomes.
+    related_entities:
+      - entity:assertion
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:guideline-rule-version
+      - entity:principal
+    related_nodes:
+      - adr:0026
+      - adr:0056
+      - capability:authorization-enforcement
+      - capability:grounded-gl-guideline-assessment
+      - workflow:guideline-assessment
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0026-derived-facts-have-dependency-lineage.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0004-temporal-reassessment.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
   - id: entity:audit-event
     label: Audit event
     notes: 'Append-only record of authorization decisions, commits, and review decisions: actor and delegate,
@@ -453,6 +489,27 @@ entities:
     source_docs:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:guideline-rule-version
+    label: Guideline rule version
+    notes: Immutable reviewed release of one bounded guideline. Carries rule identity, version, ontology
+      release, guideline source and approved authority references, tenant/knowledge-base scope, effective
+      interval, coverage type, limit basis, currency, the single v0.1 operation money_gte_minimum, and
+      an exact decimal minimum. A changed minimum produces a new release; installation is a separately
+      authorized administrative act with an audit record. Selection is verified against known_as_of and
+      valid_as_of, so a later release is never applied to an earlier question.
+    related_entities:
+      - entity:assessment-record
+      - entity:audit-event
+      - entity:principal
+    related_nodes:
+      - adr:0056
+      - capability:authorization-enforcement
+      - capability:grounded-gl-guideline-assessment
+      - workflow:guideline-assessment
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
   - id: entity:outbox-event
     label: Outbox event
     notes: Transactional outbox row written with every canonical commit and consumed idempotently by projectors;
@@ -642,6 +699,13 @@ schemas:
     related_nodes:
       - capability:evidence-review-round-trip
       - entity:review-decision
+  - id: schema:semantic-example
+    label: SemanticExample
+    path: planning-mds/schemas/semantic-example.schema.json
+    related_nodes:
+      - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
+      - entity:guideline-rule-version
 workflows:
   - id: workflow:canonical-commit
     label: Canonical commit lifecycle
@@ -678,6 +742,58 @@ workflows:
         transitions_to: []
       - id: state:canonical-commit:rejected
         label: Rejected
+        transitions_to: []
+  - id: workflow:guideline-assessment
+    label: Guideline assessment lifecycle
+    rationale:
+      - adr: adr:0056
+        section: Decision
+        summary: Bounded on-demand assessment. Request validity, rule-release availability, and authorization
+          are resolved before any business outcome is disclosed; the comparison itself is deterministic
+          exact-decimal arithmetic over accepted canonical facts read from one consistent snapshot, with
+          no model call.
+      - adr: adr:0026
+        section: Decision
+        summary: The recorded result carries the exact input fact versions it derived from, so the derivation
+          is reconstructable without re-running interpretation.
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+      - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
+      - entity:canonical-fact-version
+      - entity:guideline-rule-version
+    source_docs:
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0002-evaluate-accepted-facts.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+    states:
+      - id: state:guideline-assessment:requested
+        label: Requested
+        transitions_to:
+          - state:guideline-assessment:authorized
+          - state:guideline-assessment:rejected
+      - id: state:guideline-assessment:rejected
+        label: Rejected
+        transitions_to: []
+      - id: state:guideline-assessment:authorized
+        label: Authorized
+        transitions_to:
+          - state:guideline-assessment:snapshot-resolved
+          - state:guideline-assessment:denied
+      - id: state:guideline-assessment:denied
+        label: Denied
+        transitions_to: []
+      - id: state:guideline-assessment:snapshot-resolved
+        label: Snapshot resolved
+        transitions_to:
+          - state:guideline-assessment:evaluated
+      - id: state:guideline-assessment:evaluated
+        label: Evaluated
+        transitions_to:
+          - state:guideline-assessment:recorded
+      - id: state:guideline-assessment:recorded
+        label: Recorded
         transitions_to: []
   - id: workflow:human-review
     label: Human review round trip

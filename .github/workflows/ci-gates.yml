@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: gajakannan/nebula-agents
-          ref: 4eaf7b3abef84687f6fda622c61a95d378a50888
+          ref: c218bf1776f509a30f71967a1ee79879caa9a000
           path: framework
       - uses: actions/setup-python@v5
         with:
@@ -53,8 +53,9 @@ jobs:
       - name: Feature evidence validation (registry-wide)
         working-directory: framework
         run: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root ../product
-      # Rollout prerequisite: publish the generic extension change, then advance
-      # the ref above AND BLUEPRINT.md together. Fail closed at an older pin.
+      # Standing guard: the pin above and BLUEPRINT.md must always name a
+      # framework revision that carries project extensions. Advance both
+      # together; fail closed rather than silently skipping declared checks.
       - name: Require project-extension support at the pinned framework revision
         shell: bash
         run: |

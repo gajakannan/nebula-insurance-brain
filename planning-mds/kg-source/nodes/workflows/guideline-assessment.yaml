@@ -1,0 +1,51 @@
+id: workflow:guideline-assessment
+label: Guideline assessment lifecycle
+rationale:
+- adr: adr:0056
+  section: Decision
+  summary: Bounded on-demand assessment. Request validity, rule-release availability, and authorization are
+    resolved before any business outcome is disclosed; the comparison itself is deterministic exact-decimal
+    arithmetic over accepted canonical facts read from one consistent snapshot, with no model call.
+- adr: adr:0026
+  section: Decision
+  summary: The recorded result carries the exact input fact versions it derived from, so the derivation is
+    reconstructable without re-running interpretation.
+source_docs:
+- F0065/assessment-contract.md
+- F0065/F0065-S0002-evaluate-accepted-facts.md
+- F0065/F0065-S0003-preserve-assessment-lineage.md
+related_nodes:
+- capability:grounded-gl-guideline-assessment
+- capability:authorization-enforcement
+- capability:bitemporal-canonical-commit
+- entity:guideline-rule-version
+- entity:assessment-record
+- entity:canonical-fact-version
+states:
+- id: state:guideline-assessment:requested
+  label: Requested
+  transitions_to:
+  - state:guideline-assessment:authorized
+  - state:guideline-assessment:rejected
+- id: state:guideline-assessment:rejected
+  label: Rejected
+  transitions_to: []
+- id: state:guideline-assessment:authorized
+  label: Authorized
+  transitions_to:
+  - state:guideline-assessment:snapshot-resolved
+  - state:guideline-assessment:denied
+- id: state:guideline-assessment:denied
+  label: Denied
+  transitions_to: []
+- id: state:guideline-assessment:snapshot-resolved
+  label: Snapshot resolved
+  transitions_to:
+  - state:guideline-assessment:evaluated
+- id: state:guideline-assessment:evaluated
+  label: Evaluated
+  transitions_to:
+  - state:guideline-assessment:recorded
+- id: state:guideline-assessment:recorded
+  label: Recorded
+  transitions_to: []

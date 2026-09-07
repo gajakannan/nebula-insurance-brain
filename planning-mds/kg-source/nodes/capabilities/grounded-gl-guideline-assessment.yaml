@@ -1,7 +1,10 @@
 id: capability:grounded-gl-guideline-assessment
 label: Grounded GL guideline assessment
 notes: Proposed v0.1B bounded on-demand comparison; planned, not implemented. Exact canonical input/rule versions,
-  temporal snapshot, evidence lineage, and current authorization.
+  temporal snapshot, evidence lineage, and current authorization. The single operation is money_gte_minimum over
+  accepted canonical facts; outcomes are a closed set and authorization failures are errors outside it. Runtime
+  endpoints, permission mapping, and DTO schemas are open decisions in the assembly plan and are deliberately not
+  bound here.
 source_docs:
 - F0065/PRD.md
 - F0065/assessment-contract.md
@@ -11,4 +14,11 @@ related_nodes:
 - capability:semantic-interpretation-run
 - capability:bitemporal-canonical-commit
 - capability:authorization-enforcement
+- entity:guideline-rule-version
+- entity:assessment-record
+- entity:canonical-fact-version
+- entity:audit-event
+- workflow:guideline-assessment
+- schema:semantic-example
+- adr:0026
 - adr:0056

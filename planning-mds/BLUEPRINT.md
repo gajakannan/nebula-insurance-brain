@@ -30,11 +30,11 @@ IMPORTANT RULES:
 
 ### Framework binding
 
-- Framework: `nebula-agents` pinned at commit `4eaf7b3abef84687f6fda622c61a95d378a50888` (2026-08-30). Advance the pin deliberately and record the new commit here.
+- Framework: `nebula-agents` pinned at commit `c218bf1776f509a30f71967a1ee79879caa9a000` (2026-09-07). Advance the pin deliberately, in step with `.github/workflows/ci-gates.yml`, and record the new commit here.
 - Session setup: export `NEBULA_PRODUCT_ROOT=<absolute path to this repo>` before running any framework script. The framework default points at the CRM repo, not this one.
 - Layout convention: `engine/`, `experience/`, `neuron/` runtime roots (section 2.3). Path-class extensions for the additional roots are declared in section 2.4 and registered in `operations/evidence/README.md` at init.
 - Local guidance: [agent instructions](../docs/agent-instructions.md) and [plan review checklist](../docs/plan-review-checklist.md), declared in `../.nebula-project.yaml`, supplement this blueprint without changing its authority.
-- Extension rollout: the working-tree integration requires a newer framework revision than the pin above. Publish that revision and update this pin and `.github/workflows/ci-gates.yml` together before rollout; see [adoption status](../docs/framework-adoption.md).
+- Extension rollout: complete. The pinned revision carries `agents/scripts/project_checks.py` and `agents/scripts/project_context.py`, so the checks declared in `../.nebula-project.yaml` execute at the framework's `plan-review` extension point; see [adoption status](../docs/framework-adoption.md).
 
 ### Tracker Governance (Mandatory)
 
@@ -194,7 +194,14 @@ Engineering personas established by F0001 Phase A (2026-09-06):
 - Ingrid the Persistence Engineer — `examples/personas/persistence-engineer.md`
 - Rosa the Business Reviewer — `examples/personas/business-reviewer.md`
 
-End-user personas (underwriters, analysts, stewards) are authored with the first user-facing features (F0021 to F0023).
+End-user personas established by F0065 Phase A (2026-09-07), ahead of F0021 to F0023, because F0065 was
+planned first and its stories are written against them:
+
+- Priya the GL Underwriter — `examples/personas/gl-underwriter.md`
+- Sameer the Domain Steward — `examples/personas/domain-steward.md`
+
+Remaining end-user personas (analysts, and any further steward or governance roles) are authored with the
+first user-facing features, F0021 to F0023.
 
 ### 3.3 Epics & Features
 
@@ -355,13 +362,13 @@ Performance, availability, scalability, and security targets are proposed gates 
 - `security/policies/` — Casbin model and policy; `security/` — AuthX contract and pending security artifacts
 - `testing/evaluation-strategy.md` — Golden Corpus, metrics, regression suites, release gates
 
-### 4.9 F0001 Phase B (2026-09-06)
-
-Assembly plan: `features/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
-
 ### 4.8 Open decisions
 
 Section 117.1 lists the decisions the implementation team still owes: source-authority owner, tenant and knowledge-base identity scope, host and extension build, Docling-Graph pin, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18), the Label Studio edition (Community), and the proof model policy (self-hosted); the production host, the Docling-Graph pin, and the corpus source remain open.
+
+### 4.9 F0001 Phase B (2026-09-06)
+
+Assembly plan: `features/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
 
 ---
 
