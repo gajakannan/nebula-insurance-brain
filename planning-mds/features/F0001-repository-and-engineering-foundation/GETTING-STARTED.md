@@ -11,7 +11,7 @@
 ## Services to Run
 
 ```bash
-docker compose up -d postgres objectstore labelstudio authentik   # S0002 stack
+docker compose up -d postgres objectstore authentik               # S0002 stack
 # inference service on the host GPU, per docker/local-inference-runbook.md (vLLM, microsoft/Phi-4-mini-instruct, :8000)
 uv run --directory engine fastapi dev apps/api/src/brain_api/app.py   # API on :8080
 uv run --directory engine python -m brain_worker.main                 # worker (ingestion + outbox projector)
@@ -23,7 +23,6 @@ uv run --directory engine python -m brain_worker.main                 # worker (
 |----------|---------|---------|
 | `BRAIN_DATABASE_URL` | PostgreSQL 18 connection | compose default |
 | `BRAIN_OBJECT_STORE_ENDPOINT`, `_ACCESS_KEY`, `_SECRET_KEY`, `_BUCKET` | MinIO content store | compose defaults, bucket `content` |
-| `BRAIN_LABELSTUDIO_URL`, `BRAIN_LABELSTUDIO_TOKEN_ENV`, `BRAIN_LABELSTUDIO_WEBHOOK_SECRET_ENV` | Label Studio Community API and webhook trust | names only; values from `~/.brain-secrets` |
 | `BRAIN_OIDC_ISSUER`, `BRAIN_OIDC_AUDIENCE` | authentik verification | compose defaults |
 | `BRAIN_INFERENCE_BASE_URL`, `BRAIN_INFERENCE_MODEL`, `BRAIN_INFERENCE_API_KEY_ENV`, `BRAIN_INFERENCE_CONTEXT_LIMIT` | vLLM endpoint, `microsoft/Phi-4-mini-instruct`, key name, `4096` | see runbook |
 | `BRAIN_GRANT_CACHE_SECONDS` | Bound on revocation propagation | `30` |
@@ -44,11 +43,12 @@ uv run --directory engine python -m brain_worker.main                 # worker (
 | Layer | Path | Purpose |
 |-------|------|---------|
 | Backend | `engine/apps/api/src/brain_api/` | app factory, `/health`, deps, routes (content, reviews, facts) |
-| Backend | `engine/packages/brain-{domain,persistence,content,security,temporal,review,review-labelstudio}/` | kernel packages per the assembly plan |
+| Backend | `engine/packages/brain-{domain,persistence,content,security,temporal,review}/` | kernel packages per the assembly plan |
+| Frontend | `experience/src/review-panel/` | proof-scope Review Panel for S0004 (ADR-0057) |
 | AI runtime | `neuron/` | Docling and Docling-Graph adapters, proof harness for S0003 |
 | Containers | `docker/`, `docker-compose.yml` | Dependency stack and pinned matrix |
 
 ## Notes
 
-- Section 114.3: pin one exact combination of Python, PostgreSQL, AGE, pgvector, Docling, Docling-Graph, and Label Studio; do not rely on generic compatibility claims.
-- Section 111.1: prove the Label Studio workflow with the selected edition before estimating anything that depends on it.
+- Section 114.3: pin one exact combination of Python, PostgreSQL, AGE, pgvector, Docling, Docling-Graph, `pdf.js`, and `fflate`; do not rely on generic compatibility claims.
+- Sections 111.1 and 125: prove the native review workflow, including the anchoring and unresolved-evidence paths, before estimating anything that depends on it.

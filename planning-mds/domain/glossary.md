@@ -89,11 +89,27 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 
 ### Review Item
 **Type:** Entity
-**Definition:** A Nebula-owned unit of human adjudication (low-confidence assertion, extraction, provenance, entity, or relationship correction) routed to Label Studio (75, ADR-0034)
+**Definition:** A Nebula-owned unit of human adjudication (low-confidence assertion, extraction, provenance, entity, or relationship correction) routed to the Nebula Review Panel (75, 125, ADR-0057)
+
+### Review Batch
+**Type:** Entity
+**Definition:** The set of review items a reviewer is shown together, typically the fields of one submission package across its artifacts; submitted in one transaction (125, ADR-0057)
+
+### Review Panel
+**Type:** Term
+**Definition:** Nebula's native evidence review surface: renders the immutable content artifact per content type, anchors each assertion in its source region at a declared precision, and submits governed decisions (111, 125, ADR-0057)
 
 ### Review Decision
 **Type:** Entity
-**Definition:** The governed outcome of human review (`ACCEPT`, `CORRECT`, `REJECT`) with correction lineage; corrections append and never rewrite evidence (75, ADR-0037)
+**Definition:** The governed outcome of human review (`ACCEPT`, `CORRECT`, `REJECT`) with correction lineage; corrections append and never rewrite evidence. `BLOCKED` records that evidence could not be anchored and is not an adjudication (75, 125, ADR-0037, ADR-0058)
+
+### Evidence Locator
+**Type:** Entity
+**Definition:** The stored target that binds an assertion to its source region: W3C Web Annotation selectors per content type plus the declared precision, with `unresolved` a valid value (108.2, 125, ADR-0058)
+
+### Evidence Precision
+**Type:** Term
+**Definition:** How exactly an assertion is grounded — `exact-span`, `table-cell`, `block`, `page`, `document`, or `unresolved` — declared rather than inferred, and rendered as claimed (108.2, 125, ADR-0058)
 
 ### Learning Candidate
 **Type:** Entity
@@ -177,7 +193,7 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 
 ### Golden Corpus
 **Type:** Term
-**Definition:** Version-controlled labeled documents and expected results exported from Label Studio, used for evaluation and regression (96, 115.1)
+**Definition:** Version-controlled labeled documents and expected results exported from Nebula review decisions, used for evaluation and regression (96, 115.1, ADR-0057)
 
 ### Loss Run
 **Type:** Term
@@ -207,7 +223,6 @@ The following terms are specific to the Nebula Insurance Brain domain and must n
 - FactSlot
 - Docling
 - Docling-Graph
-- Label Studio
 - Insurance Brain
 
 ## Neurosymbolic assessment vocabulary (F0065)

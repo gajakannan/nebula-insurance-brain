@@ -2,21 +2,68 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://nebula.local/schemas/review-decision.schema.json",
   "title": "ReviewDecision",
-  "description": "Governed outcome of one human review; corrections append and never rewrite the original assertion (master blueprint section 75, ADR-0037; F0001-S0004).",
+  "description": "Governed outcome of one human review submitted from the Nebula Review Panel; corrections append and never rewrite the original assertion (master blueprint sections 75 and 125, ADR-0037, ADR-0057, ADR-0058; F0001-S0004).",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "review_item_id", "action", "reviewer_principal_id", "decided_at", "assertion_version", "stale", "event_sha256"],
+  "required": ["id", "review_item_id", "review_batch_id", "action", "reviewer_principal_id", "decided_at", "assertion_version", "stale", "event_sha256"],
   "properties": {
     "id": { "type": "string", "format": "uuid" },
     "review_item_id": { "type": "string", "format": "uuid" },
-    "action": { "type": "string", "enum": ["ACCEPT", "CORRECT", "REJECT"] },
+    "review_batch_id": { "type": "string", "format": "uuid" },
+    "action": {
+      "type": "string",
+      "description": "ACCEPT, CORRECT, and REJECT are adjudications. BLOCKED is not: it records that the evidence could not be anchored, produces no assertion, and leaves the review item open (ADR-0058).",
+      "enum": ["ACCEPT", "CORRECT", "REJECT", "BLOCKED"]
+    },
+    "reason_code": {
+      "type": ["string", "null"],
+      "description": "Required for CORRECT, REJECT, and BLOCKED. EVIDENCE_UNRESOLVED is the only reason code valid with BLOCKED.",
+      "enum": ["MISREAD_VALUE", "WRONG_REGION", "NOT_IN_SOURCE", "OUT_OF_SCOPE", "EVIDENCE_UNRESOLVED", null]
+    },
     "corrected_value": { "type": ["object", "null"] },
     "corrected_assertion_id": { "type": ["string", "null"], "format": "uuid" },
-    "reviewer_principal_id": { "type": "string", "format": "uuid" },
+    "evidence": {
+      "description": "The locator the reviewer actually saw, at the precision it was shown, carried onto any assertion this decision creates.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "precision"],
+          "properties": {
+            "source": { "type": "string" },
+            "part": { "type": "string" },
+            "precision": {
+              "type": "string",
+              "enum": ["exact-span", "table-cell", "block", "page", "document", "unresolved"]
+            },
+            "unresolved_reason": { "type": "string" },
+            "selector": {
+              "type": "array",
+              "description": "W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points.",
+              "items": {
+                "type": "object",
+                "required": ["type"],
+                "properties": { "type": { "type": "string" } }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "reviewer_principal_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Resolved from the authenticated session, never from the request payload (ADR-0049, ADR-0057)."
+    },
     "reviewer_comment": { "type": ["string", "null"] },
     "decided_at": { "type": "string", "format": "date-time" },
     "assertion_version": { "type": "integer", "minimum": 1 },
     "stale": { "type": "boolean" },
-    "event_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    "event_sha256": {
+      "type": "string",
+      "description": "Hash of the submitted decision event; the idempotency key for resubmission of a batch.",
+      "pattern": "^[a-f0-9]{64}$"
+    }
   }
 }

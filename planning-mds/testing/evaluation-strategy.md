@@ -7,18 +7,18 @@ This document points at the authoritative sections of `../architecture/master-bl
 ## Golden Corpus (section 96)
 
 - Start with 20 to 30 labeled insurance documents across the listed categories; concentrate initial labeling on GL policy packages and endorsements per section 115.1.
-- Label Studio is the primary labeling and correction environment; the Nebula export (source identity, evidence locators, expected assertions, relationships, canonical result, reviewer metadata) is what becomes version-controlled fixtures under `golden-corpus/`.
+- The Nebula Review Panel is the primary labeling and correction environment (ADR-0057); ground-truth creation and production correction produce the same records. The export (source identity, evidence locators, expected assertions, relationships, canonical result, reviewer metadata) is what becomes version-controlled fixtures under `golden-corpus/`.
 - Separate development and tuning examples from a frozen holdout. Split by related account, policy package, and template family so near-duplicate renewals or endorsements do not leak across sets.
 - Production corrections enter a governed candidate benchmark pool; they never silently alter the holdout or expected answers.
 - Add a small property and casualty loss-run contrast set to test schema extensibility; do not treat it as certification of those lines of business.
 
 ## Evaluation metrics (section 97)
 
-Report sample sizes and uncertainty for every measured metric; never a single aggregate accuracy score that hides financially material mistakes. The metric list in section 97 spans classification, entity and fact precision and recall, qualifier, relationship, interpretation-basis, provenance, evidence-region, temporal, entity-resolution, conflict, reinterpretation-delta, citation, learning-candidate, review-agreement, and Label Studio round-trip accuracy.
+Report sample sizes and uncertainty for every measured metric; never a single aggregate accuracy score that hides financially material mistakes. The metric list in section 97 spans classification, entity and fact precision and recall, qualifier, relationship, interpretation-basis, provenance, evidence-region, temporal, entity-resolution, conflict, reinterpretation-delta, citation, learning-candidate, review-agreement, review round-trip, and evidence-anchor resolution accuracy.
 
 ## Regression suites (section 98)
 
-Section 98 enumerates the required regression cases. The framework `test` action and each feature's `test-plan.md` cite the cases they cover by name; ontology, temporal, review, Label Studio, and authorization-leakage cases are mandatory once the corresponding feature ships.
+Section 98 enumerates the required regression cases. The framework `test` action and each feature's `test-plan.md` cite the cases they cover by name; ontology, temporal, review, evidence-anchoring, and authorization-leakage cases are mandatory once the corresponding feature ships.
 
 ## Release gates (section 115.2)
 

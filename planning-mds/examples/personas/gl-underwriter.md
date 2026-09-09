@@ -47,7 +47,7 @@
 
 - **Not:** the domain steward who defines and releases the guideline (see [domain steward](domain-steward.md))
 - **Not:** a claims adjuster, broker, or external insured (out of v0.1 scope)
-- **Not:** a reviewer adjudicating extractions in Label Studio — that is Rosa (see [business reviewer](business-reviewer.md))
+- **Not:** a reviewer adjudicating extractions in the Review Panel — that is Rosa (see [business reviewer](business-reviewer.md))
 
 ## Related Personas
 

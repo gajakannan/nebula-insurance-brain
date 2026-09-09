@@ -99,8 +99,10 @@ adrs:
   label: Qdrant Is Optional
   path: planning-mds/architecture/decisions/ADR-0033-qdrant-is-optional.md
 - id: adr:0034
-  label: Label Studio Is the Human Evidence-Adjudication Engine
+  label: Label Studio Is the Human Evidence-Adjudication Engine (superseded by adr:0057)
   path: planning-mds/architecture/decisions/ADR-0034-label-studio-is-the-human-evidence-adjudication-engine.md
+  related_nodes:
+  - adr:0057
 - id: adr:0035
   label: Interpretation Basis Is First-Class
   path: planning-mds/architecture/decisions/ADR-0035-interpretation-basis-is-first-class.md
@@ -129,8 +131,8 @@ adrs:
   label: Retention and Revocation Lifecycle
   path: planning-mds/architecture/decisions/ADR-0043-retention-and-revocation-lifecycle.md
 - id: adr:0044
-  label: Review Edition and Approval Contract
-  path: planning-mds/architecture/decisions/ADR-0044-review-edition-and-approval-contract.md
+  label: Review Surface and Approval Contract
+  path: planning-mds/architecture/decisions/ADR-0044-review-surface-and-approval-contract.md
 - id: adr:0045
   label: Ontology Release Compatibility
   path: planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
@@ -174,3 +176,20 @@ adrs:
 - id: adr:0056
   label: Bounded Neurosymbolic Assessment in v0.1
   path: planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md
+- id: adr:0057
+  label: Nebula Owns the Native Evidence Review Panel
+  path: planning-mds/architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md
+  related_nodes:
+  - adr:0034
+  - adr:0044
+  - adr:0058
+  - capability:evidence-review-round-trip
+  - workflow:human-review
+- id: adr:0058
+  label: Evidence Anchoring and Selector Contract
+  path: planning-mds/architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md
+  related_nodes:
+  - adr:0040
+  - adr:0057
+  - capability:evidence-review-round-trip
+  - entity:review-decision

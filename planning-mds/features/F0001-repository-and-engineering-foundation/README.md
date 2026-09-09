@@ -6,7 +6,7 @@
 
 ## Overview
 
-Stand up the `engine/` and `neuron/` runtime roots with their toolchain and CI, the local dependency stack (PostgreSQL with pgvector and Apache AGE, object storage, Label Studio), and execute the four pre-build contract proofs from master blueprint section 115.4 so their measured results settle the Proposed ADRs before v0.1A begins.
+Stand up the `engine/` and `neuron/` runtime roots with their toolchain and CI, the local dependency stack (PostgreSQL with pgvector and Apache AGE, object storage, authentik), and execute the four pre-build contract proofs from master blueprint section 115.4 so their measured results settle the Proposed ADRs before v0.1A begins.
 
 Source: `planning-mds/architecture/master-blueprint.md` sections 106.2, 108, 109, 111.1, 114, 115.4, 117.1. Governing ADRs: [ADR-0001](../../architecture/decisions/ADR-0001-the-brain-owns-semantics.md).
 
@@ -26,7 +26,7 @@ Source: `planning-mds/architecture/master-blueprint.md` sections 106.2, 108, 109
 | [F0001-S0001](./F0001-S0001-runtime-roots-and-toolchain-skeleton.md) | Runtime roots and toolchain skeleton | Not Started |
 | [F0001-S0002](./F0001-S0002-local-runtime-containers-and-dependency-matrix.md) | Local runtime containers and dependency matrix | Not Started |
 | [F0001-S0003](./F0001-S0003-proof-parse-once-reinterpret-evidence.md) | Proof: parse once, reinterpret twice, evidence resolves | Not Started |
-| [F0001-S0004](./F0001-S0004-proof-label-studio-review-round-trip.md) | Proof: Label Studio review round trip with lineage | Not Started |
+| [F0001-S0004](./F0001-S0004-proof-native-review-round-trip.md) | Proof: native review round trip with lineage | Not Started |
 | [F0001-S0005](./F0001-S0005-proof-bitemporal-commit.md) | Proof: bitemporal commit under retroactive and concurrent change | Not Started |
 | [F0001-S0006](./F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) | Proof: access boundaries, extension build, and restore | Not Started |
 | [F0001-S0007](./F0001-S0007-record-proof-outcomes-and-settle-contracts.md) | Record proof outcomes and settle the pre-build contracts | Not Started |

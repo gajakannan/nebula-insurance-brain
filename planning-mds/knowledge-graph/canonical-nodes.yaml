@@ -104,8 +104,10 @@ adrs:
     label: Qdrant Is Optional
     path: planning-mds/architecture/decisions/ADR-0033-qdrant-is-optional.md
   - id: adr:0034
-    label: Label Studio Is the Human Evidence-Adjudication Engine
+    label: Label Studio Is the Human Evidence-Adjudication Engine (superseded by adr:0057)
     path: planning-mds/architecture/decisions/ADR-0034-label-studio-is-the-human-evidence-adjudication-engine.md
+    related_nodes:
+      - adr:0057
   - id: adr:0035
     label: Interpretation Basis Is First-Class
     path: planning-mds/architecture/decisions/ADR-0035-interpretation-basis-is-first-class.md
@@ -134,8 +136,8 @@ adrs:
     label: Retention and Revocation Lifecycle
     path: planning-mds/architecture/decisions/ADR-0043-retention-and-revocation-lifecycle.md
   - id: adr:0044
-    label: Review Edition and Approval Contract
-    path: planning-mds/architecture/decisions/ADR-0044-review-edition-and-approval-contract.md
+    label: Review Surface and Approval Contract
+    path: planning-mds/architecture/decisions/ADR-0044-review-surface-and-approval-contract.md
   - id: adr:0045
     label: Ontology Release Compatibility
     path: planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
@@ -178,6 +180,23 @@ adrs:
   - id: adr:0056
     label: Bounded Neurosymbolic Assessment in v0.1
     path: planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md
+  - id: adr:0057
+    label: Nebula Owns the Native Evidence Review Panel
+    path: planning-mds/architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md
+    related_nodes:
+      - adr:0034
+      - adr:0044
+      - adr:0058
+      - capability:evidence-review-round-trip
+      - workflow:human-review
+  - id: adr:0058
+    label: Evidence Anchoring and Selector Contract
+    path: planning-mds/architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md
+    related_nodes:
+      - adr:0040
+      - adr:0057
+      - capability:evidence-review-round-trip
+      - entity:review-decision
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -187,7 +206,7 @@ api_contracts:
       - endpoint:fact-commit
       - endpoint:fact-get
       - endpoint:health
-      - endpoint:label-studio-webhook
+      - endpoint:review-decisions-submit
       - endpoint:review-item-get
 capabilities:
   - id: capability:authorization-enforcement
@@ -248,17 +267,18 @@ capabilities:
       - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:evidence-review-round-trip
     label: Evidence review round trip
-    notes: ReviewItem routing to a Label Studio task, secured webhook receipt with payload hashing, duplicate
-      and stale rejection, and a governed ReviewDecision with correction lineage (ADR-0034, ADR-0037).
+    notes: ReviewItem routing into a review batch, rendering and anchor resolution in the native Review
+      Panel, duplicate and stale rejection, blocked decisions on unresolved evidence, and a governed ReviewDecision
+      with correction lineage (ADR-0057, ADR-0058, ADR-0037).
     related_nodes:
-      - endpoint:label-studio-webhook
+      - endpoint:review-decisions-submit
       - endpoint:review-item-get
       - entity:review-decision
       - entity:review-item
       - schema:review-decision
       - workflow:human-review
     source_docs:
-      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
       - planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:grounded-gl-guideline-assessment
     label: Grounded GL guideline assessment
@@ -286,8 +306,8 @@ capabilities:
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/feature-assembly-plan.md
   - id: capability:local-dependency-stack
     label: Local dependency stack
-    notes: 'Docker Compose stack: PostgreSQL 18 with pgvector, AGE, btree_gist; MinIO content store; Label
-      Studio Community; authentik; pinned dependency matrix.'
+    notes: 'Docker Compose stack: PostgreSQL 18 with pgvector, AGE, btree_gist; MinIO content store; authentik;
+      pinned dependency matrix including the experience/ toolchain, pdf.js, and fflate.'
     related_nodes:
       - adr:0054
     source_docs:
@@ -381,13 +401,13 @@ endpoints:
     route: /health
     source_docs:
       - planning-mds/api/brain-api.yaml
-  - id: endpoint:label-studio-webhook
-    label: POST /reviews/webhooks/label-studio
+  - id: endpoint:review-decisions-submit
+    label: POST /reviews/batches/{reviewBatchId}/decisions
     method: POST
     related_nodes:
       - capability:evidence-review-round-trip
     resource: review_task
-    route: /reviews/webhooks/label-studio
+    route: /reviews/batches/{reviewBatchId}/decisions
     source_docs:
       - planning-mds/api/brain-api.yaml
   - id: endpoint:review-item-get
@@ -414,7 +434,7 @@ entities:
     source_docs:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
-      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
   - id: entity:assessment-record
     label: Assessment record
     notes: Append-only result of applying one guideline rule version to exact canonical inputs at explicit
@@ -537,8 +557,9 @@ entities:
       - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
   - id: entity:review-decision
     label: Review decision
-    notes: Governed outcome of a review (ACCEPT, CORRECT, REJECT) bound to a verified reviewer principal,
-      the payload hash, and the assertion version; corrections append a new assertion linked to the original.
+    notes: Governed outcome of a review (ACCEPT, CORRECT, REJECT) bound to the authenticated reviewer
+      principal, the decision event hash, and the assertion version; corrections append a new assertion
+      linked to the original. BLOCKED records unresolved evidence and is not an adjudication (ADR-0058).
     related_entities:
       - entity:assertion
       - entity:principal
@@ -548,11 +569,11 @@ entities:
       - schema:review-decision
     source_docs:
       - planning-mds/architecture/master-blueprint.md
-      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
   - id: entity:review-item
     label: Review item
     notes: Nebula-owned unit of human adjudication for a low-confidence or corrected assertion; carries
-      the assertion version and the external Label Studio task reference.
+      the assertion version, its review batch, and the evidence locator the panel renders from.
     related_entities:
       - entity:assertion
       - entity:review-decision
@@ -561,7 +582,7 @@ entities:
       - workflow:human-review
     source_docs:
       - planning-mds/architecture/master-blueprint.md
-      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
   - id: entity:semantic-interpretation-run
     label: Semantic interpretation run
     notes: Versioned execution of an extraction profile over a content artifact; records run configuration,
@@ -618,7 +639,7 @@ policy_rules:
       - role:reviewer
     related_nodes:
       - capability:evidence-review-round-trip
-      - endpoint:label-studio-webhook
+      - endpoint:review-decisions-submit
     resource: review_task
     source_docs:
       - planning-mds/security/policies/policy.csv
@@ -637,13 +658,13 @@ policy_rules:
 roles:
   - id: role:reviewer
     label: Reviewer
-    notes: Verified user principal bound to Label Studio; may annotate review tasks in scope; annotation
-      is not canonical approval (section 111.2).
+    notes: Verified user principal; reviews evidence in the native Review Panel as its own session principal
+      and may annotate review tasks in scope; annotation is not canonical approval (sections 111.2, 125).
     related_nodes:
       - entity:principal
       - entity:review-decision
     source_docs:
-      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
       - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
   - id: role:service-principal
     label: ServicePrincipal
@@ -798,31 +819,40 @@ workflows:
   - id: workflow:human-review
     label: Human review round trip
     rationale:
-      - adr: adr:0034
+      - adr: adr:0057
         section: Boundary
-        summary: Nebula creates the task and owns the decision; Label Studio presents it; a stale assertion
-          version re-tasks instead of applying (sections 75, 111.1).
+        summary: Nebula renders the evidence and owns the decision inside one trust boundary; a stale
+          assertion version reopens the item instead of applying (sections 75, 111.1, 125).
+      - adr: adr:0058
+        section: Proposed decision
+        summary: Evidence that cannot be re-anchored blocks the decision with EVIDENCE_UNRESOLVED rather
+          than resolving to an approximate region (section 125.4).
     related_nodes:
       - capability:evidence-review-round-trip
       - entity:review-decision
       - entity:review-item
     source_docs:
       - planning-mds/architecture/master-blueprint.md
-      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+      - planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
     states:
       - id: state:human-review:open
         label: Open
         transitions_to:
-          - state:human-review:task-created
-      - id: state:human-review:task-created
-        label: Label Studio task created
+          - state:human-review:in-review
+      - id: state:human-review:in-review
+        label: In review
         transitions_to:
           - state:human-review:decided
           - state:human-review:stale
+          - state:human-review:blocked
       - id: state:human-review:stale
         label: Stale assertion version
         transitions_to:
-          - state:human-review:task-created
+          - state:human-review:in-review
+      - id: state:human-review:blocked
+        label: Evidence unresolved
+        transitions_to:
+          - state:human-review:in-review
       - id: state:human-review:decided
         label: Decided
         transitions_to: []

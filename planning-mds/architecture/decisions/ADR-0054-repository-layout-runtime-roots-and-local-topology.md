@@ -8,6 +8,7 @@
 - [ ] Rejected
 
 **Date:** 2026-09-06
+**Amended:** 2026-09-08 by [ADR-0057](ADR-0057-nebula-owns-the-native-evidence-review-panel.md) — see Consequences
 **Deciders:** Operator (layout, 2026-09-05), Architect (topology, F0001 Phase B)
 **Source:** BLUEPRINT sections 2.2 to 2.4; master blueprint sections 77, 114.3; F0001 plan run `2026-09-06-cdb5d8cb`
 
@@ -43,7 +44,7 @@ ASCII companion of the container view (Mermaid in `planning-mds/architecture/c4-
         │ SQLAlchemy / asyncpg            ▲
         ▼                                 │ chunk text only
  ┌────────────────────── docker compose ──┴──────────────────────┐
- │ postgres:18 (+vector,+age,+btree_gist)  minio  labelstudio  authentik │
+ │ postgres:18 (+vector,+age,+btree_gist)     minio        authentik      │
  └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -55,6 +56,7 @@ ASCII companion of the container view (Mermaid in `planning-mds/architecture/c4-
 
 ## Consequences
 
+- **Amendment, 2026-09-08 (ADR-0057).** Decision points 3 and 4 change: the `integrations/label-studio/` asset tree is removed, and the Compose stack no longer runs a Label Studio service. `experience/` gains the Nebula Review Panel, which F0022 depends on, so the React root is no longer entirely deferred to F0021. `engine/packages/brain-review-labelstudio/` is dropped; `engine/packages/brain-review/` keeps the whole review boundary. The runtime roots, workspace rules, and dependency-matrix requirement are unchanged.
 - Framework role ownership maps cleanly: backend-developer owns `engine/`, ai-engineer owns `neuron/`, frontend-developer owns `experience/`.
 - Path-class extensions are required for `neuron/`, the asset trees, and lowercase security packages (registered at init).
 - The inference service is a documented host prerequisite, not a container; CI runs S0003 against a recorded fixture when no GPU is present, and the live proof runs on the developer host.
@@ -62,7 +64,7 @@ ASCII companion of the container view (Mermaid in `planning-mds/architecture/c4-
 ## Security & Compliance Notes
 
 - Secrets never live in the repository; `.env.example` documents variables and a gitignored secrets file supplies values.
-- authentik and Label Studio bind to localhost in the default Compose configuration.
+- authentik binds to localhost in the default Compose configuration.
 
 ## References
 

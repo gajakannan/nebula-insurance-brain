@@ -1,7 +1,7 @@
 # Persona: Rosa the Business Reviewer
 
 **Role/Title:** Senior Commercial Lines Analyst acting as Business Reviewer
-**Archetype:** Internal insurance user — adjudicates extracted evidence in Label Studio
+**Archetype:** Internal insurance user — adjudicates extracted evidence in the Nebula Review Panel
 **Priority:** Primary (F0001, F0022, F0026); becomes a primary end-user persona for Document 360
 
 ## Demographics & Background

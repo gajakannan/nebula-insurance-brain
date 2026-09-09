@@ -1,4 +1,4 @@
-# F0026 — v0.1 hardening + Label Studio Golden Corpus workflow + AuthX negative tests and policy parity
+# F0026 — v0.1 hardening + Golden Corpus workflow + AuthX negative tests and policy parity
 
 **Status:** Planned
 **Phase:** v0.1C
@@ -8,7 +8,9 @@
 
 v0.1 hardening closes Golden Corpus, AuthX, recovery, revocation, and independent frozen evaluation gates, including F0065 assessment correctness, lineage, temporal freshness, and complete derived-result access (sections 96, 115, 121, 124).
 
-Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0048](../../architecture/decisions/ADR-0048-pilot-evidence-and-operational-readiness.md), [ADR-0053](../../architecture/decisions/ADR-0053-permission-safe-retrieval-and-historical-access.md).
+Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0048](../../architecture/decisions/ADR-0048-pilot-evidence-and-operational-readiness.md), [ADR-0053](../../architecture/decisions/ADR-0053-permission-safe-retrieval-and-historical-access.md), [ADR-0057](../../architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md).
+
+The Golden Corpus is exported from Nebula review decisions, not from an external labeling project: ground-truth creation and production correction are the same surface producing the same records (section 96, ADR-0057).
 
 ## Documents
 

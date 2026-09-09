@@ -5,7 +5,7 @@ All solution-specific planning for Nebula Insurance Brain lives here. Generic ro
 ## Entry points
 
 - `BLUEPRINT.md` — framework entry point: process, product context, platform baseline, phase status
-- `architecture/master-blueprint.md` — the full architecture baseline (through section 124); referenced by section number everywhere else
+- `architecture/master-blueprint.md` — the full architecture baseline (through section 125); referenced by section number everywhere else
 - `features/REGISTRY.md` and `features/ROADMAP.md` — generated from `kg-source/features/**` (created by init, populated when the feature shards are seeded)
 
 ## Where the master blueprint sections landed

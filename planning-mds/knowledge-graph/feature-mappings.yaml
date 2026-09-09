@@ -85,7 +85,7 @@ coverage:
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0022
-      path: planning-mds/features/F0022-document-360-and-label-studio-evidence-review
+      path: planning-mds/features/F0022-document-360-and-native-evidence-review
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0023
@@ -275,7 +275,7 @@ features:
       - endpoint:fact-commit
       - endpoint:fact-get
       - endpoint:health
-      - endpoint:label-studio-webhook
+      - endpoint:review-decisions-submit
       - endpoint:review-item-get
       - entity:assertion
       - entity:audit-event
@@ -305,7 +305,6 @@ features:
       - adr:0009
       - adr:0010
       - adr:0016
-      - adr:0034
       - adr:0035
       - adr:0037
       - adr:0040
@@ -315,7 +314,12 @@ features:
       - adr:0050
       - adr:0054
       - adr:0055
+      - adr:0057
+      - adr:0058
     notes:
+      - 'ADR-0057 (2026-09-08) replaced Label Studio with the native Nebula Review Panel: S0004 renamed,
+        the webhook endpoint became the review decision submission endpoint, and ADR-0058 added the anchoring
+        contract S0004 also settles.'
       - 'Phase A drafted 2026-09-06 in plan run 2026-09-06-cdb5d8cb: seven stories (toolchain, containers,
         four section 115.4 proofs, contract settlement). coverage_excluded stays until Phase B binds capabilities.'
       - 'Phase B approved 2026-09-06: coverage_excluded removed; ten capabilities, ten entities, three
@@ -431,18 +435,19 @@ stories:
       - schema:interpretation-result
   - id: story:F0001-S0004
     feature: feature:F0001
-    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md
+    path: planning-mds/features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
     affects:
       - capability:evidence-review-round-trip
-      - endpoint:label-studio-webhook
+      - endpoint:review-decisions-submit
       - endpoint:review-item-get
       - entity:review-decision
       - entity:review-item
       - workflow:human-review
     governed_by:
-      - adr:0034
       - adr:0037
       - adr:0044
+      - adr:0057
+      - adr:0058
     uses_schema:
       - schema:review-decision
   - id: story:F0001-S0005
@@ -490,6 +495,7 @@ stories:
       - adr:0044
       - adr:0049
       - adr:0050
+      - adr:0058
   - id: story:F0065-S0001
     feature: feature:F0065
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md

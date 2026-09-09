@@ -1,12 +1,16 @@
 id: workflow:human-review
 label: Human review round trip
 rationale:
-- adr: adr:0034
+- adr: adr:0057
   section: Boundary
-  summary: Nebula creates the task and owns the decision; Label Studio presents it; a stale assertion version re-tasks
-    instead of applying (sections 75, 111.1).
+  summary: Nebula renders the evidence and owns the decision inside one trust boundary; a stale assertion version
+    reopens the item instead of applying (sections 75, 111.1, 125).
+- adr: adr:0058
+  section: Proposed decision
+  summary: Evidence that cannot be re-anchored blocks the decision with EVIDENCE_UNRESOLVED rather than resolving
+    to an approximate region (section 125.4).
 source_docs:
-- F0001/F0001-S0004-proof-label-studio-review-round-trip.md
+- F0001/F0001-S0004-proof-native-review-round-trip.md
 - planning-mds/architecture/master-blueprint.md
 related_nodes:
 - capability:evidence-review-round-trip
@@ -16,16 +20,21 @@ states:
 - id: state:human-review:open
   label: Open
   transitions_to:
-  - state:human-review:task-created
-- id: state:human-review:task-created
-  label: Label Studio task created
+  - state:human-review:in-review
+- id: state:human-review:in-review
+  label: In review
   transitions_to:
   - state:human-review:decided
   - state:human-review:stale
+  - state:human-review:blocked
 - id: state:human-review:stale
   label: Stale assertion version
   transitions_to:
-  - state:human-review:task-created
+  - state:human-review:in-review
+- id: state:human-review:blocked
+  label: Evidence unresolved
+  transitions_to:
+  - state:human-review:in-review
 - id: state:human-review:decided
   label: Decided
   transitions_to: []

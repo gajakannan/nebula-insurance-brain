@@ -10,7 +10,7 @@
 
 **As a** Dana the Platform Engineer
 **I want** each proof's measured results and unresolved limitations recorded in its governing ADR, the dependency matrix completed, and the open decisions the proofs answer written into the blueprint
-**So that** ADR-0040, ADR-0041, ADR-0044, ADR-0049, and ADR-0050 move from Proposed to Accepted or amended before v0.1A starts building on them
+**So that** ADR-0040, ADR-0041, ADR-0044, ADR-0049, ADR-0050, and ADR-0058 move from Proposed to Accepted or amended before v0.1A starts building on them
 
 ## Context & Background
 
@@ -29,7 +29,11 @@ Master blueprint section 115.4 states that proofs are small implementation inves
 
 - **Given** S0004 has run
 - **When** ADR-0044 is updated
-- **Then** it records the selected Label Studio edition, the workflow steps proven, the access behavior observed for an out-of-scope reviewer, and the isolation controls required
+- **Then** it records the review workflow steps proven, the access behavior observed for an out-of-scope reviewer, and the permission split that kept adjudication separate from canonical approval
+
+- **Given** S0004 has run
+- **When** ADR-0058 is updated
+- **Then** it records the anchor resolution rate and the precision observed per renderer, the quote-recovery result after deliberate coordinate drift, the code-point conversion result, and every case that resolved as `unresolved` with its reason
 
 - **Given** S0006 has run
 - **When** ADR-0049 and ADR-0050 are updated

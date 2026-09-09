@@ -23,6 +23,9 @@ def product(tmp_path):
         dest = root / path
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / path, dest)
+    # Referenced by F0001-S0004 and the architecture decisions; linked, not read, so a stub resolves it
+    # without copying 2 MB of embedded fixture documents into every test's tmp tree.
+    (root / "planning-mds/examples/nebula-review-panel-live-files.html").touch()
     for folder in ["planning-mds/architecture", "planning-mds/security", "planning-mds/features/F0001-repository-and-engineering-foundation"]:
         shutil.copytree(ROOT / folder, root / folder)
     shutil.copy2(ROOT / "planning-mds/features/TRACKER-GOVERNANCE.md", root / "planning-mds/features/TRACKER-GOVERNANCE.md")

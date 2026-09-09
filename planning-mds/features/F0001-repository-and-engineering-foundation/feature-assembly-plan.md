@@ -11,11 +11,11 @@ F0001 creates the `engine/` and `neuron/` runtime roots, the local dependency st
 
 ## Governing Decisions
 
-- Runtime roots and topology: `engine/` (API, worker, kernel packages), `neuron/` (AI runtime), `experience/` (deferred to F0021); one uv workspace per root; modular monolith of API plus worker over PostgreSQL 18, MinIO, Label Studio Community, authentik, and a host-GPU vLLM service (ADR-0054, BLUEPRINT 2.3).
+- Runtime roots and topology: `engine/` (API, worker, kernel packages), `neuron/` (AI runtime), `experience/` (proof-scope Review Panel here; the full shell is F0021); one uv workspace per Python root; modular monolith of API plus worker over PostgreSQL 18, MinIO, authentik, and a host-GPU vLLM service (ADR-0054 as amended by ADR-0057, BLUEPRINT 2.3).
 - Local inference profile: `microsoft/Phi-4-mini-instruct` on vLLM as an OpenAI-compatible service with a 4,096-token context and bearer auth, outside Compose, aligned with the CRM's ADR-035; context enforced client-side; no PII or tokens to the model server (ADR-0055).
 - Parse once with a lossless bundle including `docling-document.json`; evidence precision declared per binding; failed pages are partial, never negative (ADR-0003, ADR-0004, proposed ADR-0040 settled by S0003).
 - Two-range bitemporal commit with a multi-column GiST exclusion constraint, facts plus audit plus outbox in one transaction, idempotent projector (ADR-0007, ADR-0008, ADR-0009, proposed ADR-0041 settled by S0005).
-- Label Studio owns task presentation; Nebula owns ReviewItem, ReviewDecision, lineage, and audit; annotation is not approval (ADR-0034, ADR-0037, proposed ADR-0044 settled by S0004).
+- Nebula owns the review surface as well as ReviewItem, ReviewDecision, lineage, and audit; adjudication is not approval; unresolved evidence blocks a decision rather than misplacing it (ADR-0057, ADR-0037, proposed ADR-0044 and ADR-0058 settled by S0004).
 - Credentials verified before any storage read; verified `(issuer, subject)` maps to a stable internal principal; native Casbin adapter with typed resource attributes; every decision audited with policy hash and grant revision (proposed ADR-0049 and ADR-0050 settled by S0006).
 - Python packages use the `brain_` import prefix; distribution directories keep `brain-*` names (BLUEPRINT 2.2). Pydantic v2 models are the wire and manifest contracts; SQLAlchemy 2 models are persistence only.
 - AI scope: yes. S0003 runs an LLM through Docling-Graph; the ai-engineer owns `neuron/`.
@@ -26,11 +26,11 @@ F0001 creates the `engine/` and `neuron/` runtime roots, the local dependency st
 | Step | Scope | Stories | Rationale |
 |------|-------|---------|-----------|
 | 1 | Runtime roots, workspaces, API skeleton, health endpoint, CI | S0001 | Everything else needs a place to live and a gate to pass |
-| 2 | Compose stack, PostgreSQL 18 image with pgvector and AGE, MinIO, Label Studio, authentik, inference runbook, dependency matrix | S0002 | Every proof runs on this stack |
+| 2 | Compose stack, PostgreSQL 18 image with pgvector and AGE, MinIO, authentik, inference runbook, dependency matrix | S0002 | Every proof runs on this stack |
 | 3 | Identity and authorization core: credential verifier, principal resolver, Casbin adapter, authorization audit, protected resource reads | S0006 (access part) | S0004 needs verified reviewer principals; S0005 needs an authorized actor |
 | 4 | Content artifact bundle, Docling adapter, Docling-Graph adapter, interpretation runs, counters | S0003 | Produces the assertion S0004 reviews and the evidence S0006 restores |
 | 5 | FactSlot, canonical fact versions, commit service, outbox, projector stub | S0005 | Independent of review; needed before the restore drill |
-| 6 | ReviewItem, Label Studio task adapter, webhook receiver, ReviewDecision with lineage | S0004 | Consumes S0003's assertion and S0006's principals |
+| 6 | ReviewItem, review batch, Review Panel with its renderers and anchor resolution, ReviewDecision with lineage | S0004 | Consumes S0003's assertion and evidence locators, and S0006's principals |
 | 7 | Backup and restore drill, revocation propagation measurement, DAST run | S0006 (hosting part) | Needs S0003 to S0005 data in place |
 | 8 | Record outcomes, settle ADRs, complete the dependency matrix | S0007 | Closes the feature |
 
@@ -50,17 +50,17 @@ None. `engine/`, `neuron/`, `docker/`, and `docker-compose.yml` do not exist. `p
 | `engine/packages/brain-content/src/brain_content/{manifest,store,object_store}.py` | Infrastructure | Artifact manifest model, `ContentArtifactStore` port, MinIO adapter |
 | `engine/packages/brain-security/src/brain_security/{verification,principals,authorization,audit,casbin_adapter}.py` | Application | Credential verifier, principal resolver, Casbin adapter, decision audit |
 | `engine/packages/brain-temporal/src/brain_temporal/{commit,ranges,outbox}.py` | Application | Bitemporal commit algorithm, range helpers, outbox writer |
-| `engine/packages/brain-review/src/brain_review/{items,decisions,webhook}.py` | Application | ReviewItem routing, ReviewDecision translation, webhook trust and idempotency |
-| `engine/packages/brain-review-labelstudio/src/brain_review_labelstudio/{client,tasks,mapping}.py` | Infrastructure | Label Studio REST client, task creation, annotation mapping |
+| `engine/packages/brain-review/src/brain_review/{items,batches,decisions}.py` | Application | ReviewItem routing, review batch assembly, ReviewDecision persistence and idempotency |
+| `experience/src/review-panel/**` | Frontend | Review Panel: renderers (pdf.js, fflate, `TextDecoder`), anchor resolution, decision batch submission |
 | `engine/tests/{unit,integration,security,contract}/` | Tests | pytest suites per step |
 | `neuron/pyproject.toml`, `neuron/uv.lock` | AI workspace | uv workspace root: members `packages/*` |
 | `neuron/packages/brain-ingestion/src/brain_ingestion/{docling_adapter,bundle_writer}.py` | AI | Parse once: Docling conversion, bundle assembly, manifest hashing |
 | `neuron/packages/brain-extraction/src/brain_extraction/{profiles,docling_graph_adapter,context_guard}.py` | AI | Extraction profiles, Docling-Graph OpenAI-compatible backend, context enforcement |
 | `neuron/packages/brain-interpretation/src/brain_interpretation/{result,runs,counters}.py` | AI | InterpretationResult model, run recording, conversion and OCR counters |
 | `neuron/tests/{unit,integration,evaluation}/` | Tests | pytest suites for Step 4 |
-| `docker-compose.yml`, `docker/postgres/Dockerfile`, `docker/postgres/init/*.sql`, `docker/authentik/`, `docker/labelstudio/`, `.env.example` | Runtime | Dependency stack (Step 2) |
+| `docker-compose.yml`, `docker/postgres/Dockerfile`, `docker/postgres/init/*.sql`, `docker/authentik/`, `.env.example` | Runtime | Dependency stack (Step 2) |
 | `docker/DEPENDENCY-MATRIX.md`, `docker/local-inference-runbook.md` | Runtime docs | Pinned matrix; vLLM runbook adapted from the CRM |
-| `planning-mds/api/brain-api.yaml` | Contract | OpenAPI 3.1 for `/health`, protected reads, webhook, commit (authored in this plan run) |
+| `planning-mds/api/brain-api.yaml` | Contract | OpenAPI 3.1 for `/health`, protected reads, review decisions, commit (authored in this plan run) |
 | `planning-mds/schemas/*.schema.json` | Contract | Manifest, interpretation result, review decision, commit request and response, problem details (authored in this plan run) |
 | `planning-mds/security/policies/{model.conf,policy.csv}` | Authorization | Casbin model and proof policy (authored in this plan run) |
 
@@ -136,14 +136,14 @@ N/A — read-only.
 
 | File | Change |
 |------|--------|
-| `docker-compose.yml` | services `postgres` (built from `docker/postgres/Dockerfile`: PostgreSQL 18 base, `pgvector`, `age` compiled and `CREATE EXTENSION` in init SQL, `btree_gist`), `objectstore` (MinIO, bucket `content` created by an init job), `labelstudio` (Community, pinned tag), `authentik` (server, worker, its own PostgreSQL and Redis per the CRM pattern), healthchecks on all |
+| `docker-compose.yml` | services `postgres` (built from `docker/postgres/Dockerfile`: PostgreSQL 18 base, `pgvector`, `age` compiled and `CREATE EXTENSION` in init SQL, `btree_gist`), `objectstore` (MinIO, bucket `content` created by an init job), `authentik` (server, worker, its own PostgreSQL and Redis per the CRM pattern), healthchecks on all |
 | `docker/local-inference-runbook.md` | vLLM on the host GPU: Python 3.12 venv, `vllm` pinned, `--model microsoft/Phi-4-mini-instruct --dtype auto --max-model-len 4096 --gpu-memory-utilization 0.90 --port 8000 --api-key $BRAIN_INFERENCE_API_KEY`; WSL2 flags `VLLM_WSL2_ENABLE_PIN_MEMORY=1`, `VLLM_USE_FLASHINFER_SAMPLER=0`; secrets from `~/.brain-secrets` (0600) |
-| `docker/DEPENDENCY-MATRIX.md` | Python, PostgreSQL 18.x, AGE build, pgvector, btree_gist, Docling, Docling-Graph, Label Studio Community version, authentik, MinIO, vLLM, model id and Hugging Face revision, context length; each row cites its verification source |
-| `.env.example` | `BRAIN_DATABASE_URL`, `BRAIN_OBJECT_STORE_ENDPOINT`, `BRAIN_OBJECT_STORE_ACCESS_KEY`, `BRAIN_OBJECT_STORE_SECRET_KEY`, `BRAIN_OBJECT_STORE_BUCKET`, `BRAIN_LABELSTUDIO_URL`, `BRAIN_LABELSTUDIO_TOKEN_ENV`, `BRAIN_LABELSTUDIO_WEBHOOK_SECRET_ENV`, `BRAIN_OIDC_ISSUER`, `BRAIN_OIDC_AUDIENCE`, `BRAIN_INFERENCE_BASE_URL`, `BRAIN_INFERENCE_MODEL`, `BRAIN_INFERENCE_API_KEY_ENV`, `BRAIN_INFERENCE_CONTEXT_LIMIT=4096` |
+| `docker/DEPENDENCY-MATRIX.md` | Python, PostgreSQL 18.x, AGE build, pgvector, btree_gist, Docling, Docling-Graph, Node and the `experience/` toolchain, `pdf.js`, `fflate`, authentik, MinIO, vLLM, model id and Hugging Face revision, context length; each row cites its verification source |
+| `.env.example` | `BRAIN_DATABASE_URL`, `BRAIN_OBJECT_STORE_ENDPOINT`, `BRAIN_OBJECT_STORE_ACCESS_KEY`, `BRAIN_OBJECT_STORE_SECRET_KEY`, `BRAIN_OBJECT_STORE_BUCKET`, `BRAIN_OIDC_ISSUER`, `BRAIN_OIDC_AUDIENCE`, `BRAIN_INFERENCE_BASE_URL`, `BRAIN_INFERENCE_MODEL`, `BRAIN_INFERENCE_API_KEY_ENV`, `BRAIN_INFERENCE_CONTEXT_LIMIT=4096` |
 
 ### Logic Flow
 
-`docker compose up -d` → postgres init runs `CREATE EXTENSION IF NOT EXISTS vector; ... age; ... btree_gist;` → MinIO init job creates `content` → Label Studio and authentik healthy → `scripts/dev/seed_principals.py` provisions two tenants, two users, one service client in authentik (Step 3 consumes them).
+`docker compose up -d` → postgres init runs `CREATE EXTENSION IF NOT EXISTS vector; ... age; ... btree_gist;` → MinIO init job creates `content` → authentik healthy → `scripts/dev/seed_principals.py` provisions two tenants, two users, one service client in authentik (Step 3 consumes them).
 
 ### Edge cases resolved here
 
@@ -426,61 +426,69 @@ CREATE TABLE canonical_fact_version (
 
 ---
 
-## Step 6 — Label Studio review round trip (S0004)
+## Step 6 — Native review round trip (S0004)
 
 ### New Files
 
 | File | Layer |
 |------|-------|
 | `engine/packages/brain-domain/src/brain_domain/review.py` | Domain |
-| `engine/packages/brain-review/src/brain_review/items.py`, `decisions.py`, `webhook.py` | Application |
-| `engine/packages/brain-review-labelstudio/src/brain_review_labelstudio/client.py`, `tasks.py`, `mapping.py` | Infrastructure |
-| `engine/migrations/versions/0004_review.py` | `review_item`, `review_external_task`, `review_event`, `review_decision` |
-| `engine/apps/api/src/brain_api/routes/reviews.py` | API (`GET /reviews/{reviewItemId}`, `POST /reviews/webhooks/label-studio`) |
-| `integrations/label-studio/project-templates/gl-limit-review.xml`, `task-mappers/assertion_to_task.py`, `webhook-contracts/annotation-event.schema.json` | Integration assets |
-| `engine/tests/integration/test_review_round_trip.py`, `engine/tests/security/test_webhook_trust.py` | Tests |
+| `engine/packages/brain-review/src/brain_review/items.py`, `batches.py`, `decisions.py` | Application |
+| `engine/migrations/versions/0004_review.py` | `review_item`, `review_batch`, `review_event`, `review_decision` |
+| `engine/apps/api/src/brain_api/routes/reviews.py` | API (`GET /reviews/{reviewItemId}`, `POST /reviews/batches/{reviewBatchId}/decisions`) |
+| `experience/src/review-panel/{Panel,ArtifactRail,FieldList}.tsx` | Frontend shell (ADR-0057) |
+| `experience/src/review-panel/renderers/{pdf,ooxml,text}.ts` | Frontend renderers: pdf.js, fflate over the OOXML parts, `TextDecoder` |
+| `experience/src/review-panel/anchors/{resolve,selectors}.ts` | Frontend anchor resolution against the stored locator (ADR-0058) |
+| `engine/tests/integration/test_review_round_trip.py`, `engine/tests/security/test_review_authority.py`, `experience/tests/review-panel/anchors.spec.ts` | Tests |
 
 ### Code
 
 ```python
 # brain_domain/review.py
 class ReviewItemType(StrEnum): LOW_CONFIDENCE_ASSERTION = "LOW_CONFIDENCE_ASSERTION"; EXTRACTION_CORRECTION = "EXTRACTION_CORRECTION"; PROVENANCE_CORRECTION = "PROVENANCE_CORRECTION"; ENTITY_CORRECTION = "ENTITY_CORRECTION"; RELATIONSHIP_CORRECTION = "RELATIONSHIP_CORRECTION"
-class ReviewAction(StrEnum): ACCEPT = "ACCEPT"; CORRECT = "CORRECT"; REJECT = "REJECT"
-class ReviewItemStatus(StrEnum): OPEN = "open"; TASK_CREATED = "task_created"; DECIDED = "decided"; STALE = "stale"
+class ReviewAction(StrEnum): ACCEPT = "ACCEPT"; CORRECT = "CORRECT"; REJECT = "REJECT"; BLOCKED = "BLOCKED"
+class ReviewItemStatus(StrEnum): OPEN = "open"; IN_REVIEW = "in_review"; DECIDED = "decided"; STALE = "stale"; BLOCKED = "blocked"
+class EvidencePrecision(StrEnum): EXACT_SPAN = "exact-span"; TABLE_CELL = "table-cell"; BLOCK = "block"; PAGE = "page"; DOCUMENT = "document"; UNRESOLVED = "unresolved"
 
 @dataclass(frozen=True, slots=True)
 class ReviewDecision:
-    id: UUID; review_item_id: UUID; action: ReviewAction; corrected_value: Mapping[str, Any] | None
+    id: UUID; review_item_id: UUID; review_batch_id: UUID; action: ReviewAction
+    reason_code: str | None; corrected_value: Mapping[str, Any] | None; evidence: EvidenceLocator | None
     reviewer_principal_id: UUID; decided_at: datetime; assertion_version: int; stale: bool
     corrected_assertion_id: UUID | None; event_sha256: str
 ```
 
 ```python
-# brain_review/webhook.py
-class WebhookReceiver:
-    async def receive(self, raw_body: bytes, headers: Mapping[str, str], *, trace_id: str) -> ReviewDecision | None:
-        # 1 verify shared secret header (constant-time) → 401
-        # 2 sha256(raw_body); INSERT review_event ... ON CONFLICT DO NOTHING; if not inserted → duplicate → 200 {"duplicate": true}
-        # 3 map task id → review_item; reviewer email → principal (must be a verified principal with Reviewer membership) → else 403 recorded, decision not applied
-        # 4 if item.assertion_version != current assertion version → decision stored with stale=True, item.status=STALE, new item created → return
-        # 5 translate annotation → ReviewDecision; if CORRECT create corrected assertion linked to original (original untouched)
-        # 6 audit_event; item.status = DECIDED
+# brain_review/decisions.py
+class ReviewDecisionService:
+    async def submit(self, batch_id: UUID, body: DecisionBatch, principal: Principal, *, trace_id: str) -> Receipt:
+        # 1 authorize principal for review:annotate on every item's knowledge base → else 404 (no existence leak)
+        #   the reviewer is `principal`, never a payload field (ADR-0049, ADR-0057)
+        # 2 sha256(canonical(body)); INSERT review_event ... ON CONFLICT DO NOTHING; if not inserted → duplicate → 200 {"duplicate": true}
+        # 3 one transaction for the whole batch:
+        #     if item.assertion_version != current assertion version → decision stored with stale=True, item.status=STALE, new item opened
+        #     if action == BLOCKED → require reason_code EVIDENCE_UNRESOLVED; no assertion created; item stays OPEN
+        #     if action == CORRECT → create corrected assertion linked to the original, carrying the evidence target
+        #                            and precision the reviewer saw (original untouched)
+        # 4 audit_event per decision; item.status = DECIDED for applied adjudications
+        # 5 canonical commit is never reachable from here — review:approve is a separate permission (section 111.2)
 ```
 
 ### Mutation Traceability
 
 | Screen / Entry Point | User Action | Endpoint | Service Method | Entity / Carrier | Authorization | Concurrency | Validation Failure | Audit / Timeline | Test Expectation |
 |----------------------|-------------|----------|----------------|------------------|---------------|-------------|--------------------|------------------|------------------|
-| Label Studio task view (deep link from the ReviewItem) | edit value, submit annotation | `POST /reviews/webhooks/label-studio` | `WebhookReceiver.receive` → `ReviewDecisionService.apply` | `review_decision`, corrected `assertion` | `review_task:annotate` for the mapped reviewer principal | payload sha256 unique per item; assertion version check | 401 bad secret; duplicate → 200 no-op; stale → decision flagged, not applied | `audit_event` per decision | `test_review_round_trip.py`: decision queryable after restart; original assertion unchanged; second delivery no-op |
+| Nebula Review Panel, opened on a review batch | inspect the anchored region, edit value, submit batch | `POST /reviews/batches/{reviewBatchId}/decisions` | `ReviewDecisionService.submit` | `review_decision`, corrected `assertion` | `review_task:annotate` for the session principal on every item's knowledge base | decision event sha256 unique per item; assertion version check | 404 unauthorized; duplicate → 200 no-op; stale → decision flagged, not applied; unresolved evidence → BLOCKED, no assertion | `audit_event` per decision | `test_review_round_trip.py`: decision queryable after restart; original assertion unchanged; resubmission no-op; `anchors.spec.ts`: quote recovery and unresolved cases |
 
 ### HTTP Responses
 
 | Status | Body | Condition |
 |--------|------|-----------|
-| 200 | `{"decision_id": ..., "duplicate": false, "stale": false}` | Applied |
-| 200 | `{"duplicate": true}` | Redelivery |
-| 401 | ProblemDetails (`webhook_unauthenticated`) | Secret missing or wrong |
-| 422 | ProblemDetails (`webhook_unmappable`) | Task or reviewer cannot be mapped |
+| 200 | `{"decision_ids": [...], "applied": n, "duplicate": false, "stale": 0, "blocked": 0}` | Applied |
+| 200 | `{"duplicate": true}` | Resubmission of an already-decided batch |
+| 401 | ProblemDetails (`unauthenticated`) | Credentials missing or invalid |
+| 404 | ProblemDetails (`not_found`) | Batch not visible to this principal, or an item outside their scope |
+| 422 | ProblemDetails (`decision_invalid`) | BLOCKED without EVIDENCE_UNRESOLVED, or CORRECT without a corrected value |
 
 ---
 
@@ -508,7 +516,7 @@ Documentation-only step: per-ADR result tables citing `artifacts/` paths; depend
 | Frontend (`experience/`) | None (F0021) | — | N/A |
 | Quality | Test plan; AC matrix below; coverage ≥ 80% per workspace | quality-engineer | Not started |
 | DevOps/Runtime | Steps 2 and 7 (stack, matrix, runbook, backup and restore, CI) | devops | Not started |
-| Security | Step 3 review; webhook trust; four scan classes | security | Not started |
+| Security | Step 3 review; review authority and evidence scope; four scan classes | security | Not started |
 
 ## Dependency Order
 
@@ -520,7 +528,7 @@ Step 2 (DevOps):      compose stack, matrix, inference runbook
 Step 3 (Backend):     verifier, resolver, Casbin adapter, audit, protected reads
 Step 4 (AI):          parse once, two interpretations, evidence bindings
 Step 5 (Backend):     bitemporal commit, outbox, projector stub
-Step 6 (Backend):     review items, Label Studio adapter, webhook, decisions
+Step 6 (Backend + Frontend): review items and batches, Review Panel, anchor resolution, decisions
   ──── Proof checkpoint: S0003, S0004, S0005 acceptance criteria green ────
 Step 7 (DevOps+Sec):  backup/restore drill, revocation timing, DAST
 Step 8 (Architect):   ADR results, matrix, blueprint updates
@@ -566,7 +574,7 @@ Step 8 (Architect):   ADR results, matrix, blueprint updates
 
 ### Cross-Story Verification
 
-- [ ] Full lifecycle: ingest → interpret twice → route low-confidence assertion → correct in Label Studio → commit corrected value → query at four time coordinates → backup → restore → citations resolve
+- [ ] Full lifecycle: ingest → interpret twice → route low-confidence assertion → correct in the Review Panel → commit corrected value → query at four time coordinates → backup → restore → citations resolve
 - [ ] All three roles enforced; revoked principal denied
 - [ ] ProblemDetails format consistent across every endpoint (`code` + `traceId`)
 
@@ -577,7 +585,7 @@ Step 8 (Architect):   ADR results, matrix, blueprint updates
 | S0001 | `uv sync`, `/health` 200 with sha and versions, ruff and mypy clean, CI runs suites | `engine/tests/unit/test_health.py`; CI job |
 | S0002 | Stack healthy, extensions created, object round trip, model listed, matrix pinned, no `latest` tags | `engine/tests/integration/test_stack_health.py`; `scripts/dev/check_pins.py` |
 | S0003 | Bundle files and manifest; zero conversion on second run; binding precision; partial page; invalid model output | `neuron/tests/integration/test_parse_once_reinterpret.py`; `neuron/tests/unit/test_context_guard.py` |
-| S0004 | Task created; decision with lineage; original preserved; duplicate; stale; bad secret | `engine/tests/integration/test_review_round_trip.py`; `engine/tests/security/test_webhook_trust.py` |
+| S0004 | Batch rendered and anchored; decision with lineage; original preserved; resubmission; stale; unresolved evidence blocked; annotate cannot commit | `engine/tests/integration/test_review_round_trip.py`; `engine/tests/security/test_review_authority.py`; `experience/tests/review-panel/anchors.spec.ts` |
 | S0005 | Four-coordinate matrix; correction split; concurrency; transactional outbox; separate timestamps | `engine/tests/integration/test_bitemporal_commit.py`, `test_commit_concurrency.py`, `test_outbox_replay.py` |
 | S0006 | Verification before storage; cross-scope 404; revocation timing; extension build; restore with citations | `engine/tests/security/test_credential_verification.py`, `test_scope_isolation.py`, `test_revocation_propagation.py`; `scripts/ops/restore.sh` output |
 | S0007 | ADR status and results; matrix complete; blueprint updated | Link check in the feature run; Architect signoff |
@@ -585,7 +593,7 @@ Step 8 (Architect):   ADR results, matrix, blueprint updates
 ## Security and Runtime Evidence
 
 - `security_sensitive_scope = true` (Steps 3, 6, 7): Security Reviewer required; scan classes dependency, secrets, SAST, and DAST all apply because the API listens on a port in Compose.
-- No secret in the repository; `.env.example` only; the inference key and Label Studio token live in `~/.brain-secrets` (0600) or CI secrets.
+- No secret in the repository; `.env.example` only; the inference key lives in `~/.brain-secrets` (0600) or CI secrets.
 - The model server receives chunk text only; never a user token, principal id, or tenant identifier.
 - Authorization denials never disclose existence; reason codes live in `audit_event` only.
 
@@ -600,7 +608,7 @@ At feature G7 the Architect binds as-built source to the ten capabilities, ten e
 | `capability:local-inference-service` | `docker/local-inference-runbook.md`, `neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py` |
 | `capability:parse-once-content-artifact` | `neuron/packages/brain-ingestion/src/**`, `engine/packages/brain-content/src/**` |
 | `capability:semantic-interpretation-run` | `neuron/packages/brain-extraction/src/**`, `neuron/packages/brain-interpretation/src/**` |
-| `capability:evidence-review-round-trip` | `engine/packages/brain-review/src/**`, `engine/packages/brain-review-labelstudio/src/**`, `integrations/label-studio/**` |
+| `capability:evidence-review-round-trip` | `engine/packages/brain-review/src/**`, `experience/src/review-panel/**` |
 | `capability:bitemporal-canonical-commit` | `engine/packages/brain-temporal/src/**`, `engine/migrations/versions/0003_*.py` |
 | `capability:credential-verification-and-principal-resolution` | `engine/packages/brain-security/src/brain_security/{verification,principals}.py` |
 | `capability:authorization-enforcement` | `engine/packages/brain-security/src/brain_security/{authorization,casbin_adapter,audit}.py`, `planning-mds/security/policies/**` |
@@ -614,7 +622,7 @@ Feature status moves `architecture-complete → in-progress` in the shard at fea
 |------|----------|------------|-------|
 | Phi-4-mini-instruct's 4,096-token context is short for document chunks | High | Client-side guard; chunk sizing in the profile; adequacy result recorded in ADR-0040; alternative backend proposed at Phase B of F0005 if needed | ai-engineer |
 | AGE build on PostgreSQL 18 fails | Medium | Fallback to 17 recorded in the matrix; no silent downgrade | devops |
-| Label Studio Community lacks reviewer roles and task assignment | Medium | Proof records the gaps; Nebula-owned reviewer binding and isolation controls documented for ADR-0044 | backend-developer, security |
+| Real documents defeat the panel's renderers: no text layer, rotated pages, fragmented text items, multi-row spreadsheet headers | Medium | Precision is declared and unresolved anchors block the decision (ADR-0058); S0004 proves that path deliberately and the gaps are recorded for ADR-0058 | frontend-developer, ai-engineer, QA |
 | Docling-Graph grounding coarser than expected | Medium | Precision recorded per binding; page-level accepted and displayed honestly | ai-engineer |
 | GL policy package not available in time | Medium | Operator supplies; otherwise a synthetic package selected and recorded | product-manager |
 | Restore drill omits content objects | High | `verify_citations.py` fails the drill; failure recorded, not waived | devops |
@@ -625,7 +633,7 @@ snake_case keys (the single exception is the ProblemDetails `traceId` extension 
 
 ## DI Registration Changes
 
-`brain_api.app.create_app()` builds `Settings` from environment, then the adapters (`OidcJwksVerifier`, `PrincipalResolver`, `CasbinAuthorizationService`, `MinioContentArtifactStore`, `CanonicalCommitService`, `WebhookReceiver`, `LabelStudioClient`) and exposes them through FastAPI dependencies in `brain_api.deps`. The worker (`brain_worker.main`) builds the same `Settings` and only the ingestion runner and outbox projector.
+`brain_api.app.create_app()` builds `Settings` from environment, then the adapters (`OidcJwksVerifier`, `PrincipalResolver`, `CasbinAuthorizationService`, `MinioContentArtifactStore`, `CanonicalCommitService`, `ReviewDecisionService`) and exposes them through FastAPI dependencies in `brain_api.deps`. The worker (`brain_worker.main`) builds the same `Settings` and only the ingestion runner and outbox projector.
 
 ## Casbin Policy Sync
 

@@ -51,11 +51,11 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | F0019 | Basic endorsement supersession | Planned | v0.1B | `F0019-basic-endorsement-supersession/` |
 | F0020 | Minimal graph/temporal query API | Planned | v0.1B | `F0020-minimal-graph-and-temporal-query-api/` |
 | F0021 | Native React semantic shell + OIDC/session contract and safe re-auth behavior | Planned | v0.1B | `F0021-native-react-semantic-shell-and-oidc-session/` |
-| F0022 | Document 360 + Label Studio evidence review integration + parent/classification and reviewer authority | Planned | v0.1B | `F0022-document-360-and-label-studio-evidence-review/` |
+| F0022 | Document 360 + native evidence review panel + parent/classification and reviewer authority | Planned | v0.1B | `F0022-document-360-and-native-evidence-review/` |
 | F0023 | Minimal Entity 360 | Planned | v0.1B | `F0023-minimal-entity-360/` |
 | F0024 | GL vertical slice | Planned | v0.1B | `F0024-gl-vertical-slice/` |
 | F0025 | Endorsement bitemporal slice | Planned | v0.1B | `F0025-endorsement-bitemporal-slice/` |
-| F0026 | v0.1 hardening + Label Studio Golden Corpus workflow + AuthX negative tests and policy parity | Planned | v0.1C | `F0026-v0-1-hardening-golden-corpus-and-authx-tests/` |
+| F0026 | v0.1 hardening + Golden Corpus workflow + AuthX negative tests and policy parity | Planned | v0.1C | `F0026-v0-1-hardening-golden-corpus-and-authx-tests/` |
 | F0027 | Probabilistic entity resolution | Planned | v0.2B | `F0027-probabilistic-entity-resolution/` |
 | F0028 | Conflict and supersession | Planned | v0.2B | `F0028-conflict-and-supersession/` |
 | F0029 | Ontology discovery | Planned | v0.2B | `F0029-ontology-discovery/` |

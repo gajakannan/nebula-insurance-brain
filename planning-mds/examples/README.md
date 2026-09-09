@@ -1,6 +1,6 @@
 # Semantic examples and contributor reading path
 
-Start with the [GL neurosymbolic walkthrough](neurosymbolic-gl/README.md), then use the [domain glossary](../domain/glossary.md) and [feature registry](../features/REGISTRY.md). Persona files describe who contributes; these examples explain what the Brain represents and does.
+Start with the [GL neurosymbolic walkthrough](neurosymbolic-gl/README.md), then use the [domain glossary](../domain/glossary.md) and [feature registry](../features/REGISTRY.md). The [Review Panel prototype](nebula-review-panel-live-files.html) is the one runnable artifact here. Persona files describe who contributes; these examples explain what the Brain represents and does.
 
 ## Example contract
 
@@ -22,10 +22,17 @@ Documentation/development examples remain outside the frozen evaluation holdout.
 | Derivation, rule authority, assessment versus approval | [Assessment](neurosymbolic-gl/README.md#assessment), CASE-16/17 | F0009/F0018/F0065 S0001/S0003, v0.1 |
 | Unknown, explicit negative, conflict | CASE-04/07/08 | F0006/F0018/F0065 S0002, v0.1 |
 | Derived-result and evidence authorization | CASE-18/19 | F0002/F0018/F0065 S0005/F0026, v0.1 |
+| Evidence anchoring, selector shapes, declared precision, unresolved evidence | [Review Panel prototype](nebula-review-panel-live-files.html) | F0001 S0004/F0022, v0.1B |
 | Vector similarity versus accepted facts | [EX-FUTURE-001](future-semantics.md#retrieval-projection) | F0033/F0035, v0.2A |
 | Learned candidates and repeated model claims | [EX-FUTURE-002](future-semantics.md#learning-candidate) | F0041/F0042, v0.2B; F0060 rule promotion, v0.4+ |
 | Obligations versus observed facts | [EX-FUTURE-003](future-semantics.md#normative-obligation) | F0052, v0.3 |
 | Hypothetical assumptions versus canonical state | [EX-FUTURE-004](future-semantics.md#hypothetical-scenario) | F0053, v0.3 |
+
+## Review Panel prototype
+
+[`nebula-review-panel-live-files.html`](nebula-review-panel-live-files.html) is a self-contained page that embeds four real files — a declarations PDF, an endorsement DOCX, an SOV XLSX, and a loss-run CSV — and parses them in the browser at load: pdf.js reads the PDF, fflate unzips the OOXML, `TextDecoder` handles the CSV. Every coordinate, paragraph path, cell reference, and character offset it displays is derived from the bytes at runtime, including the anchoring failures. It also accepts a dropped file of your own, and its anchor probe shows the locator any piece of text in that file resolves to.
+
+It is design evidence for [ADR-0057](../architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md) and [ADR-0058](../architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md) and illustrative under this document's contract: synthetic documents, no server, no persistence, no authorization, and no OCR path. It demonstrates that the selector crosswalk survives real parser output; it demonstrates nothing about the governed loop. Observed runtime evidence for that loop belongs to F0001-S0004 and is recorded under operations evidence runs.
 
 CASE identifiers refer to the [challenge table](neurosymbolic-gl/cases.md). F0065 owns the continuing example; upstream features own their domain contracts and cite the relevant step rather than duplicating the fixture.
 
