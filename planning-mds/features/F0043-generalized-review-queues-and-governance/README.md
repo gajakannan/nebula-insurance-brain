@@ -6,9 +6,9 @@
 
 ## Overview
 
-Review queues generalize beyond extraction correction to conflicts, merges, candidates, and promotions, with Label Studio kept for evidence-oriented adjudication and business approval kept separate (sections 75, 111.2).
+Review queues generalize beyond extraction correction to conflicts, merges, candidates, and promotions, with the Nebula Review Panel kept for evidence-oriented adjudication and business approval kept separate (sections 75, 111.2, 125). Queues whose subject is a proposal rather than a document region use a governance workbench surface; both are native, and both produce Nebula-owned decisions.
 
-Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0034](../../architecture/decisions/ADR-0034-label-studio-is-the-human-evidence-adjudication-engine.md), [ADR-0044](../../architecture/decisions/ADR-0044-review-edition-and-approval-contract.md). Likely predecessors (inferred, confirm at Phase B): F0022.
+Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0057](../../architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md), [ADR-0044](../../architecture/decisions/ADR-0044-review-surface-and-approval-contract.md). Likely predecessors (inferred, confirm at Phase B): F0022.
 
 ## Documents
 

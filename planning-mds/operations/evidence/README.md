@@ -66,7 +66,6 @@ The framework default path classes (in `nebula-agents/agents/product-manager/scr
 | `profiles/**` | `runtime_bearing = true` |
 | `schemas/**` | `runtime_bearing = true` |
 | `knowledge-packs/**` | `runtime_bearing = true` |
-| `integrations/label-studio/**` | `runtime_bearing = true` and `deployment_config_changed = true` |
 | `golden-corpus/**` | `runtime_bearing = true` |
 | `**/brain_security/**` | `security_sensitive_scope = true` |
 | `**/brain-security/**` | `security_sensitive_scope = true` |
@@ -75,7 +74,7 @@ The framework default path classes (in `nebula-agents/agents/product-manager/scr
 | `**/identity/**` | `security_sensitive_scope = true` |
 | `**/principals/**` | `security_sensitive_scope = true` |
 
-Rationale: `neuron/` hosts the AI and semantic runtime (Docling ingestion, extraction, interpretation, conversation, learning, MCP tools) and is runtime-bearing; the authored semantic assets (`ontology/`, `profiles/`, `schemas/`, `knowledge-packs/`) drive interpretation at runtime; Label Studio integration changes alter deployment topology; the Golden Corpus is executable test input; Python security and identity packages use lowercase directory names that the capitalized framework defaults do not match. The extension is additive; framework defaults are not overridden (`path_class_extension_conflict_fails`).
+Rationale: `neuron/` hosts the AI and semantic runtime (Docling ingestion, extraction, interpretation, conversation, learning, MCP tools) and is runtime-bearing; the authored semantic assets (`ontology/`, `profiles/`, `schemas/`, `knowledge-packs/`) drive interpretation at runtime; the Golden Corpus is executable test input; Python security and identity packages use lowercase directory names that the capitalized framework defaults do not match. The extension is additive; framework defaults are not overridden (`path_class_extension_conflict_fails`).
 
 ## Global Lanes (§20)
 

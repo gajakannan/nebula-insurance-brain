@@ -122,7 +122,7 @@ GET /facts/8b2c…?validAsOf=2026-07-01T00:00:00Z&knownAsOf=2026-06-05T00:00:00Z
 - Stack context: Python packages under `engine/packages/` and `neuron/packages/`
 
 ### Decision
-- Layer boundaries: `brain_domain` (frozen dataclasses, enums, invariants, no I/O) → application packages (`brain_security`, `brain_temporal`, `brain_review`, `brain_content` ports) → infrastructure adapters (`brain_persistence`, `brain_review_labelstudio`, MinIO adapter) → `brain_api` and `brain_worker`.
+- Layer boundaries: `brain_domain` (frozen dataclasses, enums, invariants, no I/O) → application packages (`brain_security`, `brain_temporal`, `brain_review`, `brain_content` ports) → infrastructure adapters (`brain_persistence`, MinIO adapter) → `brain_api` and `brain_worker`.
 - Dependency direction: inward only; adapters implement `Protocol` ports declared in application packages; `brain_api` wires them in `create_app()`.
 - `neuron/` mirrors the split: `brain_interpretation` (models, ports) → `brain_ingestion` and `brain_extraction` (adapters over Docling, Docling-Graph, vLLM).
 
@@ -209,7 +209,7 @@ canonical_fact_version(id, slot_id, tenant_id, knowledge_base_id, value jsonb, v
 - Stack context: pytest with coverage for `engine/` and `neuron/`; Playwright for `experience/` (from F0021)
 
 ### Decision
-- Unit/integration/e2e split: unit tests own domain invariants and pure logic; integration tests run against the Compose stack (database, object store, Label Studio, authentik); evaluation tests run against the Golden Corpus fixtures; contract tests validate JSON Schemas and the OpenAPI document.
+- Unit/integration/e2e split: unit tests own domain invariants and pure logic; integration tests run against the Compose stack (database, object store, authentik); evaluation tests run against the Golden Corpus fixtures; contract tests validate JSON Schemas and the OpenAPI document.
 - Coverage targets: 80% line coverage per workspace (framework evidence contract); severe-error rate and precision/recall reported with sample sizes (section 115.2).
 - Test data policy: synthetic or licensed fixtures only; no production documents; fixture text never enters telemetry.
 

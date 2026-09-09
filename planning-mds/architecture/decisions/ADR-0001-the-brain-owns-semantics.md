@@ -32,6 +32,7 @@ Baseline architecture decision carried verbatim from the master blueprint. The s
 
 - Accepted as a baseline decision on 2026-09-05. Change it only through a superseding ADR that links back here; never edit the decision text in place.
 - Implementation features that depend on this decision cite `adr:0001` in their kg-source shards.
+- Amended 2026-09-08 by [ADR-0057](ADR-0057-nebula-owns-the-native-evidence-review-panel.md): Label Studio is no longer among the engines around the semantic core. The human evidence review surface is native to Nebula. Every other engine named in the decision text is unaffected.
 
 ## References
 

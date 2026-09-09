@@ -79,7 +79,7 @@ entity_merge
 entity_merge_history
 conflict
 review_item
-review_external_task
+review_batch
 review_decision
 review_decision_evidence
 

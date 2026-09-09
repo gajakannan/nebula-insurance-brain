@@ -12,7 +12,7 @@ This review seeds the Brain's authorization model from the master blueprint (sec
 
 - Identity provider: authentik OIDC. Verified `(issuer, subject)` maps to a stable internal principal through a governed registry contract (proposed ADR-0049).
 - Principal kinds: UserPrincipal, ServicePrincipal, AgentPrincipal; Membership, Role, Permission, ResourceScope are first-class (section 66).
-- Reviewer identity: Label Studio callbacks map to authenticated reviewer principals; annotation permission is separate from adjudication and canonical approval authority (section 75, proposed ADR-0052).
+- Reviewer identity: the reviewer is the authenticated session principal in the native Review Panel, so there is no callback to trust and no second directory to map (ADR-0057); annotation permission remains separate from adjudication and canonical approval authority (sections 75, 111.2, 125; proposed ADR-0044 and ADR-0052).
 
 ## Policy evaluation
 

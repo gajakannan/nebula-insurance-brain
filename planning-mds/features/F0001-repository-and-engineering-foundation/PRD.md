@@ -12,7 +12,7 @@
 
 **As a** platform engineer standing up Nebula Insurance Brain
 **I want** the runtime roots, local dependency stack, and the four pre-build contract proofs delivered and recorded
-**So that** every v0.1 feature builds on a repository whose gates already run and on contracts that were proven against the real Docling, Label Studio, PostgreSQL, and authentik dependencies before they froze.
+**So that** every v0.1 feature builds on a repository whose gates already run and on contracts that were proven against the real Docling, PostgreSQL, and authentik dependencies before they froze.
 
 ## Business Objective
 
@@ -23,7 +23,7 @@
 
 ## Problem Statement
 
-- **Current State:** The architecture is documented but unproven. Docling-Graph reuse, the Label Studio edition workflow, the two-range bitemporal commit, and the authentik plus Casbin access path are assumptions on paper. There is no toolchain, no containers, no CI for runtime code.
+- **Current State:** The architecture is documented but unproven. Docling-Graph reuse, the native review round trip and its evidence anchoring, the two-range bitemporal commit, and the authentik plus Casbin access path are assumptions on paper. There is no toolchain, no containers, no CI for runtime code.
 - **Desired State:** A fresh clone installs, starts its dependencies, runs its gates, and carries four small proof harnesses whose measured results are recorded where later features can rely on them.
 - **Impact:** Without the proofs, F0004 to F0009 and F0018 to F0022 would freeze contracts on unverified behavior; section 106.2 marks these as P0 because rework there invalidates persisted artifacts and audit history.
 
@@ -31,9 +31,9 @@
 
 **In Scope:**
 - `engine/` and `neuron/` runtime roots with a uv workspace, a FastAPI application skeleton with a health endpoint, Alembic, lint, type-check, and test configuration, and CI wiring (S0001)
-- Local containers for PostgreSQL with pgvector and Apache AGE, an S3-compatible object store for content artifacts, and Label Studio, plus a pinned dependency matrix (S0002)
+- Local containers for PostgreSQL with pgvector and Apache AGE, an S3-compatible object store for content artifacts, and authentik, plus a pinned dependency matrix (S0002)
 - Proof 1: parse once with Docling, reinterpret with two profiles through Docling-Graph, evidence resolves (S0003)
-- Proof 2: Label Studio review round trip with duplicate and stale callbacks rejected and lineage preserved (S0004)
+- Proof 2: native review round trip with duplicate and stale submissions rejected, unresolved evidence blocked, and lineage preserved (S0004)
 - Proof 3: bitemporal commit under retroactive and concurrent change (S0005)
 - Proof 4: access boundaries across two security scopes, revocation, the exact extension build, and a timed restore (S0006)
 - Recording proof outcomes into the governing ADRs and the dependency matrix (S0007)
@@ -56,18 +56,18 @@
 
 ## UX / Screens
 
-No UI. This feature delivers engineering infrastructure and proof harnesses exercised through tests, CLI commands, and the Label Studio interface (a direct dependency, not a Nebula screen). The first Nebula screens arrive with F0021 to F0023.
+Minimal UI. This feature delivers engineering infrastructure and proof harnesses exercised through tests and CLI commands, plus the proof-scope Nebula Review Panel that S0004 needs (ADR-0057). The full application shell and Document 360 arrive with F0021 to F0023.
 
 ## Screen Layouts (ASCII)
 
-Omitted. No Nebula user-visible screen, zone, or multi-step flow is introduced or modified; Label Studio's own task view is used as shipped.
+Limited to the proof-scope Review Panel in S0004: an artifact rail, a rendered viewport with anchored regions, a field list with per-field actions, and batch submission. No other Nebula screen, zone, or flow is introduced.
 
 ## Data Requirements
 
 **Core Entities:**
 - Content Artifact: the parse-once bundle including the native DoclingDocument JSON, normalized projections, and manifest with parser identity and hashes (sections 80, 81, 108.1)
 - Semantic Interpretation Run and Interpretation Result: versioned run configuration, candidate assertions, evidence bindings with declared precision (section 108.3)
-- Review Item, Review External Task, Review Decision: the Label Studio round trip records (section 75)
+- Review Item, Review Batch, Evidence Locator, Review Decision: the native review round trip records (sections 75, 125)
 - Fact Slot, Canonical Fact Version, Canonical Fact Change, Outbox Event: the bitemporal commit proof records (sections 13, 14, 16, 109)
 - Principal, Membership, Audit Event: the access proof records (sections 65, 66)
 
@@ -88,23 +88,23 @@ Omitted. No Nebula user-visible screen, zone, or multi-step flow is introduced o
 | Platform engineer (developer) | Run containers, tests, and proof harnesses locally and in CI | No production data |
 | Document intelligence engineer | Run ingestion and interpretation proofs; read artifacts in the dev object store | Same tenant scope as the proof fixture |
 | Persistence engineer | Run commit proof against the dev database | Service principal for the worker |
-| Business reviewer | Annotate the Label Studio task bound to their verified principal | Annotation only; no canonical approval authority (section 111.2) |
+| Business reviewer | Review a batch in the Nebula Review Panel as their verified session principal | Adjudication only; no canonical approval authority (section 111.2) |
 | CI runner | Execute gates and suites read-only against ephemeral services | No secrets beyond ephemeral service credentials |
 
 ## Success Criteria
 
 - CI product-gates job passes on the F0001 closeout commit with runtime suites included.
 - Each of the four proofs has a pass record with measured values in its ADR.
-- The dependency matrix pins Python, PostgreSQL major and minor, AGE build, pgvector, Docling, Docling-Graph, and Label Studio edition and version.
+- The dependency matrix pins Python, PostgreSQL major and minor, AGE build, pgvector, Docling, Docling-Graph, and the `pdf.js` and `fflate` versions the Review Panel renders with.
 - Section 117.1 decisions 3 and 4 are answered in BLUEPRINT section 2 and section 4.8.
 
 ## Risks & Assumptions
 
-- Risk: the Label Studio Community edition lacks task assignment or reviewer roles the governed loop needs; mitigation is to prove the workflow with the selected edition first (section 111.1) and document isolation controls.
+- Risk: the Brain now owns document rendering fidelity, and real submission packages bring scanned pages with no text layer, rotated pages, fragmented PDF text items, and spreadsheet headers that are not row 1; mitigation is that unresolved anchors block the decision rather than misplacing it (ADR-0058), and S0004 proves that path deliberately.
 - Risk: the PostgreSQL major version and the AGE build are incompatible on the intended host; mitigation is to pin and test one exact combination in S0002 and S0006 (section 114.3).
 - Risk: Docling-Graph's grounding precision differs across extraction modes; mitigation is to record precision per binding rather than assume span level (section 108.2).
 - Risk: Phi-4-mini-instruct's 4,096-token context was validated by the CRM for short structured calls, not for document chunks; mitigation is client-side context enforcement and a recorded adequacy result in ADR-0040, with an alternative backend proposed at Phase B if needed.
-- Decided at the clarification gate (2026-09-06): Label Studio Community self-hosted; PostgreSQL 18 with fallback to 17 only on AGE build failure; the extraction model is `microsoft/Phi-4-mini-instruct` served by vLLM on the host GPU, the profile the CRM validated in its ADR-035 (verified: the CRM runs Phi, not Mistral; Ollama is an unwired seam there); proofs run in local Docker Compose with the inference service on the host.
+- Decided at the clarification gate (2026-09-06), amended 2026-09-08 by ADR-0057 (native Review Panel replaces Label Studio): PostgreSQL 18 with fallback to 17 only on AGE build failure; the extraction model is `microsoft/Phi-4-mini-instruct` served by vLLM on the host GPU, the profile the CRM validated in its ADR-035 (verified: the CRM runs Phi, not Mistral; Ollama is an unwired seam there); proofs run in local Docker Compose with the inference service on the host.
 - Deferred to the Architect at Phase B: object store choice (MinIO assumed), Docling-Graph pin, authentik version, webhook trust mechanism.
 - Assumption: a licensed GL policy package is supplied by the operator before S0003; otherwise the Architect selects a synthetic package (section 117.1 item 5).
 
@@ -112,7 +112,7 @@ Omitted. No Nebula user-visible screen, zone, or multi-step flow is introduced o
 
 - Master blueprint sections 106.2, 108, 109.2, 109.3, 111.1, 114.1, 114.3, 115.4, 117.1, 120.1, 121.2
 - ADR-0001, ADR-0003, ADR-0007, ADR-0008, ADR-0010, ADR-0034, ADR-0037 (Accepted); ADR-0040, ADR-0041, ADR-0044, ADR-0049, ADR-0050 (Proposed, settled by S0007)
-- Open decisions from section 117.1: target host and extension build, model-provider data policy, Label Studio edition, Docling-Graph pin, sample package availability
+- Open decisions from section 117.1: target host and extension build, model-provider data policy, Docling-Graph pin, sample package availability
 
 ## Related Stories
 
@@ -121,7 +121,7 @@ Stories are colocated in this feature folder as `F0001-S000N-{slug}.md`.
 - [F0001-S0001] - Runtime roots and toolchain skeleton
 - [F0001-S0002] - Local runtime containers and dependency matrix
 - [F0001-S0003] - Proof: parse once, reinterpret twice, evidence resolves
-- [F0001-S0004] - Proof: Label Studio review round trip with lineage
+- [F0001-S0004] - Proof: native review round trip with lineage
 - [F0001-S0005] - Proof: bitemporal commit under retroactive and concurrent change
 - [F0001-S0006] - Proof: access boundaries, extension build, and restore
 - [F0001-S0007] - Record proof outcomes and settle the pre-build contracts

@@ -9,12 +9,12 @@
 ## User Story
 
 **As a** Dana the Platform Engineer
-**I want** Docker Compose to start PostgreSQL with pgvector and Apache AGE, an S3-compatible object store for content artifacts, Label Studio, and authentik, plus the local vLLM inference service serving Phi-4-mini-instruct on the host GPU, all from one pinned dependency matrix
+**I want** Docker Compose to start PostgreSQL with pgvector and Apache AGE, an S3-compatible object store for content artifacts, and authentik, plus the local vLLM inference service serving Phi-4-mini-instruct on the host GPU, all from one pinned dependency matrix
 **So that** the four pre-build proofs run against the exact combination the pilot will deploy instead of generic compatibility claims
 
 ## Context & Background
 
-Master blueprint section 114.3 requires a tested dependency matrix (exact Python build, Docling and Docling-Graph releases, PostgreSQL major and minor, AGE build, pgvector, Label Studio edition and version) and a modular-monolith topology of API, worker, web, PostgreSQL, object storage, and Label Studio. Section 111.1 requires proving the Label Studio workflow with the intended edition. This story delivers the stack and records the matrix.
+Master blueprint section 114.3 requires a tested dependency matrix (exact Python build, Docling and Docling-Graph releases, PostgreSQL major and minor, AGE build, pgvector, and the `pdf.js` and `fflate` versions the Review Panel renders with) and a modular-monolith topology of API, worker, and web over PostgreSQL and object storage. ADR-0057 removed the Label Studio service from this stack on 2026-09-08; the review surface ships inside `experience/` and needs no container. This story delivers the stack and records the matrix.
 
 ## Acceptance Criteria
 
@@ -27,10 +27,6 @@ Master blueprint section 114.3 requires a tested dependency matrix (exact Python
 - **When** the engine health check runs
 - **Then** it writes and reads back a 1 KB object in the `content` bucket using the credentials from `.env.example`
 
-- **Given** Label Studio
-- **When** it starts
-- **Then** the API answers `GET /api/version` with the pinned Community edition version and an API token can be created for the proof user
-
 - **Given** authentik
 - **When** it starts
 - **Then** the OIDC discovery document is served and two test principals in two tenants exist from the seed script
@@ -41,7 +37,7 @@ Master blueprint section 114.3 requires a tested dependency matrix (exact Python
 
 - **Given** `docker/DEPENDENCY-MATRIX.md`
 - **When** reviewed
-- **Then** it pins Python, PostgreSQL major and minor, AGE build, pgvector, Docling, Docling-Graph, Label Studio edition and version, authentik version, vLLM version, the model id `microsoft/Phi-4-mini-instruct` with its Hugging Face revision, and the context length, each with the source it was verified against
+- **Then** it pins Python, PostgreSQL major and minor, AGE build, pgvector, Docling, Docling-Graph, the Node and `experience/` toolchain, `pdf.js`, `fflate`, authentik version, vLLM version, the model id `microsoft/Phi-4-mini-instruct` with its Hugging Face revision, and the context length, each with the source it was verified against
 
 **Alternative Flows / Edge Cases:**
 - AGE build fails on the chosen PostgreSQL major → the postgres image build fails with the extension name in the error; the matrix records the incompatibility and the fallback major
@@ -55,7 +51,7 @@ N/A — infrastructure story; no user-facing mutation of business data.
 ## Data Requirements
 
 **Required Fields:**
-- `docker-compose.yml` with services `postgres`, `objectstore`, `labelstudio`, `authentik`
+- `docker-compose.yml` with services `postgres`, `objectstore`, `authentik`
 - `docker/local-inference-runbook.md`: vLLM OpenAI-compatible server on the host GPU (outside Compose, as in the CRM's ADR-035), `--max-model-len 4096`, bearer `--api-key`, secrets sourced from a gitignored file, never from the repo
 - `docker/postgres/Dockerfile` building the pinned PostgreSQL with pgvector and AGE
 - `.env.example` with every endpoint, port, bucket, and credential variable
@@ -81,7 +77,7 @@ N/A — infrastructure story; no user-facing mutation of business data.
 ## Non-Functional Expectations
 
 - Performance: cold start with cached images completes within 3 minutes on a developer machine and within 5 minutes on the CI runner
-- Security: no production credentials; authentik and Label Studio bind to localhost by default
+- Security: no production credentials; authentik binds to localhost by default
 - Reliability: two consecutive `down -v` and `up -d` cycles reach healthy without intervention
 
 ## Dependencies
@@ -109,7 +105,7 @@ N/A — infrastructure story; no user-facing mutation of business data.
 
 **Open Questions:**
 - [x] PostgreSQL major version — decided at the F0001 clarification gate (2026-09-06): PostgreSQL 18; fall back to 17 only if the AGE build fails, and record the outcome in the dependency matrix
-- [x] Label Studio edition — decided: Community, self-hosted; the proof records missing governed-review features for ADR-0044
+- [x] Review surface — decided 2026-09-08 (ADR-0057): the native Nebula Review Panel, not Label Studio. No review container is in this stack; `pdf.js` and `fflate` are pinned in the matrix as `experience/` dependencies
 - [x] Local model — decided at the F0001 clarification gate (2026-09-06), aligned with the CRM's validated profile (nebula-insurance-crm ADR-035): `microsoft/Phi-4-mini-instruct` served by vLLM 0.25.1 as an OpenAI-compatible service on the host GPU; not Mistral, not Ollama
 - [ ] Object store — Architect to decide at Phase B; assumption below applies until then
 

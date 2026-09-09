@@ -15,7 +15,6 @@
 USE DIRECTLY
     Docling
     Docling-Graph
-    Label Studio
 
 REINCORPORATE SELECTED CAPABILITIES / CONCEPTS
     Utopia
@@ -29,7 +28,7 @@ NOT ADOPTED INTO THE BRAIN ARCHITECTURE
     Omnigraph
 ```
 
-Mature external capabilities may be used directly when they provide a complete specialist function, while Nebula remains the semantic authority.
+Mature external capabilities may be used directly when they provide a complete specialist function, while Nebula remains the semantic authority. Label Studio held that position for human evidence adjudication until 2026-09-08; [ADR-0057](decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md) removed it and made the review surface native (section 125).
 
 ---
 
@@ -210,10 +209,6 @@ Docling
 Docling-Graph
     semantic/graph-oriented extraction support
     entity and relationship extraction from persisted content
-
-Label Studio
-    visual human adjudication
-    annotation, correction, entity/relationship review, evidence localization
 ```
 
 The direct-dependency rule is:
@@ -223,7 +218,7 @@ External specialist engine owns its specialist execution.
 Nebula owns semantic identity, provenance, review decisions, canonical truth, and audit.
 ```
 
-Label Studio is therefore treated like Docling and Docling-Graph: **use the product directly rather than recreating its mature specialist capability inside Nebula.**
+The rule applies where a product delivers the whole specialist function. It does not apply to human evidence adjudication: the reviewer-authority, assignment, and review-workflow capabilities the governed loop needs are not in Label Studio's Community edition, so adopting it would have meant paying full integration cost for a partial capability. **Human review is native** (section 125, [ADR-0057](decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md)).
 
 ## Reincorporated architectural capabilities
 
@@ -321,7 +316,11 @@ Tailwind CSS
 TanStack Table
 Cytoscape.js
 react-i18next
+pdf.js
+fflate
 ```
+
+`pdf.js` and `fflate` back the Nebula Review Panel: the panel renders the original bytes of a submission package — PDF through pdf.js, WordprocessingML and SpreadsheetML by unzipping the OOXML parts with fflate, delimited text through `TextDecoder` — and anchors each assertion in the region it came from (section 125, [ADR-0057](decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md), [ADR-0058](decisions/ADR-0058-evidence-anchoring-and-selector-contract.md)).
 
 The frontend is semantic-first, not chat-first. Chat is one interaction modality within Entity 360, Document 360, Account/Policy/Claim/Submission views, search, graph exploration, evidence inspection, and history.
 
@@ -785,7 +784,7 @@ Persisted Content
                          ▼
                   policy / confidence
                          │
-                   Label Studio review
+                    native review panel
                          │
                          ▼
                     ReviewDecision
@@ -1037,19 +1036,18 @@ Nebula preserves:
 
 ```text
 review_item_id
-external_review_system
-external_task_id
-external_annotation_id
+review_batch_id
 reviewer_principal_id
 review_decision
-review_reason
+review_reason_code
 reviewed_at
 corrected_from_assertion_id
 created_assertion_id
 source evidence locator
+evidence precision
 ```
 
-For Label Studio integration:
+Review happens inside Nebula, so the decision needs no external system, task, or annotation identity. The reviewer is the authenticated session principal:
 
 ```text
 Docling / Docling-Graph output
@@ -1061,19 +1059,17 @@ Assertion + Evidence
 Nebula ReviewItem
         │
         ▼
-Label Studio Task
+Nebula Review Panel
         │
-   reviewer sees
-   original page / region
+   panel renders from the immutable artifact
+   original page / region / cell / span
    predicted entity or relationship
    extracted value
    model confidence
+   evidence precision, including unresolved
         │
         ▼
-Label Studio Annotation
-        │
-        ▼
-Nebula Review Adapter
+Reviewer decision in session
         │
         ▼
 ReviewDecision
@@ -1111,7 +1107,7 @@ Who changed it and why?
 Which canonical fact resulted?
 ```
 
-Label Studio owns the review interaction and annotation workflow. Nebula owns the durable semantic review decision and its effect on enterprise knowledge.
+The Nebula Review Panel owns the review interaction. Nebula owns the durable semantic review decision and its effect on enterprise knowledge. Both sit inside the same trust boundary, so evidence is never copied to an external system to be reviewed (section 125).
 
 ---
 
@@ -2688,7 +2684,7 @@ Conversation
 
 Document 360 is the primary evidence-oriented Nebula surface.
 
-When an assertion needs specialist adjudication, Document 360 does not recreate annotation tooling. It launches or deep-links the corresponding Label Studio task and then reflects the resulting Nebula `ReviewDecision` back into the document history.
+When an assertion needs adjudication, Document 360 opens the Nebula Review Panel on that review item in place. Inspecting evidence and correcting it are the same surface at two levels of authority, not two applications, and the resulting `ReviewDecision` appears directly in the document history.
 
 ```text
 Document 360
@@ -2698,7 +2694,7 @@ Document 360
    └── Review required
            │
            ▼
-      Label Studio
+   Nebula Review Panel
            │
            ▼
       ReviewDecision
@@ -2796,7 +2792,7 @@ Normative
 
 Human adjudication is a first-class capability.
 
-**AuthX boundary:** Verify the review callback, map the reviewer to a stable internal principal, restrict task evidence to current grants, and check assertion/task versions. Separate permission to annotate from permission to adjudicate source authority or approve canonical truth. Reauthorize at commit time; Label Studio completion does not itself confer approval authority. See sections 111 and 120.4.
+**AuthX boundary:** The reviewer is the authenticated session principal; there is no callback to verify and no second user directory to map. Restrict rendered evidence to current grants and check the assertion version at submission. Separate permission to annotate from permission to adjudicate source authority or approve canonical truth. Reauthorize at commit time; submitting a review decision does not itself confer approval authority. See sections 111, 120.4, and 125.
 
 ## v0.1 minimum review path
 
@@ -2821,10 +2817,10 @@ REJECT
 Execution surface:
 
 ```text
-Label Studio
+Nebula Review Panel
 ```
 
-Nebula creates the review task; Label Studio presents the source and annotations; Nebula receives the result and persists a governed `ReviewDecision`.
+Nebula opens the review item in its own panel, renders the source from the immutable content artifact, and persists a governed `ReviewDecision` in the same session and trust boundary (section 125).
 
 ```text
 Source Document
@@ -2844,16 +2840,17 @@ Assertion / Relationship Candidate
 Nebula ReviewItem
       │
       ▼
-Label Studio Task
+Nebula Review Panel
       │
-      ├── rendered source page
-      ├── bounding box / span
+      ├── source rendered from the immutable artifact
+      ├── region / cell / span, or a declared page-level ground
       ├── predicted entity / relationship
       ├── extracted value
-      └── confidence / evidence
+      ├── confidence / evidence
+      └── unresolved evidence blocks the decision
       │
       ▼
-Human Annotation
+Human decision in session
       │
       ▼
 Nebula ReviewDecision
@@ -2882,9 +2879,9 @@ NORMATIVE_VIOLATION
 KNOWLEDGE_PROMOTION
 ```
 
-Not every queue requires Label Studio. Label Studio is strongest where a reviewer benefits from seeing source content, spans, boxes, entities, relationships, tables, or other evidence-oriented annotation.
+Not every queue is evidence-oriented. The Review Panel is the right surface where a reviewer benefits from seeing source content, spans, regions, entities, relationships, or tables next to the claim.
 
-Ontology governance, process conflicts, policy decisions, and knowledge promotion may use native Nebula workbench surfaces.
+Ontology governance, process conflicts, policy decisions, and knowledge promotion use governance workbench surfaces where the subject is a proposal, not a document region. Both are native; they differ in what they render, not in who owns the decision.
 
 The review architecture therefore separates:
 
@@ -2893,7 +2890,7 @@ ReviewItem
     what requires adjudication
 
 Review Surface
-    Label Studio or native Nebula workbench depending on task
+    Review Panel for evidence; governance workbench for proposals
 
 ReviewDecision
     durable governed semantic result owned by Nebula
@@ -2903,11 +2900,13 @@ ReviewDecision
 
 # 76. Architecture Decision Records
 
-> Each ADR below is also maintained as an individual record under `decisions/` (ADR-0001 to ADR-0037 as the Accepted baseline; ADR-0038 to ADR-0053 from sections 116 and 122 as Proposed). The individual records are the working copies; this section is the baseline text as of 2026-09-05.
+> Each ADR below is also maintained as an individual record under `decisions/` (ADR-0001 to ADR-0037 as the Accepted baseline; ADR-0038 to ADR-0053 from sections 116 and 122 as Proposed; ADR-0054 to ADR-0058 authored after the baseline). The individual records are the working copies; this section is the baseline text as of 2026-09-05, with later status changes noted inline rather than rewritten.
 
 ## ADR-0001 — The Brain Owns Semantics
 
 **Decision:** Nebula owns canonical semantic meaning. Docling, Docling-Graph, Label Studio, AGE, pgvector, Temporal, Cytoscape, AJV, Pydantic, and future reasoners are engines around it.
+
+**Amended 2026-09-08 by ADR-0057:** Label Studio is no longer among those engines; human evidence adjudication is native (section 125). The decision itself is unchanged — it is the reason the swap cost nothing semantically.
 
 **Use case:** Replace an extraction library without replacing enterprise meaning.
 
@@ -3208,6 +3207,8 @@ Coverage
 
 ## ADR-0034 — Label Studio Is the Human Evidence-Adjudication Engine
 
+**Status: superseded 2026-09-08 by ADR-0057** (section 125). The baseline text is kept as written; the review surface is now native.
+
 **Decision:** Use Label Studio directly for evidence-oriented annotation, review, and correction rather than rebuilding that specialist UX in Nebula.
 
 **Boundary:** Label Studio owns task presentation and annotation workflow. Nebula owns `ReviewItem`, `ReviewDecision`, provenance, audit, semantic commits, and canonical truth.
@@ -3235,6 +3236,14 @@ Coverage
 **Use case:** Account 360 can expose a Chat panel using Onyx-inspired message branching and citations while remaining integrated with Nebula-native graph, temporal, evidence, and entity views.
 
 ---
+
+## ADR-0057 — Nebula Owns the Native Evidence Review Panel
+
+**Decision:** Nebula owns the human evidence review surface. The Nebula Review Panel renders the immutable content artifact and its evidence selectors and is the only surface that produces a `ReviewDecision`. Label Studio is removed from the architecture. Supersedes ADR-0034; see section 125 and [the record](decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md).
+
+## ADR-0058 — Evidence Anchoring and Selector Contract
+
+**Decision (proposed):** Evidence locators are W3C Web Annotation selectors with a declared `nebula:TableCellSelector` extension, positions in Unicode code points, precision declared including `unresolved`, and unresolved evidence blocking the decision rather than degrading it. See section 125 and [the record](decisions/ADR-0058-evidence-anchoring-and-selector-contract.md).
 
 ## ADR-0037 — Human Corrections Append; They Do Not Rewrite Evidence
 
@@ -3276,7 +3285,6 @@ engine/                           # Python backend: API, worker, semantic kernel
         brain-decisions/
         brain-governance/
         brain-review/
-        brain-review-labelstudio/
         brain-security/
     migrations/                   # Alembic
     tests/
@@ -3295,6 +3303,7 @@ neuron/                           # Python AI and semantic runtime (ai-engineer)
 
 experience/                       # React and TypeScript web app (frontend-developer)
     src/
+        review-panel/             # Nebula Review Panel: renderers, selector resolvers, decision batch
     tests/
 
 ontology/                         # authored ontology modules; compiled into normalized runtime structures
@@ -3322,13 +3331,7 @@ schemas/                          # runtime JSON Schema contracts; planning-mds/
 knowledge-packs/
     okf/
 
-integrations/
-    label-studio/
-        project-templates/
-        task-mappers/
-        webhook-contracts/
-
-golden-corpus/                    # version-controlled regression fixtures exported from Label Studio (section 96)
+golden-corpus/                    # version-controlled regression fixtures exported from Nebula review decisions (section 96)
 
 scripts/
     kg/                           # knowledge-graph toolchain (product-owned copy of the framework tooling)
@@ -3337,6 +3340,8 @@ docker/                           # container definitions
 ```
 
 Mapping from the original layout: `apps/api` and `apps/worker` moved under `engine/apps/`; `apps/web` became `experience/`; the AI-facing packages moved to `neuron/packages/`; `docs/adr`, `docs/architecture`, and `docs/domain` moved under `planning-mds/architecture/decisions/`, `planning-mds/architecture/`, and `planning-mds/domain/`; the single top-level `tests/` tree is split per runtime root, with `golden-documents` promoted to `golden-corpus/`.
+
+ADR-0057 removed `engine/packages/brain-review-labelstudio/` and the `integrations/label-studio/` asset tree on 2026-09-08. The review boundary is `engine/packages/brain-review/` plus `experience/src/review-panel/`; `integrations/` returns when a first integration justifies it.
 
 ---
 
@@ -3413,7 +3418,7 @@ entity_merge
 entity_merge_history
 conflict
 review_item
-review_external_task
+review_batch
 review_decision
 review_decision_evidence
 
@@ -3620,7 +3625,7 @@ Assertion + provenance
         ↓
 low-confidence / correction policy
         ↓
-Label Studio
+Nebula Review Panel
         ↓
 ReviewDecision
         ↓
@@ -3647,7 +3652,7 @@ GL Extraction Profile
 Assertions
       ↓
 Confidence / review policy
-      ├──────────────► Label Studio review when needed
+      ├──────────────► Review Panel when needed
       │                        ↓
       │                 ReviewDecision
       └────────────────────────┘
@@ -3693,7 +3698,7 @@ valid time
 recorded time
 evidence pointer
 clickable source region in Document 360
-review/correction path through Label Studio when intentionally seeded with a low-confidence or incorrect extraction
+review/correction path through the Nebula Review Panel when intentionally seeded with a low-confidence or incorrect extraction
 ```
 
 ---
@@ -3741,7 +3746,8 @@ SemanticInterpretationRun
 InterpretationBasis
 ReviewItem
 ReviewDecision
-LabelStudioExternalTaskRef
+ReviewBatch
+EvidenceLocator
 ConversationContext
 LearningCandidate
 Derivation dependency tables
@@ -3765,7 +3771,7 @@ Process Workbench
 Ontology Workbench
 full probabilistic ER
 full conflict engine
-advanced/generalized review workbenches beyond the Label Studio evidence-correction path
+advanced/generalized review workbenches beyond the Review Panel evidence-correction path
 general reasoning engine (bounded F0065 guideline assessment is included)
 decision ledger
 execution gate
@@ -3803,7 +3809,7 @@ Conversation Graph
 Graphify-inspired inferred/ambiguous relationship discovery
 Learning Plane
 knowledge promotion/governance
-generalized review queues with Label Studio used for evidence-oriented adjudication
+generalized review queues with the Review Panel used for evidence-oriented adjudication
 expanded Entity 360
 Cytoscape Graph Explorer
 Semantic API expansion
@@ -3906,12 +3912,12 @@ F0018 Canonical commit service + action authorization and policy-version audit
 F0019 Basic endorsement supersession
 F0020 Minimal graph/temporal query API
 F0021 Native React semantic shell + OIDC/session contract and safe re-auth behavior
-F0022 Document 360 + Label Studio evidence review integration + parent/classification and reviewer authority
+F0022 Document 360 + native evidence review panel + parent/classification and reviewer authority
 F0023 Minimal Entity 360
 F0065 Grounded GL guideline assessment (bounded neurosymbolic workflow)
 F0024 GL vertical slice
 F0025 Endorsement bitemporal slice
-F0026 v0.1 hardening + Label Studio Golden Corpus workflow + AuthX negative tests and policy parity
+F0026 v0.1 hardening + Golden Corpus workflow + AuthX negative tests and policy parity
 ```
 
 ## v0.2
@@ -3990,7 +3996,7 @@ financial statement
 underwriting memo
 ```
 
-Use **Label Studio as the primary human labeling and correction environment** for evidence-oriented ground truth.
+Use the **Nebula Review Panel as the primary human labeling and correction environment** for evidence-oriented ground truth. Ground-truth creation and production correction are the same surface producing the same records, which is what this section always wanted from a shared review mechanism.
 
 Hand-label and validate:
 
@@ -4009,13 +4015,13 @@ extraction profile
 human correction lineage where applicable
 ```
 
-The Golden Corpus is not owned only by Label Studio.
+The Golden Corpus is an export of governed decisions, not a labeling project's private state.
 
 ```text
-Label Studio Project
+Review batches over the corpus documents
        │
        ▼
-Human annotations
+Human decisions
        │
        ▼
 Nebula Golden Corpus Export
@@ -4061,7 +4067,8 @@ conversation citation accuracy
 learning candidate precision
 ontology candidate usefulness
 review agreement / adjudication consistency
-Label Studio → Nebula review round-trip accuracy
+review round-trip accuracy
+evidence anchor resolution rate and precision honesty
 human-correction regression retention
 ```
 
@@ -4096,12 +4103,13 @@ vector search tenant leakage
 conversation hypothesis non-promotion
 conversation branch / parent-child turn integrity
 structured citation → evidence navigation
-Label Studio task mapping
-Label Studio webhook idempotency
+review batch assembly and rendering per content type
+evidence anchor resolution, including deliberate unresolved cases
 review decision idempotency
 original assertion preserved after correction
 corrected assertion lineage
 reviewed evidence locator stability
+code-point offset conversion at the panel boundary
 knowledge promotion policy
 ```
 
@@ -4134,7 +4142,7 @@ knowledge promotion policy
 22. Derived facts reference exact input versions.
 23. YAML/JSONL/OKF are authoring/interchange, not canonical runtime truth.
 24. All semantic writes pass through governed commit services.
-25. Label Studio is a human adjudication engine, not semantic authority.
+25. The Review Panel is a human adjudication surface, not semantic authority; evidence is never copied outside the Brain to be reviewed.
 26. Human corrections append durable decisions/assertions; they do not mutate original source/content artifacts.
 27. Interpretation basis (EXPLICIT / INFERRED / AMBIGUOUS) is preserved independently from fact mode.
 28. Nebula keeps a native semantic UX; Onyx is not a runtime frontend dependency.
@@ -4146,6 +4154,7 @@ knowledge promotion policy
 34. Agents and reviewers cannot claim approval authority through payload fields or model output.
 35. Authorization policy changes follow their own governed release process and are not automatic learning promotions.
 36. Session renewal does not automatically replay user-initiated canonical or business mutations.
+37. Evidence precision is declared, `unresolved` included; unresolved evidence blocks a review decision rather than producing an approximate one.
 ```
 
 ---
@@ -4157,9 +4166,9 @@ knowledge promotion policy
                                            │
         ┌──────────────────────────────────┼──────────────────────────────────┐
         ▼                                  ▼                                  ▼
- NATIVE NEBULA UX                    Semantic APIs / MCP                 LABEL STUDIO
+ NATIVE NEBULA UX                    Semantic APIs / MCP               NEBULA REVIEW PANEL
  360 views / Chat /                 agents / integrations              human reviewers
- search / evidence /                      │                                  │
+ search / evidence /                      │                            same app, same session
  graph / history                          │                                  │
         │                                 │                                  │
         └───────────────────────┬─────────┴───────────────┐                  │
@@ -4214,9 +4223,6 @@ Docling
 Docling-Graph
     direct semantic/graph extraction engine
 
-Label Studio
-    direct human evidence-adjudication engine
-
 Graphify
     selected semantic capabilities reincorporated into Nebula
 
@@ -4227,7 +4233,7 @@ RAGFlow / Omnigraph
     not adopted
 ```
 
-The Brain owns semantics. Direct dependencies execute specialized capabilities around that semantic core.
+The Brain owns semantics. Direct dependencies execute specialized capabilities around that semantic core. Human evidence adjudication is not one of them: it is native (section 125). `pdf.js` and `fflate` are rendering libraries inside the Nebula frontend, not engines holding a specialist function.
 
 ---
 
@@ -4254,7 +4260,7 @@ Assertions + Relationship Candidates
 confidence/policy       World Model
     │                      │
     ▼                      ├─────────────────────────────────────┐
-Label Studio               │                                     │
+Review Panel               │                                     │
 when review needed          ▼                                     ▼
     │                  Conversation                           New Knowledge
     ▼                      │                                     │
@@ -4426,7 +4432,15 @@ It should preserve the evidence once, continuously reinterpret that evidence as 
 - Direct specialist dependencies selected for this blueprint:
   - Docling: https://github.com/DS4SD/docling
   - Docling-Graph: use the selected Docling-Graph implementation already incorporated into the blueprint
-  - Label Studio: https://github.com/HumanSignal/label-studio
+
+- Nebula Review Panel rendering libraries (frontend dependencies, not specialist engines; section 125):
+  - pdf.js (Apache-2.0): https://github.com/mozilla/pdf.js
+  - fflate (MIT): https://github.com/101arrowz/fflate
+  - W3C Web Annotation Data Model: https://www.w3.org/TR/annotation-model/
+  - W3C Media Fragments URI 1.0: https://www.w3.org/TR/media-frags/
+
+- Evaluated for human evidence adjudication and not adopted:
+  - Label Studio: https://github.com/HumanSignal/label-studio (ADR-0034, superseded by ADR-0057 on 2026-09-08; section 125)
 
 - Reference / reincorporated-capability projects from the user's fork collection:
   - Graphify: https://github.com/gajakannan/graphify
@@ -4462,7 +4476,7 @@ The requirements below are designed to be validated against representative insur
 | Separate assertions from accepted facts | Preserves disagreement instead of overwriting it | 11–16 |
 | Versioned, modular ontology and profiles | Accommodates differences by LOB, document, product, and jurisdiction | 19–29 |
 | Bitemporality | Supports retroactive endorsements and reconstruction of prior knowledge | 14–16, 63 |
-| Human corrections append with provenance | Makes correction inspectable and reusable | 17, 75, ADR-0037 |
+| Human corrections append with provenance | Makes correction inspectable and reusable | 17, 75, 125, ADR-0037 |
 | PostgreSQL authority; graph/vector projections | Gives the system a clear commit boundary | 46–52 |
 | Native semantic UX with chat in context | Supports account, document, policy, and claim investigation | 36–44, 70–74 |
 | Candidate learning before governed promotion | Allows learning without silently redefining accepted knowledge | 30–35, 41–43 |
@@ -4479,7 +4493,7 @@ The requirements below are designed to be validated against representative insur
 | P0 | Temporal commit and relationship identity | Exclusion constraint sketch | Executable temporal mutation specification |
 | P0 | Tenancy, ACL inheritance, derived-data access | Enforcement points listed | Resource-policy model and isolation proof |
 | P0 | Durable ingestion and commit recovery | Outbox table and idempotency tests listed | State machine, idempotency keys, transactional outbox |
-| P0 | Label Studio edition and evidence mapping | Direct dependency chosen | Working review proof with selected edition |
+| P0 | Review surface and evidence mapping | Native panel chosen (ADR-0057); selector contract proposed (ADR-0058) | Working review proof in the native panel with anchors resolving across the four renderers |
 | P0 | Ontology release and migration contract | Versions and modules listed | Immutable releases, compatibility and impact rules |
 | P0 | Application boundary and deployable topology | Large package list | Modular monolith boundary and dependency matrix |
 | P1 | Context/answer contract and analytic query routing | Rich conversation model | Scoped answers, abstention, exact calculations |
@@ -4751,27 +4765,27 @@ User statements also need scope and intent. “Assume the limit is $5M” belong
 
 **Acceptance:** Ten regenerated answers repeat a false relationship. Support strength does not increase without additional independent evidence. A later retraction invalidates dependent candidates and identifies previously affected answers.
 
-# 111. Label Studio and Human Governance
+# 111. Review Surface and Human Governance
 
-## 111.1 Pin the edition and prove the exact workflow
+**Revised 2026-09-08.** This section originally required pinning a Label Studio edition and proving the workflow on it. That investigation reached its conclusion: the reviewer-authority, assignment, and review-workflow capabilities the governed loop needs are differentiated across editions and absent from Community, so the Brain would have paid full integration cost — a second identity system, evidence copied outside the semantic boundary, webhook trust, task-versus-assertion version reconciliation — for a partial capability it would still have to complete itself. [ADR-0057](decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md) removed Label Studio and made the surface native. Section 125 defines the panel; reference R3 is retired.
 
-Label Studio remains a suitable specialist annotation boundary. However, its official comparison marks project roles/access control, task assignment, and reviewer workflows differently across Community, Starter Cloud, and Enterprise. Community APIs/webhooks and pre-annotations do not imply that every governed review feature is included. [R3]
+## 111.1 Prove the native review workflow
 
-Before selecting deployment and estimating effort, build a narrow proof with the intended edition:
+The proof obligation did not go away with the dependency. Build the narrow proof against the Nebula Review Panel before treating the review contracts as frozen:
 
-1. Create a task from immutable evidence and predicted annotations.
-2. Display a scanned page, table header/value, and related evidence.
-3. Bind the reviewer to a verified Nebula principal.
-4. Receive annotation events securely and persist the original event payload/hash.
-5. Translate annotations into an authorized Nebula `ReviewDecision`.
-6. Reject duplicates and detect decisions based on stale assertion/ontology versions.
-7. Commit corrected assertions through Nebula's existing semantic boundary.
+1. Assemble a review batch from immutable evidence and predicted values.
+2. Render a scanned page, a table header and value, and related evidence — each at its declared precision, with `unresolved` shown as unresolved rather than approximated (ADR-0058).
+3. Resolve the reviewer from the authenticated session principal; no second user directory, no email matching.
+4. Persist the submitted decision batch in one transaction with its audit events.
+5. Record an authorized Nebula `ReviewDecision` per field.
+6. Reject duplicate submissions and detect decisions taken against stale assertion or ontology versions.
+7. Commit corrected assertions through Nebula's existing semantic boundary, under a separate permission.
 
-If Community is chosen, document how deployment isolation and Nebula-owned review authorization meet the pilot's access requirements. Merely hiding the Label Studio link does not provide isolation. Do not assume a commercially licensed embedding or review feature is available in the chosen edition.
+The isolation question the external surface raised is answered structurally: evidence is rendered inside the authorized session and never exported to another service. What replaces it is a rendering-fidelity obligation. The panel is now responsible for scanned pages with no text layer, rotated and cropped pages, fragmented PDF text items, tables continuing across page breaks, merged cells, and spreadsheet headers that are not row 1. Where it cannot anchor, it must say so.
 
 ## 111.2 Separate annotation from business approval
 
-A person confirming that the PDF says $2M is performing evidence adjudication. A person deciding that this document governs a particular policy term is making an authority/applicability decision. Store the distinction and enforce reviewer permissions accordingly.
+A person confirming that the PDF says $2M is performing evidence adjudication. A person deciding that this document governs a particular policy term is making an authority/applicability decision. Store the distinction and enforce reviewer permissions accordingly. Bringing the surface in-house makes this easier to enforce and no less necessary: the panel submits decisions, it never commits canonical truth, and the two capabilities are separate permissions on separate resources (section 120.2, ADR-0044).
 
 Use reason codes, escalation, explicit stale-review handling, and second review for selected high-impact disputes. A review decision should reference the assertion revision and policy version it adjudicated.
 
@@ -4871,13 +4885,13 @@ Evolution jobs need an impact preview, bounded scope, deduplication, priority, b
 
 ## 114.3 Define deployment and recovery early
 
-Start with a modular monolith: API, worker, and web application, plus PostgreSQL, object storage, and the selected Label Studio deployment. Treat the package list as code boundaries, not 25 independently deployed services. Keep parser/model workers separately resource-controlled where required.
+Start with a modular monolith: API, worker, and web application, plus PostgreSQL and object storage. Treat the package list as code boundaries, not 25 independently deployed services. Keep parser/model workers separately resource-controlled where required.
 
-Specify a tested dependency matrix: exact Python/runtime build, Docling and Docling-Graph commits/releases, model weights, PostgreSQL major/minor, AGE build, pgvector, and Label Studio edition/version. PostgreSQL 18 is not inherently ruled out by AGE: the official download page lists a PG18 release. Select and test an exact combination instead of relying on generic compatibility claims. [R4]
+Specify a tested dependency matrix: exact Python/runtime build, Docling and Docling-Graph commits/releases, model weights, PostgreSQL major/minor, AGE build, pgvector, and the pinned `pdf.js` and `fflate` versions the Review Panel renders with. PostgreSQL 18 is not inherently ruled out by AGE: the official download page lists a PG18 release. Select and test an exact combination instead of relying on generic compatibility claims. [R4]
 
 Validate availability on the intended hosting environment, extension upgrade path, backup/restore, and operational ownership before deployment assumptions harden. No new graph or vector platform is justified solely by this blueprint.
 
-Set recovery point/time objectives for a pilot and prove a restore of relational state, original content, artifact manifests, ontology releases, and review evidence. Rebuild graph/vector views and reapply deletion/revocation controls. A backup that omits original evidence or cannot restore stable citations is insufficient.
+Set recovery point/time objectives for a pilot and prove a restore of relational state, original content, artifact manifests, ontology releases, and review evidence — all of which now live in one system, with no external annotation store to reconcile. Rebuild graph/vector views and reapply deletion/revocation controls. A backup that omits original evidence or cannot restore stable citations is insufficient.
 
 # 115. Evaluation, Release Gates, and Delivery Sequence
 
@@ -4920,7 +4934,7 @@ Preserve the existing F0001–F0063 identifiers. F0064 separately tracks reposit
 
 | Stage | Scope | Existing roadmap mapping |
 | --- | --- | --- |
-| Pre-build contract proofs | Docling reuse, Label Studio round trip, temporal mutation, authorization/deployment compatibility | F0001–F0005, F0008, F0009, F0022 |
+| Pre-build contract proofs | Docling reuse, native review round trip and evidence anchoring, temporal mutation, authorization/deployment compatibility | F0001–F0005, F0008, F0009, F0022 |
 | v0.1A | Typed domain contracts, durable ingestion, immutable evidence, assertion extraction | F0002–F0017 |
 | v0.1B | Authorized canonical commits, source resolution minimum, GL limits, temporal endorsement, human review, bounded neurosymbolic guideline assessment | F0018–F0023 → F0065 → F0024/F0025 integration |
 | v0.1C | Recovery, deletion/revocation minimum, audit, independent frozen evaluation, constrained policy question, assessment challenge suite | F0026 including F0065 cases, and narrow acceptance coverage from F0036–F0039 |
@@ -4935,7 +4949,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 | Proof | Concrete outcome | Suggested owner role |
 | --- | --- | --- |
 | Parse/reinterpret/evidence | One GL package, two profiles, unchanged content artifact, correct citation mapping | Document intelligence engineer |
-| Review round trip | Wrong amount corrected once; replayed/stale callbacks handled with lineage | Application engineer + business reviewer |
+| Review round trip | Wrong amount corrected once in the native panel; duplicate and stale submissions handled with lineage; anchors resolve or declare themselves unresolved | Application engineer + frontend + business reviewer |
 | Bitemporal commit | Retroactive and concurrent changes, interval splitting, distinct received/accepted times | Persistence engineer |
 | Access and hosting | Two security scopes, revocation, object/review access, exact extension build and restore | Platform/security engineer |
 
@@ -4953,11 +4967,12 @@ The following ADR IDs are reserved suggestions, all with **status: Proposed**. T
 | ADR-0041 — Atomic Semantic Commit and Projection Delivery | Canonical transaction + audit + outbox; versioned/rebuildable projections | Crash after commit; section 109 |
 | ADR-0042 — Resource and Derivation Authorization | Enforce current grants across facts, evidence, reviews, derived results, and caches | Restricted note cannot leak via summary; section 110 |
 | ADR-0043 — Retention and Revocation Lifecycle | Immutable content within authorized retention; dependency-aware deletion and restore | Deleted source stays unavailable after restore; section 110.3 |
-| ADR-0044 — Review Edition and Approval Contract | Selected Label Studio edition; annotation separate from canonical approval | Stale reviewer correction; section 111 |
+| ADR-0044 — Review Surface and Approval Contract | Annotation, adjudication, and business approval as separate authorities (the edition half is closed by ADR-0057) | Stale reviewer correction; section 111.2 |
 | ADR-0045 — Ontology Release Compatibility | Immutable module releases, dependency locks, explicit semantic migration | Concept split preserves history; section 112 |
 | ADR-0046 — Grounded Answer and Analytic Query Contract | Scope/time/evidence in every answer; exact queries for totals | Complete open-claim count; section 113 |
 | ADR-0047 — Controlled Learning and Reinterpretation | Independent support, candidate scope, budgeted jobs, separate executable releases | Repeated hallucination earns no support; sections 110.5 and 114 |
 | ADR-0048 — Pilot Evidence and Operational Readiness | Frozen evaluation slice and recovery/access/review gates | Demonstrated GL end-to-end proof; section 115 |
+| ADR-0058 — Evidence Anchoring and Selector Contract | W3C selectors per format, code-point offsets, declared precision, unresolved blocks the decision | Quote recovery after coordinate drift; section 125 |
 
 ## 116.1 Original statements that need reconciliation
 
@@ -4971,6 +4986,7 @@ The following ADR IDs are reserved suggestions, all with **status: Proposed**. T
 | 53 | Stable identifiers lack namespace/term qualification | Scoped identifiers and collision handling |
 | 65 | Tenant/KB ownership leaves shared entity identity unresolved | Explicit identity scope and authorized KB membership |
 | 75 | Human annotation can be read as canonical approval | Separate annotation, adjudication, and business authority |
+| 3, 75, 96, 100, 111 | Label Studio named as the adjudication engine | Native Review Panel; ADR-0034 superseded by ADR-0057 (section 125) |
 | 80–81 | Native DoclingDocument is missing from the bundle | Persist native JSON and explicit evidence adapter mappings |
 | 89, 92 | Full governance delayed while initial writes already occur | Baseline authorization and audit in v0.1 |
 | 90 | v0.2 combines too many large capabilities | Split retrieval/chat delivery from ontology/learning workbenches |
@@ -4983,7 +4999,7 @@ These primary references support the technology findings and implementation cons
 
 - **R1 — Docling-Graph input formats:** [Official input guide](https://docling-project.github.io/docling-graph/fundamentals/pipeline-configuration/input-formats/). Supports native DoclingDocument reuse without conversion and the high-fidelity JSON handoff recommendation.
 - **R2 — Docling-Graph provenance:** [Official grounding guide](https://docling-project.github.io/docling-graph/fundamentals/graph-management/provenance/). Supports full-ledger preservation and explicit treatment of grounding precision/fallbacks.
-- **R3 — Label Studio editions:** [Official feature comparison](https://labelstud.io/guide/label_studio_compare). Supports verifying roles, review, task assignment, and embedding capability against the selected edition.
+- **R3 — Label Studio editions (retired 2026-09-08):** [Official feature comparison](https://labelstud.io/guide/label_studio_compare). It established that project roles/access control, task assignment, and reviewer workflows are differentiated across Community, Starter Cloud, and Enterprise, and that Community APIs, webhooks, and pre-annotations do not imply a governed review feature set. That finding is the evidence behind ADR-0057; the reference no longer supports an active dependency.
 - **R4 — Apache AGE deployment:** [Official download page](https://age.apache.org/download/) and [upstream repository](https://github.com/apache/age). Support PG-version-specific build selection, including listed PG18 support; they do not establish the capabilities of a chosen managed host.
 - **R5 — PostgreSQL row security:** [PostgreSQL 18 row security](https://www.postgresql.org/docs/18/ddl-rowsecurity.html). Supports testing owner, privileged-role, and application-role behavior.
 - **R6 — PostgreSQL temporal/exclusion constraints:** [PostgreSQL 18 CREATE TABLE](https://www.postgresql.org/docs/18/sql-createtable.html). Supports the distinction between one-range temporal keys and explicit multi-column exclusion conditions.
@@ -4994,13 +5010,13 @@ These primary references support the technology findings and implementation cons
 
 1. Named owner and approved policy for source authority and canonical promotion in the first GL slice.
 2. Tenant/entity/knowledge-base identity scope and pilot access model.
-3. Target host, PostgreSQL/extension build, model/provider data policy, and Label Studio edition.
+3. Target host, PostgreSQL/extension build, and model/provider data policy.
 4. Exact Docling-Graph implementation and release/commit; the selected upstream project is `docling-project/docling-graph`.
 5. Licensed/authorized representative policy packages and reviewers for the initial corpus.
 6. Critical-field acceptance thresholds, review capacity, latency/cost budget, and recovery objectives.
 7. Applicable retention schedules, holds, conversation-sharing policy, and deletion/revocation behavior.
 
-Recommended first build objective: a single GL policy package and retroactive endorsement that can be ingested once, interpreted, corrected visually, committed with the right authority and time semantics, and queried with trustworthy evidence. Use that proof to stabilize the kernel before expanding the ontology and learning surfaces.
+Recommended first build objective: a single GL policy package and retroactive endorsement that can be ingested once, interpreted, corrected visually in the Review Panel, committed with the right authority and time semantics, and queried with trustworthy evidence. Use that proof to stabilize the kernel before expanding the ontology and learning surfaces.
 
 ---
 
@@ -5170,7 +5186,7 @@ Use resource/action permissions instead of one broad “Brain write” permissio
 | document/evidence | read, download, ingest, classify, declassify | Reading the parent does not automatically authorize every classified artifact |
 | assertion | read, propose, correct, reject | Proposing/correcting evidence is separate from committing canonical truth |
 | canonical fact | read, accept, supersede, retract | Restricted to authorized commit services operating for an approved actor/policy |
-| review | annotate, adjudicate, approve | Label Studio annotation is not unrestricted business approval |
+| review | annotate, adjudicate, approve | Submitting a decision in the Review Panel is not unrestricted business approval |
 | ontology/profile | propose, validate, publish, retire | Candidate learning cannot publish its own semantic definitions |
 | conversation | create, read, update, delete, share | Ownership plus current underlying evidence access; sharing is explicit |
 | learning/evolution | propose, promote, schedule, cancel | Independent evidence and budget/delegation policy still apply |
@@ -5186,7 +5202,7 @@ A user's requested account/territory/LOB/date is an analytical filter, not an en
 
 For derived artifacts, enforce access to the supporting evidence path used to construct the result, or a separately approved declassification/aggregation policy. Knowledge-base sharing is explicit and does not arise from entity resolution merging two records.
 
-## 120.4 Agent, MCP, and Label Studio boundaries
+## 120.4 Agent, MCP, and review boundaries
 
 The model may request actions; the typed action registry constrains what can be requested; deterministic services authorize and validate them. Topic/scope guards and JSON Schema validation improve routing and structure but are not substitutes for authentication or authorization.
 
@@ -5194,7 +5210,7 @@ Preserve `acting_user_id`, `agent_principal_id`, delegation ID, allowed actions/
 
 Read-only MCP tools remain protected resource operations. Future writes call the same commit/review services as the web API. Tool adapters may not use unrestricted SQL or direct canonical table writes to bypass those services.
 
-Label Studio tasks contain only the evidence needed for an authorized reviewer. Verify callback origin, resolve the reviewer to a stable principal, check task/assertion revisions, and reauthorize the decision. Task IDs, emails in callback payloads, and annotation completion alone are not proof of approval authority.
+A review batch renders only the evidence an authorized reviewer is entitled to see, resolved under current grants at assembly time and rechecked at submission. Because the panel runs inside the authenticated session (ADR-0057), the reviewer is the session principal: there is no callback origin to verify and no payload-supplied identity to distrust. What remains is unchanged — check assertion and ontology revisions, reauthorize the decision, and treat a submitted decision as adjudication, never as approval authority.
 
 ## 120.5 Session and UI behavior
 
@@ -5218,7 +5234,7 @@ UI route guards and hidden controls are convenience only. The backend must rejec
 | Locked OIDC dependency source inspection | 3.4.1 serializes token-bearing user state to configured store | The memory-only comment conflicts with `sessionStorage` configuration |
 | Parent resolver → Casbin adapter → document-service trace | Parent attributes are not part of the active object/matcher contract | The inspected parent-access path does not implement record-specific parent authorization |
 
-The .NET integration suite, browser session flow, actual IdP, PostgreSQL deployment, Label Studio integration, and production ingress were not executed. Test files demonstrating intended audience, role, and distribution-scope behavior serve as design/coverage evidence only. No production data, tokens, or remote service state were changed.
+The .NET integration suite, browser session flow, actual IdP, PostgreSQL deployment, review round trip, and production ingress were not executed. Test files demonstrating intended audience, role, and distribution-scope behavior serve as design/coverage evidence only. No production data, tokens, or remote service state were changed.
 
 ## 121.2 Required carryover test matrix
 
@@ -5295,3 +5311,65 @@ Use [EX-GL-001](../examples/neurosymbolic-gl/README.md) as a continuing syntheti
 Each introduced/changed concept requires a glossary definition, worked example, boundary example, and owning feature/story/contract links. The [examples index](../examples/README.md) is the coverage map. Structured artifacts declare a local schema and pass planning checks. Runtime stories provide actual reproduction commands and compare observed output to independently authored expected outcomes. Label illustrative outputs, runtime evidence, future phases, and synthetic provenance explicitly. Documentation/development examples stay outside the frozen holdout.
 
 F0026 reports model extraction quality independently from deterministic rule correctness and end-to-end assessment quality. A schema check or a mocked extraction is not proof of neurosymbolic processing. The full general reasoner, dependency propagation, decision ledger, scenario engine, and learned rule promotion retain their own milestones.
+
+# 125. Native Evidence Review Panel
+
+**Scope amendment:** Authorized 2026-09-08. The human evidence review surface moves from Label Studio into Nebula. [ADR-0057](decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md) is Accepted and supersedes ADR-0034; [ADR-0058](decisions/ADR-0058-evidence-anchoring-and-selector-contract.md) is Proposed and carries the anchoring contract. Sections 3, 17, 71, 75, 76, 77, 85–90, 95–100, 104, 106.2, 111, 114.3, 115, 116, 117, and 120 are revised accordingly. A working prototype exists ([`examples/nebula-review-panel-live-files.html`](../examples/nebula-review-panel-live-files.html)); no runtime feature has shipped.
+
+## 125.1 Why the surface changed
+
+The direct-dependency rule in section 3 says to use a mature product where it delivers a complete specialist function. Label Studio delivers annotation. It does not deliver the governed loop this architecture specifies: project roles and access control, task assignment, and reviewer workflows are differentiated across editions and absent from Community, which is the edition a self-hosted pilot would run. Section 111.1 carried that as the risk to prove first. Proving it produced the answer, not the workflow.
+
+Adopting it anyway would have meant a second identity system to map reviewers through, a second copy of evidence outside the semantic boundary, webhook trust and replay handling, task-versus-assertion version reconciliation across an out-of-band callback, and a labeling configuration per document type — and reviewer authority still built in Nebula, because that is where authority lives. The integration cost was the whole cost; the capability delivered was partial.
+
+What the Brain needs is narrower than a general annotation tool and more specific: render the original bytes of a mixed submission package, put a predicted value beside the exact region it was claimed from, take accept / correct / reject, and be honest when the evidence cannot be anchored. That is a bounded frontend problem over contracts the Brain already owns.
+
+## 125.2 What the panel is
+
+A native React surface in `experience/src/review-panel/`, opened from Document 360, from a review queue, or from an assertion in Entity 360. It renders directly from the immutable content artifact:
+
+```text
+ReviewBatch
+   │
+   ├── artifact: PDF          → pdf.js canvas + text layer
+   ├── artifact: DOCX         → fflate → word/document.xml → DOM
+   ├── artifact: XLSX         → fflate → xl/worksheets/sheetN.xml
+   └── artifact: CSV / text   → TextDecoder
+   │
+   ▼
+per field: predicted value, confidence, slot, assertion version
+           anchored region at its declared precision
+   │
+   ▼
+ACCEPT / CORRECT / REJECT        (BLOCKED when evidence is unresolved)
+   │
+   ▼
+one submission, one transaction
+   │
+   ├── ReviewDecision per field, with reason code
+   ├── corrected assertions: origin HUMAN_REVIEW, corrected_from, evidence target
+   ├── one audit event per decision
+   └── canonical commit deferred — a separate permission (section 111.2)
+```
+
+The renderer set is a delivery constraint, openly. A format the panel cannot render cannot be reviewed; adding one means adding a renderer and a selector resolver behind the same contract, not a new labeling schema.
+
+The panel is a decision surface, not a commit surface. It has no path to canonical truth: `review:annotate` and `review:adjudicate` are what it exercises, `review:approve` and the commit services are elsewhere (section 120.2).
+
+## 125.3 What it buys and what it costs
+
+Removed from the architecture: an external service in the trust boundary; a second user directory; webhook signature, origin, and replay handling; the external task reference (`LabelStudioExternalTaskRef`); the `integrations/label-studio/` tree and `brain-review-labelstudio` package; the dependency of a governed capability on a vendor's edition and licensing terms. Evidence retention, revocation, and deletion (ADR-0043) no longer have a second copy to chase.
+
+Added: the Brain owns document rendering fidelity, with `pdf.js` and `fflate` pinned in the section 114.3 matrix and carrying their own upgrade and security surface. Scanned pages with no text layer, rotated and cropped pages, aggressively fragmented or out-of-reading-order PDF text items, tables continuing across page breaks, merged cells, and spreadsheet headers that are not row 1 are all now Nebula's problem. The prototype exercises none of the OCR path and uses clean, generated documents; treat it as evidence that the design is sound, not that the implementation is done.
+
+## 125.4 Anchoring is the contract that makes this work
+
+Evidence locators are W3C Web Annotation selectors — `FragmentSelector` plus `TextQuoteSelector` for PDF, `RangeSelector` over `XPathSelector` with `TextQuoteSelector` and `TextPositionSelector` for WordprocessingML, a declared `nebula:TableCellSelector` plus `XPathSelector` for SpreadsheetML, and text position plus quote for delimited text. Selectors are redundant by design: a positional selector to draw with, a textual selector to recover from. Character positions are Unicode code points, converted at the panel boundary (section 108.2). The spreadsheet header row is resolved during ingestion and stored, never assumed to be row 1.
+
+Anchoring authority is server-side. The panel's parsers display the original bytes and bind the highlight; Docling's normalized text defines where the evidence is. Where they disagree, the panel reports a resolution failure instead of moving the anchor.
+
+Precision is declared — `exact-span`, `table-cell`, `block`, `page`, `document`, `unresolved` — and unresolved is first-class. A field whose evidence cannot be re-anchored is submitted as `BLOCKED` with reason code `EVIDENCE_UNRESOLVED`: no assertion is produced, the review item stays open, and the reviewer is never asked to adjudicate evidence they were not shown. `BLOCKED` is an operational outcome; `REJECT` remains the reviewer's judgment that the source does not support the value. This will make the first corpus look worse than a system that guesses. That is the intent (invariant 37, ADR-0058).
+
+## 125.5 Delivery
+
+F0022 delivers the panel with Document 360 in v0.1B and owns the renderer set, the selector resolvers, and the reviewer-authority checks. F0001-S0004 proves the round trip, the duplicate and stale paths, and the anchoring behavior ahead of it; F0001-S0007 records the results against ADR-0044 and ADR-0058. F0026 exports the Golden Corpus from native review decisions (section 96). F0043 generalizes the queues in v0.2B without changing the evidence surface.

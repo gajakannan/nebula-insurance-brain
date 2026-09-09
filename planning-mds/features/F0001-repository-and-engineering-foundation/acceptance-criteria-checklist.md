@@ -28,7 +28,7 @@ Applied to stories F0001-S0001 to F0001-S0007 at Phase A (2026-09-06). Items mar
 
 ## 5) Navigation & Feedback
 
-- N/A: no Nebula UI in this feature; Label Studio is used as shipped
+- Proof-scope Review Panel only (S0004, ADR-0057); the full shell and Document 360 are F0021 and F0022
 
 ## 6) Non-Functional Criteria
 

@@ -63,7 +63,7 @@ What it is not: a document archive, a vector database, a chat-with-PDF system, o
 Baseline derived from the master blueprint surfaces (sections 64 to 75); Phase A refines these into personas per feature.
 
 - Insurance knowledge workers (underwriters, account and claims analysts) using Entity 360, Document 360, search, and contextual chat (sections 70 to 72)
-- Human reviewers and annotators adjudicating low-confidence or corrected extractions in Label Studio (sections 75, 111)
+- Human reviewers adjudicating low-confidence or corrected extractions in the Nebula Review Panel (sections 75, 111, 125)
 - Ontology, profile, and knowledge-governance stewards approving promotions and releases (sections 42, 112; the workbenches are v0.2)
 - Agents and integrations consuming the semantic API and MCP under verified principals and bounded delegation (sections 64, 68, 69)
 - Platform operators and security administrators managing tenancy, principals, policy releases, and retention (sections 65, 66, 110)
@@ -83,7 +83,7 @@ Semantic kernel (sections 12 to 18, 78):
 - FactSlot, FactSlotQualifier, CanonicalFactVersion, CanonicalRelationshipVersion, CanonicalFactChange
 - Derivation, DerivationInput
 - GuidelineRuleVersion, AssessmentRecord (F0065 bounded v0.1B assessment; proposed contract in its feature folder)
-- ReviewItem, ReviewDecision, ReviewExternalTask (Label Studio)
+- ReviewItem, ReviewBatch, ReviewDecision, EvidenceLocator
 - LearningCandidate, LearningEvidence, KnowledgeGap
 - Conversation, ConversationTurn, ConversationContext, ConversationKnowledgeArtifact
 - AuditEvent, OutboxEvent
@@ -97,7 +97,7 @@ Insurance core for the v0.1 GL slice (sections 23, 24, 86):
 
 Ingestion and interpretation: Source Document → Parse Once (Docling) → Content Artifact → Classify → Extraction Profile → Assertions → Confidence/Review Policy → Deterministic Entity Resolution → Canonical Commit → FactSlots + Bitemporal Facts → Entity 360 (section 86)
 Guideline assessment (v0.1B, F0065): accepted qualified facts + selected reviewed rule release + explicit time/snapshot → deterministic comparison → immutable assessment with exact lineage → authorized Entity 360 explanation (master blueprint section 124).
-Human review: Assertion → ReviewItem → Label Studio Task → Human Annotation → ReviewDecision → corrected assertion or canonical commit → Golden Corpus (sections 75, 85)
+Human review: Assertion → ReviewItem → Nebula Review Panel → reviewer decision → ReviewDecision → corrected assertion or canonical commit → Golden Corpus (sections 75, 85, 125)
 Endorsement supersession: Original fact → Endorsement (valid-time effective, recorded-time received) → superseded canonical version with both timelines queryable (sections 14 to 16, 87)
 Knowledge promotion (v0.2): Conversation or learning candidate → validate and score → retain, review, or promote (sections 30 to 44)
 
@@ -119,11 +119,11 @@ Locked unless changed by an accepted ADR (master blueprint section 3).
 
 - Backend: Python 3.13+, FastAPI, Pydantic v2, SQLAlchemy 2, asyncpg, Alembic, uv; Temporal Python SDK from v0.3
 - Data platform: PostgreSQL (authoritative) with JSONB, range and multirange types with btree_gist, full-text search, pgvector (retrieval projection), Apache AGE (graph projection); Qdrant optional and deferred (ADR-0033)
-- Direct specialist dependencies: Docling (content extraction), Docling-Graph (semantic and graph extraction), Label Studio (human evidence adjudication)
+- Direct specialist dependencies: Docling (content extraction), Docling-Graph (semantic and graph extraction). Human evidence adjudication is native (ADR-0057, section 125); `pdf.js` and `fflate` are Review Panel rendering libraries in `experience/`, not specialist engines
 - Frontend: React, TypeScript, Vite, React Router, TanStack Query, Zustand, React Hook Form, AJV with JSON Schema 2020-12, shadcn/ui, Tailwind CSS, TanStack Table, Cytoscape.js (v0.2), react-i18next
 - AuthN: authentik OIDC. AuthZ: native Casbin adapter behind an AuthorizationService with typed resource scopes. Session transport: same-origin BFF with server-held tokens is the proposed direction (ADR-0051, open)
 - Semantic interchange: JSON Schema 2020-12, JSON-LD, RDF and N-Triples, OWL, RDFS, SKOS, OKF, YAML, JSONL (authoring and interchange only, never runtime truth)
-- Deploy: Docker + docker-compose for local development; the production host is an open decision (section 117.1). Clarification decisions recorded at F0001 G1 (2026-09-06): PostgreSQL 18 is the pinned major for the pgvector and Apache AGE build (fallback 17 only on build failure); Label Studio Community, self-hosted; the F0001 proofs use `microsoft/Phi-4-mini-instruct` served by vLLM as an OpenAI-compatible service on the host GPU (the local profile the CRM validated in nebula-insurance-crm ADR-035; 4,096-token context, bearer auth, no prompt persistence) and run in local Docker Compose
+- Deploy: Docker + docker-compose for local development; the production host is an open decision (section 117.1). Clarification decisions recorded at F0001 G1 (2026-09-06): PostgreSQL 18 is the pinned major for the pgvector and Apache AGE build (fallback 17 only on build failure); the review surface is the native Nebula Review Panel (ADR-0057, 2026-09-08); the F0001 proofs use `microsoft/Phi-4-mini-instruct` served by vLLM as an OpenAI-compatible service on the host GPU (the local profile the CRM validated in nebula-insurance-crm ADR-035; 4,096-token context, bearer auth, no prompt persistence) and run in local Docker Compose
 - Testing: pytest for `engine/` and `neuron/` (unit, integration, evaluation against the Golden Corpus). Frontend stack proposed as Vitest + Playwright + axe following the CRM baseline, to be confirmed in Phase B. Cross-cutting scans per the framework evidence contract (dependency, secrets, SAST, DAST)
 
 ### 2.2 Contract locations
@@ -138,12 +138,11 @@ Three runtime roots follow the framework convention; master blueprint section 77
 
 | Root | Contents | Owning role | Notes |
 |------|----------|-------------|-------|
-| `engine/` | FastAPI API, worker, and the semantic kernel packages: domain, persistence, content, schema, ontology, graph, temporal, process, provenance, resolution (deterministic), search, decisions, governance, review, review-labelstudio, security; Alembic migrations; backend tests | backend-developer | Business logic and canonical truth live here |
+| `engine/` | FastAPI API, worker, and the semantic kernel packages: domain, persistence, content, schema, ontology, graph, temporal, process, provenance, resolution (deterministic), search, decisions, governance, review, security; Alembic migrations; backend tests | backend-developer | Business logic and canonical truth live here |
 | `neuron/` | AI and semantic runtime packages: ingestion (Docling adapter), extraction (Docling-Graph, extraction profiles), interpretation, reasoning, conversation, learning, evolution, agent-tools (MCP); AI tests | ai-engineer | Proposes assertions and candidates; never writes canonical truth directly (ADR-0001, section 64) |
 | `experience/` | React web app: 360 views, search, evidence, chat, graph explorer | frontend-developer | Semantic-first; chat is one modality (ADR-0036) |
 | `ontology/`, `profiles/`, `schemas/`, `knowledge-packs/` | Authored ontology modules, document and extraction profiles, runtime JSON Schemas, OKF packs | architect (design), backend-developer (compiler and runtime loading) | Versioned, modular, compiled into normalized runtime structures (ADR-0011, ADR-0012) |
-| `integrations/label-studio/` | Project templates, task mappers, webhook contracts | backend-developer | Nebula owns ReviewItem and ReviewDecision (ADR-0034) |
-| `golden-corpus/` | Version-controlled regression fixtures exported from Label Studio | quality-engineer | Section 96; frozen holdout rules in section 115.1 |
+| `golden-corpus/` | Version-controlled regression fixtures exported from Nebula review decisions | quality-engineer | Section 96; frozen holdout rules in section 115.1 |
 | `scripts/kg/` | Product-owned knowledge-graph toolchain | architect | Copied from the framework; `.mcp.json` exposes it over MCP |
 
 Boundary rules:
@@ -161,7 +160,6 @@ The framework defaults cover `engine/**` and `experience/**`. Register these add
 | `neuron/**` excluding test-only subtrees | `runtime_bearing = true` |
 | `neuron/**/migrations/**` | `runtime_bearing = true` and `deployment_config_changed = true` |
 | `ontology/**`, `profiles/**`, `schemas/**`, `knowledge-packs/**` | `runtime_bearing = true` |
-| `integrations/label-studio/**` | `runtime_bearing = true` and `deployment_config_changed = true` |
 | `golden-corpus/**` | `runtime_bearing = true` |
 | `**/brain_security/**`, `**/brain-security/**`, `**/auth/**`, `**/authz/**`, `**/identity/**`, `**/principals/**` | `security_sensitive_scope = true` (Python paths are lowercase; the framework defaults match capitalized names only) |
 
@@ -213,7 +211,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0001-S0001](features/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md) - Not Started
   - [F0001-S0002](features/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md) - Not Started
   - [F0001-S0003](features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md) - Not Started
-  - [F0001-S0004](features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-label-studio-review-round-trip.md) - Not Started
+  - [F0001-S0004](features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md) - Not Started
   - [F0001-S0005](features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) - Not Started
   - [F0001-S0006](features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) - Not Started
   - [F0001-S0007](features/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) - Not Started
@@ -243,7 +241,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0019 — Basic endorsement supersession](features/F0019-basic-endorsement-supersession/README.md) - Planned
 - [F0020 — Minimal graph/temporal query API](features/F0020-minimal-graph-and-temporal-query-api/README.md) - Planned
 - [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned
-- [F0022 — Document 360 + Label Studio evidence review integration + parent/classification and reviewer authority](features/F0022-document-360-and-label-studio-evidence-review/README.md) - Planned
+- [F0022 — Document 360 + native evidence review panel + parent/classification and reviewer authority](features/F0022-document-360-and-native-evidence-review/README.md) - Planned
 - [F0023 — Minimal Entity 360](features/F0023-minimal-entity-360/README.md) - Planned
 - [F0065 — Grounded GL guideline assessment](features/F0065-grounded-gl-guideline-assessment/README.md) - Planned (six stories and draft contracts authored; review and implementation pending)
   - [F0065-S0001](features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md) - Not Started
@@ -257,7 +255,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 
 **v0.1C (Later)**
 
-- [F0026 — v0.1 hardening + Label Studio Golden Corpus workflow + AuthX negative tests and policy parity](features/F0026-v0-1-hardening-golden-corpus-and-authx-tests/README.md) - Planned
+- [F0026 — v0.1 hardening + Golden Corpus workflow + AuthX negative tests and policy parity](features/F0026-v0-1-hardening-golden-corpus-and-authx-tests/README.md) - Planned
 
 **v0.2A (Later)**
 
@@ -328,7 +326,7 @@ Status: the architecture baseline exists in the master blueprint; each subsectio
 
 ### 4.1 Service Boundaries
 
-Eight architectural planes (section 4) implemented as a modular monolith across `engine/` (semantic kernel, commit services, governance, review, search, security), `neuron/` (interpretation, conversation, learning, agent tools), and `experience/` (native semantic UX), with Docling, Docling-Graph, Label Studio, PostgreSQL extensions, and Temporal as engines around the semantic core (ADR-0001, section 100). The deployable topology and dependency matrix are a P0 pre-build requirement (section 106.2).
+Eight architectural planes (section 4) implemented as a modular monolith across `engine/` (semantic kernel, commit services, governance, review, search, security), `neuron/` (interpretation, conversation, learning, agent tools), and `experience/` (native semantic UX, including the Review Panel), with Docling, Docling-Graph, PostgreSQL extensions, and Temporal as engines around the semantic core (ADR-0001 as amended by ADR-0057, sections 100 and 125). The deployable topology and dependency matrix are a P0 pre-build requirement (section 106.2).
 
 ### 4.2 Data Model
 
@@ -344,7 +342,7 @@ Verified `(issuer, subject)` mapped to a stable internal principal; typed resour
 
 ### 4.5 API Contracts
 
-Semantic REST API surface in section 68 (`GET` and `POST` over `/entities`, `/assertions`, `/facts`, `/relationships`, `/documents`, `/content`, `/ontology`, `/search`, `/graph`, `/evidence`, `/history`, `/conversations`, `/learning`, `/reviews`), read-first MCP tools in section 69, and Label Studio webhook contracts under `integrations/label-studio/`. OpenAPI lives in `api/brain-api.yaml` and is authored per feature.
+Semantic REST API surface in section 68 (`GET` and `POST` over `/entities`, `/assertions`, `/facts`, `/relationships`, `/documents`, `/content`, `/ontology`, `/search`, `/graph`, `/evidence`, `/history`, `/conversations`, `/learning`, `/reviews`), and read-first MCP tools in section 69. OpenAPI lives in `api/brain-api.yaml` and is authored per feature.
 
 ### 4.6 Non-Functional Requirements
 
@@ -364,7 +362,7 @@ Performance, availability, scalability, and security targets are proposed gates 
 
 ### 4.8 Open decisions
 
-Section 117.1 lists the decisions the implementation team still owes: source-authority owner, tenant and knowledge-base identity scope, host and extension build, Docling-Graph pin, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18), the Label Studio edition (Community), and the proof model policy (self-hosted); the production host, the Docling-Graph pin, and the corpus source remain open.
+Section 117.1 lists the decisions the implementation team still owes: source-authority owner, tenant and knowledge-base identity scope, host and extension build, Docling-Graph pin, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18) and the proof model policy (self-hosted), and ADR-0057 (2026-09-08) settled the review surface; the production host, the Docling-Graph pin, and the corpus source remain open.
 
 ### 4.9 F0001 Phase B (2026-09-06)
 
@@ -376,7 +374,7 @@ Assembly plan: `features/F0001-repository-and-engineering-foundation/feature-ass
 
 Sequence per master blueprint sections 115.3 and 124; original identifiers F0001 to F0063 are preserved. F0065 is the bounded v0.1 assessment addition; F0064 is repository tooling.
 
-1. Pre-build contract proofs as stories of F0001: parse, reinterpret, and evidence; Label Studio review round trip; bitemporal commit; access and hosting (section 115.4)
+1. Pre-build contract proofs as stories of F0001: parse, reinterpret, and evidence; native review round trip and evidence anchoring; bitemporal commit; access and hosting (section 115.4)
 2. v0.1A — F0002 to F0017: typed domain contracts, durable ingestion, immutable evidence, assertion extraction
 3. v0.1B — F0018 to F0023 establish authorized commits, temporal reads, evidence review, and minimal 360 views; F0065 adds bounded on-demand GL guideline assessment; F0024/F0025 prove real interpretation-to-assessment and temporal reassessment end to end
 4. v0.1C — F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases

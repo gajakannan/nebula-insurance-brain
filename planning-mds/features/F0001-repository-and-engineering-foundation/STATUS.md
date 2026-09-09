@@ -10,7 +10,7 @@
 | F0001-S0001 | Runtime roots and toolchain skeleton | [ ] Not Started |
 | F0001-S0002 | Local runtime containers and dependency matrix | [ ] Not Started |
 | F0001-S0003 | Proof: parse once, reinterpret twice, evidence resolves | [ ] Not Started |
-| F0001-S0004 | Proof: Label Studio review round trip with lineage | [ ] Not Started |
+| F0001-S0004 | Proof: native review round trip with lineage | [ ] Not Started |
 | F0001-S0005 | Proof: bitemporal commit under retroactive and concurrent change | [ ] Not Started |
 | F0001-S0006 | Proof: access boundaries, extension build, and restore | [ ] Not Started |
 | F0001-S0007 | Record proof outcomes and settle the pre-build contracts | [ ] Not Started |
@@ -33,7 +33,7 @@ Cell states: `⬜` not started · `🔄` in progress · `✅` done · `—` not 
 
 - [ ] `engine/` uv workspace, FastAPI skeleton, Alembic, health endpoint
 - [ ] Bitemporal commit proof harness and exclusion constraints
-- [ ] Review round-trip proof harness (ReviewItem, ReviewDecision, webhook persistence)
+- [ ] Review round-trip proof harness (ReviewItem, ReviewBatch, ReviewDecision, decision transaction)
 - [ ] Credential verifier, principal resolver, Casbin adapter proof
 - [ ] Unit tests passing
 - [ ] Integration tests passing
@@ -47,11 +47,14 @@ Cell states: `⬜` not started · `🔄` in progress · `✅` done · `—` not 
 
 ## Frontend Progress
 
-Not in scope (no Nebula UI; F0021 delivers the shell).
+- [ ] `experience/` root and toolchain
+- [ ] Proof-scope Review Panel for S0004: artifact rail, rendered viewport with anchored regions, field list, batch submission (ADR-0057)
+
+The full application shell remains F0021.
 
 ## Cross-Cutting
 
-- [ ] docker-compose with PostgreSQL (pgvector, AGE), object store, Label Studio, authentik
+- [ ] docker-compose with PostgreSQL (pgvector, AGE), object store, authentik
 - [ ] Dependency matrix pinned (`docker/DEPENDENCY-MATRIX.md`)
 - [ ] Backup and restore drill executed and timed
 - [ ] CI product-gates job runs runtime suites
@@ -66,7 +69,7 @@ Set by the Architect at Phase B (plan run `2026-09-06-cdb5d8cb`).
 |------|----------|--------------|--------|------|
 | Quality Engineer | Yes | Acceptance criteria and proof harness coverage | Architect | 2026-09-06 |
 | Code Reviewer | Yes | Independent code quality review | Architect | 2026-09-06 |
-| Security Reviewer | Yes | S0004 and S0006 touch identity, authorization, webhook trust, and secrets | Architect | 2026-09-06 |
+| Security Reviewer | Yes | S0004 and S0006 touch identity, authorization, evidence access, and secrets | Architect | 2026-09-06 |
 | DevOps | Yes | Containers, dependency matrix, CI, restore drill | Architect | 2026-09-06 |
 | Architect | Yes | Proof outcomes settle Proposed ADRs (S0007); G7 binds ten capabilities | Architect | 2026-09-06 |
 

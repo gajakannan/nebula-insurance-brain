@@ -29,9 +29,8 @@ Open this repository directly for Git/source control. The parent `nebula/` is a 
 | `planning-mds/` | Blueprint, features, architecture, ADRs, kg-source, evidence | product-manager, architect |
 | `engine/` | Python backend: FastAPI API, worker, semantic kernel packages, Alembic migrations | backend-developer |
 | `neuron/` | Python AI runtime: Docling ingestion, extraction, interpretation, conversation, learning, MCP tools | ai-engineer |
-| `experience/` | React and TypeScript web app | frontend-developer |
+| `experience/` | React and TypeScript web app, including the Nebula Review Panel | frontend-developer |
 | `ontology/`, `profiles/`, `schemas/`, `knowledge-packs/` | Authored semantic assets compiled into the runtime | architect |
-| `integrations/label-studio/` | Label Studio project templates, task mappers, webhook contracts | backend-developer |
 | `golden-corpus/` | Version-controlled evaluation fixtures | quality-engineer |
 | `scripts/kg/` | Knowledge-graph toolchain (product-owned copy of the framework tooling) | architect |
 
