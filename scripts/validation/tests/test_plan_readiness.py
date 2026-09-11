@@ -16,6 +16,42 @@ validator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(validator)
 
 
+F0001_FOLDER = "planning-mds/features/archive/F0001-repository-and-engineering-foundation"
+
+# A synthetic minimal "Active" feature, independent of any real feature's registry
+# status. F0001 is archived (terminal), so project-scope's active-feature PRD-completeness
+# rule needs a feature that will always be "In Progress" to exercise it; hardcoding a real
+# feature ID here previously broke this suite every time that feature's own lifecycle moved on.
+SYNTHETIC_ACTIVE_ID = "F0999"
+SYNTHETIC_ACTIVE_FOLDER = "planning-mds/features/F0999-synthetic-active-feature"
+
+
+def _add_synthetic_active_feature(root):
+    registry = root / "planning-mds/features/REGISTRY.md"
+    text = registry.read_text()
+    marker = "<!-- generated:begin registry:active -->\n| Feature ID | Name | Status | Phase | Folder |\n|------------|------|--------|-------|--------|\n"
+    row = f"| {SYNTHETIC_ACTIVE_ID} | Synthetic active feature | In Progress | v0.1A | `F0999-synthetic-active-feature/` |\n"
+    assert marker in text, "REGISTRY.md active-table header shape changed; update the test fixture"
+    registry.write_text(text.replace(marker, marker + row, 1))
+
+    folder = root / SYNTHETIC_ACTIVE_FOLDER
+    folder.mkdir(parents=True)
+    (folder / "README.md").write_text("# F0999 - Synthetic active feature\n\nFixture-only feature for plan-readiness tests.\n")
+    (folder / "STATUS.md").write_text("**Overall Status:** In Progress\n")
+    (folder / "PRD.md").write_text(
+        "# F0999 PRD\n\n"
+        "## Feature Statement\nFixture-only feature for plan-readiness tests.\n\n"
+        "## Scope & Boundaries\nTest fixture scope only.\n\n"
+        "## Acceptance Criteria Overview\nN/A — fixture.\n\n"
+        "## Dependencies\nNone.\n"
+    )
+    (folder / "F0999-S0001-synthetic-story.md").write_text(
+        "# F0999-S0001 Synthetic story\n\n"
+        "## User Story\nAs a test, I want a synthetic story.\n\n"
+        "## Acceptance Criteria\n- Fixture resolves.\n"
+    )
+
+
 @pytest.fixture
 def product(tmp_path):
     root = tmp_path / "brain"
@@ -26,9 +62,10 @@ def product(tmp_path):
     # Referenced by F0001-S0004 and the architecture decisions; linked, not read, so a stub resolves it
     # without copying 2 MB of embedded fixture documents into every test's tmp tree.
     (root / "planning-mds/examples/nebula-review-panel-live-files.html").touch()
-    for folder in ["planning-mds/architecture", "planning-mds/security", "planning-mds/features/F0001-repository-and-engineering-foundation"]:
+    for folder in ["planning-mds/architecture", "planning-mds/security", F0001_FOLDER]:
         shutil.copytree(ROOT / folder, root / folder)
     shutil.copy2(ROOT / "planning-mds/features/TRACKER-GOVERNANCE.md", root / "planning-mds/features/TRACKER-GOVERNANCE.md")
+    _add_synthetic_active_feature(root)
     return root
 
 
@@ -46,7 +83,7 @@ def test_valid_plan_with_future_runtime_paths(product, tmp_path):
 
 @pytest.mark.parametrize("mutation,rule", [("empty", "BRAIN-SECTIONS"), ("reference", "BRAIN-REFERENCE"), ("checklist", "BRAIN-CHECKLIST"), ("missing", "BRAIN-ARTIFACT")])
 def test_invalid_inputs_fail(product, mutation, rule):
-    prd = product / "planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md"
+    prd = product / F0001_FOLDER / "PRD.md"
     if mutation == "empty": prd.write_text("")
     if mutation == "reference": prd.write_text(prd.read_text() + "\n[Required planning](missing-plan.md)\n")
     if mutation == "missing": prd.unlink()
@@ -83,12 +120,12 @@ def test_validation_does_not_mutate_plans(product):
 
 
 def test_project_scope_detects_deleted_active_prd(product):
-    (product / "planning-mds/features/F0001-repository-and-engineering-foundation/PRD.md").unlink()
+    (product / SYNTHETIC_ACTIVE_FOLDER / "PRD.md").unlink()
     assert run(product, product, "--plan-scope", "project", "--target", "project")[0] == 1
 
 
 def test_story_planning_reference_must_resolve(product):
-    folder = product / "planning-mds/features/F0001-repository-and-engineering-foundation"
+    folder = product / F0001_FOLDER
     story = next(folder.glob("F0001-S*.md"))
     story.write_text(story.read_text() + "\n[Missing source](missing-plan.md)\n")
     rc, result = run(product, product, "--plan-scope", "feature", "--target", "F0001")

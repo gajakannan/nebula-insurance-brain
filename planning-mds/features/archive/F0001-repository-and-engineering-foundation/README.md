@@ -8,7 +8,7 @@
 
 Stand up the `engine/` and `neuron/` runtime roots with their toolchain and CI, the local dependency stack (PostgreSQL with pgvector and Apache AGE, the local filesystem content-artifact adapter, authentik), and execute the four pre-build contract proofs from master blueprint section 115.4 so their measured results settle the Proposed ADRs before v0.1A begins.
 
-Source: `planning-mds/architecture/master-blueprint.md` sections 106.2, 108, 109, 111.1, 114, 115.4, 117.1. Governing ADRs: [ADR-0001](../../architecture/decisions/ADR-0001-the-brain-owns-semantics.md).
+Source: `planning-mds/architecture/master-blueprint.md` sections 106.2, 108, 109, 111.1, 114, 115.4, 117.1. Governing ADRs: [ADR-0001](../../../architecture/decisions/ADR-0001-the-brain-owns-semantics.md).
 
 ## Documents
 

@@ -14,9 +14,9 @@
 
 ## Context & Background
 
-Master blueprint section 75 defines the v0.1 minimum review path and section 111.1 requires a narrow proof of the review workflow before the review contracts are frozen. [ADR-0057](../../architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md) moved that surface into Nebula on 2026-09-08, superseding ADR-0034: there is no external task, no webhook, and no second identity system, so this proof covers the panel, the anchor resolution behind [ADR-0058](../../architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md), and the decision transaction. ADR-0037 governs correction lineage; proposed ADR-0044 (approval contract) and ADR-0058 (anchoring) are settled by the outcome. Section 125 defines the panel and its honest-failure behavior.
+Master blueprint section 75 defines the v0.1 minimum review path and section 111.1 requires a narrow proof of the review workflow before the review contracts are frozen. [ADR-0057](../../../architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md) moved that surface into Nebula on 2026-09-08, superseding ADR-0034: there is no external task, no webhook, and no second identity system, so this proof covers the panel, the anchor resolution behind [ADR-0058](../../../architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md), and the decision transaction. ADR-0037 governs correction lineage; proposed ADR-0044 (approval contract) and ADR-0058 (anchoring) are settled by the outcome. Section 125 defines the panel and its honest-failure behavior.
 
-The prototype at [`planning-mds/examples/nebula-review-panel-live-files.html`](../../examples/nebula-review-panel-live-files.html) demonstrates the rendering and anchoring approach against real byte streams and is the design input for this story. It is not evidence of the loop: it has no server, no persistence, and no authorization.
+The prototype at [`planning-mds/examples/nebula-review-panel-live-files.html`](../../../examples/nebula-review-panel-live-files.html) demonstrates the rendering and anchoring approach against real byte streams and is the design input for this story. It is not evidence of the loop: it has no server, no persistence, and no authorization.
 
 ## Acceptance Criteria
 
