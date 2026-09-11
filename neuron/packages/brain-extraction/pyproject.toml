@@ -1,0 +1,33 @@
+[project]
+name = "brain-extraction"
+version = "0.1.0"
+description = "Extraction profiles, Docling-Graph adapter, and the context-length guard (F0001-S0003)."
+requires-python = ">=3.13"
+dependencies = [
+  "openai>=1.50",
+  "tiktoken>=0.8",
+  "brain-interpretation",
+  "brain-content",
+]
+
+[tool.uv.sources]
+brain-interpretation = { workspace = true }
+# Path dependency, not a workspace member — see brain-ingestion/pyproject.toml for why
+# (shared content-artifact contract across the engine/ and neuron/ uv workspaces).
+brain-content = { path = "../../../engine/packages/brain-content" }
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

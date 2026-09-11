@@ -1,0 +1,38 @@
+[project]
+name = "brain-persistence"
+version = "0.1.0"
+description = "SQLAlchemy 2 async models and session factory for source/artifact/interpretation persistence (F0001-S0003)."
+requires-python = ">=3.13"
+dependencies = [
+  "sqlalchemy>=2.0.52",
+  "asyncpg>=0.30",
+  "brain-domain",
+  "brain-security",
+  "brain-review",
+  "brain-temporal",
+]
+
+[tool.uv.sources]
+brain-domain = { workspace = true }
+brain-security = { workspace = true }
+brain-review = { workspace = true }
+brain-temporal = { workspace = true }
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pytest-asyncio>=0.24",
+  "aiosqlite>=0.20",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

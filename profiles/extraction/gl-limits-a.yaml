@@ -1,0 +1,19 @@
+# Extraction profile: gl-limits-a (F0001-S0003)
+#
+# The Pydantic template enforced at call time (vLLM structured/guided JSON output)
+# is `brain_extraction.profiles.GLLimitsA` — this file documents scope and intent;
+# it is not parsed at runtime (F0015 introduces a compiled profile format).
+profile_id: gl-limits-a
+profile_version: "1"
+template: brain_extraction.profiles.GLLimitsA
+description: >
+  Extracts the two headline General Liability limits from a CGL declarations page:
+  Each Occurrence Limit and General Aggregate Limit (Other Than Products-Completed
+  Operations). One of the two hand-selected proof profiles (master blueprint 115.4);
+  proves reinterpretation of the same persisted artifact under a second, independent
+  extraction scope (gl-limits-b).
+fields:
+  - name: each_occurrence_limit
+    slot_type: EachOccurrenceLimit
+  - name: general_aggregate_limit
+    slot_type: GeneralAggregateLimit

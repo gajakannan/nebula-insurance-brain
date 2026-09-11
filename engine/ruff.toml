@@ -1,0 +1,17 @@
+target-version = "py313"
+line-length = 100
+src = ["apps", "packages"]
+# Alembic-generated migration bodies are not hand-formatted; don't fight the autogenerator.
+extend-exclude = ["migrations/versions/*.py"]
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+# B008: FastAPI's `Depends(...)` default-argument idiom is the framework's documented
+# dependency-injection pattern, not the mutable-default-argument bug this rule targets.
+ignore = ["B008"]
+
+[lint.isort]
+known-first-party = ["brain_api", "brain_worker"]
+
+[format]
+quote-style = "double"

@@ -2,13 +2,14 @@
 
 ## Status
 
-- [x] Proposed
-- [ ] Accepted
+- [ ] Proposed
+- [x] Accepted (amended — see "Amendment: selector shape" below)
 - [ ] Superseded
 - [ ] Rejected
 
 **Date:** 2026-09-08
-**Deciders:** Pending; becomes Accepted only when the stated proofs, owners, and release gates are satisfied (master blueprint section 106 decision posture)
+**Settled:** 2026-09-10 (F0001-S0007), from F0001-S0003/S0004's live proof runs on 2026-09-09
+**Deciders:** Architect (record owner); backend-developer, ai-engineer, and frontend-developer executed the proof
 **Settled by:** F0001-S0003 (evidence resolves) and F0001-S0004 (native review round trip); results recorded by F0001-S0007
 **Source:** Master blueprint sections 108.2, 111, 125; prototype `planning-mds/examples/nebula-review-panel-live-files.html`
 
@@ -55,26 +56,76 @@ The prototype resolved this against real files in four formats. Its findings are
 
 ## Proofs required
 
-| Proof | Owner | Release gate | Recorded result |
+| Proof | Owner | Release gate | Recorded result (F0001-S0007, 2026-09-10) |
 |---|---|---|---|
-| A locator round-trips through interpretation, storage, and the panel for each of the four formats | Document intelligence engineer | F0001-S0003 | Not executed |
-| Quote recovery after a deliberate coordinate drift; the panel re-anchors from the quote | Frontend + QA | F0001-S0004 | Not executed |
-| A page-level ground renders as page-level and never as a tight box | Frontend + QA | F0001-S0004 | Not executed |
-| An unresolvable locator produces `BLOCKED` / `EVIDENCE_UNRESOLVED` and no assertion | Backend + QA | F0001-S0004 | Not executed |
-| A statement of values with banner rows above the header resolves through the stored header row | Document intelligence engineer | F0001-S0003 | Not executed |
-| Code-point offsets survive the UTF-16 boundary in both directions | Frontend + backend | F0001-S0004 | Not executed |
-| A rotated or scanned page with no text layer declares its precision honestly | Document intelligence engineer | F0001-S0003 | Not executed |
+| A locator round-trips through interpretation, storage, and the panel for each of the four formats | Document intelligence engineer | F0001-S0003 | **Partially executed.** PDF only (native and, per a manual check, scanned/OCR — see ADR-0040's Results). No WordprocessingML, SpreadsheetML, or delimited-text fixture exists in this feature; `fflate` (the OOXML/zip dependency) is declared but unexercised. Deferred to whichever future story adds a DOCX/XLSX fixture (`STATUS.md` Deferred Non-Blocking Follow-ups, S0004 row). |
+| Quote recovery after a deliberate coordinate drift; the panel re-anchors from the quote | Frontend + QA | F0001-S0004 | **Not executed.** No test in `experience/src/review-panel/__tests__/` exercises a coordinate-drift/quote-recovery scenario. Open — see Amendment below. |
+| A page-level ground renders as page-level and never as a tight box | Frontend + QA | F0001-S0004 | **Executed.** `Viewport.test.tsx::"shows a page-level banner instead of a tight box when precision is not exact"`. |
+| An unresolvable locator produces `BLOCKED` / `EVIDENCE_UNRESOLVED` and no assertion | Backend + QA | F0001-S0004 | **Executed.** `FieldList.test.tsx::"offers only a blocked action, no accept/correct, when evidence is unresolved"`; backend enforcement in `brain_review.decisions.UnresolvedEvidenceRequiresBlocked` (ADR-0044's Results). |
+| A statement of values with banner rows above the header resolves through the stored header row | Document intelligence engineer | F0001-S0003 | **Not executed.** No spreadsheet fixture exists in this feature (same OOXML gap as row 1). |
+| Code-point offsets survive the UTF-16 boundary in both directions | Frontend + backend | F0001-S0004 | **Not executed.** The Review Panel's current `Viewport.tsx` renders bbox-region overlays only; it does not read or convert `char_start`/`char_end` at all, so there is no UTF-16 boundary being exercised yet in the panel. `char_start`/`char_end` are stored as Docling's native code-point `charspan` on the backend (`brain-ingestion`'s `bundle_writer.py`), which is the storage half of this decision; the panel-side conversion is not yet built. |
+| A rotated or scanned page with no text layer declares its precision honestly | Document intelligence engineer | F0001-S0003 | **Not executed as stated.** The scanned fixture used in this feature has a recoverable text layer via OCR (see ADR-0040 Results) and never reaches the "no text layer at all" case this proof describes; no fixture exercises that case. |
+
+## Amendment: selector shape (2026-09-10, F0001-S0007)
+
+Point 1 of the Proposed decision specifies the W3C Web Annotation selector
+model (`FragmentSelector`/`TextQuoteSelector`/`RangeSelector`/`XPathSelector`/
+`nebula:TableCellSelector`), redundant by design (a positional selector plus a
+textual recovery selector). **What F0001-S0003/S0004 actually built and proved
+is narrower:** `brain_review.evidence.evidence_binding_to_locator()` produces a
+single `nebula:BoxSelector` — page, optional `x0`/`y0`/`x1`/`y1` bbox fields,
+and optional `char_start`/`char_end` — with no redundant textual selector and
+no W3C selector vocabulary at all.
+
+This is a real, deliberate scope narrowing recorded here rather than silently
+carried forward as if the original model had been built:
+
+- What the simpler model *does* prove: precision is declared honestly per
+  binding (point 4), `unresolved` blocks the decision rather than degrading it
+  (point 5), a page-level ground never renders as a tight box, and anchoring
+  authority is server-side (the locator is produced during interpretation, the
+  panel only renders it) — all genuinely proven, per the table above.
+- What it does *not* yet prove: recovery when the stored positional selector
+  drifts from the current rendering (no `TextQuoteSelector` exists to recover
+  from), the OOXML `RangeSelector`/`XPathSelector`/`nebula:TableCellSelector`
+  shapes (no OOXML fixture exists at all), and the UTF-16/code-point
+  round-trip at the panel boundary (the panel doesn't read character offsets
+  yet).
+
+**Decision on the amendment:** v0.1A ships with `nebula:BoxSelector` as the
+accepted evidence-locator shape — it is sufficient for the PDF-only proof
+corpus this feature actually has, and building the full redundant W3C model
+now, untested against real DOCX/XLSX fixtures, would be speculative
+complexity. The full model described in point 1 is retained here as a
+**proposed future enhancement**, not a v0.1A requirement — it should be
+revisited by whichever feature first adds a non-PDF evidence fixture (OOXML
+ingestion) or a renderer-upgrade/quote-recovery requirement, at which point
+this ADR should be revised again (or a successor ADR opened) rather than
+silently reinterpreted.
 
 ## Consequences
 
-- Until accepted, implementation treats master blueprint sections 108.2 and 125 as requirements to prove, not as settled contracts.
-- Acceptance requires recording the executed proofs, the owner, and the release gate in this record (F0001-S0007).
-- The `ReviewDecision` schema and the evidence portion of `InterpretationResult` are bound by this record; changing a selector shape is an ADR change, not a schema tweak.
+- Master blueprint sections 108.2 and 125 are satisfied for the PDF-only,
+  `nebula:BoxSelector` scope actually built; the multi-format, redundant-selector
+  ambition in the original point 1 remains open, tracked above, not silently
+  dropped.
+- The `ReviewDecision` schema and the evidence portion of `InterpretationResult`
+  are bound by this record as amended; changing the selector shape again is an
+  ADR change, not a schema tweak.
+- `EvidenceLocatorPrecision` (review-layer: `exact-span`/`table-cell`/`block`/
+  `page`/`document`/`unresolved`) and `InterpretationPrecision`
+  (interpretation-layer: `span`/`table_cell`/`block`/`page`/`unresolved`) are
+  two deliberately distinct, related vocabularies, bridged explicitly by
+  `brain_review.evidence.evidence_binding_to_locator()` — not a naming
+  inconsistency to unify.
 
 ## References
 
 - Master blueprint sections 108.2 (evidence precision), 111, 125
-- [ADR-0057](ADR-0057-nebula-owns-the-native-evidence-review-panel.md), [ADR-0037](ADR-0037-human-corrections-append-they-do-not-rewrite-evidence.md), [ADR-0040](ADR-0040-lossless-content-and-evidence-contract.md)
+- [ADR-0057](ADR-0057-nebula-owns-the-native-evidence-review-panel.md), [ADR-0037](ADR-0037-human-corrections-append-they-do-not-rewrite-evidence.md), [ADR-0040](ADR-0040-lossless-content-and-evidence-contract.md), [ADR-0044](ADR-0044-review-surface-and-approval-contract.md)
 - Prototype: [`planning-mds/examples/nebula-review-panel-live-files.html`](../../examples/nebula-review-panel-live-files.html)
 - W3C Web Annotation Data Model, Selectors and States: https://www.w3.org/TR/annotation-model/#selectors
 - W3C Media Fragments URI 1.0: https://www.w3.org/TR/media-frags/
+- `engine/packages/brain-review/src/brain_review/evidence.py` (`evidence_binding_to_locator`, the actual `nebula:BoxSelector` shape)
+- `experience/src/review-panel/__tests__/Viewport.test.tsx`, `FieldList.test.tsx`
+- `planning-mds/features/F0001-repository-and-engineering-foundation/STATUS.md` (Deferred Non-Blocking Follow-ups)

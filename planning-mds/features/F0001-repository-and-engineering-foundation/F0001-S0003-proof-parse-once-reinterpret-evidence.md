@@ -83,7 +83,7 @@ N/A — proof harness driven by tests and a CLI; no user-facing mutation.
 
 **Depends On:**
 - F0001-S0001 — `neuron/` workspace
-- F0001-S0002 — object store and PostgreSQL
+- F0001-S0002 — local filesystem content-artifact store and PostgreSQL
 
 **Related Stories:**
 - F0001-S0004 — consumes a low-confidence assertion from this proof

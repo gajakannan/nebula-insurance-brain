@@ -8,7 +8,7 @@
 - [ ] Rejected
 
 **Date:** 2026-09-06
-**Amended:** 2026-09-08 by [ADR-0057](ADR-0057-nebula-owns-the-native-evidence-review-panel.md) — see Consequences
+**Amended:** 2026-09-08 by [ADR-0057](ADR-0057-nebula-owns-the-native-evidence-review-panel.md) and [ADR-0059](ADR-0059-provider-neutral-content-artifact-storage.md) — see Consequences
 **Deciders:** Operator (layout, 2026-09-05), Architect (topology, F0001 Phase B)
 **Source:** BLUEPRINT sections 2.2 to 2.4; master blueprint sections 77, 114.3; F0001 plan run `2026-09-06-cdb5d8cb`
 
@@ -28,7 +28,7 @@ The master blueprint's original section 77 used an `apps/` plus `packages/` mono
 1. Runtime roots: `engine/` (FastAPI API under `apps/api`, worker under `apps/worker`, kernel packages under `packages/brain-*`, Alembic under `migrations/`), `neuron/` (AI runtime packages `brain-ingestion`, `brain-extraction`, `brain-interpretation`, later reasoning, conversation, learning, evolution, agent-tools), `experience/` (React, from F0021). Import packages use the `brain_` prefix.
 2. One uv workspace per Python root with its own committed lockfile; `requires-python >= 3.13`.
 3. Authored semantic assets stay top-level: `ontology/`, `profiles/`, `schemas/` (runtime), `knowledge-packs/`, `integrations/label-studio/`, `golden-corpus/`. Design-time shared JSON Schemas live in `planning-mds/schemas/`.
-4. Local topology: Docker Compose runs PostgreSQL 18 (built with pgvector, Apache AGE, btree_gist), MinIO as the S3-compatible content store, Label Studio Community, and authentik; the vLLM inference service runs on the host GPU outside Compose (ADR-0055). The API and worker run from the uv workspaces during development and as containers in CI.
+4. Local topology: Docker Compose runs PostgreSQL 18 (built with pgvector, Apache AGE, btree_gist) and authentik; the API, worker, and `neuron/` use the local filesystem content-artifact adapter rooted at the committed `config/local.yaml` path. The vLLM inference service runs on the host GPU outside Compose (ADR-0055). The API and worker run from the uv workspaces during development and as containers in CI, with the artifact root mounted/shared when containerized.
 5. `docker/DEPENDENCY-MATRIX.md` pins every component with the source it was verified against; `latest` tags are rejected by CI.
 
 ASCII companion of the container view (Mermaid in `planning-mds/architecture/c4-container.md`):
@@ -44,7 +44,7 @@ ASCII companion of the container view (Mermaid in `planning-mds/architecture/c4-
         │ SQLAlchemy / asyncpg            ▲
         ▼                                 │ chunk text only
  ┌────────────────────── docker compose ──┴──────────────────────┐
- │ postgres:18 (+vector,+age,+btree_gist)     minio        authentik      │
+ │ postgres:18 (+vector,+age,+btree_gist)                  authentik      │
  └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -57,13 +57,14 @@ ASCII companion of the container view (Mermaid in `planning-mds/architecture/c4-
 ## Consequences
 
 - **Amendment, 2026-09-08 (ADR-0057).** Decision points 3 and 4 change: the `integrations/label-studio/` asset tree is removed, and the Compose stack no longer runs a Label Studio service. `experience/` gains the Nebula Review Panel, which F0022 depends on, so the React root is no longer entirely deferred to F0021. `engine/packages/brain-review-labelstudio/` is dropped; `engine/packages/brain-review/` keeps the whole review boundary. The runtime roots, workspace rules, and dependency-matrix requirement are unchanged.
+- **Amendment, 2026-09-08 (ADR-0059).** The local content-store service is not a container dependency. F0001 uses `LocalFilesystemObjectStore` behind the `ContentArtifactStore` port, with non-secret defaults in committed `config/local.yaml` and runtime bytes under the ignored `./content/` directory. Future S3, Azure Blob, GCS, or other adapters are composition-root choices and are not implemented by this decision.
 - Framework role ownership maps cleanly: backend-developer owns `engine/`, ai-engineer owns `neuron/`, frontend-developer owns `experience/`.
 - Path-class extensions are required for `neuron/`, the asset trees, and lowercase security packages (registered at init).
 - The inference service is a documented host prerequisite, not a container; CI runs S0003 against a recorded fixture when no GPU is present, and the live proof runs on the developer host.
 
 ## Security & Compliance Notes
 
-- Secrets never live in the repository; `.env.example` documents variables and a gitignored secrets file supplies values.
+- Secrets never live in the repository. Committed `config/local.yaml` supplies non-secret local storage defaults; secret-bearing integrations use a platform secret source when implemented.
 - authentik binds to localhost in the default Compose configuration.
 
 ## References

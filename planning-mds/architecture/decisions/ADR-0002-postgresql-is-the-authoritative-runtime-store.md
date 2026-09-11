@@ -33,6 +33,7 @@ Baseline architecture decision carried verbatim from the master blueprint. The s
 
 - Accepted as a baseline decision on 2026-09-05. Change it only through a superseding ADR that links back here; never edit the decision text in place.
 - Implementation features that depend on this decision cite `adr:0002` in their kg-source shards.
+- [ADR-0059](ADR-0059-provider-neutral-content-artifact-storage.md) clarifies the boundary: PostgreSQL remains authoritative for semantic and artifact metadata, while original source and content-artifact bytes are accessed through the provider-neutral content-storage ports.
 
 ## References
 

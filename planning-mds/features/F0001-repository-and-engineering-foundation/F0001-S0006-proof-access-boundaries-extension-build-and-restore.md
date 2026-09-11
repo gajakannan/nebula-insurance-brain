@@ -59,7 +59,7 @@ N/A — proof harness driven by tests; no user-facing mutation of business data.
 - `membership`: principal id, tenant, knowledge base, role, grant revision
 - Casbin model and policy files under `planning-mds/security/policies/` covering the proof's resources and actions
 - `audit_event` for authorization decisions with policy hash, grant revision, actor, resource, action, decision, reason code, trace id
-- Backup manifest: database dump, object store snapshot, timestamps
+- Backup manifest: database dump, local content-root snapshot, timestamps
 
 **Optional Fields:**
 - Delegation record for the worker service principal
@@ -90,7 +90,7 @@ N/A — proof harness driven by tests; no user-facing mutation of business data.
 
 **Depends On:**
 - F0001-S0001 — engine skeleton
-- F0001-S0002 — authentik, PostgreSQL, object store
+- F0001-S0002 — authentik, PostgreSQL, local content-artifact store
 
 **Related Stories:**
 - F0001-S0004 — reviewer principal binding

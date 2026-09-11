@@ -1,0 +1,87 @@
+# Local dependency stack (F0001-S0002, ADR-0054). PostgreSQL 18 with pgvector/AGE and
+# authentik. The content-artifact store is a local filesystem directory (config/local.yaml),
+# not a service. vLLM runs on the host GPU outside Compose — see docker/local-inference-runbook.md.
+#
+# Port note: authentik is remapped off its stock 9000/9443 because this host may already run
+# nebula-insurance-crm's own authentik instance on those ports (F0001-G1 preflight finding).
+# Override any port with a gitignored docker-compose.override.yml.
+services:
+  postgres:
+    build: docker/postgres
+    image: brain-postgres:18-pgvector-age
+    container_name: brain-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: brain
+      POSTGRES_PASSWORD: brain
+      POSTGRES_DB: brain
+    ports:
+      - "5432:5432"
+    volumes:
+      # PostgreSQL 18's official image manages data in major-version-specific
+      # subdirectories (pg_ctlcluster-style) and requires the mount at
+      # /var/lib/postgresql itself, not the old /var/lib/postgresql/data.
+      - brain-postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brain"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  authentik-server:
+    image: authentik/server:2026.2.0
+    container_name: brain-authentik-server
+    command: server
+    restart: unless-stopped
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__USER: brain
+      AUTHENTIK_POSTGRESQL__PASSWORD: brain
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+      AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD}
+    volumes:
+      # Mount into /blueprints/custom — authentik scans /blueprints/** recursively, so
+      # built-in flows (default/, system/) are preserved alongside our custom blueprint.
+      - ./docker/authentik/blueprints:/blueprints/custom:ro
+    ports:
+      - "9010:9000"
+      - "9444:9443"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - >-
+          python -c "import urllib.request;
+          urllib.request.urlopen('http://localhost:9000/-/health/live/', timeout=2).read()"
+      # Fresh-volume boot runs authentik migrations before gunicorn is ready; without a
+      # grace period Docker marks the container unhealthy before it settles.
+      start_period: 5m
+      interval: 10s
+      timeout: 5s
+      retries: 18
+
+  authentik-worker:
+    image: authentik/server:2026.2.0
+    container_name: brain-authentik-worker
+    command: worker
+    restart: unless-stopped
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__USER: brain
+      AUTHENTIK_POSTGRESQL__PASSWORD: brain
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+      AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD}
+    volumes:
+      - ./docker/authentik/blueprints:/blueprints/custom:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  brain-postgres-data:

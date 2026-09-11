@@ -6,7 +6,7 @@
 
 ## Overview
 
-Stand up the `engine/` and `neuron/` runtime roots with their toolchain and CI, the local dependency stack (PostgreSQL with pgvector and Apache AGE, object storage, authentik), and execute the four pre-build contract proofs from master blueprint section 115.4 so their measured results settle the Proposed ADRs before v0.1A begins.
+Stand up the `engine/` and `neuron/` runtime roots with their toolchain and CI, the local dependency stack (PostgreSQL with pgvector and Apache AGE, the local filesystem content-artifact adapter, authentik), and execute the four pre-build contract proofs from master blueprint section 115.4 so their measured results settle the Proposed ADRs before v0.1A begins.
 
 Source: `planning-mds/architecture/master-blueprint.md` sections 106.2, 108, 109, 111.1, 114, 115.4, 117.1. Governing ADRs: [ADR-0001](../../architecture/decisions/ADR-0001-the-brain-owns-semantics.md).
 
@@ -41,7 +41,7 @@ Source: `planning-mds/architecture/master-blueprint.md` sections 106.2, 108, 109
 
 ### Key Findings
 
-- The proofs need real contracts to be testable, so Phase B authored the first OpenAPI document, six JSON Schemas, and the Casbin model and policy for the proof scope rather than deferring them to the feature action.
+- The proofs need real contracts to be testable, so Phase B authored the first OpenAPI document, six JSON Schemas, the Casbin model and policy for the proof scope, and the provider-neutral content-artifact storage decision rather than deferring them to the feature action.
 - S0006 must precede S0004 and S0005: the reviewer binding and the commit actor both need verified principals. Build order in the plan reflects this.
 - Phi-4-mini-instruct's 4,096-token context is the one open technical risk; it is enforced client-side and measured as a recorded result rather than assumed.
 - No existing code; the knowledge graph gains ten capabilities, ten entities, three workflows, six endpoints, six schemas, three roles, and five policy rules, with code bindings deferred to feature G7.
@@ -56,7 +56,7 @@ Source: `planning-mds/architecture/master-blueprint.md` sections 106.2, 108, 109
 | Casbin policy | Created `planning-mds/security/policies/{model.conf,policy.csv}` |
 | JSON schemas | Created six under `planning-mds/schemas/` |
 | C4 diagrams | `architecture/c4-context.md` and `c4-container.md` created; ASCII companion in ADR-0054 |
-| ADRs | ADR-0054 and ADR-0055 created; settlement lines added to ADR-0040, 0041, 0044, 0049, 0050 |
+| ADRs | ADR-0054, ADR-0055, and ADR-0059 created; settlement lines added to ADR-0040, 0041, 0044, 0049, 0050 |
 | Assembly plan | [`feature-assembly-plan.md`](./feature-assembly-plan.md) |
 
 ### Feature ERD (proof scope)

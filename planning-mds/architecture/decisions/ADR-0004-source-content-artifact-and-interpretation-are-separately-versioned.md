@@ -36,6 +36,7 @@ Source v1
 
 - Accepted as a baseline decision on 2026-09-05. Change it only through a superseding ADR that links back here; never edit the decision text in place.
 - Implementation features that depend on this decision cite `adr:0004` in their kg-source shards.
+- [ADR-0059](ADR-0059-provider-neutral-content-artifact-storage.md) defines the provider-neutral storage ports used by the source and content-artifact identities.
 
 ## References
 

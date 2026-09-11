@@ -11,7 +11,7 @@ F0001 creates the `engine/` and `neuron/` runtime roots, the local dependency st
 
 ## Governing Decisions
 
-- Runtime roots and topology: `engine/` (API, worker, kernel packages), `neuron/` (AI runtime), `experience/` (proof-scope Review Panel here; the full shell is F0021); one uv workspace per Python root; modular monolith of API plus worker over PostgreSQL 18, MinIO, authentik, and a host-GPU vLLM service (ADR-0054 as amended by ADR-0057, BLUEPRINT 2.3).
+- Runtime roots and topology: `engine/` (API, worker, kernel packages), `neuron/` (AI runtime), `experience/` (proof-scope Review Panel here; the full shell is F0021); one uv workspace per Python root; modular monolith of API plus worker over PostgreSQL 18 and authentik, with `LocalFilesystemObjectStore` behind the content-artifact ports and a host-GPU vLLM service (ADR-0054 as amended by ADR-0057 and ADR-0059, BLUEPRINT 2.3).
 - Local inference profile: `microsoft/Phi-4-mini-instruct` on vLLM as an OpenAI-compatible service with a 4,096-token context and bearer auth, outside Compose, aligned with the CRM's ADR-035; context enforced client-side; no PII or tokens to the model server (ADR-0055).
 - Parse once with a lossless bundle including `docling-document.json`; evidence precision declared per binding; failed pages are partial, never negative (ADR-0003, ADR-0004, proposed ADR-0040 settled by S0003).
 - Two-range bitemporal commit with a multi-column GiST exclusion constraint, facts plus audit plus outbox in one transaction, idempotent projector (ADR-0007, ADR-0008, ADR-0009, proposed ADR-0041 settled by S0005).
@@ -26,7 +26,7 @@ F0001 creates the `engine/` and `neuron/` runtime roots, the local dependency st
 | Step | Scope | Stories | Rationale |
 |------|-------|---------|-----------|
 | 1 | Runtime roots, workspaces, API skeleton, health endpoint, CI | S0001 | Everything else needs a place to live and a gate to pass |
-| 2 | Compose stack, PostgreSQL 18 image with pgvector and AGE, MinIO, authentik, inference runbook, dependency matrix | S0002 | Every proof runs on this stack |
+| 2 | Compose stack, PostgreSQL 18 image with pgvector and AGE, authentik, local filesystem artifact store, inference runbook, dependency matrix | S0002 | Every proof runs on this stack |
 | 3 | Identity and authorization core: credential verifier, principal resolver, Casbin adapter, authorization audit, protected resource reads | S0006 (access part) | S0004 needs verified reviewer principals; S0005 needs an authorized actor |
 | 4 | Content artifact bundle, Docling adapter, Docling-Graph adapter, interpretation runs, counters | S0003 | Produces the assertion S0004 reviews and the evidence S0006 restores |
 | 5 | FactSlot, canonical fact versions, commit service, outbox, projector stub | S0005 | Independent of review; needed before the restore drill |
@@ -47,7 +47,7 @@ None. `engine/`, `neuron/`, `docker/`, and `docker-compose.yml` do not exist. `p
 | `engine/apps/worker/src/brain_worker/{__init__,main,outbox_projector}.py` | Worker | Ingestion job runner (Step 4) and idempotent outbox projector stub (Step 5) |
 | `engine/packages/brain-domain/src/brain_domain/{principal,content,assertion,review,facts,audit,errors}.py` | Domain | Frozen dataclasses and enums shared by every package; no I/O |
 | `engine/packages/brain-persistence/src/brain_persistence/{base,models,session,repositories}.py`, `engine/migrations/` | Infrastructure | SQLAlchemy 2 async models, Alembic environment, migrations 0001 to 0004 |
-| `engine/packages/brain-content/src/brain_content/{manifest,store,object_store}.py` | Infrastructure | Artifact manifest model, `ContentArtifactStore` port, MinIO adapter |
+| `engine/packages/brain-content/src/brain_content/{manifest,store,object_store}.py` | Infrastructure | Artifact manifest model, `ContentArtifactStore` and object-store ports, local filesystem adapter |
 | `engine/packages/brain-security/src/brain_security/{verification,principals,authorization,audit,casbin_adapter}.py` | Application | Credential verifier, principal resolver, Casbin adapter, decision audit |
 | `engine/packages/brain-temporal/src/brain_temporal/{commit,ranges,outbox}.py` | Application | Bitemporal commit algorithm, range helpers, outbox writer |
 | `engine/packages/brain-review/src/brain_review/{items,batches,decisions}.py` | Application | ReviewItem routing, review batch assembly, ReviewDecision persistence and idempotency |
@@ -58,7 +58,7 @@ None. `engine/`, `neuron/`, `docker/`, and `docker-compose.yml` do not exist. `p
 | `neuron/packages/brain-extraction/src/brain_extraction/{profiles,docling_graph_adapter,context_guard}.py` | AI | Extraction profiles, Docling-Graph OpenAI-compatible backend, context enforcement |
 | `neuron/packages/brain-interpretation/src/brain_interpretation/{result,runs,counters}.py` | AI | InterpretationResult model, run recording, conversion and OCR counters |
 | `neuron/tests/{unit,integration,evaluation}/` | Tests | pytest suites for Step 4 |
-| `docker-compose.yml`, `docker/postgres/Dockerfile`, `docker/postgres/init/*.sql`, `docker/authentik/`, `.env.example` | Runtime | Dependency stack (Step 2) |
+| `docker-compose.yml`, `docker/postgres/Dockerfile`, `docker/postgres/init/*.sql`, `docker/authentik/`, `config/local.yaml` | Runtime | Dependency stack and committed local artifact-store configuration (Step 2) |
 | `docker/DEPENDENCY-MATRIX.md`, `docker/local-inference-runbook.md` | Runtime docs | Pinned matrix; vLLM runbook adapted from the CRM |
 | `planning-mds/api/brain-api.yaml` | Contract | OpenAPI 3.1 for `/health`, protected reads, review decisions, commit (authored in this plan run) |
 | `planning-mds/schemas/*.schema.json` | Contract | Manifest, interpretation result, review decision, commit request and response, problem details (authored in this plan run) |
@@ -136,14 +136,14 @@ N/A — read-only.
 
 | File | Change |
 |------|--------|
-| `docker-compose.yml` | services `postgres` (built from `docker/postgres/Dockerfile`: PostgreSQL 18 base, `pgvector`, `age` compiled and `CREATE EXTENSION` in init SQL, `btree_gist`), `objectstore` (MinIO, bucket `content` created by an init job), `authentik` (server, worker, its own PostgreSQL and Redis per the CRM pattern), healthchecks on all |
+| `docker-compose.yml` | services `postgres` (built from `docker/postgres/Dockerfile`: PostgreSQL 18 base, `pgvector`, `age` compiled and `CREATE EXTENSION` in init SQL, `btree_gist`) and `authentik` (server, worker, its own PostgreSQL and Redis per the CRM pattern), healthchecks on all; the local artifact store is a filesystem directory, not a service |
 | `docker/local-inference-runbook.md` | vLLM on the host GPU: Python 3.12 venv, `vllm` pinned, `--model microsoft/Phi-4-mini-instruct --dtype auto --max-model-len 4096 --gpu-memory-utilization 0.90 --port 8000 --api-key $BRAIN_INFERENCE_API_KEY`; WSL2 flags `VLLM_WSL2_ENABLE_PIN_MEMORY=1`, `VLLM_USE_FLASHINFER_SAMPLER=0`; secrets from `~/.brain-secrets` (0600) |
-| `docker/DEPENDENCY-MATRIX.md` | Python, PostgreSQL 18.x, AGE build, pgvector, btree_gist, Docling, Docling-Graph, Node and the `experience/` toolchain, `pdf.js`, `fflate`, authentik, MinIO, vLLM, model id and Hugging Face revision, context length; each row cites its verification source |
-| `.env.example` | `BRAIN_DATABASE_URL`, `BRAIN_OBJECT_STORE_ENDPOINT`, `BRAIN_OBJECT_STORE_ACCESS_KEY`, `BRAIN_OBJECT_STORE_SECRET_KEY`, `BRAIN_OBJECT_STORE_BUCKET`, `BRAIN_OIDC_ISSUER`, `BRAIN_OIDC_AUDIENCE`, `BRAIN_INFERENCE_BASE_URL`, `BRAIN_INFERENCE_MODEL`, `BRAIN_INFERENCE_API_KEY_ENV`, `BRAIN_INFERENCE_CONTEXT_LIMIT=4096` |
+| `config/local.yaml` | committed non-secret local configuration: `filesystem` provider, `./content` root, and immutable writes; no storage environment variables |
+| `docker/DEPENDENCY-MATRIX.md` | Python, PostgreSQL 18.x, AGE build, pgvector, btree_gist, Docling, Docling-Graph, Node and the `experience/` toolchain, `pdf.js`, `fflate`, authentik, vLLM, model id and Hugging Face revision, context length; each row cites its verification source |
 
 ### Logic Flow
 
-`docker compose up -d` → postgres init runs `CREATE EXTENSION IF NOT EXISTS vector; ... age; ... btree_gist;` → MinIO init job creates `content` → authentik healthy → `scripts/dev/seed_principals.py` provisions two tenants, two users, one service client in authentik (Step 3 consumes them).
+`docker compose up -d` → postgres init runs `CREATE EXTENSION IF NOT EXISTS vector; ... age; ... btree_gist;` → authentik healthy → the factory loads `config/local.yaml` and creates/validates `./content/` → `scripts/dev/seed_principals.py` provisions two tenants, two users, one service client in authentik (Step 3 consumes them).
 
 ### Edge cases resolved here
 
@@ -265,7 +265,7 @@ N/A — read-only endpoints; the audit event is a system record, not a user muta
 | File | Layer |
 |------|-------|
 | `engine/packages/brain-content/src/brain_content/manifest.py` | Contract (pydantic) |
-| `engine/packages/brain-content/src/brain_content/store.py`, `object_store.py` | Port and MinIO adapter |
+| `engine/packages/brain-content/src/brain_content/store.py`, `object_store.py` | `ContentArtifactStore` and object-store ports plus local filesystem adapter |
 | `engine/migrations/versions/0002_content_and_interpretation.py` | `source_document`, `document_version`, `content_artifact`, `semantic_interpretation_run`, `assertion`, `assertion_evidence` |
 | `neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py`, `bundle_writer.py` | AI |
 | `neuron/packages/brain-extraction/src/brain_extraction/profiles.py`, `docling_graph_adapter.py`, `context_guard.py` | AI |
@@ -494,8 +494,8 @@ class ReviewDecisionService:
 
 ## Step 7 — Restore drill, revocation, DAST (S0006, hosting part)
 
-- `scripts/ops/backup.sh`: `pg_dump` (custom format) plus MinIO `content` bucket mirror plus `docker/DEPENDENCY-MATRIX.md` snapshot into one timestamped directory with a manifest of sha256s.
-- `scripts/ops/restore.sh`: fresh Compose project name → restore database → mirror bucket → run `scripts/ops/verify_citations.py` (every S0003 evidence binding resolves to a block in the restored artifact) → print measured restore duration.
+- `scripts/ops/backup.sh`: `pg_dump` (custom format) plus a content-root snapshot from `config/local.yaml` plus `docker/DEPENDENCY-MATRIX.md` snapshot into one timestamped directory with a manifest of sha256s.
+- `scripts/ops/restore.sh`: fresh Compose project/configuration → restore database → restore the local content root → run `scripts/ops/verify_citations.py` (every S0003 evidence binding resolves to a block in the restored artifact) → print measured restore duration.
 - Revocation: `scripts/dev/revoke_membership.py` advances `grant_revision` and sets `revoked_at`; `test_revocation_propagation.py` polls until denied and records the elapsed time (JWKS and membership caches bounded by `BRAIN_GRANT_CACHE_SECONDS`, default 30).
 - DAST: ZAP baseline against the API in Compose; dependency, secrets, and SAST scans via the framework security scripts; outputs under the feature run's `artifacts/security/`.
 
@@ -583,7 +583,7 @@ Step 8 (Architect):   ADR results, matrix, blueprint updates
 | Story | Criterion | Test |
 |-------|-----------|------|
 | S0001 | `uv sync`, `/health` 200 with sha and versions, ruff and mypy clean, CI runs suites | `engine/tests/unit/test_health.py`; CI job |
-| S0002 | Stack healthy, extensions created, object round trip, model listed, matrix pinned, no `latest` tags | `engine/tests/integration/test_stack_health.py`; `scripts/dev/check_pins.py` |
+| S0002 | Stack healthy, extensions created, filesystem object round trip through the storage port, model listed, matrix pinned, no `latest` tags | `engine/tests/integration/test_stack_health.py`; `scripts/dev/check_pins.py` |
 | S0003 | Bundle files and manifest; zero conversion on second run; binding precision; partial page; invalid model output | `neuron/tests/integration/test_parse_once_reinterpret.py`; `neuron/tests/unit/test_context_guard.py` |
 | S0004 | Batch rendered and anchored; decision with lineage; original preserved; resubmission; stale; unresolved evidence blocked; annotate cannot commit | `engine/tests/integration/test_review_round_trip.py`; `engine/tests/security/test_review_authority.py`; `experience/tests/review-panel/anchors.spec.ts` |
 | S0005 | Four-coordinate matrix; correction split; concurrency; transactional outbox; separate timestamps | `engine/tests/integration/test_bitemporal_commit.py`, `test_commit_concurrency.py`, `test_outbox_replay.py` |
@@ -593,7 +593,7 @@ Step 8 (Architect):   ADR results, matrix, blueprint updates
 ## Security and Runtime Evidence
 
 - `security_sensitive_scope = true` (Steps 3, 6, 7): Security Reviewer required; scan classes dependency, secrets, SAST, and DAST all apply because the API listens on a port in Compose.
-- No secret in the repository; `.env.example` only; the inference key lives in `~/.brain-secrets` (0600) or CI secrets.
+- `config/local.yaml` is committed and contains only non-secret local storage defaults. No storage environment variable is required; the inference key lives in `~/.brain-secrets` (0600) or CI secrets.
 - The model server receives chunk text only; never a user token, principal id, or tenant identifier.
 - Authorization denials never disclose existence; reason codes live in `audit_event` only.
 
@@ -633,7 +633,7 @@ snake_case keys (the single exception is the ProblemDetails `traceId` extension 
 
 ## DI Registration Changes
 
-`brain_api.app.create_app()` builds `Settings` from environment, then the adapters (`OidcJwksVerifier`, `PrincipalResolver`, `CasbinAuthorizationService`, `MinioContentArtifactStore`, `CanonicalCommitService`, `ReviewDecisionService`) and exposes them through FastAPI dependencies in `brain_api.deps`. The worker (`brain_worker.main`) builds the same `Settings` and only the ingestion runner and outbox projector.
+`brain_api.app.create_app()` loads the committed non-secret `config/local.yaml` as the default local configuration, then the adapters (`OidcJwksVerifier`, `PrincipalResolver`, `CasbinAuthorizationService`, `LocalFilesystemObjectStore`, `CanonicalCommitService`, `ReviewDecisionService`) and exposes them through FastAPI dependencies in `brain_api.deps`. The worker (`brain_worker.main`) loads the same configuration and only the ingestion runner and outbox projector. Future cloud adapters are selected by the same composition-root factory and are not part of F0001.
 
 ## Casbin Policy Sync
 
