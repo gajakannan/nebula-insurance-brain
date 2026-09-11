@@ -1,0 +1,60 @@
+bindings:
+- id: capability:runtime-roots-and-toolchain
+  paths:
+    backend:
+    - engine/apps/api/src/brain_api/app.py
+    - engine/apps/api/src/brain_api/health.py
+    - engine/apps/api/src/brain_api/errors.py
+    - engine/pyproject.toml
+    - neuron/pyproject.toml
+- id: capability:local-dependency-stack
+  paths:
+    infra:
+    - docker-compose.yml
+    - docker/postgres/**
+    - docker/DEPENDENCY-MATRIX.md
+- id: capability:local-inference-service
+  paths:
+    infra:
+    - docker/local-inference-runbook.md
+    ai:
+    - neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
+- id: capability:parse-once-content-artifact
+  paths:
+    ai:
+    - neuron/packages/brain-ingestion/src/**
+    backend:
+    - engine/packages/brain-content/src/**
+- id: capability:semantic-interpretation-run
+  paths:
+    ai:
+    - neuron/packages/brain-extraction/src/**
+    - neuron/packages/brain-interpretation/src/**
+- id: capability:evidence-review-round-trip
+  paths:
+    backend:
+    - engine/packages/brain-review/src/**
+    frontend:
+    - experience/src/review-panel/**
+- id: capability:bitemporal-canonical-commit
+  paths:
+    backend:
+    - engine/packages/brain-temporal/src/**
+    - engine/migrations/versions/0003_fact_slots_and_commits.py
+- id: capability:credential-verification-and-principal-resolution
+  paths:
+    backend:
+    - engine/packages/brain-security/src/brain_security/verification.py
+    - engine/packages/brain-security/src/brain_security/principals.py
+- id: capability:authorization-enforcement
+  paths:
+    backend:
+    - engine/packages/brain-security/src/brain_security/authorization.py
+    - engine/packages/brain-security/src/brain_security/casbin_adapter.py
+    - engine/packages/brain-security/src/brain_security/audit.py
+    infra:
+    - planning-mds/security/policies/**
+- id: capability:backup-and-restore
+  paths:
+    infra:
+    - scripts/ops/**

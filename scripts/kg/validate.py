@@ -28,6 +28,7 @@ from kg_common import (
     iter_feature_dirs,
     load_bundle,
     normalize_repo_path,
+    tracked_files,
     type_regex_map,
 )
 from hotspots import compute_hotspots
@@ -175,6 +176,7 @@ def validate_rationale_entry(
 def iter_existing_files(paths: Iterable[str]) -> list[Path]:
     files: list[Path] = []
     seen: set[str] = set()
+    tracked = tracked_files()
 
     for value in paths:
         normalized = normalize_repo_path(value)
@@ -186,7 +188,7 @@ def iter_existing_files(paths: Iterable[str]) -> list[Path]:
             nested = sorted(path for path in candidate.rglob("*") if path.is_file())
             for path in nested:
                 rel = path.relative_to(REPO_ROOT).as_posix()
-                if rel not in seen:
+                if rel not in seen and rel in tracked:
                     seen.add(rel)
                     files.append(path)
             continue

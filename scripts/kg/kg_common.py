@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import fnmatch
+import glob
 import json
 import math
 import os
 import re
+import subprocess
 import sys
 import uuid
 from datetime import UTC, datetime
@@ -135,13 +137,45 @@ def has_wildcards(pattern: str) -> bool:
     return bool(WILDCARD_RE.search(pattern))
 
 
+_TRACKED_FILES_CACHE: set[str] | None = None
+
+
+def tracked_files() -> set[str]:
+    """Git-tracked file paths (repo-relative, POSIX). Wildcard bindings are
+    filtered against this set so untracked local build artifacts
+    (.egg-info, __pycache__, *.pyc, etc.) never affect what a binding glob
+    resolves to -- those differ machine to machine and would otherwise make
+    coverage-report.yaml and the symbol/decision indexes non-reproducible."""
+    global _TRACKED_FILES_CACHE
+    if _TRACKED_FILES_CACHE is None:
+        result = subprocess.run(
+            ["git", "ls-files"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        _TRACKED_FILES_CACHE = set(result.stdout.splitlines())
+    return _TRACKED_FILES_CACHE
+
+
 def expand_declared_pattern(pattern: str) -> list[str]:
     normalized = normalize_repo_path(pattern)
     if has_wildcards(normalized):
+        # `glob.glob(..., recursive=True)` is used instead of
+        # `pathlib.Path.glob()`: the recursion depth of a trailing "/**"
+        # component differs between Python versions under pathlib (observed
+        # Python 3.12 stopping one level short of Python 3.14's full
+        # recursion), which would make binding resolution -- and therefore
+        # coverage-report.yaml -- depend on the interpreter running it. The
+        # `glob` module's `recursive=True` has been consistently fully
+        # recursive since Python 3.5.
+        tracked = tracked_files()
+        matches = glob.glob(str(REPO_ROOT / normalized), recursive=True)
         return sorted(
-            repo_relative(path)
-            for path in REPO_ROOT.glob(normalized)
-            if path.exists()
+            rel
+            for match in matches
+            if (rel := repo_relative(Path(match))) in tracked
         )
 
     candidate = REPO_ROOT / normalized
