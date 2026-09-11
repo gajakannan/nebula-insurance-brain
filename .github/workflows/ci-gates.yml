@@ -59,8 +59,9 @@ jobs:
       - name: engine/ — mypy
         working-directory: engine
         run: >
-          uv run mypy apps/api/src packages/brain-content/src packages/brain-persistence/src
-          packages/brain-domain/src packages/brain-security/src packages/brain-review/src
+          uv run mypy apps/api/src apps/worker/src packages/brain-content/src
+          packages/brain-persistence/src packages/brain-domain/src packages/brain-security/src
+          packages/brain-review/src packages/brain-temporal/src
       - name: engine/ — pytest, all packages (>=80% coverage each, checked per-package below)
         working-directory: engine
         run: uv run pytest -q
@@ -86,6 +87,9 @@ jobs:
       - name: engine/ — pytest brain_review coverage gate (>=80%)
         working-directory: engine
         run: uv run pytest packages/brain-review/tests --cov=brain_review --cov-fail-under=80
+      - name: engine/ — pytest brain_temporal coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-temporal/tests --cov=brain_temporal --cov-fail-under=80
       - name: neuron/ — sync
         working-directory: neuron
         run: uv sync
