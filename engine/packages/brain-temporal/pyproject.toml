@@ -1,0 +1,32 @@
+[project]
+name = "brain-temporal"
+version = "0.1.0"
+description = "Bitemporal commit algorithm, range helpers, and the outbox writer (F0001-S0005)."
+requires-python = ">=3.13"
+dependencies = [
+  "brain-domain",
+]
+
+[tool.uv.sources]
+brain-domain = { workspace = true }
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pytest-asyncio>=0.24",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+brain_temporal = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

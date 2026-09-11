@@ -1,0 +1,25 @@
+[project]
+name = "brain-domain"
+version = "0.1.0"
+description = "Frozen dataclasses and enums shared by application packages; no I/O (F0001-S0006/S0004)."
+requires-python = ">=3.13"
+dependencies = []
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+brain_domain = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

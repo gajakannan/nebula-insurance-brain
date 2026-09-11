@@ -161,7 +161,10 @@ manifest JSON
     versions / hashes / parser metadata
 ```
 
-Original source binary is retained separately.
+Original source binary is retained separately through the provider-neutral `ContentArtifactStore` port. The initial
+implementation is `LocalFilesystemObjectStore`, configured by committed `config/local.yaml` and writing runtime
+bytes below the ignored `./content/` directory. PostgreSQL stores the authoritative artifact metadata and lifecycle
+state; future S3, Azure Blob, GCS, or other adapters can satisfy the same storage port.
 
 ## Bounded v0.1B assessment records (F0065)
 

@@ -1,0 +1,133 @@
+# authentik Blueprint — Nebula Insurance Brain dev setup (F0001-S0002)
+# Provisions: OAuth2 provider + application, two tenant-scoped principals (S0006's
+# access-boundary proof), and one service-client principal.
+
+version: 1
+metadata:
+  name: Nebula Brain Dev Blueprint
+  labels:
+    blueprints.goauthentik.io/description: "Nebula Insurance Brain development identity configuration"
+
+entries:
+  - model: authentik_providers_oauth2.scopemapping
+    id: brain-tenant-id-mapping
+    identifiers:
+      managed: nebula-brain.dev/providers/oauth2/scope-tenant-id
+    attrs:
+      name: "Brain Tenant ID"
+      managed: nebula-brain.dev/providers/oauth2/scope-tenant-id
+      scope_name: tenant_id
+      description: "Emits the user's tenant_id attribute as a JWT claim"
+      expression: |
+        tenant_id = request.user.attributes.get("tenant_id")
+        return {"tenant_id": tenant_id} if tenant_id else {}
+
+  - model: authentik_providers_oauth2.oauth2provider
+    id: brain-provider
+    identifiers:
+      client_id: brain
+    attrs:
+      name: brain
+      client_id: brain
+      client_type: public
+      authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+      authentication_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+      invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+      redirect_uris:
+        - url: "http://localhost:8100/auth/callback"
+          matching_mode: strict
+      signing_key: !Find
+        - authentik_crypto.certificatekeypair
+        - [name, authentik Self-signed Certificate]
+      property_mappings:
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-openid]]
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-email]]
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-profile]]
+        - !Find [authentik_providers_oauth2.scopemapping, [managed, goauthentik.io/providers/oauth2/scope-offline_access]]
+        - !KeyOf brain-tenant-id-mapping
+      sub_mode: user_username
+      access_token_validity: minutes=5
+      refresh_token_validity: days=30
+      include_claims_in_id_token: true
+
+  - model: authentik_core.application
+    id: brain-app
+    identifiers:
+      slug: brain
+    attrs:
+      name: Nebula Insurance Brain
+      slug: brain
+      provider: !KeyOf brain-provider
+
+  # F0001-S0006: two principals in two tenants for the access-boundary proof.
+  - model: authentik_core.user
+    identifiers:
+      username: alice.tenant-a
+    attrs:
+      username: alice.tenant-a
+      name: Alice (Tenant A)
+      email: alice@tenant-a.brain.local
+      is_active: true
+      password: "devpassword"
+      attributes:
+        tenant_id: "tenant-a"
+
+  - model: authentik_core.user
+    identifiers:
+      username: bob.tenant-b
+    attrs:
+      username: bob.tenant-b
+      name: Bob (Tenant B)
+      email: bob@tenant-b.brain.local
+      is_active: true
+      password: "devpassword"
+      attributes:
+        tenant_id: "tenant-b"
+
+  # F0001-S0002/S0006: one service-client principal (machine-to-machine caller;
+  # no interactive login). Casbin authorization treats it like any other verified
+  # principal — it carries no tenant_id, matching a cross-tenant service role.
+  - model: authentik_core.user
+    identifiers:
+      username: brain-service
+    attrs:
+      username: brain-service
+      name: Brain Service Client
+      email: brain-service@brain.local
+      is_active: true
+      password: "devpassword"
+      attributes:
+        principal_type: "service"
+
+  - model: authentik_core.token
+    identifiers:
+      identifier: alice-tenant-a-app-password
+    attrs:
+      identifier: alice-tenant-a-app-password
+      key: "brain-dev-token"
+      user: !Find [authentik_core.user, [username, alice.tenant-a]]
+      intent: app_password
+      expiring: false
+      description: "Dev ROPC token for alice.tenant-a"
+
+  - model: authentik_core.token
+    identifiers:
+      identifier: bob-tenant-b-app-password
+    attrs:
+      identifier: bob-tenant-b-app-password
+      key: "brain-dev-token"
+      user: !Find [authentik_core.user, [username, bob.tenant-b]]
+      intent: app_password
+      expiring: false
+      description: "Dev ROPC token for bob.tenant-b"
+
+  - model: authentik_core.token
+    identifiers:
+      identifier: brain-service-app-password
+    attrs:
+      identifier: brain-service-app-password
+      key: "brain-dev-token"
+      user: !Find [authentik_core.user, [username, brain-service]]
+      intent: app_password
+      expiring: false
+      description: "Dev token for the brain-service machine principal"

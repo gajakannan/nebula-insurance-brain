@@ -3,7 +3,14 @@
 # Job 1 runs the product-local gates declared in lifecycle-stage.yaml for the current
 # lifecycle stage; it needs only this repo. Job 2 runs the framework-owned planning
 # validators (trackers, feature evidence) against this repo with the sibling framework
-# checked out at the commit pinned in planning-mds/BLUEPRINT.md section 0.
+# checked out at the commit pinned in planning-mds/BLUEPRINT.md section 0. Job 3 runs the
+# engine/ and neuron/ uv-workspace runtime suites (ruff, mypy, pytest+coverage) added at
+# F0001-S0001; it uses Python 3.13 (the runtime roots' own `requires-python`), distinct
+# from the 3.12 used by the planning tooling in job 1. Job 4 (added F0001-S0002) builds and
+# boots the local dependency stack (PostgreSQL 18 + pgvector/AGE, authentik) as an ephemeral
+# CI stack and verifies it end to end. Job 5 (added F0001-S0004) builds and tests the
+# proof-scope experience/ Review Panel (tsc, eslint, vitest, vite build) — the full
+# frontend toolchain (theme lint, Playwright, Lighthouse) is F0021's, not this job's.
 # The knowledge-graph reproducibility gate lives in kg-reproducibility.yml.
 name: CI Gates (Stage-Scoped)
 
@@ -31,6 +38,151 @@ jobs:
         run: python3 scripts/run-lifecycle-gates.py --list
       - name: Run required gates for the current lifecycle stage
         run: python3 scripts/run-lifecycle-gates.py
+
+  runtime-suites:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.11.31"
+      - name: engine/ — sync
+        working-directory: engine
+        run: uv sync
+      - name: engine/ — ruff check
+        working-directory: engine
+        run: uv run ruff check .
+      - name: engine/ — ruff format --check
+        working-directory: engine
+        run: uv run ruff format --check .
+      - name: engine/ — mypy
+        working-directory: engine
+        run: >
+          uv run mypy apps/api/src packages/brain-content/src packages/brain-persistence/src
+          packages/brain-domain/src packages/brain-security/src packages/brain-review/src
+      - name: engine/ — pytest, all packages (>=80% coverage each, checked per-package below)
+        working-directory: engine
+        run: uv run pytest -q
+      - name: engine/ — pytest brain_api coverage gate (>=80%)
+        working-directory: engine
+        run: >
+          uv run pytest apps/api/tests --cov=brain_api --cov-report=term-missing
+          --cov-report=xml:coverage/coverage.xml --cov-fail-under=80
+      - name: engine/ — pytest brain_content coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-content/tests --cov=brain_content --cov-fail-under=80
+      - name: engine/ — pytest brain_persistence coverage gate (>=80%)
+        working-directory: engine
+        run: >
+          uv run pytest packages/brain-persistence/tests --cov=brain_persistence
+          --cov-fail-under=80
+      - name: engine/ — pytest brain_domain coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-domain/tests --cov=brain_domain --cov-fail-under=80
+      - name: engine/ — pytest brain_security coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-security/tests --cov=brain_security --cov-fail-under=80
+      - name: engine/ — pytest brain_review coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-review/tests --cov=brain_review --cov-fail-under=80
+      - name: neuron/ — sync
+        working-directory: neuron
+        run: uv sync
+      - name: neuron/ — ruff check
+        working-directory: neuron
+        run: uv run ruff check .
+      - name: neuron/ — ruff format --check
+        working-directory: neuron
+        run: uv run ruff format --check .
+      - name: neuron/ — mypy
+        working-directory: neuron
+        run: uv run mypy
+      - name: neuron/ — pytest
+        working-directory: neuron
+        run: uv run pytest -q
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-coverage
+          path: |
+            engine/coverage/coverage.xml
+          if-no-files-found: ignore
+
+  runtime-stack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check every image reference is pinned (no `latest`, no bare tag)
+        run: python3 scripts/dev/check_pins.py
+      - name: Validate docker-compose.yml
+        run: docker compose config -q
+      - name: Build the postgres image (pgvector + AGE from source)
+        run: docker compose build postgres
+      - name: Prepare non-secret CI env
+        run: |
+          python3 -c "import secrets; print('AUTHENTIK_SECRET_KEY=' + secrets.token_urlsafe(50))" > .env
+          echo "AUTHENTIK_BOOTSTRAP_PASSWORD=ci-$(python3 -c 'import secrets; print(secrets.token_hex(8))')" >> .env
+      - name: Start the stack
+        run: docker compose up -d
+      - name: Wait for postgres and authentik to report healthy (<=120s)
+        run: |
+          for _ in $(seq 1 24); do
+            pg="$(docker inspect --format '{{.State.Health.Status}}' brain-postgres 2>/dev/null)"
+            ak="$(docker inspect --format '{{.State.Health.Status}}' brain-authentik-server 2>/dev/null)"
+            echo "postgres=$pg authentik=$ak"
+            if [[ "$pg" == "healthy" && "$ak" == "healthy" ]]; then exit 0; fi
+            sleep 5
+          done
+          echo "::error::stack did not become healthy in time"
+          docker compose logs
+          exit 1
+      - name: Verify extensions (vector, age, btree_gist)
+        run: |
+          docker exec brain-postgres psql -U brain -d brain -c "\dx" | tee /tmp/extensions.txt
+          grep -q vector /tmp/extensions.txt
+          grep -q age /tmp/extensions.txt
+          grep -q btree_gist /tmp/extensions.txt
+      - name: Verify OIDC discovery is served
+        run: curl -sf http://localhost:9010/application/o/brain/.well-known/openid-configuration >/dev/null
+      - name: Verify the two seeded tenant principals and the service client (retries the
+          blueprint-application race documented in GETTING-STARTED)
+        run: |
+          for _ in $(seq 1 6); do
+            if python3 scripts/dev/seed_principals.py --base-url http://localhost:9010; then exit 0; fi
+            sleep 10
+          done
+          exit 1
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
+
+  experience:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "11"
+      - name: experience/ — install
+        working-directory: experience
+        run: pnpm install --frozen-lockfile
+      - name: experience/ — typecheck
+        working-directory: experience
+        run: pnpm exec tsc -b
+      - name: experience/ — lint
+        working-directory: experience
+        run: pnpm exec eslint .
+      - name: experience/ — test
+        working-directory: experience
+        run: pnpm exec vitest run
+      - name: experience/ — build
+        working-directory: experience
+        run: pnpm exec vite build
 
   framework-validators:
     runs-on: ubuntu-latest

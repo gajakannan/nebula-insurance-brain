@@ -78,7 +78,7 @@ N/A — infrastructure story; no user-facing mutation of business data.
 ## Non-Functional Expectations
 
 - Performance: the CI product-gates job completes within 10 minutes on the default GitHub-hosted runner; cold `uv sync` per workspace completes within 5 minutes
-- Security: no secrets in the repository; `.env.example` only
+- Security: no secrets in the repository; committed local configuration contains non-secret defaults only, and future secret-bearing integrations use external secret management
 - Reliability: CI is deterministic across two consecutive runs on the same commit
 
 ## Dependencies

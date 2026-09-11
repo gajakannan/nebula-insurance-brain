@@ -199,6 +199,18 @@ Apache AGE provides graph storage/query capability inside PostgreSQL and openCyp
 
 pgvector provides exact and approximate vector retrieval. Vectors are retrieval projections, not truth.
 
+## Content artifact storage
+
+PostgreSQL remains authoritative for semantic state, artifact metadata, hashes, permissions, evidence bindings,
+interpretation runs, review records, and canonical facts. Original source bytes and immutable parse-once artifact
+bundles are retained through the provider-neutral `ContentArtifactStore` port rather than being coupled to a database
+or vendor SDK.
+
+The initial implementation is `LocalFilesystemObjectStore`, configured by the committed `config/local.yaml` and
+writing runtime state below the ignored `./content/` directory. Future `S3ObjectStore`, `AzureBlobObjectStore`, or
+other adapters may satisfy the same port. The application depends on the artifact contract, not on MinIO, S3, Azure,
+or filesystem paths.
+
 ## Direct specialist dependencies
 
 ```text
@@ -427,7 +439,10 @@ Recommended artifact layout:
           manifest.json
 ```
 
-The exact object store is replaceable. The artifact contract is not.
+The exact object-store provider is replaceable. The artifact contract is not. `ContentArtifactStore` owns artifact
+identity, bundle layout, manifest validation, immutability, and checksums; a lower-level provider-neutral object-store
+port owns byte operations. The initial adapter is local filesystem storage, selected at the composition root from
+`config/local.yaml`. No storage environment variable is required for the local profile.
 
 ## Semantic interpretation may happen many times
 
@@ -3245,6 +3260,12 @@ Coverage
 
 **Decision (proposed):** Evidence locators are W3C Web Annotation selectors with a declared `nebula:TableCellSelector` extension, positions in Unicode code points, precision declared including `unresolved`, and unresolved evidence blocking the decision rather than degrading it. See section 125 and [the record](decisions/ADR-0058-evidence-anchoring-and-selector-contract.md).
 
+## ADR-0059 — Provider-Neutral Content Artifact Storage
+
+**Decision:** Content artifacts use a provider-neutral `ContentArtifactStore` port over a lower-level object-store
+port. v0.1 implements only `LocalFilesystemObjectStore`, configured by the committed `config/local.yaml`; future S3,
+Azure Blob, GCS, or other adapters are wired at the composition root. See [the record](decisions/ADR-0059-provider-neutral-content-artifact-storage.md).
+
 ## ADR-0037 — Human Corrections Append; They Do Not Rewrite Evidence
 
 **Decision:** A correction produces a durable review decision and, when appropriate, a new assertion or canonical version linked to the prior assertion. Original source artifacts and original machine interpretations remain historically inspectable.
@@ -3332,6 +3353,11 @@ knowledge-packs/
     okf/
 
 golden-corpus/                    # version-controlled regression fixtures exported from Nebula review decisions (section 96)
+
+config/                            # committed non-secret local runtime configuration
+    local.yaml                    # default filesystem content-artifact store profile
+
+content/                           # ignored local artifact bytes; never committed
 
 scripts/
     kg/                           # knowledge-graph toolchain (product-owned copy of the framework tooling)
@@ -3505,6 +3531,10 @@ manifest JSON
 ```
 
 Original source binary is retained separately.
+
+The initial local profile stores the source binary and artifact files under the configured filesystem root. The root is
+runtime state, not version-controlled corpus content. A future cloud adapter may map the same logical keys to an S3,
+Azure Blob, GCS, or other object-store namespace without changing artifact consumers.
 
 ---
 
@@ -4885,7 +4915,10 @@ Evolution jobs need an impact preview, bounded scope, deduplication, priority, b
 
 ## 114.3 Define deployment and recovery early
 
-Start with a modular monolith: API, worker, and web application, plus PostgreSQL and object storage. Treat the package list as code boundaries, not 25 independently deployed services. Keep parser/model workers separately resource-controlled where required.
+Start with a modular monolith: API, worker, and web application, plus PostgreSQL and the content-artifact storage
+port. The v0.1 local profile implements that port with a filesystem directory; treat the package list as code
+boundaries, not 25 independently deployed services. Keep parser/model workers separately resource-controlled where
+required.
 
 Specify a tested dependency matrix: exact Python/runtime build, Docling and Docling-Graph commits/releases, model weights, PostgreSQL major/minor, AGE build, pgvector, and the pinned `pdf.js` and `fflate` versions the Review Panel renders with. PostgreSQL 18 is not inherently ruled out by AGE: the official download page lists a PG18 release. Select and test an exact combination instead of relying on generic compatibility claims. [R4]
 
@@ -4980,18 +5013,18 @@ The following ADR IDs are reserved suggestions, all with **status: Proposed**. T
 | --- | --- | --- |
 | 0, 5, 94 | Indefinite evidence retention versus future forgetting | Authorized retention, holds, deletion, and restore behavior |
 | 6 | “Deterministic” parsing overstates a model-backed pipeline guarantee | Immutable versioned artifact; execution reproducibility metadata |
-| 14 | Received time appears to stand in for accepted recorded time | Separate receipt, assertion, and canonical acceptance timestamps |
+| 14 | Received time appears to stand in for accepted recorded time | **Reconciled at F0001-S0005/S0007 (2026-09-10):** `canonical_fact_version` stores `source_received_at`, `artifact_created_at`, `assertion_created_at`, and `canonical_accepted_at` as four distinct columns; `recorded`'s lower bound equals `canonical_accepted_at` specifically, never one of the other three (ADR-0041, accepted) |
 | 13, 15 | Scalar overlap rule versus multivalued slots | Explicit member identity and relationship temporal rules |
-| 47–49 | Projection consistency and historical topology are unspecified | Commit/outbox contract and time-aware relationship traversal |
+| 47–49 | Projection consistency and historical topology are unspecified | **Partially reconciled at F0001-S0005/S0007 (2026-09-10):** the commit/outbox contract itself is settled (one transaction writes the fact version, lineage, audit, and outbox rows together; a killed worker's replay processes each outbox event exactly once — ADR-0041, accepted). Time-aware *relationship* (graph) traversal is not yet built — no graph projection exists in this feature; F0033/F0034 own it |
 | 53 | Stable identifiers lack namespace/term qualification | Scoped identifiers and collision handling |
 | 65 | Tenant/KB ownership leaves shared entity identity unresolved | Explicit identity scope and authorized KB membership |
-| 75 | Human annotation can be read as canonical approval | Separate annotation, adjudication, and business authority |
+| 75 | Human annotation can be read as canonical approval | **Reconciled at F0001-S0004/S0007 (2026-09-10):** the Casbin policy grants `Reviewer` the `review:annotate` action but never `fact_slot:commit`, which only `ServicePrincipal` holds — a Review Panel decision cannot itself write canonical truth, structurally, not just by convention (ADR-0044, accepted). The review-decision-to-canonical-commit wiring itself is F0002's integration |
 | 3, 75, 96, 100, 111 | Label Studio named as the adjudication engine | Native Review Panel; ADR-0034 superseded by ADR-0057 (section 125) |
-| 80–81 | Native DoclingDocument is missing from the bundle | Persist native JSON and explicit evidence adapter mappings |
+| 80–81 | Native DoclingDocument is missing from the bundle | **Reconciled at F0001-S0003/S0007 (2026-09-10):** `docling-document.json` is one of the six persisted bundle files, and every extracted value carries a declared evidence precision (`span`/`block`/`page`/`unresolved`), never a fabricated location (ADR-0040, accepted). The evidence *locator* shape itself is narrower than originally proposed (ADR-0058, amended) — see that record |
 | 89, 92 | Full governance delayed while initial writes already occur | Baseline authorization and audit in v0.1 |
 | 90 | v0.2 combines too many large capabilities | Split retrieval/chat delivery from ontology/learning workbenches |
 | 96–97 | Broad small corpus and metrics without release targets | Narrow frozen slice, representative challenge set, measured thresholds |
-| 104 | Docling-Graph dependency is not precisely identified | Pin the selected implementation, release/commit, and adapter contract |
+| 104 | Docling-Graph dependency is not precisely identified | **Reconciled at F0001-S0003/S0007 (2026-09-10):** not pinned, because not used. Live testing found `docling-graph`'s public API always reconverts its source and has no path to accept an already-parsed `DoclingDocument`, conflicting with the parse-once requirement (section 6, ADR-0003). Semantic/structured extraction instead calls the OpenAI-compatible vLLM endpoint directly (ADR-0040, accepted). See `docker/DEPENDENCY-MATRIX.md`'s "ADR-0040 input" section for the full finding |
 
 # 117. Sources and Remaining Decisions
 
@@ -5257,8 +5290,8 @@ The .NET integration suite, browser session flow, actual IdP, PostgreSQL deploym
 
 | ADR | Status | Proposed decision |
 | --- | --- | --- |
-| ADR-0049 — Shared Identity and Verified Principal Boundary | Proposed | authentik default; verified `(iss, sub)` maps to stable internal principal for all Brain/companion storage access |
-| ADR-0050 — Native Policy Evaluation and Resource Scope | Proposed | Casbin adapter plus typed scopes and parent/classification constraints; policy parity across runtimes |
+| ADR-0049 — Shared Identity and Verified Principal Boundary | Accepted (F0001-S0006/S0007, 2026-09-10; scoped — see the ADR's Scope note) | authentik default; verified `(iss, sub)` maps to stable internal principal for all Brain/companion storage access |
+| ADR-0050 — Native Policy Evaluation and Resource Scope | Accepted (F0001-S0006/S0007, 2026-09-10; scoped — see the ADR's Scope note) | Casbin adapter plus typed scopes and parent/classification constraints; policy parity across runtimes |
 | ADR-0051 — Browser Session and Revocation Contract | Proposed | Prefer same-origin BFF with server-held tokens; resolve SPA/cookie design drift before implementation |
 | ADR-0052 — Delegated Agents and Review Authority | Proposed | Bounded acting-user/service grants; reviewer identity verification; all canonical writes through authorized commits |
 | ADR-0053 — Permission-Safe Retrieval and Historical Access | Proposed | Current grants across all projections/derivatives; historical business queries cannot reinstate access |

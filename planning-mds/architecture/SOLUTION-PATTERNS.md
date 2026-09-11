@@ -122,7 +122,7 @@ GET /facts/8b2c…?validAsOf=2026-07-01T00:00:00Z&knownAsOf=2026-06-05T00:00:00Z
 - Stack context: Python packages under `engine/packages/` and `neuron/packages/`
 
 ### Decision
-- Layer boundaries: `brain_domain` (frozen dataclasses, enums, invariants, no I/O) → application packages (`brain_security`, `brain_temporal`, `brain_review`, `brain_content` ports) → infrastructure adapters (`brain_persistence`, MinIO adapter) → `brain_api` and `brain_worker`.
+- Layer boundaries: `brain_domain` (frozen dataclasses, enums, invariants, no I/O) → application packages (`brain_security`, `brain_temporal`, `brain_review`, `brain_content` ports) → infrastructure adapters (`brain_persistence`, local filesystem content adapter) → `brain_api` and `brain_worker`.
 - Dependency direction: inward only; adapters implement `Protocol` ports declared in application packages; `brain_api` wires them in `create_app()`.
 - `neuron/` mirrors the split: `brain_interpretation` (models, ports) → `brain_ingestion` and `brain_extraction` (adapters over Docling, Docling-Graph, vLLM).
 
@@ -272,7 +272,7 @@ Commit: proposed -> authorized -> committed -> projected
 ### Decision
 - Observability defaults: structured logs with `trace_id`, principal id, resource ids, model id, token counts, latency, and status; never full prompts, full model responses, fixture text, or PII (section 114.2).
 - Error handling standard: typed `BrainError(code)` hierarchy mapped to ProblemDetails; no stack traces in responses.
-- Configuration strategy: environment variables prefixed `BRAIN_`, documented in `.env.example`; secrets referenced by `*_ENV` names and sourced from a gitignored file or CI secrets.
+- Configuration strategy: committed, non-secret local defaults live in `config/local.yaml`; the composition root loads that file without requiring storage environment variables. Deployment-specific overrides and secrets remain outside the repository and are introduced only where a future integration requires them.
 
 ### Rationale
 - Sections 110.4, 114.2; ADR-0055 client conventions.
@@ -300,7 +300,7 @@ Commit: proposed -> authorized -> committed -> projected
 ### Decision
 - Container strategy: Compose for the local stack with pinned tags or digests; the PostgreSQL image is built from `docker/postgres/Dockerfile`; the inference service runs on the host per the runbook (ADR-0054, ADR-0055).
 - Environment promotion model: local Compose now; the production host is an open decision settled by F0026 (section 117.1).
-- Secrets handling: never in the repository; `.env.example` documents names only.
+- Secrets handling: never in the repository; committed local configuration contains no credentials. Future deployment integrations use platform secret management.
 
 ### Rationale
 - Sections 114.3, 117.1; ADR-0054.

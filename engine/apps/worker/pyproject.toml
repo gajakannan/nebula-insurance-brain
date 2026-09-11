@@ -1,0 +1,38 @@
+[project]
+name = "brain-worker"
+version = "0.1.0"
+description = "Outbox projector worker (F0001-S0005): records processed events; no graph or vector projection yet."
+requires-python = ">=3.13"
+dependencies = [
+  "sqlalchemy>=2.0.52",
+  "asyncpg>=0.30",
+  "brain-temporal",
+  "brain-persistence",
+]
+
+[tool.uv.sources]
+brain-temporal = { workspace = true }
+brain-persistence = { workspace = true }
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pytest-asyncio>=0.24",
+  "aiosqlite>=0.20",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+brain_worker = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--import-mode=importlib"

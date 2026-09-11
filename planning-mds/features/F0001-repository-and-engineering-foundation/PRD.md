@@ -31,7 +31,7 @@
 
 **In Scope:**
 - `engine/` and `neuron/` runtime roots with a uv workspace, a FastAPI application skeleton with a health endpoint, Alembic, lint, type-check, and test configuration, and CI wiring (S0001)
-- Local containers for PostgreSQL with pgvector and Apache AGE, an S3-compatible object store for content artifacts, and authentik, plus a pinned dependency matrix (S0002)
+- Local containers for PostgreSQL with pgvector and Apache AGE and authentik, plus the committed local filesystem content-artifact store configuration and pinned dependency matrix (S0002)
 - Proof 1: parse once with Docling, reinterpret with two profiles through Docling-Graph, evidence resolves (S0003)
 - Proof 2: native review round trip with duplicate and stale submissions rejected, unresolved evidence blocked, and lineage preserved (S0004)
 - Proof 3: bitemporal commit under retroactive and concurrent change (S0005)
@@ -105,13 +105,13 @@ Limited to the proof-scope Review Panel in S0004: an artifact rail, a rendered v
 - Risk: Docling-Graph's grounding precision differs across extraction modes; mitigation is to record precision per binding rather than assume span level (section 108.2).
 - Risk: Phi-4-mini-instruct's 4,096-token context was validated by the CRM for short structured calls, not for document chunks; mitigation is client-side context enforcement and a recorded adequacy result in ADR-0040, with an alternative backend proposed at Phase B if needed.
 - Decided at the clarification gate (2026-09-06), amended 2026-09-08 by ADR-0057 (native Review Panel replaces Label Studio): PostgreSQL 18 with fallback to 17 only on AGE build failure; the extraction model is `microsoft/Phi-4-mini-instruct` served by vLLM on the host GPU, the profile the CRM validated in its ADR-035 (verified: the CRM runs Phi, not Mistral; Ollama is an unwired seam there); proofs run in local Docker Compose with the inference service on the host.
-- Deferred to the Architect at Phase B: object store choice (MinIO assumed), Docling-Graph pin, authentik version, webhook trust mechanism.
+- Settled at Phase B by ADR-0059: the provider-neutral artifact-storage ports are implemented initially by `LocalFilesystemObjectStore`; cloud adapters remain future work. Docling-Graph pin, authentik version, and webhook trust mechanism remain open.
 - Assumption: a licensed GL policy package is supplied by the operator before S0003; otherwise the Architect selects a synthetic package (section 117.1 item 5).
 
 ## Dependencies
 
 - Master blueprint sections 106.2, 108, 109.2, 109.3, 111.1, 114.1, 114.3, 115.4, 117.1, 120.1, 121.2
-- ADR-0001, ADR-0003, ADR-0007, ADR-0008, ADR-0010, ADR-0034, ADR-0037 (Accepted); ADR-0040, ADR-0041, ADR-0044, ADR-0049, ADR-0050 (Proposed, settled by S0007)
+- ADR-0001, ADR-0003, ADR-0007, ADR-0008, ADR-0010, ADR-0034, ADR-0037, ADR-0059 (Accepted); ADR-0040, ADR-0041, ADR-0044, ADR-0049, ADR-0050 (Proposed, settled by S0007)
 - Open decisions from section 117.1: target host and extension build, model-provider data policy, Docling-Graph pin, sample package availability
 
 ## Related Stories

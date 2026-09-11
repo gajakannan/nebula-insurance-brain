@@ -1,0 +1,35 @@
+[project]
+name = "brain-ingestion"
+version = "0.1.0"
+description = "Parse-once Docling adapter and content-artifact bundle writer (F0001-S0003)."
+requires-python = ">=3.13"
+dependencies = [
+  "docling>=2.126.0",
+  "pypdf>=6.0",
+  "brain-content",
+]
+
+[tool.uv.sources]
+# brain-content is a path dependency, not a workspace member: it lives in the engine/
+# uv workspace (owned by backend-developer), while neuron/ is ai-engineer's separate
+# workspace. Both runtime roots share the content-artifact manifest contract
+# (planning-mds/schemas/content-artifact-manifest.schema.json) without neuron/ pulling
+# in engine's runtime (FastAPI, SQLAlchemy) as a dependency.
+brain-content = { path = "../../../engine/packages/brain-content" }
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "reportlab>=4.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

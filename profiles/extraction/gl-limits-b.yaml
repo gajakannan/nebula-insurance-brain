@@ -1,0 +1,21 @@
+# Extraction profile: gl-limits-b (F0001-S0003)
+#
+# The Pydantic template enforced at call time (vLLM structured/guided JSON output)
+# is `brain_extraction.profiles.GLLimitsB` — this file documents scope and intent;
+# it is not parsed at runtime (F0015 introduces a compiled profile format).
+profile_id: gl-limits-b
+profile_version: "1"
+template: brain_extraction.profiles.GLLimitsB
+description: >
+  Extracts the named insured and policy period from a CGL declarations page.
+  The second of the two hand-selected proof profiles (master blueprint 115.4);
+  interpreting the same persisted content artifact under this profile after
+  gl-limits-a proves reinterpretation reuses the artifact with zero conversion
+  or OCR calls (F0001-S0003 acceptance criterion 2).
+fields:
+  - name: named_insured
+    slot_type: NamedInsured
+  - name: policy_period_start
+    slot_type: PolicyPeriodStart
+  - name: policy_period_end
+    slot_type: PolicyPeriodEnd

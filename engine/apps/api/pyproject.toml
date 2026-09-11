@@ -1,0 +1,36 @@
+[project]
+name = "brain-api"
+version = "0.1.0"
+description = "Nebula Insurance Brain API application (F0001-S0001)"
+requires-python = ">=3.13"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.9",
+  "sqlalchemy>=2.0.52",
+  "brain-content",
+  "brain-domain",
+  "brain-security",
+  "brain-review",
+  "brain-persistence",
+  "brain-temporal",
+]
+
+[tool.uv.sources]
+brain-content = { workspace = true }
+brain-domain = { workspace = true }
+brain-security = { workspace = true }
+brain-review = { workspace = true }
+brain-persistence = { workspace = true }
+brain-temporal = { workspace = true }
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
