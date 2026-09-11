@@ -40,6 +40,21 @@
       "required": true,
       "result": "PASS",
       "artifact": "g1-runtime-preflight.md"
+    },
+    "self_review": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "g2-self-review.md"
+    },
+    "code_review": {
+      "required": true,
+      "result": "APPROVED WITH RECOMMENDATIONS",
+      "artifact": "code-review-report.md"
+    },
+    "security_review": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "security-review-report.md"
     }
   },
   "files": {
@@ -68,10 +83,26 @@
     "compactions": null
   },
   "security_scans": {
-    "dependency": {},
-    "secrets": {},
-    "sast": {},
-    "dast": {}
+    "dependency": {
+      "ran": true,
+      "result": "PASS",
+      "artifact": "artifacts/security/engine-pip-audit.json"
+    },
+    "secrets": {
+      "ran": true,
+      "result": "PASS",
+      "artifact": "artifacts/security/gitleaks-report-git.json"
+    },
+    "sast": {
+      "ran": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "artifacts/security/semgrep-report-recheck.json"
+    },
+    "dast": {
+      "ran": true,
+      "result": "PASS",
+      "artifact": "artifacts/security/zap-report.json"
+    }
   },
   "omissions": [],
   "waivers": {},
