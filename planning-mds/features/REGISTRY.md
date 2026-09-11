@@ -14,7 +14,7 @@ The feature tables below are generated fenced regions compiled from `planning-md
 <!-- generated:begin registry:active -->
 | Feature ID | Name | Status | Phase | Folder |
 |------------|------|--------|-------|--------|
-| F0001 | Repository and engineering foundation | In Progress | Pre-build | `F0001-repository-and-engineering-foundation/` |
+| F0001 | Repository and engineering foundation | Done | Pre-build | `F0001-repository-and-engineering-foundation/` |
 <!-- generated:end registry:active -->
 
 ## Retired Features

@@ -1,8 +1,16 @@
 version: 0
-generated_at: '2026-09-09T02:31:09+00:00'
+generated_at: '2026-09-11T03:06:47+00:00'
 summary:
-  total_symbols: 0
-  by_language: {}
+  total_symbols: 190
+  by_language:
+    python:
+      files: 35
+      parsed: 0
+      cached: 35
+    typescript:
+      files: 8
+      parsed: 0
+      cached: 8
   disambiguated_ids: 0
   compilation_roots_by_language:
     python:
@@ -18,5 +26,2605 @@ summary:
     python: 0b86e437fc52203bf021904b96d9cb9878531be5ad42bee5d58cdffa650fee9e
     typescript: 6599d91ca234bbd991550f63cf08a7d3d0a8a259913b85478e311307d8c1e499
     csharp: f1e324c369f84d91c7fc9babd3fbb3df5352bd259db0a2d31fe5c8f61f74ce96
-  sidecar_authoritative_languages: []
-symbols: []
+  sidecar_authoritative_languages:
+  - python
+symbols:
+- id: symbol:capability-authorization-enforcement:audit-event-repository.append
+  node: capability:authorization-enforcement
+  kind: method
+  name: append
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 13
+  signature: 'async def append(self, event: AuditEvent)'
+  visibility: public
+  language: python
+  container: AuditEventRepository
+  end_line: 13
+  callers:
+  - symbol:capability-authorization-enforcement:in-memory-audit-event-repository.append
+  - symbol:capability-authorization-enforcement:repository-audit-sink.record
+  callees: []
+- id: symbol:capability-authorization-enforcement:audit-sink.record
+  node: capability:authorization-enforcement
+  kind: method
+  name: record
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 44
+  signature: 'async def record(self, *, actor_principal_id: UUID, delegate_principal_id:
+    UUID | None, resource: ResourceRef, action: str, decision: Decision)'
+  visibility: public
+  language: python
+  container: AuditSink
+  end_line: 52
+  callers:
+  - symbol:capability-authorization-enforcement:authorization-service.authorize
+  callees: []
+- id: symbol:capability-authorization-enforcement:audit.audit-event-repository
+  node: capability:authorization-enforcement
+  kind: class
+  name: AuditEventRepository
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 12
+  signature: class AuditEventRepository
+  visibility: public
+  language: python
+  end_line: 13
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:audit.in-memory-audit-event-repository
+  node: capability:authorization-enforcement
+  kind: class
+  name: InMemoryAuditEventRepository
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 50
+  signature: class InMemoryAuditEventRepository
+  visibility: public
+  language: python
+  end_line: 57
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:audit.repository-audit-sink
+  node: capability:authorization-enforcement
+  kind: class
+  name: RepositoryAuditSink
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 16
+  signature: class RepositoryAuditSink
+  visibility: public
+  language: python
+  end_line: 47
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authorization-service.authorize
+  node: capability:authorization-enforcement
+  kind: method
+  name: authorize
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 63
+  signature: 'async def authorize(self, principal: Principal, memberships: Sequence[Membership],
+    resource: ResourceRef, action: str, *, trace_id: str)'
+  visibility: public
+  language: python
+  container: AuthorizationService
+  end_line: 110
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:audit-sink.record
+  - symbol:capability-authorization-enforcement:authorization.decision
+  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
+  - symbol:capability-authorization-enforcement:casbin-enforcer.enforce
+  - symbol:capability-authorization-enforcement:repository-audit-sink.record
+- id: symbol:capability-authorization-enforcement:authorization-service.init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 59
+  signature: 'def __init__(self, enforcer: CasbinEnforcer, audit: AuditSink)'
+  visibility: private
+  language: python
+  container: AuthorizationService
+  end_line: 61
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authorization.audit-sink
+  node: capability:authorization-enforcement
+  kind: class
+  name: AuditSink
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 43
+  signature: class AuditSink
+  visibility: public
+  language: python
+  end_line: 52
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authorization.authorization-service
+  node: capability:authorization-enforcement
+  kind: class
+  name: AuthorizationService
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 55
+  signature: class AuthorizationService
+  visibility: public
+  language: python
+  end_line: 110
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authorization.casbin-enforcer
+  node: capability:authorization-enforcement
+  kind: class
+  name: CasbinEnforcer
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 29
+  signature: class CasbinEnforcer
+  visibility: public
+  language: python
+  end_line: 40
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authorization.decision
+  node: capability:authorization-enforcement
+  kind: class
+  name: Decision
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 21
+  signature: class Decision
+  visibility: public
+  language: python
+  end_line: 26
+  callers:
+  - symbol:capability-authorization-enforcement:authorization-service.authorize
+  callees: []
+- id: symbol:capability-authorization-enforcement:authorization.resource-ref
+  node: capability:authorization-enforcement
+  kind: class
+  name: ResourceRef
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 12
+  signature: class ResourceRef
+  visibility: public
+  language: python
+  end_line: 17
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:casbin-adapter.casbin-authorization-adapter
+  node: capability:authorization-enforcement
+  kind: class
+  name: CasbinAuthorizationAdapter
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 22
+  signature: class CasbinAuthorizationAdapter
+  visibility: public
+  language: python
+  end_line: 47
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:casbin-adapter.obj
+  node: capability:authorization-enforcement
+  kind: class
+  name: _Obj
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 17
+  signature: class _Obj
+  visibility: private
+  language: python
+  end_line: 19
+  callers:
+  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
+  callees: []
+- id: symbol:capability-authorization-enforcement:casbin-adapter.sub
+  node: capability:authorization-enforcement
+  kind: class
+  name: _Sub
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 11
+  signature: class _Sub
+  visibility: private
+  language: python
+  end_line: 13
+  callers:
+  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
+  callees: []
+- id: symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
+  node: capability:authorization-enforcement
+  kind: method
+  name: enforce
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 33
+  signature: 'def enforce(self, role: str, sub_knowledge_base_id: str, resource_type:
+    str, obj_knowledge_base_id: str, action: str)'
+  visibility: public
+  language: python
+  container: CasbinAuthorizationAdapter
+  end_line: 43
+  callers:
+  - symbol:capability-authorization-enforcement:authorization-service.authorize
+  callees:
+  - symbol:capability-authorization-enforcement:casbin-adapter.obj
+  - symbol:capability-authorization-enforcement:casbin-adapter.sub
+  - symbol:capability-authorization-enforcement:casbin-enforcer.enforce
+- id: symbol:capability-authorization-enforcement:casbin-authorization-adapter.init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 28
+  signature: 'def __init__(self, model_path: str | Path, policy_path: str | Path)'
+  visibility: private
+  language: python
+  container: CasbinAuthorizationAdapter
+  end_line: 31
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:casbin-authorization-adapter.policy-hash
+  node: capability:authorization-enforcement
+  kind: method
+  name: policy_hash
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 46
+  signature: def policy_hash(self)
+  visibility: public
+  language: python
+  container: CasbinAuthorizationAdapter
+  end_line: 47
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:casbin-enforcer.enforce
+  node: capability:authorization-enforcement
+  kind: method
+  name: enforce
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 30
+  signature: 'def enforce(self, role: str, sub_knowledge_base_id: str, resource_type:
+    str, obj_knowledge_base_id: str, action: str)'
+  visibility: public
+  language: python
+  container: CasbinEnforcer
+  end_line: 37
+  callers:
+  - symbol:capability-authorization-enforcement:authorization-service.authorize
+  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
+  callees: []
+- id: symbol:capability-authorization-enforcement:casbin-enforcer.policy-hash
+  node: capability:authorization-enforcement
+  kind: method
+  name: policy_hash
+  file: engine/packages/brain-security/src/brain_security/authorization.py
+  line: 40
+  signature: def policy_hash(self)
+  visibility: public
+  language: python
+  container: CasbinEnforcer
+  end_line: 40
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:in-memory-audit-event-repository.append
+  node: capability:authorization-enforcement
+  kind: method
+  name: append
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 56
+  signature: 'async def append(self, event: AuditEvent)'
+  visibility: public
+  language: python
+  container: InMemoryAuditEventRepository
+  end_line: 57
+  callers:
+  - symbol:capability-authorization-enforcement:repository-audit-sink.record
+  callees:
+  - symbol:capability-authorization-enforcement:audit-event-repository.append
+- id: symbol:capability-authorization-enforcement:in-memory-audit-event-repository.init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 53
+  signature: def __init__(self)
+  visibility: private
+  language: python
+  container: InMemoryAuditEventRepository
+  end_line: 54
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:repository-audit-sink.init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 20
+  signature: 'def __init__(self, repository: AuditEventRepository)'
+  visibility: private
+  language: python
+  container: RepositoryAuditSink
+  end_line: 21
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:repository-audit-sink.record
+  node: capability:authorization-enforcement
+  kind: method
+  name: record
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 23
+  signature: 'async def record(self, *, actor_principal_id: UUID, delegate_principal_id:
+    UUID | None, resource: ResourceRef, action: str, decision: Decision)'
+  visibility: public
+  language: python
+  container: RepositoryAuditSink
+  end_line: 47
+  callers:
+  - symbol:capability-authorization-enforcement:authorization-service.authorize
+  callees:
+  - symbol:capability-authorization-enforcement:audit-event-repository.append
+  - symbol:capability-authorization-enforcement:in-memory-audit-event-repository.append
+- id: symbol:capability-backup-and-restore:verify-citations.bundle-dir
+  node: capability:backup-and-restore
+  kind: function
+  name: _bundle_dir
+  file: scripts/ops/verify_citations.py
+  line: 28
+  signature: 'def _bundle_dir(content_root: Path, artifact_id: str)'
+  visibility: private
+  language: python
+  end_line: 29
+  callers:
+  - symbol:capability-backup-and-restore:verify-citations.verify
+  callees: []
+- id: symbol:capability-backup-and-restore:verify-citations.load-jsonl
+  node: capability:backup-and-restore
+  kind: function
+  name: _load_jsonl
+  file: scripts/ops/verify_citations.py
+  line: 32
+  signature: 'def _load_jsonl(path: Path)'
+  visibility: private
+  language: python
+  end_line: 35
+  callers:
+  - symbol:capability-backup-and-restore:verify-citations.verify
+  callees: []
+- id: symbol:capability-backup-and-restore:verify-citations.main
+  node: capability:backup-and-restore
+  kind: function
+  name: main
+  file: scripts/ops/verify_citations.py
+  line: 86
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 102
+  callers: []
+  callees:
+  - symbol:capability-backup-and-restore:verify-citations.verify
+- id: symbol:capability-backup-and-restore:verify-citations.verify
+  node: capability:backup-and-restore
+  kind: function
+  name: verify
+  file: scripts/ops/verify_citations.py
+  line: 38
+  signature: 'def verify(*, database_url: str, content_root: Path)'
+  visibility: public
+  language: python
+  end_line: 83
+  callers:
+  - symbol:capability-backup-and-restore:verify-citations.main
+  callees:
+  - symbol:capability-backup-and-restore:verify-citations.bundle-dir
+  - symbol:capability-backup-and-restore:verify-citations.load-jsonl
+- id: symbol:capability-bitemporal-canonical-commit:0003-fact-slots-and-commits.downgrade
+  node: capability:bitemporal-canonical-commit
+  kind: function
+  name: downgrade
+  file: engine/migrations/versions/0003_fact_slots_and_commits.py
+  line: 72
+  signature: def downgrade()
+  visibility: public
+  language: python
+  end_line: 77
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:0003-fact-slots-and-commits.upgrade
+  node: capability:bitemporal-canonical-commit
+  kind: function
+  name: upgrade
+  file: engine/migrations/versions/0003_fact_slots_and_commits.py
+  line: 20
+  signature: def upgrade()
+  visibility: public
+  language: python
+  end_line: 68
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: commit
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 75
+  signature: 'async def commit(self, actor: Principal, memberships: Sequence[Membership],
+    proposal: CommitProposal, *, trace_id: str)'
+  visibility: public
+  language: python
+  container: CanonicalCommitService
+  end_line: 187
+  callers: []
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:commit.fact-slot-not-found
+  - symbol:capability-bitemporal-canonical-commit:commit.stale-version-error
+  - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.close-recorded
+  - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.current-versions
+  - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.insert-change
+  - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.insert-version
+  - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.lock-slot
+  - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.write-outbox
+  - symbol:capability-bitemporal-canonical-commit:ranges.split-remainder
+  - symbol:capability-bitemporal-canonical-commit:ranges.time-range
+  - symbol:capability-bitemporal-canonical-commit:time-range.overlaps
+- id: symbol:capability-bitemporal-canonical-commit:canonical-commit-service.init
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: __init__
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 71
+  signature: 'def __init__(self, repository: FactCommitRepository, authz: AuthorizationService)'
+  visibility: private
+  language: python
+  container: CanonicalCommitService
+  end_line: 73
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:commit.canonical-commit-service
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: CanonicalCommitService
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 64
+  signature: class CanonicalCommitService
+  visibility: public
+  language: python
+  end_line: 187
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:commit.fact-commit-repository
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: FactCommitRepository
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 24
+  signature: class FactCommitRepository
+  visibility: public
+  language: python
+  end_line: 61
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:commit.fact-slot-not-found
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: FactSlotNotFound
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 15
+  signature: class FactSlotNotFound
+  visibility: public
+  language: python
+  end_line: 16
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:commit.stale-version-error
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: StaleVersionError
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 19
+  signature: class StaleVersionError
+  visibility: public
+  language: python
+  end_line: 21
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:fact-commit-repository.close-recorded
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: close_recorded
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 35
+  signature: 'async def close_recorded(self, version_id: UUID, at: datetime)'
+  visibility: public
+  language: python
+  container: FactCommitRepository
+  end_line: 35
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:fact-commit-repository.current-versions
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: current_versions
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 31
+  signature: 'async def current_versions(self, slot_id: UUID)'
+  visibility: public
+  language: python
+  container: FactCommitRepository
+  end_line: 33
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:fact-commit-repository.insert-change
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: insert_change
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 57
+  signature: 'async def insert_change(self, *, reason: ChangeReason, from_version_id:
+    UUID | None, to_version_id: UUID)'
+  visibility: public
+  language: python
+  container: FactCommitRepository
+  end_line: 59
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:fact-commit-repository.insert-version
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: insert_version
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 37
+  signature: 'async def insert_version(self, *, version_id: UUID, slot_id: UUID, tenant_id:
+    UUID, knowledge_base_id: UUID, value: dict, valid: TimeRange, recorded: TimeRange,
+    change_reason: ChangeReason | None, evidence_refs: tuple[UUID, ...], review_decision_id:
+    UUID | None, commit_id: UUID, source_received_at: datetime, artifact_created_at:
+    datetime, assertion_created_at: datetime, canonical_accepted_at: datetime)'
+  visibility: public
+  language: python
+  container: FactCommitRepository
+  end_line: 55
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:fact-commit-repository.lock-slot
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: lock_slot
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 25
+  signature: 'async def lock_slot(self, slot_id: UUID)'
+  visibility: public
+  language: python
+  container: FactCommitRepository
+  end_line: 29
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:fact-commit-repository.write-outbox
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: write_outbox
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 61
+  signature: 'async def write_outbox(self, commit_id: UUID, payload: dict)'
+  visibility: public
+  language: python
+  container: FactCommitRepository
+  end_line: 61
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:outbox-projector.init
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: __init__
+  file: engine/packages/brain-temporal/src/brain_temporal/outbox.py
+  line: 34
+  signature: 'def __init__(self, reader: OutboxReader)'
+  visibility: private
+  language: python
+  container: OutboxProjector
+  end_line: 35
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:outbox-projector.run-once
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: run_once
+  file: engine/packages/brain-temporal/src/brain_temporal/outbox.py
+  line: 37
+  signature: 'async def run_once(self, *, now: datetime, limit: int=100)'
+  visibility: public
+  language: python
+  container: OutboxProjector
+  end_line: 41
+  callers: []
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:outbox-reader.mark-processed
+  - symbol:capability-bitemporal-canonical-commit:outbox-reader.unprocessed
+- id: symbol:capability-bitemporal-canonical-commit:outbox-reader.mark-processed
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: mark_processed
+  file: engine/packages/brain-temporal/src/brain_temporal/outbox.py
+  line: 25
+  signature: 'async def mark_processed(self, event_id: UUID, *, processed_at: datetime)'
+  visibility: public
+  language: python
+  container: OutboxReader
+  end_line: 25
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:outbox-projector.run-once
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:outbox-reader.unprocessed
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: unprocessed
+  file: engine/packages/brain-temporal/src/brain_temporal/outbox.py
+  line: 23
+  signature: 'async def unprocessed(self, limit: int=100)'
+  visibility: public
+  language: python
+  container: OutboxReader
+  end_line: 23
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:outbox-projector.run-once
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:outbox.outbox-event
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: OutboxEvent
+  file: engine/packages/brain-temporal/src/brain_temporal/outbox.py
+  line: 10
+  signature: class OutboxEvent
+  visibility: public
+  language: python
+  end_line: 15
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:outbox.outbox-projector
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: OutboxProjector
+  file: engine/packages/brain-temporal/src/brain_temporal/outbox.py
+  line: 28
+  signature: class OutboxProjector
+  visibility: public
+  language: python
+  end_line: 41
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:outbox.outbox-reader
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: OutboxReader
+  file: engine/packages/brain-temporal/src/brain_temporal/outbox.py
+  line: 18
+  signature: class OutboxReader
+  visibility: public
+  language: python
+  end_line: 25
+  callers: []
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:ranges.invalid-range-error
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: InvalidRangeError
+  file: engine/packages/brain-temporal/src/brain_temporal/ranges.py
+  line: 7
+  signature: class InvalidRangeError
+  visibility: public
+  language: python
+  end_line: 9
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:time-range.post-init
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:ranges.split-remainder
+  node: capability:bitemporal-canonical-commit
+  kind: function
+  name: split_remainder
+  file: engine/packages/brain-temporal/src/brain_temporal/ranges.py
+  line: 37
+  signature: 'def split_remainder(old: TimeRange, new: TimeRange)'
+  visibility: public
+  language: python
+  end_line: 50
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:ranges.time-range
+- id: symbol:capability-bitemporal-canonical-commit:ranges.time-range
+  node: capability:bitemporal-canonical-commit
+  kind: class
+  name: TimeRange
+  file: engine/packages/brain-temporal/src/brain_temporal/ranges.py
+  line: 13
+  signature: class TimeRange
+  visibility: public
+  language: python
+  end_line: 34
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  - symbol:capability-bitemporal-canonical-commit:ranges.split-remainder
+  - symbol:capability-bitemporal-canonical-commit:time-range.close
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:time-range.close
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: close
+  file: engine/packages/brain-temporal/src/brain_temporal/ranges.py
+  line: 31
+  signature: 'def close(self, at: datetime)'
+  visibility: public
+  language: python
+  container: TimeRange
+  end_line: 34
+  callers: []
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:ranges.time-range
+- id: symbol:capability-bitemporal-canonical-commit:time-range.overlaps
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: overlaps
+  file: engine/packages/brain-temporal/src/brain_temporal/ranges.py
+  line: 24
+  signature: 'def overlaps(self, other: TimeRange)'
+  visibility: public
+  language: python
+  container: TimeRange
+  end_line: 29
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:time-range.post-init
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-temporal/src/brain_temporal/ranges.py
+  line: 20
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: TimeRange
+  end_line: 22
+  callers: []
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:ranges.invalid-range-error
+- id: symbol:capability-credential-verification-and-principal-resolution:credential-error.init
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 15
+  signature: 'def __init__(self, code: str, message: str | None=None)'
+  visibility: private
+  language: python
+  container: CredentialError
+  end_line: 17
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.init
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.init
+- id: symbol:capability-credential-verification-and-principal-resolution:credential-verifier.verify
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: verify
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 31
+  signature: 'async def verify(self, bearer_token: str)'
+  visibility: public
+  language: python
+  container: CredentialVerifier
+  end_line: 31
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.init
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 39
+  signature: 'def __init__(self, *, issuer: str, audience: str, jwks_url: str | None=None)'
+  visibility: private
+  language: python
+  container: OidcJwksVerifier
+  end_line: 42
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:credential-error.init
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.verify
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: verify
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 44
+  signature: 'async def verify(self, bearer_token: str)'
+  visibility: public
+  language: python
+  container: OidcJwksVerifier
+  end_line: 78
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
+  - symbol:capability-credential-verification-and-principal-resolution:verification.verified-credential
+- id: symbol:capability-credential-verification-and-principal-resolution:principal-repository.create
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: create
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 14
+  signature: 'async def create(self, *, issuer: str, subject: str, kind: PrincipalKind)'
+  visibility: public
+  language: python
+  container: PrincipalRepository
+  end_line: 14
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:principal-repository.find-by-issuer-subject
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: find_by_issuer_subject
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 12
+  signature: 'async def find_by_issuer_subject(self, issuer: str, subject: str)'
+  visibility: public
+  language: python
+  container: PrincipalRepository
+  end_line: 12
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:principal-repository.memberships
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: memberships
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 16
+  signature: 'async def memberships(self, principal_id: UUID)'
+  visibility: public
+  language: python
+  container: PrincipalRepository
+  end_line: 16
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.memberships
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:principal-resolver.init
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 23
+  signature: 'def __init__(self, repository: PrincipalRepository)'
+  visibility: private
+  language: python
+  container: PrincipalResolver
+  end_line: 24
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:credential-error.init
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:principal-resolver.memberships
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: memberships
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 38
+  signature: 'async def memberships(self, principal: Principal)'
+  visibility: public
+  language: python
+  container: PrincipalResolver
+  end_line: 41
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-repository.memberships
+- id: symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: resolve
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 26
+  signature: 'async def resolve(self, credential: VerifiedCredential)'
+  visibility: public
+  language: python
+  container: PrincipalResolver
+  end_line: 36
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-repository.create
+  - symbol:capability-credential-verification-and-principal-resolution:principal-repository.find-by-issuer-subject
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
+- id: symbol:capability-credential-verification-and-principal-resolution:principals.principal-repository
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: PrincipalRepository
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 11
+  signature: class PrincipalRepository
+  visibility: public
+  language: python
+  end_line: 16
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:principals.principal-resolver
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: PrincipalResolver
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 19
+  signature: class PrincipalResolver
+  visibility: public
+  language: python
+  end_line: 41
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: CredentialError
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 11
+  signature: class CredentialError
+  visibility: public
+  language: python
+  end_line: 17
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.verify
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:verification.credential-verifier
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: CredentialVerifier
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 30
+  signature: class CredentialVerifier
+  visibility: public
+  language: python
+  end_line: 31
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:verification.oidc-jwks-verifier
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: OidcJwksVerifier
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 34
+  signature: class OidcJwksVerifier
+  visibility: public
+  language: python
+  end_line: 78
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:verification.verified-credential
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: VerifiedCredential
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 21
+  signature: class VerifiedCredential
+  visibility: public
+  language: python
+  end_line: 27
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.verify
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:audit-recorder.record-decision
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: record_decision
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 94
+  signature: 'async def record_decision(self, decision: ReviewDecision)'
+  visibility: public
+  language: python
+  container: AuditRecorder
+  end_line: 94
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:batches.assemble-batch
+  node: capability:evidence-review-round-trip
+  kind: function
+  name: assemble_batch
+  file: engine/packages/brain-review/src/brain_review/batches.py
+  line: 9
+  signature: 'def assemble_batch(items: list[ReviewItem], *, assembling_principal_id:
+    UUID)'
+  visibility: public
+  language: python
+  end_line: 20
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.audit-recorder
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: AuditRecorder
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 93
+  signature: class AuditRecorder
+  visibility: public
+  language: python
+  end_line: 94
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.compute-event-sha256
+  node: capability:evidence-review-round-trip
+  kind: function
+  name: compute_event_sha256
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 53
+  signature: 'def compute_event_sha256(request: DecisionRequest)'
+  visibility: public
+  language: python
+  end_line: 64
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.decision-outcome
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: DecisionOutcome
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 98
+  signature: class DecisionOutcome
+  visibility: public
+  language: python
+  end_line: 101
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.decision-request
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: DecisionRequest
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 42
+  signature: class DecisionRequest
+  visibility: public
+  language: python
+  end_line: 50
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.invalid-blocked-reason-code
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: InvalidBlockedReasonCode
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 37
+  signature: class InvalidBlockedReasonCode
+  visibility: public
+  language: python
+  end_line: 38
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.review-decision-service
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: ReviewDecisionService
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 104
+  signature: class ReviewDecisionService
+  visibility: public
+  language: python
+  end_line: 205
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.review-item-already-decided
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: ReviewItemAlreadyDecided
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 24
+  signature: class ReviewItemAlreadyDecided
+  visibility: public
+  language: python
+  end_line: 27
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.review-item-not-found
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: ReviewItemNotFound
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 20
+  signature: class ReviewItemNotFound
+  visibility: public
+  language: python
+  end_line: 21
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.review-item-repository
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: ReviewItemRepository
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 67
+  signature: class ReviewItemRepository
+  visibility: public
+  language: python
+  end_line: 90
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:decisions.unresolved-evidence-requires-blocked
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: UnresolvedEvidenceRequiresBlocked
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 30
+  signature: class UnresolvedEvidenceRequiresBlocked
+  visibility: public
+  language: python
+  end_line: 34
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:evidence.evidence-binding-to-locator
+  node: capability:evidence-review-round-trip
+  kind: function
+  name: evidence_binding_to_locator
+  file: engine/packages/brain-review/src/brain_review/evidence.py
+  line: 24
+  signature: 'def evidence_binding_to_locator(*, artifact_id: UUID, precision: InterpretationPrecision,
+    block_id: str | None=None, page: int | None=None, bbox: dict | None=None, char_start:
+    int | None=None, char_end: int | None=None, unresolved_reason: str | None=None)'
+  visibility: public
+  language: python
+  end_line: 60
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:items.review-item-sink
+  node: capability:evidence-review-round-trip
+  kind: class
+  name: ReviewItemSink
+  file: engine/packages/brain-review/src/brain_review/items.py
+  line: 16
+  signature: class ReviewItemSink
+  visibility: public
+  language: python
+  end_line: 17
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:items.route-low-confidence-assertion
+  node: capability:evidence-review-round-trip
+  kind: function
+  name: route_low_confidence_assertion
+  file: engine/packages/brain-review/src/brain_review/items.py
+  line: 20
+  signature: 'def route_low_confidence_assertion(*, assertion_id: UUID, assertion_version:
+    int, tenant_id: UUID, knowledge_base_id: UUID, model_confidence: float, evidence:
+    EvidenceLocator)'
+  visibility: public
+  language: python
+  end_line: 43
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-decision-service.init
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: __init__
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 113
+  signature: 'def __init__(self, repository: ReviewItemRepository, audit: AuditRecorder)'
+  visibility: private
+  language: python
+  container: ReviewDecisionService
+  end_line: 115
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: submit
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 117
+  signature: 'async def submit(self, request: DecisionRequest)'
+  visibility: public
+  language: python
+  container: ReviewDecisionService
+  end_line: 205
+  callers: []
+  callees:
+  - symbol:capability-evidence-review-round-trip:audit-recorder.record-decision
+  - symbol:capability-evidence-review-round-trip:decisions.compute-event-sha256
+  - symbol:capability-evidence-review-round-trip:decisions.decision-outcome
+  - symbol:capability-evidence-review-round-trip:decisions.invalid-blocked-reason-code
+  - symbol:capability-evidence-review-round-trip:decisions.review-item-already-decided
+  - symbol:capability-evidence-review-round-trip:decisions.review-item-not-found
+  - symbol:capability-evidence-review-round-trip:decisions.unresolved-evidence-requires-blocked
+  - symbol:capability-evidence-review-round-trip:review-item-repository.create-corrected-assertion
+  - symbol:capability-evidence-review-round-trip:review-item-repository.current-assertion-version
+  - symbol:capability-evidence-review-round-trip:review-item-repository.get
+  - symbol:capability-evidence-review-round-trip:review-item-repository.get-decision-by-event-sha256
+  - symbol:capability-evidence-review-round-trip:review-item-repository.has-any-decision
+  - symbol:capability-evidence-review-round-trip:review-item-repository.mark-item-status
+  - symbol:capability-evidence-review-round-trip:review-item-repository.open-new-review-item-for-new-version
+  - symbol:capability-evidence-review-round-trip:review-item-repository.save-decision
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.create-corrected-assertion
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: create_corrected_assertion
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 82
+  signature: 'async def create_corrected_assertion(self, *, original_assertion_id:
+    UUID, value: dict, evidence: EvidenceLocator | None)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 84
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.current-assertion-version
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: current_assertion_version
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 78
+  signature: 'async def current_assertion_version(self, assertion_id: UUID)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 78
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.get
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: get
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 68
+  signature: 'async def get(self, review_item_id: UUID)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 68
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.get-decision-by-event-sha256
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: get_decision_by_event_sha256
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 70
+  signature: 'async def get_decision_by_event_sha256(self, review_item_id: UUID, event_sha256:
+    str)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 72
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.get-latest-decision
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: get_latest_decision
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 76
+  signature: 'async def get_latest_decision(self, review_item_id: UUID)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 76
+  callers: []
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.has-any-decision
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: has_any_decision
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 74
+  signature: 'async def has_any_decision(self, review_item_id: UUID)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 74
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.mark-item-status
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: mark_item_status
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 86
+  signature: 'async def mark_item_status(self, review_item_id: UUID, status: ReviewItemStatus)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 86
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.open-new-review-item-for-new-version
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: open_new_review_item_for_new_version
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 88
+  signature: 'async def open_new_review_item_for_new_version(self, original_item:
+    ReviewItem, new_version: int)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 90
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-repository.save-decision
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: save_decision
+  file: engine/packages/brain-review/src/brain_review/decisions.py
+  line: 80
+  signature: 'async def save_decision(self, decision: ReviewDecision)'
+  visibility: public
+  language: python
+  container: ReviewItemRepository
+  end_line: 80
+  callers:
+  - symbol:capability-evidence-review-round-trip:review-decision-service.submit
+  callees: []
+- id: symbol:capability-evidence-review-round-trip:review-item-sink.create
+  node: capability:evidence-review-round-trip
+  kind: method
+  name: create
+  file: engine/packages/brain-review/src/brain_review/items.py
+  line: 17
+  signature: 'async def create(self, item: ReviewItem)'
+  visibility: public
+  language: python
+  container: ReviewItemSink
+  end_line: 17
+  callers: []
+  callees: []
+- id: symbol:capability-local-inference-service:docling-graph-adapter.bind-field
+  node: capability:local-inference-service
+  kind: method
+  name: _bind_field
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
+  line: 223
+  signature: 'def _bind_field(self, field_name: str, value: object, blocks: list[Block],
+    page_heights: dict[int, float], artifact_id: UUID)'
+  visibility: private
+  language: python
+  container: DoclingGraphAdapter
+  end_line: 277
+  callers:
+  - symbol:capability-local-inference-service:docling-graph-adapter.interpret
+  callees:
+  - symbol:capability-local-inference-service:docling-graph-adapter.to-top-left-bbox
+- id: symbol:capability-local-inference-service:docling-graph-adapter.docling-graph-adapter
+  node: capability:local-inference-service
+  kind: class
+  name: DoclingGraphAdapter
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
+  line: 81
+  signature: class DoclingGraphAdapter
+  visibility: public
+  language: python
+  end_line: 277
+  callers: []
+  callees: []
+- id: symbol:capability-local-inference-service:docling-graph-adapter.init
+  node: capability:local-inference-service
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
+  line: 86
+  signature: 'def __init__(self, *, base_url: str, api_key: str, model_id: str, context_limit:
+    int=4096, max_output_tokens: int=512)'
+  visibility: private
+  language: python
+  container: DoclingGraphAdapter
+  end_line: 101
+  callers: []
+  callees: []
+- id: symbol:capability-local-inference-service:docling-graph-adapter.interpret
+  node: capability:local-inference-service
+  kind: method
+  name: interpret
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
+  line: 103
+  signature: 'async def interpret(self, *, store: ContentArtifactStore, artifact_id:
+    UUID, profile: ExtractionProfile)'
+  visibility: public
+  language: python
+  container: DoclingGraphAdapter
+  end_line: 221
+  callers: []
+  callees:
+  - symbol:capability-local-inference-service:docling-graph-adapter.bind-field
+  - symbol:capability-local-inference-service:docling-graph-adapter.strict-json-schema
+- id: symbol:capability-local-inference-service:docling-graph-adapter.strict-json-schema
+  node: capability:local-inference-service
+  kind: function
+  name: _strict_json_schema
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
+  line: 57
+  signature: 'def _strict_json_schema(template: type[BaseModel])'
+  visibility: private
+  language: python
+  end_line: 68
+  callers:
+  - symbol:capability-local-inference-service:docling-graph-adapter.interpret
+  callees: []
+- id: symbol:capability-local-inference-service:docling-graph-adapter.to-top-left-bbox
+  node: capability:local-inference-service
+  kind: function
+  name: _to_top_left_bbox
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
+  line: 71
+  signature: 'def _to_top_left_bbox(bbox: DoclingBoundingBox | None, page_height:
+    float)'
+  visibility: private
+  language: python
+  end_line: 78
+  callers:
+  - symbol:capability-local-inference-service:docling-graph-adapter.bind-field
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: build_bundle
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py
+  line: 50
+  signature: 'def build_bundle(parse_result: ParseResult, *, tenant_id: UUID, knowledge_base_id:
+    UUID, document_id: UUID, version_id: UUID, artifact_id: UUID, source_sha256: str,
+    configuration_hash: str, source_bytes: bytes | None=None, source_filename: str
+    | None=None)'
+  visibility: public
+  language: python
+  end_line: 167
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.environment-digest
+  - symbol:capability-parse-once-content-artifact:bundle-writer.sha256
+  - symbol:capability-parse-once-content-artifact:bundle-writer.to-top-left-bbox
+  - symbol:capability-parse-once-content-artifact:manifest.artifact-file
+  - symbol:capability-parse-once-content-artifact:manifest.artifact-manifest
+  - symbol:capability-parse-once-content-artifact:manifest.docling-document-ref
+  - symbol:capability-parse-once-content-artifact:manifest.execution-record
+  - symbol:capability-parse-once-content-artifact:manifest.extraction-quality
+- id: symbol:capability-parse-once-content-artifact:bundle-writer.environment-digest
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: _environment_digest
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py
+  line: 41
+  signature: def _environment_digest()
+  visibility: private
+  language: python
+  end_line: 47
+  callers:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  callees:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.sha256
+- id: symbol:capability-parse-once-content-artifact:bundle-writer.sha256
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: _sha256
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py
+  line: 24
+  signature: 'def _sha256(data: bytes)'
+  visibility: private
+  language: python
+  end_line: 25
+  callers:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  - symbol:capability-parse-once-content-artifact:bundle-writer.environment-digest
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:bundle-writer.to-top-left-bbox
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: _to_top_left_bbox
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py
+  line: 28
+  signature: 'def _to_top_left_bbox(bbox: BoundingBox, page_height: float)'
+  visibility: private
+  language: python
+  end_line: 38
+  callers:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:config.config-error
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ConfigError
+  file: engine/packages/brain-content/src/brain_content/config.py
+  line: 10
+  signature: class ConfigError
+  visibility: public
+  language: python
+  end_line: 11
+  callers:
+  - symbol:capability-parse-once-content-artifact:config.find-config-file
+  - symbol:capability-parse-once-content-artifact:config.load-local-object-store-config
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:config.find-config-file
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: _find_config_file
+  file: engine/packages/brain-content/src/brain_content/config.py
+  line: 21
+  signature: 'def _find_config_file(start: Path)'
+  visibility: private
+  language: python
+  end_line: 31
+  callers:
+  - symbol:capability-parse-once-content-artifact:config.load-local-object-store-config
+  callees:
+  - symbol:capability-parse-once-content-artifact:config.config-error
+- id: symbol:capability-parse-once-content-artifact:config.load-local-object-store-config
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: load_local_object_store_config
+  file: engine/packages/brain-content/src/brain_content/config.py
+  line: 34
+  signature: def load_local_object_store_config()
+  visibility: public
+  language: python
+  end_line: 63
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:config.config-error
+  - symbol:capability-parse-once-content-artifact:config.find-config-file
+  - symbol:capability-parse-once-content-artifact:config.local-object-store-config
+- id: symbol:capability-parse-once-content-artifact:config.local-object-store-config
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: LocalObjectStoreConfig
+  file: engine/packages/brain-content/src/brain_content/config.py
+  line: 15
+  signature: class LocalObjectStoreConfig
+  visibility: public
+  language: python
+  end_line: 18
+  callers:
+  - symbol:capability-parse-once-content-artifact:config.load-local-object-store-config
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:content-artifact-store.get-manifest
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: get_manifest
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 25
+  signature: 'async def get_manifest(self, artifact_id: UUID)'
+  visibility: public
+  language: python
+  container: ContentArtifactStore
+  end_line: 25
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:content-artifact-store.open-file
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: open_file
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 27
+  signature: 'async def open_file(self, artifact_id: UUID, path: str)'
+  visibility: public
+  language: python
+  container: ContentArtifactStore
+  end_line: 27
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:content-artifact-store.put-bundle
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: put_bundle
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 21
+  signature: 'async def put_bundle(self, manifest: ArtifactManifest, files: Mapping[str,
+    bytes])'
+  visibility: public
+  language: python
+  container: ContentArtifactStore
+  end_line: 23
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:docling-adapter.count-pages-needing-ocr
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _count_pages_needing_ocr
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
+  line: 63
+  signature: 'def _count_pages_needing_ocr(source_path: Path)'
+  visibility: private
+  language: python
+  container: DoclingAdapter
+  end_line: 65
+  callers:
+  - symbol:capability-parse-once-content-artifact:docling-adapter.parse
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:docling-adapter.docling-adapter
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: DoclingAdapter
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
+  line: 31
+  signature: class DoclingAdapter
+  visibility: public
+  language: python
+  end_line: 65
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:docling-adapter.init
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
+  line: 42
+  signature: def __init__(self)
+  visibility: private
+  language: python
+  container: DoclingAdapter
+  end_line: 43
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:docling-adapter.parse
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: parse
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
+  line: 45
+  signature: 'def parse(self, source_path: Path)'
+  visibility: public
+  language: python
+  container: DoclingAdapter
+  end_line: 60
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:docling-adapter.count-pages-needing-ocr
+  - symbol:capability-parse-once-content-artifact:docling-adapter.parse-result
+- id: symbol:capability-parse-once-content-artifact:docling-adapter.parse-result
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ParseResult
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
+  line: 22
+  signature: class ParseResult
+  visibility: public
+  language: python
+  end_line: 28
+  callers:
+  - symbol:capability-parse-once-content-artifact:docling-adapter.parse
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:local-content-artifact-store.bundle-prefix
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _bundle_prefix
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 41
+  signature: 'def _bundle_prefix(self, artifact_id: UUID)'
+  visibility: private
+  language: python
+  container: LocalContentArtifactStore
+  end_line: 42
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.get-manifest
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.open-file
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:local-content-artifact-store.get-manifest
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: get_manifest
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 65
+  signature: 'async def get_manifest(self, artifact_id: UUID)'
+  visibility: public
+  language: python
+  container: LocalContentArtifactStore
+  end_line: 75
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.bundle-prefix
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  - symbol:capability-parse-once-content-artifact:object-store.read
+  - symbol:capability-parse-once-content-artifact:store.artifact-not-found
+- id: symbol:capability-parse-once-content-artifact:local-content-artifact-store.init
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: __init__
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 38
+  signature: 'def __init__(self, object_store: LocalFilesystemObjectStore)'
+  visibility: private
+  language: python
+  container: LocalContentArtifactStore
+  end_line: 39
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:local-content-artifact-store.open-file
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: open_file
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 77
+  signature: 'async def open_file(self, artifact_id: UUID, path: str)'
+  visibility: public
+  language: python
+  container: LocalContentArtifactStore
+  end_line: 86
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.bundle-prefix
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  - symbol:capability-parse-once-content-artifact:object-store.read
+  - symbol:capability-parse-once-content-artifact:store.artifact-not-found
+- id: symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: put_bundle
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 44
+  signature: 'async def put_bundle(self, manifest: ArtifactManifest, files: Mapping[str,
+    bytes])'
+  visibility: public
+  language: python
+  container: LocalContentArtifactStore
+  end_line: 63
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.bundle-prefix
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.exists
+  - symbol:capability-parse-once-content-artifact:object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:object-store.exists
+  - symbol:capability-parse-once-content-artifact:store.artifact-exists
+- id: symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: create_exclusive
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 66
+  signature: 'def create_exclusive(self, key: str, data: bytes)'
+  visibility: public
+  language: python
+  container: LocalFilesystemObjectStore
+  end_line: 82
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  callees:
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
+  - symbol:capability-parse-once-content-artifact:object-store.object-already-exists-error
+- id: symbol:capability-parse-once-content-artifact:local-filesystem-object-store.delete
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: delete
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 94
+  signature: 'def delete(self, key: str)'
+  visibility: public
+  language: python
+  container: LocalFilesystemObjectStore
+  end_line: 99
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
+  - symbol:capability-parse-once-content-artifact:object-store.object-not-found-error
+- id: symbol:capability-parse-once-content-artifact:local-filesystem-object-store.exists
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: exists
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 91
+  signature: 'def exists(self, key: str)'
+  visibility: public
+  language: python
+  container: LocalFilesystemObjectStore
+  end_line: 92
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  callees:
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
+- id: symbol:capability-parse-once-content-artifact:local-filesystem-object-store.init
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: __init__
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 53
+  signature: 'def __init__(self, config: LocalObjectStoreConfig)'
+  visibility: private
+  language: python
+  container: LocalFilesystemObjectStore
+  end_line: 56
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _path_for
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 58
+  signature: 'def _path_for(self, key: str)'
+  visibility: private
+  language: python
+  container: LocalFilesystemObjectStore
+  end_line: 64
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.delete
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.exists
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: read
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 84
+  signature: 'def read(self, key: str)'
+  visibility: public
+  language: python
+  container: LocalFilesystemObjectStore
+  end_line: 89
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.get-manifest
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.open-file
+  callees:
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
+  - symbol:capability-parse-once-content-artifact:object-store.object-not-found-error
+- id: symbol:capability-parse-once-content-artifact:manifest.artifact-file
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ArtifactFile
+  file: engine/packages/brain-content/src/brain_content/manifest.py
+  line: 10
+  signature: class ArtifactFile
+  visibility: public
+  language: python
+  end_line: 15
+  callers:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:manifest.artifact-manifest
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ArtifactManifest
+  file: engine/packages/brain-content/src/brain_content/manifest.py
+  line: 43
+  signature: class ArtifactManifest
+  visibility: public
+  language: python
+  end_line: 63
+  callers:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:manifest.docling-document-ref
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: DoclingDocumentRef
+  file: engine/packages/brain-content/src/brain_content/manifest.py
+  line: 18
+  signature: class DoclingDocumentRef
+  visibility: public
+  language: python
+  end_line: 23
+  callers:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:manifest.execution-record
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ExecutionRecord
+  file: engine/packages/brain-content/src/brain_content/manifest.py
+  line: 26
+  signature: class ExecutionRecord
+  visibility: public
+  language: python
+  end_line: 32
+  callers:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:manifest.extraction-quality
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ExtractionQuality
+  file: engine/packages/brain-content/src/brain_content/manifest.py
+  line: 35
+  signature: class ExtractionQuality
+  visibility: public
+  language: python
+  end_line: 40
+  callers:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:object-store.create-exclusive
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: create_exclusive
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 26
+  signature: 'def create_exclusive(self, key: str, data: bytes)'
+  visibility: public
+  language: python
+  container: ObjectStore
+  end_line: 29
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:object-store.delete
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: delete
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 37
+  signature: 'def delete(self, key: str)'
+  visibility: public
+  language: python
+  container: ObjectStore
+  end_line: 39
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:object-store.exists
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: exists
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 35
+  signature: 'def exists(self, key: str)'
+  visibility: public
+  language: python
+  container: ObjectStore
+  end_line: 35
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:object-store.local-filesystem-object-store
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: LocalFilesystemObjectStore
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 42
+  signature: class LocalFilesystemObjectStore
+  visibility: public
+  language: python
+  end_line: 99
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:object-store.object-already-exists-error
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ObjectAlreadyExistsError
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 11
+  signature: class ObjectAlreadyExistsError
+  visibility: public
+  language: python
+  end_line: 12
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:object-store.object-not-found-error
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ObjectNotFoundError
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 15
+  signature: class ObjectNotFoundError
+  visibility: public
+  language: python
+  end_line: 16
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.delete
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:object-store.object-store
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ObjectStore
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 19
+  signature: class ObjectStore
+  visibility: public
+  language: python
+  end_line: 39
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:object-store.read
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: read
+  file: engine/packages/brain-content/src/brain_content/object_store.py
+  line: 31
+  signature: 'def read(self, key: str)'
+  visibility: public
+  language: python
+  container: ObjectStore
+  end_line: 33
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.get-manifest
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.open-file
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:store.artifact-exists
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ArtifactExists
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 12
+  signature: class ArtifactExists
+  visibility: public
+  language: python
+  end_line: 13
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:store.artifact-not-found
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ArtifactNotFound
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 16
+  signature: class ArtifactNotFound
+  visibility: public
+  language: python
+  end_line: 17
+  callers:
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.get-manifest
+  - symbol:capability-parse-once-content-artifact:local-content-artifact-store.open-file
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:store.content-artifact-store
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ContentArtifactStore
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 20
+  signature: class ContentArtifactStore
+  visibility: public
+  language: python
+  end_line: 27
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:store.local-content-artifact-store
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: LocalContentArtifactStore
+  file: engine/packages/brain-content/src/brain_content/store.py
+  line: 30
+  signature: class LocalContentArtifactStore
+  visibility: public
+  language: python
+  end_line: 86
+  callers: []
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:app.create-app
+  node: capability:runtime-roots-and-toolchain
+  kind: function
+  name: create_app
+  file: engine/apps/api/src/brain_api/app.py
+  line: 12
+  signature: def create_app()
+  visibility: public
+  language: python
+  end_line: 23
+  callers: []
+  callees:
+  - symbol:capability-runtime-roots-and-toolchain:errors.install-problem-details-handlers
+- id: symbol:capability-runtime-roots-and-toolchain:brain-error.init
+  node: capability:runtime-roots-and-toolchain
+  kind: method
+  name: __init__
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 31
+  signature: 'def __init__(self, detail: str | None=None)'
+  visibility: private
+  language: python
+  container: BrainError
+  end_line: 33
+  callers: []
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:errors.brain-error
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: BrainError
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 24
+  signature: class BrainError
+  visibility: public
+  language: python
+  end_line: 33
+  callers: []
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:errors.concurrent-commit-api-error
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: ConcurrentCommitApiError
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 70
+  signature: class ConcurrentCommitApiError
+  visibility: public
+  language: python
+  end_line: 76
+  callers: []
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:errors.install-problem-details-handlers
+  node: capability:runtime-roots-and-toolchain
+  kind: function
+  name: install_problem_details_handlers
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 103
+  signature: 'def install_problem_details_handlers(app: FastAPI)'
+  visibility: public
+  language: python
+  end_line: 126
+  callers:
+  - symbol:capability-runtime-roots-and-toolchain:app.create-app
+  callees:
+  - symbol:capability-runtime-roots-and-toolchain:errors.problem-response
+- id: symbol:capability-runtime-roots-and-toolchain:errors.invalid-range-api-error
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: InvalidRangeApiError
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 53
+  signature: class InvalidRangeApiError
+  visibility: public
+  language: python
+  end_line: 58
+  callers: []
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:errors.not-found-error
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: NotFoundError
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 36
+  signature: class NotFoundError
+  visibility: public
+  language: python
+  end_line: 42
+  callers: []
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:errors.problem-details
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: ProblemDetails
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 11
+  signature: class ProblemDetails
+  visibility: public
+  language: python
+  end_line: 21
+  callers:
+  - symbol:capability-runtime-roots-and-toolchain:errors.problem-response
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:errors.problem-response
+  node: capability:runtime-roots-and-toolchain
+  kind: function
+  name: _problem_response
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 79
+  signature: 'def _problem_response(*, status_code: int, title: str, code: str, detail:
+    str | None, instance: str | None)'
+  visibility: private
+  language: python
+  end_line: 100
+  callers:
+  - symbol:capability-runtime-roots-and-toolchain:errors.install-problem-details-handlers
+  callees:
+  - symbol:capability-runtime-roots-and-toolchain:errors.problem-details
+- id: symbol:capability-runtime-roots-and-toolchain:errors.stale-version-api-error
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: StaleVersionApiError
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 61
+  signature: class StaleVersionApiError
+  visibility: public
+  language: python
+  end_line: 67
+  callers: []
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:errors.unprocessable-error
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: UnprocessableError
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 45
+  signature: class UnprocessableError
+  visibility: public
+  language: python
+  end_line: 50
+  callers: []
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:health.check-storage-round-trip
+  node: capability:runtime-roots-and-toolchain
+  kind: function
+  name: _check_storage_round_trip
+  file: engine/apps/api/src/brain_api/health.py
+  line: 23
+  signature: def _check_storage_round_trip()
+  visibility: private
+  language: python
+  end_line: 37
+  callers:
+  - symbol:capability-runtime-roots-and-toolchain:health.get-health
+  callees: []
+- id: symbol:capability-runtime-roots-and-toolchain:health.get-health
+  node: capability:runtime-roots-and-toolchain
+  kind: function
+  name: get_health
+  file: engine/apps/api/src/brain_api/health.py
+  line: 41
+  signature: async def get_health()
+  visibility: public
+  language: python
+  end_line: 47
+  callers: []
+  callees:
+  - symbol:capability-runtime-roots-and-toolchain:health.check-storage-round-trip
+  - symbol:capability-runtime-roots-and-toolchain:health.health-response
+- id: symbol:capability-runtime-roots-and-toolchain:health.health-response
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: HealthResponse
+  file: engine/apps/api/src/brain_api/health.py
+  line: 16
+  signature: class HealthResponse
+  visibility: public
+  language: python
+  end_line: 20
+  callers:
+  - symbol:capability-runtime-roots-and-toolchain:health.get-health
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:context-guard.check
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: check
+  file: neuron/packages/brain-extraction/src/brain_extraction/context_guard.py
+  line: 29
+  signature: 'def check(self, prompt_tokens: int)'
+  visibility: public
+  language: python
+  container: ContextGuard
+  end_line: 31
+  callers: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:context-guard.context-limit-exceeded
+- id: symbol:capability-semantic-interpretation-run:context-guard.context-guard
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: ContextGuard
+  file: neuron/packages/brain-extraction/src/brain_extraction/context_guard.py
+  line: 21
+  signature: class ContextGuard
+  visibility: public
+  language: python
+  end_line: 31
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:context-guard.context-limit-exceeded
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: ContextLimitExceeded
+  file: neuron/packages/brain-extraction/src/brain_extraction/context_guard.py
+  line: 4
+  signature: class ContextLimitExceeded
+  visibility: public
+  language: python
+  end_line: 18
+  callers:
+  - symbol:capability-semantic-interpretation-run:context-guard.check
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:context-guard.init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/context_guard.py
+  line: 25
+  signature: 'def __init__(self, limit: int, reserve_for_output: int=512)'
+  visibility: private
+  language: python
+  container: ContextGuard
+  end_line: 27
+  callers:
+  - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/context_guard.py
+  line: 11
+  signature: 'def __init__(self, prompt_tokens: int, limit: int, reserve_for_output:
+    int)'
+  visibility: private
+  language: python
+  container: ContextLimitExceeded
+  end_line: 18
+  callers: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:context-guard.init
+  - symbol:capability-semantic-interpretation-run:in-memory-run-recorder.init
+- id: symbol:capability-semantic-interpretation-run:counter-accumulator.freeze
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: freeze
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/counters.py
+  line: 40
+  signature: def freeze(self)
+  visibility: public
+  language: python
+  container: CounterAccumulator
+  end_line: 47
+  callers: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:result.counters
+- id: symbol:capability-semantic-interpretation-run:counter-accumulator.record-model-call
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: record_model_call
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/counters.py
+  line: 35
+  signature: 'def record_model_call(self, *, prompt_tokens: int, completion_tokens:
+    int)'
+  visibility: public
+  language: python
+  container: CounterAccumulator
+  end_line: 38
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:counters.assert-no-reparse
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: assert_no_reparse
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/counters.py
+  line: 14
+  signature: 'def assert_no_reparse(counters: Counters)'
+  visibility: public
+  language: python
+  end_line: 18
+  callers: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:counters.reparse-detected
+- id: symbol:capability-semantic-interpretation-run:counters.counter-accumulator
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: CounterAccumulator
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/counters.py
+  line: 22
+  signature: class CounterAccumulator
+  visibility: public
+  language: python
+  end_line: 47
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:counters.reparse-detected
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: ReparseDetected
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/counters.py
+  line: 8
+  signature: class ReparseDetected
+  visibility: public
+  language: python
+  end_line: 11
+  callers:
+  - symbol:capability-semantic-interpretation-run:counters.assert-no-reparse
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:in-memory-run-recorder.init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/runs.py
+  line: 25
+  signature: def __init__(self)
+  visibility: private
+  language: python
+  container: InMemoryRunRecorder
+  end_line: 26
+  callers:
+  - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:in-memory-run-recorder.record
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: record
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/runs.py
+  line: 28
+  signature: 'async def record(self, result: InterpretationResult)'
+  visibility: public
+  language: python
+  container: InMemoryRunRecorder
+  end_line: 29
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:interpretation-run-recorder.record
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: record
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/runs.py
+  line: 18
+  signature: 'async def record(self, result: InterpretationResult)'
+  visibility: public
+  language: python
+  container: InterpretationRunRecorder
+  end_line: 18
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:profiles.extraction-profile
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: ExtractionProfile
+  file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
+  line: 36
+  signature: class ExtractionProfile
+  visibility: public
+  language: python
+  end_line: 40
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:profiles.gl-limits-a
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: GLLimitsA
+  file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
+  line: 8
+  signature: class GLLimitsA
+  visibility: public
+  language: python
+  end_line: 21
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:profiles.gl-limits-b
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: GLLimitsB
+  file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
+  line: 24
+  signature: class GLLimitsB
+  visibility: public
+  language: python
+  end_line: 32
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:profiles.load-profile
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: load_profile
+  file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
+  line: 53
+  signature: 'def load_profile(profile_id: str)'
+  visibility: public
+  language: python
+  end_line: 57
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:result.bounding-box
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: BoundingBox
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  line: 13
+  signature: class BoundingBox
+  visibility: public
+  language: python
+  end_line: 20
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:result.candidate-assertion
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: CandidateAssertion
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  line: 56
+  signature: class CandidateAssertion
+  visibility: public
+  language: python
+  end_line: 65
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:result.candidate-entity
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: CandidateEntity
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  line: 37
+  signature: class CandidateEntity
+  visibility: public
+  language: python
+  end_line: 43
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:result.candidate-relationship
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: CandidateRelationship
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  line: 46
+  signature: class CandidateRelationship
+  visibility: public
+  language: python
+  end_line: 53
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:result.counters
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: Counters
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  line: 82
+  signature: class Counters
+  visibility: public
+  language: python
+  end_line: 89
+  callers:
+  - symbol:capability-semantic-interpretation-run:counter-accumulator.freeze
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:result.evidence-binding
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: EvidenceBinding
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  line: 23
+  signature: class EvidenceBinding
+  visibility: public
+  language: python
+  end_line: 34
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:result.interpretation-result
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: InterpretationResult
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  line: 92
+  signature: class InterpretationResult
+  visibility: public
+  language: python
+  end_line: 107
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:result.run-configuration
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: RunConfiguration
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  line: 68
+  signature: class RunConfiguration
+  visibility: public
+  language: python
+  end_line: 79
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:runs.in-memory-run-recorder
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: InMemoryRunRecorder
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/runs.py
+  line: 21
+  signature: class InMemoryRunRecorder
+  visibility: public
+  language: python
+  end_line: 29
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:runs.interpretation-run-recorder
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: InterpretationRunRecorder
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/runs.py
+  line: 13
+  signature: class InterpretationRunRecorder
+  visibility: public
+  language: python
+  end_line: 18
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:runs.new-run-id
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: new_run_id
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/runs.py
+  line: 9
+  signature: def new_run_id()
+  visibility: public
+  language: python
+  end_line: 10
+  callers: []
+  callees: []

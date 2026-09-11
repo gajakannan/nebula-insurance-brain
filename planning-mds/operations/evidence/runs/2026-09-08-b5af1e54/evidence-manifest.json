@@ -3,20 +3,31 @@
   "feature_id": "F0001",
   "feature_slug": "repository-and-engineering-foundation",
   "run_id": "2026-09-08-b5af1e54",
-  "status": "in-progress",
+  "status": "approved",
   "recorded_on": "2026-09-08",
   "contract_version": "2026-07-11",
   "contract_effective_date": "2026-07-11",
   "feature_path_at_run_start": "planning-mds/features/F0001-repository-and-engineering-foundation",
-  "feature_path_at_closeout": null,
-  "feature_state": "In Progress",
+  "feature_path_at_closeout": "planning-mds/features/F0001-repository-and-engineering-foundation",
+  "feature_state": "Done",
   "rerun_of": null,
   "changed_paths": [
-    "planning-mds/features/F0001-repository-and-engineering-foundation"
+    ".env.example",
+    ".github",
+    ".gitignore",
+    "config",
+    "docker",
+    "docker-compose.yml",
+    "engine",
+    "experience",
+    "neuron",
+    "planning-mds",
+    "profiles",
+    "scripts"
   ],
   "scm": {
     "base_ref": "main",
-    "head_ref": "feature/F####-{slug}",
+    "head_ref": "feature/F0001-repository-and-engineering-foundation",
     "diff_artifact": "artifacts/diffs/changed-files.txt"
   },
   "runtime_bearing": true,
@@ -55,6 +66,31 @@
       "required": true,
       "result": "PASS WITH RECOMMENDATIONS",
       "artifact": "security-review-report.md"
+    },
+    "deployability": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "deployability-check.md"
+    },
+    "signoff": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "signoff-ledger.md"
+    },
+    "kg_reconciliation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "kg-reconciliation.md"
+    },
+    "pm_closeout": {
+      "required": true,
+      "result": "APPROVED",
+      "artifact": "pm-closeout.md"
+    },
+    "tracker_sync": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "lifecycle-gates.log"
     }
   },
   "files": {
@@ -65,22 +101,67 @@
     "commands_log": "commands.log",
     "lifecycle_gates_log": "lifecycle-gates.log",
     "assembly_plan_validation": "g0-assembly-plan-validation.md",
-    "runtime_preflight": "g1-runtime-preflight.md"
+    "runtime_preflight": "g1-runtime-preflight.md",
+    "token_usage": "token-usage.json"
   },
-  "role_results": {},
+  "role_results": {
+    "Quality Engineer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "test-plan.md",
+        "test-execution-report.md",
+        "coverage-report.md"
+      ],
+      "verdict_artifact": "test-execution-report.md"
+    },
+    "Code Reviewer": {
+      "required": true,
+      "result": "APPROVED WITH RECOMMENDATIONS",
+      "required_artifacts": [
+        "code-review-report.md"
+      ],
+      "verdict_artifact": "code-review-report.md"
+    },
+    "Security Reviewer": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "required_artifacts": [
+        "security-review-report.md"
+      ],
+      "verdict_artifact": "security-review-report.md"
+    },
+    "DevOps": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g1-runtime-preflight.md",
+        "deployability-check.md"
+      ],
+      "verdict_artifact": "deployability-check.md"
+    },
+    "Architect": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g0-assembly-plan-validation.md"
+      ],
+      "verdict_artifact": "g0-assembly-plan-validation.md"
+    }
+  },
   "token_usage": {
     "artifact": "token-usage.json",
-    "agent_tool": null,
-    "turns": null,
-    "context_tokens": null,
-    "uncached_input_tokens": null,
-    "cached_input_tokens": null,
-    "cache_creation_input_tokens": null,
-    "cache_creation_1h_input_tokens": null,
-    "cache_creation_5m_input_tokens": null,
-    "output_tokens": null,
-    "cache_hit_ratio": null,
-    "compactions": null
+    "agent_tool": "claude-code",
+    "turns": 1541,
+    "context_tokens": 773408132,
+    "uncached_input_tokens": 3080,
+    "cached_input_tokens": 769093330,
+    "cache_creation_input_tokens": 4311722,
+    "cache_creation_1h_input_tokens": 4311722,
+    "cache_creation_5m_input_tokens": 0,
+    "output_tokens": 851880,
+    "cache_hit_ratio": 0.9944,
+    "compactions": 2
   },
   "security_scans": {
     "dependency": {

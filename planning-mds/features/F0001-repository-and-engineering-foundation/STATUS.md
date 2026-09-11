@@ -1,7 +1,8 @@
 # F0001 — Repository and engineering foundation — Status
 
-**Overall Status:** In Progress — feature action run `2026-09-08-b5af1e54`, G0–G1 passed, Step 1 implementation finished (all 7 stories implemented); ADRs settled, ready for self-review (G3)
+**Overall Status:** Done — feature action run `2026-09-08-b5af1e54` complete (G0–G8 all passed); all seven stories implemented and proven live, all six pre-build ADRs settled, all five required signoff roles passing, knowledge graph reconciled at G7
 **Last Updated:** 2026-09-10
+**Archival note:** Not moved to `planning-mds/features/archive/` at this closeout — a deliberate PM judgment call, not an oversight. F0001 is the foundation every subsequently planned feature (F0002–F0063, F0065) references by path and by ADR; every one of their `ROADMAP.md`/`kg-source` rationale entries cites "F0001 accepted" as their entry criterion. Archiving now would require repointing a large number of hand-authored cross-references across the planning tree for a feature whose content (this STATUS.md, GETTING-STARTED.md, and the ADRs it settled) stays in continuous active use, not superseded or historical. `Overall Status: Done` already satisfies feature.md Step 8's own conditional phrasing ("move to archive **when appropriate**") — full closeout evidence validation applies regardless of the archive decision.
 
 ## Story Checklist
 
@@ -84,7 +85,7 @@ The full application shell remains F0021.
 - [x] Runtime validation evidence recorded (S0002: see Deferred Non-Blocking Follow-ups for the one open item — a blueprint-application race on first boot)
 - [ ] No TODOs remain in code
 
-## Required Signoff Roles (Set in Planning)
+## Required Role Matrix
 
 Set by the Architect at Phase B (plan run `2026-09-06-cdb5d8cb`).
 
@@ -98,8 +99,45 @@ Set by the Architect at Phase B (plan run `2026-09-06-cdb5d8cb`).
 
 ## Story Signoff Provenance
 
+Reviewed feature-scoped at F0001's G2/G3 gates (run `2026-09-08-b5af1e54`, 2026-09-10) — one proof-scope implementation pass covering all seven stories together, so each role's evidence artifact applies across the row set below rather than being re-derived per story.
+
 | Story | Role | Reviewer | Verdict | Evidence | Date | Notes |
 |-------|------|----------|---------|----------|------|-------|
+| F0001-S0001 | Quality Engineer | Quality Engineer pass | PASS | `test-execution-report.md` | 2026-09-10 | Engine Workspace + `coverage-report.md`; `apps/api/tests/test_health.py`; version-gate fails closed |
+| F0001-S0001 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | Workspace skeleton architecture compliant (with recommendations — see code-review-report.md) |
+| F0001-S0001 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | No auth/authz surface at S0001 |
+| F0001-S0001 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | `uv sync`/CI `runtime-suites` green |
+| F0001-S0001 | Architect | Architect (record owner) | PASS | `code-review-report.md` | 2026-09-10 | Architecture Compliance section; clean-architecture boundaries established |
+| F0001-S0002 | Quality Engineer | Quality Engineer pass | PASS | `deployability-check.md` | 2026-09-10 | Two `down -v`/`up -d` cycles both healthy; see also `test-execution-report.md`'s CI section |
+| F0001-S0002 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | Dependency matrix corrections documented, not silent (with recommendations — see code-review-report.md) |
+| F0001-S0002 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | Scan Disposition section; no secrets committed; `.env.example` only |
+| F0001-S0002 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | `docker/DEPENDENCY-MATRIX.md` complete (S0007) |
+| F0001-S0002 | Architect | Architect (record owner) | PASS | `{PRODUCT_ROOT}/docker/DEPENDENCY-MATRIX.md` | 2026-09-10 | PostgreSQL 18/pgvector/AGE pins re-verified at S0006 |
+| F0001-S0003 | Quality Engineer | Quality Engineer pass | PASS | `test-plan.md` | 2026-09-10 | See also `test-execution-report.md`'s Neuron Workspace section; 18 passed, 2 skipped (vLLM-dependent) |
+| F0001-S0003 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | `docling-graph` rejection recorded as a reviewed architecture decision (with recommendations — see code-review-report.md) |
+| F0001-S0003 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | Secrets / Config section; inference service receives chunk text only, no identifiers |
+| F0001-S0003 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | Migration `0001` applies/downgrades cleanly |
+| F0001-S0003 | Architect | Architect (record owner) | PASS | `planning-mds/architecture/decisions/ADR-0040-lossless-content-and-evidence-contract.md` | 2026-09-10 | Accepted with measured results |
+| F0001-S0004 | Quality Engineer | Quality Engineer pass | PASS | `test-plan.md` | 2026-09-10 | See also `test-execution-report.md`'s Experience Workspace section; 47 backend + 11 frontend component tests |
+| F0001-S0004 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | Vertical-Slice Completeness section; review→commit wiring gap disclosed, not silent (with recommendations — see code-review-report.md) |
+| F0001-S0004 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | Threat Boundary section; reviewer cannot commit canonical truth, verified structurally |
+| F0001-S0004 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | Migration `0002` applies/downgrades cleanly |
+| F0001-S0004 | Architect | Architect (record owner) | PASS | `planning-mds/architecture/decisions/ADR-0044-review-surface-and-approval-contract.md` | 2026-09-10 | ADR-0044 accepted; ADR-0058 accepted as amended (see ADR-0058 file) |
+| F0001-S0005 | Quality Engineer | Quality Engineer pass | PASS | `test-plan.md` | 2026-09-10 | See also `test-execution-report.md`; section 87 matrix, concurrency, outbox replay all live-verified |
+| F0001-S0005 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | `CanonicalCommitService` protocol boundary reviewed (with recommendations — see code-review-report.md) |
+| F0001-S0005 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | A08 Software & Data Integrity section; GiST exclusion constraint backstops the row lock |
+| F0001-S0005 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | Migration `0003` applies/downgrades cleanly |
+| F0001-S0005 | Architect | Architect (record owner) | PASS | `planning-mds/architecture/decisions/ADR-0041-atomic-semantic-commit-and-projection-delivery.md` | 2026-09-10 | Accepted with measured results |
+| F0001-S0006 | Quality Engineer | Quality Engineer pass | PASS | `test-plan.md` | 2026-09-10 | See also `test-execution-report.md`'s Live-Infrastructure Drills section; restore drill ×4, revocation propagation measured |
+| F0001-S0006 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | `engine/tests/security/` reviewed (with recommendations — see code-review-report.md) |
+| F0001-S0006 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | Full report; all four scan classes run; see Scan Disposition (with recommendations — see security-review-report.md) |
+| F0001-S0006 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | `scripts/ops/backup.sh`/`restore.sh` verified |
+| F0001-S0006 | Architect | Architect (record owner) | PASS | `planning-mds/architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md` | 2026-09-10 | Both ADR-0049/ADR-0050 accepted, scoped per their Scope notes (see ADR-0050 file) |
+| F0001-S0007 | Quality Engineer | Quality Engineer pass | PASS | `g2-self-review.md` | 2026-09-10 | Acceptance Criteria Review section; every ADR's recorded result traces to a cited artifact |
+| F0001-S0007 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | ADR settlement reviewed for honesty (no overclaiming) (with recommendations — see code-review-report.md) |
+| F0001-S0007 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | No fixture text or credentials in recorded results |
+| F0001-S0007 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | N/A — documentation-only story, no runtime change |
+| F0001-S0007 | Architect | Architect (record owner) | PASS | `planning-mds/architecture/decisions/ADR-0040-lossless-content-and-evidence-contract.md` | 2026-09-10 | All six ADRs under `planning-mds/architecture/decisions/` and `BLUEPRINT.md` §2.1/§4.8; ADR-0040/0041/0044/0049/0050 accepted, ADR-0058 accepted as amended |
 
 ## Deferred Non-Blocking Follow-ups
 
@@ -126,7 +164,7 @@ Set by the Architect at Phase B (plan run `2026-09-06-cdb5d8cb`).
 - [x] `planning-mds/features/ROADMAP.md` section aligned (Now)
 - [x] `planning-mds/features/STORY-INDEX.md` regenerated (7 stories)
 - [x] `planning-mds/BLUEPRINT.md` feature/story status links aligned
-- [ ] Every required signoff role has story-level `PASS` entries with reviewer, date, and evidence
+- [x] Every required signoff role has story-level `PASS` entries with reviewer, date, and evidence
 
 ## Archival Criteria
 

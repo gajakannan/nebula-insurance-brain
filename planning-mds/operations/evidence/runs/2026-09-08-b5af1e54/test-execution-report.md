@@ -42,7 +42,7 @@ development (2026-09-09; see `docker/DEPENDENCY-MATRIX.md`'s "ADR-0040 input" se
 the measured extraction results from that run) and are re-verified live again whenever
 `docker/local-inference-runbook.md`'s vLLM server is running.
 
-## Experience Workspace (`experience/`)
+## Experience Workspace (`experience/`) — frontend
 
 ```text
 $ pnpm exec tsc -b              -> clean
