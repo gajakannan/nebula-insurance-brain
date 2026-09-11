@@ -31,10 +31,10 @@ frontend toolchain, including coverage thresholds, is F0021's).
 
 ## Raw Artifact Paths
 
-Per-package coverage output is reproduced verbatim in `test-execution-report.md`; no
-separate XML/lcov artifact files were persisted under `artifacts/coverage/` for this run
-(CI's `runtime-suites` job uploads `engine/coverage/coverage.xml` as a workflow artifact —
-see run `34554563562`).
+Per-package coverage output is reproduced verbatim in `test-execution-report.md`; this
+run's evidence package does not include a separate coverage-artifacts subdirectory (CI's
+`runtime-suites` job instead uploads `engine/coverage/coverage.xml` as its own workflow
+artifact — see run `34554563562`).
 
 ## Feature-Scoped Notes
 

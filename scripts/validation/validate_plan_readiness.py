@@ -82,7 +82,7 @@ def validate(root: Path, scope: str, target: str) -> list[dict[str, str]]:
                 fail("BRAIN-REGISTRY", f"Invalid or duplicate registry entry: {cells[0]}", registry_path)
                 continue
             entries[cells[0]] = "planning-mds/features/" + folders[0].rstrip("/")
-            if "Active" in cells or "In Progress" in cells:
+            if "Active" in cells or "In Progress" in cells or "Done" in cells:
                 active.add(cells[0])
     if scope == "project":
         if target != "project":
