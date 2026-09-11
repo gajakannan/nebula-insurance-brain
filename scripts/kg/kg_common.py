@@ -6,6 +6,7 @@ import json
 import math
 import os
 import re
+import subprocess
 import sys
 import uuid
 from datetime import UTC, datetime
@@ -135,13 +136,36 @@ def has_wildcards(pattern: str) -> bool:
     return bool(WILDCARD_RE.search(pattern))
 
 
+_TRACKED_FILES_CACHE: set[str] | None = None
+
+
+def tracked_files() -> set[str]:
+    """Git-tracked file paths (repo-relative, POSIX). Wildcard bindings are
+    filtered against this set so untracked local build artifacts
+    (.egg-info, __pycache__, *.pyc, etc.) never affect what a binding glob
+    resolves to -- those differ machine to machine and would otherwise make
+    coverage-report.yaml and the symbol/decision indexes non-reproducible."""
+    global _TRACKED_FILES_CACHE
+    if _TRACKED_FILES_CACHE is None:
+        result = subprocess.run(
+            ["git", "ls-files"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        _TRACKED_FILES_CACHE = set(result.stdout.splitlines())
+    return _TRACKED_FILES_CACHE
+
+
 def expand_declared_pattern(pattern: str) -> list[str]:
     normalized = normalize_repo_path(pattern)
     if has_wildcards(normalized):
+        tracked = tracked_files()
         return sorted(
             repo_relative(path)
             for path in REPO_ROOT.glob(normalized)
-            if path.exists()
+            if path.is_file() and repo_relative(path) in tracked
         )
 
     candidate = REPO_ROOT / normalized
