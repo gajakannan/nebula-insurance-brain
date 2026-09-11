@@ -1,6 +1,6 @@
 # F0001 — Repository and engineering foundation — Status
 
-**Overall Status:** In Progress — feature action run `2026-09-08-b5af1e54`, G0–G1 passed, Step 1 implementation complete (all 7 stories done); ADRs settled, ready for self-review (G3)
+**Overall Status:** In Progress — feature action run `2026-09-08-b5af1e54`, G0–G1 passed, Step 1 implementation finished (all 7 stories implemented); ADRs settled, ready for self-review (G3)
 **Last Updated:** 2026-09-10
 
 ## Story Checklist
