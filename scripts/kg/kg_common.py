@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import fnmatch
+import glob
 import json
 import math
 import os
@@ -161,11 +162,20 @@ def tracked_files() -> set[str]:
 def expand_declared_pattern(pattern: str) -> list[str]:
     normalized = normalize_repo_path(pattern)
     if has_wildcards(normalized):
+        # `glob.glob(..., recursive=True)` is used instead of
+        # `pathlib.Path.glob()`: the recursion depth of a trailing "/**"
+        # component differs between Python versions under pathlib (observed
+        # Python 3.12 stopping one level short of Python 3.14's full
+        # recursion), which would make binding resolution -- and therefore
+        # coverage-report.yaml -- depend on the interpreter running it. The
+        # `glob` module's `recursive=True` has been consistently fully
+        # recursive since Python 3.5.
         tracked = tracked_files()
+        matches = glob.glob(str(REPO_ROOT / normalized), recursive=True)
         return sorted(
-            repo_relative(path)
-            for path in REPO_ROOT.glob(normalized)
-            if path.is_file() and repo_relative(path) in tracked
+            rel
+            for match in matches
+            if (rel := repo_relative(Path(match))) in tracked
         )
 
     candidate = REPO_ROOT / normalized
