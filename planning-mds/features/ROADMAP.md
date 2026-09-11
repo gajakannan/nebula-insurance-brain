@@ -113,5 +113,5 @@ This document is the working prioritization view for feature sequencing. The tab
 <!-- generated:begin roadmap:completed -->
 | Feature | Completed Date | Evidence |
 |---------|----------------|----------|
-| [F0001 — Repository and engineering foundation](./F0001-repository-and-engineering-foundation/README.md) | 2026-09-10 | All seven stories implemented and proven live; ADR-0040/0041/0044/0049/0050 accepted, ADR-0058 accepted as amended; ten capabilities bound to as-built source at G7; signoff complete for all five required roles. |
+| [F0001 — Repository and engineering foundation](./archive/F0001-repository-and-engineering-foundation/README.md) | 2026-09-10 | All seven stories implemented and proven live; ADR-0040/0041/0044/0049/0050 accepted, ADR-0058 accepted as amended; ten capabilities bound to as-built source at G7; signoff complete for all five required roles. |
 <!-- generated:end roadmap:completed -->

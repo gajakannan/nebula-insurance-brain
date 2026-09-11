@@ -209,14 +209,14 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 
 **Pre-build (Now)**
 
-- [F0001 — Repository and engineering foundation](features/F0001-repository-and-engineering-foundation/README.md) - Plan approved 2026-09-06 (Phase A and B); ready for the feature action
-  - [F0001-S0001](features/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md) - Not Started
-  - [F0001-S0002](features/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md) - Not Started
-  - [F0001-S0003](features/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md) - Not Started
-  - [F0001-S0004](features/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md) - Not Started
-  - [F0001-S0005](features/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) - Not Started
-  - [F0001-S0006](features/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) - Not Started
-  - [F0001-S0007](features/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) - Not Started
+- [F0001 — Repository and engineering foundation](features/archive/F0001-repository-and-engineering-foundation/README.md) - Plan approved 2026-09-06 (Phase A and B); ready for the feature action
+  - [F0001-S0001](features/archive/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md) - Not Started
+  - [F0001-S0002](features/archive/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md) - Not Started
+  - [F0001-S0003](features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md) - Not Started
+  - [F0001-S0004](features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md) - Not Started
+  - [F0001-S0005](features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) - Not Started
+  - [F0001-S0006](features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) - Not Started
+  - [F0001-S0007](features/archive/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) - Not Started
 
 **v0.1A (Next)**
 
@@ -373,7 +373,7 @@ Section 117.1 lists the decisions the implementation team still owes: source-aut
 
 ### 4.9 F0001 Phase B (2026-09-06)
 
-Assembly plan: `features/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
+Assembly plan: `features/archive/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
 
 ---
 

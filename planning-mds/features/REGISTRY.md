@@ -14,7 +14,6 @@ The feature tables below are generated fenced regions compiled from `planning-md
 <!-- generated:begin registry:active -->
 | Feature ID | Name | Status | Phase | Folder |
 |------------|------|--------|-------|--------|
-| F0001 | Repository and engineering foundation | Done | Pre-build | `F0001-repository-and-engineering-foundation/` |
 <!-- generated:end registry:active -->
 
 ## Retired Features
@@ -102,6 +101,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:archived -->
 | Feature ID | Name | Archived Date | Evidence Reentry Date | Folder |
 |------------|------|---------------|-----------------------|--------|
+| F0001 | Repository and engineering foundation | 2026-09-11 |  | `archive/F0001-repository-and-engineering-foundation/` |
 <!-- generated:end registry:archived -->
 
 ## Numbering Rules
