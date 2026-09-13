@@ -116,7 +116,7 @@ N/A — proof harness driven by tests; no user-facing mutation of business data.
 
 **Open Questions:**
 - [x] Proof host — decided at the F0001 clarification gate (2026-09-06): local Docker Compose only; the production host decision waits for F0026 (section 117.1 item 3)
-- [ ] authentik version — Architect to decide at Phase B and pin in the dependency matrix
+- [x] authentik version — pinned at `authentik/server:2026.2.0` in the local compose stack
 
 **Assumptions (to be validated):**
 - The proof host image is the PostgreSQL 18 image built in S0002
@@ -124,14 +124,14 @@ N/A — proof harness driven by tests; no user-facing mutation of business data.
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Edge cases handled
-- [ ] Permissions enforced
-- [ ] Audit/timeline logged (authorization decision audit)
-- [ ] Tests pass
-- [ ] Documentation updated (security README, ADR-0049 and ADR-0050 input for S0007)
-- [ ] Story filename matches `Story ID` prefix
-- [ ] Story index regenerated
+- [x] Acceptance criteria met
+- [x] Edge cases handled
+- [x] Permissions enforced
+- [x] Audit/timeline logged (authorization and credential-failure audit)
+- [x] Tests pass
+- [x] Documentation updated (security README, ADR-0049 and ADR-0050 input for S0007)
+- [x] Story filename matches `Story ID` prefix
+- [x] Story index regenerated
 
 ## Review Provenance
 

@@ -207,16 +207,11 @@ first user-facing features, F0021 to F0023.
 
 The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065), sequenced per sections 115.3 and 124. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. Story links are appended by the plan action as each feature is planned.
 
-**Pre-build (Now)**
+**Completed**
 
-- [F0001 — Repository and engineering foundation](features/archive/F0001-repository-and-engineering-foundation/README.md) - Plan approved 2026-09-06 (Phase A and B); ready for the feature action
-  - [F0001-S0001](features/archive/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md) - Not Started
-  - [F0001-S0002](features/archive/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md) - Not Started
-  - [F0001-S0003](features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md) - Not Started
-  - [F0001-S0004](features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md) - Not Started
-  - [F0001-S0005](features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) - Not Started
-  - [F0001-S0006](features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) - Not Started
-  - [F0001-S0007](features/archive/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) - Not Started
+- [F0001 — Repository and engineering foundation](features/archive/F0001-repository-and-engineering-foundation/README.md) - Done and archived 2026-09-11; remediation evidence refreshed 2026-09-12
+
+**Pre-build (Now)**
 
 **v0.1A (Next)**
 

@@ -1,20 +1,20 @@
 # F0001 — Repository and engineering foundation — Status
 
-**Overall Status:** Done and Archived — feature action run `2026-09-08-b5af1e54` complete (G0–G8 all passed); all seven stories implemented and proven live, all six pre-build ADRs settled, all five required signoff roles passing, knowledge graph reconciled at G7
-**Last Updated:** 2026-09-11
+**Overall Status:** Done and Archived — feature action run `2026-09-08-b5af1e54` complete (G0–G8 all passed); security remediation run `2026-09-12-855d2b93` added credential-failure audit logging and refreshed the evidence package
+**Last Updated:** 2026-09-12
 **Archival note:** Moved to `planning-mds/features/archive/F0001-repository-and-engineering-foundation/` on 2026-09-11. The initial closeout (2026-09-10) deliberately deferred this move on the assumption that archiving would require repointing hand-authored cross-references across the planning tree, since F0001 is the foundation every subsequently planned feature (F0002–F0063, F0065) references by path and by ADR. That assumption was wrong: `F####`/`F####-S####` references resolve through each referencing feature's own `kg-source` shard `path:`/story `path:` fields (the F0005 payoff described in `agents/actions/feature.md` Step 8.6), so the archive move requires no doc-ref repoint in any *other* feature's tracker or KG projection — only this feature's own feature-local relative links (README.md, STATUS.md, F0001-S0004) needed a `../` adjustment for the added `archive/` path segment, which this move made. Corrected per `agents/actions/feature.md` Step 8 item 3.
 
 ## Story Checklist
 
 | Story | Title | Status |
 |-------|-------|--------|
-| F0001-S0001 | Runtime roots and toolchain skeleton | [x] Implemented (pending Code Review/Signoff at G3/G5) |
-| F0001-S0002 | Local runtime containers and dependency matrix | [x] Implemented (pending Code Review/Signoff at G3/G5) |
-| F0001-S0003 | Proof: parse once, reinterpret twice, evidence resolves | [x] Implemented (pending Code Review/Signoff at G3/G5) |
-| F0001-S0004 | Proof: native review round trip with lineage | [x] Implemented (pending Code Review/Signoff at G3/G5) |
-| F0001-S0005 | Proof: bitemporal commit under retroactive and concurrent change | [x] Implemented (pending Code Review/Signoff at G3/G5) |
-| F0001-S0006 | Proof: access boundaries, extension build, and restore | [x] Implemented (pending Code Review/Signoff at G3/G5) |
-| F0001-S0007 | Record proof outcomes and settle the pre-build contracts | [x] Implemented (pending Code Review/Signoff at G3/G5) |
+| F0001-S0001 | Runtime roots and toolchain skeleton | [x] Done — all required role signoffs recorded |
+| F0001-S0002 | Local runtime containers and dependency matrix | [x] Done — all required role signoffs recorded |
+| F0001-S0003 | Proof: parse once, reinterpret twice, evidence resolves | [x] Done — all required role signoffs recorded |
+| F0001-S0004 | Proof: native review round trip with lineage | [x] Done — all required role signoffs recorded |
+| F0001-S0005 | Proof: bitemporal commit under retroactive and concurrent change | [x] Done — all required role signoffs recorded |
+| F0001-S0006 | Proof: access boundaries, extension build, and restore | [x] Done — security remediation verified in `2026-09-12-855d2b93` |
+| F0001-S0007 | Record proof outcomes and settle the pre-build contracts | [x] Done — all required role signoffs recorded |
 
 ## Story × Role Progress
 
@@ -22,13 +22,13 @@ Cell states: `⬜` not started · `🔄` in progress · `✅` done · `—` not 
 
 | Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
 |-------|---------|----------|----|----|-------------|----------|--------|---------|
-| F0001-S0001 | ✅ | — | ✅ | ✅ | ⬜ | — | ✅ | 🔄 In Progress (Code Review pending, G3) |
-| F0001-S0002 | ✅ | — | — | ✅ | ⬜ | — | ✅ | 🔄 In Progress (Code Review pending, G3) |
-| F0001-S0003 | ✅ | — | ✅ | ✅ | ⬜ | — | — | 🔄 In Progress (Code Review pending, G3) |
-| F0001-S0004 | ✅ | ✅ | — | ✅ | ⬜ | ⬜ | ⬜ | 🔄 In Progress (Code Review/Security/DevOps pending) |
-| F0001-S0005 | ✅ | — | — | ✅ | ⬜ | — | — | 🔄 In Progress (Code Review pending, G3) |
-| F0001-S0006 | ✅ | — | — | ✅ | ⬜ | ⬜ | ⬜ | 🔄 In Progress (Code Review/Security/DevOps pending) |
-| F0001-S0007 | — | — | — | — | ⬜ | — | — | 🔄 In Progress (Architect-authored, documentation-only; Code Review pending, G3) |
+| F0001-S0001 | ✅ | — | ✅ | ✅ | ✅ | — | ✅ | ✅ Done |
+| F0001-S0002 | ✅ | — | — | ✅ | ✅ | — | ✅ | ✅ Done |
+| F0001-S0003 | ✅ | — | ✅ | ✅ | ✅ | — | — | ✅ Done |
+| F0001-S0004 | ✅ | ✅ | — | ✅ | ✅ | ✅ | ✅ | ✅ Done |
+| F0001-S0005 | ✅ | — | — | ✅ | ✅ | — | — | ✅ Done |
+| F0001-S0006 | ✅ | — | — | ✅ | ✅ | ✅ | ✅ | ✅ Done |
+| F0001-S0007 | — | — | — | — | ✅ | — | — | ✅ Done |
 
 ## Backend Progress
 
@@ -80,10 +80,10 @@ The full application shell remains F0021.
 
 - [x] docker-compose with PostgreSQL (pgvector, AGE) and authentik; local filesystem artifact store loaded from `config/local.yaml` (S0002: live-verified — extensions load, OIDC discovery served, two `down -v`/`up -d` cycles both reach healthy)
 - [x] Dependency matrix pinned (`docker/DEPENDENCY-MATRIX.md`) — two pins corrected from the assembly plan's originals after a real build failure: pgvector v0.8.0→v0.8.6 (PG18 API break) and AGE `PG18/v1.6.0-rc0`→`PG18/v1.8.0-rc0` (tag did not exist upstream)
-- [ ] Backup and restore drill executed and timed
+- [x] Backup and restore drill executed and timed
 - [x] CI product-gates job runs runtime suites (S0001: `runtime-suites` job — engine/neuron `uv sync`, ruff, mypy, pytest+coverage; S0002: `runtime-stack` job — builds postgres image, boots the compose stack, verifies extensions/OIDC/seed principals, tears down)
 - [x] Runtime validation evidence recorded (S0002: see Deferred Non-Blocking Follow-ups for the one open item — a blueprint-application race on first boot)
-- [ ] No TODOs remain in code
+- [x] No TODOs remain in implementation code; lifecycle TODO placeholders were removed from the current evidence run
 
 ## Required Role Matrix
 
@@ -112,7 +112,7 @@ Reviewed feature-scoped at F0001's G2/G3 gates (run `2026-09-08-b5af1e54`, 2026-
 | F0001-S0002 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | Dependency matrix corrections documented, not silent (with recommendations — see code-review-report.md) |
 | F0001-S0002 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | Scan Disposition section; no secrets committed; `.env.example` only |
 | F0001-S0002 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | `docker/DEPENDENCY-MATRIX.md` complete (S0007) |
-| F0001-S0002 | Architect | Architect (record owner) | PASS | `{PRODUCT_ROOT}/docker/DEPENDENCY-MATRIX.md` | 2026-09-10 | PostgreSQL 18/pgvector/AGE pins re-verified at S0006 |
+| F0001-S0002 | Architect | Architect (record owner) | PASS | `deployability-check.md` | 2026-09-10 | PostgreSQL 18/pgvector/AGE pins re-verified at S0006 |
 | F0001-S0003 | Quality Engineer | Quality Engineer pass | PASS | `test-plan.md` | 2026-09-10 | See also `test-execution-report.md`'s Neuron Workspace section; 18 passed, 2 skipped (vLLM-dependent) |
 | F0001-S0003 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | `docling-graph` rejection recorded as a reviewed architecture decision (with recommendations — see code-review-report.md) |
 | F0001-S0003 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | Secrets / Config section; inference service receives chunk text only, no identifiers |
@@ -128,9 +128,9 @@ Reviewed feature-scoped at F0001's G2/G3 gates (run `2026-09-08-b5af1e54`, 2026-
 | F0001-S0005 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | A08 Software & Data Integrity section; GiST exclusion constraint backstops the row lock |
 | F0001-S0005 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | Migration `0003` applies/downgrades cleanly |
 | F0001-S0005 | Architect | Architect (record owner) | PASS | `planning-mds/architecture/decisions/ADR-0041-atomic-semantic-commit-and-projection-delivery.md` | 2026-09-10 | Accepted with measured results |
-| F0001-S0006 | Quality Engineer | Quality Engineer pass | PASS | `test-plan.md` | 2026-09-10 | See also `test-execution-report.md`'s Live-Infrastructure Drills section; restore drill ×4, revocation propagation measured |
+| F0001-S0006 | Quality Engineer | Quality Engineer remediation pass | PASS | `test-execution-report.md` | 2026-09-12 | Credential-failure logging contract passed; live HTTP cases remain explicitly runtime-dependent |
 | F0001-S0006 | Code Reviewer | Code Reviewer pass | APPROVED | `code-review-report.md` | 2026-09-10 | `engine/tests/security/` reviewed (with recommendations — see code-review-report.md) |
-| F0001-S0006 | Security Reviewer | Security Reviewer pass | PASS | `security-review-report.md` | 2026-09-10 | Full report; all four scan classes run; see Scan Disposition (with recommendations — see security-review-report.md) |
+| F0001-S0006 | Security Reviewer | Security Reviewer remediation pass | PASS | `security-review-report.md` | 2026-09-12 | Credential-failure reason is structured-log recorded and never disclosed; four baseline scan classes remain cited |
 | F0001-S0006 | DevOps | DevOps pass | PASS | `deployability-check.md` | 2026-09-10 | `scripts/ops/backup.sh`/`restore.sh` verified |
 | F0001-S0006 | Architect | Architect (record owner) | PASS | `planning-mds/architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md` | 2026-09-10 | Both ADR-0049/ADR-0050 accepted, scoped per their Scope notes (see ADR-0050 file) |
 | F0001-S0007 | Quality Engineer | Quality Engineer pass | PASS | `g2-self-review.md` | 2026-09-10 | Acceptance Criteria Review section; every ADR's recorded result traces to a cited artifact |
@@ -160,8 +160,8 @@ Reviewed feature-scoped at F0001's G2/G3 gates (run `2026-09-08-b5af1e54`, 2026-
 
 ## Tracker Sync Checklist
 
-- [x] `planning-mds/features/REGISTRY.md` status/path aligned (Active, compiled from the shard)
-- [x] `planning-mds/features/ROADMAP.md` section aligned (Now)
+- [x] `planning-mds/features/REGISTRY.md` status/path aligned (Archived, compiled from the shard)
+- [x] `planning-mds/features/ROADMAP.md` section aligned (Completed)
 - [x] `planning-mds/features/STORY-INDEX.md` regenerated (7 stories)
 - [x] `planning-mds/BLUEPRINT.md` feature/story status links aligned
 - [x] Every required signoff role has story-level `PASS` entries with reviewer, date, and evidence

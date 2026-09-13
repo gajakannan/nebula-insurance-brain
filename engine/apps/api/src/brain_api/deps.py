@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncGenerator, Sequence
+from uuid import uuid4
 
 from brain_content.config import load_local_object_store_config
 from brain_content.object_store import LocalFilesystemObjectStore
@@ -17,11 +19,13 @@ from brain_security.authorization import AuthorizationService
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter
 from brain_security.principals import PrincipalResolver
 from brain_security.verification import CredentialError, OidcJwksVerifier
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from brain_api.config import Settings
 from brain_api.errors import BrainError
+
+logger = logging.getLogger(__name__)
 
 settings = Settings.from_env()
 _engine = make_engine(settings.database_url)
@@ -52,6 +56,21 @@ class UnauthenticatedError(BrainError):
         super().__init__(None)
 
 
+def _record_credential_failure(request: Request, reason_code: str) -> None:
+    """Record the verification reason without ever logging the bearer token."""
+
+    logger.warning(
+        "unauthenticated_request",
+        extra={
+            "security_event": "credential_verification_failed",
+            "reason_code": reason_code,
+            "method": request.method,
+            "path": request.url.path,
+            "trace_id": request.headers.get("x-request-id") or str(uuid4()),
+        },
+    )
+
+
 async def get_db_session() -> AsyncGenerator[AsyncSession]:
     async with _session_factory() as session:
         yield session
@@ -66,11 +85,13 @@ def get_casbin_adapter() -> CasbinAuthorizationAdapter:
 
 
 async def current_principal(
+    request: Request,
     authorization: str | None = Header(default=None),
     session: AsyncSession = Depends(get_db_session),
     credential_verifier: OidcJwksVerifier = Depends(get_credential_verifier),
 ) -> Principal:
     if not authorization or not authorization.startswith("Bearer "):
+        _record_credential_failure(request, "malformed")
         raise UnauthenticatedError("malformed")
     token = authorization.removeprefix("Bearer ")
     try:
@@ -78,6 +99,7 @@ async def current_principal(
         resolver = PrincipalResolver(SqlAlchemyPrincipalRepository(session))
         principal = await resolver.resolve(credential)
     except CredentialError as exc:
+        _record_credential_failure(request, exc.code)
         raise UnauthenticatedError(exc.code) from exc
     await session.commit()
     return principal

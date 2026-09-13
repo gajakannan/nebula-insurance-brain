@@ -2,37 +2,30 @@
   "schema_version": 1,
   "feature_id": "F0001",
   "feature_slug": "repository-and-engineering-foundation",
-  "run_id": "2026-09-08-b5af1e54",
-  "status": "superseded",
-  "recorded_on": "2026-09-08",
+  "run_id": "2026-09-12-855d2b93",
+  "status": "approved",
+  "recorded_on": "2026-09-12",
   "contract_version": "2026-07-11",
   "contract_effective_date": "2026-07-11",
-  "feature_path_at_run_start": "planning-mds/features/F0001-repository-and-engineering-foundation",
+  "feature_path_at_run_start": "planning-mds/features/archive/F0001-repository-and-engineering-foundation",
   "feature_path_at_closeout": "planning-mds/features/archive/F0001-repository-and-engineering-foundation",
   "feature_state": "Done",
-  "rerun_of": null,
+  "rerun_of": "2026-09-08-b5af1e54",
   "changed_paths": [
-    ".env.example",
-    ".github",
-    ".gitignore",
-    "config",
-    "docker",
-    "docker-compose.yml",
-    "engine",
-    "experience",
-    "neuron",
-    "planning-mds",
-    "profiles",
-    "scripts"
+    "engine/apps/api/src/brain_api/deps.py",
+    "engine/tests/security/conftest.py",
+    "engine/tests/security/test_credential_verification.py",
+    "planning-mds/BLUEPRINT.md",
+    "planning-mds/features/archive/F0001-repository-and-engineering-foundation"
   ],
   "scm": {
     "base_ref": "main",
-    "head_ref": "feature/F0001-repository-and-engineering-foundation",
+    "head_ref": "remediation/F0001-credential-audit",
     "diff_artifact": "artifacts/diffs/changed-files.txt"
   },
   "runtime_bearing": true,
-  "deployment_config_changed": true,
-  "frontend_in_scope": true,
+  "deployment_config_changed": false,
+  "frontend_in_scope": false,
   "security_sensitive_scope": true,
   "required_roles": [
     "Quality Engineer",
@@ -54,7 +47,7 @@
     },
     "self_review": {
       "required": true,
-      "result": "PASS WITH RECOMMENDATIONS",
+      "result": "PASS",
       "artifact": "g2-self-review.md"
     },
     "code_review": {
@@ -151,17 +144,17 @@
   },
   "token_usage": {
     "artifact": "token-usage.json",
-    "agent_tool": "claude-code",
-    "turns": 1541,
-    "context_tokens": 773408132,
-    "uncached_input_tokens": 3080,
-    "cached_input_tokens": 769093330,
-    "cache_creation_input_tokens": 4311722,
-    "cache_creation_1h_input_tokens": 4311722,
-    "cache_creation_5m_input_tokens": 0,
-    "output_tokens": 851880,
-    "cache_hit_ratio": 0.9944,
-    "compactions": 2
+    "agent_tool": "codex",
+    "turns": 203,
+    "context_tokens": 28010286,
+    "uncached_input_tokens": 762158,
+    "cached_input_tokens": 27248128,
+    "cache_creation_input_tokens": null,
+    "cache_creation_1h_input_tokens": null,
+    "cache_creation_5m_input_tokens": null,
+    "output_tokens": 84663,
+    "cache_hit_ratio": 0.9728,
+    "compactions": 1
   },
   "security_scans": {
     "dependency": {
@@ -187,6 +180,8 @@
   },
   "omissions": [],
   "waivers": {},
-  "global_evidence_refs": {},
+  "global_evidence_refs": {
+    "prior_run": "planning-mds/operations/evidence/runs/2026-09-08-b5af1e54"
+  },
   "run_scope": "feature-completion"
 }

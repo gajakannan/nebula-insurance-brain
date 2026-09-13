@@ -2,7 +2,7 @@
 
 **Created:** 2026-09-06
 **Author:** Architect Agent
-**Status:** Draft (Phase B, plan run `2026-09-06-cdb5d8cb`)
+**Status:** Approved and reconciled (Phase B plan run `2026-09-06-cdb5d8cb`; feature run `2026-09-08-b5af1e54`; remediation `2026-09-12-855d2b93`)
 **Feature type:** infrastructure plus four proof harnesses; the template's entity/endpoint sections are adapted accordingly
 
 ## Overview

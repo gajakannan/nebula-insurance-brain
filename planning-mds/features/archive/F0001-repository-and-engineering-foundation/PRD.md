@@ -6,7 +6,7 @@
 **Feature Name:** Repository and engineering foundation
 **Priority:** Critical
 **Phase:** Infrastructure
-**Status:** Draft
+**Status:** Done and Archived (2026-09-11; remediation evidence refreshed 2026-09-12)
 
 ## Feature Statement
 
@@ -47,12 +47,12 @@
 
 ## Acceptance Criteria Overview
 
-- [ ] A fresh clone installs both Python workspaces, starts all containers, and passes the product gates and the runtime test suites in CI.
-- [ ] Proof 1 shows a second interpretation with zero conversion or OCR calls and citations resolving to immutable blocks with declared precision.
-- [ ] Proof 2 corrects a deliberately wrong limit exactly once; replayed and stale callbacks are rejected; the original assertion remains readable.
-- [ ] Proof 3 answers the section 87 questions at every valid-time and recorded-time coordinate; concurrent commits cannot create ambiguous accepted state.
-- [ ] Proof 4 verifies credentials before storage access, denies cross-scope object and review access, propagates revocation, installs the pinned extension build, and restores from backup with citations intact.
-- [ ] Every proof's results and limitations are recorded in its governing ADR and the dependency matrix is complete.
+- [x] A fresh clone installs both Python workspaces, starts all containers, and passes the product gates and the runtime test suites in CI.
+- [x] Proof 1 shows a second interpretation with zero conversion or OCR calls and citations resolving to immutable blocks with declared precision.
+- [x] Proof 2 corrects a deliberately wrong limit exactly once; replayed and stale callbacks are rejected; the original assertion remains readable.
+- [x] Proof 3 answers the section 87 questions at every valid-time and recorded-time coordinate; concurrent commits cannot create ambiguous accepted state.
+- [x] Proof 4 verifies credentials before storage access, denies cross-scope object and review access, propagates revocation, installs the pinned extension build, and restores from backup with citations intact.
+- [x] Every proof's results and limitations are recorded in its governing ADR and the dependency matrix is complete.
 
 ## UX / Screens
 

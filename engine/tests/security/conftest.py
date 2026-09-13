@@ -10,10 +10,14 @@ portal (found at S0005, see `apps/api/tests/test_facts.py`).
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
+import socket
+from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
+from urllib.parse import urlsplit
 from uuid import UUID, uuid4
 
 import httpx2 as httpx
@@ -142,12 +146,25 @@ def rsa_key() -> rsa.RSAPrivateKey:
 
 @pytest_asyncio.fixture
 async def pg_session_factory() -> async_sessionmaker[AsyncSession]:
+    parsed_url = urlsplit(_database_url())
+    try:
+        with socket.create_connection(
+            (parsed_url.hostname or "localhost", parsed_url.port or 5432), timeout=2
+        ):
+            pass
+    except OSError as exc:
+        pytest.skip(f"Postgres not reachable at {_database_url()}: {exc}")
+
     engine = make_engine(_database_url())
     try:
-        async with engine.connect() as connection:
-            await connection.execute(text("SELECT 1"))
+        connection = await asyncio.wait_for(engine.connect(), timeout=5)
+        try:
+            await asyncio.wait_for(connection.execute(text("SELECT 1")), timeout=5)
+        finally:
+            await connection.close()
     except Exception as exc:  # noqa: BLE001 - any connection failure means "skip"
-        await engine.dispose()
+        with suppress(TimeoutError):
+            await asyncio.wait_for(engine.dispose(), timeout=5)
         pytest.skip(f"Postgres not reachable at {_database_url()}: {exc}")
     session_factory = make_session_factory(engine)
     yield session_factory
