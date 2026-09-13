@@ -108,14 +108,14 @@ N/A — documentation and governance story; no runtime mutation. The ADR status 
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Edge cases handled
-- [ ] Permissions enforced (N/A — documentation)
-- [ ] Audit/timeline logged (N/A — git history is the record)
-- [ ] Tests pass (N/A — documentation; link check passes)
-- [ ] Documentation updated
-- [ ] Story filename matches `Story ID` prefix
-- [ ] Story index regenerated
+- [x] Acceptance criteria met
+- [x] Edge cases handled
+- [x] Permissions enforced (N/A — documentation)
+- [x] Audit/timeline logged (N/A — git history is the record)
+- [x] Tests pass (N/A — documentation; link check passes)
+- [x] Documentation updated
+- [x] Story filename matches `Story ID` prefix
+- [x] Story index regenerated
 
 ## Review Provenance
 

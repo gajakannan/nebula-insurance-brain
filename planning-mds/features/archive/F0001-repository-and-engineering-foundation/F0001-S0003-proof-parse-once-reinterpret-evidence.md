@@ -120,14 +120,14 @@ N/A — proof harness driven by tests and a CLI; no user-facing mutation.
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Edge cases handled
-- [ ] Permissions enforced (service principal scoped to the fixture tenant)
-- [ ] Audit/timeline logged (interpretation runs recorded with configuration and status)
-- [ ] Tests pass
-- [ ] Documentation updated (harness README, ADR-0040 input for S0007)
-- [ ] Story filename matches `Story ID` prefix
-- [ ] Story index regenerated
+- [x] Acceptance criteria met
+- [x] Edge cases handled
+- [x] Permissions enforced (service principal scoped to the fixture tenant)
+- [x] Audit/timeline logged (interpretation runs recorded with configuration and status)
+- [x] Tests pass
+- [x] Documentation updated (harness README, ADR-0040 input for S0007)
+- [x] Story filename matches `Story ID` prefix
+- [x] Story index regenerated
 
 ## Review Provenance
 

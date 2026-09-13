@@ -115,14 +115,14 @@ N/A — infrastructure story; no user-facing mutation of business data.
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Edge cases handled
-- [ ] Permissions enforced (N/A — infrastructure story)
-- [ ] Audit/timeline logged (N/A — no business mutation)
-- [ ] Tests pass (compose health checks and object round trip in CI)
-- [ ] Documentation updated (GETTING-STARTED, dependency matrix)
-- [ ] Story filename matches `Story ID` prefix
-- [ ] Story index regenerated
+- [x] Acceptance criteria met
+- [x] Edge cases handled
+- [x] Permissions enforced (N/A — infrastructure story)
+- [x] Audit/timeline logged (N/A — no business mutation)
+- [x] Tests pass (compose health checks and object round trip in CI)
+- [x] Documentation updated (GETTING-STARTED, dependency matrix)
+- [x] Story filename matches `Story ID` prefix
+- [x] Story index regenerated
 
 ## Review Provenance
 

@@ -132,14 +132,14 @@ Required checks for this mutation story:
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Edge cases handled
-- [ ] Permissions enforced (reviewer binding verified; annotate cannot commit)
-- [ ] Audit/timeline logged (one audit event per decision)
-- [ ] Tests pass
-- [ ] Documentation updated (panel notes under `experience/src/review-panel/`, ADR-0044 and ADR-0058 input for S0007)
-- [ ] Story filename matches `Story ID` prefix
-- [ ] Story index regenerated
+- [x] Acceptance criteria met
+- [x] Edge cases handled
+- [x] Permissions enforced (reviewer binding verified; annotate cannot commit)
+- [x] Audit/timeline logged (one audit event per decision)
+- [x] Tests pass
+- [x] Documentation updated (panel notes under `experience/src/review-panel/`, ADR-0044 and ADR-0058 input for S0007)
+- [x] Story filename matches `Story ID` prefix
+- [x] Story index regenerated
 
 ## Review Provenance
 

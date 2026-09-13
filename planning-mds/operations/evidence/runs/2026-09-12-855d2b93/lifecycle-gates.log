@@ -1,0 +1,233 @@
+# Lifecycle Gate Run — F0001 remediation run 2026-09-12-855d2b93
+
+### G0
+Command: Architect assembly-plan reconciliation
+Stage: G0
+Exit Code: 0
+Result: PASS
+Output References: g0-assembly-plan-validation.md
+Skipped Gates: -
+
+### G1
+Command: docker compose ps
+Stage: G1
+Exit Code: 0
+Result: PASS
+Output References: g1-runtime-preflight.md
+Skipped Gates: -
+
+### G2
+Command: ruff and security test execution
+Stage: G2
+Exit Code: 0
+Result: PASS
+Output References: g2-self-review.md, test-execution-report.md, coverage-report.md, deployability-check.md
+Skipped Gates: live Postgres HTTP cases unavailable from managed sandbox; bounded skip recorded
+
+### G3
+Command: Code Reviewer and Security Reviewer remediation review
+Stage: G3
+Exit Code: 0
+Result: PASS
+Output References: code-review-report.md, security-review-report.md
+Skipped Gates: -
+
+### G4
+Command: Product Manager remediation approval
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: gate-decisions.md
+Skipped Gates: -
+
+### G5
+Command: required role signoff verification
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: signoff-ledger.md
+Skipped Gates: -
+
+### G6
+Command: validate-feature-evidence.py and validate-trackers.py candidate pass
+Stage: G6
+Exit Code: 0
+Result: PASS
+Output References: feature-action-execution.md
+Skipped Gates: -
+
+### G7
+Command: python3 scripts/kg/compile.py; python3 scripts/kg/validate.py --regenerate-symbols --check-symbols --regenerate-decisions --check-decisions; python3 scripts/kg/validate.py --check-drift
+Stage: G7
+Exit Code: 0
+Result: PASS
+Output References: kg-reconciliation.md
+Skipped Gates: -
+
+### G8
+Command: python3 scripts/kg/validate.py --write-coverage-report; tracker and closeout validation
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: pm-closeout.md, planning-mds/knowledge-graph/coverage-report.yaml
+Skipped Gates: -
+
+### Tracker Sync
+Command: python3 ../nebula-agents/agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93
+Stage: closeout
+Exit Code: 0
+Result: PASS
+Output References: planning-mds/features/REGISTRY.md, planning-mds/features/ROADMAP.md, planning-mds/features/STORY-INDEX.md
+Skipped Gates: -
+
+### G0
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93 --stage G0
+Stage: G0
+Exit Code: 1
+Result: FAIL
+Output References: -
+Skipped Gates: -
+
+### G0
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93 --stage G0
+Stage: G0
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G1
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93 --stage G1
+Stage: G1
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G2
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93 --stage G2
+Stage: G2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G3
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93 --stage G3
+Stage: G3
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G4
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93 --stage G4
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93 --stage G5
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G6
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93 --stage G6
+Stage: G6
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G6
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93
+Stage: G6
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G7
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G7
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G7
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --regenerate-symbols --check-symbols --regenerate-decisions --check-decisions
+Stage: G7
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G7
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G7
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 agents/product-manager/scripts/patch-prior-manifest.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --new-run-id 2026-09-12-855d2b93
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --write-coverage-report
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 agents/scripts/capture-run-telemetry.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-09-12-855d2b93
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --stage closeout
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0001 --run-id 2026-09-12-855d2b93
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -

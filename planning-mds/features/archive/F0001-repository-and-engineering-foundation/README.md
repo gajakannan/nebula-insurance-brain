@@ -1,6 +1,6 @@
 # F0001 — Repository and engineering foundation
 
-**Status:** Draft — plan approved 2026-09-06; ready for the feature action
+**Status:** Done and Archived — feature action run `2026-09-08-b5af1e54` completed G0–G8; security remediation run `2026-09-12-855d2b93` added credential-failure audit logging and refreshed the closeout evidence
 **Priority:** Critical
 **Phase:** Infrastructure
 
@@ -23,16 +23,16 @@ Source: `planning-mds/architecture/master-blueprint.md` sections 106.2, 108, 109
 
 | ID | Title | Status |
 |----|-------|--------|
-| [F0001-S0001](./F0001-S0001-runtime-roots-and-toolchain-skeleton.md) | Runtime roots and toolchain skeleton | Not Started |
-| [F0001-S0002](./F0001-S0002-local-runtime-containers-and-dependency-matrix.md) | Local runtime containers and dependency matrix | Not Started |
-| [F0001-S0003](./F0001-S0003-proof-parse-once-reinterpret-evidence.md) | Proof: parse once, reinterpret twice, evidence resolves | Not Started |
-| [F0001-S0004](./F0001-S0004-proof-native-review-round-trip.md) | Proof: native review round trip with lineage | Not Started |
-| [F0001-S0005](./F0001-S0005-proof-bitemporal-commit.md) | Proof: bitemporal commit under retroactive and concurrent change | Not Started |
-| [F0001-S0006](./F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) | Proof: access boundaries, extension build, and restore | Not Started |
-| [F0001-S0007](./F0001-S0007-record-proof-outcomes-and-settle-contracts.md) | Record proof outcomes and settle the pre-build contracts | Not Started |
+| [F0001-S0001](./F0001-S0001-runtime-roots-and-toolchain-skeleton.md) | Runtime roots and toolchain skeleton | Done |
+| [F0001-S0002](./F0001-S0002-local-runtime-containers-and-dependency-matrix.md) | Local runtime containers and dependency matrix | Done |
+| [F0001-S0003](./F0001-S0003-proof-parse-once-reinterpret-evidence.md) | Proof: parse once, reinterpret twice, evidence resolves | Done |
+| [F0001-S0004](./F0001-S0004-proof-native-review-round-trip.md) | Proof: native review round trip with lineage | Done |
+| [F0001-S0005](./F0001-S0005-proof-bitemporal-commit.md) | Proof: bitemporal commit under retroactive and concurrent change | Done |
+| [F0001-S0006](./F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) | Proof: access boundaries, extension build, and restore | Done |
+| [F0001-S0007](./F0001-S0007-record-proof-outcomes-and-settle-contracts.md) | Record proof outcomes and settle the pre-build contracts | Done |
 
 **Total Stories:** 7
-**Completed:** 0 / 7
+**Completed:** 7 / 7
 
 ## Architecture Review
 

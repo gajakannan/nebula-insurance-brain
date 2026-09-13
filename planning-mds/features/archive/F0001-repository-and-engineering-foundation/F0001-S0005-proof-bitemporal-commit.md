@@ -111,14 +111,14 @@ N/A — proof harness driven by tests and a CLI under a service principal; no us
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Edge cases handled
-- [ ] Permissions enforced (service principal authorized)
-- [ ] Audit/timeline logged (audit and outbox in the commit transaction)
-- [ ] Tests pass
-- [ ] Documentation updated (ADR-0041 input for S0007)
-- [ ] Story filename matches `Story ID` prefix
-- [ ] Story index regenerated
+- [x] Acceptance criteria met
+- [x] Edge cases handled
+- [x] Permissions enforced (service principal authorized)
+- [x] Audit/timeline logged (audit and outbox in the commit transaction)
+- [x] Tests pass
+- [x] Documentation updated (ADR-0041 input for S0007)
+- [x] Story filename matches `Story ID` prefix
+- [x] Story index regenerated
 
 ## Review Provenance
 
