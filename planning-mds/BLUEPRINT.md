@@ -95,7 +95,7 @@ Insurance core for the v0.1 GL slice (sections 23, 24, 86):
 
 ### 1.4 Critical workflows (baseline)
 
-Ingestion and interpretation: Source Document → Parse Once (Docling) → Content Artifact → Classify → Extraction Profile → Assertions → Confidence/Review Policy → Deterministic Entity Resolution → Canonical Commit → FactSlots + Bitemporal Facts → Entity 360 (section 86)
+Ingestion and interpretation: Source Document → Docling-Graph conversion (Docling underneath) → Persisted Content Artifact → Classify → Docling-Graph extraction with compiled profile → Assertions → Confidence/Review Policy → Deterministic Entity Resolution → Canonical Commit → FactSlots + Bitemporal Facts → Entity 360 (section 86)
 Guideline assessment (v0.1B, F0065): accepted qualified facts + selected reviewed rule release + explicit time/snapshot → deterministic comparison → immutable assessment with exact lineage → authorized Entity 360 explanation (master blueprint section 124).
 Human review: Assertion → ReviewItem → Nebula Review Panel → reviewer decision → ReviewDecision → corrected assertion or canonical commit → Golden Corpus (sections 75, 85, 125)
 Endorsement supersession: Original fact → Endorsement (valid-time effective, recorded-time received) → superseded canonical version with both timelines queryable (sections 14 to 16, 87)
@@ -120,7 +120,7 @@ Locked unless changed by an accepted ADR (master blueprint section 3).
 - Backend: Python 3.13+, FastAPI, Pydantic v2, SQLAlchemy 2, asyncpg, Alembic, uv; Temporal Python SDK from v0.3
 - Data platform: PostgreSQL (authoritative) with JSONB, range and multirange types with btree_gist, full-text search, pgvector (retrieval projection), Apache AGE (graph projection); Qdrant optional and deferred (ADR-0033)
 - Content artifacts: provider-neutral `ContentArtifactStore` port over an object-store port; v0.1 implements `LocalFilesystemObjectStore` using committed `config/local.yaml` and ignored `./content/` runtime state; S3, Azure Blob, GCS, and other adapters are future composition-root implementations (ADR-0059)
-- Direct specialist dependencies: Docling (content extraction) only. Docling-Graph is **not used** — F0001-S0003 proved its public API always reconverts the source and cannot accept an already-parsed document, which conflicts with the parse-once requirement (ADR-0040 input, `docker/DEPENDENCY-MATRIX.md`); semantic/structured extraction instead calls the OpenAI-compatible vLLM endpoint directly with guided/structured JSON output. Human evidence adjudication is native (ADR-0057, section 125); `pdf.js` and `fflate` are Review Panel rendering libraries in `experience/`, not specialist engines
+- Direct specialist dependency: Docling-Graph coordinates document conversion and extraction; Docling remains its underlying converter and native document format. [ADR-0060](architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes this architecture, with a pinned 1.9.1 candidate and partial contract evidence in F0005; durable recovery and live-model qualification remain pending. The running F0001 baseline uses Docling plus a direct OpenAI-compatible/vLLM adapter. Native evidence review remains governed by ADR-0057; `pdf.js` and `fflate` are rendering libraries in `experience/`.
 - Frontend: React, TypeScript, Vite, React Router, TanStack Query, Zustand, React Hook Form, AJV with JSON Schema 2020-12, shadcn/ui, Tailwind CSS, TanStack Table, Cytoscape.js (v0.2), react-i18next
 - AuthN: authentik OIDC. AuthZ: native Casbin adapter behind an AuthorizationService with typed resource scopes. Session transport: same-origin BFF with server-held tokens is the proposed direction (ADR-0051, open)
 - Semantic interchange: JSON Schema 2020-12, JSON-LD, RDF and N-Triples, OWL, RDFS, SKOS, OKF, YAML, JSONL (authoring and interchange only, never runtime truth)
@@ -141,7 +141,7 @@ Three runtime roots follow the framework convention; master blueprint section 77
 | Root | Contents | Owning role | Notes |
 |------|----------|-------------|-------|
 | `engine/` | FastAPI API, worker, and the semantic kernel packages: domain, persistence, content, schema, ontology, graph, temporal, process, provenance, resolution (deterministic), search, decisions, governance, review, security; Alembic migrations; backend tests | backend-developer | Business logic and canonical truth live here |
-| `neuron/` | AI and semantic runtime packages: ingestion (Docling adapter), extraction (Docling-Graph, extraction profiles), interpretation, reasoning, conversation, learning, evolution, agent-tools (MCP); AI tests | ai-engineer | Proposes assertions and candidates; never writes canonical truth directly (ADR-0001, section 64) |
+| `neuron/` | AI and semantic runtime packages: ingestion (bundle publication and checkpoint callback), extraction (Docling-Graph pipeline adapter, templates, and evidence translation), interpretation, reasoning, conversation, learning, evolution, agent-tools (MCP); AI tests | ai-engineer | Proposes assertions and candidates; never writes canonical truth directly (ADR-0001, section 64) |
 | `experience/` | React web app: 360 views, search, evidence, chat, graph explorer | frontend-developer | Semantic-first; chat is one modality (ADR-0036) |
 | `ontology/`, `profiles/`, `schemas/`, `knowledge-packs/` | Authored ontology modules, document and extraction profiles, runtime JSON Schemas, OKF packs | architect (design), backend-developer (compiler and runtime loading) | Versioned, modular, compiled into normalized runtime structures (ADR-0011, ADR-0012) |
 | `golden-corpus/` | Version-controlled regression fixtures exported from Nebula review decisions | quality-engineer | Section 96; frozen holdout rules in section 115.1 |
@@ -218,7 +218,11 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md) - Planned
 - [F0003 — PostgreSQL persistence](features/F0003-postgresql-persistence/README.md) - Planned
 - [F0004 — Content artifact model](features/F0004-content-artifact-model/README.md) - Planned
-- [F0005 — One-time Docling ingestion](features/F0005-one-time-docling-ingestion/README.md) - Planned
+- [F0005 — One-time document ingestion](features/F0005-one-time-docling-ingestion/README.md) - Planned
+  - [F0005-S0001](features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) — In Progress
+  - [F0005-S0002](features/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) — In Progress
+  - [F0005-S0003](features/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) — In Progress
+  - [F0005-S0004](features/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) — Not Started
 - [F0006 — Assertion plane + origin + interpretation basis](features/F0006-assertion-plane-origin-and-interpretation-basis/README.md) - Planned
 - [F0007 — FactSlot model](features/F0007-factslot-model/README.md) - Planned
 - [F0008 — Bitemporal canonical facts](features/F0008-bitemporal-canonical-facts/README.md) - Planned
@@ -348,7 +352,7 @@ Performance, availability, scalability, and security targets are proposed gates 
 ### 4.7 Architecture Artifacts
 
 - `architecture/master-blueprint.md` — full baseline
-- `architecture/decisions/` — ADR-0001 to ADR-0056 (Accepted baseline and Proposed; ADR-0056 records the bounded v0.1 assessment)
+- `architecture/decisions/` — ADR-0001 to ADR-0060 (Accepted architecture and Proposed contracts; ADR-0060 proposes Docling-Graph, pending exact-version proof)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
@@ -361,10 +365,10 @@ Performance, availability, scalability, and security targets are proposed gates 
 
 Section 117.1 lists the decisions the implementation team still owes: source-authority owner, tenant and knowledge-base identity scope, host and extension build, Docling-Graph pin, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18) and the proof model policy (self-hosted), and ADR-0057 (2026-09-08) settled the review surface.
 
-**Items 3 and 4 answered at F0001-S0007 (2026-09-10):**
+**Local proof decisions from F0001-S0007, updated for ADR-0060 (2026-09-15):**
 
 - **Item 3 (target host, PostgreSQL/extension build, model/provider data policy) — answered for the local proof scope.** The exact PostgreSQL/pgvector/AGE build is pinned and twice-verified live (S0002, re-verified at S0006 with no drift beyond an upstream base-image patch bump — `docker/DEPENDENCY-MATRIX.md`). The model/provider data policy is proven: self-hosted vLLM, chunk-text-only requests, no prompt persistence (F0001-S0003/S0006 live runs). The **production host** (as opposed to local Docker Compose) remains explicitly open, owned by F0026 per this feature's own G1 clarification and the F0001-S0006 story's stated assumption ("the production host decision waits for F0026").
-- **Item 4 (exact Docling-Graph implementation and release/commit) — answered: not pinned, because not used.** F0001-S0003 found `docling-graph`'s public API always reconverts its source document and has no path to accept an already-parsed one, directly conflicting with ADR-0003's parse-once requirement. The decision is to not depend on the `docling-graph` package at all: semantic/structured extraction calls the OpenAI-compatible vLLM endpoint directly (ADR-0040, accepted at F0001-S0007). Section 2.1's stack line is corrected accordingly. This closes item 4 as a considered rejection, not an oversight — a future feature revisiting graph-native extraction should treat this as a fresh evaluation, not resume the original pin search.
+- **Item 4 (exact Docling-Graph implementation and release/commit) — reopened for F0005 by ADR-0060 (2026-09-15).** Select `docling-project/docling-graph`, identify a tested immutable release/commit and dependency lock, and prove native JSON reuse plus durable publication before extraction. F0001 recorded rejection of its tested 1.9.1 build and used a direct vLLM adapter. The pinned candidate now passes native/scanned conversion and saved-JSON tests with recorded model responses; see [F0005 compatibility evidence](features/F0005-one-time-docling-ingestion/compatibility-evidence.md). F0001's blanket no-reuse conclusion was too broad. Full acceptance gates remain pending.
 
 ### 4.9 F0001 Phase B (2026-09-06)
 
@@ -376,7 +380,7 @@ Assembly plan: `features/archive/F0001-repository-and-engineering-foundation/fea
 
 Sequence per master blueprint sections 115.3 and 124; original identifiers F0001 to F0063 are preserved. F0065 is the bounded v0.1 assessment addition; F0064 is repository tooling.
 
-1. Pre-build contract proofs as stories of F0001: parse, reinterpret, and evidence; native review round trip and evidence anchoring; bitemporal commit; access and hosting (section 115.4)
+1. Archived F0001 supplies the measured foundation contracts. F0005 must freshly prove Docling-Graph conversion, checkpoint/reuse, and evidence mapping under ADR-0060; F0001 did not validate that package (sections 115.4, 126).
 2. v0.1A — F0002 to F0017: typed domain contracts, durable ingestion, immutable evidence, assertion extraction
 3. v0.1B — F0018 to F0023 establish authorized commits, temporal reads, evidence review, and minimal 360 views; F0065 adds bounded on-demand GL guideline assessment; F0024/F0025 prove real interpretation-to-assessment and temporal reassessment end to end
 4. v0.1C — F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases

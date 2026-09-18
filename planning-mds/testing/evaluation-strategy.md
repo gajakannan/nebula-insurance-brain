@@ -54,3 +54,18 @@ F0024 must run actual neural interpretation through evidence review/canonical ac
 Report model extraction correctness and severe errors separately from deterministic rule correctness, abstention, review workload, end-to-end result accuracy, latency, and cost. Expected outcomes are authored independently of the evaluator. Quality thresholds, sample sizes, corpus licensing, and named reviewers must be settled before the v0.1 release gate.
 
 Worked examples are development/documentation fixtures and remain outside the frozen holdout. Require definition/example/boundary/contract/story links for new concepts, local schema/reference validation for structured examples, and actual runnable reproduction instructions when the corresponding runtime ships. A structural example check supplies no measured model performance or runtime proof.
+
+## Docling-Graph integration gate (ADR-0060)
+
+F0005 must exercise the real pinned upstream package and local model. F0001's direct-client proof is the historical comparison, not evidence that the new pipeline passes. F0026 carries these checks into release qualification:
+
+- Convert native and scanned fixtures; publish native JSON and the normalized bundle before semantic extraction. Force model failure and worker restart after publication, then recover without conversion/OCR. Also cover failure before publication and incomplete-bundle cleanup.
+- Interpret each saved artifact under two profiles; instrument actual converter/OCR entry points to fail if invoked. Check artifact hashes and selected-block scope. Do not rely solely on adapter-reported zero counters.
+- Resolve property and relationship evidence independently of node identity. Exercise repeated values, Unicode offsets, chunk/block boundaries, table references, geometry conversion, coarse/document grounding, and synthetic/merged nodes.
+- Enforce schema/prompt/input/output budgets before every upstream model call. Record complete/partial/failed outcomes, retries, tokens, latency, and cost without logging protected content.
+- Exercise duplicate jobs, expired leases, cancellation, unauthorized artifacts/run outputs, and idempotent canonical effects. Prove that extraction graph exports cannot bypass review or write canonical/AGE state.
+- Compare against independently labeled expectations on the frozen slice. Record extraction errors, evidence precision, unresolved rate, and review burden separately; do not infer improvement from fewer lines of adapter code.
+
+Persist the exact upstream revision/package digest, dependency lock, model configuration, and observed results in the dependency matrix/evidence run. Activation requires the conversion checkpoint and reuse gates in [ADR-0060](../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md).
+
+Additional ADR-0060 acceptance cases: limit amount, currency, basis, effective date, table headers, and multi-region support; invalid extraction after successful conversion; partial-conversion quality/warnings; secrets redaction; bounded concurrency including internal fan-out; and retention/deletion of source-bearing provenance. Compare Graph's chunked path with the current full-document, one-request-per-profile adapter. F0032 must separately prove affected-content-only scheduling; a successful whole-document rerun is insufficient.

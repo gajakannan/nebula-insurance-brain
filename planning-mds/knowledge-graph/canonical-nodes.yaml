@@ -209,6 +209,22 @@ adrs:
       - capability:backup-and-restore
       - capability:local-dependency-stack
       - capability:parse-once-content-artifact
+  - id: adr:0060
+    label: Docling-Graph Document Pipeline Orchestration
+    path: planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+    related_nodes:
+      - adr:0003
+      - adr:0004
+      - adr:0015
+      - adr:0028
+      - adr:0040
+      - adr:0055
+      - adr:0058
+      - adr:0059
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+      - entity:content-artifact
+      - entity:semantic-interpretation-run
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -340,15 +356,18 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:parse-once-content-artifact
     label: Parse-once content artifact
-    notes: Docling converts each document version once into an immutable bundle with the native DoclingDocument
-      JSON, normalized projections, and a hashed manifest; reinterpretation never re-parses.
+    notes: 'Target: Docling-Graph coordinates Docling conversion; Nebula publishes the immutable native
+      bundle before extraction and reuses it on restart. F0005 must prove ADR-0060; F0001 used Docling
+      directly.'
     related_nodes:
       - adr:0003
       - adr:0004
+      - adr:0060
       - entity:content-artifact
       - schema:content-artifact-manifest
       - workflow:ingestion-interpretation
     source_docs:
+      - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:runtime-roots-and-toolchain
@@ -363,17 +382,19 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:semantic-interpretation-run
     label: Semantic interpretation run
-    notes: Docling-Graph extraction over persisted content producing a provider-neutral InterpretationResult
-      with evidence bindings of declared precision, run configuration, and counters proving zero conversion
-      calls.
+    notes: 'Target: Docling-Graph extracts from saved native content, producing run-owned graph/provenance
+      and a provider-neutral InterpretationResult with honest evidence precision. F0001 used direct vLLM;
+      the ADR-0060 integration is planned.'
     related_nodes:
       - adr:0016
       - adr:0035
+      - adr:0060
       - entity:assertion
       - entity:semantic-interpretation-run
       - schema:interpretation-result
       - workflow:ingestion-interpretation
     source_docs:
+      - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
 endpoints:

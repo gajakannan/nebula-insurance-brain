@@ -40,7 +40,7 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 
 ### Content Artifact
 **Type:** Entity
-**Definition:** The parse-once output of Docling for a document version: normalized text, blocks, tables, coordinates, and a manifest with parser identity and hashes (5, 80, 81)
+**Definition:** The immutable parse-once output for a document version, produced by Docling underneath the planned Docling-Graph pipeline (ADR-0060): normalized text, blocks, tables, coordinates, and a manifest with parser identity and hashes (5, 80, 81)
 **In the Brain:** Reinterpretation always reads the persisted artifact and never re-parses the source
 
 ### Content Block

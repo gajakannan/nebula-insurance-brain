@@ -29,3 +29,7 @@ Baseline architecture decision carried verbatim from the master blueprint. The s
 ## References
 
 - `planning-mds/architecture/master-blueprint.md` section 76
+
+## Refinement — 2026-09-15
+
+[ADR-0060](ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph document pipeline orchestration. F0015 compiles released Nebula profiles into trusted Docling-Graph Pydantic templates and pipeline configuration, with stable schema/configuration hashes and explicit unsupported-mapping failures. Nebula retains profile and ontology semantics.

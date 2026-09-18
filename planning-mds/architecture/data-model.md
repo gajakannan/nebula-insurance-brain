@@ -140,6 +140,7 @@ Recommended artifact set:
 
 ```text
 manifest.json
+docling-document.json
 normalized.md
 blocks.jsonl
 tables.jsonl
@@ -181,6 +182,8 @@ The [assessment contract](../features/F0065-grounded-gl-guideline-assessment/ass
 
 ## Example Manifest (master blueprint section 81)
 
+Illustrative layout; the accepted wire shape is `planning-mds/schemas/content-artifact-manifest.schema.json`. The parser remains Docling under ADR-0060. F0004/F0016 must version any new pipeline/run metadata contract rather than add undeclared fields to the current strict schemas.
+
 ```json
 {
   "document_id": "doc_123",
@@ -192,6 +195,7 @@ The [assessment contract](../features/F0065-grounded-gl-guideline-assessment/ass
     "config_hash": "..."
   },
   "artifacts": {
+    "native_document": "docling-document.json",
     "normalized_text": "normalized.md",
     "blocks": "blocks.jsonl",
     "tables": "tables.jsonl",
@@ -200,3 +204,16 @@ The [assessment contract](../features/F0065-grounded-gl-guideline-assessment/ass
   "artifact_hash": "..."
 }
 ```
+
+## Planned pipeline and run metadata (ADR-0060)
+
+Docling-Graph does not change source, content, and interpretation identity. F0004/F0016 must settle the following contract additions before implementation:
+
+| Record | Required information and owner |
+|---|---|
+| Content artifact | Native document/schema hash, Docling parser version/configuration, producing pipeline revision, immutable bundle file hashes, and durable publication state — F0004/F0005 |
+| Interpretation run | Artifact reference, selected block scope, profile/template/schema/prompt hashes, pipeline revision/configuration and chunking/extraction settings, model identity, attempts, status, token/cost counters — F0016 |
+| Interpretation output manifest | Hashes and authorized store references for upstream graph, provenance ledger, effective configuration, and chunk/item-to-Nebula evidence mapping — F0016 |
+| Document job | Tenant/KB-scoped idempotency key, lease/heartbeat, failure stage, parse checkpoint, cancellation, and retry state — F0005 |
+
+The current manifest and InterpretationResult schemas reject undeclared fields. Version additions with compatible readers and retain old bundles; do not relabel F0001 files as new-pipeline outputs. Original graph IDs remain run-local. Nebula entity resolution, evidence bindings, and commit services remain authoritative; no graph export becomes a canonical database import.

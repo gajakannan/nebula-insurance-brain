@@ -45,3 +45,7 @@ Canonical Content
 ## References
 
 - `planning-mds/architecture/master-blueprint.md` section 76
+
+## Refinement — 2026-09-15
+
+[ADR-0060](ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph document pipeline orchestration. Docling-Graph coordinates conversion through Docling and subsequent extraction. A durable content checkpoint remains mandatory; later interpretations perform zero physical conversion/OCR. F0005 proves the new integration.

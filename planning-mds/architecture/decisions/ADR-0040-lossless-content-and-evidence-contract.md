@@ -81,3 +81,7 @@ declares `unresolved` rather than fabricating a bounding box.
 - `docker/DEPENDENCY-MATRIX.md` — "ADR-0040 input: Docling-Graph rejected as the extraction engine" (why `docling-graph` itself is not the extraction path; the extraction contract this ADR settles is honored through a direct OpenAI-compatible/vLLM call instead)
 - `neuron/tests/integration/test_parse_once_reinterpret.py`
 - `planning-mds/features/F0001-repository-and-engineering-foundation/STATUS.md` (AI Runtime Progress, Deferred Non-Blocking Follow-ups)
+
+## Refinement — 2026-09-15
+
+[ADR-0060](ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph document pipeline orchestration. The six-file content contract and measured F0001 results remain accepted. The selected future extraction path is Docling-Graph, subject to F0005 proving native JSON reuse, publication before extraction failure, and evidence translation. F0001 used a direct OpenAI-compatible adapter; its results do not establish Docling-Graph compatibility.

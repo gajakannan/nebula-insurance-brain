@@ -1,31 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 
+from brain_interpretation.parsed_content import ParseResult, ParseStatus
 from docling.datamodel.base_models import ConversionStatus
 from docling.document_converter import DocumentConverter
 from docling_core.types.doc.document import DoclingDocument
 from pypdf import PdfReader
 
-Status = Literal["complete", "partial", "failed"]
-
-_STATUS_MAP: dict[ConversionStatus, Status] = {
+_STATUS_MAP: dict[ConversionStatus, ParseStatus] = {
     ConversionStatus.SUCCESS: "complete",
     ConversionStatus.PARTIAL_SUCCESS: "partial",
     ConversionStatus.FAILURE: "failed",
 }
-
-
-@dataclass(frozen=True, slots=True)
-class ParseResult:
-    document: DoclingDocument
-    page_count: int
-    failed_pages: list[int]
-    ocr_page_count: int
-    status: Status
-    warnings: list[str]
 
 
 class DoclingAdapter:
@@ -42,7 +29,7 @@ class DoclingAdapter:
     def __init__(self) -> None:
         self._converter = DocumentConverter()
 
-    def parse(self, source_path: Path) -> ParseResult:
+    def parse(self, source_path: Path) -> ParseResult[DoclingDocument]:
         ocr_page_count = self._count_pages_needing_ocr(source_path)
         result = self._converter.convert(str(source_path), raises_on_error=False)
 

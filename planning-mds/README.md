@@ -5,7 +5,7 @@ All solution-specific planning for Nebula Insurance Brain lives here. Generic ro
 ## Entry points
 
 - `BLUEPRINT.md` — framework entry point: process, product context, platform baseline, phase status
-- `architecture/master-blueprint.md` — the full architecture baseline (through section 125); referenced by section number everywhere else
+- `architecture/master-blueprint.md` — the full architecture baseline (through section 126); referenced by section number everywhere else
 - `features/REGISTRY.md` and `features/ROADMAP.md` — generated from `kg-source/features/**` (created by init, populated when the feature shards are seeded)
 
 ## Where the master blueprint sections landed
@@ -19,6 +19,7 @@ All solution-specific planning for Nebula Insurance Brain lives here. Generic ro
 | 96 to 98, 115, 121.2 | `testing/evaluation-strategy.md` |
 | 95 roadmap, 115.3 sequencing | `BLUEPRINT.md` section 5; `kg-source/features/**` (seeded after init) |
 | 85 to 89 v0.1 slices | Story sources for F0001, F0024, F0025 |
+| 126 document pipeline orchestration | ADR-0060; F0004/F0005/F0015/F0016 and dependent feature scope amendments |
 | 106 to 117 pre-build requirements and open decisions | `BLUEPRINT.md` section 4.8; ADR-0038 to ADR-0048 |
 
 Everything else in the master blueprint remains authoritative in place until a feature's Phase B extracts it into a contract, schema, or ADR.

@@ -16,10 +16,6 @@ coverage:
       path: planning-mds/features/F0004-content-artifact-model
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
-    - id: feature:F0005
-      path: planning-mds/features/F0005-one-time-docling-ingestion
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0006
       path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -340,6 +336,34 @@ features:
       - schema:problem-details
       - schema:review-decision
   - status: planned
+    id: feature:F0005
+    path: planning-mds/features/F0005-one-time-docling-ingestion
+    affects:
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+      - entity:content-artifact
+      - entity:semantic-interpretation-run
+      - workflow:ingestion-interpretation
+    depends_on:
+      - feature:F0001
+      - feature:F0004
+    governed_by:
+      - adr:0003
+      - adr:0004
+      - adr:0040
+      - adr:0055
+      - adr:0058
+      - adr:0059
+      - adr:0060
+    notes:
+      - Candidate contract evidence is recorded in the feature folder. No production activation or lifecycle
+        approvals claimed; F0001 remains the live-model baseline.
+      - Fixed proof templates avoid a dependency on the F0015 production compiler; F0002/F0003 contracts
+        are required for production job wiring.
+    uses_schema:
+      - schema:content-artifact-manifest
+      - schema:interpretation-result
+  - status: planned
     id: feature:F0065
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment
     affects:
@@ -497,6 +521,38 @@ stories:
       - adr:0049
       - adr:0050
       - adr:0058
+  - id: story:F0005-S0001
+    feature: feature:F0005
+    path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
+    affects:
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+    governed_by:
+      - adr:0060
+  - id: story:F0005-S0002
+    feature: feature:F0005
+    path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md
+    affects:
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+    governed_by:
+      - adr:0060
+  - id: story:F0005-S0003
+    feature: feature:F0005
+    path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md
+    affects:
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+    governed_by:
+      - adr:0060
+  - id: story:F0005-S0004
+    feature: feature:F0005
+    path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md
+    affects:
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+    governed_by:
+      - adr:0060
   - id: story:F0065-S0001
     feature: feature:F0065
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md

@@ -29,3 +29,10 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 - Depends on F0065 for assessment integration; existing extraction/commit foundations remain prerequisites.
 
 Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../../examples/neurosymbolic-gl/cases.md), and [F0065](../F0065-grounded-gl-guideline-assessment/README.md). These requirements must be carried into this feature's PRD/stories when planned; runtime and feature status remain Planned.
+
+## Docling-Graph scope amendment (2026-09-15)
+
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+
+- Run the real F0005/F0015/F0016 pipeline from source conversion through reviewed/accepted facts and the F0065 assessment. A direct-vLLM baseline run or mocked graph adapter does not establish migration acceptance.
+- Keep the parse artifact and run outputs traceable through evidence, canonical facts, and the assessment. Report extraction failures separately from deterministic rule failures.

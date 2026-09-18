@@ -1,11 +1,14 @@
 id: capability:parse-once-content-artifact
 label: Parse-once content artifact
-notes: Docling converts each document version once into an immutable bundle with the native DoclingDocument JSON,
-  normalized projections, and a hashed manifest; reinterpretation never re-parses.
+notes: >-
+  Target: Docling-Graph coordinates Docling conversion; Nebula publishes the immutable native bundle
+  before extraction and reuses it on restart. F0005 must prove ADR-0060; F0001 used Docling directly.
 source_docs:
+- planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
 - F0001/F0001-S0003-proof-parse-once-reinterpret-evidence.md
 - F0001/PRD.md
 related_nodes:
+- adr:0060
 - entity:content-artifact
 - schema:content-artifact-manifest
 - workflow:ingestion-interpretation

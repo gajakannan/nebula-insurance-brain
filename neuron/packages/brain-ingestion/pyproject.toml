@@ -7,9 +7,11 @@ dependencies = [
   "docling>=2.126.0",
   "pypdf>=6.0",
   "brain-content",
+  "brain-interpretation",
 ]
 
 [tool.uv.sources]
+brain-interpretation = { workspace = true }
 # brain-content is a path dependency, not a workspace member: it lives in the engine/
 # uv workspace (owned by backend-developer), while neuron/ is ai-engineer's separate
 # workspace. Both runtime roots share the content-artifact manifest contract

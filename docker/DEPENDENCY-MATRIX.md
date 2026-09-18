@@ -18,7 +18,7 @@ Docling row) was corrected in the process rather than left standing.
 | btree_gist | ships with PostgreSQL contrib | `CREATE EXTENSION btree_gist` in `docker/postgres/init/02-extensions.sql` | PostgreSQL 18 contrib |
 | authentik | 2026.2.0 | `docker-compose.yml`; matches `nebula-insurance-crm`'s validated pin (ADR-006) | nebula-insurance-crm docker-compose.yml |
 | Docling | 2.126.0 | `engine/apps/api/src/brain_api/versions.py` (`DOCLING_PINNED_VERSION`); installed as a `neuron/brain-ingestion` dependency, exercised live against the native fixture by the automated F0001-S0003 test, and against the scanned/OCR fixture by a manual check at F0001-S0007 (2026-09-10: RapidOCR recovers identical content, 4 blocks/542 chars, from both variants) — the OCR path itself is not yet covered by an automated assertion (see ADR-0040 Limitations) | F0001-S0001 (declared); F0001-S0003 (live, native); F0001-S0007 (live, scanned/OCR, manual) |
-| Docling-Graph | **not used** — evaluated 1.9.1 and rejected at F0001-S0003; see ADR-0040 input below | `docling-graph==1.9.1` was installed and run live against this proof's fixture on 2026-09-09, then removed as a `neuron/` dependency | F0001-S0003 |
+| Docling-Graph | **1.9.1 candidate**, locked in `neuron/uv.lock`; not activated | Installed from cache; real Graph stage tests cover native/scanned conversion, saved JSON reuse, and publication ordering with recorded model responses. Live model and operational gates remain open. | [F0005 evidence](../planning-mds/features/F0005-one-time-docling-ingestion/compatibility-evidence.md) |
 | vLLM | 0.25.1 | `docker/local-inference-runbook.md`; matches the CRM's validated ADR-035 profile; served `microsoft/Phi-4-mini-instruct` live on this host's RTX 5070 for F0001-S0003's proof harness on 2026-09-09 | F0001 G1 clarification (2026-09-06); F0001-S0003 (live) |
 | Inference model | `microsoft/Phi-4-mini-instruct` | Hugging Face revision pinned in `docker/local-inference-runbook.md`; `--max-model-len 4096` | F0001 G1 clarification (2026-09-06); ADR-0055 |
 | Node (experience/ toolchain, proof scope only) | Node 24.16.0 (host tested); React 18.3.1, Vite 6.4.3, TypeScript 5.9.3, Vitest 5.0.0 | `experience/package.json`; `pnpm install`/`pnpm exec tsc -b`/`pnpm exec vitest run`/`pnpm exec vite build` all green on this host 2026-09-09. The full toolchain (ESLint theme rules, Playwright, Lighthouse, contract tests) is F0021's — this proof only needs build+unit-test+lint | F0001-S0004 |
@@ -32,22 +32,13 @@ Not exercised. The `PG18/v1.8.0-rc0` build succeeded after correcting the origin
 
 ## ADR-0040 input: Docling-Graph rejected as the extraction engine (F0001-S0003, 2026-09-09)
 
-`docling-graph==1.9.1`'s public `run_pipeline()` API always reconverts the source document
-itself (`docling_graph.core.extractors.document_processor.DocumentProcessor
-.convert_to_docling_doc` calls `DocumentConverter.convert(source)` unconditionally); it has no
-path to accept an already-parsed `DoclingDocument`, and its internal converter only registers
-`InputFormat.PDF`/`InputFormat.IMAGE` — not `InputFormat.JSON_DOCLING` — so even a
-serialized-DoclingDocument-as-source workaround is closed off. This was confirmed by a live
-run, not by reading the source alone. It directly conflicts with ADR-0003 (parse once) and
-this story's own acceptance criterion 2 (zero conversion/OCR calls on reinterpretation).
+F0001 reported that its tested invocation could not reuse a parsed document and chose a direct OpenAI-compatible adapter. That implementation and its measured results remain the historical baseline; see the unchanged archived F0001 records.
 
-**Decision:** `neuron/brain-extraction`'s `docling_graph_adapter.py` calls the OpenAI-compatible
-backend directly (the same contract ADR-0001/ADR-0055 already specify) against the
-already-persisted `docling-document.json`, using vLLM's native structured/guided JSON output
-(`response_format: json_schema`, `strict: true`) instead of the `docling-graph` package.
-`docling-graph` is not a `neuron/` runtime dependency.
+**Correction, 2026-09-17:** the pinned 1.9.1 wheel has a separate native-JSON input path. F0005 tests now exercise that path with conversion prohibited, including JSON from the native and scanned PDF fixtures. The earlier inference that the entire package always reconverts was too broad. This does not establish what differed in F0001's environment or invocation, nor prove live extraction quality.
 
-Two further findings from the same live run, both applied in `docling_graph_adapter.py`:
+The direct baseline is now `openai_compatible_adapter.py`; `docling_graph_adapter.py` is a compatibility import. The candidate `docling_graph_pipeline.py` composes a pre-extraction publication stage into the pinned upstream orchestrator. Graph is installed for this candidate; activation remains gated by ADR-0060.
+
+Two further findings from the same live run, retained in `openai_compatible_adapter.py`:
 - Pydantic's `model_json_schema()` omits `required`/`additionalProperties`; OpenAI/vLLM's
   `strict: true` mode needs both on every property to reliably constrain generation — without
   them the model returned `null` for a present field and fabricated a composite string for
@@ -65,3 +56,15 @@ fields (`each_occurrence_limit`, `named_insured`, both policy period dates) extr
 correctly and deterministically across repeated runs. This is a real, measured limit of
 `microsoft/Phi-4-mini-instruct` at 4,096 tokens on densely-packed source text, not a tooling
 defect — recorded here for ADR-0040 and F0001-S0007's settlement of context adequacy.
+
+## Proposed migration — Docling-Graph (ADR-0060, 2026-09-15)
+
+The table and F0001 finding above record the installed proof baseline. [ADR-0060](../planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph as the future document pipeline coordinator; Docling remains its converter. The 1.9.1 candidate is installed and has limited contract evidence; production activation and the complete proof gates remain pending.
+
+| Candidate component | Activation requirement | Owner |
+|---|---|---|
+| `docling-project/docling-graph` | Exact release/source commit and package digest, tested native JSON reuse and durable conversion checkpoint before extraction; no floating `main` dependency | F0005 |
+| Docling / docling-core and chunking/model dependencies | Compatible locked versions, native + scanned fixture conversion, stable item/evidence mappings; record any change from the F0001 pin | F0005 |
+| Local vLLM / Phi profile | Revalidate supported backend configuration, structured templates, every-call context guard, and extraction quality at the existing context limit | F0005 / F0015 |
+
+The [F0005 compatibility evidence](../planning-mds/features/F0005-one-time-docling-ingestion/compatibility-evidence.md) records the selected wheel digest and the tested stage seam. The [current input documentation](https://github.com/docling-project/docling-graph/blob/main/docs/fundamentals/pipeline-configuration/input-formats.md) describes native JSON reuse; it does not prove the previously tested package supported it. Record an immutable source identity as well as a version string. The [current orchestrator](https://github.com/docling-project/docling-graph/blob/main/docling_graph/pipeline/orchestrator.py) exports after extraction and disables disk output by default in API mode; verify a supported pre-extraction persistence seam before activation. Keep proof results separate from these pending acceptance requirements.

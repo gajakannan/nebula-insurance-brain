@@ -13,7 +13,7 @@ C4Container
     Container_Ext(fs, "Local artifact store", "Filesystem directory / shared volume", "Initial ContentArtifactStore adapter; configured by config/local.yaml")
     Container(api, "engine/apps/api", "Python 3.13, FastAPI", "Verifies credentials, authorizes, serves /health, /content, /reviews, /facts; records review decisions; commits facts")
     Container(worker, "engine/apps/worker", "Python 3.13", "Ingestion jobs; idempotent outbox projector")
-    Container(neuron, "neuron/ packages", "Python 3.13, Docling, Docling-Graph", "Parse-once bundles; interpretation runs with context guard")
+    Container(neuron, "neuron/ packages", "Python 3.13, Docling, direct vLLM client", "F0001 measured baseline; parse-once bundles and context guard")
     Container_Ext(vllm, "vLLM", "host GPU, :8000", "microsoft/Phi-4-mini-instruct, 4,096-token context, bearer auth")
     Container(panel, "experience/src/review-panel", "React, pdf.js, fflate", "Renders the immutable artifact, resolves evidence anchors, submits decision batches")
     Rel(dev, api, "HTTPS")
@@ -24,8 +24,14 @@ C4Container
     Rel(worker, fs, "artifact writes/reads")
     Rel(neuron, fs, "bundle writes/reads")
     Rel(neuron, pg, "runs, assertions")
-    Rel(neuron, vllm, "chunk text only")
+    Rel(neuron, vllm, "authorized document text")
     Rel(api, ak, "JWKS / discovery")
 ```
 
 The API, worker, and `neuron/` packages form one modular monolith (section 114.3); the package list is a code boundary, not a deployment topology. The inference service is a host prerequisite documented in `docker/local-inference-runbook.md`.
+
+## Planned document pipeline change (ADR-0060)
+
+F0005 replaces the specialist coordination inside `neuron/` with Docling-Graph, which still uses Docling for conversion. No new service/container is introduced. The worker retains PostgreSQL job leases, retry/cancel state, and artifact publication; the interpretation adapter maps upstream output to Nebula assertions and evidence. The diagram above remains the measured F0001 topology until the complete checkpoint, reuse, and live-model proof passes. The pinned candidate and six contract tests are present in `neuron/`; they are not activated in the application.
+
+F0050 later adds Temporal for durable business workflows and invokes this same bounded document operation from an activity. Docling-Graph does not supply Temporal's timers, human waits, or cross-process recovery.

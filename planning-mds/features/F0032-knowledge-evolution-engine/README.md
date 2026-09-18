@@ -20,3 +20,12 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Docling-Graph scope amendment (2026-09-15)
+
+Proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) adds these implementation acceptance requirements:
+
+- Determine the affected profiles and native block/item scope from the ontology/profile delta, then invoke F0016 with that scope and the saved native JSON.
+- Prove excluded blocks do not enter model context; any necessary context expansion is declared, authorized, and budgeted before execution. Preserve references to the original immutable artifact when selecting or reconstructing input views.
+- Assert zero physical conversion/OCR, unchanged artifact hashes, and a new run identity. A full-document pipeline rerun does not satisfy targeted reinterpretation; reject unsupported scope without silently broadening it.
+- Exercise budget previews, canaries, deduplicated scheduling, pause/cancel, retry, and checkpointed resumption over affected content. F0016 supplies scoped runs; this feature owns evolution scheduling and impact analysis.
