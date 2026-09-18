@@ -1,16 +1,11 @@
 version: 0
-generated_at: '2026-09-12T14:30:19+00:00'
 summary:
-  total_symbols: 190
+  total_symbols: 189
   by_language:
     python:
-      files: 35
-      parsed: 0
-      cached: 35
-    typescript:
-      files: 8
-      parsed: 0
-      cached: 8
+      files: 36
+      parsed: 4
+      cached: 32
   disambiguated_ids: 0
   compilation_roots_by_language:
     python:
@@ -1381,90 +1376,90 @@ symbols:
   end_line: 17
   callers: []
   callees: []
-- id: symbol:capability-local-inference-service:docling-graph-adapter.bind-field
+- id: symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.bind-field
   node: capability:local-inference-service
   kind: method
   name: _bind_field
-  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
-  line: 223
+  file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+  line: 205
   signature: 'def _bind_field(self, field_name: str, value: object, blocks: list[Block],
     page_heights: dict[int, float], artifact_id: UUID)'
   visibility: private
   language: python
-  container: DoclingGraphAdapter
-  end_line: 277
+  container: OpenAICompatibleExtractionAdapter
+  end_line: 259
   callers:
-  - symbol:capability-local-inference-service:docling-graph-adapter.interpret
+  - symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.interpret
   callees:
-  - symbol:capability-local-inference-service:docling-graph-adapter.to-top-left-bbox
-- id: symbol:capability-local-inference-service:docling-graph-adapter.docling-graph-adapter
-  node: capability:local-inference-service
-  kind: class
-  name: DoclingGraphAdapter
-  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
-  line: 81
-  signature: class DoclingGraphAdapter
-  visibility: public
-  language: python
-  end_line: 277
-  callers: []
-  callees: []
-- id: symbol:capability-local-inference-service:docling-graph-adapter.init
+  - symbol:capability-local-inference-service:openai-compatible-adapter.to-top-left-bbox
+- id: symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.init
   node: capability:local-inference-service
   kind: method
   name: __init__
-  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
-  line: 86
+  file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+  line: 68
   signature: 'def __init__(self, *, base_url: str, api_key: str, model_id: str, context_limit:
     int=4096, max_output_tokens: int=512)'
   visibility: private
   language: python
-  container: DoclingGraphAdapter
-  end_line: 101
+  container: OpenAICompatibleExtractionAdapter
+  end_line: 83
   callers: []
   callees: []
-- id: symbol:capability-local-inference-service:docling-graph-adapter.interpret
+- id: symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.interpret
   node: capability:local-inference-service
   kind: method
   name: interpret
-  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
-  line: 103
+  file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+  line: 85
   signature: 'async def interpret(self, *, store: ContentArtifactStore, artifact_id:
     UUID, profile: ExtractionProfile)'
   visibility: public
   language: python
-  container: DoclingGraphAdapter
-  end_line: 221
+  container: OpenAICompatibleExtractionAdapter
+  end_line: 203
   callers: []
   callees:
-  - symbol:capability-local-inference-service:docling-graph-adapter.bind-field
-  - symbol:capability-local-inference-service:docling-graph-adapter.strict-json-schema
-- id: symbol:capability-local-inference-service:docling-graph-adapter.strict-json-schema
+  - symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.bind-field
+  - symbol:capability-local-inference-service:openai-compatible-adapter.strict-json-schema
+- id: symbol:capability-local-inference-service:openai-compatible-adapter.open-ai-compatible-extraction-adapter
+  node: capability:local-inference-service
+  kind: class
+  name: OpenAICompatibleExtractionAdapter
+  file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+  line: 63
+  signature: class OpenAICompatibleExtractionAdapter
+  visibility: public
+  language: python
+  end_line: 259
+  callers: []
+  callees: []
+- id: symbol:capability-local-inference-service:openai-compatible-adapter.strict-json-schema
   node: capability:local-inference-service
   kind: function
   name: _strict_json_schema
-  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
-  line: 57
+  file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+  line: 39
   signature: 'def _strict_json_schema(template: type[BaseModel])'
   visibility: private
   language: python
-  end_line: 68
+  end_line: 50
   callers:
-  - symbol:capability-local-inference-service:docling-graph-adapter.interpret
+  - symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.interpret
   callees: []
-- id: symbol:capability-local-inference-service:docling-graph-adapter.to-top-left-bbox
+- id: symbol:capability-local-inference-service:openai-compatible-adapter.to-top-left-bbox
   node: capability:local-inference-service
   kind: function
   name: _to_top_left_bbox
-  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
-  line: 71
+  file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+  line: 53
   signature: 'def _to_top_left_bbox(bbox: DoclingBoundingBox | None, page_height:
     float)'
   visibility: private
   language: python
-  end_line: 78
+  end_line: 60
   callers:
-  - symbol:capability-local-inference-service:docling-graph-adapter.bind-field
+  - symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.bind-field
   callees: []
 - id: symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
   node: capability:parse-once-content-artifact
@@ -1472,10 +1467,10 @@ symbols:
   name: build_bundle
   file: neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py
   line: 50
-  signature: 'def build_bundle(parse_result: ParseResult, *, tenant_id: UUID, knowledge_base_id:
-    UUID, document_id: UUID, version_id: UUID, artifact_id: UUID, source_sha256: str,
-    configuration_hash: str, source_bytes: bytes | None=None, source_filename: str
-    | None=None)'
+  signature: 'def build_bundle(parse_result: ParseResult[DoclingDocument], *, tenant_id:
+    UUID, knowledge_base_id: UUID, document_id: UUID, version_id: UUID, artifact_id:
+    UUID, source_sha256: str, configuration_hash: str, source_bytes: bytes | None=None,
+    source_filename: str | None=None)'
   visibility: public
   language: python
   end_line: 167
@@ -1631,12 +1626,12 @@ symbols:
   kind: method
   name: _count_pages_needing_ocr
   file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
-  line: 63
+  line: 50
   signature: 'def _count_pages_needing_ocr(source_path: Path)'
   visibility: private
   language: python
   container: DoclingAdapter
-  end_line: 65
+  end_line: 52
   callers:
   - symbol:capability-parse-once-content-artifact:docling-adapter.parse
   callees: []
@@ -1645,11 +1640,11 @@ symbols:
   kind: class
   name: DoclingAdapter
   file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
-  line: 31
+  line: 18
   signature: class DoclingAdapter
   visibility: public
   language: python
-  end_line: 65
+  end_line: 52
   callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:docling-adapter.init
@@ -1657,12 +1652,12 @@ symbols:
   kind: method
   name: __init__
   file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
-  line: 42
+  line: 29
   signature: def __init__(self)
   visibility: private
   language: python
   container: DoclingAdapter
-  end_line: 43
+  end_line: 30
   callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:docling-adapter.parse
@@ -1670,29 +1665,15 @@ symbols:
   kind: method
   name: parse
   file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
-  line: 45
+  line: 32
   signature: 'def parse(self, source_path: Path)'
   visibility: public
   language: python
   container: DoclingAdapter
-  end_line: 60
+  end_line: 47
   callers: []
   callees:
   - symbol:capability-parse-once-content-artifact:docling-adapter.count-pages-needing-ocr
-  - symbol:capability-parse-once-content-artifact:docling-adapter.parse-result
-- id: symbol:capability-parse-once-content-artifact:docling-adapter.parse-result
-  node: capability:parse-once-content-artifact
-  kind: class
-  name: ParseResult
-  file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
-  line: 22
-  signature: class ParseResult
-  visibility: public
-  language: python
-  end_line: 28
-  callers:
-  - symbol:capability-parse-once-content-artifact:docling-adapter.parse
-  callees: []
 - id: symbol:capability-parse-once-content-artifact:local-content-artifact-store.bundle-prefix
   node: capability:parse-once-content-artifact
   kind: method

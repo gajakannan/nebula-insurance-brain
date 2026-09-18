@@ -1,7 +1,7 @@
 # Persona: Mateo the Document Intelligence Engineer
 
 **Role/Title:** Document Intelligence Engineer, Nebula Insurance Brain
-**Archetype:** Internal builder — owns Docling ingestion, Docling-Graph interpretation, and evidence contracts
+**Archetype:** Internal builder — owns the Docling-Graph document pipeline, durable parse reuse, and evidence contracts
 **Priority:** Primary (F0001, F0004, F0005, F0016)
 
 ## Demographics & Background

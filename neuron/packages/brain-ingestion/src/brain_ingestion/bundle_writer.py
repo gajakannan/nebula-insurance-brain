@@ -16,9 +16,9 @@ from brain_content.manifest import (
     ExecutionRecord,
     ExtractionQuality,
 )
+from brain_interpretation.parsed_content import ParseResult
 from docling_core.types.doc.base import BoundingBox, CoordOrigin
-
-from brain_ingestion.docling_adapter import ParseResult
+from docling_core.types.doc.document import DoclingDocument
 
 
 def _sha256(data: bytes) -> str:
@@ -48,7 +48,7 @@ def _environment_digest() -> str:
 
 
 def build_bundle(
-    parse_result: ParseResult,
+    parse_result: ParseResult[DoclingDocument],
     *,
     tenant_id: UUID,
     knowledge_base_id: UUID,

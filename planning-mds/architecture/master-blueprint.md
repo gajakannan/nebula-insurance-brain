@@ -9,12 +9,14 @@
 
 **AuthX reference:** [Architecture patterns](#118-authx-reference-architecture), [implementation gaps](#119-crm-gaps-that-must-not-be-copied-unchanged), [Brain contracts](#120-concrete-authx-contract-for-insurance-brain), and [validation evidence](#121-validation-evidence-and-required-tests).
 
+**Document pipeline update (2026-09-15):** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph for document pipeline coordination. Section 126 defines the delivery gates. F0001 remains the measured Docling + direct-vLLM baseline; the unactivated 1.9.1 candidate now has native/scanned conversion and saved-JSON contract tests. See [F0005 compatibility evidence](../features/F0005-one-time-docling-ingestion/compatibility-evidence.md) for the remaining gates.
+
 **Technology direction:**
 
 ```text
 USE DIRECTLY
-    Docling
-    Docling-Graph
+    Docling-Graph — document pipeline coordination
+    Docling — underlying conversion engine and native representation
 
 REINCORPORATE SELECTED CAPABILITIES / CONCEPTS
     Utopia
@@ -214,13 +216,12 @@ or filesystem paths.
 ## Direct specialist dependencies
 
 ```text
-Docling
-    physical/content extraction
-    layout, blocks, tables, coordinates, normalized document representation
-
 Docling-Graph
-    semantic/graph-oriented extraction support
-    entity and relationship extraction from persisted content
+    coordinates conversion, chunking, template-driven extraction, validation, and graph output
+    reuses the persisted native document for subsequent interpretation
+
+Docling (under Docling-Graph)
+    physical/content extraction: layout, blocks, tables, coordinates, native document representation
 ```
 
 The direct-dependency rule is:
@@ -388,14 +389,16 @@ YAML/JSONL are authoring and interchange formats, not runtime truth stores.
 
 This is a foundational rule.
 
-For a specific document version, expensive physical/content parsing happens once.
+For a specific document version, preserve one accepted physical/content parse for reuse. Docling-Graph coordinates conversion through Docling; Nebula publishes the immutable bundle before semantic extraction proceeds. After publication, interpretation and recovery perform zero conversion/OCR calls. A failed attempt before publication may need a conversion retry (ADR-0060, section 126).
 
 ```text
 Original File
     ↓
-Docling
+Docling-Graph conversion (Docling underneath)
     ↓
-Canonical Content Artifact
+Durable Content Artifact checkpoint
+    ↓
+Docling-Graph extraction from saved native JSON
 ```
 
 Persist:
@@ -1065,7 +1068,7 @@ evidence precision
 Review happens inside Nebula, so the decision needs no external system, task, or annotation identity. The reviewer is the authenticated session principal:
 
 ```text
-Docling / Docling-Graph output
+Docling-Graph extraction output
         │
         ▼
 Assertion + Evidence
@@ -1461,7 +1464,7 @@ BUSINESS_RULE_CHANGE
 TARGETED_REINTERPRETATION
 ```
 
-An interpretation can target a subset of stored blocks.
+An interpretation can target a subset of stored blocks. The Docling-Graph adapter must preserve the selected scope and a mapping to original item/block references; it must not silently expand a targeted run to the full document (ADR-0060). Pipeline revision/configuration and template hashes belong to the run. Graph output and provenance are retained separately from the immutable parse bundle.
 
 ---
 
@@ -1500,7 +1503,7 @@ New assertions
 Canonical reconciliation
 ```
 
-No Docling rerun.
+Docling-Graph runs again over saved native content; Docling conversion does not.
 No full-document reparse.
 No mandatory full-corpus semantic extraction.
 
@@ -2447,6 +2450,8 @@ TransitionCommitService
 
 # 62. Temporal.io
 
+Temporal remains planned for v0.3 durable business workflows, human waits, timers, and external-system activities. Docling-Graph owns document processing stages inside a bounded activity/job; it does not replace durable execution. v0.1 uses PostgreSQL-backed jobs/outbox for recovery (section 114.1). Both scheduling paths invoke the same authorized document operation and reuse persisted artifacts (ADR-0060).
+
 ```text
 Workflow
     ↓
@@ -2841,7 +2846,7 @@ Nebula opens the review item in its own panel, renders the source from the immut
 Source Document
       │
       ▼
-Docling content + coordinates
+Docling-Graph conversion → saved Docling content + coordinates
       │
       ▼
 Docling-Graph / semantic interpretation
@@ -3312,8 +3317,8 @@ engine/                           # Python backend: API, worker, semantic kernel
 
 neuron/                           # Python AI and semantic runtime (ai-engineer)
     packages/
-        brain-ingestion/          # Docling parse-once adapter
-        brain-extraction/         # Docling-Graph and extraction-profile execution
+        brain-ingestion/          # bundle writer + durable conversion checkpoint callback
+        brain-extraction/         # Docling-Graph pipeline adapter + templates/result/evidence mapping
         brain-interpretation/     # semantic interpretation runs
         brain-reasoning/
         brain-conversation/
@@ -3509,6 +3514,7 @@ Recommended artifact set:
 
 ```text
 manifest.json
+docling-document.json
 normalized.md
 blocks.jsonl
 tables.jsonl
@@ -3540,6 +3546,8 @@ Azure Blob, GCS, or other object-store namespace without changing artifact consu
 
 # 81. Example Manifest
 
+Illustrative layout; the accepted wire shape is `planning-mds/schemas/content-artifact-manifest.schema.json`. The parser remains Docling under ADR-0060. F0004/F0016 must version any new pipeline/run metadata contract rather than add undeclared fields to the current strict schemas.
+
 ```json
 {
   "document_id": "doc_123",
@@ -3551,6 +3559,7 @@ Azure Blob, GCS, or other object-store namespace without changing artifact consu
     "config_hash": "..."
   },
   "artifacts": {
+    "native_document": "docling-document.json",
     "normalized_text": "normalized.md",
     "blocks": "blocks.jsonl",
     "tables": "tables.jsonl",
@@ -3649,7 +3658,7 @@ Two semantic vertical slices plus shared review/evaluation and the bounded F0065
 The v0.1 human-review objective is intentionally narrow:
 
 ```text
-Docling/Docling-Graph output
+Docling-Graph extraction output
         ↓
 Assertion + provenance
         ↓
@@ -3925,7 +3934,7 @@ F0001 Repository and engineering foundation
 F0002 Tenancy-aware domain kernel + verified stable principal and scope contracts
 F0003 PostgreSQL persistence
 F0004 Content artifact model
-F0005 One-time Docling ingestion
+F0005 One-time document ingestion
 F0006 Assertion plane + origin + interpretation basis
 F0007 FactSlot model
 F0008 Bitemporal canonical facts
@@ -4238,7 +4247,8 @@ ASSERTION PLANE          ONTOLOGY / SCHEMA                  PROVENANCE
                     CANONICAL CONTENT ARTIFACTS
                                 ▲
                                 │
-                         DOCLING PARSE ONCE
+                     DOCLING-GRAPH CONVERSION
+                       (Docling underneath)
                                 ▲
                                 │
                          SOURCE DOCUMENTS
@@ -4247,11 +4257,11 @@ ASSERTION PLANE          ONTOLOGY / SCHEMA                  PROVENANCE
 Technology roles are intentionally asymmetric:
 
 ```text
-Docling
-    direct extraction engine
-
 Docling-Graph
-    direct semantic/graph extraction engine
+    document pipeline coordinator (conversion, extraction, graph output)
+
+Docling
+    conversion engine used by Docling-Graph
 
 Graphify
     selected semantic capabilities reincorporated into Nebula
@@ -4273,7 +4283,7 @@ The Brain owns semantics. Direct dependencies execute specialized capabilities a
 New Document
     │
     ▼
-Docling Parse Once
+Docling-Graph Conversion (Docling)
     │
     ▼
 Persisted Content + Coordinates
@@ -4460,8 +4470,8 @@ It should preserve the evidence once, continuously reinterpret that evidence as 
   - https://github.com/pgvector/pgvector
 
 - Direct specialist dependencies selected for this blueprint:
-  - Docling: https://github.com/DS4SD/docling
-  - Docling-Graph: use the selected Docling-Graph implementation already incorporated into the blueprint
+  - Docling-Graph: https://github.com/docling-project/docling-graph — proposed pipeline; exact tested pin is F0005/ADR-0060
+  - Docling: https://github.com/docling-project/docling — underlying converter; lock the compatible transitive version
 
 - Nebula Review Panel rendering libraries (frontend dependencies, not specialist engines; section 125):
   - pdf.js (Apache-2.0): https://github.com/mozilla/pdf.js
@@ -4610,11 +4620,11 @@ Track expected versus received forms/pages/attachments, processing completeness,
 
 ## 108.1 Preserve the native DoclingDocument
 
-**Finding:** Sections 5, 80, and 81 list Markdown and flattened JSONL files but do not explicitly retain the full native DoclingDocument JSON.
+**Original finding, resolved by ADR-0040:** the bundle must preserve the native DoclingDocument JSON alongside its normalized views. Sections 80–81 now show that file; ADR-0060 carries this requirement into the new pipeline.
 
-**Verified technology behavior:** Docling-Graph documents a DoclingDocument JSON input path that skips conversion; its input guide recommends the lossless JSON for highest-fidelity reuse. Raw text and Markdown take different input paths. [R1]
+**Upstream documented behavior, requiring a pinned integration proof:** the current Docling-Graph guide describes DoclingDocument JSON input that skips conversion. Raw text and Markdown take different paths. F0001 recorded different behavior in its tested build; F0005 must resolve the version/API difference and prove reuse under ADR-0060. [R1]
 
-**Proposal:** Add `docling-document.json` to each content artifact, alongside the existing normalized projections. Preserve its schema version and assets required by the selected pipeline. Make that file the default input to the Docling-Graph adapter when reusing parsed documents.
+**Accepted content contract:** `docling-document.json` is already persisted by F0001 (ADR-0040), alongside normalized projections. ADR-0060 makes it the required reuse input to the planned Docling-Graph adapter. Preserve its schema version and required assets, publish the bundle before extraction, and store subsequent graph/provenance outputs under their interpretation run.
 
 Suggested additions to the artifact manifest:
 
@@ -4893,7 +4903,7 @@ Add first-class knowledge-gap objects that can become assigned evidence requests
 
 ## 114.1 Make ingestion durable before adopting full workflow orchestration
 
-Temporal is deferred to v0.3, but v0.1 still needs durable jobs. A PostgreSQL-backed job/outbox mechanism is a reasonable initial implementation within the existing stack.
+Temporal is deferred to v0.3. v0.1 uses PostgreSQL-backed durable jobs/outbox around Docling-Graph processing attempts (ADR-0060). Persist the parse checkpoint before semantic extraction, then reuse it on retry. Docling-Graph internal stage control and model retries do not replace job leases, cancellation, crash recovery, or idempotent publication. F0005 proves the checkpoint seam before activation; a pipeline export produced only after successful extraction is insufficient.
 
 Define states such as discovered, acquired, quarantined, parsed, partially parsed, interpreted, awaiting review, committed, failed, and cancelled. Persist job attempts, failure stage, lease/heartbeat, retry policy, idempotency key, content hashes, and correlation IDs.
 
@@ -5024,7 +5034,7 @@ The following ADR IDs are reserved suggestions, all with **status: Proposed**. T
 | 89, 92 | Full governance delayed while initial writes already occur | Baseline authorization and audit in v0.1 |
 | 90 | v0.2 combines too many large capabilities | Split retrieval/chat delivery from ontology/learning workbenches |
 | 96–97 | Broad small corpus and metrics without release targets | Narrow frozen slice, representative challenge set, measured thresholds |
-| 104 | Docling-Graph dependency is not precisely identified | **Reconciled at F0001-S0003/S0007 (2026-09-10):** not pinned, because not used. Live testing found `docling-graph`'s public API always reconverts its source and has no path to accept an already-parsed `DoclingDocument`, conflicting with the parse-once requirement (section 6, ADR-0003). Semantic/structured extraction instead calls the OpenAI-compatible vLLM endpoint directly (ADR-0040, accepted). See `docker/DEPENDENCY-MATRIX.md`'s "ADR-0040 input" section for the full finding |
+| 104 | Docling-Graph dependency and orchestration | **Reopened by ADR-0060 (2026-09-15):** Docling-Graph is the proposed document coordinator; F0005 must pin and prove native JSON reuse, pre-extraction persistence, and provenance translation. F0001 rejected its tested 1.9.1 build and used direct vLLM. Those measurements remain in `docker/DEPENDENCY-MATRIX.md`; they do not settle the new integration. |
 
 # 117. Sources and Remaining Decisions
 
@@ -5044,7 +5054,7 @@ These primary references support the technology findings and implementation cons
 1. Named owner and approved policy for source authority and canonical promotion in the first GL slice.
 2. Tenant/entity/knowledge-base identity scope and pilot access model.
 3. Target host, PostgreSQL/extension build, and model/provider data policy.
-4. Exact Docling-Graph implementation and release/commit; the selected upstream project is `docling-project/docling-graph`.
+4. F0005: pin and test `docling-project/docling-graph` plus compatible Docling dependencies under ADR-0060. Prove native JSON reuse and publication before extraction; do not treat current `main` documentation or the F0001 version label as a tested combination.
 5. Licensed/authorized representative policy packages and reviewers for the initial corpus.
 6. Critical-field acceptance thresholds, review capacity, latency/cost budget, and recovery objectives.
 7. Applicable retention schedules, holds, conversation-sharing policy, and deletion/revocation behavior.
@@ -5406,3 +5416,22 @@ Precision is declared — `exact-span`, `table-cell`, `block`, `page`, `document
 ## 125.5 Delivery
 
 F0022 delivers the panel with Document 360 in v0.1B and owns the renderer set, the selector resolvers, and the reviewer-authority checks. F0001-S0004 proves the round trip, the duplicate and stale paths, and the anchoring behavior ahead of it; F0001-S0007 records the results against ADR-0044 and ADR-0058. F0026 exports the Golden Corpus from native review decisions (section 96). F0043 generalizes the queues in v0.2B without changing the evidence surface.
+
+# 126. Docling-Graph Document Pipeline Orchestration
+
+**Proposed direction, exact-version proof pending — 2026-09-15.** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this change and its proof gates.
+
+Docling-Graph becomes the specialist document coordinator. Docling still converts the source underneath it. Nebula supplies the durable artifact checkpoint, released profile, scope, and budget; maps the result to assertions and evidence; and retains canonical authority. The extraction graph is a run artifact, not the AGE projection or an accepted enterprise graph.
+
+```text
+Authorized job (PostgreSQL now; Temporal activity where needed in v0.3)
+    → Docling-Graph conversion through Docling
+    → Nebula publishes native JSON + normalized artifact bundle
+    → Docling-Graph extraction from saved JSON + compiled profile
+    → Nebula translates provenance into evidence-bound assertions
+    → Review / entity resolution / authorized canonical commit
+```
+
+The integration must expose a durable conversion checkpoint before model failure can discard parsed content. F0005 proves that seam and restart reuse; F0015 delivers the profile compiler; F0016 persists scoped runs and graph/provenance outputs; F0032 proves affected-content-only evolution scheduling. Upstream stage ordering is not itself durable orchestration. The PostgreSQL job mechanism and later Temporal workflows remain necessary for their respective responsibilities.
+
+F0001's direct-vLLM proof remains the historical baseline. Its accepted evidence, inference, and artifact contracts survive the switch. The new ADR's delivery table assigns the remaining changes and tests without reopening the archive or declaring the new runtime shipped.

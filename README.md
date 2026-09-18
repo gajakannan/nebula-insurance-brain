@@ -28,7 +28,7 @@ Open this repository directly for Git/source control. The parent `nebula/` is a 
 | --- | --- | --- |
 | `planning-mds/` | Blueprint, features, architecture, ADRs, kg-source, evidence | product-manager, architect |
 | `engine/` | Python backend: FastAPI API, worker, semantic kernel packages, Alembic migrations | backend-developer |
-| `neuron/` | Python AI runtime: Docling ingestion, extraction, interpretation, conversation, learning, MCP tools | ai-engineer |
+| `neuron/` | Python AI runtime: Docling-Graph document pipeline (planned, ADR-0060), interpretation, conversation, learning, MCP tools | ai-engineer |
 | `experience/` | React and TypeScript web app, including the Nebula Review Panel | frontend-developer |
 | `ontology/`, `profiles/`, `schemas/`, `knowledge-packs/` | Authored semantic assets compiled into the runtime | architect |
 | `golden-corpus/` | Version-controlled evaluation fixtures | quality-engineer |
@@ -50,4 +50,8 @@ See [LICENSE](LICENSE).
 
 ## Start with an example
 
-Read [EX-GL-001: from policy evidence to guideline assessment](planning-mds/examples/neurosymbolic-gl/README.md) and the [concept coverage map](planning-mds/examples/README.md). The v0.1 roadmap now includes [F0065](planning-mds/features/F0065-grounded-gl-guideline-assessment/README.md), a bounded neurosymbolic assessment with six planned stories. All example outputs are synthetic; the repository remains a planning baseline with no runtime implementation.
+Read [EX-GL-001: from policy evidence to guideline assessment](planning-mds/examples/neurosymbolic-gl/README.md) and the [concept coverage map](planning-mds/examples/README.md). The v0.1 roadmap now includes [F0065](planning-mds/features/F0065-grounded-gl-guideline-assessment/README.md), a bounded neurosymbolic assessment with six planned stories. All example outputs are synthetic; F0065 remains planned; F0001 has runtime proofs and F0005 has an unactivated candidate pipeline.
+
+## Document pipeline direction
+
+[ADR-0060](planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph to coordinate conversion through Docling and extraction over saved native content. F0005 must prove the pinned integration and durable parse checkpoint before activation; the current F0001 runtime still uses Docling and a direct vLLM adapter.

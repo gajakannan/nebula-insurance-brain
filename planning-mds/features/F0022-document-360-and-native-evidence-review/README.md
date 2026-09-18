@@ -6,7 +6,7 @@
 
 ## Overview
 
-Document 360 with the Nebula Review Panel is the v0.1 human-correction loop, including parent and classification checks and reviewer authority (sections 71, 75, 111, 125).
+Document 360 with the Nebula Review Panel is the v0.1 human-correction loop, including parent and classification checks and reviewer authority (sections 71, 75, 111, 125). ADR-0060 adds evidence translation from upstream chunks/items to the existing panel contract.
 
 This feature owns the panel: the renderer set (pdf.js for PDF, fflate over the OOXML parts for DOCX and XLSX, `TextDecoder` for delimited text), the selector resolvers behind [ADR-0058](../../architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md), the review batch and its submission, and the reviewer-authority checks that keep adjudication separate from canonical approval. Evidence is rendered inside the authorized session and never exported to another service.
 
@@ -24,3 +24,10 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Docling-Graph scope amendment (2026-09-15)
+
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+
+- Test chunk-relative to block/code-point mapping, page/bbox conventions, repeated values, and table-cell references in the native panel. Node-level provenance must not be displayed as property-level support.
+- Preserve ADR-0058 failure behavior when translated evidence cannot resolve. The pipeline switch does not replace the native review surface or its authority checks.

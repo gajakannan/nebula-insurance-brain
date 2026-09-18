@@ -20,3 +20,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Docling-Graph scope amendment (2026-09-15)
+
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+
+- Build AGE from accepted canonical records and the existing outbox/rebuild path. Do not load upstream graph exports directly; local extraction IDs and deduplication have no canonical authority.

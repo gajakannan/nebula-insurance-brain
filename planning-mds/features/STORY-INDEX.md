@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 13
+**Total Stories:** 17
 
 ---
 
@@ -17,6 +17,17 @@ Auto-generated index of all user stories across feature folders.
 | [F0001-S0005](./archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) | Proof: bitemporal commit under retroactive and concurrent change | High | Infrastructure | Ingrid the Persistence Engineer |
 | [F0001-S0006](./archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) | Proof: access boundaries, extension build, and restore | High | Infrastructure | Dana the Platform Engineer |
 | [F0001-S0007](./archive/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) | Record proof outcomes and settle the pre-build contracts | High | Infrastructure | Dana the Platform Engineer |
+
+---
+
+## F0005 — One-time document ingestion
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0005-S0001](./F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) | Pin and process source documents | High | v0.1A | document intelligence engineer |
+| [F0005-S0002](./F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) | Persist artifacts and recover jobs | High | v0.1A | platform engineer |
+| [F0005-S0003](./F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) | Reinterpret saved JSON and map evidence | High | v0.1A | document intelligence engineer |
+| [F0005-S0004](./F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | High | v0.1A | platform owner |
 
 ---
 
@@ -38,6 +49,7 @@ Auto-generated index of all user stories across feature folders.
 | Phase | Count |
 |-------|-------|
 | Infrastructure | 7 |
+| v0.1A | 4 |
 | v0.1B | 6 |
 
 ---
@@ -47,7 +59,7 @@ Auto-generated index of all user stories across feature folders.
 | Priority | Count |
 |----------|-------|
 | Critical | 2 |
-| High | 11 |
+| High | 15 |
 
 ---
 

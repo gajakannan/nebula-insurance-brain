@@ -20,7 +20,7 @@ import pytest
 from brain_content.config import LocalObjectStoreConfig
 from brain_content.object_store import LocalFilesystemObjectStore
 from brain_content.store import LocalContentArtifactStore
-from brain_extraction.docling_graph_adapter import DoclingGraphAdapter
+from brain_extraction.openai_compatible_adapter import OpenAICompatibleExtractionAdapter
 from brain_extraction.profiles import load_profile
 from brain_ingestion.bundle_writer import build_bundle
 from brain_ingestion.docling_adapter import DoclingAdapter
@@ -75,7 +75,7 @@ def test_parse_once_reinterpret_twice_evidence_resolves(tmp_path: Path) -> None:
     asyncio.run(store.put_bundle(manifest, files))
 
     # --- Step 2: reinterpret twice, from the persisted artifact only ---------
-    adapter = DoclingGraphAdapter(
+    adapter = OpenAICompatibleExtractionAdapter(
         base_url=BASE_URL, api_key=API_KEY, model_id="microsoft/Phi-4-mini-instruct"
     )
 
@@ -139,7 +139,7 @@ def test_reinterpretation_over_context_limit_is_rejected_client_side(tmp_path: P
     )
     asyncio.run(store.put_bundle(manifest, files))
 
-    tiny_context_adapter = DoclingGraphAdapter(
+    tiny_context_adapter = OpenAICompatibleExtractionAdapter(
         base_url=BASE_URL,
         api_key=API_KEY,
         model_id="microsoft/Phi-4-mini-instruct",

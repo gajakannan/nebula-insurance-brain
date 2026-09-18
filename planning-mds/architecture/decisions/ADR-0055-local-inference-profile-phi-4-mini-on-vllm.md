@@ -49,3 +49,7 @@ The F0001 parse-once proof (S0003) drives Docling-Graph extraction through a lan
 
 - nebula-insurance-crm: ADR-035, `neuron/config/models.yaml` (`local_phi`), `neuron/neuron-local-phi-vllm-wsl2-runbook.md`
 - F0001 stories S0002 and S0003; proposed ADR-0040
+
+## Refinement — 2026-09-15
+
+[ADR-0060](ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph document pipeline orchestration. The model/provider policy continues to apply through Docling-Graph. F0001 actually executed the direct-vLLM adapter, despite the original plan naming Docling-Graph. F0005 must revalidate context adequacy, structured output, and per-call guards for the new templates and any multi-call extraction strategy.

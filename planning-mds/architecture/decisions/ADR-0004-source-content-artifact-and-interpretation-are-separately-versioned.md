@@ -41,3 +41,7 @@ Source v1
 ## References
 
 - `planning-mds/architecture/master-blueprint.md` section 76
+
+## Proposed refinement — 2026-09-15
+
+[ADR-0060](ADR-0060-docling-graph-document-pipeline-orchestration.md) preserves separate source, content, and interpretation identities. Conversion-recipe and Docling parser metadata identify the content artifact; Graph chunking, templates, prompts, models, and provenance belong to the interpretation run. A profile change cannot mint a new parse artifact. The new pipeline remains subject to F0005 proof.

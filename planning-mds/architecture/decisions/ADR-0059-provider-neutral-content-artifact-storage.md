@@ -82,3 +82,7 @@ Local non-secret configuration is committed in `config/local.yaml` so a fresh ch
 - `planning-mds/architecture/decisions/ADR-0004-source-content-artifact-and-interpretation-are-separately-versioned.md`
 - `planning-mds/architecture/decisions/ADR-0040-lossless-content-and-evidence-contract.md`
 - `planning-mds/features/F0001-repository-and-engineering-foundation/feature-assembly-plan.md`
+
+## Refinement — 2026-09-15
+
+[ADR-0060](ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph document pipeline orchestration. Docling-Graph output directories are temporary processing outputs, not the artifact storage API. Nebula publishes the parse bundle through ContentArtifactStore, and stores graph/provenance/configuration as separate versioned interpretation outputs with authorized access and retention.

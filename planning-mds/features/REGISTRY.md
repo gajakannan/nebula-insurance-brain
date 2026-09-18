@@ -33,7 +33,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | F0002 | Tenancy-aware domain kernel + verified stable principal and scope contracts | Planned | v0.1A | `F0002-tenancy-aware-domain-kernel-and-principal-contracts/` |
 | F0003 | PostgreSQL persistence | Planned | v0.1A | `F0003-postgresql-persistence/` |
 | F0004 | Content artifact model | Planned | v0.1A | `F0004-content-artifact-model/` |
-| F0005 | One-time Docling ingestion | Planned | v0.1A | `F0005-one-time-docling-ingestion/` |
+| F0005 | One-time document ingestion | Planned | v0.1A | `F0005-one-time-docling-ingestion/` |
 | F0006 | Assertion plane + origin + interpretation basis | Planned | v0.1A | `F0006-assertion-plane-origin-and-interpretation-basis/` |
 | F0007 | FactSlot model | Planned | v0.1A | `F0007-factslot-model/` |
 | F0008 | Bitemporal canonical facts | Planned | v0.1A | `F0008-bitemporal-canonical-facts/` |

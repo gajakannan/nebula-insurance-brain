@@ -129,3 +129,7 @@ silently reinterpreted.
 - `engine/packages/brain-review/src/brain_review/evidence.py` (`evidence_binding_to_locator`, the actual `nebula:BoxSelector` shape)
 - `experience/src/review-panel/__tests__/Viewport.test.tsx`, `FieldList.test.tsx`
 - `planning-mds/features/F0001-repository-and-engineering-foundation/STATUS.md` (Deferred Non-Blocking Follow-ups)
+
+## Refinement — 2026-09-15
+
+[ADR-0060](ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph document pipeline orchestration. Docling-Graph provenance must be translated to these Nebula evidence contracts. Chunk-relative or node-identity matches do not prove property/relationship grounding. Preserve coarse or unresolved precision; test offsets, table references, and coordinate conversion against the immutable source.
