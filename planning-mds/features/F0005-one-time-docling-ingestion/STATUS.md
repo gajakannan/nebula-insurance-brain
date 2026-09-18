@@ -26,7 +26,7 @@
 | Review and release | F0022/F0026 evidence and failure/quality cases specified | Panel mapping and measured corpus results |
 | Runtime, dependency lock, misleading adapter name | Candidate adapter, shared ParseResult, explicit direct baseline, pyproject/uv.lock pin, package/schema/input metadata implemented and tested | Production composition, model/run metadata, evidence translation, durable services, activation |
 | Full-document versus chunked extraction | F0001 one-call baseline retained; candidate tests use direct mode | Comparative schema/quality/cost/latency/review results |
-| Local inference and operations | Secrets, bounded concurrency, tenant access/retention included | Observed failure/security/resource tests |
+| Local inference and operations | Bounded SDK client implemented; 23 offline tests cover budgets, cancellation, shared concurrency, errors, redacted diagnostics, and cached serving tokenizer | Live serving parity, worker-wide limits, production credential/log review, tenant access/retention, and operational proof |
 | Temporal and archive | v0.1 jobs / v0.3 Temporal retained; F0001 unchanged | No architecture replacement or reopened archive required |
 
 ## Proof Gates

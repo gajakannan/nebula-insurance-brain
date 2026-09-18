@@ -82,3 +82,21 @@ Expected: the response lists `microsoft/Phi-4-mini-instruct` with `max_model_len
   since a single RTX 5070 cannot serve two 7+ GiB model weights concurrently at this VRAM budget).
 - **Port 8000 already bound** — confirm no other local server owns it (`ss -ltn | grep :8000`);
   override with `--port` and update `BRAIN_INFERENCE_BASE_URL` to match.
+
+## F0005 candidate model revision
+
+The Graph candidate's offline tokenizer check uses `microsoft/Phi-4-mini-instruct` at cached commit `cfbefacb99257ffa30c83adab238a50856ac3083`. This is an explicit candidate pin, not a claim that F0001's historical server ran that revision. Its tokenizer loads from local assets with remote Python code disabled.
+
+For the live Graph proof, start a dedicated Brain server with that same model and tokenizer revision; do not infer a revision from the model name returned by `/models`:
+
+```bash
+source ~/.brain-secrets
+export BRAIN_INFERENCE_MODEL_REVISION=cfbefacb99257ffa30c83adab238a50856ac3083
+~/.venvs/brain-vllm/bin/vllm serve microsoft/Phi-4-mini-instruct \
+  --revision "$BRAIN_INFERENCE_MODEL_REVISION" \
+  --tokenizer-revision "$BRAIN_INFERENCE_MODEL_REVISION" \
+  --host 127.0.0.1 --port 8000 --dtype auto \
+  --max-model-len 4096 --gpu-memory-utilization 0.90
+```
+
+The candidate client counts chat-template token IDs plus a conservative schema reservation. If reported usage exceeds its reservation, it records the incurred usage and refuses further calls in that attempt. Follow [F0005's live smoke instructions](../planning-mds/features/F0005-one-time-docling-ingestion/GETTING-STARTED.md#opt-in-live-smoke-proof). Live model quality and serving-revision parity have not been verified by the offline tests.

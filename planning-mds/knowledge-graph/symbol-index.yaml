@@ -1,11 +1,11 @@
 version: 0
 summary:
-  total_symbols: 189
+  total_symbols: 199
   by_language:
     python:
-      files: 36
-      parsed: 4
-      cached: 32
+      files: 38
+      parsed: 2
+      cached: 36
   disambiguated_ids: 0
   compilation_roots_by_language:
     python:
@@ -2321,7 +2321,51 @@ symbols:
   callers: []
   callees:
   - symbol:capability-semantic-interpretation-run:context-guard.init
+  - symbol:capability-semantic-interpretation-run:conversion-checkpoint.init
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.init
   - symbol:capability-semantic-interpretation-run:in-memory-run-recorder.init
+- id: symbol:capability-semantic-interpretation-run:conversion-checkpoint.execute
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: execute
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 55
+  signature: 'def execute(self, context: PipelineContext)'
+  visibility: public
+  language: python
+  container: _ConversionCheckpoint
+  end_line: 73
+  callers: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline.conversion-checkpoint-error
+- id: symbol:capability-semantic-interpretation-run:conversion-checkpoint.init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 47
+  signature: 'def __init__(self, converter: Converter | None, publish: Publisher |
+    None)'
+  visibility: private
+  language: python
+  container: _ConversionCheckpoint
+  end_line: 50
+  callers:
+  - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:conversion-checkpoint.name
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: name
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 52
+  signature: def name(self)
+  visibility: public
+  language: python
+  container: _ConversionCheckpoint
+  end_line: 53
+  callers: []
+  callees: []
 - id: symbol:capability-semantic-interpretation-run:counter-accumulator.freeze
   node: capability:semantic-interpretation-run
   kind: method
@@ -2388,6 +2432,88 @@ symbols:
   callers:
   - symbol:capability-semantic-interpretation-run:counters.assert-no-reparse
   callees: []
+- id: symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 98
+  signature: 'def __init__(self, *, llm_client: LLMClientProtocol, model_id: str)'
+  visibility: private
+  language: python
+  container: DoclingGraphPipelineAdapter
+  end_line: 102
+  callers:
+  - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.run
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: run
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 104
+  signature: 'def run(self, *, source: Path, template: type[BaseModel], converter:
+    Converter | None=None, publish: Publisher | None=None, extraction_contract: Literal[''direct'',
+    ''dense'']=''direct'', chunk_max_tokens: int=512)'
+  visibility: public
+  language: python
+  container: DoclingGraphPipelineAdapter
+  end_line: 175
+  callers: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline.conversion-checkpoint
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline.graph-pipeline-output
+- id: symbol:capability-semantic-interpretation-run:docling-graph-pipeline.conversion-checkpoint
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: _ConversionCheckpoint
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 39
+  signature: class _ConversionCheckpoint
+  visibility: private
+  language: python
+  end_line: 73
+  callers:
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.run
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:docling-graph-pipeline.conversion-checkpoint-error
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: ConversionCheckpointError
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 35
+  signature: class ConversionCheckpointError
+  visibility: public
+  language: python
+  end_line: 36
+  callers:
+  - symbol:capability-semantic-interpretation-run:conversion-checkpoint.execute
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:docling-graph-pipeline.docling-graph-pipeline-adapter
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: DoclingGraphPipelineAdapter
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 90
+  signature: class DoclingGraphPipelineAdapter
+  visibility: public
+  language: python
+  end_line: 175
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:docling-graph-pipeline.graph-pipeline-output
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: GraphPipelineOutput
+  file: neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+  line: 77
+  signature: class GraphPipelineOutput
+  visibility: public
+  language: python
+  end_line: 87
+  callers:
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.run
+  callees: []
 - id: symbol:capability-semantic-interpretation-run:in-memory-run-recorder.init
   node: capability:semantic-interpretation-run
   kind: method
@@ -2426,6 +2552,18 @@ symbols:
   language: python
   container: InterpretationRunRecorder
   end_line: 18
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:parsed-content.parse-result
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: ParseResult
+  file: neuron/packages/brain-interpretation/src/brain_interpretation/parsed_content.py
+  line: 10
+  signature: class ParseResult
+  visibility: public
+  language: python
+  end_line: 22
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:profiles.extraction-profile
