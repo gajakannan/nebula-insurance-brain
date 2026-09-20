@@ -84,3 +84,14 @@ The engine-owned checkpoint test suite adds **7 passing tests**, with **93% cove
 engine/.venv/bin/python -m pytest engine/packages/brain-content/tests/test_checkpoints.py \
   --cov=brain_content.checkpoints --cov-report=term-missing --cov-fail-under=80 -q
 ```
+
+## Remote PostgreSQL and complete CI result — 2026-09-20
+
+[CI run 35534966011](https://github.com/gajakannan/nebula-insurance-brain/actions/runs/35534966011), source commit `3151e5eff82eb6f8aa6d1c0c2dd8611fd85790d5`, passed all five jobs: product gates, framework validators, runtime suites, runtime stack, and experience. Git delivery succeeded despite the local API/DNS restrictions described in earlier observations; the candidate and article are now on their repositories' main branches.
+
+- Engine suite: **126 passed, 19 skipped**. All configured per-package coverage gates passed; `brain_content` reached **96.21%** and `brain_jobs` **88.64%**.
+- Neuron suite: **58 passed, 4 skipped**. This includes real native/scanned conversion with recorded extraction responses, not live-model quality.
+- Disposable PostgreSQL stack: migrations **0001 through 0004 applied successfully**. The dedicated document-job concurrency/fencing tests ran against PostgreSQL: **2 passed in 0.45 seconds**. General-suite database skips do not count as this proof.
+- Planning regression tests, readiness, KG freshness/reproducibility, framework validation, frontend checks, and both runtime lint/type checks passed.
+
+This closes the initial PostgreSQL migration, competing-claim, and expired-worker-fencing checks. It does not establish process-kill recovery against PostgreSQL, live vLLM quality, serving-tokenizer parity, corpus thresholds, multi-region/relationship correctness, retention/deletion, or reviewer acceptance. The same live-model restrictions remain locally; ADR-0060 stays Proposed.
