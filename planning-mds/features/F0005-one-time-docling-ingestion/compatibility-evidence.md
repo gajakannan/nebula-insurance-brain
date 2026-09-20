@@ -77,3 +77,10 @@ The combined runtime command, adding `engine/packages/brain-security/tests/test_
 Migration 0004 generates PostgreSQL SQL successfully (`cd engine/migrations && ../.venv/bin/alembic upgrade 0003:0004 --sql`). This is a DDL check, not a real database migration. Localhost ports 5432 and 8000 return `PermissionError: Operation not permitted`; `BRAIN_TEST_POSTGRES_URL`, `BRAIN_INFERENCE_API_KEY`, and `BRAIN_INFERENCE_MODEL_REVISION` are unset in this session.
 
 Remaining acceptance covers actual PostgreSQL/model runs, direct-versus-chunked corpus measurements, unsupported relationship and multi-region evidence cases, deployment resource/retention qualification, and reviewer decisions. The full profile compiler and affected-content scheduler remain in their owning future features. No switch-wide or production completion claim is made.
+
+The engine-owned checkpoint test suite adds **7 passing tests**, with **93% coverage** of `brain_content.checkpoints` under its own coverage command. This keeps the existing engine package coverage gate meaningful when neuron tests are not included. The full engine mypy invocation, including the new jobs/contracts packages, passes for 52 source files.
+
+```bash
+engine/.venv/bin/python -m pytest engine/packages/brain-content/tests/test_checkpoints.py \
+  --cov=brain_content.checkpoints --cov-report=term-missing --cov-fail-under=80 -q
+```
