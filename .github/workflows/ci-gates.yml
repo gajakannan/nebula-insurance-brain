@@ -49,7 +49,7 @@ jobs:
           version: "0.11.31"
       - name: engine/ — sync
         working-directory: engine
-        run: uv sync
+        run: uv sync --locked
       - name: engine/ — ruff check
         working-directory: engine
         run: uv run ruff check .
@@ -62,6 +62,7 @@ jobs:
           uv run mypy apps/api/src apps/worker/src packages/brain-content/src
           packages/brain-persistence/src packages/brain-domain/src packages/brain-security/src
           packages/brain-review/src packages/brain-temporal/src
+          packages/brain-jobs/src packages/brain-contracts/src
       - name: engine/ — pytest, all packages (>=80% coverage each, checked per-package below)
         working-directory: engine
         run: uv run pytest -q
@@ -90,9 +91,12 @@ jobs:
       - name: engine/ — pytest brain_temporal coverage gate (>=80%)
         working-directory: engine
         run: uv run pytest packages/brain-temporal/tests --cov=brain_temporal --cov-fail-under=80
+      - name: engine/ — pytest brain_jobs coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-jobs/tests --cov=brain_jobs --cov-fail-under=80
       - name: neuron/ — sync
         working-directory: neuron
-        run: uv sync
+        run: uv sync --locked
       - name: neuron/ — ruff check
         working-directory: neuron
         run: uv run ruff check .
@@ -148,6 +152,21 @@ jobs:
           grep -q vector /tmp/extensions.txt
           grep -q age /tmp/extensions.txt
           grep -q btree_gist /tmp/extensions.txt
+      - name: Install uv for PostgreSQL document-job qualification
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.11.31"
+      - name: Install the locked engine dependencies
+        run: uv sync --locked --project engine
+      - name: Apply engine migrations to the disposable CI database
+        working-directory: engine/migrations
+        env:
+          BRAIN_DATABASE_URL: postgresql+psycopg://brain:brain@localhost:5432/brain
+        run: ../.venv/bin/alembic upgrade head
+      - name: Prove PostgreSQL document-job concurrency and fencing
+        env:
+          BRAIN_TEST_POSTGRES_URL: postgresql+psycopg://brain:brain@localhost:5432/brain
+        run: engine/.venv/bin/python -m pytest engine/packages/brain-jobs/tests/test_postgres.py -q
       - name: Verify OIDC discovery is served (retries the blueprint-application race
           documented in GETTING-STARTED — the custom blueprint applies asynchronously
           just after authentik-server's healthcheck passes)

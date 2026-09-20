@@ -87,3 +87,5 @@ neuron/.venv/bin/python -m pytest engine/packages/brain-jobs/tests/test_postgres
 ```
 
 Run the combined offline suite documented in [compatibility evidence](compatibility-evidence.md) as well. Neither this PostgreSQL test nor the live model smoke test replaces the approved corpus comparison, operational qualification, and reviewer acceptance gates.
+
+CI's `runtime-stack` job now applies the engine migrations to its disposable PostgreSQL database and runs the document-job concurrency/fencing tests. The tests retain isolated schemas. A green result is still limited to those cases and is not live model or full crash/retention acceptance.

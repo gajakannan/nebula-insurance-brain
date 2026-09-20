@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from starlette.requests import Request
 
 from brain_api.deps import _record_credential_failure
+
 from .conftest import make_token, seed_content_artifact, seed_principal_and_membership
 
 
