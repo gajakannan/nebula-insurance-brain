@@ -632,6 +632,28 @@ entities:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
 policy_rules:
+  - id: policy_rule:content-artifact-ingest
+    label: content_artifact:ingest
+    action: ingest
+    allowed_roles:
+      - role:service-principal
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:parse-once-content-artifact
+    resource: content_artifact
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:content-artifact-interpret
+    label: content_artifact:interpret
+    action: interpret
+    allowed_roles:
+      - role:service-principal
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:parse-once-content-artifact
+    resource: content_artifact
+    source_docs:
+      - planning-mds/security/policies/policy.csv
   - id: policy_rule:content-artifact-read
     label: content_artifact:read
     action: read

@@ -13,7 +13,7 @@ import math
 import re
 import time
 from collections.abc import Callable, Iterator, Mapping
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from threading import BoundedSemaphore, Event, Lock
 from typing import Any, Literal, cast
 from urllib.parse import urlsplit
@@ -186,6 +186,7 @@ class VllmGraphClient:
                 "model_revision": self._revision,
                 "endpoint_hash": self._endpoint_hash,
                 "reserved_tokens": self._reserved,
+                "limits": asdict(self._limits),
                 "calls": [dict(call) for call in self._calls],
             }
 

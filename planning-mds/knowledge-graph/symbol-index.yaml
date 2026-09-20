@@ -1,11 +1,11 @@
 version: 0
 summary:
-  total_symbols: 199
+  total_symbols: 258
   by_language:
     python:
-      files: 38
-      parsed: 2
-      cached: 36
+      files: 49
+      parsed: 8
+      cached: 41
   disambiguated_ids: 0
   compilation_roots_by_language:
     python:
@@ -1165,7 +1165,7 @@ symbols:
     int | None=None, char_end: int | None=None, unresolved_reason: str | None=None)'
   visibility: public
   language: python
-  end_line: 60
+  end_line: 59
   callers: []
   callees: []
 - id: symbol:capability-evidence-review-round-trip:items.review-item-sink
@@ -1474,7 +1474,8 @@ symbols:
   visibility: public
   language: python
   end_line: 167
-  callers: []
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
   callees:
   - symbol:capability-parse-once-content-artifact:bundle-writer.environment-digest
   - symbol:capability-parse-once-content-artifact:bundle-writer.sha256
@@ -1525,6 +1526,187 @@ symbols:
   callers:
   - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
   callees: []
+- id: symbol:capability-parse-once-content-artifact:checkpoint-store.init
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: __init__
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 25
+  signature: 'def __init__(self, objects: ObjectStore)'
+  visibility: private
+  language: python
+  container: CheckpointStore
+  end_line: 26
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: load
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 98
+  signature: 'def load(self, artifact_id: UUID, tenant_id: UUID, knowledge_base_id:
+    UUID)'
+  visibility: public
+  language: python
+  container: CheckpointStore
+  end_line: 123
+  callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load-run
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish-run
+  - symbol:capability-parse-once-content-artifact:document-result-importer.run-one
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.scope
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.verify
+  - symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  - symbol:capability-parse-once-content-artifact:object-store.read
+- id: symbol:capability-parse-once-content-artifact:checkpoint-store.load-run
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: load_run
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 152
+  signature: 'def load_run(self, *, tenant_id: UUID, knowledge_base_id: UUID, artifact_id:
+    UUID, run_id: UUID)'
+  visibility: public
+  language: python
+  container: CheckpointStore
+  end_line: 187
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-result-importer.run-one
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  - symbol:capability-parse-once-content-artifact:object-store.read
+- id: symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: publish
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 77
+  signature: 'def publish(self, manifest: ArtifactManifest, files: Mapping[str, bytes])'
+  visibility: public
+  language: python
+  container: CheckpointStore
+  end_line: 96
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.put-identical
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.verify
+  - symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+  - symbol:capability-parse-once-content-artifact:document-job-queue.publish
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.exists
+  - symbol:capability-parse-once-content-artifact:object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:object-store.exists
+- id: symbol:capability-parse-once-content-artifact:checkpoint-store.publish-run
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: publish_run
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 125
+  signature: 'def publish_run(self, *, tenant_id: UUID, knowledge_base_id: UUID, artifact_id:
+    UUID, run_id: UUID, files: Mapping[str, bytes])'
+  visibility: public
+  language: python
+  container: CheckpointStore
+  end_line: 150
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.put-identical
+  - symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+- id: symbol:capability-parse-once-content-artifact:checkpoint-store.put-identical
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _put_identical
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 70
+  signature: 'def _put_identical(self, key: str, data: bytes)'
+  visibility: private
+  language: python
+  container: CheckpointStore
+  end_line: 75
+  callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish-run
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  - symbol:capability-parse-once-content-artifact:object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:object-store.read
+- id: symbol:capability-parse-once-content-artifact:checkpoint-store.scope
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _scope
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 29
+  signature: 'def _scope(manifest: ArtifactManifest, tenant_id: UUID, knowledge_base_id:
+    UUID)'
+  visibility: private
+  language: python
+  container: CheckpointStore
+  end_line: 31
+  callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:checkpoint-store.verify
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _verify
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 34
+  signature: 'def _verify(manifest: ArtifactManifest, files: Mapping[str, bytes])'
+  visibility: private
+  language: python
+  container: CheckpointStore
+  end_line: 68
+  callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+- id: symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: ArtifactIntegrityError
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 14
+  signature: class ArtifactIntegrityError
+  visibility: public
+  language: python
+  end_line: 15
+  callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load-run
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish-run
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.put-identical
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.verify
+  - symbol:capability-parse-once-content-artifact:document-delivery.register-artifact
+  - symbol:capability-parse-once-content-artifact:document-result-importer.run-one
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:checkpoints.checkpoint-store
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: CheckpointStore
+  file: engine/packages/brain-content/src/brain_content/checkpoints.py
+  line: 18
+  signature: class CheckpointStore
+  visibility: public
+  language: python
+  end_line: 187
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
 - id: symbol:capability-parse-once-content-artifact:config.config-error
   node: capability:parse-once-content-artifact
   kind: class
@@ -1563,7 +1745,8 @@ symbols:
   visibility: public
   language: python
   end_line: 63
-  callers: []
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees:
   - symbol:capability-parse-once-content-artifact:config.config-error
   - symbol:capability-parse-once-content-artifact:config.find-config-file
@@ -1645,7 +1828,8 @@ symbols:
   visibility: public
   language: python
   end_line: 52
-  callers: []
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
   callees: []
 - id: symbol:capability-parse-once-content-artifact:docling-adapter.init
   node: capability:parse-once-content-artifact
@@ -1674,6 +1858,413 @@ symbols:
   callers: []
   callees:
   - symbol:capability-parse-once-content-artifact:docling-adapter.count-pages-needing-ocr
+- id: symbol:capability-parse-once-content-artifact:document-delivery.document-job-authorization
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: DocumentJobAuthorization
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 41
+  signature: class DocumentJobAuthorization
+  visibility: public
+  language: python
+  end_line: 102
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-delivery.document-result-importer
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: DocumentResultImporter
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 157
+  signature: class DocumentResultImporter
+  visibility: public
+  language: python
+  end_line: 343
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-delivery.register-artifact
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: _register_artifact
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 105
+  signature: 'def _register_artifact(session: Session, manifest: ArtifactManifest)'
+  visibility: private
+  language: python
+  end_line: 144
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-delivery.register-document-artifact
+  - symbol:capability-parse-once-content-artifact:document-result-importer.run-one
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+- id: symbol:capability-parse-once-content-artifact:document-delivery.register-document-artifact
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: register_document_artifact
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 147
+  signature: 'def register_document_artifact(connection: Connection, manifest: ArtifactManifest)'
+  visibility: public
+  language: python
+  end_line: 154
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-delivery.register-artifact
+- id: symbol:capability-parse-once-content-artifact:document-job-authorization.for-job
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: for_job
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 52
+  signature: 'def for_job(self, lease: JobLease)'
+  visibility: public
+  language: python
+  container: DocumentJobAuthorization
+  end_line: 102
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-job-authorization.init
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: __init__
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 49
+  signature: 'def __init__(self, engine: Engine, model_path: Path, policy_path: Path)'
+  visibility: private
+  language: python
+  container: DocumentJobAuthorization
+  end_line: 50
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.cancel
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: cancel
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 381
+  signature: 'def cancel(self, job_id: UUID, tenant_id: UUID, knowledge_base_id: UUID)'
+  visibility: public
+  language: python
+  container: DocumentJobQueue
+  end_line: 403
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.event
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.claim
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: claim
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 216
+  signature: def claim(self)
+  visibility: public
+  language: python
+  container: DocumentJobQueue
+  end_line: 275
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-worker.run-one
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.event
+  - symbol:capability-parse-once-content-artifact:document-job-queue.now
+  - symbol:capability-parse-once-content-artifact:queue.job-lease
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.enqueue
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: enqueue
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 142
+  signature: 'def enqueue(self, *, tenant_id: UUID, knowledge_base_id: UUID, artifact_id:
+    UUID, request_key: str, payload: dict[str, Any], max_attempts: int=3)'
+  visibility: public
+  language: python
+  container: DocumentJobQueue
+  end_line: 214
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.event
+  - symbol:capability-parse-once-content-artifact:document-job-queue.now
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.event
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _event
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 131
+  signature: 'def _event(self, conn: Connection, job_id: str, generation: int, event:
+    str)'
+  visibility: private
+  language: python
+  container: DocumentJobQueue
+  end_line: 140
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.cancel
+  - symbol:capability-parse-once-content-artifact:document-job-queue.claim
+  - symbol:capability-parse-once-content-artifact:document-job-queue.enqueue
+  - symbol:capability-parse-once-content-artifact:document-job-queue.finish
+  - symbol:capability-parse-once-content-artifact:document-job-queue.publish-transaction
+  - symbol:capability-parse-once-content-artifact:document-job-queue.retry
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.now
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.fence
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _fence
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 277
+  signature: 'def _fence(self, conn: Connection, lease: JobLease)'
+  visibility: private
+  language: python
+  container: DocumentJobQueue
+  end_line: 315
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.finish
+  - symbol:capability-parse-once-content-artifact:document-job-queue.heartbeat
+  - symbol:capability-parse-once-content-artifact:document-job-queue.publish-transaction
+  - symbol:capability-parse-once-content-artifact:document-job-queue.retry
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.now
+  - symbol:capability-parse-once-content-artifact:queue.lease-lost
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.finish
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: finish
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 340
+  signature: 'def finish(self, lease: JobLease, result_ref: str)'
+  visibility: public
+  language: python
+  container: DocumentJobQueue
+  end_line: 362
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.event
+  - symbol:capability-parse-once-content-artifact:document-job-queue.fence
+  - symbol:capability-parse-once-content-artifact:document-job-queue.now
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.heartbeat
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: heartbeat
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 317
+  signature: 'def heartbeat(self, lease: JobLease)'
+  visibility: public
+  language: python
+  container: DocumentJobQueue
+  end_line: 328
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-worker.run-one
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.fence
+  - symbol:capability-parse-once-content-artifact:document-job-queue.now
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.init
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: __init__
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 104
+  signature: 'def __init__(self, engine: Engine, *, lease_seconds: float=120, clock:
+    Callable[[], float] | None=None)'
+  visibility: private
+  language: python
+  container: DocumentJobQueue
+  end_line: 115
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.now
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _now
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 117
+  signature: 'def _now(self, connection: Connection)'
+  visibility: private
+  language: python
+  container: DocumentJobQueue
+  end_line: 129
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.claim
+  - symbol:capability-parse-once-content-artifact:document-job-queue.enqueue
+  - symbol:capability-parse-once-content-artifact:document-job-queue.event
+  - symbol:capability-parse-once-content-artifact:document-job-queue.fence
+  - symbol:capability-parse-once-content-artifact:document-job-queue.finish
+  - symbol:capability-parse-once-content-artifact:document-job-queue.heartbeat
+  - symbol:capability-parse-once-content-artifact:document-job-queue.retry
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.publish
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: publish
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 330
+  signature: 'def publish(self, lease: JobLease, operation: Callable[[], T])'
+  visibility: public
+  language: python
+  container: DocumentJobQueue
+  end_line: 331
+  callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.publish-transaction
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.publish-transaction
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: publish_transaction
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 333
+  signature: 'def publish_transaction(self, lease: JobLease, operation: Callable[[Connection],
+    T])'
+  visibility: public
+  language: python
+  container: DocumentJobQueue
+  end_line: 338
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.publish
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.event
+  - symbol:capability-parse-once-content-artifact:document-job-queue.fence
+- id: symbol:capability-parse-once-content-artifact:document-job-queue.retry
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: retry
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 364
+  signature: 'def retry(self, lease: JobLease, *, delay_seconds: float=5)'
+  visibility: public
+  language: python
+  container: DocumentJobQueue
+  end_line: 379
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
+  - symbol:capability-parse-once-content-artifact:document-worker.run-one
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.event
+  - symbol:capability-parse-once-content-artifact:document-job-queue.fence
+  - symbol:capability-parse-once-content-artifact:document-job-queue.now
+- id: symbol:capability-parse-once-content-artifact:document-result-importer.init
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: __init__
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 158
+  signature: 'def __init__(self, engine: Engine, store: CheckpointStore, authorize_for_job:
+    Callable[[JobLease], Authorizer])'
+  visibility: private
+  language: python
+  container: DocumentResultImporter
+  end_line: 164
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-result-importer.run-one
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: run_one
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 166
+  signature: def run_one(self)
+  visibility: public
+  language: python
+  container: DocumentResultImporter
+  end_line: 343
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load-run
+  - symbol:capability-parse-once-content-artifact:checkpoints.artifact-integrity-error
+  - symbol:capability-parse-once-content-artifact:document-delivery.register-artifact
+  - symbol:capability-parse-once-content-artifact:queue.job-lease
+- id: symbol:capability-parse-once-content-artifact:document-worker.document-task
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: DocumentTask
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+  line: 31
+  signature: class DocumentTask
+  visibility: public
+  language: python
+  end_line: 41
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-worker.document-worker
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: DocumentWorker
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+  line: 44
+  signature: class DocumentWorker
+  visibility: public
+  language: python
+  end_line: 209
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-worker.execute
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: _execute
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+  line: 90
+  signature: 'def _execute(self, lease: JobLease, cancelled: Event)'
+  visibility: private
+  language: python
+  container: DocumentWorker
+  end_line: 209
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-worker.run-one
+  callees:
+  - symbol:capability-parse-once-content-artifact:bundle-writer.build-bundle
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load-run
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  - symbol:capability-parse-once-content-artifact:docling-adapter.docling-adapter
+  - symbol:capability-parse-once-content-artifact:document-job-queue.finish
+  - symbol:capability-parse-once-content-artifact:document-job-queue.publish
+  - symbol:capability-parse-once-content-artifact:document-job-queue.publish-transaction
+  - symbol:capability-parse-once-content-artifact:document-job-queue.retry
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  - symbol:capability-parse-once-content-artifact:object-store.read
+- id: symbol:capability-parse-once-content-artifact:document-worker.init
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+  line: 45
+  signature: 'def __init__(self, *, queue: DocumentJobQueue, store: CheckpointStore,
+    authorize_for_job: Callable[[JobLease], Callable[[UUID, UUID, UUID, str], None]],
+    client_factory: Callable[[Event], VllmGraphClient], record_artifact: Callable[[Connection,
+    ArtifactManifest], None], converter: Callable[[Path], ParseResult[DoclingDocument]]
+    | None=None)'
+  visibility: private
+  language: python
+  container: DocumentWorker
+  end_line: 59
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:document-worker.run-one
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: run_one
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+  line: 61
+  signature: def run_one(self)
+  visibility: public
+  language: python
+  container: DocumentWorker
+  end_line: 88
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.claim
+  - symbol:capability-parse-once-content-artifact:document-job-queue.heartbeat
+  - symbol:capability-parse-once-content-artifact:document-job-queue.retry
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
 - id: symbol:capability-parse-once-content-artifact:local-content-artifact-store.bundle-prefix
   node: capability:parse-once-content-artifact
   kind: method
@@ -1762,14 +2353,17 @@ symbols:
   kind: method
   name: create_exclusive
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 66
+  line: 67
   signature: 'def create_exclusive(self, key: str, data: bytes)'
   visibility: public
   language: python
   container: LocalFilesystemObjectStore
-  end_line: 82
+  end_line: 96
   callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.put-identical
   - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees:
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
   - symbol:capability-parse-once-content-artifact:object-store.object-already-exists-error
@@ -1778,12 +2372,12 @@ symbols:
   kind: method
   name: delete
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 94
+  line: 108
   signature: 'def delete(self, key: str)'
   visibility: public
   language: python
   container: LocalFilesystemObjectStore
-  end_line: 99
+  end_line: 113
   callers: []
   callees:
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
@@ -1793,13 +2387,14 @@ symbols:
   kind: method
   name: exists
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 91
+  line: 105
   signature: 'def exists(self, key: str)'
   visibility: public
   language: python
   container: LocalFilesystemObjectStore
-  end_line: 92
+  end_line: 106
   callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
   - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
   callees:
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
@@ -1808,12 +2403,12 @@ symbols:
   kind: method
   name: __init__
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 53
+  line: 54
   signature: 'def __init__(self, config: LocalObjectStoreConfig)'
   visibility: private
   language: python
   container: LocalFilesystemObjectStore
-  end_line: 56
+  end_line: 57
   callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
@@ -1821,12 +2416,12 @@ symbols:
   kind: method
   name: _path_for
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 58
+  line: 59
   signature: 'def _path_for(self, key: str)'
   visibility: private
   language: python
   container: LocalFilesystemObjectStore
-  end_line: 64
+  end_line: 65
   callers:
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.delete
@@ -1838,15 +2433,20 @@ symbols:
   kind: method
   name: read
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 84
+  line: 98
   signature: 'def read(self, key: str)'
   visibility: public
   language: python
   container: LocalFilesystemObjectStore
-  end_line: 89
+  end_line: 103
   callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load-run
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.put-identical
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
   - symbol:capability-parse-once-content-artifact:local-content-artifact-store.get-manifest
   - symbol:capability-parse-once-content-artifact:local-content-artifact-store.open-file
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees:
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.path-for
   - symbol:capability-parse-once-content-artifact:object-store.object-not-found-error
@@ -1920,26 +2520,29 @@ symbols:
   kind: method
   name: create_exclusive
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 26
+  line: 27
   signature: 'def create_exclusive(self, key: str, data: bytes)'
   visibility: public
   language: python
   container: ObjectStore
-  end_line: 29
+  end_line: 30
   callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.put-identical
   - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees: []
 - id: symbol:capability-parse-once-content-artifact:object-store.delete
   node: capability:parse-once-content-artifact
   kind: method
   name: delete
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 37
+  line: 38
   signature: 'def delete(self, key: str)'
   visibility: public
   language: python
   container: ObjectStore
-  end_line: 39
+  end_line: 40
   callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:object-store.exists
@@ -1947,13 +2550,14 @@ symbols:
   kind: method
   name: exists
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 35
+  line: 36
   signature: 'def exists(self, key: str)'
   visibility: public
   language: python
   container: ObjectStore
-  end_line: 35
+  end_line: 36
   callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
   - symbol:capability-parse-once-content-artifact:local-content-artifact-store.put-bundle
   callees: []
 - id: symbol:capability-parse-once-content-artifact:object-store.local-filesystem-object-store
@@ -1961,23 +2565,24 @@ symbols:
   kind: class
   name: LocalFilesystemObjectStore
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 42
+  line: 43
   signature: class LocalFilesystemObjectStore
   visibility: public
   language: python
-  end_line: 99
-  callers: []
+  end_line: 113
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees: []
 - id: symbol:capability-parse-once-content-artifact:object-store.object-already-exists-error
   node: capability:parse-once-content-artifact
   kind: class
   name: ObjectAlreadyExistsError
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 11
+  line: 12
   signature: class ObjectAlreadyExistsError
   visibility: public
   language: python
-  end_line: 12
+  end_line: 13
   callers:
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
   callees: []
@@ -1986,11 +2591,11 @@ symbols:
   kind: class
   name: ObjectNotFoundError
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 15
+  line: 16
   signature: class ObjectNotFoundError
   visibility: public
   language: python
-  end_line: 16
+  end_line: 17
   callers:
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.delete
   - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
@@ -2000,11 +2605,11 @@ symbols:
   kind: class
   name: ObjectStore
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 19
+  line: 20
   signature: class ObjectStore
   visibility: public
   language: python
-  end_line: 39
+  end_line: 40
   callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:object-store.read
@@ -2012,15 +2617,61 @@ symbols:
   kind: method
   name: read
   file: engine/packages/brain-content/src/brain_content/object_store.py
-  line: 31
+  line: 32
   signature: 'def read(self, key: str)'
   visibility: public
   language: python
   container: ObjectStore
-  end_line: 33
+  end_line: 34
   callers:
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.load-run
+  - symbol:capability-parse-once-content-artifact:checkpoint-store.put-identical
+  - symbol:capability-parse-once-content-artifact:document-worker.execute
   - symbol:capability-parse-once-content-artifact:local-content-artifact-store.get-manifest
   - symbol:capability-parse-once-content-artifact:local-content-artifact-store.open-file
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:queue.document-job-queue
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: DocumentJobQueue
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 96
+  signature: class DocumentJobQueue
+  visibility: public
+  language: python
+  end_line: 403
+  callers:
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:queue.job-lease
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: JobLease
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 86
+  signature: class JobLease
+  visibility: public
+  language: python
+  end_line: 93
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.claim
+  - symbol:capability-parse-once-content-artifact:document-result-importer.run-one
+  - symbol:capability-parse-once-content-artifact:worker-cli.main
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:queue.lease-lost
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: LeaseLost
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 81
+  signature: class LeaseLost
+  visibility: public
+  language: python
+  end_line: 82
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-job-queue.fence
   callees: []
 - id: symbol:capability-parse-once-content-artifact:store.artifact-exists
   node: capability:parse-once-content-artifact
@@ -2073,6 +2724,35 @@ symbols:
   end_line: 86
   callers: []
   callees: []
+- id: symbol:capability-parse-once-content-artifact:worker-cli.main
+  node: capability:parse-once-content-artifact
+  kind: function
+  name: main
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py
+  line: 31
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 162
+  callers: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:checkpoints.checkpoint-store
+  - symbol:capability-parse-once-content-artifact:config.load-local-object-store-config
+  - symbol:capability-parse-once-content-artifact:document-delivery.document-job-authorization
+  - symbol:capability-parse-once-content-artifact:document-delivery.document-result-importer
+  - symbol:capability-parse-once-content-artifact:document-job-authorization.for-job
+  - symbol:capability-parse-once-content-artifact:document-job-queue.enqueue
+  - symbol:capability-parse-once-content-artifact:document-result-importer.run-one
+  - symbol:capability-parse-once-content-artifact:document-worker.document-task
+  - symbol:capability-parse-once-content-artifact:document-worker.document-worker
+  - symbol:capability-parse-once-content-artifact:document-worker.run-one
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:local-filesystem-object-store.read
+  - symbol:capability-parse-once-content-artifact:object-store.create-exclusive
+  - symbol:capability-parse-once-content-artifact:object-store.local-filesystem-object-store
+  - symbol:capability-parse-once-content-artifact:object-store.read
+  - symbol:capability-parse-once-content-artifact:queue.document-job-queue
+  - symbol:capability-parse-once-content-artifact:queue.job-lease
 - id: symbol:capability-runtime-roots-and-toolchain:app.create-app
   node: capability:runtime-roots-and-toolchain
   kind: function
@@ -2305,6 +2985,7 @@ symbols:
   end_line: 27
   callers:
   - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  - symbol:capability-semantic-interpretation-run:inference-rejected.init
   callees: []
 - id: symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
   node: capability:semantic-interpretation-run
@@ -2318,12 +2999,16 @@ symbols:
   language: python
   container: ContextLimitExceeded
   end_line: 18
-  callers: []
+  callers:
+  - symbol:capability-semantic-interpretation-run:inference-rejected.init
   callees:
   - symbol:capability-semantic-interpretation-run:context-guard.init
   - symbol:capability-semantic-interpretation-run:conversion-checkpoint.init
   - symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.init
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.init
   - symbol:capability-semantic-interpretation-run:in-memory-run-recorder.init
+  - symbol:capability-semantic-interpretation-run:inference-rejected.init
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.init
 - id: symbol:capability-semantic-interpretation-run:conversion-checkpoint.execute
   node: capability:semantic-interpretation-run
   kind: method
@@ -2352,6 +3037,7 @@ symbols:
   end_line: 50
   callers:
   - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  - symbol:capability-semantic-interpretation-run:inference-rejected.init
   callees: []
 - id: symbol:capability-semantic-interpretation-run:conversion-checkpoint.name
   node: capability:semantic-interpretation-run
@@ -2445,6 +3131,7 @@ symbols:
   end_line: 102
   callers:
   - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  - symbol:capability-semantic-interpretation-run:inference-rejected.init
   callees: []
 - id: symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.run
   node: capability:semantic-interpretation-run
@@ -2454,12 +3141,13 @@ symbols:
   line: 104
   signature: 'def run(self, *, source: Path, template: type[BaseModel], converter:
     Converter | None=None, publish: Publisher | None=None, extraction_contract: Literal[''direct'',
-    ''dense'']=''direct'', chunk_max_tokens: int=512)'
+    ''dense'']=''direct'', chunk_max_tokens: int=512, conversion_only: bool=False)'
   visibility: public
   language: python
   container: DoclingGraphPipelineAdapter
-  end_line: 175
-  callers: []
+  end_line: 178
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
   callees:
   - symbol:capability-semantic-interpretation-run:docling-graph-pipeline.conversion-checkpoint
   - symbol:capability-semantic-interpretation-run:docling-graph-pipeline.graph-pipeline-output
@@ -2498,8 +3186,9 @@ symbols:
   signature: class DoclingGraphPipelineAdapter
   visibility: public
   language: python
-  end_line: 175
-  callers: []
+  end_line: 178
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
   callees: []
 - id: symbol:capability-semantic-interpretation-run:docling-graph-pipeline.graph-pipeline-output
   node: capability:semantic-interpretation-run
@@ -2514,6 +3203,101 @@ symbols:
   callers:
   - symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.run
   callees: []
+- id: symbol:capability-semantic-interpretation-run:extraction-profile.schema-sha256
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: schema_sha256
+  file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
+  line: 45
+  signature: def schema_sha256(self)
+  visibility: public
+  language: python
+  container: ExtractionProfile
+  end_line: 48
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:graph-evidence.ground-value
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: ground_value
+  file: neuron/packages/brain-extraction/src/brain_extraction/graph_evidence.py
+  line: 18
+  signature: 'def ground_value(document: DoclingDocument, ledger: dict[str, Any] |
+    None, artifact_id: UUID, value: Any)'
+  visibility: public
+  language: python
+  end_line: 83
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
+  callees:
+  - symbol:capability-semantic-interpretation-run:result.bounding-box
+  - symbol:capability-semantic-interpretation-run:result.evidence-binding
+- id: symbol:capability-semantic-interpretation-run:graph-interpretation-service.init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py
+  line: 35
+  signature: 'def __init__(self, store: CheckpointStore, authorize: Callable[[UUID,
+    UUID, UUID, str], None])'
+  visibility: private
+  language: python
+  container: GraphInterpretationService
+  end_line: 39
+  callers:
+  - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  - symbol:capability-semantic-interpretation-run:inference-rejected.init
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: interpret
+  file: neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py
+  line: 41
+  signature: 'def interpret(self, *, tenant_id: UUID, knowledge_base_id: UUID, artifact_id:
+    UUID, run_id: UUID, profile: ExtractionProfile, client: VllmGraphClient, extraction_contract:
+    Literal[''direct'', ''dense'']=''direct'', chunk_max_tokens: int=512, selected_refs:
+    tuple[str, ...]=(), publish: Callable[[Callable[[], str]], str] | None=None)'
+  visibility: public
+  language: python
+  container: GraphInterpretationService
+  end_line: 214
+  callers: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.run
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline.docling-graph-pipeline-adapter
+  - symbol:capability-semantic-interpretation-run:graph-evidence.ground-value
+  - symbol:capability-semantic-interpretation-run:graph-interpretation.json
+  - symbol:capability-semantic-interpretation-run:result.candidate-assertion
+  - symbol:capability-semantic-interpretation-run:result.counters
+  - symbol:capability-semantic-interpretation-run:result.interpretation-result
+  - symbol:capability-semantic-interpretation-run:result.run-configuration
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.diagnostics
+- id: symbol:capability-semantic-interpretation-run:graph-interpretation.graph-interpretation-service
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: GraphInterpretationService
+  file: neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py
+  line: 34
+  signature: class GraphInterpretationService
+  visibility: public
+  language: python
+  end_line: 214
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:graph-interpretation.json
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: _json
+  file: neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py
+  line: 30
+  signature: 'def _json(value: Any)'
+  visibility: private
+  language: python
+  end_line: 31
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
+  callees: []
 - id: symbol:capability-semantic-interpretation-run:in-memory-run-recorder.init
   node: capability:semantic-interpretation-run
   kind: method
@@ -2527,6 +3311,7 @@ symbols:
   end_line: 26
   callers:
   - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  - symbol:capability-semantic-interpretation-run:inference-rejected.init
   callees: []
 - id: symbol:capability-semantic-interpretation-run:in-memory-run-recorder.record
   node: capability:semantic-interpretation-run
@@ -2541,6 +3326,40 @@ symbols:
   end_line: 29
   callers: []
   callees: []
+- id: symbol:capability-semantic-interpretation-run:inference-limits.post-init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __post_init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 47
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: InferenceLimits
+  end_line: 60
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:inference-rejected.init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 33
+  signature: 'def __init__(self, code: str)'
+  visibility: private
+  language: python
+  container: InferenceRejected
+  end_line: 35
+  callers:
+  - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  callees:
+  - symbol:capability-semantic-interpretation-run:context-guard.init
+  - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  - symbol:capability-semantic-interpretation-run:conversion-checkpoint.init
+  - symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.init
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.init
+  - symbol:capability-semantic-interpretation-run:in-memory-run-recorder.init
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.init
 - id: symbol:capability-semantic-interpretation-run:interpretation-run-recorder.record
   node: capability:semantic-interpretation-run
   kind: method
@@ -2571,11 +3390,11 @@ symbols:
   kind: class
   name: ExtractionProfile
   file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
-  line: 36
+  line: 38
   signature: class ExtractionProfile
   visibility: public
   language: python
-  end_line: 40
+  end_line: 48
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:profiles.gl-limits-a
@@ -2583,11 +3402,11 @@ symbols:
   kind: class
   name: GLLimitsA
   file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
-  line: 8
+  line: 10
   signature: class GLLimitsA
   visibility: public
   language: python
-  end_line: 21
+  end_line: 23
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:profiles.gl-limits-b
@@ -2595,11 +3414,11 @@ symbols:
   kind: class
   name: GLLimitsB
   file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
-  line: 24
+  line: 26
   signature: class GLLimitsB
   visibility: public
   language: python
-  end_line: 32
+  end_line: 34
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:profiles.load-profile
@@ -2607,42 +3426,44 @@ symbols:
   kind: function
   name: load_profile
   file: neuron/packages/brain-extraction/src/brain_extraction/profiles.py
-  line: 53
+  line: 61
   signature: 'def load_profile(profile_id: str)'
   visibility: public
   language: python
-  end_line: 57
+  end_line: 65
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:result.bounding-box
   node: capability:semantic-interpretation-run
   kind: class
   name: BoundingBox
-  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  file: engine/packages/brain-contracts/src/brain_contracts/result.py
   line: 13
   signature: class BoundingBox
   visibility: public
   language: python
   end_line: 20
-  callers: []
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-evidence.ground-value
   callees: []
 - id: symbol:capability-semantic-interpretation-run:result.candidate-assertion
   node: capability:semantic-interpretation-run
   kind: class
   name: CandidateAssertion
-  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  file: engine/packages/brain-contracts/src/brain_contracts/result.py
   line: 56
   signature: class CandidateAssertion
   visibility: public
   language: python
   end_line: 65
-  callers: []
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
   callees: []
 - id: symbol:capability-semantic-interpretation-run:result.candidate-entity
   node: capability:semantic-interpretation-run
   kind: class
   name: CandidateEntity
-  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  file: engine/packages/brain-contracts/src/brain_contracts/result.py
   line: 37
   signature: class CandidateEntity
   visibility: public
@@ -2654,7 +3475,7 @@ symbols:
   node: capability:semantic-interpretation-run
   kind: class
   name: CandidateRelationship
-  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  file: engine/packages/brain-contracts/src/brain_contracts/result.py
   line: 46
   signature: class CandidateRelationship
   visibility: public
@@ -2666,7 +3487,7 @@ symbols:
   node: capability:semantic-interpretation-run
   kind: class
   name: Counters
-  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  file: engine/packages/brain-contracts/src/brain_contracts/result.py
   line: 82
   signature: class Counters
   visibility: public
@@ -2674,42 +3495,46 @@ symbols:
   end_line: 89
   callers:
   - symbol:capability-semantic-interpretation-run:counter-accumulator.freeze
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
   callees: []
 - id: symbol:capability-semantic-interpretation-run:result.evidence-binding
   node: capability:semantic-interpretation-run
   kind: class
   name: EvidenceBinding
-  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  file: engine/packages/brain-contracts/src/brain_contracts/result.py
   line: 23
   signature: class EvidenceBinding
   visibility: public
   language: python
   end_line: 34
-  callers: []
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-evidence.ground-value
   callees: []
 - id: symbol:capability-semantic-interpretation-run:result.interpretation-result
   node: capability:semantic-interpretation-run
   kind: class
   name: InterpretationResult
-  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  file: engine/packages/brain-contracts/src/brain_contracts/result.py
   line: 92
   signature: class InterpretationResult
   visibility: public
   language: python
   end_line: 107
-  callers: []
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
   callees: []
 - id: symbol:capability-semantic-interpretation-run:result.run-configuration
   node: capability:semantic-interpretation-run
   kind: class
   name: RunConfiguration
-  file: neuron/packages/brain-interpretation/src/brain_interpretation/result.py
+  file: engine/packages/brain-contracts/src/brain_contracts/result.py
   line: 68
   signature: class RunConfiguration
   visibility: public
   language: python
   end_line: 79
-  callers: []
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
   callees: []
 - id: symbol:capability-semantic-interpretation-run:runs.in-memory-run-recorder
   node: capability:semantic-interpretation-run
@@ -2745,5 +3570,178 @@ symbols:
   visibility: public
   language: python
   end_line: 10
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.cached-model-token-counter
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: cached_model_token_counter
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 66
+  signature: 'def cached_model_token_counter(model_id: str, model_revision: str)'
+  visibility: public
+  language: python
+  end_line: 90
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.check-active
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: _check_active
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 172
+  signature: def _check_active(self)
+  visibility: private
+  language: python
+  container: VllmGraphClient
+  end_line: 180
+  callers:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response
+  callees:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.inference-rejected
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.close
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: close
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 169
+  signature: def close(self)
+  visibility: public
+  language: python
+  container: VllmGraphClient
+  end_line: 170
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.diagnostics
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: diagnostics
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 182
+  signature: def diagnostics(self)
+  visibility: public
+  language: python
+  container: VllmGraphClient
+  end_line: 191
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: get_json_response
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 193
+  signature: 'def get_json_response(self, prompt: str | Mapping[str, str], schema_json:
+    str, structured_output: bool=True, response_top_level: Literal[''object'', ''array'']=''object'',
+    response_schema_name: str=''extraction_result'')'
+  visibility: public
+  language: python
+  container: VllmGraphClient
+  end_line: 317
+  callers:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response-stream
+  callees:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.check-active
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.inference-rejected
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.json-value
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.local-schema
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response-stream
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: get_json_response_stream
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 319
+  signature: 'def get_json_response_stream(self, prompt: str | Mapping[str, str],
+    schema_json: str, structured_output: bool=True, response_top_level: Literal[''object'',
+    ''array'']=''object'', response_schema_name: str=''extraction_result'')'
+  visibility: public
+  language: python
+  container: VllmGraphClient
+  end_line: 330
+  callers: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.inference-limits
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: InferenceLimits
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 39
+  signature: class InferenceLimits
+  visibility: public
+  language: python
+  end_line: 60
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.inference-rejected
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: InferenceRejected
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 30
+  signature: class InferenceRejected
+  visibility: public
+  language: python
+  end_line: 35
+  callers:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.check-active
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.local-schema
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.init
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: __init__
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 122
+  signature: 'def __init__(self, *, base_url: str, api_key: str, model_id: str, model_revision:
+    str, token_counter: TokenCounter, slots: BoundedSemaphore, limits: InferenceLimits=DEFAULT_LIMITS,
+    cancelled: Event | None=None, http_client: httpx.Client | None=None)'
+  visibility: private
+  language: python
+  container: VllmGraphClient
+  end_line: 167
+  callers:
+  - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
+  - symbol:capability-semantic-interpretation-run:inference-rejected.init
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.json-value
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: _json_value
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 106
+  signature: 'def _json_value(raw: str)'
+  visibility: private
+  language: python
+  end_line: 118
+  callers:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.local-schema
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: _local_schema
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 93
+  signature: 'def _local_schema(value: Any)'
+  visibility: private
+  language: python
+  end_line: 103
+  callers:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response
+  callees:
+  - symbol:capability-semantic-interpretation-run:vllm-graph-client.inference-rejected
+- id: symbol:capability-semantic-interpretation-run:vllm-graph-client.vllm-graph-client
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: VllmGraphClient
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 121
+  signature: class VllmGraphClient
+  visibility: public
+  language: python
+  end_line: 330
   callers: []
   callees: []

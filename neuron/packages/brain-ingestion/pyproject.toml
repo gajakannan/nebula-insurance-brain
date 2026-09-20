@@ -8,16 +8,20 @@ dependencies = [
   "pypdf>=6.0",
   "brain-content",
   "brain-interpretation",
+  "brain-extraction",
+  "brain-jobs",
+  "brain-worker",
 ]
 
 [tool.uv.sources]
 brain-interpretation = { workspace = true }
+brain-extraction = { workspace = true }
+brain-jobs = { path = "../../../engine/packages/brain-jobs", editable = true }
+brain-worker = { path = "../../../engine/apps/worker", editable = true }
 # brain-content is a path dependency, not a workspace member: it lives in the engine/
-# uv workspace (owned by backend-developer), while neuron/ is ai-engineer's separate
-# workspace. Both runtime roots share the content-artifact manifest contract
-# (planning-mds/schemas/content-artifact-manifest.schema.json) without neuron/ pulling
-# in engine's runtime (FastAPI, SQLAlchemy) as a dependency.
-brain-content = { path = "../../../engine/packages/brain-content" }
+# uv workspace, while neuron/ is the AI workspace. The candidate worker composition
+# shares engine persistence/security packages; the API is not a dependency.
+brain-content = { path = "../../../engine/packages/brain-content", editable = true }
 
 [project.optional-dependencies]
 test = [

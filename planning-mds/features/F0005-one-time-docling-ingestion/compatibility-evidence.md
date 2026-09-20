@@ -13,7 +13,7 @@ This is partial compatibility evidence, not release acceptance. ADR-0060 remains
 
 `brain_extraction.docling_graph_pipeline.DoclingGraphPipelineAdapter` composes a Nebula checkpoint stage into `PipelineOrchestrator.stages`, immediately before its `ExtractionStage`. This is a version-pinned stage integration, not an upstream built-in checkpoint guarantee. A stage-layout check rejects an incompatible layout.
 
-The injected Docling converter returns the shared `brain_interpretation.parsed_content.ParseResult`. A synchronous publication callback receives that document and its parse quality; extraction cannot proceed until publication returns successfully. The stage then uses the same native-document handoff as upstream's JSON input normalizer. API exports remain disabled. Graph, provenance, and effective configuration are returned separately from the content bundle; production run persistence is still required.
+The injected Docling converter returns the shared `brain_interpretation.parsed_content.ParseResult`. A synchronous publication callback receives that document and its parse quality; extraction cannot proceed until publication returns successfully. The stage then uses the same native-document handoff as upstream's JSON input normalizer. API exports remain disabled. Graph, provenance, and effective configuration are returned separately from the content bundle; the later delivery increment below adds run persistence.
 
 The direct client is explicitly named `OpenAICompatibleExtractionAdapter`; the old `DoclingGraphAdapter` name remains only as a compatibility import. F0001's archived records and measured results are unchanged.
 
@@ -44,18 +44,36 @@ Initial combined neuron validation: **24 passed, 2 skipped** (the two existing l
 
 The result corrects an overly broad active-document claim: this pinned 1.9.1 build **does have a native-JSON reuse branch**. The earlier F0001 unsuccessful invocation does not prove that the whole package lacks reuse. The exact difference in the historical invocation/environment has not been reconstructed.
 
-## Remaining work and environmental limits
+## Acceptance remains open
 
-| Gate | Remaining implementation or proof |
-|---|---|
-| Durable ingestion | Production composition with F0004 metadata and F0002/F0003 services; PostgreSQL jobs, leases/fencing, scoped idempotency, cancellation, retries, interrupted publication, real process restart |
-| Evidence and interpretation | Translate property/relationship provenance into immutable block/table selectors; unresolved evidence stays unresolved; persist run outputs under tenant access and retention; return Nebula InterpretationResult |
-| Profiles and scope | Production profile compiler, durable model revision/run metadata, affected-content-only input with original references; the new per-call controls still require serving-tokenizer parity and live qualification |
-| Extraction quality | Live vLLM and chunked-versus-direct comparison: schema validity, accuracy, abstention, tokens, latency, review effort; timeout/invalid-output/partial-result behavior |
-| Operations and activation | Cross-process worker/model concurrency beyond the tested shared in-process semaphore, production credential injection and log review, retention/deletion, independent reviewer verdicts, accepted ADR and application activation |
+The dated increments below are historical observations. [STATUS](STATUS.md) is the current implementation and acceptance inventory. The local model credentials are absent, localhost service sockets are denied, and shell GitHub DNS resolution fails. These restrictions prevent live-service qualification and remote delivery; they do not establish architectural acceptance. Temporal remains F0050/v0.3.
 
-The local inference API key is absent in this session, socket access to the local endpoint is denied, and shell GitHub DNS resolution fails. No live Graph/model comparison or external-service recovery proof is claimed. These restrictions do not explain away the remaining implementation work above.
+## Follow-up: checkpoint, queue, and result path — 2026-09-20
 
-The related future features have updated requirements; this candidate does not claim to implement their complete production scope. PostgreSQL durable jobs remain the v0.1 plan; Temporal remains F0050/v0.3.
+The next increment adds verified synchronous checkpoint publication, atomic filesystem object publication, scoped run outputs, generation-fenced artifact leases and jobs, retry/cancel/heartbeat operations, a transactional completion outbox, and the blocking document-worker composition. Interpretation returns the existing Nebula result contract and independently grounds each supported scalar property using Graph's native-item refs. It never promotes a node's chunk-relative span to a property selector.
 
-Reproduction commands are in [GETTING-STARTED](GETTING-STARTED.md); completion and reviewer tracking are in [STATUS](STATUS.md).
+The combined command below passed **68 tests**, with **3 live tests skipped**:
+
+```bash
+LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+  neuron/.venv/bin/python -m pytest \
+  neuron/packages/brain-ingestion/tests neuron/packages/brain-interpretation/tests neuron/tests \
+  engine/packages/brain-jobs/tests engine/packages/brain-content/tests/test_object_store.py \
+  -q --disable-warnings
+```
+
+The focused new suite passed 21 cases. A test found and fixed ambiguity handling when an additional textual occurrence lacks usable geometry. Queue tests exercise idempotency conflicts, cross-tenant artifact rejection, profile jobs sharing an artifact lease, stale-generation fencing, cancellation, retry exhaustion, and an exactly-once completion row. The worker test reconstructs the worker/store after model failure and forbids another conversion; it does not kill an operating-system process or run against PostgreSQL.
+
+The new queue dependency resolves in both lockfiles. Neuron sync succeeds offline. Engine sync could not rebuild its worker in this cache because the required build dependencies were unavailable under its resolver constraints; no successful engine installation is claimed. Production authorization binding, assertion/review import, targeted content, relationships, retention, and the external-service proof remain unfinished; see STATUS for the complete list.
+
+## Follow-up: authorized delivery and process recovery — 2026-09-20
+
+This increment supersedes the earlier engine-installation and missing-composition limitations. Both workspaces now resolve and sync offline. The candidate worker is runnable explicitly; jobs bind a current principal/grant check and pin the extraction profile schema. A neutral `brain-contracts` package carries the unchanged result shape without making engine code import the AI runtime.
+
+The worker registers source/artifact metadata before extraction inside its publication fence; a model timeout leaves the artifact discoverable through the engine. The engine importer verifies that metadata and commits runs, assertions, all evidence bindings, review items, and its outbox acknowledgement in one transaction. An injected failure during review insertion leaves no partial run or assertion; a retry imports exactly once. The importer does not commit canonical facts and refuses unsupported entity/relationship output. Missing constituent files in an accepted artifact/run are corruption, not a reason to reconvert. Text/table occurrences without geometry still count toward ambiguity.
+
+The combined runtime command, adding `engine/packages/brain-security/tests/test_casbin_adapter.py` to the preceding command, passed **80 tests, 5 skipped**. New coverage includes real child-process exit after artifact/run publication, recovery with both converter and model forbidden, live-grant revocation, audited denial, table headers/cells, missing run files, and atomic import rollback/retry. The process test uses SQLite and preconstructed output; it does not measure live model accuracy or PostgreSQL crash behavior. Two isolated-schema PostgreSQL tests are opt-in and were skipped; the three model-service tests were also skipped.
+
+Migration 0004 generates PostgreSQL SQL successfully (`cd engine/migrations && ../.venv/bin/alembic upgrade 0003:0004 --sql`). This is a DDL check, not a real database migration. Localhost ports 5432 and 8000 return `PermissionError: Operation not permitted`; `BRAIN_TEST_POSTGRES_URL`, `BRAIN_INFERENCE_API_KEY`, and `BRAIN_INFERENCE_MODEL_REVISION` are unset in this session.
+
+Remaining acceptance covers actual PostgreSQL/model runs, direct-versus-chunked corpus measurements, unsupported relationship and multi-region evidence cases, deployment resource/retention qualification, and reviewer decisions. The full profile compiler and affected-content scheduler remain in their owning future features. No switch-wide or production completion claim is made.

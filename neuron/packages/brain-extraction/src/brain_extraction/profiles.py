@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 
 from pydantic import BaseModel, Field
@@ -38,6 +40,12 @@ class ExtractionProfile:
     profile_version: str
     template: type[BaseModel]
     declaration_path: str
+
+    @property
+    def schema_sha256(self) -> str:
+        return hashlib.sha256(
+            json.dumps(self.template.model_json_schema(), sort_keys=True).encode()
+        ).hexdigest()
 
 
 PROFILES: dict[str, ExtractionProfile] = {

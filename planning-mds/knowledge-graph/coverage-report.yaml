@@ -1,13 +1,13 @@
 version: 0
 summary:
-  canonical_nodes: 131
+  canonical_nodes: 133
   features_mapped: 3
   stories_mapped: 17
   features_excluded: 62
   features_uncovered: 0
   code_bindings: 10
-  symbol_count: 199
-  bound_symbol_count: 199
+  symbol_count: 258
+  bound_symbol_count: 258
   decision_count: 0
   why_count: 0
 coverage:
@@ -556,7 +556,7 @@ freshness:
       last_modified: '2026-09-17'
       source_hash: 39238239f975db1e
       hotspot_rank: 8
-      hotspot_score: 0.06
+      hotspot_score: 0.08
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
@@ -594,7 +594,7 @@ freshness:
       last_modified: '2026-09-17'
       source_hash: 88974532801b9f54
       hotspot_rank: 2
-      hotspot_score: 0.68
+      hotspot_score: 0.8
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
@@ -654,36 +654,48 @@ freshness:
       source_count: 1
       last_modified: '2026-09-13'
       source_hash: 3cb18d56c79b7d4c
+    policy_rule:content-artifact-ingest:
+      source_paths:
+      - planning-mds/security/policies/policy.csv
+      source_count: 1
+      last_modified: '2026-09-20'
+      source_hash: 4ef458003a0b85ca
+    policy_rule:content-artifact-interpret:
+      source_paths:
+      - planning-mds/security/policies/policy.csv
+      source_count: 1
+      last_modified: '2026-09-20'
+      source_hash: 4ef458003a0b85ca
     policy_rule:content-artifact-read:
       source_paths:
       - planning-mds/security/policies/policy.csv
       source_count: 1
-      last_modified: '2026-09-06'
-      source_hash: 399273c93d842d69
+      last_modified: '2026-09-20'
+      source_hash: 4ef458003a0b85ca
     policy_rule:fact-slot-commit:
       source_paths:
       - planning-mds/security/policies/policy.csv
       source_count: 1
-      last_modified: '2026-09-06'
-      source_hash: 399273c93d842d69
+      last_modified: '2026-09-20'
+      source_hash: 4ef458003a0b85ca
     policy_rule:fact-slot-read:
       source_paths:
       - planning-mds/security/policies/policy.csv
       source_count: 1
-      last_modified: '2026-09-06'
-      source_hash: 399273c93d842d69
+      last_modified: '2026-09-20'
+      source_hash: 4ef458003a0b85ca
     policy_rule:review-task-annotate:
       source_paths:
       - planning-mds/security/policies/policy.csv
       source_count: 1
-      last_modified: '2026-09-06'
-      source_hash: 399273c93d842d69
+      last_modified: '2026-09-20'
+      source_hash: 4ef458003a0b85ca
     policy_rule:review-task-read:
       source_paths:
       - planning-mds/security/policies/policy.csv
       source_count: 1
-      last_modified: '2026-09-06'
-      source_hash: 399273c93d842d69
+      last_modified: '2026-09-20'
+      source_hash: 4ef458003a0b85ca
     adr:0001:
       source_paths:
       - planning-mds/architecture/decisions/ADR-0001-the-brain-owns-semantics.md
@@ -1124,8 +1136,8 @@ freshness:
       - planning-mds/features/F0005-one-time-docling-ingestion/compatibility-evidence.md
       - planning-mds/features/F0005-one-time-docling-ingestion/feature-assembly-plan.md
       source_count: 10
-      last_modified: '2026-09-18'
-      source_hash: ff2c9904087c34a9
+      last_modified: '2026-09-20'
+      source_hash: 80dbd1e74a2ce6dc
     feature:F0065:
       source_paths:
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
@@ -1255,8 +1267,8 @@ freshness:
       - planning-mds/security/policies/model.conf
       - planning-mds/security/policies/policy.csv
       source_count: 5
-      last_modified: '2026-09-11'
-      source_hash: 7cd3e2f5c9340230
+      last_modified: '2026-09-20'
+      source_hash: f512cafeb7f81888
     capability:backup-and-restore:
       source_paths:
       - scripts/ops/backup.sh
@@ -1300,8 +1312,8 @@ freshness:
       - experience/src/review-panel/api.ts
       - experience/src/review-panel/types.ts
       source_count: 14
-      last_modified: '2026-09-11'
-      source_hash: 7635f06c221846f1
+      last_modified: '2026-09-20'
+      source_hash: 0d2b0d635b85761b
     capability:local-dependency-stack:
       source_paths:
       - docker-compose.yml
@@ -1325,15 +1337,22 @@ freshness:
       - neuron/packages/brain-ingestion/src/brain_ingestion/__init__.py
       - neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py
       - neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
+      - neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+      - neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py
+      - engine/apps/worker/src/brain_worker/document_delivery.py
       - engine/packages/brain-content/src/brain_content/__init__.py
+      - engine/packages/brain-content/src/brain_content/checkpoints.py
       - engine/packages/brain-content/src/brain_content/config.py
       - engine/packages/brain-content/src/brain_content/manifest.py
       - engine/packages/brain-content/src/brain_content/object_store.py
       - engine/packages/brain-content/src/brain_content/py.typed
       - engine/packages/brain-content/src/brain_content/store.py
-      source_count: 9
-      last_modified: '2026-09-17'
-      source_hash: 0f07d57d4845c60c
+      - engine/packages/brain-jobs/src/brain_jobs/__init__.py
+      - engine/packages/brain-jobs/src/brain_jobs/py.typed
+      - engine/packages/brain-jobs/src/brain_jobs/queue.py
+      source_count: 16
+      last_modified: '2026-09-20'
+      source_hash: a820baaa71027733
     capability:runtime-roots-and-toolchain:
       source_paths:
       - engine/apps/api/src/brain_api/app.py
@@ -1350,21 +1369,27 @@ freshness:
       - neuron/packages/brain-extraction/src/brain_extraction/context_guard.py
       - neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
       - neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py
+      - neuron/packages/brain-extraction/src/brain_extraction/graph_evidence.py
+      - neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py
       - neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
       - neuron/packages/brain-extraction/src/brain_extraction/profiles.py
+      - neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
       - neuron/packages/brain-interpretation/src/brain_interpretation/__init__.py
       - neuron/packages/brain-interpretation/src/brain_interpretation/counters.py
       - neuron/packages/brain-interpretation/src/brain_interpretation/parsed_content.py
       - neuron/packages/brain-interpretation/src/brain_interpretation/result.py
       - neuron/packages/brain-interpretation/src/brain_interpretation/runs.py
-      source_count: 11
-      last_modified: '2026-09-17'
-      source_hash: ac6b701c31812851
+      - engine/packages/brain-contracts/src/brain_contracts/__init__.py
+      - engine/packages/brain-contracts/src/brain_contracts/py.typed
+      - engine/packages/brain-contracts/src/brain_contracts/result.py
+      source_count: 17
+      last_modified: '2026-09-20'
+      source_hash: 502c34b4a052db4c
 symbols:
-  symbol_count: 199
-  bound_symbol_count: 199
+  symbol_count: 258
+  bound_symbol_count: 258
   by_language:
-    python: 199
+    python: 258
 decisions:
   decision_count: 0
   why_count: 0

@@ -4,7 +4,7 @@ Nebula Insurance Brain — a continuously evolving enterprise semantic system fo
 
 ## Status
 
-Planning baseline. No runtime code yet. The architecture baseline is `planning-mds/architecture/master-blueprint.md`; the framework entry point is `planning-mds/BLUEPRINT.md`.
+F0001 runtime proofs are implemented. F0005 has an opt-in Docling-Graph candidate with durable jobs and engine integration; live qualification and activation are pending. The architecture baseline is `planning-mds/architecture/master-blueprint.md`; the framework entry point is `planning-mds/BLUEPRINT.md`.
 
 ## How this repo is built
 

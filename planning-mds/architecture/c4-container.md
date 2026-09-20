@@ -35,3 +35,6 @@ The API, worker, and `neuron/` packages form one modular monolith (section 114.3
 F0005 replaces the specialist coordination inside `neuron/` with Docling-Graph, which still uses Docling for conversion. No new service/container is introduced. The worker retains PostgreSQL job leases, retry/cancel state, and artifact publication; the interpretation adapter maps upstream output to Nebula assertions and evidence. The diagram above remains the measured F0001 topology until the complete checkpoint, reuse, and live-model proof passes. The pinned candidate and six contract tests are present in `neuron/`; they are not activated in the application.
 
 F0050 later adds Temporal for durable business workflows and invokes this same bounded document operation from an activity. Docling-Graph does not supply Temporal's timers, human waits, or cross-process recovery.
+
+
+The 2026-09-20 candidate adds the explicit `brain_ingestion.worker_cli` composition, engine-owned principal checks and a transactional assertion/review importer, plus shared `brain-contracts` DTOs. It runs in the existing modular monolith and introduces no service. The implementation is opt-in and has local contract evidence; the diagram continues to describe the accepted baseline until ADR-0060 passes its live and operational gates.

@@ -14,8 +14,10 @@ exclude-newer-span = "P7D"
 members = [
     "brain-api",
     "brain-content",
+    "brain-contracts",
     "brain-domain",
     "brain-engine-workspace",
+    "brain-jobs",
     "brain-persistence",
     "brain-review",
     "brain-security",
@@ -209,6 +211,7 @@ name = "brain-content"
 version = "0.1.0"
 source = { editable = "packages/brain-content" }
 dependencies = [
+    { name = "pydantic" },
     { name = "pyyaml" },
 ]
 
@@ -220,11 +223,23 @@ test = [
 
 [package.metadata]
 requires-dist = [
+    { name = "pydantic", specifier = ">=2.9" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5.0" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]
 provides-extras = ["test"]
+
+[[package]]
+name = "brain-contracts"
+version = "0.1.0"
+source = { editable = "packages/brain-contracts" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.9" }]
 
 [[package]]
 name = "brain-domain"
@@ -297,6 +312,21 @@ dev = [
     { name = "pytest-cov", specifier = ">=5.0" },
     { name = "ruff", specifier = ">=0.8" },
     { name = "types-pyyaml", specifier = ">=6.0" },
+]
+
+[[package]]
+name = "brain-jobs"
+version = "0.1.0"
+source = { editable = "packages/brain-jobs" }
+dependencies = [
+    { name = "psycopg", extra = ["binary"] },
+    { name = "sqlalchemy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
+    { name = "sqlalchemy", specifier = ">=2.0.52" },
 ]
 
 [[package]]
@@ -417,7 +447,12 @@ version = "0.1.0"
 source = { editable = "apps/worker" }
 dependencies = [
     { name = "asyncpg" },
+    { name = "brain-content" },
+    { name = "brain-contracts" },
+    { name = "brain-jobs" },
     { name = "brain-persistence" },
+    { name = "brain-review" },
+    { name = "brain-security" },
     { name = "brain-temporal" },
     { name = "sqlalchemy" },
 ]
@@ -434,7 +469,12 @@ test = [
 requires-dist = [
     { name = "aiosqlite", marker = "extra == 'test'", specifier = ">=0.20" },
     { name = "asyncpg", specifier = ">=0.30" },
+    { name = "brain-content", editable = "packages/brain-content" },
+    { name = "brain-contracts", editable = "packages/brain-contracts" },
+    { name = "brain-jobs", editable = "packages/brain-jobs" },
     { name = "brain-persistence", editable = "packages/brain-persistence" },
+    { name = "brain-review", editable = "packages/brain-review" },
+    { name = "brain-security", editable = "packages/brain-security" },
     { name = "brain-temporal", editable = "packages/brain-temporal" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.24" },

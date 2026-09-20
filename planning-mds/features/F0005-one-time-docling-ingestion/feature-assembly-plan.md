@@ -1,10 +1,10 @@
 # F0005 assembly plan
 
-**Status:** Draft delivery plan; candidate adapter and contract tests implemented. See [compatibility evidence](compatibility-evidence.md). Production wiring remains pending; ADR-0060 is Proposed.
+**Status:** Draft delivery plan; candidate adapter and contract tests implemented. See [compatibility evidence](compatibility-evidence.md). The opt-in worker, authorization binding, and transactional result import are implemented; live qualification and activation remain pending. ADR-0060 is Proposed.
 
 ## Ownership and package boundary
 
-AI engineering owns the proposed `DoclingGraphPipelineAdapter` in `brain-extraction`, the only adapter calling upstream Graph. It handles raw input and saved-native-JSON entry points, templates, and InterpretationResult/evidence translation. Ingestion owns `build_bundle()` and ContentArtifactStore publication. Move the parse-result DTO currently defined in `brain_ingestion/docling_adapter.py` to a neutral contract consumed by both; avoid a circular package dependency.
+AI engineering owns the proposed `DoclingGraphPipelineAdapter` in `brain-extraction`, the only adapter calling upstream Graph. It handles raw input and saved-native-JSON entry points, templates, and InterpretationResult/evidence translation. Ingestion owns `build_bundle()` and ContentArtifactStore publication. The parse-result DTO is shared through `brain_interpretation.parsed_content`; engine and neuron share the result DTO from `brain-contracts`. Neither engine persistence nor review imports the AI implementation.
 
 The job supplies a synchronous publication boundary to the pipeline adapter. After conversion, the adapter passes the native DoclingDocument plus status, failed pages, OCR counts, page count, and warnings into this boundary. Ingestion builds/hashes the six-file bundle, retains the source, publishes the completion marker, and records the checkpoint. Extraction can proceed only after that succeeds. Prove the selected package exposes a supported seam for this ordering. End-of-pipeline exports or a PipelineContext available only on successful return do not establish the checkpoint.
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import tempfile
 from pathlib import Path
 from typing import Protocol
 
@@ -66,19 +67,32 @@ class LocalFilesystemObjectStore:
     def create_exclusive(self, key: str, data: bytes) -> str:
         path = self._path_for(key)
         path.parent.mkdir(parents=True, exist_ok=True)
-        is_scratch = key.startswith(self._SCRATCH_PREFIX)
-        flags = os.O_WRONLY | os.O_CREAT
-        flags |= os.O_TRUNC if (is_scratch or not self._immutable) else os.O_EXCL
-        try:
-            fd = os.open(path, flags, 0o644)
-        except FileExistsError as exc:
-            raise ObjectAlreadyExistsError(key) from exc
+        # Publish only complete bytes. A process dying during write must not leave
+        # a visible half-object that prevents a later immutable retry.
+        fd, temporary = tempfile.mkstemp(prefix=".pending-", dir=path.parent)
         try:
             with os.fdopen(fd, "wb") as handle:
                 handle.write(data)
-        except Exception:
-            path.unlink(missing_ok=True)
-            raise
+                handle.flush()
+                os.fsync(handle.fileno())
+            if key.startswith(self._SCRATCH_PREFIX) or not self._immutable:
+                os.replace(temporary, path)
+            else:
+                try:
+                    os.link(temporary, path)
+                except FileExistsError as exc:
+                    raise ObjectAlreadyExistsError(key) from exc
+            # Flush the publication and newly created ancestor directories.
+            for directory in (path.parent, *path.parent.parents):
+                directory_fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
+                if directory == self._root:
+                    break
+        finally:
+            Path(temporary).unlink(missing_ok=True)
         return hashlib.sha256(data).hexdigest()
 
     def read(self, key: str) -> bytes:

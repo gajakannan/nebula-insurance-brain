@@ -57,3 +57,25 @@ policy_rules:
   - endpoint:fact-commit
   source_docs:
   - planning-mds/security/policies/policy.csv
+- id: policy_rule:content-artifact-ingest
+  label: content_artifact:ingest
+  resource: content_artifact
+  action: ingest
+  allowed_roles:
+  - role:service-principal
+  related_nodes:
+  - capability:authorization-enforcement
+  - capability:parse-once-content-artifact
+  source_docs:
+  - planning-mds/security/policies/policy.csv
+- id: policy_rule:content-artifact-interpret
+  label: content_artifact:interpret
+  resource: content_artifact
+  action: interpret
+  allowed_roles:
+  - role:service-principal
+  related_nodes:
+  - capability:authorization-enforcement
+  - capability:parse-once-content-artifact
+  source_docs:
+  - planning-mds/security/policies/policy.csv

@@ -1,18 +1,28 @@
 [project]
 name = "brain-worker"
 version = "0.1.0"
-description = "Outbox projector worker (F0001-S0005): records processed events; no graph or vector projection yet."
+description = "Outbox projector and engine-owned durable document job dependencies."
 requires-python = ">=3.13"
 dependencies = [
   "sqlalchemy>=2.0.52",
   "asyncpg>=0.30",
   "brain-temporal",
   "brain-persistence",
+  "brain-jobs",
+  "brain-content",
+  "brain-security",
+  "brain-review",
+  "brain-contracts",
 ]
 
 [tool.uv.sources]
 brain-temporal = { workspace = true }
 brain-persistence = { workspace = true }
+brain-jobs = { workspace = true }
+brain-content = { workspace = true }
+brain-security = { workspace = true }
+brain-review = { workspace = true }
+brain-contracts = { workspace = true }
 
 [project.optional-dependencies]
 test = [

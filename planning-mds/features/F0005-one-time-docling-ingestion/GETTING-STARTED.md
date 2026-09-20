@@ -40,3 +40,50 @@ BRAIN_RUN_LIVE_GRAPH_PROOF=1 LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 
 ```
 
 This test performs actual model requests for two GL profiles over saved JSON with conversion forbidden. It is skipped unless explicitly enabled. It does not replace the chunked corpus comparison, evidence-mapping proof, or worker recovery gates.
+
+## Candidate worker and result import
+
+The candidate now has a runnable composition and engine import. It stays opt-in while ADR-0060 is Proposed. Use one worker process/replica for qualification; its shared model semaphore does not impose a distributed GPU quota. The fixed-template worker currently uses Graph's `direct` contract. Chunked comparison must explicitly exercise the service's `dense` contract; the direct-path tests are not chunking proof.
+
+Install both locked workspaces, then apply the migration to a **development** PostgreSQL database. Set `BRAIN_DATABASE_URL` for Alembic and `BRAIN_WORKER_DATABASE_URL` for the worker to the same `postgresql+psycopg` database through the local secret mechanism. The configured filesystem root must be immutable and shared by the worker and importer.
+
+```bash
+uv sync --locked --project engine
+uv sync --locked --project neuron
+cd engine/migrations
+../.venv/bin/alembic upgrade head
+cd ../..
+```
+
+Provide `BRAIN_WORKER_PRINCIPAL_ID` for an active, provisioned service principal with an unrevoked `ServicePrincipal` membership in the target tenant/knowledge base. The CLI trusts the local operator to select that identity; expose an authenticated application boundary before making submission available to external callers. Do not grant service roles to arbitrary uploaders. Both ingestion and interpretation decisions are checked and audited, including after a job restarts.
+
+Set `NEBULA_TENANT_ID` and `NEBULA_KB_ID` to the provisioned scope. Submit a development fixture:
+
+```bash
+export BRAIN_ENABLE_GRAPH_CANDIDATE=1
+neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+  --policy-dir planning-mds/security/policies \
+  --enqueue neuron/fixtures/gl-policy-declarations.pdf \
+  --tenant "$NEBULA_TENANT_ID" --knowledge-base "$NEBULA_KB_ID" --profile gl-limits-a
+```
+
+For processing, supply `BRAIN_INFERENCE_BASE_URL`, `BRAIN_INFERENCE_API_KEY`, `BRAIN_INFERENCE_MODEL`, and the immutable `BRAIN_INFERENCE_MODEL_REVISION` through the inference runbook's credential mechanism. Cache the matching tokenizer and Docling assets first. `--once` processes at most one job and one pending import; omit it to poll until SIGINT/SIGTERM. Shutdown waits for the current activity; it is not a hard kill for a converter or provider operation already in progress.
+
+```bash
+neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+  --policy-dir planning-mds/security/policies --once
+neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+  --policy-dir planning-mds/security/policies --import-only --once
+```
+
+Submission is idempotent for a source/recipe/actor/profile identity. A second profile reuses the same bundle and creates a separate job/run. Published successful attempts are recovered without new model calls. An outbox import failure leaves the acknowledgement pending and rolls back all imported rows. Investigate the stable failure code, correct the cause, and rerun import; never delete a bundle to clear a model error. Source-bearing outputs and failed/partial runs live beneath the protected object-store root; production retention must include `runs/` as well as `bundles/` and `sources/`. No automatic retention policy is invented here. OS-killed workers can leave private temporary files; cleanup must run with workers stopped or with a reviewed age/lease policy.
+
+## PostgreSQL qualification
+
+Set `BRAIN_TEST_POSTGRES_URL` to a disposable development PostgreSQL database using the psycopg driver. The tests create and drop only their own random schemas. They fail on a configured but unreachable database; they skip only when the variable is absent.
+
+```bash
+neuron/.venv/bin/python -m pytest engine/packages/brain-jobs/tests/test_postgres.py -q
+```
+
+Run the combined offline suite documented in [compatibility evidence](compatibility-evidence.md) as well. Neither this PostgreSQL test nor the live model smoke test replaces the approved corpus comparison, operational qualification, and reviewer acceptance gates.

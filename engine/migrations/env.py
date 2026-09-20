@@ -4,6 +4,7 @@ import os
 from logging.config import fileConfig
 
 from alembic import context
+from brain_jobs.queue import metadata as document_job_metadata
 
 # Import every model module so its table lands on Base.metadata before autogenerate
 # or a bare `context.configure(target_metadata=...)` runs.
@@ -15,7 +16,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata
+target_metadata = [Base.metadata, document_job_metadata]
 
 
 def include_object(object, name, type_, reflected, compare_to):  # noqa: ANN001, A002

@@ -110,6 +110,7 @@ class DoclingGraphPipelineAdapter:
         publish: Publisher | None = None,
         extraction_contract: Literal["direct", "dense"] = "direct",
         chunk_max_tokens: int = 512,
+        conversion_only: bool = False,
     ) -> GraphPipelineOutput:
         if not isinstance(source, Path) or not source.is_file():
             raise ValueError("source must be a materialized local file")
@@ -145,6 +146,8 @@ class DoclingGraphPipelineAdapter:
         if len(extraction_positions) != 1:
             raise RuntimeError("upstream stage layout differs from the tested integration")
         pipeline.stages.insert(extraction_positions[0], checkpoint)
+        if conversion_only:
+            pipeline.stages = pipeline.stages[: extraction_positions[0] + 1]
         context = pipeline.run()
         graph = context.knowledge_graph
         return GraphPipelineOutput(

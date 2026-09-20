@@ -330,3 +330,10 @@ docker compose up -d; scripts/dev/check_pins.py; backup and restore drill per sc
 ## Change Log
 
 - 2026-09-06: Initial project-specific pattern set created at F0001 Phase B.
+
+
+## F0005 candidate composition — 2026-09-20
+
+The opt-in `brain_ingestion.worker_cli` composes engine-owned jobs/authorization and result import with neuron-owned conversion/extraction activities. `brain-contracts` holds the shared result DTO; engine code does not import the AI runtime. Publication is manifest-last and fenced by the current artifact lease. Missing files under an accepted manifest are corruption, never a cache miss. A completion outbox imports the result and acknowledges delivery in one database transaction; retries do not promote or duplicate canonical facts.
+
+The fixed-template candidate uses Graph direct extraction. Scalar values receive independent native selectors or remain unresolved. Unhandled entity/relationship output fails closed. Production compilation and targeted evolution remain in F0015/F0032. Activation and PostgreSQL/live-model qualification are still gated by ADR-0060; see [F0005 status](../features/F0005-one-time-docling-ingestion/STATUS.md).

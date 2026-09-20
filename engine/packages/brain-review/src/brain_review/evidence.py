@@ -32,12 +32,11 @@ def evidence_binding_to_locator(
     char_end: int | None = None,
     unresolved_reason: str | None = None,
 ) -> EvidenceLocator:
-    """Bridges an interpretation-run `EvidenceBinding` (`neuron/brain_interpretation`)
-    into the review layer's `EvidenceLocator` (ADR-0058), the boundary where a
-    candidate assertion becomes something a reviewer can be shown. Takes plain values
-    rather than `neuron`'s Pydantic model — `engine/` never imports from `neuron/`
-    (clean architecture: canonical/review data crosses that boundary through this kind
-    of explicit mapping, not a shared type)."""
+    """Map the shared result contract's binding to a review locator (ADR-0058).
+
+    The mapper accepts plain values. Engine code never imports the AI runtime;
+    provider-neutral DTOs live in `brain-contracts` and neuron re-exports them.
+    """
     selector: tuple[dict, ...] = ()
     if precision != "unresolved" and (bbox is not None or page is not None):
         box_selector: dict = {"type": "nebula:BoxSelector"}
