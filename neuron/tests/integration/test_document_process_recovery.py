@@ -12,20 +12,23 @@ import os
 import subprocess
 import sys
 import time
+from collections.abc import Iterator, Mapping
 from pathlib import Path
-from threading import BoundedSemaphore
+from threading import BoundedSemaphore, Event
+from typing import Any
 from uuid import uuid4
 
 import httpx
 import pytest
 from brain_content.checkpoints import CheckpointStore
 from brain_content.config import LocalObjectStoreConfig
+from brain_content.manifest import ArtifactManifest
 from brain_content.object_store import LocalFilesystemObjectStore
 from brain_extraction.profiles import load_profile
 from brain_extraction.vllm_graph_client import VllmGraphClient
 from brain_ingestion.document_worker import DocumentTask, DocumentWorker
 from brain_interpretation.parsed_content import ParseResult
-from brain_jobs.queue import DocumentJobQueue, jobs, metadata, outbox
+from brain_jobs.queue import DocumentJobQueue, JobLease, jobs, metadata, outbox
 from brain_persistence.base import Base
 from brain_persistence.models import (
     Assertion,
@@ -46,19 +49,24 @@ from docling_core.types.doc import DocItemLabel, DoclingDocument
 from docling_core.types.doc.base import BoundingBox, CoordOrigin, Size
 from docling_core.types.doc.document import ProvenanceItem
 from sqlalchemy import create_engine, event, func, select, text
+from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session
 
 ROOT = Path(__file__).resolve().parents[3]
 EXIT_CODE = 29
 
 
-def database(url, schema):
-    options = {"options": f"-csearch_path={schema},public"} if schema else {}
+def database(url: str, schema: str | None) -> Engine:
+    # No public fallback: create_all must not mistake migrated public tables for
+    # this proof's tables and accidentally share data between isolated cases.
+    options = {"options": f"-csearch_path={schema}"} if schema else {}
     return create_engine(url, connect_args=options)
 
 
 @pytest.fixture(params=["sqlite", "postgresql"])
-def recovery_database(request, tmp_path):
+def recovery_database(
+    request: pytest.FixtureRequest, tmp_path: Path
+) -> Iterator[tuple[Engine, str, str | None]]:
     schema = None
     admin = None
     if request.param == "postgresql":
@@ -90,28 +98,32 @@ def recovery_database(request, tmp_path):
             admin.dispose()
 
 
-def components(engine, root, crash_at=None):
-    def record(name):
+def components(
+    engine: Engine, root: Path, crash_at: str | None = None
+) -> tuple[DocumentWorker, DocumentResultImporter, CheckpointStore]:
+    def record(name: str) -> None:
         with (root / name).open("a") as log:
             log.write("called\n")
 
-    def crash(stage):
+    def crash(stage: str) -> None:
         if crash_at == stage:
             os._exit(EXIT_CODE)
 
     class CrashingStore(CheckpointStore):
-        def publish(self, manifest, files):
+        def publish(
+            self, manifest: ArtifactManifest, files: Mapping[str, bytes]
+        ) -> ArtifactManifest:
             result = super().publish(manifest, files)
             crash("bundle")
             return result
 
-        def publish_run(self, **kwargs):
+        def publish_run(self, **kwargs: Any) -> str:
             result = super().publish_run(**kwargs)
             crash("run")
             return result
 
     class CrashingQueue(DocumentJobQueue):
-        def finish(self, lease, result_ref):
+        def finish(self, lease: JobLease, result_ref: str) -> None:
             super().finish(lease, result_ref)
             crash("completion")
 
@@ -122,7 +134,7 @@ def components(engine, root, crash_at=None):
     policy = ROOT / "planning-mds/security/policies"
     authorization = DocumentJobAuthorization(engine, policy / "model.conf", policy / "policy.csv")
 
-    def convert(_path):
+    def convert(_path: Path) -> ParseResult[DoclingDocument]:
         # A second physical conversion is an immediate proof failure.
         if (root / "conversions").exists():
             raise AssertionError("reconverted an already-published artifact")
@@ -141,7 +153,7 @@ def components(engine, root, crash_at=None):
         )
         return ParseResult(doc, 1, [], 0, "complete", [])
 
-    def response(_request):
+    def response(_request: httpx.Request) -> httpx.Response:
         # Likewise, successful published output must never cause another model call.
         if (root / "model_calls").exists():
             raise AssertionError("repeated a completed extraction")
@@ -172,7 +184,7 @@ def components(engine, root, crash_at=None):
             },
         )
 
-    def client(cancelled):
+    def client(cancelled: Event) -> VllmGraphClient:
         return VllmGraphClient(
             base_url="http://127.0.0.1:8000/v1",
             api_key="recorded-test",
@@ -197,7 +209,9 @@ def components(engine, root, crash_at=None):
 
 
 @pytest.mark.parametrize("crash_at", ["bundle", "run", "completion", "import", "imported"])
-def test_process_recovery_delivers_one_reviewed_assertion(recovery_database, tmp_path, crash_at):
+def test_process_recovery_delivers_one_reviewed_assertion(
+    recovery_database: tuple[Engine, str, str | None], tmp_path: Path, crash_at: str
+) -> None:
     engine, url, schema = recovery_database
     actor, tenant, kb, artifact = uuid4(), uuid4(), uuid4(), uuid4()
     with Session(engine) as session, session.begin():
@@ -281,13 +295,20 @@ def test_process_recovery_delivers_one_reviewed_assertion(recovery_database, tmp
         assert audits and all(row.decision and row.actor_principal_id == actor for row in audits)
 
 
-def child_main():
+def child_main() -> None:
     root, schema, crash_at = Path(sys.argv[1]), sys.argv[2] or None, sys.argv[3]
     engine = database(os.environ["RECOVERY_PROOF_DATABASE_URL"], schema)
     worker, importer, _ = components(engine, root, crash_at)
     if crash_at == "import":
 
-        def crash_review(_conn, _cursor, statement, _parameters, _context, _many):
+        def crash_review(
+            _conn: Connection,
+            _cursor: Any,
+            statement: str,
+            _parameters: Any,
+            _context: Any,
+            _many: bool,
+        ) -> None:
             if statement.startswith("INSERT INTO review_item"):
                 os._exit(EXIT_CODE)
 
