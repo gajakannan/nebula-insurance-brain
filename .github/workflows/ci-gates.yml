@@ -167,6 +167,18 @@ jobs:
         env:
           BRAIN_TEST_POSTGRES_URL: postgresql+psycopg://brain:brain@localhost:5432/brain
         run: engine/.venv/bin/python -m pytest engine/packages/brain-jobs/tests/test_postgres.py -q
+      - name: Install the locked neuron dependencies for delivery recovery
+        run: uv sync --locked --project neuron
+      - name: Prove worker and importer recovery against PostgreSQL
+        timeout-minutes: 5
+        env:
+          BRAIN_TEST_POSTGRES_URL: postgresql+psycopg://brain:brain@localhost:5432/brain
+          LITELLM_LOCAL_MODEL_COST_MAP: "True"
+          HF_HUB_OFFLINE: "1"
+          OMP_NUM_THREADS: "2"
+        run: >
+          neuron/.venv/bin/python -m pytest
+          neuron/tests/integration/test_document_process_recovery.py -k postgresql -q
       # Server liveness does not imply that the worker has applied the custom blueprint.
       - name: Wait for OIDC application readiness (up to 180s)
         timeout-minutes: 4
