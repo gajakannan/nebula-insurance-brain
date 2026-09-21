@@ -6,7 +6,7 @@
 **Feature Name:** One-time document ingestion
 **Priority:** High
 **Phase:** v0.1A
-**Status:** Draft — direction authorized; no completed plan gates, implementation, or proof acceptance claimed.
+**Status:** Candidate implementation in progress — direction authorized; formal acceptance and activation remain open. See [STATUS](STATUS.md) for observed proof and outstanding gates.
 
 ## Feature Statement
 
@@ -47,7 +47,7 @@ F0004 artifact contract; F0001 fixtures and historical results; F0002/F0003 prod
 
 ## Risks and Open Decisions
 
-The exact upstream build, supported pre-extraction checkpoint seam, quality/cost thresholds, licensed comparison corpus, and named reviewers remain unsettled. They are implementation/proof prerequisites owned in the assembly plan, not implied approvals. A version string or successful graph export alone proves neither reuse nor source grounding.
+The candidate pins Docling-Graph 1.9.1 and tests a version-specific pre-extraction checkpoint seam; [compatibility evidence](compatibility-evidence.md) records its limits. Quality/cost thresholds, a licensed comparison corpus, operational qualification, and named reviewers remain open. A version string or successful graph export alone proves neither reuse nor source grounding.
 
 ## Success and Evidence
 

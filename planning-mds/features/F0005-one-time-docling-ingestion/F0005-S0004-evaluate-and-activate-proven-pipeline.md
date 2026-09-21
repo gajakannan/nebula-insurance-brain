@@ -51,7 +51,7 @@ Full profile workbench, enterprise entity resolution, canonical commits, AGE pro
 
 ## Questions & Assumptions
 
-No candidate pin, benchmark result, lockfile change, activation, or reviewer verdict has been produced by this planning work. Record limitations before approval; do not invent quality thresholds.
+The candidate pin, lockfiles, implementation, and contract results are recorded in [compatibility evidence](compatibility-evidence.md). Comparative live benchmarks, activation, and reviewer verdicts remain open. Record limitations before approval; do not invent quality thresholds.
 
 ## Definition of Done
 

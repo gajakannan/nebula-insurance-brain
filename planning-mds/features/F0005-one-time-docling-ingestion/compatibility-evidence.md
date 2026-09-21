@@ -95,3 +95,22 @@ engine/.venv/bin/python -m pytest engine/packages/brain-content/tests/test_check
 - Planning regression tests, readiness, KG freshness/reproducibility, framework validation, frontend checks, and both runtime lint/type checks passed.
 
 This closes the initial PostgreSQL migration, competing-claim, and expired-worker-fencing checks. It does not establish process-kill recovery against PostgreSQL, live vLLM quality, serving-tokenizer parity, corpus thresholds, multi-region/relationship correctness, retention/deletion, or reviewer acceptance. The same live-model restrictions remain locally; ADR-0060 stays Proposed.
+
+## PostgreSQL process-exit and lock-wait proof — 2026-09-20
+
+[CI run 35535414661](https://github.com/gajakannan/nebula-insurance-brain/actions/runs/35535414661), source commit `a64f0ebc6a87602ccf1463c3998902f0e983a1a6`, applied migrations 0001–0004 and passed **all four PostgreSQL document-job tests in 3.06 seconds**. The two additional tests establish:
+
+- A separate worker process publishes an atomic filesystem checkpoint through its PostgreSQL lease and exits with `os._exit(23)`. After lease expiry, a new claim recovers the checkpoint, rejects publication from the old generation, and commits one completion/outbox row.
+- Publication waiting for a locked job row rechecks the current database clock after obtaining the lock. A lease that expires during that wait cannot publish, even though it was valid when the transaction began.
+
+These extend the earlier competing-claim and expired-generation tests. The process-exit case exercises the queue and object store, not the complete Graph/model/engine-import composition, a database restart, or machine/storage failure.
+
+The run passed runtime suites, product gates, framework validators, and experience, but its runtime-stack job subsequently failed while waiting for OIDC discovery. No Authentik failure logs were retained, so the cause is unconfirmed. Commit `9379e84` adds bounded HTTP attempts, a 180-second application-readiness window, and stack diagnostics before teardown. This failed full run still supplies the four observed PostgreSQL results; it is not recorded as complete CI acceptance.
+
+## Complete CI with four PostgreSQL cases — 2026-09-20
+
+[CI run 35552348580](https://github.com/gajakannan/nebula-insurance-brain/actions/runs/35552348580), source commit `9379e8466ad310b1630295992d21e6a6eeddc10f`, passed **all five jobs**. Engine: **126 passed / 21 skipped**; neuron: **58 passed / 4 skipped**; dedicated PostgreSQL qualification: **4 passed in 3.18 seconds**, after migrations 0001–0004 applied. All configured coverage, lint/type, product, framework, and frontend gates passed.
+
+OIDC discovery returned 404 on the first attempt and 200 on the next attempt five seconds later; all three seeded principals authenticated. This confirms application readiness can lag server health in this run. It does not reconstruct the earlier failure or establish that every startup failure is a timing issue. The workflow now retains diagnostics for future failures.
+
+Queue recovery is qualified for the four named cases. Full worker/model/import recovery on PostgreSQL, deployment/storage failure recovery, the live model/corpus comparison, operational controls, and reviewer acceptance remain open. ADR-0060 remains Proposed and runtime activation remains opt-in.
