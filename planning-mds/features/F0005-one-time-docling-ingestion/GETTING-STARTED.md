@@ -84,8 +84,15 @@ Set `BRAIN_TEST_POSTGRES_URL` to a disposable development PostgreSQL database us
 
 ```bash
 neuron/.venv/bin/python -m pytest engine/packages/brain-jobs/tests/test_postgres.py -q
+LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+  neuron/.venv/bin/python -m pytest \
+  neuron/tests/integration/test_document_process_recovery.py -k postgresql -q
 ```
 
 Run the combined offline suite documented in [compatibility evidence](compatibility-evidence.md) as well. Neither this PostgreSQL test nor the live model smoke test replaces the approved corpus comparison, operational qualification, and reviewer acceptance gates.
 
-CI's `runtime-stack` job applies the engine migrations to its disposable PostgreSQL database and runs four isolated-schema document-job tests: competing claims, expired-generation fencing, child-process exit/reclaim after checkpoint publication, and lease expiry while publication waits for a row lock. These cases do not establish complete worker/model/import recovery on PostgreSQL, machine/storage failure recovery, or retention acceptance.
+CI's `runtime-stack` job applies the engine migrations to its disposable PostgreSQL database and runs four isolated-schema document-job tests: competing claims, expired-generation fencing, child-process exit/reclaim after checkpoint publication, and lease expiry while publication waits for a row lock.
+
+It also runs five worker/importer process-exit cases: after bundle publication, after extraction-result publication, after job completion, midway through result import, and after import commits. These use real Graph stages, authorization, artifact registration, and result import, with synthetic native content and recorded model responses. Recovery must retain one conversion, one model call, one assertion/evidence/review set, and one acknowledged completion. Each test owns an isolated schema populated from the application metadata; migration execution is a separate CI step.
+
+To run these five cases offline with SQLite, omit the database variable and use `-k sqlite` instead. A configured but unreachable PostgreSQL database is a failure, never a skip. These cases do not establish live provider behavior, machine/database/storage failure recovery, retention acceptance, or extraction quality.

@@ -84,7 +84,7 @@ ADR acceptance and activation require observed tests against the real upstream p
 - Compare the current single-request baseline with Graph chunking on an agreed corpus: schema validity, accuracy, abstention, tokens/calls, latency, and review workload. Cover timeouts, partial conversion, invalid extraction, retries, and worker restart.
 - Verify local vLLM configuration, secret redaction, bounded worker/model concurrency (including upstream internal fan-out), and tenant access/retention for source-bearing outputs.
 
-Evidence and reviewer verdicts belong in [F0005 STATUS](../../features/F0005-one-time-docling-ingestion/STATUS.md). The pin, native/scanned conversion, publication ordering, native-JSON reuse, scalar/table evidence, and durable recovery have bounded test evidence, including real PostgreSQL queue process-exit recovery. No complete gate is satisfied: live comparative extraction, multi-region/relationship evidence, full deployment recovery, operational qualification, and reviewer acceptance remain pending. Structural planning checks cannot change this ADR to Accepted.
+Evidence and reviewer verdicts belong in [F0005 STATUS](../../features/F0005-one-time-docling-ingestion/STATUS.md). The pin, native/scanned conversion, publication ordering, native-JSON reuse, scalar/table evidence, and durable recovery have bounded test evidence, including PostgreSQL queue and worker/importer process-exit recovery with recorded model responses. No complete gate is satisfied: live comparative extraction, multi-region/relationship evidence, full deployment recovery, operational qualification, and reviewer acceptance remain pending. Structural planning checks cannot change this ADR to Accepted.
 
 ## References
 
