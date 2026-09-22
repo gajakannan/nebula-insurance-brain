@@ -9,7 +9,7 @@
 
 **AuthX reference:** [Architecture patterns](#118-authx-reference-architecture), [implementation gaps](#119-crm-gaps-that-must-not-be-copied-unchanged), [Brain contracts](#120-concrete-authx-contract-for-insurance-brain), and [validation evidence](#121-validation-evidence-and-required-tests).
 
-**Document pipeline update (2026-09-15):** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph for document pipeline coordination. Section 126 defines the delivery gates. F0001 remains the measured Docling + direct-vLLM baseline; the unactivated 1.9.1 candidate now has native/scanned conversion and saved-JSON contract tests. See [F0005 compatibility evidence](../features/F0005-one-time-docling-ingestion/compatibility-evidence.md) for the remaining gates.
+**Document pipeline update (2026-09-22):** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph for document pipeline coordination. F0005's pinned 1.9.1 candidate has completed its synthetic development scope: native/scanned conversion, saved-JSON reuse, PostgreSQL recovery, recorded-response dense extraction, and multi-region review mapping. The candidate remains opt-in; live-model and deployment qualification and reviewer acceptance remain future work under section 126. F0001 remains the measured Docling + direct-vLLM baseline. See [F0005 compatibility evidence](../features/F0005-one-time-docling-ingestion/compatibility-evidence.md).
 
 **Technology direction:**
 
@@ -4622,9 +4622,9 @@ Track expected versus received forms/pages/attachments, processing completeness,
 
 **Original finding, resolved by ADR-0040:** the bundle must preserve the native DoclingDocument JSON alongside its normalized views. Sections 80–81 now show that file; ADR-0060 carries this requirement into the new pipeline.
 
-**Upstream documented behavior, requiring a pinned integration proof:** the current Docling-Graph guide describes DoclingDocument JSON input that skips conversion. Raw text and Markdown take different paths. F0001 recorded different behavior in its tested build; F0005 must resolve the version/API difference and prove reuse under ADR-0060. [R1]
+**Pinned reuse proof completed in F0005:** Docling-Graph 1.9.1 accepts saved DoclingDocument JSON without conversion, verified with conversion forbidden on reuse. Raw text and Markdown take different paths. The upstream guide describes the native-JSON path [R1]; the [observed compatibility evidence](../features/F0005-one-time-docling-ingestion/compatibility-evidence.md) establishes it for the locked candidate. F0001's unsuccessful invocation remains historical evidence; the exact difference in its invocation/environment has not been reconstructed. Production acceptance remains pending under ADR-0060.
 
-**Accepted content contract:** `docling-document.json` is already persisted by F0001 (ADR-0040), alongside normalized projections. ADR-0060 makes it the required reuse input to the planned Docling-Graph adapter. Preserve its schema version and required assets, publish the bundle before extraction, and store subsequent graph/provenance outputs under their interpretation run.
+**Accepted content contract:** `docling-document.json` is already persisted by F0001 (ADR-0040), alongside normalized projections. ADR-0060 makes it the required reuse input to the opt-in Docling-Graph adapter. Preserve its schema version and required assets, publish the bundle before extraction, and store subsequent graph/provenance outputs under their interpretation run.
 
 Suggested additions to the artifact manifest:
 
@@ -5034,7 +5034,7 @@ The following ADR IDs are reserved suggestions, all with **status: Proposed**. T
 | 89, 92 | Full governance delayed while initial writes already occur | Baseline authorization and audit in v0.1 |
 | 90 | v0.2 combines too many large capabilities | Split retrieval/chat delivery from ontology/learning workbenches |
 | 96–97 | Broad small corpus and metrics without release targets | Narrow frozen slice, representative challenge set, measured thresholds |
-| 104 | Docling-Graph dependency and orchestration | **Reopened by ADR-0060 (2026-09-15):** Docling-Graph is the proposed document coordinator; F0005 must pin and prove native JSON reuse, pre-extraction persistence, and provenance translation. F0001 rejected its tested 1.9.1 build and used direct vLLM. Those measurements remain in `docker/DEPENDENCY-MATRIX.md`; they do not settle the new integration. |
+| 104 | Docling-Graph dependency and orchestration | **Synthetic development proof complete (2026-09-22):** the locked 1.9.1 candidate proves native JSON reuse, pre-extraction publication, PostgreSQL recovery, and bounded scalar/table/multi-region evidence mapping. ADR-0060 remains Proposed pending production qualification and reviewer acceptance. F0001's rejected invocation and direct-vLLM measurements remain historical records in `docker/DEPENDENCY-MATRIX.md`. |
 
 # 117. Sources and Remaining Decisions
 
@@ -5054,7 +5054,7 @@ These primary references support the technology findings and implementation cons
 1. Named owner and approved policy for source authority and canonical promotion in the first GL slice.
 2. Tenant/entity/knowledge-base identity scope and pilot access model.
 3. Target host, PostgreSQL/extension build, and model/provider data policy.
-4. F0005: pin and test `docling-project/docling-graph` plus compatible Docling dependencies under ADR-0060. Prove native JSON reuse and publication before extraction; do not treat current `main` documentation or the F0001 version label as a tested combination.
+4. F0005: complete production qualification and reviewer acceptance under ADR-0060. The locked Docling-Graph 1.9.1 / Docling 2.126.0 candidate already has synthetic development proof for native JSON reuse, publication before extraction, PostgreSQL recovery, and recorded-response extraction/evidence mapping. Live comparative extraction, deployment/storage failures, operational controls, and unsupported relationship semantics remain open; see [F0005 STATUS](../features/F0005-one-time-docling-ingestion/STATUS.md).
 5. Licensed/authorized representative policy packages and reviewers for the initial corpus.
 6. Critical-field acceptance thresholds, review capacity, latency/cost budget, and recovery objectives.
 7. Applicable retention schedules, holds, conversation-sharing policy, and deletion/revocation behavior.
@@ -5419,7 +5419,7 @@ F0022 delivers the panel with Document 360 in v0.1B and owns the renderer set, t
 
 # 126. Docling-Graph Document Pipeline Orchestration
 
-**Proposed direction, exact-version proof pending — 2026-09-15.** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this change and its proof gates.
+**Proposed direction, pinned synthetic development proof complete — 2026-09-22.** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this change. Docling-Graph 1.9.1 / Docling 2.126.0 have bounded conversion/reuse, PostgreSQL recovery, recorded-response dense extraction, and multi-region review evidence. Production qualification and reviewer acceptance remain pending; the candidate is opt-in.
 
 Docling-Graph becomes the specialist document coordinator. Docling still converts the source underneath it. Nebula supplies the durable artifact checkpoint, released profile, scope, and budget; maps the result to assertions and evidence; and retains canonical authority. The extraction graph is a run artifact, not the AGE projection or an accepted enterprise graph.
 
@@ -5432,6 +5432,6 @@ Authorized job (PostgreSQL now; Temporal activity where needed in v0.3)
     → Review / entity resolution / authorized canonical commit
 ```
 
-The integration must expose a durable conversion checkpoint before model failure can discard parsed content. F0005 proves that seam and restart reuse; F0015 delivers the profile compiler; F0016 persists scoped runs and graph/provenance outputs; F0032 proves affected-content-only evolution scheduling. Upstream stage ordering is not itself durable orchestration. The PostgreSQL job mechanism and later Temporal workflows remain necessary for their respective responsibilities.
+The candidate publishes a durable conversion checkpoint before semantic extraction, using a version-pinned stage integration. F0005 has bounded proof for this seam and worker/importer restart reuse. It persists candidate run outputs; F0015's production profile compiler, F0016's full scoped-run lifecycle, and F0032's affected-content-only evolution scheduling remain planned. Upstream stage ordering is not itself durable orchestration. The PostgreSQL job mechanism and later Temporal workflows remain necessary for their respective responsibilities.
 
-F0001's direct-vLLM proof remains the historical baseline. Its accepted evidence, inference, and artifact contracts survive the switch. The new ADR's delivery table assigns the remaining changes and tests without reopening the archive or declaring the new runtime shipped.
+F0001's direct-vLLM proof remains the historical baseline. Its accepted evidence, inference, and artifact contracts survive the switch. The ADR's delivery table assigns the remaining production work. The candidate and synthetic proof are delivered; this does not reopen the archive or declare production activation.
