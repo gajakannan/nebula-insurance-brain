@@ -4,7 +4,7 @@ Nebula Insurance Brain — a continuously evolving enterprise semantic system fo
 
 ## Status
 
-F0001 runtime proofs are implemented. F0005 has an opt-in Docling-Graph candidate with durable jobs and engine integration; live qualification and activation are pending. The architecture baseline is `planning-mds/architecture/master-blueprint.md`; the framework entry point is `planning-mds/BLUEPRINT.md`.
+F0001 runtime proofs are implemented. F0005's synthetic development scope is complete: its opt-in Docling-Graph candidate has durable jobs, engine integration, PostgreSQL recovery proof, and a recorded-response dense comparison with multi-region review evidence. Production qualification and activation are future work. The architecture baseline is `planning-mds/architecture/master-blueprint.md`; the framework entry point is `planning-mds/BLUEPRINT.md`.
 
 ## How this repo is built
 

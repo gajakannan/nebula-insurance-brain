@@ -10,8 +10,8 @@ interface ReviewPanelProps {
   bearerToken: string;
 }
 
-function regionFromSelector(item: ReviewItem): RegionBox | null {
-  const selector = item.evidence?.selector?.find((s) => s.type === "nebula:BoxSelector");
+function regionFromSelector(item: ReviewItem, index: number): RegionBox | null {
+  const selector = item.evidence?.selector?.filter((s) => s.type === "nebula:BoxSelector")[index];
   if (!selector || typeof selector.page !== "number") return null;
   const { page, x0, y0, x1, y1 } = selector as Record<string, number>;
   if ([x0, y0, x1, y1].some((v) => typeof v !== "number")) {
@@ -26,12 +26,14 @@ export function ReviewPanel({ reviewItemId, bearerToken }: ReviewPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [receiptMessage, setReceiptMessage] = useState<string | null>(null);
+  const [regionIndex, setRegionIndex] = useState(0);
 
   const load = useCallback(async () => {
     setError(null);
     try {
       const loaded = await fetchReviewItem(reviewItemId, bearerToken);
       setItem(loaded);
+      setRegionIndex(0);
       if (loaded.evidence?.source) {
         const response = await fetch(`/content/${loaded.evidence.source}/files/source.pdf`, {
           headers: { Authorization: `Bearer ${bearerToken}` },
@@ -94,7 +96,8 @@ export function ReviewPanel({ reviewItemId, bearerToken }: ReviewPanelProps) {
     return <div data-testid="review-panel-loading">Loading…</div>;
   }
 
-  const region = regionFromSelector(item);
+  const regions = item.evidence?.selector?.filter((s) => s.type === "nebula:BoxSelector") ?? [];
+  const region = regionFromSelector(item, regionIndex);
   const precisionIsExact = item.evidence?.precision === "exact-span" || item.evidence?.precision === "table-cell";
 
   return (
@@ -103,6 +106,19 @@ export function ReviewPanel({ reviewItemId, bearerToken }: ReviewPanelProps) {
         <p>Artifact: {item.evidence?.source ?? "none"}</p>
       </aside>
       <main>
+        {regions.length > 1 && (
+          <label>
+            Evidence region
+            <select aria-label="Evidence region" value={regionIndex}
+              onChange={(event) => setRegionIndex(Number(event.target.value))}>
+              {regions.map((selector, index) => (
+                <option key={index} value={index}>
+                  Region {index + 1} of {regions.length} — page {String(selector.page ?? "unknown")}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <Viewport pdfBytes={pdfBytes} region={region} precisionIsExact={precisionIsExact} />
       </main>
       <section className="field-panel" data-testid="field-panel">

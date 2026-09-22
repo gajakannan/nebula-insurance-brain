@@ -29,7 +29,7 @@ from brain_persistence.models import (
     SemanticInterpretationRun,
     SourceDocument,
 )
-from brain_review.evidence import evidence_binding_to_locator
+from brain_review.evidence import combine_evidence_locators, evidence_binding_to_locator
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter
 from sqlalchemy import func, select, update
 from sqlalchemy.engine import Connection, Engine
@@ -298,7 +298,18 @@ class DocumentResultImporter:
                                 bbox=evidence.bbox.model_dump() if evidence.bbox else None,
                             )
                         )
-                    unresolved = any(e.precision == "unresolved" for e in candidate.evidence)
+                    locator = combine_evidence_locators(
+                        [
+                            evidence_binding_to_locator(
+                                **evidence.model_dump(),
+                                unresolved_reason="property_not_uniquely_located"
+                                if evidence.precision == "unresolved"
+                                else None,
+                            )
+                            for evidence in candidate.evidence
+                        ]
+                    )
+                    unresolved = locator.precision == "unresolved"
                     # Unknown model confidence is not a confidence of 1. Candidate
                     # adoption has no automatic acceptance policy.
                     if (
@@ -306,16 +317,6 @@ class DocumentResultImporter:
                         or candidate.model_confidence is None
                         or candidate.model_confidence < 0.5
                     ):
-                        evidence = next(
-                            (e for e in candidate.evidence if e.precision == "unresolved"),
-                            candidate.evidence[0],
-                        )
-                        locator = evidence_binding_to_locator(
-                            **evidence.model_dump(),
-                            unresolved_reason="property_not_uniquely_located"
-                            if unresolved
-                            else None,
-                        )
                         session.add(
                             ReviewItemRow(
                                 id=uuid5(candidate.id, "review"),

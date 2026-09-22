@@ -1,0 +1,224 @@
+{
+  "scope": "synthetic development proof; recorded responses; not release acceptance",
+  "model": "none \u2014 HTTP MockTransport only",
+  "token_count_source": "cl100k_base estimate; not serving-tokenizer or provider usage",
+  "latency_scope": "local pipeline time; no model inference latency",
+  "fixture_version": 1,
+  "configuration": {
+    "context_tokens": 16384,
+    "chunk_max_tokens": 96,
+    "output_tokens": 512,
+    "parallel_workers": 1,
+    "evidence_mapper_version": 2
+  },
+  "package_versions": {
+    "docling": "2.126.0",
+    "docling-graph": "1.9.1",
+    "docling-core": "2.95.0"
+  },
+  "profile_schema_sha256": "4782813dfa481a42b8ce5dbd4642593f797ae38483c0b429610bb5f71560ba95",
+  "rows": [
+    {
+      "case": "unique",
+      "engine": "baseline",
+      "status": "complete",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": true,
+        "review_candidates": 2
+      },
+      "model_phases": [
+        "GLLimitsA"
+      ],
+      "model_calls": 1,
+      "chunk_count": null,
+      "estimated_prompt_tokens": 796,
+      "estimated_completion_tokens": 21,
+      "local_elapsed_seconds": 0.1765,
+      "native_sha256": "dcfd623c4bb8f4fd5c9492eaa075a1c5a5f201ef875d85979e7a125d4a4f2867",
+      "conversion_calls": 0
+    },
+    {
+      "case": "unique",
+      "engine": "direct",
+      "status": "partial",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": false,
+        "review_candidates": 1
+      },
+      "model_phases": [
+        "direct_extraction"
+      ],
+      "model_calls": 1,
+      "chunk_count": 1,
+      "estimated_prompt_tokens": 1189,
+      "estimated_completion_tokens": 21,
+      "local_elapsed_seconds": 0.0497,
+      "native_sha256": "dcfd623c4bb8f4fd5c9492eaa075a1c5a5f201ef875d85979e7a125d4a4f2867",
+      "conversion_calls": 0
+    },
+    {
+      "case": "unique",
+      "engine": "dense",
+      "status": "complete",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": true,
+        "review_candidates": 1
+      },
+      "model_phases": [
+        "dense_skeleton",
+        "dense_fill"
+      ],
+      "model_calls": 2,
+      "chunk_count": 8,
+      "estimated_prompt_tokens": 4166,
+      "estimated_completion_tokens": 48,
+      "local_elapsed_seconds": 0.0851,
+      "native_sha256": "dcfd623c4bb8f4fd5c9492eaa075a1c5a5f201ef875d85979e7a125d4a4f2867",
+      "conversion_calls": 0
+    },
+    {
+      "case": "ambiguous",
+      "engine": "baseline",
+      "status": "complete",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": false,
+        "review_candidates": 2
+      },
+      "model_phases": [
+        "GLLimitsA"
+      ],
+      "model_calls": 1,
+      "chunk_count": null,
+      "estimated_prompt_tokens": 809,
+      "estimated_completion_tokens": 21,
+      "local_elapsed_seconds": 0.0025,
+      "native_sha256": "d5c040b4b64a8e7cf7b8d9e7ea3724acfcc2799a90a92e8e6908ec74cfc665c7",
+      "conversion_calls": 0
+    },
+    {
+      "case": "ambiguous",
+      "engine": "direct",
+      "status": "partial",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": true,
+        "review_candidates": 1
+      },
+      "model_phases": [
+        "direct_extraction"
+      ],
+      "model_calls": 1,
+      "chunk_count": 1,
+      "estimated_prompt_tokens": 1203,
+      "estimated_completion_tokens": 21,
+      "local_elapsed_seconds": 0.1099,
+      "native_sha256": "d5c040b4b64a8e7cf7b8d9e7ea3724acfcc2799a90a92e8e6908ec74cfc665c7",
+      "conversion_calls": 0
+    },
+    {
+      "case": "ambiguous",
+      "engine": "dense",
+      "status": "partial",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": true,
+        "review_candidates": 1
+      },
+      "model_phases": [
+        "dense_skeleton",
+        "dense_fill"
+      ],
+      "model_calls": 2,
+      "chunk_count": 9,
+      "estimated_prompt_tokens": 4146,
+      "estimated_completion_tokens": 48,
+      "local_elapsed_seconds": 0.0679,
+      "native_sha256": "d5c040b4b64a8e7cf7b8d9e7ea3724acfcc2799a90a92e8e6908ec74cfc665c7",
+      "conversion_calls": 0
+    },
+    {
+      "case": "multi-region",
+      "engine": "baseline",
+      "status": "complete",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": false,
+        "review_candidates": 2
+      },
+      "model_phases": [
+        "GLLimitsA"
+      ],
+      "model_calls": 1,
+      "chunk_count": null,
+      "estimated_prompt_tokens": 809,
+      "estimated_completion_tokens": 21,
+      "local_elapsed_seconds": 0.0022,
+      "native_sha256": "8485e37f3ac410079f3dcbefde6f3eadef8fd7c6e20df0c1f1aa2419ac372c6f",
+      "conversion_calls": 0
+    },
+    {
+      "case": "multi-region",
+      "engine": "direct",
+      "status": "partial",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": false,
+        "review_candidates": 1
+      },
+      "model_phases": [
+        "direct_extraction"
+      ],
+      "model_calls": 1,
+      "chunk_count": 1,
+      "estimated_prompt_tokens": 1189,
+      "estimated_completion_tokens": 21,
+      "local_elapsed_seconds": 0.0438,
+      "native_sha256": "8485e37f3ac410079f3dcbefde6f3eadef8fd7c6e20df0c1f1aa2419ac372c6f",
+      "conversion_calls": 0
+    },
+    {
+      "case": "multi-region",
+      "engine": "dense",
+      "status": "complete",
+      "checks": {
+        "schema_valid": true,
+        "amount_exact": true,
+        "absent_field_abstained": true,
+        "evidence_matches_expected": true,
+        "review_candidates": 1
+      },
+      "model_phases": [
+        "dense_skeleton",
+        "dense_fill"
+      ],
+      "model_calls": 2,
+      "chunk_count": 8,
+      "estimated_prompt_tokens": 4166,
+      "estimated_completion_tokens": 48,
+      "local_elapsed_seconds": 0.0729,
+      "native_sha256": "8485e37f3ac410079f3dcbefde6f3eadef8fd7c6e20df0c1f1aa2419ac372c6f",
+      "conversion_calls": 0
+    }
+  ],
+  "development_checks_passed": true
+}

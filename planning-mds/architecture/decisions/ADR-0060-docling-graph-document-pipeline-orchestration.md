@@ -9,7 +9,7 @@
 
 **Date:** 2026-09-15
 **Direction authorized by:** Operator; formal ADR acceptance awaits the proof gates below.
-**Implementation:** Candidate in progress. Docling-Graph 1.9.1 is locked and its checkpoint/native-JSON path has contract tests. Production activation and all acceptance gates remain pending; see [compatibility evidence](../../features/F0005-one-time-docling-ingestion/compatibility-evidence.md).
+**Implementation:** Synthetic development proof complete for the current scope. Docling-Graph 1.9.1 is locked; conversion/reuse, PostgreSQL recovery, dense extraction with recorded responses, and multi-region review mapping have bounded proof. Production acceptance and activation remain future work; see [compatibility evidence](../../features/F0005-one-time-docling-ingestion/compatibility-evidence.md).
 **Would refine:** ADR-0003, ADR-0004, ADR-0028, ADR-0040, ADR-0055, ADR-0058, ADR-0059. Reconsiders the exclusion recorded after F0001; the current runtime decision, accepted content/evidence contracts, and F0001 measurements remain in force pending proof.
 
 ## Context
@@ -78,6 +78,8 @@ F0005's proof may use two small fixed templates before the production F0015 comp
 ADR acceptance and activation require observed tests against the real upstream package and local model, not a renamed mock or the existing direct client. Failure injection must cover a crash after conversion publication and a model failure before graph export. Keep the F0001 runtime as the measured baseline until those gates pass; do not claim it validates Docling-Graph. Record the selected package/source digest, measured limitations, and results in the dependency matrix. Archived F0001 requirements, results, and Done status remain historical records.
 
 ## Proof gates before acceptance
+
+These are production-acceptance requirements. The current early-development scope uses synthetic fixtures and is complete without claiming these release gates. The [synthetic comparison](../../features/F0005-one-time-docling-ingestion/synthetic-comparison.json) proves dense skeleton/fill orchestration with recorded responses; its estimated tokens and local timing are not model-quality or serving-cost measurements. On its longer fixtures, Graph direct lacks usable item refs and remains unresolved; dense preserves the refs. Multi-region grounding requires complete character coverage and retains separate selectors through review. Unsupported relationship output still fails closed.
 
 - Exact release/commit and digest plus locked dependencies; native and scanned processing, durable parse publication, worker restart, and two saved-JSON profiles with instrumented zero conversion/OCR on reuse.
 - Ground limit amount, currency, basis, effective date, table headers, and values supported by multiple regions; preserve the provenance ledger and unresolved precision.

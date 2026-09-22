@@ -5,7 +5,8 @@ import { ReviewPanel } from "../ReviewPanel";
 import type { ReviewItem } from "../types";
 
 vi.mock("../Viewport", () => ({
-  Viewport: () => <div data-testid="mock-viewport" />,
+  Viewport: ({ region }: { region: { page: number } | null }) =>
+    <div data-testid="mock-viewport">{region?.page}</div>,
 }));
 
 const openItem: ReviewItem = {
@@ -78,5 +79,28 @@ describe("ReviewPanel", () => {
 
     await waitFor(() => expect(screen.getByTestId("review-panel-error")).toBeInTheDocument());
     expect(screen.getByTestId("review-panel-error")).toHaveTextContent("not_found");
+  });
+
+  it("lets the reviewer inspect every supporting region and submits all selectors", async () => {
+    const user = userEvent.setup();
+    const selectors = [1, 2].map((page) => ({
+      type: "nebula:BoxSelector", page, x0: 10, y0: 10, x1: 80, y1: 30,
+    }));
+    const item = { ...openItem, evidence: { ...openItem.evidence!, selector: selectors } };
+    const fetcher = vi.fn(async (url: string) => {
+      if (url === "/reviews/item-1") return new Response(JSON.stringify(item));
+      if (url.startsWith("/content/")) return new Response(new ArrayBuffer(4));
+      return new Response(JSON.stringify({ decision_ids: ["d1"], applied: 1, duplicate: false, stale: 0, blocked: 0 }));
+    });
+    vi.stubGlobal("fetch", fetcher);
+    render(<ReviewPanel reviewItemId="item-1" bearerToken="tok" />);
+    const chooser = await screen.findByLabelText("Evidence region");
+    expect(screen.getByTestId("mock-viewport")).toHaveTextContent("1");
+    await user.selectOptions(chooser, "1");
+    expect(screen.getByTestId("mock-viewport")).toHaveTextContent("2");
+    await user.click(screen.getByText("Accept"));
+    await screen.findByTestId("receipt-message");
+    const submission = vi.mocked(fetch).mock.calls.find(([url]) => String(url).endsWith("/decisions"));
+    expect(JSON.parse(String(submission?.[1]?.body)).decisions[0].evidence.selector).toEqual(selectors);
   });
 });

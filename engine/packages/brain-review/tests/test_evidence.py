@@ -49,3 +49,50 @@ def test_page_precision_without_bbox_still_carries_a_selector() -> None:
     assert locator.precision == "page"
     assert locator.selector[0]["page"] == 3
     assert "x0" not in locator.selector[0]
+
+
+def test_combined_regions_preserve_every_selector() -> None:
+    from brain_review.evidence import combine_evidence_locators
+
+    artifact = uuid4()
+    locators = [
+        evidence_binding_to_locator(
+            artifact_id=artifact,
+            precision="span",
+            block_id="text-0",
+            page=page,
+            char_start=start,
+            char_end=end,
+        )
+        for page, start, end in [(1, 10, 14), (2, 14, 20)]
+    ]
+    result = combine_evidence_locators(locators)
+    assert result.precision == "exact-span" and result.part == "text-0"
+    assert [s["page"] for s in result.selector] == [1, 2]
+    assert [(s["char_start"], s["char_end"]) for s in result.selector] == [(10, 14), (14, 20)]
+
+
+def test_combined_mixed_or_unresolved_evidence_never_claims_precision() -> None:
+    from brain_review.evidence import combine_evidence_locators
+
+    artifact = uuid4()
+    span = evidence_binding_to_locator(
+        artifact_id=artifact, precision="span", block_id="text-0", page=1
+    )
+    for other in [
+        evidence_binding_to_locator(artifact_id=artifact, precision="unresolved"),
+        evidence_binding_to_locator(
+            artifact_id=artifact, precision="span", block_id="text-1", page=1
+        ),
+        evidence_binding_to_locator(artifact_id=artifact, precision="page", page=1),
+    ]:
+        result = combine_evidence_locators([span, other])
+        assert result.precision == "unresolved" and result.selector == ()
+    import pytest
+
+    with pytest.raises(ValueError, match="different artifacts"):
+        combine_evidence_locators(
+            [span, evidence_binding_to_locator(artifact_id=uuid4(), precision="page", page=1)]
+        )
+    with pytest.raises(ValueError, match="at least one"):
+        combine_evidence_locators([])

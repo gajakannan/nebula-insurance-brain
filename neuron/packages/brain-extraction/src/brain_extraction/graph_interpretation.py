@@ -184,7 +184,7 @@ class GraphInterpretationService:
                 "model_revision": diagnostics["model_revision"],
                 "limits": diagnostics["limits"],
             },
-            "evidence_mapper_version": 1,
+            "evidence_mapper_version": 2,
             "pipeline_config": output.effective_configuration if output else None,
             "package_versions": {
                 name: version(name) for name in ("docling", "docling-core", "docling-graph")

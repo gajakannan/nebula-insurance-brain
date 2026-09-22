@@ -5,7 +5,7 @@
 **Title:** Evaluate and activate the proven pipeline
 **Priority:** High
 **Phase:** v0.1A
-**Status:** Not Started
+**Status:** In Progress
 
 ## User Story
 
@@ -50,6 +50,8 @@ S0001–S0003; named quality/architecture/security reviewers and agreed corpus/t
 Full profile workbench, enterprise entity resolution, canonical commits, AGE projection, and Temporal business workflows retain their owning features. This story cannot bypass those services.
 
 ## Questions & Assumptions
+
+The current authorized scope is early development using synthetic fixtures. The recorded-response comparison is implemented and reproducible; its [report](synthetic-comparison.json) is orchestration/evidence proof, not model-quality acceptance. Live comparison, business thresholds, reviewer signoff, and activation remain later release work.
 
 The candidate pin, lockfiles, implementation, and contract results are recorded in [compatibility evidence](compatibility-evidence.md). Comparative live benchmarks, activation, and reviewer verdicts remain open. Record limitations before approval; do not invent quality thresholds.
 

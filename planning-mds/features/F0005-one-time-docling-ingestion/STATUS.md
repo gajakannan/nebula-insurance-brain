@@ -1,7 +1,15 @@
 # F0005 — One-time document ingestion — Status
 
-**Overall Status:** Candidate implementation in progress; production delivery incomplete. ADR-0060 is Proposed. The exact pin and six contract tests are recorded in [compatibility evidence](compatibility-evidence.md). No live-model acceptance, runtime activation, or reviewer signoff claimed.
+**Overall Status:** Synthetic development scope complete. The opt-in candidate and its development proof are implemented; production qualification and activation are future work. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).
 **Last Updated:** 2026-09-21
+
+## Current scope: early development
+
+The authorized scope uses synthetic development fixtures. Architecture/article reconciliation, the pinned Graph integration, durable recovery, bounded transport, evidence mapping, and a reproducible recorded-response comparison are delivered. This is the completion boundary for the current development work. The production proof gates below remain release requirements, not prerequisites for completing this scope.
+
+The comparison runs the direct baseline, Graph direct, and Graph dense over three synthetic cases. All nine retain the saved native JSON without conversion. Dense performs skeleton/fill requests across multiple chunks and passes the unique, ambiguous, and multi-region evidence expectations. The historical baseline chooses a first match for repeated values; Graph direct lacks usable item refs on these longer fixtures and remains unresolved. These are observed development limitations, not measured model quality. The worker's current direct default remains opt-in.
+
+Multi-region text now requires continuous source coverage and preserves separate selectors through assertion import, review-item creation, and region selection in the Review Panel. Mixed or incomplete evidence remains unresolved. The mapper version is 2. Dense legacy-mode hints retain Nebula's schema-enforced transport and validation.
 
 ## Candidate runtime delivery — 2026-09-20
 
@@ -32,7 +40,7 @@ The candidate has been merged to main from `feature/docling-graph-delivery`, bas
 | [F0005-S0001](F0005-S0001-pin-and-process-source-documents.md) | Pin and process source documents | In Progress |
 | [F0005-S0002](F0005-S0002-persist-artifacts-and-recover-jobs.md) | Persist artifacts and recover jobs | In Progress |
 | [F0005-S0003](F0005-S0003-reinterpret-saved-json-and-map-evidence.md) | Reinterpret saved JSON and map evidence | In Progress |
-| [F0005-S0004](F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | Not Started |
+| [F0005-S0004](F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | In Progress — synthetic comparison complete; production qualification deferred |
 
 ## Recommendation Audit
 

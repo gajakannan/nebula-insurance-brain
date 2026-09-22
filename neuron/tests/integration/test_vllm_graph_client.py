@@ -375,3 +375,19 @@ def test_two_clients_share_one_inflight_slot(make_client: Any) -> None:
     assert not a.is_alive() and not b.is_alive()
     assert second_entered.is_set()
     assert not errors
+
+
+def test_dense_legacy_hint_keeps_schema_enforcement(make_client: Any) -> None:
+    requests = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(json.loads(request.content))
+        return httpx.Response(200, json=completion())
+
+    client = make_client(handler)
+    assert client.get_json_response("synthetic", SCHEMA, structured_output=False)
+    assert requests[0]["response_format"]["type"] == "json_schema"
+    assert requests[0]["response_format"]["json_schema"]["schema"] == json.loads(SCHEMA)
+    invalid = make_client(lambda _: httpx.Response(200, json=completion('{"wrong":"value"}')))
+    with pytest.raises(InferenceRejected):
+        invalid.get_json_response("synthetic", SCHEMA, structured_output=False)

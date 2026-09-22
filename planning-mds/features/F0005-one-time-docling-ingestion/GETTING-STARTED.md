@@ -96,3 +96,19 @@ CI's `runtime-stack` job applies the engine migrations to its disposable Postgre
 It also runs five worker/importer process-exit cases: after bundle publication, after extraction-result publication, after job completion, midway through result import, and after import commits. These use real Graph stages, authorization, artifact registration, and result import, with synthetic native content and recorded model responses. Recovery must retain one conversion, one model call, one assertion/evidence/review set, and one acknowledged completion. Each test owns an isolated schema populated from the application metadata; migration execution is a separate CI step.
 
 To run these five cases offline with SQLite, omit the database variable and use `-k sqlite` instead. A configured but unreachable PostgreSQL database is a failure, never a skip. These cases do not establish live provider behavior, machine/database/storage failure recovery, retention acceptance, or extraction quality.
+
+## Synthetic development comparison
+
+The current scope uses synthetic development fixtures. No model endpoint or credential is required:
+
+```bash
+LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+  neuron/.venv/bin/python neuron/benchmarks/docling_graph_comparison.py \
+  --output /tmp/nebula-synthetic-comparison.json
+```
+
+Choose a new output path on each run. The runner creates temporary verified bundles and executes the baseline, Graph direct, and Graph dense using HTTP MockTransport recordings. It forbids conversion during interpretation and checks that saved native JSON is unchanged. Nine runs cover unique, repeated, and multi-region values; the aggregate field is deliberately absent to exercise abstention. The command fails if dense falls back to direct, loses its chunking, or fails the development expectations.
+
+The [recorded report](synthetic-comparison.json) contains per-case schema/value/abstention/evidence checks, model phases and call counts, chunk counts, token estimates, local elapsed time, and review-candidate counts. Token estimates use cl100k_base and elapsed time excludes inference. Recorded responses dictate the values: these measurements demonstrate orchestration and grounding behavior, not accuracy, provider cost, or live latency. Direct Graph evidence on these longer fixtures remains unresolved where upstream supplies no usable item references. Dense preserves the references and passes the evidence expectations.
+
+Live corpus qualification and production signoff are later release work. They do not block this synthetic development scope or change the opt-in activation boundary.

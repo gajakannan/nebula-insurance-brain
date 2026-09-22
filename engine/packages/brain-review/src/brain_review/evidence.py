@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+from dataclasses import replace
 from typing import Literal
 from uuid import UUID
 
@@ -57,3 +59,30 @@ def evidence_binding_to_locator(
         unresolved_reason=unresolved_reason,
         selector=selector,
     )
+
+
+def combine_evidence_locators(locators: Sequence[EvidenceLocator]) -> EvidenceLocator:
+    """Keep all regions for one native item, without overstating mixed evidence."""
+    if not locators:
+        raise ValueError("at least one evidence locator is required")
+    first = locators[0]
+    if any(locator.source != first.source for locator in locators):
+        raise ValueError("evidence locators span different artifacts")
+    if any(locator.precision == "unresolved" for locator in locators):
+        return replace(
+            first,
+            precision="unresolved",
+            selector=(),
+            unresolved_reason="property_not_uniquely_located",
+        )
+    if any(
+        (locator.part, locator.precision) != (first.part, first.precision) for locator in locators
+    ):
+        return replace(
+            first,
+            precision="unresolved",
+            part=None,
+            selector=(),
+            unresolved_reason="mixed_evidence_locators",
+        )
+    return replace(first, selector=tuple(s for locator in locators for s in locator.selector))

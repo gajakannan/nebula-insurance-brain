@@ -199,8 +199,9 @@ class VllmGraphClient:
         response_schema_name: str = "extraction_result",
     ) -> dict[str, Any] | list[Any]:
         self._check_active()
-        if not structured_output:
-            raise InferenceRejected("structured_output_required")
+        # Graph 1.9.1 requests its legacy JSON path for dense skeleton/fill calls.
+        # Nebula still sends the supplied schema as response_format and validates
+        # the result below. The upstream hint cannot disable our schema boundary.
         if response_top_level not in ("object", "array"):
             raise InferenceRejected("invalid_response_type")
         if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", response_schema_name):

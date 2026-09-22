@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from typing import Literal
 from uuid import UUID, uuid4
 
+import httpx
 import tiktoken
 from brain_content.store import ContentArtifactStore
 from brain_interpretation.counters import CounterAccumulator
@@ -73,14 +74,18 @@ class OpenAICompatibleExtractionAdapter:
         model_id: str,
         context_limit: int = 4096,
         max_output_tokens: int = 512,
+        http_client: httpx.Client | None = None,
     ) -> None:
-        self._client = OpenAI(base_url=base_url, api_key=api_key)
+        self._client = OpenAI(base_url=base_url, api_key=api_key, http_client=http_client)
         self._base_url = base_url
         self._model_id = model_id
         self._context_limit = context_limit
         self._max_output_tokens = max_output_tokens
         self._guard = ContextGuard(context_limit, reserve_for_output=max_output_tokens)
         self._encoding = tiktoken.get_encoding("cl100k_base")
+
+    def close(self) -> None:
+        self._client.close()
 
     async def interpret(
         self, *, store: ContentArtifactStore, artifact_id: UUID, profile: ExtractionProfile

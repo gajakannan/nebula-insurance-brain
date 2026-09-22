@@ -370,7 +370,10 @@ def test_job_authorization_reloads_revocations_and_audits_denials(tmp_path: Path
     engine.dispose()
 
 
-def test_outbox_import_is_atomic_idempotent_and_never_commits_facts(tmp_path: Path) -> None:
+@pytest.mark.parametrize("multiple_regions", [False, True])
+def test_outbox_import_is_atomic_idempotent_and_never_commits_facts(
+    tmp_path: Path, multiple_regions: bool
+) -> None:
     from datetime import UTC, datetime
 
     from brain_contracts.result import (
@@ -421,7 +424,19 @@ def test_outbox_import_is_atomic_idempotent_and_never_commits_facts(tmp_path: Pa
         value={"value": "$7,000"},
         model_confidence=None,
         interpretation_basis="AMBIGUOUS",
-        evidence=[EvidenceBinding(artifact_id=manifest.artifact_id, precision="unresolved")],
+        evidence=[
+            EvidenceBinding(
+                artifact_id=manifest.artifact_id,
+                precision="span",
+                block_id="text-0",
+                page=page,
+                char_start=start,
+                char_end=end,
+            )
+            for page, start, end in [(1, 0, 3), (2, 3, 6)]
+        ]
+        if multiple_regions
+        else [EvidenceBinding(artifact_id=manifest.artifact_id, precision="unresolved")],
     )
     result = InterpretationResult(
         run_id=run_id,
@@ -487,10 +502,19 @@ def test_outbox_import_is_atomic_idempotent_and_never_commits_facts(tmp_path: Pa
     assert not importer.run_one()
     with Session(engine) as session:
         assert session.scalar(select(func.count()).select_from(Assertion)) == 1
-        assert session.scalar(select(func.count()).select_from(AssertionEvidence)) == 1
+        assert session.scalar(select(func.count()).select_from(AssertionEvidence)) == (
+            2 if multiple_regions else 1
+        )
         item = session.scalars(select(ReviewItemRow)).one()
-        assert item.type == "PROVENANCE_CORRECTION" and item.status == "open"
-        assert item.evidence and item.evidence["precision"] == "unresolved"
+        assert item.status == "open"
+        assert item.evidence
+        if multiple_regions:
+            assert item.type == "EXTRACTION_CORRECTION"
+            assert item.evidence["precision"] == "exact-span"
+            assert [s["page"] for s in item.evidence["selector"]] == [1, 2]
+        else:
+            assert item.type == "PROVENANCE_CORRECTION"
+            assert item.evidence["precision"] == "unresolved"
         assert session.scalar(select(outbox.c.delivered_at)) is not None
     event.remove(engine, "before_cursor_execute", fail_review)
     engine.dispose()
@@ -609,3 +633,42 @@ os._exit(27)  # no finally, no completion acknowledgement, no clean worker shutd
         assert conn.scalar(select(jobs.c.state)) == "complete"
         assert len(conn.execute(select(outbox)).all()) == 1
     engine.dispose()
+
+
+def test_value_crossing_regions_keeps_separate_complete_selectors() -> None:
+    doc = document()
+    value = "$1,000,000"
+    start = doc.texts[0].text.index(value)
+    split = start + 4
+    original = doc.texts[0].prov[0]
+    doc.add_page(page_no=2, size=Size(width=600, height=800))
+    doc.texts[0].prov = [
+        original.model_copy(update={"charspan": (0, split)}),
+        original.model_copy(update={"page_no": 2, "charspan": (split, len(doc.texts[0].text))}),
+    ]
+    ledger = {"version": 2, "chunks": {"0": {"doc_item_refs": ["#/texts/0"]}}}
+    bindings = ground_value(doc, ledger, uuid4(), value)
+    assert [(e.page, e.char_start, e.char_end) for e in bindings] == [
+        (1, start, split),
+        (2, split, start + len(value)),
+    ]
+    assert all(e.precision == "span" and e.block_id == "text-0" for e in bindings)
+    assert "".join(doc.texts[0].text[e.char_start : e.char_end] for e in bindings) == value
+    # One unsupported character invalidates the entire candidate locator set.
+    doc.texts[0].prov[1].charspan = (split + 1, len(doc.texts[0].text))
+    assert ground_value(doc, ledger, uuid4(), value)[0].precision == "unresolved"
+    # Missing page geometry also leaves the full value unresolved.
+    doc.texts[0].prov[1].charspan = (split, len(doc.texts[0].text))
+    del doc.pages[2]
+    assert ground_value(doc, ledger, uuid4(), value)[0].precision == "unresolved"
+
+
+def test_relationship_object_is_not_grounded_by_a_node_anchor() -> None:
+    doc = document()
+    ledger = {
+        "version": 2,
+        "chunks": {"0": {"doc_item_refs": ["#/texts/0"]}},
+        "nodes": {"policy": {"anchors": [{"chunk_id": 0, "span": [0, 35]}]}},
+    }
+    relationship = {"subject": "Policy", "type": "HAS_LIMIT", "object": "$1,000,000"}
+    assert ground_value(doc, ledger, uuid4(), relationship)[0].precision == "unresolved"

@@ -1,11 +1,11 @@
 version: 0
 summary:
-  total_symbols: 258
+  total_symbols: 260
   by_language:
     python:
       files: 49
-      parsed: 8
-      cached: 41
+      parsed: 6
+      cached: 43
   disambiguated_ids: 0
   compilation_roots_by_language:
     python:
@@ -1154,18 +1154,30 @@ symbols:
   callers:
   - symbol:capability-evidence-review-round-trip:review-decision-service.submit
   callees: []
+- id: symbol:capability-evidence-review-round-trip:evidence.combine-evidence-locators
+  node: capability:evidence-review-round-trip
+  kind: function
+  name: combine_evidence_locators
+  file: engine/packages/brain-review/src/brain_review/evidence.py
+  line: 64
+  signature: 'def combine_evidence_locators(locators: Sequence[EvidenceLocator])'
+  visibility: public
+  language: python
+  end_line: 88
+  callers: []
+  callees: []
 - id: symbol:capability-evidence-review-round-trip:evidence.evidence-binding-to-locator
   node: capability:evidence-review-round-trip
   kind: function
   name: evidence_binding_to_locator
   file: engine/packages/brain-review/src/brain_review/evidence.py
-  line: 24
+  line: 26
   signature: 'def evidence_binding_to_locator(*, artifact_id: UUID, precision: InterpretationPrecision,
     block_id: str | None=None, page: int | None=None, bbox: dict | None=None, char_start:
     int | None=None, char_end: int | None=None, unresolved_reason: str | None=None)'
   visibility: public
   language: python
-  end_line: 59
+  end_line: 61
   callers: []
   callees: []
 - id: symbol:capability-evidence-review-round-trip:items.review-item-sink
@@ -1381,29 +1393,42 @@ symbols:
   kind: method
   name: _bind_field
   file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
-  line: 205
+  line: 210
   signature: 'def _bind_field(self, field_name: str, value: object, blocks: list[Block],
     page_heights: dict[int, float], artifact_id: UUID)'
   visibility: private
   language: python
   container: OpenAICompatibleExtractionAdapter
-  end_line: 259
+  end_line: 264
   callers:
   - symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.interpret
   callees:
   - symbol:capability-local-inference-service:openai-compatible-adapter.to-top-left-bbox
+- id: symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.close
+  node: capability:local-inference-service
+  kind: method
+  name: close
+  file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+  line: 87
+  signature: def close(self)
+  visibility: public
+  language: python
+  container: OpenAICompatibleExtractionAdapter
+  end_line: 88
+  callers: []
+  callees: []
 - id: symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.init
   node: capability:local-inference-service
   kind: method
   name: __init__
   file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
-  line: 68
+  line: 69
   signature: 'def __init__(self, *, base_url: str, api_key: str, model_id: str, context_limit:
-    int=4096, max_output_tokens: int=512)'
+    int=4096, max_output_tokens: int=512, http_client: httpx.Client | None=None)'
   visibility: private
   language: python
   container: OpenAICompatibleExtractionAdapter
-  end_line: 83
+  end_line: 85
   callers: []
   callees: []
 - id: symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.interpret
@@ -1411,13 +1436,13 @@ symbols:
   kind: method
   name: interpret
   file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
-  line: 85
+  line: 90
   signature: 'async def interpret(self, *, store: ContentArtifactStore, artifact_id:
     UUID, profile: ExtractionProfile)'
   visibility: public
   language: python
   container: OpenAICompatibleExtractionAdapter
-  end_line: 203
+  end_line: 208
   callers: []
   callees:
   - symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.bind-field
@@ -1427,11 +1452,11 @@ symbols:
   kind: class
   name: OpenAICompatibleExtractionAdapter
   file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
-  line: 63
+  line: 64
   signature: class OpenAICompatibleExtractionAdapter
   visibility: public
   language: python
-  end_line: 259
+  end_line: 264
   callers: []
   callees: []
 - id: symbol:capability-local-inference-service:openai-compatible-adapter.strict-json-schema
@@ -1439,11 +1464,11 @@ symbols:
   kind: function
   name: _strict_json_schema
   file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
-  line: 39
+  line: 40
   signature: 'def _strict_json_schema(template: type[BaseModel])'
   visibility: private
   language: python
-  end_line: 50
+  end_line: 51
   callers:
   - symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.interpret
   callees: []
@@ -1452,12 +1477,12 @@ symbols:
   kind: function
   name: _to_top_left_bbox
   file: neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
-  line: 53
+  line: 54
   signature: 'def _to_top_left_bbox(bbox: DoclingBoundingBox | None, page_height:
     float)'
   visibility: private
   language: python
-  end_line: 60
+  end_line: 61
   callers:
   - symbol:capability-local-inference-service:open-ai-compatible-extraction-adapter.bind-field
   callees: []
@@ -1880,7 +1905,7 @@ symbols:
   signature: class DocumentResultImporter
   visibility: public
   language: python
-  end_line: 343
+  end_line: 344
   callers:
   - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees: []
@@ -2170,7 +2195,7 @@ symbols:
   visibility: public
   language: python
   container: DocumentResultImporter
-  end_line: 343
+  end_line: 344
   callers:
   - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees:
@@ -3226,7 +3251,7 @@ symbols:
     None, artifact_id: UUID, value: Any)'
   visibility: public
   language: python
-  end_line: 83
+  end_line: 94
   callers:
   - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
   callees:
@@ -3638,7 +3663,7 @@ symbols:
   visibility: public
   language: python
   container: VllmGraphClient
-  end_line: 317
+  end_line: 318
   callers:
   - symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response-stream
   callees:
@@ -3651,14 +3676,14 @@ symbols:
   kind: method
   name: get_json_response_stream
   file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
-  line: 319
+  line: 320
   signature: 'def get_json_response_stream(self, prompt: str | Mapping[str, str],
     schema_json: str, structured_output: bool=True, response_top_level: Literal[''object'',
     ''array'']=''object'', response_schema_name: str=''extraction_result'')'
   visibility: public
   language: python
   container: VllmGraphClient
-  end_line: 330
+  end_line: 331
   callers: []
   callees:
   - symbol:capability-semantic-interpretation-run:vllm-graph-client.get-json-response
@@ -3742,6 +3767,6 @@ symbols:
   signature: class VllmGraphClient
   visibility: public
   language: python
-  end_line: 330
+  end_line: 331
   callers: []
   callees: []

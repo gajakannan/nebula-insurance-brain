@@ -6,7 +6,7 @@
 **Feature Name:** One-time document ingestion
 **Priority:** High
 **Phase:** v0.1A
-**Status:** Candidate implementation in progress — direction authorized; formal acceptance and activation remain open. See [STATUS](STATUS.md) for observed proof and outstanding gates.
+**Status:** Synthetic development scope complete; production qualification and activation deferred. The feature remains open for those release gates. See [STATUS](STATUS.md) for the scope boundary and observed proof.
 
 ## Feature Statement
 

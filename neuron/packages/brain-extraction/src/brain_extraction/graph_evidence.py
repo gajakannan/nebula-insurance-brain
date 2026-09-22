@@ -33,7 +33,9 @@ def ground_value(
             end = start + len(value)
             bindings = []
             for prov in item.prov:
-                if not prov.charspan[0] <= start < end <= prov.charspan[1]:
+                region_start = max(start, prov.charspan[0])
+                region_end = min(end, prov.charspan[1])
+                if region_start >= region_end:
                     continue
                 page = document.pages.get(prov.page_no)
                 if page is None:
@@ -45,13 +47,22 @@ def ground_value(
                         block_id=f"text-{index}",
                         page=prov.page_no,
                         bbox=BoundingBox(page=prov.page_no, x0=box.l, y0=box.t, x1=box.r, y1=box.b),
-                        char_start=start,
-                        char_end=end,
+                        char_start=region_start,
+                        char_end=region_end,
                         precision="span",
                     )
                 )
+            # A value may cross region/page boundaries within one native text item.
+            # Every character must be covered; partial geometry cannot imply a
+            # fully grounded value. Preserve individual selectors, never a union box.
+            covered_until = start
+            for binding in sorted(bindings, key=lambda b: b.char_start or 0):
+                assert binding.char_start is not None and binding.char_end is not None
+                if binding.char_start > covered_until:
+                    break
+                covered_until = max(covered_until, binding.char_end)
             # An unlocatable second occurrence still makes the value ambiguous.
-            hits.append(bindings)
+            hits.append(bindings if covered_until == end else [])
             start = item.text.find(value, start + 1)
     for index, table in enumerate(document.tables):
         if table.self_ref not in refs:
