@@ -28,7 +28,7 @@ Open this repository directly for Git/source control. The parent `nebula/` is a 
 | --- | --- | --- |
 | `planning-mds/` | Blueprint, features, architecture, ADRs, kg-source, evidence | product-manager, architect |
 | `engine/` | Python backend: FastAPI API, worker, semantic kernel packages, Alembic migrations | backend-developer |
-| `neuron/` | Python AI runtime: Docling-Graph document pipeline (planned, ADR-0060), interpretation, conversation, learning, MCP tools | ai-engineer |
+| `neuron/` | Python AI runtime: opt-in Docling-Graph document pipeline candidate (ADR-0060), interpretation, conversation, learning, MCP tools | ai-engineer |
 | `experience/` | React and TypeScript web app, including the Nebula Review Panel | frontend-developer |
 | `ontology/`, `profiles/`, `schemas/`, `knowledge-packs/` | Authored semantic assets compiled into the runtime | architect |
 | `golden-corpus/` | Version-controlled evaluation fixtures | quality-engineer |
@@ -54,4 +54,4 @@ Read [EX-GL-001: from policy evidence to guideline assessment](planning-mds/exam
 
 ## Document pipeline direction
 
-[ADR-0060](planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph to coordinate conversion through Docling and extraction over saved native content. F0005 must prove the pinned integration and durable parse checkpoint before activation; the current F0001 runtime still uses Docling and a direct vLLM adapter.
+[ADR-0060](planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph to coordinate conversion through Docling and extraction over saved native content. F0005's pinned integration, durable parse checkpoint, PostgreSQL recovery, and recorded-response extraction/evidence comparison have completed the synthetic development scope. Production qualification and acceptance remain pending; the candidate is opt-in and the F0001 direct-vLLM implementation remains the historical baseline.

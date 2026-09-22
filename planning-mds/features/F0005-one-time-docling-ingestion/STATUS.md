@@ -1,7 +1,7 @@
 # F0005 — One-time document ingestion — Status
 
 **Overall Status:** Synthetic development scope complete. The opt-in candidate and its development proof are implemented; production qualification and activation are future work. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).
-**Last Updated:** 2026-09-21
+**Last Updated:** 2026-09-22
 
 ## Current scope: early development
 
@@ -47,15 +47,15 @@ The candidate has been merged to main from `feature/docling-graph-delivery`, bas
 | Recommendation | Planning state | Delivery / proof still required |
 |---|---|---|
 | New orchestration ADR | ADR-0060 Proposed; acceptance gates explicit | Complete all four proof gates and obtain actual reviewer verdicts |
-| Existing ADR invariants | Dated links preserve ADR-0003/0004/0040/0055/0058/0059 and F0001 results | Demonstrate compatibility with those contracts |
+| Existing ADR invariants | Dated links preserve ADR-0003/0004/0040/0055/0058/0059 and F0001 results; bounded artifact/reuse/evidence tests pass | Complete production qualification against those contracts |
 | Consistent blueprints, C4, article | Proposed target distinguished from current runtime | Update actual runtime descriptions after activation |
 | Artifact and run identity | F0004/F0016 specify separate parser/pipeline/recipe/profile metadata and run-owned provenance | Shared result DTO and candidate persistence implemented; full F0016 lifecycle remains planned |
-| F0004/F0005 feature planning | Neutral F0005 title; four stories; F0004 dependency explicit | S0001–S0004 execution |
+| F0004/F0005 feature planning | Neutral F0005 title; four stories; F0004 dependency explicit; synthetic development scope delivered | Remaining production qualification and signoffs for S0001–S0004 |
 | Profiles and interpretation | F0014/F0015/F0016 scope updated | Compiler and production run service implementation |
 | Targeted evolution | F0032 now owns affected-content-only scheduling proof | Demonstrate bounded input, original refs, zero reparse |
-| Review and release | F0022/F0026 evidence and failure/quality cases specified | Panel mapping and measured corpus results |
+| Review and release | F0022/F0026 cases specified; synthetic multi-region evidence survives import and Review Panel decisions | Live property/relationship evidence qualification and measured corpus results |
 | Runtime, dependency lock, misleading adapter name | Candidate adapter, shared ParseResult, explicit direct baseline, pyproject/uv.lock pin, package/schema/input metadata implemented and tested | Candidate composition, metadata, scalar evidence and durable services implemented; full proof and activation pending |
-| Full-document versus chunked extraction | F0001 one-call baseline retained; candidate tests use direct mode | Comparative schema/quality/cost/latency/review results |
+| Full-document versus chunked extraction | Nine recorded-response runs compare the direct baseline, Graph direct, and Graph dense; schema, abstention, evidence, and zero-conversion expectations checked | Live quality/cost/latency/review measurements; synthetic token estimates and timing are not serving measurements |
 | Local inference and operations | Bounded SDK client implemented; 23 offline tests cover budgets, cancellation, shared concurrency, errors, redacted diagnostics, and cached serving tokenizer | Live serving parity, deployment replica limits, credential/log and retention review, and operational qualification |
 | Temporal and archive | v0.1 jobs / v0.3 Temporal retained; F0001 unchanged | No architecture replacement or reopened archive required |
 
