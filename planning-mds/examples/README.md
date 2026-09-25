@@ -21,6 +21,9 @@ Documentation/development examples remain outside the frozen evaluation holdout.
 | Valid time, recorded time, correction, retraction | [Temporal walkthrough](neurosymbolic-gl/README.md#temporal-walkthrough), CASE-11–15 | F0008/F0010/F0019/F0025/F0065 S0004, v0.1 |
 | Derivation, rule authority, assessment versus approval | [Assessment](neurosymbolic-gl/README.md#assessment), CASE-16/17 | F0009/F0018/F0065 S0001/S0003, v0.1 |
 | Unknown, explicit negative, conflict | CASE-04/07/08 | F0006/F0018/F0065 S0002, v0.1 |
+| Structural tenancy, tenant entity identity and explicit KB access | [EX-AUTHX-001–003](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md) | F0002 S0001/S0003; ADR-0061; AuthX v1 schema |
+| Verified principal, membership and current resource scope | [EX-AUTHX-004–011](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md) | F0002 S0002–S0004; glossary F0002 refinements; AuthX v1 schema |
+| Resource envelope, delegation and durable decision/authentication events | [EX-AUTHX-012–018](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md), [structured shapes](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/contract-examples.json) | F0002 S0004–S0006; ADR-0062; synthetic planning examples, no runtime proof |
 | Derived-result and evidence authorization | CASE-18/19 | F0002/F0018/F0065 S0005/F0026, v0.1 |
 | Evidence anchoring, selector shapes, declared precision, unresolved evidence | [Review Panel prototype](nebula-review-panel-live-files.html) | F0001 S0004/F0022, v0.1B |
 | Vector similarity versus accepted facts | [EX-FUTURE-001](future-semantics.md#retrieval-projection) | F0033/F0035, v0.2A |

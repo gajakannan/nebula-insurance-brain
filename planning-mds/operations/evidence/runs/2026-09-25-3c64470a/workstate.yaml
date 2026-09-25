@@ -1,0 +1,57 @@
+session:
+  started: '2026-09-25T04:03:54+00:00'
+  role: product-manager
+  scope: F0002
+  run_id: 2026-09-25-3c64470a
+  mode: null
+  scope_label: F0002
+  scope_id: feature:F0002
+decisions:
+- decision_id: 0
+  timestamp: '2026-09-25T04:05:26+00:00'
+  summary: User selected tenant-scoped entity identity with explicit KB access; cross-KB references never grant access.
+  topic: identity-scope
+  supersedes: []
+  rationale: Explicit user response during F0002 G1 clarification.
+- decision_id: 1
+  timestamp: '2026-09-25T04:05:26+00:00'
+  summary: User selected reuse of TenantMember, Reviewer, and ServicePrincipal pilot roles; new business-role grants remain
+    with owning features.
+  topic: pilot-roles
+  supersedes: []
+  rationale: Explicit user response during F0002 G1 clarification.
+- decision_id: 2
+  timestamp: '2026-09-25T04:13:45+00:00'
+  summary: 'G1/G2 passed; G3 paused at approve-phase-a. Six stories and 18 examples drafted. Next: receive explicit Phase
+    A token, record/attest G3, then architect Phase B.'
+  topic: phase-position
+  supersedes: []
+  rationale: run-gate journal is paused at mandatory manual checkpoint; no Phase A approval token received.
+- decision_id: 3
+  timestamp: '2026-09-25T04:47:54+00:00'
+  summary: 'Architect Phase B complete and validated: G3/G4 passed; all seven G5 commands passed; G5 pending explicit approve-phase-b.
+    No runtime changes or feature evidence package.'
+  topic: phase-position
+  supersedes: []
+  rationale: Resume from the G5 manual checkpoint only; preserve run 2026-09-25-3c64470a. ADR-0061/0062 remain Proposed pending
+    proof.
+- decision_id: 4
+  timestamp: '2026-09-25T04:48:25+00:00'
+  summary: G1-G4 completed; Phase A approved. All automated G5 exit checks passed; next action is explicit user approve-phase-b,
+    then attest/complete G5 and close the same base run. Runtime stories remain Not Started.
+  topic: phase-position
+  supersedes:
+  - 2
+  - 3
+  rationale: Supersedes stale Phase A wait state and records the final Phase B review position.
+- decision_id: 5
+  timestamp: '2026-09-25T11:47:59+00:00'
+  summary: 'Plan A+B complete: explicit user tokens approve-phase-a and approve-phase-b attested; G1-G5 completed; base-run
+    manifest approved. F0002 remains Planned, six stories Not Started. Next action is separate feature implementation.'
+  topic: phase-position
+  supersedes:
+  - 4
+  rationale: User explicitly approved Phase B; ordered exit checks passed after final metadata/KG synchronization; G5 completed.
+files_touched: []
+open_questions: []
+escalations: []

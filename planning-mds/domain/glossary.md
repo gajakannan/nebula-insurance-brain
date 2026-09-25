@@ -243,3 +243,31 @@ These definitions accompany the [worked example](../examples/neurosymbolic-gl/RE
 | Hypothetical scenario | A base snapshot plus explicit assumption overrides with isolated results | EX-FUTURE-004: an assumed higher limit does not overwrite the policy fact | F0053, v0.3 |
 
 Existing Assertion, FactSlot, Canonical Fact Version, Derivation, and Review Decision definitions are illustrated by the source-to-fact and temporal sections of EX-GL-001. Every changed or new concept must link a worked/boundary example and owning story/contract before its plan is considered ready.
+
+## F0002 identity and authorization refinements (proposed design)
+
+These definitions refine the existing Tenant/Workspace/Knowledge Base/Principal terms for the approved F0002 requirements. Runtime proof and Phase B approval remain pending. Contract: [AuthX v1 schema](../schemas/authx-kernel.schema.json), [assembly plan](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md); worked and boundary examples: [EX-AUTHX](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md).
+
+### Tenant entity identity
+A stable entity identity within one tenant, which may have explicit associations to several KBs of that tenant. An association is not a membership or access grant. F0002-S0001; EX-AUTHX-002/003; ADR-0061. Distinct from the globally stable verified principal identity.
+
+### Membership
+A current trusted principal-to-tenant/KB association carrying a role, validity/revocation, revision and complete resource restriction slice. Matching dimensions from unrelated grants cannot be combined into broader authority. F0002-S0003; EX-AUTHX-007–009.
+
+### Resource scope
+The actual permitted tenant/KB and broker/account/policy resource population derived from trusted grants and authoritative resource metadata. Request filters only intersect this authority. F0002-S0003/S0004; EX-AUTHX-007/010/011.
+
+### Resource envelope
+The server-hydrated ownership, parent chain, classification/source requirements, evidence dependencies and revisions for a resource. It is not a public request DTO. F0002-S0004; EX-AUTHX-010–012.
+
+### Delegation
+An explicit binding between a verified executor and acting principal, with a finite action/resource ceiling, expiry and revocation. Effective permission is the intersection of current acting authority and that ceiling; no onward delegation in v1. F0002-S0005; EX-AUTHX-014–016.
+
+### Authorization context
+A current trusted carrier of verified identities, complete grant slices, optional delegation, policy release and trace; business query dates are separate from enforcement time. F0002-S0002/S0003/S0005; EX-AUTHX-004/008/014.
+
+### Authorization decision
+An append-only record of permission evaluation under exact current revisions; allowed does not mean a business mutation succeeded. A durable outcome and decision reference distinguish success, denial and failure. F0002-S0006; EX-AUTHX-017/018.
+
+### Authentication failure event
+A durable sanitized record of rejected credentials without looking up protected data or inventing a principal. Invalid tokens never appear in its payload. F0002-S0002/S0006; EX-AUTHX-005.
