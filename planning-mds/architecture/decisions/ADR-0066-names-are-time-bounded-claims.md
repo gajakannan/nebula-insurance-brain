@@ -44,6 +44,16 @@ Batch model verdicts on similar-looking names produced confident wrong merges.
 - **The display name.** An entity's display name is selected from its current accepted name facts. It is not a separate authority.
 - **`entity_alias`.** A rebuildable search projection over name facts.
 
+### 1a. Names are knowledge-base-owned content
+
+Under ADR-0061, entity identity is tenant-scoped with explicit KB associations, while semantic content stays KB-owned.
+
+- **Name facts are semantic content.** Each is owned by the knowledge base of the evidence it was admitted from, like any other assertion or canonical fact.
+- **The `entity_alias` search projection is built per knowledge base,** and is filtered by current authorization like every other read (ADR-0053).
+- **No cross-KB leakage.** A name known only in KB A is never displayed, searched, or used for resolution in KB B, even though the tenant entity identity is shared.
+- **Resolution uses only names the resolving KB can see.** An entity's display name in a KB is selected from that KB's name facts only.
+- **Shared identity is not shared vocabulary.** A cross-KB association never copies names between knowledge bases.
+
 ### 2. A rename keeps the entity
 
 An endorsement that changes the named insured does not create a new entity. It asserts a new legal name valid from the endorsement's effective date (ADR-0064), and the prior legal name ends there. "What was the named insured on March 3?" is an ordinary valid-time query.
@@ -73,6 +83,7 @@ Merges and reverts (section 53) move name facts with every other fact. A read at
 - **Two entities with the same legal name and different FEINs** stay apart. A DBA shared with another entity creates a review pair.
 - **An abbreviation arriving before the full name,** and the reverse order, resolve to the same outcome. Measure pairwise precision and recall in both arrival orders and report the difference.
 - **A name absent from its quote,** or claimed by another entity in the same document, is dropped with its reason (ADR-0065).
+- **Cross-KB negative case:** a trade name admitted only in KB A for a tenant entity associated with KBs A and B does not appear in KB B's entity view, alias search, or resolution candidates. A principal with only KB B access cannot infer it.
 
 ## References
 

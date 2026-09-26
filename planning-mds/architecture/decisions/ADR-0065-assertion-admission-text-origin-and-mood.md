@@ -17,7 +17,7 @@
 ADR-0058 defines how evidence resolves for rendering, and section 108.2 requires declared precision. Neither says what the Brain refuses when a model returns a claim. Three gaps remain.
 
 1. **Nothing verifies model evidence.** A model can return a quote that is not in the block, a name that is not in its quote, or offsets that point elsewhere. If the pipeline trusts the offsets, the review panel highlights the wrong region. If it drops the item without a record, a run reported as complete hides a gap. That conflicts with section 107.4's `NOT_PROCESSED` versus `NOT_FOUND`.
-2. **Nothing records how a block's words were obtained.** A block's words may come from a native text layer, OCR, audio transcription, or a model's description of a figure. Docling produces all four. A chart description that misreads a figure should not be able to supersede a correct limit read from the declarations page.
+2. **Nothing records how a block's words were obtained.** A block's words may come from a native text layer, OCR, audio transcription, or a model's description of a figure. Docling produces all four. A chart description that misreads a figure must not be able to supersede a correct limit read from the declarations page, and nothing prevents it today.
 3. **Nothing marks mood.** Insurance text is full of claims that are not claims about how things are:
    - "Binding is subject to receipt of a signed application."
    - "The insured must maintain automatic sprinklers."

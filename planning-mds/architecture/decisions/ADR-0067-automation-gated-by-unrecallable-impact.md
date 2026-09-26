@@ -14,7 +14,7 @@
 
 ## Context
 
-Section 64 lists what the Execution Gate should consult, and section 53 says merges are reversible. Neither addresses what Utopia found in production use.
+Section 64 lists what the Execution Gate is meant to consult, and section 53 says merges are reversible. Neither addresses what Utopia found in production use.
 
 **Undo restores the graph, not what the graph was read into.** Suppose an automated merge of "Acme" and "Acme Corp" is reverted on Monday. Meanwhile it had already:
 
@@ -53,6 +53,14 @@ Before applying such a change, the service computes its impact. Any one of the f
 | `EXPORTED` | An affected row has left the Brain through an export or an external projection; opt-in per knowledge base |
 
 The hold reason is recorded as `IMPACT_HOLD:<kind> <detail>`, for example `IMPACT_HOLD:DERIVED 3 assessments`. The UI presents it as a reason, not as doubt about the verdict.
+
+**The recorded reason can reveal restricted content.** The impact computation runs with system authority, so it sees derived results, answers, and decisions the reviewer may not be allowed to see. A count or a kind can reveal that restricted content exists. Master blueprint §107.4, ADR-0042, and ADR-0053 forbid that. So:
+
+- **The full detail** is stored in the automated-decision row and audit record, which follow the authorization of the underlying resources.
+- **What a reviewer sees** is re-evaluated against that reviewer's current authorization at display time. The detail shows only impacts the reviewer may read.
+- **When any contributing impact is not visible to the reviewer,** the reason shows only the generic `IMPACT_HOLD` ("held for a person; the change would affect content outside this view"), with no kind, count, or identifier. The hold still applies.
+- **A reviewer without authority** over every affected resource cannot approve the held change. The item routes to a reviewer who has it (ADR-0044, ADR-0052).
+- **Holds are computed the same way** whether or not the eventual reviewer can see the impacts, so whether a change is held reveals nothing either.
 
 Decisions that only keep things apart (keep separate, keep both) are not gated, because the next decision undoes them and nothing outside the Brain is told.
 
@@ -94,6 +102,7 @@ Every automation type is **off by default** per knowledge base. It is enabled on
 ## Proof gates before acceptance
 
 - **A confident merge that an F0065 assessment rests on** is held with `IMPACT_HOLD:DERIVED`. The same merge with nothing downstream applies.
+- **A reviewer without access** to the assessment behind a hold sees only the generic `IMPACT_HOLD` reason, with no kind, count, or identifier, and cannot approve the change. A reviewer with access sees the detail. The audit record keeps the full detail under the assessment's authorization.
 - **A merge that would put two legal names on one entity at the same moment** is held with `CONFLICT`. A dated rename succession is not held.
 - **An agent's own decision** never appears as precedent. A person's contrary decision blocks the next automatic verdict on the same pair.
 - **Two reverts within the window** disable the automation and produce the alert and audit event.
