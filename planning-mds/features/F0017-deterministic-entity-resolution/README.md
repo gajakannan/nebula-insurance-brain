@@ -26,3 +26,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
 
 - Treat upstream graph IDs as run-scoped references. Test that local node merges, synthesized parents, and identical text across tenants cannot merge enterprise identities or increase evidence precision.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0066](../../architecture/decisions/ADR-0066-names-are-time-bounded-claims.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Resolve on identifiers first. An exact name match without an identifier creates a review pair and never merges. A name held by another compatible entity creates a shared-name pair. Roles such as "the named insured" point at entities and are not names (ADR-0066).

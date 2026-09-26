@@ -29,3 +29,10 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 - Depends on F0065 for assessment integration; the full F0056 propagation engine is not required.
 
 Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../../examples/neurosymbolic-gl/cases.md), and [F0065](../F0065-grounded-gl-guideline-assessment/README.md). These requirements must be carried into this feature's PRD/stories when planned; runtime and feature status remain Planned.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Prove the endorsement timeline with valid time taken from resolved time mentions, attestation from the endorsement's own date, and recorded time from canonical acceptance. Receipt time never dates the document (ADR-0064, EX-SEM-003).
+- Include a grade-C "as of inception" case and an unknown-end case.

@@ -20,3 +20,9 @@ Read the [worked example](../../examples/neurosymbolic-gl/README.md), [PRD](PRD.
 | [F0065-S0006](F0065-S0006-reproducible-worked-examples.md) | Reproducible worked examples | Not Started |
 
 **Total Stories:** 6
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0068](../../architecture/decisions/ADR-0068-decision-basis-fingerprints.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Assessment records add a `basis_hash` over their exact inputs, rule version, ontology release, and evaluator version. This refines existing lineage and does not change the approved outcomes (ADR-0068).

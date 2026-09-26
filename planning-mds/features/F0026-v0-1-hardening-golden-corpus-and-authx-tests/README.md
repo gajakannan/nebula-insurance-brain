@@ -41,3 +41,11 @@ Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../..
 - Compare the new path with the F0001 baseline on extraction and property/relationship evidence precision, unresolved rate, review burden, context failures, latency, and cost. Keep development cases outside the frozen holdout.
 - Test unauthorized artifact/run-output reads, scoped jobs, cancelled/stale attempts, and duplicate canonical effects. A graph export is never proof of accepted facts.
 - Carry the ADR-0060 proof cases into release qualification: limits/currency/basis/effective dates, table headers and multi-region evidence, partial conversion, invalid extraction, timeouts, secrets redaction, bounded concurrency, and provenance retention. Report the change from one full-document model request per profile to Graph's chunked calls explicitly.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0063](../../architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md), [ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md), [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md), [ADR-0066](../../architecture/decisions/ADR-0066-names-are-time-bounded-claims.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Report the open-statement not-stated and misworded rates with a calibrated judge, the judge's own variance, and run-to-run spread over at least two runs per configuration (ADR-0063).
+- Report time normalization accuracy per shape and grade against thresholds set with named reviewers; proposed starting points are 95% for absolute and 85% for anchored mentions (ADR-0064).
+- Report drop rates by reason and the described-evidence review count (ADR-0065). Report name-resolution precision and recall in both arrival orders (ADR-0066).

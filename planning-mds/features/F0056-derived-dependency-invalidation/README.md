@@ -28,3 +28,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 - Preserve exact input/rule versions and current permission propagation. Historical assessments must not be silently rewritten by the generalized engine.
 
 Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../../examples/neurosymbolic-gl/cases.md), and [F0065](../F0065-grounded-gl-guideline-assessment/README.md). These requirements must be carried into this feature's PRD/stories when planned; runtime and feature status remain Planned.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0068](../../architecture/decisions/ADR-0068-decision-basis-fingerprints.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Find the derived facts and assessments to invalidate by decision-basis fingerprint, never by timestamp comparison (ADR-0068).

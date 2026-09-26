@@ -28,3 +28,10 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 - Compile composed base/LOB profiles into trusted Pydantic templates and explicit pipeline settings while preserving units, qualifiers, ontology mappings, and evidence requirements. Reject unsupported mappings; profile authors cannot select arbitrary Python imports.
 - Version and hash the schema, template, prompt, and pipeline configuration. Exercise both fixed F0005 proof templates and compiler-produced templates against the accepted adapter.
 - Budget schema/prompt/input and output tokens before every model call, including retries, repair, fill, or reconciliation. A strategy change must not silently truncate or widen scope. Measure the dense-limit case recorded in ADR-0040.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0063](../../architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md), [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Template fields remain typed assertions on the template route. Every field that claims span precision passes the admission checks; a field that cannot be located declares coarser precision or `unresolved` (ADR-0065).
+- Never place the ontology in an open-extraction prompt. The compiler serves only the template route (ADR-0063).

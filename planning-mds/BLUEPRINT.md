@@ -205,7 +205,7 @@ first user-facing features, F0021 to F0023.
 
 ### 3.3 Epics & Features
 
-The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065), sequenced per sections 115.3 and 124. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. Story links are appended by the plan action as each feature is planned.
+The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065 and F0066), sequenced per sections 115.3 and 124. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. F0066 adds open-statement extraction and signature alignment in v0.2B under ADR-0063, accepted as direction on 2026-09-25. Story links are appended by the plan action as each feature is planned.
 
 **Completed**
 
@@ -286,6 +286,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0029 — Ontology discovery](features/F0029-ontology-discovery/README.md) - Planned
 - [F0030 — Ontology Workbench](features/F0030-ontology-workbench/README.md) - Planned
 - [F0031 — Document/Extraction Profile Workbench](features/F0031-document-and-extraction-profile-workbench/README.md) - Planned
+- [F0066 — Open-statement extraction + signature alignment](features/F0066-open-statement-extraction-and-signature-alignment/README.md) - Planned (added 2026-09-25, ADR-0063)
 - [F0032 — Knowledge Evolution Engine](features/F0032-knowledge-evolution-engine/README.md) - Planned
 - [F0041 — Learning Plane](features/F0041-learning-plane/README.md) - Planned
 - [F0042 — Knowledge promotion/governance](features/F0042-knowledge-promotion-and-governance/README.md) - Planned
@@ -358,7 +359,7 @@ Performance, availability, scalability, and security targets are proposed gates 
 ### 4.7 Architecture Artifacts
 
 - `architecture/master-blueprint.md` — full baseline
-- `architecture/decisions/` — ADR-0001 to ADR-0060 (Accepted architecture and Proposed contracts; ADR-0060 proposes Docling-Graph, with pinned synthetic development proof complete and production acceptance pending)
+- `architecture/decisions/` — ADR-0001 to ADR-0069 (Accepted architecture and Proposed contracts; ADR-0060 proposes Docling-Graph, with pinned synthetic development proof complete and production acceptance pending; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
@@ -388,6 +389,34 @@ Assembly plan: `features/archive/F0001-repository-and-engineering-foundation/fea
 
 Proposed ADR-0061/0062, AuthX v1 schema and OpenAPI design version 0.2.0 specify compatible migrations and existing-consumer integration. No new runtime or policy grants are delivered. F0002 proves review and canonical commit authorization independently; F0018 owns full review-to-canonical orchestration and F0022 owns review UI. This explicitly reconciles the old master-blueprint §116.1 F0002 wiring shorthand without broadening the approved PRD. Existing C4 deployment topology is unchanged; the feature README adds its ERD and component diagram. ADR-0042/0052/0053 remain Proposed for broader obligations.
 
+### 4.11 Statements, time, and governance amendments (2026-09-25)
+
+The operator reviewed Utopia's decisions made after this repository started (2026-09-05, Utopia commit `b3919ca`) and approved incorporating them.
+
+- **[ADR-0063](architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md), accepted as direction.** Open statements in the source's own words, beside typed assertions. Typed assertions come from template extraction (form-shaped sections) or from per-signature alignment (narrative sections, F0066, v0.2B).
+- **[ADR-0064](architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) to [ADR-0069](architecture/decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md), Proposed.** They cover time interpretation and valid-time precision, assertion admission, text origin and mood, names as time-bounded claims, impact-gated automation with human precedent and a revert fuse, decision basis fingerprints, and external action attempts.
+
+**v0.1 impact** is limited to storage and contracts, because they are expensive to retrofit after F0003, F0006, and F0008 ship:
+
+- F0004 (document date source, text origin);
+- F0006 (assertion kinds, admission, mood);
+- F0007 and F0013 (name FactSlots, temporal kinds);
+- F0008 (precision, unknown ends);
+- F0014 (interpretation route);
+- F0016 (time mentions, drops, basis);
+- F0017 (identifier-first names);
+- F0019, F0022, F0025, F0026.
+
+v0.1 acceptance still runs on the template route. Later features carry the behavioural parts: F0027, F0032, F0043, F0050, F0052, F0056, F0059.
+
+Scope amendments are recorded in each feature README. Master blueprint sections 3, 11, 14, 17, 29, 53, 56, 62, 64, 75, 76, 78, 95, and 99 were revised in place, and the glossary and [examples EX-SEM-001–011](examples/statements-time-and-governance.md) were added.
+
+**Not changed:** F0002's approved plan. Utopia's same-knowledge-base provenance record (0048) matches F0002's composite ownership keys. Its extra safeguards are left as a follow-up for the F0002 implementation run, not an amendment to the approved plan:
+
+- ownership columns made immutable by trigger;
+- triggers for link tables that have no owner column;
+- deferred self-references for restore.
+
 ---
 
 ## 5) Phase C — Implementation Plan (locked order)
@@ -398,7 +427,7 @@ Sequence per master blueprint sections 115.3 and 124; original identifiers F0001
 2. v0.1A — F0002 to F0017: typed domain contracts, durable ingestion, immutable evidence, assertion extraction
 3. v0.1B — F0018 to F0023 establish authorized commits, temporal reads, evidence review, and minimal 360 views; F0065 adds bounded on-demand GL guideline assessment; F0024/F0025 prove real interpretation-to-assessment and temporal reassessment end to end
 4. v0.1C — F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases
-5. v0.2A — F0033 to F0040 and F0044 to F0047; v0.2B — F0027 to F0032 and F0041 to F0043
+5. v0.2A — F0033 to F0040 and F0044 to F0047; v0.2B — F0027 to F0032, F0066 (open-statement alignment, ADR-0063), and F0041 to F0043
 6. v0.3 and later — F0048 to F0063: full process, generalized reasoning, automatic derivation propagation, decision replay, and advanced semantics; F0065 is already in v0.1B
 
 Baseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations even though the full Execution Gate and Decision Ledger come later (section 89).

@@ -69,3 +69,14 @@ F0005 must exercise the real pinned upstream package and local model. F0001's di
 Persist the exact upstream revision/package digest, dependency lock, model configuration, and observed results in the dependency matrix/evidence run. Activation requires the conversion checkpoint and reuse gates in [ADR-0060](../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md).
 
 Additional ADR-0060 acceptance cases: limit amount, currency, basis, effective date, table headers, and multi-region support; invalid extraction after successful conversion; partial-conversion quality/warnings; secrets redaction; bounded concurrency including internal fan-out; and retention/deletion of source-bearing provenance. Compare Graph's chunked path with the current full-document, one-request-per-profile adapter. F0032 must separately prove affected-content-only scheduling; a successful whole-document rerun is insufficient.
+
+## Statements, time, and governance measurements (ADR-0063 to ADR-0069)
+
+- **Measure noise before claiming an improvement.** Any extraction or alignment comparison reports at least two runs per configuration and the judge model's own variance on repeated judgement. The judge is calibrated against a hand-labelled set, and its agreement is stated. A difference smaller than the combined spread is not an improvement.
+- **Do not use F1 against a gold set known to omit true facts.** Report judged precision and gold recall separately (ADR-0063).
+- **Open statements (ADR-0063):** not-stated rate (target ≤ 2%) and misworded rate on the narrative slice; tokens per document. **Typed assertions per profile:** judged precision and recall against the template route on the same documents before `OPEN` activation.
+- **Time (ADR-0064):** normalization accuracy per shape and resolution grade (proposed starting thresholds 95% absolute, 85% anchored); valid-time correctness on the endorsement timeline; grade-C and unknown-end handling.
+- **Admission (ADR-0065):** drop rates by reason, `BLOCK_UNINTERPRETED` and truncation counts, and described-evidence review items. Fabricated-quote fixtures are refused and misread-value fixtures reach review (EX-SEM-005b).
+- **Names and identity (ADR-0066, ADR-0067):** pairwise precision and recall of same-entity decisions in both arrival orders, with the difference reported; wrong merges and missed merges separately. Before enabling any automation: agreement with human decisions, share decided automatically, revert rate.
+- **Regression cases (section 98):** fiscal and 52/53-week periods; time-zone and time-of-day conventions; "as of inception"; subjectivities and quote-versus-bound; chart-description contradictions; named-insured change by endorsement; basis changes through the class hierarchy; external-action crash windows.
+
