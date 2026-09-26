@@ -372,6 +372,8 @@ Performance, availability, scalability, and security targets are proposed gates 
 
 Section 117.1 tracks the decisions for implementation and production acceptance: source-authority owner, tenant and knowledge-base identity scope, production host, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18) and the proof model policy (self-hosted), and ADR-0057 (2026-09-08) settled the review surface. F0005 pins Docling-Graph 1.9.1 and Docling 2.126.0; its synthetic development proof is complete, while production qualification remains open.
 
+**Time-interpretation dependency for v0.1 (2026-09-25, validate finding P-1):** F0019 and F0025 take endorsement valid time from the template route's typed effective-date field. F0016 stores time mentions and document time context alongside. Resolution from time mentions (ADR-0064, Proposed) replaces the template field only after ADR-0064 passes its proof gates, which F0026 qualifies. v0.1 acceptance does not depend on a Proposed ADR.
+
 **Local proof decisions from F0001-S0007, updated for ADR-0060 (2026-09-15):**
 
 - **Item 3 (target host, PostgreSQL/extension build, model/provider data policy) — answered for the local proof scope.** The exact PostgreSQL/pgvector/AGE build is pinned and twice-verified live (S0002, re-verified at S0006 with no drift beyond an upstream base-image patch bump — `docker/DEPENDENCY-MATRIX.md`). The model/provider data policy is proven: self-hosted vLLM, chunk-text-only requests, no prompt persistence (F0001-S0003/S0006 live runs). The **production host** (as opposed to local Docker Compose) remains explicitly open, owned by F0026 per this feature's own G1 clarification and the F0001-S0006 story's stated assumption ("the production host decision waits for F0026").
@@ -408,6 +410,16 @@ The operator reviewed Utopia's decisions made after this repository started (202
 - F0019, F0022, F0025, F0026.
 
 v0.1 acceptance still runs on the template route. Later features carry the behavioural parts: F0027, F0032, F0043, F0050, F0052, F0056, F0059.
+
+**v0.1 scope guard (validate finding P-2).** Each v0.1 feature's Phase A admits only the storage fields, contract checks, and review/display hooks named in its amendment. It does not admit:
+
+- alignment execution;
+- automated deciders;
+- fingerprint-driven scheduling;
+- time-mention resolution replacing template fields;
+- action dispatch.
+
+Anything beyond this guard needs a new operator scope amendment.
 
 Scope amendments are recorded in each feature README. Master blueprint sections 3, 11, 14, 17, 29, 53, 56, 62, 64, 75, 76, 78, 95, and 99 were revised in place, and the glossary and [examples EX-SEM-001–011](examples/statements-time-and-governance.md) were added.
 

@@ -26,3 +26,4 @@ Read the [worked example](../../examples/neurosymbolic-gl/README.md), [PRD](PRD.
 [ADR-0068](../../architecture/decisions/ADR-0068-decision-basis-fingerprints.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
 
 - Assessment records add a `basis_hash` over their exact inputs, rule version, ontology release, and evaluator version. This refines existing lineage and does not change the approved outcomes (ADR-0068).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).

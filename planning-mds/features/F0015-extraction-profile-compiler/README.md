@@ -35,3 +35,4 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 - Template fields remain typed assertions on the template route. Every field that claims span precision passes the admission checks; a field that cannot be located declares coarser precision or `unresolved` (ADR-0065).
 - Never place the ontology in an open-extraction prompt. The compiler serves only the template route (ADR-0063).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).

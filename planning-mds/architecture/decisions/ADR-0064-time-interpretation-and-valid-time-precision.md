@@ -111,14 +111,14 @@ Section 109.2's receipt and acceptance timestamps belong to the recorded-time fa
 - **F0004** stores the document date with its source. **F0016** stores the time context, time mentions, and their interpretations per run.
 - **F0008** implements precision, `valid_to_state`, and attestation bounds inside the ADR-0008 integrity design.
 - **F0012 and F0013** declare `temporal_kind` on every property.
-- **F0019 and F0025** take effective dates from time mentions resolved against the policy period, and prove grade-`C` handling.
+- **F0019 and F0025** use the template route's typed effective-date field in v0.1 (operator decision 2026-09-25, validate finding P-1, option b). Time mentions are stored alongside. After this record is accepted, they take effective dates from time mentions resolved against the policy period and its time-of-day convention. Grade-`C` handling is proven through this record's gates, which F0026 qualifies, not through F0025 acceptance.
 - **F0022** shows a mention's words beside its resolved interval, and lets a reviewer set a document date, which triggers re-resolution.
 - **Retrieval and graph reads** take valid time explicitly (F0020, F0035). Full-text reads remain "now" unless versioned.
 
 ## Proof gates before acceptance
 
 - **Normalization accuracy on the Golden Corpus**, reported per shape and grade. Proposed starting thresholds are ≥ 95% for absolute mentions and ≥ 85% for anchored mentions. F0026 sets the final numbers with named reviewers.
-- **Endorsement acceptance** (section 87 and F0025): "effective as of inception", "effective the date shown above", and a policy-period time-of-day convention each resolve correctly, and the June 1 / June 12 / June 14 example produces the answers above.
+- **Endorsement cases** (section 87): "effective as of inception", "effective the date shown above", and a policy-period time-of-day convention each resolve correctly, and the June 1 / June 12 / June 14 example produces the answers above. Resolved dates must agree with the reviewed template effective dates on the F0025 fixtures before time-mention resolution replaces them.
 - **Undated documents:** a document with only an upload time and the text "today" produces a grade-`C` mention and no valid time. Setting its document date re-resolves it without re-parsing.
 - **Unknown ends:** reads distinguish `OPEN`, `BOUNDED`, and `UNKNOWN`, and never widen an unknown start to negative infinity.
 - **Fiscal and 52/53-week periods, time zones, and date-only values** are covered by regression cases in section 98.

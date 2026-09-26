@@ -49,3 +49,4 @@ Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../..
 - Report the open-statement not-stated and misworded rates with a calibrated judge, the judge's own variance, and run-to-run spread over at least two runs per configuration (ADR-0063).
 - Report time normalization accuracy per shape and grade against thresholds set with named reviewers; proposed starting points are 95% for absolute and 85% for anchored mentions (ADR-0064).
 - Report drop rates by reason and the described-evidence review count (ADR-0065). Report name-resolution precision and recall in both arrival orders (ADR-0066).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).

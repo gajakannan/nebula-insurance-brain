@@ -27,3 +27,4 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 - Every ontology property declares `temporal_kind` (`STATE`, `EVENT`, `ETERNAL`) (ADR-0064).
 - Properties and classes carry a definition, examples, and regression cases, which alignment and the workbench rely on (ADR-0063).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).

@@ -1514,6 +1514,10 @@ prompt version
 scope
 reason
 status
+document_time_context      (ADR-0064)
+drop counts by reason      (ADR-0065)
+outcome: COMPLETE | PARTIAL | FAILED
+basis_hash                 (ADR-0068)
 created_at
 ```
 

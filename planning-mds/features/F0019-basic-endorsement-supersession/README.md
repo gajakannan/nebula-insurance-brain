@@ -25,4 +25,6 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 [ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
 
-- Take endorsement effective dates from time mentions resolved against the policy period and its time-of-day convention. "Effective as of inception" without a known policy period is grade `C` and opens review (EX-SEM-003b).
+- In v0.1, take endorsement effective dates from the template route's typed effective-date field (operator decision 2026-09-25, validate finding P-1, option b). Store the time mentions alongside (F0016).
+- After ADR-0064 is accepted, resolve effective dates from time mentions against the policy period and its time-of-day convention. "Effective as of inception" without a known policy period is then grade `C` and opens review (EX-SEM-003b).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).

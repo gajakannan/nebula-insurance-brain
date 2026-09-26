@@ -27,3 +27,4 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 - Declare `temporal_kind` on every GL property, and declare the name properties and name kinds (ADR-0064, ADR-0066).
 - Model policy-period time-of-day and time-zone conventions so that documents can declare them in their time context.
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
