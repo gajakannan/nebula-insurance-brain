@@ -29,3 +29,9 @@ Proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document
 - Prove excluded blocks do not enter model context; any necessary context expansion is declared, authorized, and budgeted before execution. Preserve references to the original immutable artifact when selecting or reconstructing input views.
 - Assert zero physical conversion/OCR, unchanged artifact hashes, and a new run identity. A full-document pipeline rerun does not satisfy targeted reinterpretation; reject unsupported scope without silently broadening it.
 - Exercise budget previews, canaries, deduplicated scheduling, pause/cancel, retry, and checkpointed resumption over affected content. F0016 supplies scoped runs; this feature owns evolution scheduling and impact analysis.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0063](../../architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md), [ADR-0068](../../architecture/decisions/ADR-0068-decision-basis-fingerprints.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- On the alignment route, recompute only signatures and implication rules whose basis changed; re-read no documents. On the template route, keep targeted block reinterpretation (ADR-0063, ADR-0068).

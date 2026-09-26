@@ -1,0 +1,38 @@
+Knowledge graph validation
+------------------------------------------------------------
+Features mapped:   4
+Stories mapped:    23
+Feature coverage:  4 mapped, 62 excluded, 0 uncovered
+Code bindings:     10
+Symbol index:      260 symbols, 260 on bound nodes (python: 260)
+Decision markers: 0 markers, 0 WHY
+
+Warnings:
+- Declared edge type is unused: validated_by
+- Declared edge type is unused: supersedes
+
+[PASS] knowledge-graph integrity checks passed.
+reproducibility: OK — committed generated files == compile(source); git policy consistent
+{
+  "check_id": "semantic-examples",
+  "status": "pass",
+  "scope": "educational schema and references only; runtime behavior not executed",
+  "findings": []
+}
+Running lifecycle gates for stage: planning
+[GATE] knowledge_graph_sync
+  Validate knowledge-graph integrity (IDs, references, paths, feature coverage, code-index bindings, coverage-report freshness).
+  command: python3 scripts/kg/validate.py
+[PASS] knowledge_graph_sync
+
+[GATE] kg_reproducibility
+  Committed compiled projections and tracker regions equal compile(source); shards valid; .gitattributes matches the generated-paths manifest.
+  command: python3 scripts/kg/validate.py --check-reproducible
+[PASS] kg_reproducibility
+
+[GATE] semantic_examples
+  Validate educational example schemas, identities, source excerpts, and planning references; runtime reasoning is a separate feature gate.
+  command: python3 scripts/validation/validate_semantic_examples.py
+[PASS] semantic_examples
+
+[SUMMARY] PASSED (3 gate(s))

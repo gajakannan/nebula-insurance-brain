@@ -11,6 +11,17 @@
 
 **Document pipeline update (2026-09-22):** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph for document pipeline coordination. F0005's pinned 1.9.1 candidate has completed its synthetic development scope: native/scanned conversion, saved-JSON reuse, PostgreSQL recovery, recorded-response dense extraction, and multi-region review mapping. The candidate remains opt-in; live-model and deployment qualification and reviewer acceptance remain future work under section 126. F0001 remains the measured Docling + direct-vLLM baseline. See [F0005 compatibility evidence](../features/F0005-one-time-docling-ingestion/compatibility-evidence.md).
 
+**Statements, time, and governance update (2026-09-25):** Seven records incorporate what Utopia learned after this repository started (2026-09-05). [ADR-0063](decisions/ADR-0063-open-statements-and-signature-alignment.md) is accepted as direction: the assertion plane holds open statements in the source's own words beside typed assertions, and signature alignment joins template extraction as a route to typed assertions. [ADR-0064](decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) to [ADR-0069](decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md) are Proposed. They cover:
+
+- time interpretation and valid-time precision;
+- assertion admission, text origin, and mood;
+- names as time-bounded claims;
+- impact-gated automation;
+- decision basis fingerprints;
+- external action attempts.
+
+Sections 3, 11, 14, 17, 29, 53, 56, 62, 64, 75, 76, 78, 95, and 99 are revised in place. Examples: [statements, time, and governance](../examples/statements-time-and-governance.md).
+
 **Technology direction:**
 
 ```text
@@ -250,6 +261,27 @@ continuous semantic enrichment
 ```
 
 Nebula does not become a wrapper around Utopia. The concepts are incorporated into the Brain's native semantic model.
+
+Reviewed again on 2026-09-25 against Utopia's decisions since 2026-09-05 (its commit `b3919ca`). These later ideas are incorporated:
+
+```text
+open statements in the source's words; ontology as a view; per-signature alignment   ADR-0063 (accepted direction)
+time mentions interpreted by the model and computed by code; precision; unknown ends  ADR-0064
+structural admission checks, drop records, text origin, statement mood             ADR-0065
+names as time-bounded claims; similarity only proposes identity                      ADR-0066
+automation held on unrecallable impact; human-only precedent; revert fuse           ADR-0067
+decision basis fingerprints instead of timestamps                                    ADR-0068
+external action attempts with identity and uncertain outcome                         ADR-0069
+```
+
+Where Nebula is already stronger, it keeps its own design:
+
+- **FactSlot identity with qualifiers** (section 13);
+- **missingness states** (section 107.4);
+- **conjunctive authorization** (sections 118–120);
+- **declared evidence precision**, including `unresolved` (section 108.2).
+
+Unlike Utopia, automation is off by default per knowledge base (ADR-0067).
 
 ### Graphify
 
@@ -812,6 +844,27 @@ Persisted Content
 
 Normative and hypothetical semantics remain separate first-class structures.
 
+## Open statements and typed assertions (ADR-0063, ADR-0065)
+
+The assertion plane holds two kinds of assertion.
+
+```text
+OPEN_STATEMENT
+    what the source says in its own words: subject, relation phrase, object or literal,
+    role-word qualifiers, time-mention references, mandatory verbatim quote; no predicate
+
+TYPED_ASSERTION
+    the claim in an ontology property, marked with the ontology release;
+    produced by template extraction (form-shaped profile sections) or by
+    signature alignment of open statements (narrative sections)
+```
+
+Only typed assertions reach entity resolution, conflict resolution, FactSlot selection, and canonical commit.
+
+- **Alignment** decides once per signature (relation phrase, subject classes, object classes) and materializes typed assertions as a set operation that retires them when their support goes. A person's binding is final.
+- **Mood.** A statement that carries a mood (required, conditional, planned, quoted, offered) is never materialized as a fact. It routes to normative, subjectivity, quote, or scenario structures.
+- **Admission.** Every interpretation output passes structural admission checks before persistence: the quote is in the block, names are in their quote, and time words are in their quote. Offsets are computed by the server, and every refused item is a drop record with a reason.
+
 ---
 
 # 12. Canonical World Model
@@ -946,6 +999,16 @@ What did the Brain know June 5?
     previous accepted value
 ```
 
+Valid time comes from time mentions (ADR-0064):
+
+- **The model interprets and code computes.** The model returns each mention's shape, reference (absolute, or anchored with an offset), and granularity. Code computes the interval against the document's time context: its own date from content or source metadata, its declared periods, its anchors, and its time-of-day and time-zone conventions. Upload and receipt times never date a document.
+- **Unanchored mentions wait.** A mention whose anchor is unknown dates nothing until an anchor arrives.
+- **Each bound stores its precision.** An ended fact whose end date is unknown is `UNKNOWN`, not open. A missing start reaches back only to the earliest attesting document.
+- **Temporal kind.** Properties declare `STATE`, `EVENT`, or `ETERNAL`.
+- **Succession.** A successor closes a predecessor only when its start is anchored (grade `A` or `B`), never on model confidence.
+
+In the example above, the endorsement is attested by its own issue date. It is received June 12 and recorded when it is canonically accepted (section 109.2). These are three distinct times.
+
 ---
 
 # 15. Two-Dimensional Temporal Integrity
@@ -1045,6 +1108,8 @@ interpretation_basis
 ```
 
 Derived knowledge points to derivation lineage rather than pretending to have direct document evidence.
+
+Evidence also records how its words were obtained: the block's `text_origin` (`STATED`, `OCR`, `TRANSCRIBED`, `DESCRIBED`) and its producing engine. Evidence that is only a model's description of a figure cannot supersede a canonical fact; it routes to review (ADR-0065). Time mentions, with their interpretation and resolution grade, are evidence for valid time (ADR-0064).
 
 ## Human-review provenance
 
@@ -1449,6 +1514,10 @@ prompt version
 scope
 reason
 status
+document_time_context      (ADR-0064)
+drop counts by reason      (ADR-0065)
+outcome: COMPLETE | PARTIAL | FAILED
+basis_hash                 (ADR-0068)
 created_at
 ```
 
@@ -1506,6 +1575,8 @@ Canonical reconciliation
 Docling-Graph runs again over saved native content; Docling conversion does not.
 No full-document reparse.
 No mandatory full-corpus semantic extraction.
+
+For profile sections on the alignment route (ADR-0063), an ontology or rule release does not re-read documents at all. It recomputes only the signatures and implication rules whose decision basis changed (ADR-0068) and re-materializes their typed assertions. Cost grows with distinct phrasings, not documents. A model is consulted only for signatures that must be decided again.
 
 ---
 
@@ -2247,6 +2318,8 @@ REVIEW
 
 Merges are reversible.
 
+Names are time-bounded, evidenced assertions on `hasLegalName`, `hasTradeName`, `hasFormerName`, and `knownAs` (ADR-0066). A named-insured change by endorsement keeps the entity and dates each name. Name similarity, abbreviation, containment, and cross-script matches only propose pairs. A pair proposed by similarity is never merged on a batch model verdict alone. Automated merges are further held when their effects would leave what a revert can recall (ADR-0067).
+
 ---
 
 # 54. Conflict Resolution
@@ -2321,6 +2394,8 @@ Recompute
        ▼
 Publish corrected derived version
 ```
+
+Which derived facts are affected is decided by decision basis fingerprints: exact input fact versions, rule version, ontology release, and evaluator version. A comparison of timestamps is not used (ADR-0068).
 
 Schema support exists before generalized reasoning ships. F0065 uses immutable snapshot-bound assessments and on-demand recomputation in v0.1B; automatic propagation through derived canonical facts remains F0056 (section 124).
 
@@ -2466,6 +2541,16 @@ PostgreSQL Brain
 
 Temporal history is operational execution history, not enterprise truth.
 
+Activities that dispatch external side effects follow ADR-0069:
+
+- a request identity persisted before dispatch;
+- a revision-bound preview;
+- one dispatch grant;
+- `OUTCOME_UNKNOWN` when the effect's fate is unknown;
+- no automatic retry of the dispatch step unless the remote honours the attempt's idempotency key.
+
+Internal idempotent recomputation may retry normally.
+
 ---
 
 # 63. Decision Ledger
@@ -2505,6 +2590,15 @@ Execution Gate
         ↓
 ALLOW / DENY / REVIEW
 ```
+
+The gate's first concrete check is impact (ADR-0067). An automated change is held for a person, whatever its confidence, when its effects would leave what a revert can recall:
+
+- a single-valued FactSlot conflict at one moment;
+- a live derivation or assessment resting on it;
+- a cited answer or decision;
+- an export.
+
+Approved actions then execute as action attempts (ADR-0069).
 
 ---
 
@@ -2916,6 +3010,15 @@ ReviewDecision
     durable governed semantic result owned by Nebula
 ```
 
+Automated deciders on any queue follow ADR-0067:
+
+- **Precedent** comes only from human-actor decisions, with the reviewer's optional free-text reason.
+- **Impact holds** are shown as reasons, not doubts.
+- **Automated decisions** act through the same service paths as people and record their undo.
+- **A revert fuse** turns an automation type off for a knowledge base.
+
+Every automation type starts disabled until its agreement with human decisions is measured. v0.2 adds `SIGNATURE_ALIGNMENT` and `IMPLICATION_RULE` queues (ADR-0063), plus a `TIME_ANCHOR` queue for unanchored or conflicting document dates (ADR-0064).
+
 ---
 
 # 76. Architecture Decision Records
@@ -3277,6 +3380,18 @@ Azure Blob, GCS, or other adapters are wired at the composition root. See [the r
 
 **Use case:** A model reads `$20M`; a reviewer corrects it to `$2M`. The Brain can reconstruct both the original interpretation and the human correction.
 
+## ADR-0063 to ADR-0069 — Statements, time, and governance (2026-09-25)
+
+| ADR | Decision | Status |
+|---|---|---|
+| [ADR-0063](decisions/ADR-0063-open-statements-and-signature-alignment.md) | Open statements in the source's words; typed assertions from template extraction or per-signature alignment; implication rules | Accepted (direction); implementation proof gates open |
+| [ADR-0064](decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) | Time mentions interpreted by the model and computed by code; document time context; precision; unknown bounds; temporal kind | Proposed |
+| [ADR-0065](decisions/ADR-0065-assertion-admission-text-origin-and-mood.md) | Structural admission checks and drop records; text origin; statement mood | Proposed |
+| [ADR-0066](decisions/ADR-0066-names-are-time-bounded-claims.md) | Names are time-bounded, evidenced claims; similarity only proposes | Proposed |
+| [ADR-0067](decisions/ADR-0067-automation-gated-by-unrecallable-impact.md) | Automation held on unrecallable impact; human-only precedent; revert fuse | Proposed |
+| [ADR-0068](decisions/ADR-0068-decision-basis-fingerprints.md) | Decision basis fingerprints define staleness | Proposed |
+| [ADR-0069](decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md) | External action attempts keep identity and uncertain outcome | Proposed |
+
 ---
 
 # 77. Repository Structure
@@ -3411,14 +3526,25 @@ extraction_profile
 extraction_profile_module
 semantic_interpretation_run
 
-assertion
+assertion                       assertion_kind: OPEN_STATEMENT | TYPED_ASSERTION (ADR-0063)
 assertion_value
 assertion_relationship
 assertion_evidence
+assertion_qualifier             role-word qualifiers on open statements; includes mood (ADR-0065)
+typed_assertion_source          open statements behind a materialized typed assertion (ADR-0063)
+time_mention                    verbatim time expression, interpretation, computed interval, grade (ADR-0064)
+document_time_context           per document version and run (ADR-0064)
+interpretation_drop             refused / truncated / uninterpreted items with reason (ADR-0065)
+
+kind_word_binding               (ADR-0063, F0066)
+signature_binding               with decision basis (ADR-0063, ADR-0068)
+implication_rule
+implication_rule_version
+phrase_reading
 
 entity
 entity_type
-entity_alias
+entity_alias                    search projection over name facts (ADR-0066)
 
 fact_slot
 fact_slot_qualifier
@@ -3464,6 +3590,11 @@ hypothetical_scenario
 
 decision
 decision_input
+
+automated_decision              action, confidence, precedents, trace, undo, status (ADR-0067)
+automation_fuse                 per KB and automation type (ADR-0067)
+action_definition               revisioned (ADR-0069)
+action_attempt                  request identity, dispatch token, state (ADR-0069)
 
 embedding
 
@@ -3983,6 +4114,7 @@ F0044 Expanded Entity 360
 F0045 Cytoscape Graph Explorer
 F0046 Semantic API
 F0047 Read-only MCP + verified principal, bounded delegation, and evidence access
+F0066 Open-statement extraction + signature alignment (ADR-0063)
 ```
 
 ## v0.3
@@ -4194,6 +4326,16 @@ knowledge promotion policy
 35. Authorization policy changes follow their own governed release process and are not automatic learning promotions.
 36. Session renewal does not automatically replay user-initiated canonical or business mutations.
 37. Evidence precision is declared, `unresolved` included; unresolved evidence blocks a review decision rather than producing an approximate one.
+38. Only typed assertions reach canonical resolution; open statements are kept whatever the ontology becomes, and alignment never writes a typed assertion without an open statement or approved rule behind it.
+39. A statement that carries a mood is never materialized as a fact.
+40. A model never computes a date; upload, sync, and receipt times never date a document.
+41. An unknown end is not an open end, and a missing start is not "since always".
+42. Every quote and name is located in its source by the server before admission; every refused item is a drop record.
+43. Evidence that is only a model's description of a figure cannot supersede a canonical fact.
+44. A rename does not create an entity; name similarity never merges on its own.
+45. Automated changes whose effects would leave what a revert can recall are held for a person; only human decisions are precedent.
+46. Cached decisions are stale when the fingerprint of their inputs changes, never by comparing timestamps; a person's decision is never overwritten by automation.
+47. An external action whose outcome is unknown is never re-sent automatically.
 ```
 
 ---

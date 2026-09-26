@@ -20,3 +20,10 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0063](../../architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md), [ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md), [ADR-0067](../../architecture/decisions/ADR-0067-automation-gated-by-unrecallable-impact.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Add `SIGNATURE_ALIGNMENT`, `IMPLICATION_RULE`, and `TIME_ANCHOR` queues (ADR-0063, ADR-0064).
+- Automated deciders on any queue follow ADR-0067: human-only precedent, impact holds shown as reasons, the people's service paths with a recorded undo, and a revert fuse. Every automation type starts disabled until its agreement with human decisions is measured.

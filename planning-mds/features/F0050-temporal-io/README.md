@@ -28,3 +28,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 - Remain in v0.3 for human waits, timers, external activities, and durable business execution. v0.1 PostgreSQL jobs retain document-job recovery until then.
 - Invoke the same authorized document service from Temporal activities. Pass artifact/run references and idempotency keys; keep document bytes and large graph outputs outside workflow history.
 - Docling-Graph owns the internal extraction stage/chunk loop. Test activity retries, cancellation, and resumption against the persisted parse checkpoint and canonical commit idempotency.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0069](../../architecture/decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Activities that dispatch external side effects use the action-attempt state machine and do not automatically retry the dispatch step, unless the remote honours the attempt's idempotency key (ADR-0069).

@@ -271,3 +271,32 @@ An append-only record of permission evaluation under exact current revisions; al
 
 ### Authentication failure event
 A durable sanitized record of rejected credentials without looking up protected data or inventing a principal. Invalid tokens never appear in its payload. F0002-S0002/S0006; EX-AUTHX-005.
+
+## Statements, time, and automated governance (ADR-0063 to ADR-0069)
+
+These definitions come from the 2026-09-25 architecture amendments, which were informed by Utopia's decisions since 2026-09-05. ADR-0063 is accepted as direction. ADR-0064 to ADR-0069 are Proposed. Worked and boundary examples: [statements, time, and governance](../examples/statements-time-and-governance.md).
+
+| Term | Meaning in the Brain | Concrete example / boundary | Owning feature |
+|---|---|---|---|
+| Open statement | An assertion of kind `OPEN_STATEMENT` holding what a source says in its own words: a relation phrase, role-word qualifiers, time-mention references, a mandatory quote, and no predicate | EX-SEM-001: "subcontracts all tear-off work to"; never bound to a generic "related to" | F0006 (storage), F0066 (extraction) |
+| Typed assertion | An assertion expressed in an ontology property, produced by template extraction or signature alignment and marked with its ontology release; only typed assertions reach canonical resolution | EX-SEM-001: `usesSubcontractor` materialized from the open statement | F0006/F0015/F0066 |
+| Signature | The normalized relation phrase with the subject's class set and the object's class set (or `VALUE`); alignment decides each signature once per knowledge base and ontology release | EX-SEM-001; EX-SEM-010 when the class hierarchy changes | F0066 |
+| Signature binding | The decision that a signature is a property in a direction, or `NONE`, or `UNDECIDED`, with its decision basis and decider; a person's binding is final | Two votes with candidates in opposite orders must agree | F0066 |
+| Implication rule | An approved rule that a statement shape implies a typed assertion of another property, with the object read from a cached per-phrase reading; its results are `INFERRED` | EX-SEM-002: "a Texas limited liability company" implies the jurisdiction of formation | F0066 |
+| Interpretation route | A document profile section's declared route to typed assertions: `TEMPLATE`, `OPEN`, or `TEMPLATE_AND_OPEN` | Declarations pages use `TEMPLATE`; broker correspondence uses `OPEN` | F0014 |
+| Time mention | A verbatim time expression located in a block, with a model interpretation (shape, reference, granularity) and a code-computed interval and resolution grade | EX-SEM-003: "Effective as of 12:01 a.m. on July 1, 2026" | F0016 |
+| Document time context | A document's own date and its source, the periods and calendars it defines, its narrative anchors, and its time-of-day/time-zone conventions; never upload or receipt time | EX-SEM-003b: "as of inception" waits without the policy period | F0004/F0016 |
+| Resolution grade | `A` absolute, `B` anchored, `C` unanchored; only `A`/`B` starts may close a predecessor in a single-valued FactSlot | A grade-C successor opens review instead of closing | F0008/F0019 |
+| Valid-time precision | The granularity stored on each valid-time bound, with values truncated to it | "July 2026" is month precision, not July 1 | F0008 |
+| Unknown end | `valid_to_state = UNKNOWN` with `attested_to`: the fact ended, but the source gives no date; distinct from an open end | EX-SEM-004: "no longer on the account" | F0008 |
+| Temporal kind | A property's declared `STATE`, `EVENT`, or `ETERNAL`, which normalizes writes and reads | A loss occurrence is an `EVENT`; a limit is a `STATE` | F0012/F0013 |
+| Admission check | A server-side structural check on interpretation output before persistence: the quote is in the block, names are in their quote, time words are in their quote; offsets are computed by the server | EX-SEM-005b: a fabricated quote is dropped | F0006/F0016 |
+| Interpretation drop | A persisted record of a rejected, malformed, truncated, or uninterpreted item with its reason code; drops make a run `PARTIAL` and feed `NOT_PROCESSED` | `QUOTE_NOT_IN_SOURCE`, `BLOCK_UNINTERPRETED` | F0016/F0022 |
+| Text origin | How a block's words were obtained: `STATED`, `OCR`, `TRANSCRIBED`, or `DESCRIBED`; described-only evidence cannot supersede a fact | EX-SEM-006: a chart description versus the SOV table | F0004 |
+| Statement mood | A qualifier holding the passage's own words when a statement is required, conditional, planned, quoted, or offered; mood-bearing statements are never materialized as facts | EX-SEM-007: "subject to receipt of a signed application" | F0006, F0052 |
+| Name fact | A name held as a time-bounded, evidenced assertion on `hasLegalName`, `hasTradeName`, `hasFormerName`, or `knownAs`; a rename keeps the entity | EX-SEM-008: named-insured change by endorsement | F0007/F0017 |
+| Impact hold | Holding an automated change for a person because its effects would leave what a revert can recall (`CONFLICT`, `DERIVED`, `CITED`, `EXPORTED`) | EX-SEM-009: a merge an assessment rests on | F0027/F0043/F0059 |
+| Precedent | A human-actor review decision, with its optional free-text reason, that automated deciders may read; an agent's own decisions are never precedent | A person's "keep apart" blocks an automatic merge of the same pair | F0043 |
+| Automation fuse | The per-knowledge-base automatic disabling of an automation type after a configured number of reverts within a window | Default: two reverts in seven days | F0043 |
+| Decision basis | A fingerprint of every input a cached decision considered; the decision is stale when the fingerprint of current inputs differs | EX-SEM-010: a changed ancestor closure reopens a binding | F0016/F0032/F0056/F0066 |
+| Action attempt | A persisted external side-effect attempt with a request identity and the states `PREPARED`, `DISPATCHING`, `NOT_SENT`, `RESPONSE_RECEIVED`, or `OUTCOME_UNKNOWN`; never retried blindly | EX-SEM-011: a worker dies after sending | F0050/F0059 |

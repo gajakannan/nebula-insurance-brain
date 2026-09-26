@@ -20,3 +20,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Store per-bound granularity, `valid_to_state` (`OPEN`, `BOUNDED`, `UNKNOWN`), and `attested_from`/`attested_to`. Settle how `UNKNOWN` ends are represented inside the ADR-0008 exclusion constraint; the recommended option is in ADR-0064. Reads distinguish unknown from open and never widen a missing start to negative infinity.
+- A successor closes a predecessor in a single-valued slot only when its start is grade `A` or `B`, never on model confidence.
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).

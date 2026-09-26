@@ -26,6 +26,13 @@ Documentation/development examples remain outside the frozen evaluation holdout.
 | Resource envelope, delegation and durable decision/authentication events | [EX-AUTHX-012–018](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md), [structured shapes](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/contract-examples.json) | F0002 S0004–S0006; ADR-0062; synthetic planning examples, no runtime proof |
 | Derived-result and evidence authorization | CASE-18/19 | F0002/F0018/F0065 S0005/F0026, v0.1 |
 | Evidence anchoring, selector shapes, declared precision, unresolved evidence | [Review Panel prototype](nebula-review-panel-live-files.html) | F0001 S0004/F0022, v0.1B |
+| Open statements, typed assertions, signature alignment, implication rules | [EX-SEM-001/002](statements-time-and-governance.md#open-statements-and-alignment) | F0006 storage, v0.1A; F0066 alignment, v0.2B; ADR-0063 |
+| Time mentions, document time context, resolution grade, precision, unknown ends, temporal kind | [EX-SEM-003/004](statements-time-and-governance.md#time-interpretation) | F0004/F0008/F0016/F0019/F0025, v0.1; ADR-0064 |
+| Admission checks, drops, text origin, statement mood | [EX-SEM-005–007](statements-time-and-governance.md#admission-origin-and-mood) | F0004/F0006/F0016/F0022, v0.1; F0052 routing, v0.3; ADR-0065 |
+| Names as time-bounded claims; similarity only proposes | [EX-SEM-008](statements-time-and-governance.md#names) | F0007/F0017, v0.1A; F0027, v0.2B; ADR-0066 |
+| Impact holds, human precedent, automation fuse | [EX-SEM-009](statements-time-and-governance.md#automation-and-impact) | F0027/F0043, v0.2B; F0059, v0.4+; ADR-0067 |
+| Decision basis fingerprints and staleness | [EX-SEM-010](statements-time-and-governance.md#decision-basis) | F0016/F0066/F0032, v0.1–v0.2B; F0056, v0.4+; ADR-0068 |
+| External action attempts and uncertain outcomes | [EX-SEM-011](statements-time-and-governance.md#action-attempts) | F0050, v0.3; F0059, v0.4+; ADR-0069 |
 | Vector similarity versus accepted facts | [EX-FUTURE-001](future-semantics.md#retrieval-projection) | F0033/F0035, v0.2A |
 | Learned candidates and repeated model claims | [EX-FUTURE-002](future-semantics.md#learning-candidate) | F0041/F0042, v0.2B; F0060 rule promotion, v0.4+ |
 | Obligations versus observed facts | [EX-FUTURE-003](future-semantics.md#normative-obligation) | F0052, v0.3 |
