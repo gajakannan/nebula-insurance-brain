@@ -225,11 +225,22 @@ adrs:
       - capability:semantic-interpretation-run
       - entity:content-artifact
       - entity:semantic-interpretation-run
+  - id: adr:0061
+    label: Tenant identity and structural ownership
+    path: planning-mds/architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md
+    related_nodes:
+      - schema:authx-kernel
+  - id: adr:0062
+    label: Current authorization and durable decisions
+    path: planning-mds/architecture/decisions/ADR-0062-current-authorization-and-durable-decisions.md
+    related_nodes:
+      - schema:authx-kernel
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
     path: planning-mds/api/brain-api.yaml
     related_nodes:
+      - endpoint:content-artifact-file-get
       - endpoint:content-artifact-get
       - endpoint:fact-commit
       - endpoint:fact-get
@@ -244,6 +255,7 @@ capabilities:
       never disclose existence.
     related_nodes:
       - adr:0050
+      - adr:0062
       - entity:audit-event
       - policy_rule:content-artifact-read
       - policy_rule:fact-slot-commit
@@ -251,6 +263,7 @@ capabilities:
       - policy_rule:review-task-annotate
       - policy_rule:review-task-read
     source_docs:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:backup-and-restore
@@ -280,19 +293,68 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:bounded-delegation
+    label: Bounded delegation
+    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Bounded delegation with current verified authority and bounded implementation scope.
+    related_nodes:
+      - adr:0062
+      - entity:delegation
+      - entity:principal
+      - schema:authx-kernel
+    source_docs:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:credential-verification-and-principal-resolution
     label: Credential verification and principal resolution
     notes: OIDC token verification (issuer, audience, signature, expiry) before any storage read; verified
       (issuer, subject) mapped to a stable internal principal with current memberships.
     related_nodes:
       - adr:0049
+      - adr:0061
       - entity:principal
       - role:reviewer
       - role:service-principal
       - role:tenant-member
     source_docs:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:current-resource-scope
+    label: Current resource scope
+    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Current resource scope with current verified authority and bounded implementation scope.
+    related_nodes:
+      - adr:0062
+      - capability:authorization-enforcement
+      - entity:membership
+      - entity:resource-scope
+      - schema:authx-kernel
+    source_docs:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:durable-authorization-decisions
+    label: Durable authorization decisions
+    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Durable authorization decisions with current verified authority and bounded implementation
+          scope.
+    related_nodes:
+      - adr:0062
+      - capability:authorization-enforcement
+      - entity:audit-event
+      - schema:authx-kernel
+    source_docs:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:evidence-review-round-trip
     label: Evidence review round trip
     notes: ReviewItem routing into a review batch, rendering and anchor resolution in the native Review
@@ -397,7 +459,36 @@ capabilities:
       - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:structural-tenancy-and-entity-identity
+    label: Structural tenancy and entity identity
+    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Structural tenancy and entity identity with current verified authority and bounded implementation
+          scope.
+    related_nodes:
+      - adr:0061
+      - entity:knowledge-base
+      - entity:tenant
+      - entity:tenant-entity-identity
+      - entity:workspace
+      - schema:authx-kernel
+    source_docs:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
 endpoints:
+  - id: endpoint:content-artifact-file-get
+    label: GET /content/{artifactId}/files/{path}
+    method: GET
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:parse-once-content-artifact
+    resource: content_artifact
+    route: /content/{artifactId}/files/{path}
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: endpoint:content-artifact-get
     label: GET /content/{artifactId}
     method: GET
@@ -503,9 +594,11 @@ entities:
     related_entities:
       - entity:principal
     related_nodes:
+      - adr:0062
       - capability:authorization-enforcement
     source_docs:
       - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
   - id: entity:canonical-fact-version
@@ -533,6 +626,20 @@ entities:
     source_docs:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+  - id: entity:delegation
+    label: Delegation
+    notes: Proposed F0002 design; implementation pending. Trusted acting/executor binding with finite
+      resource/action ceiling and expiry; no onward delegation in v1.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Trusted acting/executor binding with finite resource/action ceiling and expiry; no onward
+          delegation in v1.
+    related_nodes:
+      - adr:0062
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:fact-slot
     label: Fact slot
     notes: Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit
@@ -565,6 +672,33 @@ entities:
       - planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: entity:knowledge-base
+    label: Knowledge base
+    notes: Proposed F0002 design; implementation pending. Exactly one tenant/workspace owner; semantic
+      ownership and explicit grants meet here.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Exactly one tenant/workspace owner; semantic ownership and explicit grants meet here.
+    related_nodes:
+      - adr:0061
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:membership
+    label: Membership
+    notes: Proposed F0002 design; implementation pending. Current complete tenant/KB role and restriction
+      slice; expiry and monotonic authority revisions are explicit.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Current complete tenant/KB role and restriction slice; expiry and monotonic authority
+          revisions are explicit.
+    related_nodes:
+      - adr:0062
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:outbox-event
     label: Outbox event
     notes: Transactional outbox row written with every canonical commit and consumed idempotently by projectors;
@@ -583,13 +717,28 @@ entities:
     related_entities:
       - entity:audit-event
     related_nodes:
+      - adr:0061
       - capability:credential-verification-and-principal-resolution
       - role:reviewer
       - role:service-principal
       - role:tenant-member
     source_docs:
       - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  - id: entity:resource-scope
+    label: Resource scope
+    notes: Proposed F0002 design; implementation pending. Trusted resource/parent/classification/source
+      scope; request filters only narrow authority.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Trusted resource/parent/classification/source scope; request filters only narrow authority.
+    related_nodes:
+      - adr:0062
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:review-decision
     label: Review decision
     notes: Governed outcome of a review (ACCEPT, CORRECT, REJECT) bound to the authenticated reviewer
@@ -631,6 +780,46 @@ entities:
     source_docs:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+  - id: entity:tenant
+    label: Tenant
+    notes: Proposed F0002 design; implementation pending. Structural tenancy root; no fabricated KB owner
+      for the tenancy registry.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Structural tenancy root; no fabricated KB owner for the tenancy registry.
+    related_nodes:
+      - adr:0061
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:tenant-entity-identity
+    label: Tenant entity identity
+    notes: Proposed F0002 design; implementation pending. Tenant-scoped identity can have explicit KB
+      associations; an association grants no access. Full resolution remains F0017.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Tenant-scoped identity can have explicit KB associations; an association grants no access.
+          Full resolution remains F0017.
+    related_nodes:
+      - adr:0061
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:workspace
+    label: Workspace
+    notes: Proposed F0002 design; implementation pending. Exactly one tenant owner; groups KBs without
+      granting access.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Exactly one tenant owner; groups KBs without granting access.
+    related_nodes:
+      - adr:0061
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
 policy_rules:
   - id: policy_rule:content-artifact-ingest
     label: content_artifact:ingest
@@ -741,6 +930,15 @@ roles:
     source_docs:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
 schemas:
+  - id: schema:authx-kernel
+    label: AuthXKernelV1
+    path: planning-mds/schemas/authx-kernel.schema.json
+    related_nodes:
+      - adr:0061
+      - adr:0062
+      - entity:delegation
+      - entity:principal
+      - entity:resource-scope
   - id: schema:canonical-commit-request
     label: CanonicalCommitRequest
     path: planning-mds/schemas/canonical-commit-request.schema.json

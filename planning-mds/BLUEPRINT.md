@@ -215,7 +215,13 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 
 **v0.1A (Next)**
 
-- [F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md) - Planned
+- [F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md) - Planned (six stories; Phase A and Phase B approved; implementation not started)
+  - [F0002-S0001](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md) - Not Started
+  - [F0002-S0002](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md) - Not Started
+  - [F0002-S0003](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md) - Not Started
+  - [F0002-S0004](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) - Not Started
+  - [F0002-S0005](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) - Not Started
+  - [F0002-S0006](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) - Not Started
 - [F0003 — PostgreSQL persistence](features/F0003-postgresql-persistence/README.md) - Planned
 - [F0004 — Content artifact model](features/F0004-content-artifact-model/README.md) - Planned
 - [F0005 — One-time document ingestion](features/F0005-one-time-docling-ingestion/README.md) - Planned
@@ -373,6 +379,14 @@ Section 117.1 tracks the decisions for implementation and production acceptance:
 ### 4.9 F0001 Phase B (2026-09-06)
 
 Assembly plan: `features/archive/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
+
+---
+
+### 4.10 F0002 Phase B design (2026-09-25; design approved)
+
+[Assembly plan](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md): structural Tenant/Workspace/KB ownership, tenant-scoped entity identity with explicit KB grants, stable verified principal aliases, complete current grant slices, conjunctive resource restrictions, bounded delegation and durable decision audit. User confirmed the entity/KB identity choice and reuse of the three existing pilot roles, then approved Phase A with `approve-phase-a` and Phase B with `approve-phase-b`. This resolves section 117.1 item 2 for the F0002 pilot scope; broader production rollout remains open.
+
+Proposed ADR-0061/0062, AuthX v1 schema and OpenAPI design version 0.2.0 specify compatible migrations and existing-consumer integration. No new runtime or policy grants are delivered. F0002 proves review and canonical commit authorization independently; F0018 owns full review-to-canonical orchestration and F0022 owns review UI. This explicitly reconciles the old master-blueprint §116.1 F0002 wiring shorthand without broadening the approved PRD. Existing C4 deployment topology is unchanged; the feature README adds its ERD and component diagram. ADR-0042/0052/0053 remain Proposed for broader obligations.
 
 ---
 

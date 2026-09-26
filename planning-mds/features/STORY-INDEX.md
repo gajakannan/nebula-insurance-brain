@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 17
+**Total Stories:** 23
 
 ---
 
@@ -17,6 +17,19 @@ Auto-generated index of all user stories across feature folders.
 | [F0001-S0005](./archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) | Proof: bitemporal commit under retroactive and concurrent change | High | Infrastructure | Ingrid the Persistence Engineer |
 | [F0001-S0006](./archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) | Proof: access boundaries, extension build, and restore | High | Infrastructure | Dana the Platform Engineer |
 | [F0001-S0007](./archive/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) | Record proof outcomes and settle the pre-build contracts | High | Infrastructure | Dana the Platform Engineer |
+
+---
+
+## F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0002-S0001](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md) | Preserve structural tenancy and tenant-scoped entity identity | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0002-S0002](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md) | Resolve verified credentials to stable typed principals | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0003](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md) | Resolve current memberships and intersect requested scope | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0004](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) | Enforce parent, classification and source restrictions together | Critical | MVP | Rosa the Business Reviewer |
+| [F0002-S0005](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) | Bound delegated and autonomous service authority | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0006](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) | Prove audited kernel behavior through existing consumers | Critical | MVP | Dana the Platform Engineer |
 
 ---
 
@@ -49,6 +62,7 @@ Auto-generated index of all user stories across feature folders.
 | Phase | Count |
 |-------|-------|
 | Infrastructure | 7 |
+| MVP | 6 |
 | v0.1A | 4 |
 | v0.1B | 6 |
 
@@ -58,7 +72,7 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
-| Critical | 2 |
+| Critical | 8 |
 | High | 15 |
 
 ---

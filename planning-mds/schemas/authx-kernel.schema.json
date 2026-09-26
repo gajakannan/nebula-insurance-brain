@@ -1,0 +1,891 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:nebula:brain:authx-kernel:v1",
+  "title": "F0002 AuthX kernel contracts",
+  "description": "Design-time internal carriers. Valid JSON is not proof of trusted origin or authorization. See F0002 feature-assembly-plan.md for relational and semantic checks. Never accept AuthorizationContext from a public request.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/AuthorizationContext"
+    },
+    {
+      "$ref": "#/$defs/TenancyIdentity"
+    },
+    {
+      "$ref": "#/$defs/Decision"
+    },
+    {
+      "$ref": "#/$defs/AuthenticationEvent"
+    }
+  ],
+  "$defs": {
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "user",
+            "service",
+            "agent"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "disabled"
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "status",
+        "issuer",
+        "subject"
+      ],
+      "additionalProperties": false
+    },
+    "OwnedScope": {
+      "type": "object",
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspace_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "workspace_id",
+        "knowledge_base_id"
+      ],
+      "additionalProperties": false
+    },
+    "ScopedId": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "broker",
+            "account",
+            "policy"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "ResourceKey": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "content_artifact",
+            "review_task",
+            "fact_slot"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Selector": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "broker",
+            "account",
+            "policy"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "all",
+            "only"
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "kind",
+        "mode",
+        "ids"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "all"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "ids": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "LabelSet": {
+      "oneOf": [
+        {
+          "const": "*"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      ]
+    },
+    "ScopeSlice": {
+      "type": "object",
+      "properties": {
+        "membership_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "scope": {
+          "$ref": "#/$defs/OwnedScope"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "TenantMember",
+            "Reviewer",
+            "ServicePrincipal"
+          ]
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revoked_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "grant_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "selectors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Selector"
+          },
+          "uniqueItems": true
+        },
+        "classifications": {
+          "$ref": "#/$defs/LabelSet"
+        },
+        "source_acl_ids": {
+          "$ref": "#/$defs/LabelSet"
+        }
+      },
+      "required": [
+        "membership_id",
+        "scope",
+        "role",
+        "valid_from",
+        "expires_at",
+        "revoked_at",
+        "grant_revision",
+        "selectors",
+        "classifications",
+        "source_acl_ids"
+      ],
+      "additionalProperties": false
+    },
+    "ResourceEnvelope": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/ResourceKey"
+        },
+        "scope": {
+          "$ref": "#/$defs/OwnedScope"
+        },
+        "parent_chain": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ScopedId"
+          },
+          "uniqueItems": true
+        },
+        "classifications": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "source_acl_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "dependency_keys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ResourceKey"
+          },
+          "uniqueItems": true
+        },
+        "resource_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "restriction_revision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "key",
+        "scope",
+        "parent_chain",
+        "classifications",
+        "source_acl_ids",
+        "dependency_keys",
+        "resource_revision",
+        "restriction_revision"
+      ],
+      "additionalProperties": false
+    },
+    "RequestedScope": {
+      "type": "object",
+      "properties": {
+        "knowledge_base_ids": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selectors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Selector"
+          },
+          "uniqueItems": true
+        },
+        "business_valid_as_of": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "business_known_as_of": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "knowledge_base_ids",
+        "selectors",
+        "business_valid_as_of",
+        "business_known_as_of"
+      ],
+      "additionalProperties": false
+    },
+    "ActionCeiling": {
+      "type": "object",
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/OwnedScope"
+        },
+        "resource": {
+          "$ref": "#/$defs/ResourceKey"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "read",
+              "annotate",
+              "ingest",
+              "interpret",
+              "commit"
+            ]
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "scope",
+        "resource",
+        "actions"
+      ],
+      "additionalProperties": false
+    },
+    "Delegation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "acting_principal_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "executor_principal_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "issued_by": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "not_before": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ceilings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ActionCeiling"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "onward_delegation": {
+          "const": false
+        }
+      },
+      "required": [
+        "id",
+        "acting_principal_id",
+        "executor_principal_id",
+        "issued_by",
+        "issued_at",
+        "not_before",
+        "expires_at",
+        "revoked_at",
+        "revision",
+        "ceilings",
+        "onward_delegation"
+      ],
+      "additionalProperties": false
+    },
+    "AuthorizationContext": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "authenticated": {
+          "$ref": "#/$defs/Principal"
+        },
+        "acting": {
+          "$ref": "#/$defs/Principal"
+        },
+        "delegation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Delegation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "authorization_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authority_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "policy_release": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_slices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ScopeSlice"
+          },
+          "uniqueItems": true
+        },
+        "requested_scope": {
+          "$ref": "#/$defs/RequestedScope"
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "schema_version",
+        "authenticated",
+        "acting",
+        "delegation",
+        "authorization_time",
+        "authority_revision",
+        "policy_release",
+        "scope_slices",
+        "requested_scope",
+        "trace_id"
+      ],
+      "additionalProperties": false
+    },
+    "TenancyIdentity": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "entity_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kb_scopes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OwnedScope"
+          },
+          "uniqueItems": true
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "schema_version",
+        "tenant_id",
+        "entity_id",
+        "kb_scopes",
+        "created_at",
+        "created_by"
+      ],
+      "additionalProperties": false
+    },
+    "Decision": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "decision_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "authenticated_principal_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "actor_principal_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "actor_kind": {
+          "type": "string",
+          "enum": [
+            "user",
+            "service",
+            "agent"
+          ]
+        },
+        "executor_principal_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delegation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delegation_revision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OwnedScope"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resource": {
+          "$ref": "#/$defs/ResourceKey"
+        },
+        "resource_revision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restriction_revision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowed": {
+          "type": "boolean"
+        },
+        "reason_code": {
+          "type": "string",
+          "enum": [
+            "allowed",
+            "inactive_principal",
+            "no_membership",
+            "membership_expired",
+            "policy_denied",
+            "scope_denied",
+            "parent_denied",
+            "classification_denied",
+            "source_denied",
+            "dependency_denied",
+            "delegation_denied",
+            "delegation_expired",
+            "stale_authority",
+            "missing_attributes",
+            "unknown_action"
+          ]
+        },
+        "policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "policy_release": {
+          "type": "string",
+          "minLength": 1
+        },
+        "grant_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "matched_membership_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation_outcome": {
+          "enum": [
+            "attempted",
+            "succeeded",
+            "denied",
+            "failed"
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "decision_id",
+        "occurred_at",
+        "authenticated_principal_id",
+        "actor_principal_id",
+        "actor_kind",
+        "executor_principal_id",
+        "delegation_id",
+        "delegation_revision",
+        "scope",
+        "resource",
+        "resource_revision",
+        "restriction_revision",
+        "action",
+        "allowed",
+        "reason_code",
+        "policy_hash",
+        "policy_release",
+        "grant_revision",
+        "matched_membership_ids",
+        "trace_id",
+        "operation_outcome"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "allowed": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "scope": {
+                "$ref": "#/$defs/OwnedScope"
+              },
+              "resource_revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "restriction_revision": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "action": {
+                "enum": [
+                  "read",
+                  "annotate",
+                  "ingest",
+                  "interpret",
+                  "commit"
+                ]
+              },
+              "matched_membership_ids": {
+                "minItems": 1
+              },
+              "reason_code": {
+                "const": "allowed"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "reason_code": {
+                "not": {
+                  "const": "allowed"
+                }
+              },
+              "operation_outcome": {
+                "enum": [
+                  "denied",
+                  "failed"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AuthenticationEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "event_id",
+        "occurred_at",
+        "event_type",
+        "principal_id",
+        "reason_code",
+        "route_template",
+        "trace_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "event_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "event_type": {
+          "const": "credential_verification_failed"
+        },
+        "principal_id": {
+          "type": "null"
+        },
+        "reason_code": {
+          "enum": [
+            "malformed",
+            "invalid_signature",
+            "wrong_issuer",
+            "wrong_audience",
+            "expired",
+            "not_yet_valid",
+            "invalid_claims",
+            "unsupported_token_type",
+            "disabled_principal"
+          ]
+        },
+        "route_template": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

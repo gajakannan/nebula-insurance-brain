@@ -1,9 +1,9 @@
 version: 0
 summary:
-  canonical_nodes: 133
-  features_mapped: 3
-  stories_mapped: 17
-  features_excluded: 62
+  canonical_nodes: 148
+  features_mapped: 4
+  stories_mapped: 23
+  features_excluded: 61
   features_uncovered: 0
   code_bindings: 10
   symbol_count: 260
@@ -13,14 +13,10 @@ summary:
 coverage:
   mapped_feature_ids:
   - feature:F0001
+  - feature:F0002
   - feature:F0005
   - feature:F0065
   excluded_features:
-  - id: feature:F0002
-    path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts
-    reason: Planned feature reserved from master blueprint section 95; no PRD, stories,
-      or implementation to bind yet. The plan action removes this exclusion at Phase
-      B.
   - id: feature:F0003
     path: planning-mds/features/F0003-postgresql-persistence
     reason: Planned feature reserved from master blueprint section 95; no PRD, stories,
@@ -335,6 +331,12 @@ coverage:
   - story:F0001-S0005
   - story:F0001-S0006
   - story:F0001-S0007
+  - story:F0002-S0001
+  - story:F0002-S0002
+  - story:F0002-S0003
+  - story:F0002-S0004
+  - story:F0002-S0005
+  - story:F0002-S0006
   - story:F0005-S0001
   - story:F0005-S0002
   - story:F0005-S0003
@@ -367,11 +369,12 @@ freshness:
     entity:audit-event:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
-      source_count: 3
-      last_modified: '2026-09-22'
-      source_hash: 438c479201c8d6c3
+      source_count: 4
+      last_modified: '2026-09-25'
+      source_hash: 54460b24ab322d09
     entity:canonical-fact-version:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -386,6 +389,13 @@ freshness:
       source_count: 2
       last_modified: '2026-09-22'
       source_hash: 095db67211595e99
+    entity:delegation:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 89c3e4dc62d8da2f
     entity:fact-slot:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -401,6 +411,20 @@ freshness:
       source_count: 3
       last_modified: '2026-09-07'
       source_hash: 27639dcf7084962e
+    entity:knowledge-base:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 89c3e4dc62d8da2f
+    entity:membership:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 89c3e4dc62d8da2f
     entity:outbox-event:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -411,10 +435,18 @@ freshness:
     entity:principal:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      source_count: 3
+      last_modified: '2026-09-25'
+      source_hash: f3263527c055d243
+    entity:resource-scope:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-09-22'
-      source_hash: d9622d273301a2b7
+      last_modified: '2026-09-25'
+      source_hash: 89c3e4dc62d8da2f
     entity:review-decision:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -436,6 +468,27 @@ freshness:
       source_count: 2
       last_modified: '2026-09-22'
       source_hash: 095db67211595e99
+    entity:tenant:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 89c3e4dc62d8da2f
+    entity:tenant-entity-identity:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 89c3e4dc62d8da2f
+    entity:workspace:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 89c3e4dc62d8da2f
     workflow:canonical-commit:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -468,11 +521,12 @@ freshness:
       source_hash: 095db67211595e99
     capability:authorization-enforcement:
       source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
-      source_count: 2
-      last_modified: '2026-09-20'
-      source_hash: 4cbacad1f77d2396
+      source_count: 3
+      last_modified: '2026-09-25'
+      source_hash: 282db051a2bde8b4
       hotspot_rank: 6
       hotspot_score: 0.07
       primary_owner: gajapathi.kannan@live.com
@@ -502,18 +556,40 @@ freshness:
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
+    capability:bounded-delegation:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 563453dcfe6ca1f2
     capability:credential-verification-and-principal-resolution:
       source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
-      source_count: 2
-      last_modified: '2026-09-13'
-      source_hash: 4cbacad1f77d2396
+      source_count: 3
+      last_modified: '2026-09-25'
+      source_hash: 282db051a2bde8b4
       hotspot_rank: 10
       hotspot_score: 0.01
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
+    capability:current-resource-scope:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 563453dcfe6ca1f2
+    capability:durable-authorization-decisions:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 563453dcfe6ca1f2
     capability:evidence-review-round-trip:
       source_paths:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
@@ -598,42 +674,56 @@ freshness:
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
+    capability:structural-tenancy-and-entity-identity:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 563453dcfe6ca1f2
+    endpoint:content-artifact-file-get:
+      source_paths:
+      - planning-mds/api/brain-api.yaml
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-09-25'
+      source_hash: 4d31a8ec7d2ada5e
     endpoint:content-artifact-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-09'
-      source_hash: d0f7b61c464eaa95
+      last_modified: '2026-09-25'
+      source_hash: 06dac75e5e57a1e6
     endpoint:fact-commit:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-09'
-      source_hash: d0f7b61c464eaa95
+      last_modified: '2026-09-25'
+      source_hash: 06dac75e5e57a1e6
     endpoint:fact-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-09'
-      source_hash: d0f7b61c464eaa95
+      last_modified: '2026-09-25'
+      source_hash: 06dac75e5e57a1e6
     endpoint:health:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-09'
-      source_hash: d0f7b61c464eaa95
+      last_modified: '2026-09-25'
+      source_hash: 06dac75e5e57a1e6
     endpoint:review-decisions-submit:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-09'
-      source_hash: d0f7b61c464eaa95
+      last_modified: '2026-09-25'
+      source_hash: 06dac75e5e57a1e6
     endpoint:review-item-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-09'
-      source_hash: d0f7b61c464eaa95
+      last_modified: '2026-09-25'
+      source_hash: 06dac75e5e57a1e6
     role:reviewer:
       source_paths:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
@@ -1056,6 +1146,24 @@ freshness:
       source_count: 1
       last_modified: '2026-09-22'
       source_hash: 8d78907d3f994abe
+    adr:0061:
+      source_paths:
+      - planning-mds/architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: e38c19f176276319
+    adr:0062:
+      source_paths:
+      - planning-mds/architecture/decisions/ADR-0062-current-authorization-and-durable-decisions.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: 31ff3ec3a8f28c70
+    schema:authx-kernel:
+      source_paths:
+      - planning-mds/schemas/authx-kernel.schema.json
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: be87feac933ccf42
     schema:canonical-commit-request:
       source_paths:
       - planning-mds/schemas/canonical-commit-request.schema.json
@@ -1102,8 +1210,8 @@ freshness:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-09'
-      source_hash: d0f7b61c464eaa95
+      last_modified: '2026-09-25'
+      source_hash: 06dac75e5e57a1e6
   mappings:
     feature:F0001:
       source_paths:
@@ -1123,6 +1231,12 @@ freshness:
       source_count: 13
       last_modified: '2026-09-13'
       source_hash: f0b7b0be3f6f3708
+    feature:F0002:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: 2e3f0ff5d0e35b64
     feature:F0005:
       source_paths:
       - planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
@@ -1199,6 +1313,42 @@ freshness:
       source_count: 1
       last_modified: '2026-09-13'
       source_hash: 4a13b3de17d7e952
+    story:F0002-S0001:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: 6cd2a9db9717204a
+    story:F0002-S0002:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: a836acb9624fd07c
+    story:F0002-S0003:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: db443e66d3130d81
+    story:F0002-S0004:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: 091c233aad8001b0
+    story:F0002-S0005:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: 63540a28680d9402
+    story:F0002-S0006:
+      source_paths:
+      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md
+      source_count: 1
+      last_modified: '2026-09-25'
+      source_hash: de3e7b83e17d5161
     story:F0005-S0001:
       source_paths:
       - planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md

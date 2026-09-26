@@ -1,0 +1,516 @@
+{
+  "provenance": "synthetic development; authored expectations, no runtime proof",
+  "schema": "../../schemas/authx-kernel.schema.json",
+  "cases": [
+    {
+      "id": "EX-AUTHX-007-context",
+      "schema_definition": "AuthorizationContext",
+      "expected_schema_valid": true,
+      "purpose": "Synthetic trusted context shape; validity alone confers no authority.",
+      "payload": {
+        "schema_version": 1,
+        "authenticated": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "kind": "user",
+          "status": "active",
+          "issuer": "https://idp.example.test/",
+          "subject": "synthetic-user"
+        },
+        "acting": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "kind": "user",
+          "status": "active",
+          "issuer": "https://idp.example.test/",
+          "subject": "synthetic-user"
+        },
+        "delegation": null,
+        "authorization_time": "2026-09-25T12:00:00Z",
+        "authority_revision": 1,
+        "policy_release": "fixture-only-v1",
+        "scope_slices": [
+          {
+            "membership_id": "00000000-0000-4000-8000-000000000005",
+            "scope": {
+              "tenant_id": "00000000-0000-4000-8000-000000000001",
+              "workspace_id": "00000000-0000-4000-8000-000000000002",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000003"
+            },
+            "role": "TenantMember",
+            "valid_from": "2026-09-25T00:00:00Z",
+            "expires_at": null,
+            "revoked_at": null,
+            "grant_revision": 1,
+            "selectors": [
+              {
+                "kind": "broker",
+                "mode": "all",
+                "ids": []
+              },
+              {
+                "kind": "account",
+                "mode": "all",
+                "ids": []
+              },
+              {
+                "kind": "policy",
+                "mode": "all",
+                "ids": []
+              }
+            ],
+            "classifications": [
+              "internal"
+            ],
+            "source_acl_ids": []
+          }
+        ],
+        "requested_scope": {
+          "knowledge_base_ids": null,
+          "selectors": [],
+          "business_valid_as_of": null,
+          "business_known_as_of": null
+        },
+        "trace_id": "EX-AUTHX-007"
+      }
+    },
+    {
+      "id": "EX-AUTHX-014-delegation",
+      "schema_definition": "Delegation",
+      "expected_schema_valid": true,
+      "purpose": "Finite explicit resource/action ceiling.",
+      "payload": {
+        "id": "00000000-0000-4000-8000-000000000006",
+        "acting_principal_id": "00000000-0000-4000-8000-000000000004",
+        "executor_principal_id": "00000000-0000-4000-8000-000000000007",
+        "issued_by": "00000000-0000-4000-8000-000000000008",
+        "issued_at": "2026-09-25T11:00:00Z",
+        "not_before": "2026-09-25T11:00:00Z",
+        "expires_at": "2026-09-25T13:00:00Z",
+        "revoked_at": null,
+        "revision": 1,
+        "ceilings": [
+          {
+            "scope": {
+              "tenant_id": "00000000-0000-4000-8000-000000000001",
+              "workspace_id": "00000000-0000-4000-8000-000000000002",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000003"
+            },
+            "resource": {
+              "type": "content_artifact",
+              "id": "00000000-0000-4000-8000-000000000009"
+            },
+            "actions": [
+              "read"
+            ]
+          }
+        ],
+        "onward_delegation": false
+      }
+    },
+    {
+      "id": "EX-AUTHX-002-identity",
+      "schema_definition": "TenancyIdentity",
+      "expected_schema_valid": true,
+      "purpose": "Tenant identity with explicit KB association; no grant implied.",
+      "payload": {
+        "schema_version": 1,
+        "tenant_id": "00000000-0000-4000-8000-000000000001",
+        "entity_id": "00000000-0000-4000-8000-000000000010",
+        "kb_scopes": [
+          {
+            "tenant_id": "00000000-0000-4000-8000-000000000001",
+            "workspace_id": "00000000-0000-4000-8000-000000000002",
+            "knowledge_base_id": "00000000-0000-4000-8000-000000000003"
+          }
+        ],
+        "created_at": "2026-09-25T11:00:00Z",
+        "created_by": "00000000-0000-4000-8000-000000000008"
+      }
+    },
+    {
+      "id": "EX-AUTHX-017-decision",
+      "schema_definition": "Decision",
+      "expected_schema_valid": true,
+      "purpose": "Complete synthetic allowed decision, not observed runtime output.",
+      "payload": {
+        "schema_version": 1,
+        "decision_id": "00000000-0000-4000-8000-000000000011",
+        "occurred_at": "2026-09-25T12:00:00Z",
+        "authenticated_principal_id": "00000000-0000-4000-8000-000000000004",
+        "actor_principal_id": "00000000-0000-4000-8000-000000000004",
+        "actor_kind": "user",
+        "executor_principal_id": null,
+        "delegation_id": null,
+        "delegation_revision": null,
+        "scope": {
+          "tenant_id": "00000000-0000-4000-8000-000000000001",
+          "workspace_id": "00000000-0000-4000-8000-000000000002",
+          "knowledge_base_id": "00000000-0000-4000-8000-000000000003"
+        },
+        "resource": {
+          "type": "content_artifact",
+          "id": "00000000-0000-4000-8000-000000000009"
+        },
+        "resource_revision": 1,
+        "restriction_revision": 1,
+        "action": "read",
+        "allowed": true,
+        "reason_code": "allowed",
+        "policy_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "policy_release": "fixture-only-v1",
+        "grant_revision": 1,
+        "matched_membership_ids": [
+          "00000000-0000-4000-8000-000000000005"
+        ],
+        "trace_id": "EX-AUTHX-017",
+        "operation_outcome": "succeeded"
+      }
+    },
+    {
+      "id": "EX-AUTHX-005-authentication",
+      "schema_definition": "AuthenticationEvent",
+      "expected_schema_valid": true,
+      "purpose": "Unresolved identity remains null.",
+      "payload": {
+        "schema_version": 1,
+        "event_id": "00000000-0000-4000-8000-000000000012",
+        "occurred_at": "2026-09-25T12:00:00Z",
+        "event_type": "credential_verification_failed",
+        "principal_id": null,
+        "reason_code": "expired",
+        "route_template": "/content/{artifactId}",
+        "trace_id": "EX-AUTHX-005"
+      }
+    },
+    {
+      "id": "SHAPE-01",
+      "schema_definition": "AuthorizationContext",
+      "expected_schema_valid": false,
+      "purpose": "Reject missing current revision.",
+      "payload": {
+        "schema_version": 1,
+        "authenticated": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "kind": "user",
+          "status": "active",
+          "issuer": "https://idp.example.test/",
+          "subject": "synthetic-user"
+        },
+        "acting": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "kind": "user",
+          "status": "active",
+          "issuer": "https://idp.example.test/",
+          "subject": "synthetic-user"
+        },
+        "delegation": null,
+        "authorization_time": "2026-09-25T12:00:00Z",
+        "policy_release": "fixture-only-v1",
+        "scope_slices": [
+          {
+            "membership_id": "00000000-0000-4000-8000-000000000005",
+            "scope": {
+              "tenant_id": "00000000-0000-4000-8000-000000000001",
+              "workspace_id": "00000000-0000-4000-8000-000000000002",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000003"
+            },
+            "role": "TenantMember",
+            "valid_from": "2026-09-25T00:00:00Z",
+            "expires_at": null,
+            "revoked_at": null,
+            "grant_revision": 1,
+            "selectors": [
+              {
+                "kind": "broker",
+                "mode": "all",
+                "ids": []
+              },
+              {
+                "kind": "account",
+                "mode": "all",
+                "ids": []
+              },
+              {
+                "kind": "policy",
+                "mode": "all",
+                "ids": []
+              }
+            ],
+            "classifications": [
+              "internal"
+            ],
+            "source_acl_ids": []
+          }
+        ],
+        "requested_scope": {
+          "knowledge_base_ids": null,
+          "selectors": [],
+          "business_valid_as_of": null,
+          "business_known_as_of": null
+        },
+        "trace_id": "EX-AUTHX-007"
+      }
+    },
+    {
+      "id": "SHAPE-02",
+      "schema_definition": "AuthorizationContext",
+      "expected_schema_valid": false,
+      "purpose": "Reject raw-token field.",
+      "payload": {
+        "schema_version": 1,
+        "authenticated": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "kind": "user",
+          "status": "active",
+          "issuer": "https://idp.example.test/",
+          "subject": "synthetic-user"
+        },
+        "acting": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "kind": "user",
+          "status": "active",
+          "issuer": "https://idp.example.test/",
+          "subject": "synthetic-user"
+        },
+        "delegation": null,
+        "authorization_time": "2026-09-25T12:00:00Z",
+        "authority_revision": 1,
+        "policy_release": "fixture-only-v1",
+        "scope_slices": [
+          {
+            "membership_id": "00000000-0000-4000-8000-000000000005",
+            "scope": {
+              "tenant_id": "00000000-0000-4000-8000-000000000001",
+              "workspace_id": "00000000-0000-4000-8000-000000000002",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000003"
+            },
+            "role": "TenantMember",
+            "valid_from": "2026-09-25T00:00:00Z",
+            "expires_at": null,
+            "revoked_at": null,
+            "grant_revision": 1,
+            "selectors": [
+              {
+                "kind": "broker",
+                "mode": "all",
+                "ids": []
+              },
+              {
+                "kind": "account",
+                "mode": "all",
+                "ids": []
+              },
+              {
+                "kind": "policy",
+                "mode": "all",
+                "ids": []
+              }
+            ],
+            "classifications": [
+              "internal"
+            ],
+            "source_acl_ids": []
+          }
+        ],
+        "requested_scope": {
+          "knowledge_base_ids": null,
+          "selectors": [],
+          "business_valid_as_of": null,
+          "business_known_as_of": null
+        },
+        "trace_id": "EX-AUTHX-007",
+        "bearer_token": "synthetic-not-a-credential"
+      }
+    },
+    {
+      "id": "SHAPE-03",
+      "schema_definition": "AuthorizationContext",
+      "expected_schema_valid": false,
+      "purpose": "Reject unapproved pilot role.",
+      "payload": {
+        "schema_version": 1,
+        "authenticated": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "kind": "user",
+          "status": "active",
+          "issuer": "https://idp.example.test/",
+          "subject": "synthetic-user"
+        },
+        "acting": {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "kind": "user",
+          "status": "active",
+          "issuer": "https://idp.example.test/",
+          "subject": "synthetic-user"
+        },
+        "delegation": null,
+        "authorization_time": "2026-09-25T12:00:00Z",
+        "authority_revision": 1,
+        "policy_release": "fixture-only-v1",
+        "scope_slices": [
+          {
+            "membership_id": "00000000-0000-4000-8000-000000000005",
+            "scope": {
+              "tenant_id": "00000000-0000-4000-8000-000000000001",
+              "workspace_id": "00000000-0000-4000-8000-000000000002",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000003"
+            },
+            "role": "Administrator",
+            "valid_from": "2026-09-25T00:00:00Z",
+            "expires_at": null,
+            "revoked_at": null,
+            "grant_revision": 1,
+            "selectors": [
+              {
+                "kind": "broker",
+                "mode": "all",
+                "ids": []
+              },
+              {
+                "kind": "account",
+                "mode": "all",
+                "ids": []
+              },
+              {
+                "kind": "policy",
+                "mode": "all",
+                "ids": []
+              }
+            ],
+            "classifications": [
+              "internal"
+            ],
+            "source_acl_ids": []
+          }
+        ],
+        "requested_scope": {
+          "knowledge_base_ids": null,
+          "selectors": [],
+          "business_valid_as_of": null,
+          "business_known_as_of": null
+        },
+        "trace_id": "EX-AUTHX-007"
+      }
+    },
+    {
+      "id": "SHAPE-04",
+      "schema_definition": "Delegation",
+      "expected_schema_valid": false,
+      "purpose": "Reject onward delegation.",
+      "payload": {
+        "id": "00000000-0000-4000-8000-000000000006",
+        "acting_principal_id": "00000000-0000-4000-8000-000000000004",
+        "executor_principal_id": "00000000-0000-4000-8000-000000000007",
+        "issued_by": "00000000-0000-4000-8000-000000000008",
+        "issued_at": "2026-09-25T11:00:00Z",
+        "not_before": "2026-09-25T11:00:00Z",
+        "expires_at": "2026-09-25T13:00:00Z",
+        "revoked_at": null,
+        "revision": 1,
+        "ceilings": [
+          {
+            "scope": {
+              "tenant_id": "00000000-0000-4000-8000-000000000001",
+              "workspace_id": "00000000-0000-4000-8000-000000000002",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000003"
+            },
+            "resource": {
+              "type": "content_artifact",
+              "id": "00000000-0000-4000-8000-000000000009"
+            },
+            "actions": [
+              "read"
+            ]
+          }
+        ],
+        "onward_delegation": true
+      }
+    },
+    {
+      "id": "SHAPE-05",
+      "schema_definition": "Delegation",
+      "expected_schema_valid": false,
+      "purpose": "Reject empty delegation ceiling.",
+      "payload": {
+        "id": "00000000-0000-4000-8000-000000000006",
+        "acting_principal_id": "00000000-0000-4000-8000-000000000004",
+        "executor_principal_id": "00000000-0000-4000-8000-000000000007",
+        "issued_by": "00000000-0000-4000-8000-000000000008",
+        "issued_at": "2026-09-25T11:00:00Z",
+        "not_before": "2026-09-25T11:00:00Z",
+        "expires_at": "2026-09-25T13:00:00Z",
+        "revoked_at": null,
+        "revision": 1,
+        "ceilings": [],
+        "onward_delegation": false
+      }
+    },
+    {
+      "id": "SHAPE-06",
+      "schema_definition": "Decision",
+      "expected_schema_valid": false,
+      "purpose": "An allow cannot carry unresolved scope.",
+      "payload": {
+        "schema_version": 1,
+        "decision_id": "00000000-0000-4000-8000-000000000011",
+        "occurred_at": "2026-09-25T12:00:00Z",
+        "authenticated_principal_id": "00000000-0000-4000-8000-000000000004",
+        "actor_principal_id": "00000000-0000-4000-8000-000000000004",
+        "actor_kind": "user",
+        "executor_principal_id": null,
+        "delegation_id": null,
+        "delegation_revision": null,
+        "scope": null,
+        "resource": {
+          "type": "content_artifact",
+          "id": "00000000-0000-4000-8000-000000000009"
+        },
+        "resource_revision": 1,
+        "restriction_revision": 1,
+        "action": "read",
+        "allowed": true,
+        "reason_code": "allowed",
+        "policy_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "policy_release": "fixture-only-v1",
+        "grant_revision": 1,
+        "matched_membership_ids": [
+          "00000000-0000-4000-8000-000000000005"
+        ],
+        "trace_id": "EX-AUTHX-017",
+        "operation_outcome": "succeeded"
+      }
+    },
+    {
+      "id": "EX-AUTHX-011-unresolved",
+      "schema_definition": "Decision",
+      "expected_schema_valid": true,
+      "purpose": "A deny may retain unresolved fields without invented ownership.",
+      "payload": {
+        "schema_version": 1,
+        "decision_id": "00000000-0000-4000-8000-000000000011",
+        "occurred_at": "2026-09-25T12:00:00Z",
+        "authenticated_principal_id": "00000000-0000-4000-8000-000000000004",
+        "actor_principal_id": "00000000-0000-4000-8000-000000000004",
+        "actor_kind": "user",
+        "executor_principal_id": null,
+        "delegation_id": null,
+        "delegation_revision": null,
+        "scope": null,
+        "resource": {
+          "type": "content_artifact",
+          "id": "00000000-0000-4000-8000-000000000009"
+        },
+        "resource_revision": null,
+        "restriction_revision": null,
+        "action": "read",
+        "allowed": false,
+        "reason_code": "missing_attributes",
+        "policy_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "policy_release": "fixture-only-v1",
+        "grant_revision": 1,
+        "matched_membership_ids": [],
+        "trace_id": "EX-AUTHX-017",
+        "operation_outcome": "denied"
+      }
+    }
+  ]
+}

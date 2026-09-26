@@ -4,10 +4,6 @@ coverage_note: Feature mappings are compiled from planning-mds/kg-source/feature
   explicit coverage exclusions until implementation exists.
 coverage:
   excluded_features:
-    - id: feature:F0002
-      path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0003
       path: planning-mds/features/F0003-postgresql-persistence
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -336,6 +332,63 @@ features:
       - schema:problem-details
       - schema:review-decision
   - status: planned
+    id: feature:F0002
+    path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts
+    affects:
+      - capability:authorization-enforcement
+      - capability:bounded-delegation
+      - capability:credential-verification-and-principal-resolution
+      - capability:current-resource-scope
+      - capability:durable-authorization-decisions
+      - capability:structural-tenancy-and-entity-identity
+      - endpoint:content-artifact-file-get
+      - endpoint:content-artifact-get
+      - endpoint:fact-commit
+      - endpoint:fact-get
+      - endpoint:review-decisions-submit
+      - endpoint:review-item-get
+      - entity:audit-event
+      - entity:delegation
+      - entity:knowledge-base
+      - entity:membership
+      - entity:principal
+      - entity:resource-scope
+      - entity:tenant
+      - entity:tenant-entity-identity
+      - entity:workspace
+    depends_on:
+      - feature:F0001
+    governed_by:
+      - adr:0030
+      - adr:0042
+      - adr:0049
+      - adr:0050
+      - adr:0052
+      - adr:0053
+      - adr:0061
+      - adr:0062
+    notes:
+      - F0005 synchronous worker is an impacted consumer requiring adapter regression; its ADR-0060 production
+        activation is not accepted by F0002.
+      - 'Historical review-to-commit wording reconciled in ADR-0062: F0002 owns authorization of existing
+        consumers, F0018 owns full orchestration, F0022 owns review UI.'
+      - Identity is tenant-scoped; KB access is explicit. Existing pilot roles only.
+      - New bindings are planning-only; runtime implementation and security proof remain unstarted. ADR-0061/0062
+        are Proposed.
+      - Phases A and B explicitly approved by user with approve-phase-a and approve-phase-b on 2026-09-25.
+    restricted_to_role:
+      - role:reviewer
+      - role:service-principal
+      - role:tenant-member
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:authx-kernel
+      - schema:canonical-commit-request
+      - schema:canonical-commit-response
+      - schema:problem-details
+      - schema:review-decision
+  - status: planned
     id: feature:F0005
     path: planning-mds/features/F0005-one-time-docling-ingestion
     affects:
@@ -521,6 +574,67 @@ stories:
       - adr:0049
       - adr:0050
       - adr:0058
+  - id: story:F0002-S0001
+    feature: feature:F0002
+    path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md
+    affects:
+      - capability:structural-tenancy-and-entity-identity
+      - entity:tenant-entity-identity
+    governed_by:
+      - adr:0061
+    uses_schema:
+      - schema:authx-kernel
+  - id: story:F0002-S0002
+    feature: feature:F0002
+    path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md
+    affects:
+      - capability:credential-verification-and-principal-resolution
+      - entity:principal
+    governed_by:
+      - adr:0061
+    uses_schema:
+      - schema:authx-kernel
+  - id: story:F0002-S0003
+    feature: feature:F0002
+    path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md
+    affects:
+      - capability:current-resource-scope
+      - entity:membership
+    governed_by:
+      - adr:0062
+    uses_schema:
+      - schema:authx-kernel
+  - id: story:F0002-S0004
+    feature: feature:F0002
+    path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md
+    affects:
+      - capability:authorization-enforcement
+      - entity:resource-scope
+    governed_by:
+      - adr:0062
+    uses_schema:
+      - schema:authx-kernel
+  - id: story:F0002-S0005
+    feature: feature:F0002
+    path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md
+    affects:
+      - capability:bounded-delegation
+      - entity:delegation
+    governed_by:
+      - adr:0062
+    uses_schema:
+      - schema:authx-kernel
+  - id: story:F0002-S0006
+    feature: feature:F0002
+    path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md
+    affects:
+      - capability:durable-authorization-decisions
+      - endpoint:content-artifact-file-get
+      - entity:audit-event
+    governed_by:
+      - adr:0062
+    uses_schema:
+      - schema:authx-kernel
   - id: story:F0005-S0001
     feature: feature:F0005
     path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md

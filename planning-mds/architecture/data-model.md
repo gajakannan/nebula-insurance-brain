@@ -217,3 +217,9 @@ Docling-Graph does not change source, content, and interpretation identity. F000
 | Document job | Tenant/KB-scoped idempotency key, lease/heartbeat, failure stage, parse checkpoint, cancellation, and retry state — F0005 |
 
 The current manifest and InterpretationResult schemas reject undeclared fields. Version additions with compatible readers and retain old bundles; do not relabel F0001 files as new-pipeline outputs. Original graph IDs remain run-local. Nebula entity resolution, evidence bindings, and commit services remain authoritative; no graph export becomes a canonical database import.
+
+## F0002 proposed structural ownership and AuthX substrate
+
+The [feature ERD](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md#feature-erd--proposed-ownership-and-security-substrate) and [assembly plan](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md#step-1--ownership-identity-substrate-and-migration-s0001) define the exact proposed registries, ownership constraints and backfill. ADR-0061 clarifies that tenant/entity identity and global principal control records do not acquire a fabricated KB owner; authoritative semantic content remains KB-owned. Tenant entity associations do not grant access. Existing IDs and audit history survive migration.
+
+New structural tables: tenant, workspace, knowledge_base, entity_identity, entity_knowledge_base, external_identity, principal_authority, resource_access and delegation. Existing membership gains current validity/restrictions; append-only audit supports the v1 decision payload. Source/content/assertion/review/fact/job descendants gain explicit composite ownership constraints. These are proposed migration targets, not claims about the current schema.

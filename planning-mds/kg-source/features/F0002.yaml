@@ -3,15 +3,14 @@ name: Tenancy-aware domain kernel + verified stable principal and scope contract
 path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
 phase: v0.1A
 roadmap_section: Next
 roadmap_order: 1
-rationale: Structural tenancy and verified principals must exist in the first schema because every authoritative
-  row carries tenant and knowledge-base ids and authorization is enforced at retrieval (sections 65, 66).
-validation_gate: F0001 accepted; plan action Phase A and Phase B approved for this feature.
+rationale: Tenant-scoped entity identity with explicit KB grants; Phases A and B approved. Six planned stories
+  define structural tenancy, stable principals, current resource scope, bounded delegation and durable decisions.
+  Runtime implementation and proof remain unstarted.
+validation_gate: 'Plan run 2026-09-25-3c64470a: Phase A and Phase B explicitly approved; G4/G5 automated validation
+  passed. Feature action must implement and prove all six stories.'
 depends_on:
 - feature:F0001
 governed_by:
@@ -19,3 +18,106 @@ governed_by:
 - adr:0042
 - adr:0049
 - adr:0050
+- adr:0052
+- adr:0053
+- adr:0061
+- adr:0062
+affects:
+- entity:tenant
+- entity:workspace
+- entity:knowledge-base
+- entity:tenant-entity-identity
+- entity:membership
+- entity:resource-scope
+- entity:delegation
+- entity:principal
+- entity:audit-event
+- capability:structural-tenancy-and-entity-identity
+- capability:current-resource-scope
+- capability:bounded-delegation
+- capability:durable-authorization-decisions
+- capability:authorization-enforcement
+- capability:credential-verification-and-principal-resolution
+- endpoint:content-artifact-get
+- endpoint:content-artifact-file-get
+- endpoint:review-item-get
+- endpoint:review-decisions-submit
+- endpoint:fact-get
+- endpoint:fact-commit
+uses_api_contract:
+- api:brain-api
+uses_schema:
+- schema:authx-kernel
+- schema:problem-details
+- schema:review-decision
+- schema:canonical-commit-request
+- schema:canonical-commit-response
+restricted_to_role:
+- role:tenant-member
+- role:reviewer
+- role:service-principal
+notes:
+- Phases A and B explicitly approved by user with approve-phase-a and approve-phase-b on 2026-09-25.
+- Identity is tenant-scoped; KB access is explicit. Existing pilot roles only.
+- New bindings are planning-only; runtime implementation and security proof remain unstarted. ADR-0061/0062
+  are Proposed.
+- 'Historical review-to-commit wording reconciled in ADR-0062: F0002 owns authorization of existing consumers,
+  F0018 owns full orchestration, F0022 owns review UI.'
+- F0005 synchronous worker is an impacted consumer requiring adapter regression; its ADR-0060 production activation
+  is not accepted by F0002.
+story_mappings:
+- id: story:F0002-S0001
+  path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md
+  affects:
+  - capability:structural-tenancy-and-entity-identity
+  - entity:tenant-entity-identity
+  uses_schema:
+  - schema:authx-kernel
+  governed_by:
+  - adr:0061
+- id: story:F0002-S0002
+  path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md
+  affects:
+  - capability:credential-verification-and-principal-resolution
+  - entity:principal
+  uses_schema:
+  - schema:authx-kernel
+  governed_by:
+  - adr:0061
+- id: story:F0002-S0003
+  path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md
+  affects:
+  - capability:current-resource-scope
+  - entity:membership
+  uses_schema:
+  - schema:authx-kernel
+  governed_by:
+  - adr:0062
+- id: story:F0002-S0004
+  path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md
+  affects:
+  - capability:authorization-enforcement
+  - entity:resource-scope
+  uses_schema:
+  - schema:authx-kernel
+  governed_by:
+  - adr:0062
+- id: story:F0002-S0005
+  path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md
+  affects:
+  - capability:bounded-delegation
+  - entity:delegation
+  uses_schema:
+  - schema:authx-kernel
+  governed_by:
+  - adr:0062
+- id: story:F0002-S0006
+  path: planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md
+  affects:
+  - capability:durable-authorization-decisions
+  - entity:audit-event
+  - endpoint:content-artifact-file-get
+  uses_schema:
+  - schema:authx-kernel
+  governed_by:
+  - adr:0062
