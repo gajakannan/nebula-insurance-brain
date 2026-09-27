@@ -31,3 +31,13 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 - Test chunk-relative to block/code-point mapping, page/bbox conventions, repeated values, and table-cell references in the native panel. Node-level provenance must not be displayed as property-level support.
 - Preserve ADR-0058 failure behavior when translated evidence cannot resolve. The pipeline switch does not replace the native review surface or its authority checks.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md), [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md), [ADR-0067](../../architecture/decisions/ADR-0067-automation-gated-by-unrecallable-impact.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Show a time mention's words beside its resolved interval and grade, and let an authorized reviewer set a document's date, which triggers re-resolution without re-parsing (ADR-0064).
+- Show interpretation drops per document, separately from review items, and show text origin beside evidence. `DESCRIBED`-only evidence arrives as a `DESCRIBED_EVIDENCE` review item (ADR-0065).
+- Capture an optional free-text `why` beside reason codes on every decision; it becomes precedent for automation (ADR-0067).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
+- **Schema versioning (validate finding A-5):** the optional free-text `why`, the `DESCRIBED_EVIDENCE` reason, and reviewer-set document dates need a versioned addition to `schemas/review-decision.schema.json` with compatible readers.

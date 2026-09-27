@@ -1,7 +1,7 @@
 # F0005 — One-time document ingestion — Status
 
 **Overall Status:** Synthetic development scope complete. The opt-in candidate and its development proof are implemented; production qualification and activation are future work. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).
-**Last Updated:** 2026-09-22
+**Last Updated:** 2026-09-25 (activation prerequisite from validate finding A-4; no status change)
 
 ## Current scope: early development
 
@@ -65,6 +65,7 @@ The candidate has been merged to main from `feature/docling-graph-delivery`, bas
 - [ ] Insurer-critical property/relationship evidence, table and multi-region cases.
 - [ ] Corpus comparison and timeout/partial/invalid-output/retry/restart cases.
 - [ ] Local vLLM, secrets, concurrency, tenant access, and retention.
+- [ ] Activation prerequisite added 2026-09-25 (validate finding A-4). Before S0004 activates the candidate pipeline, published blocks carry `text_origin` (`STATED`, `OCR`, `TRANSCRIBED`, `DESCRIBED`) and the producing engine, and the evidence mapping locates quotes on the server under the ADR-0065 admission contract. The alternative is a recorded deferral of both to F0004/F0016 with rationale. Resolve in F0005's next `feature` run. See [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md) and [validate run 2026-09-25-463eecdd](../../operations/evidence/runs/2026-09-25-463eecdd/architect-validation-report.md).
 
 ## Required Signoff Roles
 

@@ -28,3 +28,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 - Keep the six-file parse bundle and parser identity from ADR-0040. Record Docling-Graph pipeline revision/configuration separately; the converter remains Docling.
 - Publish and hash-verify the bundle through ContentArtifactStore. Store graph, provenance ledger, and effective extraction configuration as run-owned outputs; a new profile must not mutate the content artifact.
 - Preserve source and bundle access controls, retention, and backup/restore coverage for the additional run outputs.
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md), [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Store the document's own date with its source (`CONTENT`, `SOURCE_METADATA`, `HUMAN`). Upload, sync, and receipt times are recorded-time facts and never a document date (ADR-0064).
+- Content blocks carry `text_origin` (`STATED`, `OCR`, `TRANSCRIBED`, `DESCRIBED`), the producing engine/model/version, and an origin-specific anchor. A block never mixes origins (ADR-0065).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).

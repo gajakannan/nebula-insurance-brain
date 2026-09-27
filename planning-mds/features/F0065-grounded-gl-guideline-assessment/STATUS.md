@@ -41,6 +41,7 @@ No entries yet. Actual execution evidence belongs under the feature run's operat
 | General inference and rule composition | Bounded one-operation evaluator in v0.1 | [F0055](../F0055-native-reasoning/README.md) | Architect |
 | Automatic derivation propagation | Current evaluations recompute on demand | [F0056](../F0056-derived-dependency-invalidation/README.md) | Backend |
 | Embedding retrieval | Not a prerequisite for neural interpretation | [F0033](../F0033-pgvector-retrieval/README.md) | AI/backend |
+| Add `basis_hash` (exact input fact versions, rule version, ontology release, evaluator version) to `assessment-contract.md` and stories S0002/S0003 | ADR-0068 is Proposed and was added after this plan was drafted. It refines existing lineage and does not change outcomes. Carry it in through the next F0065 `plan` run (Phase B, existing feature), not a hand edit. Validate finding A-3. | [ADR-0068](../../architecture/decisions/ADR-0068-decision-basis-fingerprints.md); [validate run 2026-09-25-463eecdd](../../operations/evidence/runs/2026-09-25-463eecdd/architect-validation-report.md) | Architect + PM |
 
 ## Tracker Sync Checklist
 

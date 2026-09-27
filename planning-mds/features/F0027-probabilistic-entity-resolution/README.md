@@ -20,3 +20,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0066](../../architecture/decisions/ADR-0066-names-are-time-bounded-claims.md), [ADR-0067](../../architecture/decisions/ADR-0067-automation-gated-by-unrecallable-impact.md), [ADR-0068](../../architecture/decisions/ADR-0068-decision-basis-fingerprints.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Name-vector, abbreviation, containment, and cross-script matches only propose pairs. A pair proposed by similarity is never merged on a batch model verdict alone (ADR-0066).
+- Automated merges pass the impact hold, read only human precedent, record their undo, and respect the revert fuse. Automation is off by default (ADR-0067).
+- Key verdict caches on a basis that includes both profiles and the precedent set (ADR-0068).

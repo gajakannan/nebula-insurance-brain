@@ -20,3 +20,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0069](../../architecture/decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Future mutation tools execute through action attempts; read-only tools are unaffected (ADR-0069).

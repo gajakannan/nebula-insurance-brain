@@ -20,3 +20,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0063](../../architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Approved ontology elements carry a definition, examples, and regression cases drawn from open statements. A definition change reruns its cases, and releases record the structure alignment depends on: hierarchy, equivalences, domains, ranges (ADR-0063).

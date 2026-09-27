@@ -41,14 +41,25 @@ extraction_profile
 extraction_profile_module
 semantic_interpretation_run
 
-assertion
+assertion                       assertion_kind: OPEN_STATEMENT | TYPED_ASSERTION (ADR-0063)
 assertion_value
 assertion_relationship
 assertion_evidence
+assertion_qualifier             role-word qualifiers on open statements; includes mood (ADR-0065)
+typed_assertion_source          open statements behind a materialized typed assertion (ADR-0063)
+time_mention                    verbatim time expression, interpretation, computed interval, grade (ADR-0064)
+document_time_context           per document version and run (ADR-0064)
+interpretation_drop             refused / truncated / uninterpreted items with reason (ADR-0065)
+
+kind_word_binding               (ADR-0063, F0066)
+signature_binding               with decision basis (ADR-0063, ADR-0068)
+implication_rule
+implication_rule_version
+phrase_reading
 
 entity
 entity_type
-entity_alias
+entity_alias                    search projection over name facts (ADR-0066)
 
 fact_slot
 fact_slot_qualifier
@@ -94,6 +105,11 @@ hypothetical_scenario
 
 decision
 decision_input
+
+automated_decision              action, confidence, precedents, trace, undo, status (ADR-0067)
+automation_fuse                 per KB and automation type (ADR-0067)
+action_definition               revisioned (ADR-0069)
+action_attempt                  request identity, dispatch token, state (ADR-0069)
 
 embedding
 
@@ -223,3 +239,24 @@ The current manifest and InterpretationResult schemas reject undeclared fields. 
 The [feature ERD](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md#feature-erd--proposed-ownership-and-security-substrate) and [assembly plan](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md#step-1--ownership-identity-substrate-and-migration-s0001) define the exact proposed registries, ownership constraints and backfill. ADR-0061 clarifies that tenant/entity identity and global principal control records do not acquire a fabricated KB owner; authoritative semantic content remains KB-owned. Tenant entity associations do not grant access. Existing IDs and audit history survive migration.
 
 New structural tables: tenant, workspace, knowledge_base, entity_identity, entity_knowledge_base, external_identity, principal_authority, resource_access and delegation. Existing membership gains current validity/restrictions; append-only audit supports the v1 decision payload. Source/content/assertion/review/fact/job descendants gain explicit composite ownership constraints. These are proposed migration targets, not claims about the current schema.
+
+## Statements, time, and governance additions (ADR-0063 to ADR-0069)
+
+These are proposed contract additions, not claims about the current schema. The feature named for each record settles its columns in Phase B.
+
+| Record | Required information | Owner |
+|---|---|---|
+| Assertion (kind) | `assertion_kind`; for open statements: nullable `predicate_id`, source relation phrase, subject/object references or literal, mandatory quote with server-computed selector; typed assertions carry the ontology release | F0006 |
+| Assertion qualifier | Role word as written, value or entity reference; `mood` holds the passage's own words | F0006 |
+| Typed assertion source | Typed assertion ↔ open statement(s), with binding or implication-rule version; retirement when no source holds | F0066 |
+| Time mention | Text, block, offsets, run, shape/reference/anchor/offset/granularity, computed interval, resolution grade, assertions dated | F0016 |
+| Document time context | Document date and its source (`CONTENT`, `SOURCE_METADATA`, `HUMAN`), defined periods and calendars, anchors, time-of-day/time-zone convention | F0004/F0016 |
+| Canonical fact version (time) | Per-bound granularity; `valid_to_state` (`OPEN`, `BOUNDED`, `UNKNOWN`); `attested_from`, `attested_to` | F0008 |
+| Content block (origin) | `text_origin`, producing engine/model/version, origin-specific anchor; no mixed origins | F0004 |
+| Interpretation drop | Run, block, reason code, model/prompt identity, raw-item hash, access-controlled excerpt | F0016 |
+| Signature binding | Signature (phrase, subject classes, object classes or VALUE), property, direction or `NONE`/`UNDECIDED` with reason, ontology release, basis hash, decider, confidence | F0066 |
+| Implication rule / phrase reading | Signature or kind-word key, concluded property, object source, version; reading cached per distinct phrase including "no answer" | F0066 |
+| Name facts | `hasLegalName`, `hasTradeName`, `hasFormerName`, `knownAs` FactSlots; `entity_alias` becomes a projection | F0007/F0013/F0017 |
+| Automated decision | Target, action, confidence, model sentence, precedents shown, trace, undo data, status; impact-hold reason | F0027/F0043 |
+| Decision basis | `basis_hash` on interpretation runs, bindings, resolution verdicts, derived facts/assessments, impact analyses | F0016/F0027/F0032/F0056/F0065/F0066 |
+| Action attempt | Execution request id (unique `NULLS NOT DISTINCT` with action and scope), definition revision, dispatch token, state, response capture, timestamps, safe request snapshot | F0050/F0059 |
