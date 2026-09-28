@@ -22,8 +22,8 @@
 | Restore drill: snapshot restored into a scratch database, verified, migrated to head, dropped | restored at 0003 with 48 audit rows; migrated to 0006; legacy audit digest identical before and after (e12f16345b695146d21b22f2436d7578) | artifacts/test-results/g2-devops-restore-drill.txt |
 | Expand-only rollback (0006 → 0004 → 0006) on a throwaway database | clean round trip | artifacts/test-results/g2-devops-migration-roundtrip.txt |
 | 0006 refuses un-reconciled data without changing the schema; invalid job UUID text stops 0005 before any change | proven | artifacts/test-results/g2-engine-pytest.txt |
-| Operator runbook on the dev database: reviewed mapping, then dry-run, then digest-bound apply with `--activate-policy` | applied; policy release `sha256:059497cd…168ee` active | artifacts/test-results/g2-dev-reconcile-dryrun.json, artifacts/test-results/g2-dev-reconcile-apply.json |
-| API process starts with the committed identity profile and serves under ZAP | started; 0 FAIL | artifacts/security/g2-api-server.log, artifacts/security/g2-zap-report.json |
+| Operator runbook on the dev database: reviewed mapping, then dry-run, then digest-bound apply with `--activate-policy` | applied; policy release `sha256:059497cd…168ee` active | artifacts/test-results/g2-dev-reconcile-dryrun.json and artifacts/test-results/g2-dev-reconcile-apply.json |
+| API process starts with the committed identity profile and serves under ZAP | started; 0 FAIL | artifacts/security/g2-api-server.log and artifacts/security/g2-zap-report.json |
 | Lockfiles consistent for CI `uv sync --locked` | engine and neuron `uv lock --check` pass | artifacts/test-results/g2-devops-lock-check.txt |
 
 ## Rollback and operations notes

@@ -19,16 +19,16 @@
 
 ## Story × Role Progress
 
-Live during feature run `2026-09-27-bb7c8d1d`. Implementation, QA and DevOps cells flipped at G2; Code Review and Security resolve at G3.
+Live during feature run `2026-09-27-bb7c8d1d`. Implementation, QA and DevOps cells flipped at G2; Code Review and Security resolved PASS at G3 (APPROVED WITH RECOMMENDATIONS / PASS WITH RECOMMENDATIONS; 0 critical, 0 high). Overall stays In Progress until approval, signoff and closeout.
 
 | Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
 |---|---|---|---|---|---|---|---|---|
-| F0002-S0001 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
-| F0002-S0002 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
-| F0002-S0003 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
-| F0002-S0004 | done | not-in-scope | done (worker CLI trusted submission) | done | Pending | Pending | done | In Progress |
-| F0002-S0005 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
-| F0002-S0006 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
+| F0002-S0001 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | In Progress |
+| F0002-S0002 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | In Progress |
+| F0002-S0003 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | In Progress |
+| F0002-S0004 | done | not-in-scope | done (worker CLI trusted submission) | done | PASS | PASS | done | In Progress |
+| F0002-S0005 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | In Progress |
+| F0002-S0006 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | In Progress |
 
 ## Backend Progress
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -119,9 +120,10 @@ def _other_key_token(subject: str) -> str:
     ],
 )
 async def test_invalid_credentials_never_touch_protected_storage(
-    client, rsa_key: rsa.RSAPrivateKey, label: str, reason: str
+    client, rsa_key: rsa.RSAPrivateKey, label: str, reason: str, caplog
 ) -> None:
     """EX-AUTHX-005 / S0002 AC3 / S0006 AC2 with an instrumented database."""
+    caplog.set_level(logging.WARNING, logger="brain_api.deps")
     tenant, kb = uuid4(), uuid4()
     await seed_principal_and_membership(
         client.session_factory, subject="victim", tenant_id=tenant, knowledge_base_id=kb
@@ -176,14 +178,16 @@ async def test_invalid_credentials_never_touch_protected_storage(
         row = (
             await session.execute(
                 text(
-                    "SELECT reason_code, route_template, payload FROM authentication_event "
-                    "ORDER BY occurred_at DESC LIMIT 1"
+                    "SELECT reason_code, route_template, trace_id, payload "
+                    "FROM authentication_event ORDER BY occurred_at DESC LIMIT 1"
                 )
             )
         ).one()
     assert row.reason_code == reason
     assert row.route_template == "/content/{artifact_id}/files/{path:path}"
     assert row.payload["principal_id"] is None
+    logged = [r for r in caplog.records if r.name == "brain_api.deps"][-1]
+    assert logged.event_trace_id == row.trace_id  # log line correlates with the durable event
     credential = headers.get("Authorization", "").partition(" ")[2]
     if credential:
         assert credential not in json.dumps(row.payload)

@@ -72,8 +72,11 @@ def _route_template(request: Request) -> str:
     return getattr(route, "path", None) or "unmatched"
 
 
-def _record_credential_failure(request: Request, reason_code: str) -> None:
-    """Process diagnostics for the verification reason; never logs the bearer token."""
+def _record_credential_failure(
+    request: Request, reason_code: str, event_trace_id: str | None = None
+) -> None:
+    """Process diagnostics for the verification reason; never logs the bearer token.
+    `event_trace_id` correlates this line with the durable authentication event."""
 
     logger.warning(
         "unauthenticated_request",
@@ -83,6 +86,7 @@ def _record_credential_failure(request: Request, reason_code: str) -> None:
             "method": request.method,
             "path": request.url.path,
             "trace_id": request.headers.get("x-request-id") or str(uuid4()),
+            "event_trace_id": event_trace_id,
         },
     )
 
@@ -120,7 +124,8 @@ async def _reject(
     """Durably record the rejected credential (no principal or resource lookup), then
     return the generic 401. If the event cannot be persisted, the caller gets a
     sanitized 503 instead and no protected operation runs."""
-    _record_credential_failure(request, reason_code)
+    trace_id = new_trace_id()
+    _record_credential_failure(request, reason_code, trace_id)
     try:
         await sink.record(
             AuthenticationEvent(
@@ -128,7 +133,7 @@ async def _reject(
                 occurred_at=datetime.now(UTC),
                 reason_code=AuthenticationReason(reason_code),
                 route_template=_route_template(request),
-                trace_id=new_trace_id(),
+                trace_id=trace_id,
             )
         )
     except Exception as exc:  # noqa: BLE001 - any sink failure is an availability failure

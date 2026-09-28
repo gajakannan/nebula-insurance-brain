@@ -391,3 +391,72 @@ def _revoke_all(principal_id):
             )
 
     return revoke
+
+
+async def test_denied_and_nonexistent_are_byte_for_byte_indistinguishable(
+    client, rsa_key: rsa.RSAPrivateKey
+) -> None:
+    """S0004 AC7: apart from the per-request trace ID and path, the denial body for an
+    existing-but-forbidden artifact equals the body for an ID that does not exist."""
+    tenant, kb = uuid4(), uuid4()
+    await seed_principal(client.session_factory, subject="probe-outsider")
+    artifact = await seed_content_artifact(
+        client.session_factory, tenant_id=tenant, knowledge_base_id=kb
+    )
+    headers = bearer(rsa_key, "probe-outsider")
+    denied = (await client.get(f"/content/{artifact}", headers=headers)).json()
+    missing = (await client.get(f"/content/{uuid4()}", headers=headers)).json()
+    for body in (denied, missing):
+        body.pop("traceId")
+        body.pop("instance")
+    assert denied == missing
+
+
+async def test_stale_review_reopens_a_task_that_inherits_its_restrictions(
+    client, rsa_key: rsa.RSAPrivateKey
+) -> None:
+    """A stale annotation re-opens a review task for the newer assertion version; the
+    engine-created task carries the original's security metadata (no default)."""
+    tenant, kb = uuid4(), uuid4()
+    reviewer = await seed_principal(client.session_factory, subject="stale-reviewer")
+    await seed_grant(
+        client.session_factory, reviewer, tenant_id=tenant, knowledge_base_id=kb, role="Reviewer"
+    )
+    item, batch = await seed_review_item_in_batch(
+        client.session_factory,
+        tenant_id=tenant,
+        knowledge_base_id=kb,
+        assembling_principal_id=reviewer,
+        classifications=["internal", "claims"],
+    )
+    async with client.session_factory() as session:
+        await session.execute(
+            text(
+                "UPDATE assertion SET version = 2 WHERE id = "
+                "(SELECT assertion_id FROM review_item WHERE id = :i)"
+            ),
+            {"i": item},
+        )
+        await session.commit()
+    response = await client.post(
+        f"/reviews/batches/{batch}/decisions",
+        headers=bearer(rsa_key, "stale-reviewer"),
+        json={
+            "decisions": [{"review_item_id": str(item), "action": "ACCEPT", "assertion_version": 1}]
+        },
+    )
+    assert response.status_code == 200 and response.json()["stale"] == 1
+    async with client.session_factory() as session:
+        reopened = (
+            await session.execute(
+                text(
+                    "SELECT r.classifications, r.tenant_id, r.knowledge_base_id "
+                    "FROM resource_access r JOIN review_item i ON i.id = r.resource_id "
+                    "WHERE i.assertion_version = 2 AND i.assertion_id = "
+                    "(SELECT assertion_id FROM review_item WHERE id = :i)"
+                ),
+                {"i": item},
+            )
+        ).one()
+    assert reopened.classifications == ["claims", "internal"]
+    assert (reopened.tenant_id, reopened.knowledge_base_id) == (tenant, kb)
