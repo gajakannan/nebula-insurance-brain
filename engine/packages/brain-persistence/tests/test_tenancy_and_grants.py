@@ -21,7 +21,6 @@ from brain_domain.authx import (
 )
 from brain_domain.principal import PrincipalKind, PrincipalStatus
 from brain_domain.tenancy import OwnedScope, OwnershipConflict
-from brain_persistence import fixtures
 from brain_persistence.base import Base, sqlite_test_tables
 from brain_persistence.grants import (
     activate_policy_release,
@@ -50,6 +49,7 @@ from brain_persistence.tenancy import (
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter, compute_policy_release
 from brain_security.delegation import DelegationRejected
 from brain_security.principals import AliasConflict
+from brain_testing import fixtures
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -411,3 +411,20 @@ def test_delegation_lifecycle_guards(session) -> None:
     assert revoked.revoked_at is not None and revoked.revision == 2
     with pytest.raises(DelegationRejected):
         revoke_delegation(session, uuid4(), operator_id=OPERATOR, approval_ref="R", at=now)
+
+
+def test_hydration_refuses_metadata_that_disagrees_with_the_record_owner(session) -> None:
+    """Defense in depth beneath the 0007 immutability trigger: if trusted metadata
+    and the protected record ever disagree on owner, hydration denies (None)."""
+    from brain_persistence.authx import hydrate
+
+    tenant, kb, other_kb = uuid4(), uuid4(), uuid4()
+    artifact = fixtures.seed_content_artifact(session, tenant, kb)
+    fixtures.seed_scope(session, tenant, other_kb)
+    key = ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact)
+    assert hydrate(session, key) is not None
+    row = session.get(ResourceAccessRow, (key.type.value, key.id))
+    row.knowledge_base_id = other_kb  # SQLite has no 0007 trigger: simulate drift
+    session.flush()
+    assert hydrate(session, key) is None
+    assert hydrate(session, ResourceKey(ResourceType.CONTENT_ARTIFACT, uuid4())) is None

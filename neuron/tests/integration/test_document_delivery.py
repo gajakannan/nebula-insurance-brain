@@ -322,9 +322,9 @@ def test_job_authorization_reloads_revocations_and_audits_denials(tmp_path: Path
     from brain_domain.authx import ResourceKey, ResourceType
     from brain_domain.principal import PrincipalKind
     from brain_jobs.queue import JobLease
-    from brain_persistence import fixtures
     from brain_persistence.grants import revoke_membership
     from brain_persistence.models import AuditEventRow
+    from brain_testing import fixtures
     from brain_worker.document_delivery import DocumentJobAuthorization
     from sqlalchemy.orm import Session
 
@@ -412,7 +412,7 @@ def test_outbox_import_is_atomic_idempotent_and_never_commits_facts(
     _engine_schema(engine)
     queue = DocumentJobQueue(engine, clock=lambda: 100.0)
     from brain_domain.authx import ResourceKey, ResourceType
-    from brain_persistence import fixtures
+    from brain_testing import fixtures
 
     with Session(engine) as session, session.begin():
         fixtures.protect(

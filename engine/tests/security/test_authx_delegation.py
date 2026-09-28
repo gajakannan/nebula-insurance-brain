@@ -24,13 +24,13 @@ from brain_domain.authx import (
 )
 from brain_domain.principal import PrincipalKind
 from brain_jobs.queue import JobLease
-from brain_persistence import fixtures
 from brain_persistence.authx import SqlAlchemyAuthorityStore
 from brain_persistence.grants import issue_delegation, revoke_delegation, revoke_membership
 from brain_persistence.identity import find_by_alias
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter
 from brain_security.delegation import DelegationRejected
 from brain_security.execution import AuthorizationDenied, AuthorizationExecution
+from brain_testing import fixtures
 from cryptography.hazmat.primitives.asymmetric import rsa
 from sqlalchemy import create_engine
 
@@ -397,3 +397,74 @@ def _revoke_all(principal_id):
             )
 
     return revoke
+
+
+async def test_worker_lease_scope_must_match_the_artifact_metadata(client) -> None:
+    """The lease's KB narrows the request: an artifact whose trusted metadata names
+    another KB is a recorded `scope_denied`, never an allow refused afterwards."""
+    tenant, kb_one, kb_two = uuid4(), uuid4(), uuid4()
+    service = await seed_principal(
+        client.session_factory, subject="scope-svc", kind=PrincipalKind.SERVICE
+    )
+    for kb in (kb_one, kb_two):
+        await seed_grant(
+            client.session_factory,
+            service,
+            tenant_id=tenant,
+            knowledge_base_id=kb,
+            role="ServicePrincipal",
+        )
+    artifact = uuid4()
+    await run_sync(
+        client.session_factory,
+        lambda s: fixtures.protect(
+            s,
+            ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),
+            tenant,
+            kb_one,
+            before_record=True,
+        ),
+    )
+    engine = _sync_engine()
+    try:
+        authorization = DocumentJobAuthorization(
+            engine, POLICIES / "model.conf", POLICIES / "policy.csv"
+        )
+        mismatched = authorization.for_job(
+            JobLease(
+                uuid4(),
+                tenant,
+                kb_two,
+                artifact,
+                1,
+                1,
+                {
+                    "actor_id": str(service),
+                    "correlation_id": str(uuid4()),
+                },
+            )
+        )
+        with pytest.raises(PermissionError):
+            mismatched(tenant, kb_two, artifact, "ingest")
+        matched = authorization.for_job(
+            JobLease(
+                uuid4(),
+                tenant,
+                kb_one,
+                artifact,
+                1,
+                1,
+                {
+                    "actor_id": str(service),
+                    "correlation_id": str(uuid4()),
+                },
+            )
+        )
+        matched(tenant, kb_one, artifact, "ingest")
+    finally:
+        engine.dispose()
+    outcomes = [
+        (d["allowed"], d["reason_code"])
+        for d in await decisions_for(client.session_factory, artifact)
+    ]
+    assert outcomes[0] == (False, "scope_denied") and outcomes[-1] == (True, "allowed")

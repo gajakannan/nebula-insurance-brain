@@ -11,8 +11,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import datetime
-from typing import Protocol
-from uuid import UUID
 
 from brain_domain.authx import Delegation, ScopeSlice, is_active
 from brain_domain.principal import Principal, PrincipalKind
@@ -59,21 +57,3 @@ def validate_issuance(
                 for s in current
             ):
                 raise DelegationRejected("ceiling exceeds the acting principal's current authority")
-
-
-class DelegationService(Protocol):
-    async def resolve(
-        self, delegation_id: UUID, executor_id: UUID, at: datetime
-    ) -> Delegation | None: ...
-
-    async def issue(
-        self,
-        delegation: Delegation,
-        operator_id: UUID,
-        approval_ref: str,
-        expected_authority_revision: int,
-    ) -> UUID: ...
-
-    async def revoke(
-        self, delegation_id: UUID, operator_id: UUID, approval_ref: str, expected_revision: int
-    ) -> None: ...

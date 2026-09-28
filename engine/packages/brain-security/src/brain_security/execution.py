@@ -73,30 +73,40 @@ class PrincipalAuthority:
     revision: int
 
 
-class AuthorityStore(Protocol):
-    """Persistence port bound to one unit of work (implemented in brain_persistence)."""
+class AuthorityReader(Protocol):
+    """Synchronous trusted reads inside one unit of work (implemented in
+    brain_persistence). Both the async API and the sync worker drive the same
+    `decide` over this port, so the lock/load orchestration exists exactly once."""
 
-    async def current_policy_release(self) -> str | None:
+    def current_policy_release(self) -> str | None:
         """Read the current release pointer FOR SHARE."""
         ...
 
-    async def peek_delegation(self, delegation_id: UUID) -> Delegation | None:
+    def peek_delegation(self, delegation_id: UUID) -> Delegation | None:
         """Unlocked read, only to learn the (immutable) acting principal."""
         ...
 
-    async def lock_authority(self, principal_ids: Sequence[UUID]) -> dict[UUID, PrincipalAuthority]:
+    def lock_authority(self, principal_ids: Sequence[UUID]) -> dict[UUID, PrincipalAuthority]:
         """Reload principals and FOR SHARE their authority rows in ascending ID order."""
         ...
 
-    async def lock_delegation(self, delegation_id: UUID) -> Delegation | None: ...
+    def lock_delegation(self, delegation_id: UUID) -> Delegation | None: ...
 
-    async def scope_slices(self, principal_id: UUID) -> tuple[ScopeSlice, ...]:
+    def scope_slices(self, principal_id: UUID) -> tuple[ScopeSlice, ...]:
         """Unrevoked grant slices; validity windows are judged by the evaluator."""
         ...
 
-    async def hydrate(self, key: ResourceKey) -> ResourceEnvelope | None:
+    def hydrate(self, key: ResourceKey, *, require_record: bool = True) -> ResourceEnvelope | None:
         """FOR SHARE the resource-access row and verify it against the semantic row's
         ownership. `None` when missing or inconsistent (fail closed)."""
+        ...
+
+
+class AuthorityStore(Protocol):
+    """Async unit of work used by `AuthorizationExecution`."""
+
+    async def run_sync(self, fn: Callable[[AuthorityReader], T]) -> T:
+        """Run `fn` against a synchronous reader bound to this unit of work."""
         ...
 
     async def append_decision(self, decision: AuthorizationDecision) -> None: ...
@@ -166,6 +176,90 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
+def decide(
+    reader: AuthorityReader,
+    policy: PolicyEvaluator,
+    release: PolicyRelease,
+    *,
+    authenticated_id: UUID,
+    keys: Sequence[ResourceKey],
+    action: str,
+    requested: RequestedScope,
+    trace_id: str,
+    delegation_id: UUID | None,
+    clock: Callable[[], datetime],
+    new_id: Callable[[], UUID],
+    require_record: bool = True,
+) -> list[Evaluated]:
+    """Lock and load current trusted state, then evaluate every key (ADR-0062).
+
+    The single orchestration shared by the async API facade and the sync worker.
+    Lock order: policy pointer, principal authority rows by ID, delegation row,
+    resource-access rows by key. The authorization time is read only after the
+    locks are held, so a revocation committed before this call is observed.
+    `require_record=False` is only for a worker step on an artifact whose trusted
+    submitter provisioned its metadata before the record exists."""
+    if reader.current_policy_release() != release.release_id:
+        raise AuthorizationUnavailable("policy release is not current")
+
+    acting_id = authenticated_id
+    peeked: Delegation | None = None
+    if delegation_id is not None:
+        peeked = reader.peek_delegation(delegation_id)
+        if peeked is not None:
+            acting_id = peeked.acting_principal_id
+    authorities = reader.lock_authority(sorted({authenticated_id, acting_id}, key=str))
+    if authenticated_id not in authorities or acting_id not in authorities:
+        raise AuthorizationUnavailable("principal authority is missing")
+
+    delegation = reader.lock_delegation(delegation_id) if delegation_id else None
+    delegation_valid = delegation_id is None or (
+        delegation is not None
+        and peeked is not None
+        and delegation.acting_principal_id == peeked.acting_principal_id
+        and delegation.executor_principal_id == authenticated_id
+    )
+    at = clock()
+    if not delegation_valid:
+        # A forged/unknown/mis-bound delegation: evaluate as the executor alone and
+        # deny; the executor's own grants are never substituted (S0005 AC4).
+        acting_id, delegation = authenticated_id, None
+    context = assemble_context(
+        authenticated=authorities[authenticated_id],
+        acting=authorities[acting_id],
+        delegation=delegation,
+        at=at,
+        release=release,
+        slices=reader.scope_slices(acting_id),
+        requested=requested,
+        trace_id=trace_id,
+    )
+    results: list[Evaluated] = []
+    for key in sorted(set(keys)):
+        envelope = reader.hydrate(key, require_record=require_record)
+        dependencies = DependencySet()
+        if envelope is not None:
+            hydrated: dict[ResourceKey, ResourceEnvelope | None] = {}
+            while pending := pending_dependency_keys(envelope, hydrated):
+                for dependency_key in pending:
+                    hydrated[dependency_key] = reader.hydrate(dependency_key)
+            dependencies = collect_dependencies(envelope, hydrated)
+        decision = evaluate(
+            context,
+            key,
+            envelope,
+            dependencies,
+            action,
+            policy,
+            decision_id=new_id(),
+            delegation_unresolved=not delegation_valid,
+        )
+        results.append(
+            Evaluated(context, key, envelope, dependencies, decision, not delegation_valid)
+        )
+    return results
+
+
 class AuthorizationExecution:
     def __init__(
         self,
@@ -191,66 +285,21 @@ class AuthorizationExecution:
         trace_id: str,
         delegation_id: UUID | None,
     ) -> list[Evaluated]:
-        store = self._store
-        if await store.current_policy_release() != self._release.release_id:
-            raise AuthorizationUnavailable("policy release is not current")
-
-        acting_id = authenticated.id
-        peeked: Delegation | None = None
-        if delegation_id is not None:
-            peeked = await store.peek_delegation(delegation_id)
-            if peeked is not None:
-                acting_id = peeked.acting_principal_id
-        authorities = await store.lock_authority(sorted({authenticated.id, acting_id}, key=str))
-        if authenticated.id not in authorities or acting_id not in authorities:
-            raise AuthorizationUnavailable("principal authority is missing")
-
-        delegation = await store.lock_delegation(delegation_id) if delegation_id else None
-        delegation_valid = delegation_id is None or (
-            delegation is not None
-            and peeked is not None
-            and delegation.acting_principal_id == peeked.acting_principal_id
-            and delegation.executor_principal_id == authenticated.id
-        )
-        at = self._clock()
-        if not delegation_valid:
-            # A forged/unknown/mis-bound delegation: evaluate as the executor alone and
-            # deny; the executor's own grants are never substituted (S0005 AC4).
-            acting_id, delegation = authenticated.id, None
-        context = assemble_context(
-            authenticated=authorities[authenticated.id],
-            acting=authorities[acting_id],
-            delegation=delegation,
-            at=at,
-            release=self._release,
-            slices=await store.scope_slices(acting_id),
-            requested=requested,
-            trace_id=trace_id,
-        )
-        results: list[Evaluated] = []
-        for key in sorted(set(keys)):
-            envelope = await store.hydrate(key)
-            dependencies = DependencySet()
-            if envelope is not None:
-                hydrated: dict[ResourceKey, ResourceEnvelope | None] = {}
-                while pending := pending_dependency_keys(envelope, hydrated):
-                    for dependency_key in pending:
-                        hydrated[dependency_key] = await store.hydrate(dependency_key)
-                dependencies = collect_dependencies(envelope, hydrated)
-            decision = evaluate(
-                context,
-                key,
-                envelope,
-                dependencies,
-                action,
+        return await self._store.run_sync(
+            lambda reader: decide(
+                reader,
                 self._policy,
-                decision_id=self._new_id(),
-                delegation_unresolved=not delegation_valid,
+                self._release,
+                authenticated_id=authenticated.id,
+                keys=keys,
+                action=action,
+                requested=requested,
+                trace_id=trace_id,
+                delegation_id=delegation_id,
+                clock=self._clock,
+                new_id=self._new_id,
             )
-            results.append(
-                Evaluated(context, key, envelope, dependencies, decision, not delegation_valid)
-            )
-        return results
+        )
 
     async def _guarded_decide(
         self,

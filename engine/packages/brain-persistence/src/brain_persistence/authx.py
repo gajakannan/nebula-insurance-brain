@@ -313,8 +313,8 @@ def append_authentication_event(session: Session, event: AuthenticationEvent) ->
 
 
 class SyncAuthorityStore:
-    """`brain_security.execution.AuthorityStore` semantics over a sync `Session`
-    (the worker's transaction); methods are plain calls, not coroutines."""
+    """`brain_security.execution.AuthorityReader` over a sync `Session`: the worker
+    uses it directly; the async API reaches it through `SqlAlchemyAuthorityStore`."""
 
     def __init__(self, session: Session) -> None:
         self.session = session
@@ -342,34 +342,18 @@ class SyncAuthorityStore:
 
 
 class SqlAlchemyAuthorityStore:
-    """Async `AuthorityStore` bound to the request's unit of work."""
+    """Async `AuthorityStore` bound to the request's unit of work. Trusted reads run
+    through `run_sync` on the same `SyncAuthorityStore` the worker uses, so the API
+    and the worker execute identical queries, locks and orchestration."""
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def _run(self, fn: Callable[..., T], *args: Any, **kwargs: Any) -> T:
-        return await self._session.run_sync(lambda s: fn(s, *args, **kwargs))
-
-    async def current_policy_release(self) -> str | None:
-        return await self._run(current_policy_release)
-
-    async def peek_delegation(self, delegation_id: UUID) -> Delegation | None:
-        return await self._run(peek_delegation, delegation_id)
-
-    async def lock_authority(self, principal_ids: Sequence[UUID]) -> dict[UUID, PrincipalAuthority]:
-        return await self._run(lock_authority, principal_ids)
-
-    async def lock_delegation(self, delegation_id: UUID) -> Delegation | None:
-        return await self._run(lock_delegation, delegation_id)
-
-    async def scope_slices(self, principal_id: UUID) -> tuple[ScopeSlice, ...]:
-        return await self._run(scope_slices, principal_id)
-
-    async def hydrate(self, key: ResourceKey) -> ResourceEnvelope | None:
-        return await self._run(hydrate, key)
+    async def run_sync(self, fn: Callable[[SyncAuthorityStore], T]) -> T:
+        return await self._session.run_sync(lambda session: fn(SyncAuthorityStore(session)))
 
     async def append_decision(self, decision: AuthorizationDecision) -> None:
-        await self._run(append_decision, decision)
+        await self._session.run_sync(lambda session: append_decision(session, decision))
 
     async def commit(self) -> None:
         await self._session.commit()

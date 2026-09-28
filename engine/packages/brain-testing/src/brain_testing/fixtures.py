@@ -26,9 +26,6 @@ from brain_domain.authx import (
     unrestricted_selectors,
 )
 from brain_domain.principal import Principal, PrincipalKind
-from brain_security.casbin_adapter import CasbinAuthorizationAdapter
-from sqlalchemy.orm import Session
-
 from brain_persistence.grants import activate_policy_release, grant_membership
 from brain_persistence.identity import provision_principal
 from brain_persistence.models import (
@@ -45,6 +42,8 @@ from brain_persistence.tenancy import (
     provision_scope,
     resolve_entity,
 )
+from brain_security.casbin_adapter import CasbinAuthorizationAdapter
+from sqlalchemy.orm import Session
 
 SYNTHETIC_OPERATOR = UUID("00000000-0000-4000-8000-0000000f0002")
 FIXTURE_APPROVAL = "synthetic-fixture"

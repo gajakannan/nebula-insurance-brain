@@ -478,3 +478,75 @@ def test_invalid_job_uuid_text_stops_expand_before_any_change(fresh_db: str) -> 
     with psycopg.connect(fresh_db) as conn:
         assert conn.execute("SELECT to_regclass('public.tenant')").fetchone()[0] is None
     assert datetime.now(UTC)  # the run is wall-clock independent
+
+
+def test_safeguards_make_ownership_immutable_audit_append_only_and_restore_deferrable(
+    fresh_db: str, tmp_path: Path
+) -> None:
+    """0007 (BLUEPRINT §4.11, operator scope amendment at G4)."""
+    legacy = Legacy()
+    migrate("0004")
+    legacy.write(fresh_db)
+    migrate("0005")
+    mapping = legacy.mapping(tmp_path / "mapping.json")
+    digest = json.loads(reconcile(fresh_db, mapping, "--dry-run").stdout)["digest"]
+    applied = reconcile(
+        fresh_db,
+        mapping,
+        "--apply",
+        "--expected-digest",
+        digest,
+        "--actor-id",
+        str(uuid4()),
+        "--approval-ref",
+        "CHG-7",
+    )
+    assert applied.returncode == 0, applied.stderr
+    migrate("head")
+    assert version(fresh_db) == "0007"
+
+    rewrites = [
+        ("UPDATE document_version SET tenant_id = %s WHERE id = %s", (uuid4(), legacy.version)),
+        ("UPDATE review_item SET knowledge_base_id = %s WHERE id = %s", (legacy.kb2, legacy.item)),
+        (
+            "UPDATE resource_access SET knowledge_base_id = %s WHERE resource_id = %s",
+            (legacy.kb2, legacy.artifact),
+        ),
+        ("UPDATE membership SET principal_id = %s WHERE id = %s", (legacy.service, legacy.m_user)),
+        ("UPDATE knowledge_base SET workspace_id = %s WHERE id = %s", (uuid4(), legacy.kb1)),
+        (
+            "UPDATE external_identity SET principal_id = %s WHERE subject = 'alice'",
+            (legacy.service,),
+        ),
+        ("UPDATE audit_event SET reason_code = 'rewritten' WHERE id = %s", (legacy.audit,)),
+        ("DELETE FROM audit_event WHERE id = %s", (legacy.audit,)),
+    ]
+    for statement, params in rewrites:
+        with psycopg.connect(fresh_db) as conn, pytest.raises(psycopg.errors.CheckViolation) as exc:
+            conn.execute(statement, params)
+        assert "immutable" in str(exc.value) or "append-only" in str(exc.value), statement
+    # Non-ownership updates keep working (revocation, status, fact supersession).
+    with psycopg.connect(fresh_db) as conn:
+        conn.execute("UPDATE membership SET revoked_at = now() WHERE id = %s", (legacy.m_user,))
+        conn.execute("UPDATE review_item SET status = 'decided' WHERE id = %s", (legacy.item,))
+
+    # Restore order: a correction may be loaded before its original when deferred.
+    original, correction = uuid4(), uuid4()
+    insert = (
+        "INSERT INTO assertion (id, run_id, origin, original_assertion_id, version, subject_type, "
+        "slot_type, value, interpretation_basis, tenant_id, knowledge_base_id) "
+        "VALUES (%s, NULL, %s, %s, 1, 'Policy', 'limit', '{}', 'EXPLICIT', %s, %s)"
+    )
+    with psycopg.connect(fresh_db) as conn, pytest.raises(psycopg.errors.ForeignKeyViolation):
+        conn.execute(insert, (correction, "HUMAN_REVIEW", original, legacy.tenant, legacy.kb1))
+    with psycopg.connect(fresh_db) as conn:
+        conn.execute("SET CONSTRAINTS ALL DEFERRED")
+        conn.execute(insert, (correction, "HUMAN_REVIEW", original, legacy.tenant, legacy.kb1))
+        conn.execute(insert, (original, "MACHINE_EXTRACTION", None, legacy.tenant, legacy.kb1))
+    with psycopg.connect(fresh_db) as conn:
+        assert (
+            conn.execute(
+                "SELECT count(*) FROM assertion WHERE id IN (%s, %s)", (original, correction)
+            ).fetchone()[0]
+            == 2
+        )

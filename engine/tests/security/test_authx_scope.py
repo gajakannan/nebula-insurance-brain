@@ -25,7 +25,6 @@ from brain_domain.authx import (
     unrestricted_selectors,
 )
 from brain_domain.tenancy import OwnershipConflict
-from brain_persistence import fixtures
 from brain_persistence.authx import SqlAlchemyAuthorityStore
 from brain_persistence.grants import revoke_membership
 from brain_persistence.identity import find_by_alias
@@ -44,6 +43,7 @@ from brain_persistence.tenancy import (
 )
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter
 from brain_security.execution import AuthorizationDenied, AuthorizationExecution
+from brain_testing import fixtures
 from cryptography.hazmat.primitives.asymmetric import rsa
 from sqlalchemy import event, func, select, text
 

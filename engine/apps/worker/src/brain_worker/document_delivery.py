@@ -20,7 +20,6 @@ from brain_contracts.result import InterpretationResult
 from brain_domain.authx import (
     AuthorizationDecision,
     RequestedScope,
-    ResourceEnvelope,
     ResourceKey,
     ResourceType,
 )
@@ -38,13 +37,7 @@ from brain_persistence.models import (
 from brain_persistence.tenancy import inherit_resource_access
 from brain_review.evidence import combine_evidence_locators, evidence_binding_to_locator
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter
-from brain_security.evaluation import (
-    DependencySet,
-    collect_dependencies,
-    evaluate,
-    pending_dependency_keys,
-)
-from brain_security.execution import AuthorizationUnavailable, assemble_context
+from brain_security.execution import AuthorizationUnavailable, decide
 from sqlalchemy import func, select, update
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import SQLAlchemyError
@@ -86,61 +79,37 @@ class DocumentJobAuthorization:
         *,
         executor_id: UUID,
         delegation_id: UUID | None,
+        knowledge_base_id: UUID,
         artifact_id: UUID,
         action: str,
         trace_id: str,
     ) -> AuthorizationDecision:
+        """Same `brain_security.execution.decide` orchestration the API uses. The
+        lease's KB is a request-scope filter, so an artifact whose trusted metadata
+        names another KB is a recorded `scope_denied`, not an allow refused later.
+        A KB has exactly one tenant, and migration 0006 constrains the job row's
+        tenant/KB pair to the KB registry, so the KB filter also pins the tenant."""
         key = ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact_id)
-        release = self._policy.release
         try:
             with Session(self.engine) as session, session.begin():
                 store = SyncAuthorityStore(session)
-                if store.current_policy_release() != release.release_id:
-                    raise AuthorizationUnavailable("policy release is not current")
-                peeked = store.peek_delegation(delegation_id) if delegation_id else None
-                acting_id = peeked.acting_principal_id if peeked else executor_id
-                authorities = store.lock_authority([executor_id, acting_id])
-                if executor_id not in authorities or acting_id not in authorities:
-                    raise AuthorizationUnavailable("principal authority is missing")
-                delegation = store.lock_delegation(delegation_id) if delegation_id else None
-                delegation_valid = delegation_id is None or (
-                    delegation is not None
-                    and peeked is not None
-                    and delegation.acting_principal_id == peeked.acting_principal_id
-                    and delegation.executor_principal_id == executor_id
-                )
-                if not delegation_valid:
-                    acting_id, delegation = executor_id, None
-                context = assemble_context(
-                    authenticated=authorities[executor_id],
-                    acting=authorities[acting_id],
-                    delegation=delegation,
-                    at=self._clock(),
-                    release=release,
-                    slices=store.scope_slices(acting_id),
-                    requested=RequestedScope(None, (), None, None),
-                    trace_id=trace_id,
-                )
-                # The trusted submitter provisions the artifact's security metadata
-                # before the record exists; an existing record must still agree.
-                envelope = store.hydrate(key, require_record=False)
-                dependencies = DependencySet()
-                if envelope is not None:
-                    hydrated: dict[ResourceKey, ResourceEnvelope | None] = {}
-                    while pending := pending_dependency_keys(envelope, hydrated):
-                        for dependency_key in pending:
-                            hydrated[dependency_key] = store.hydrate(dependency_key)
-                    dependencies = collect_dependencies(envelope, hydrated)
-                decision = evaluate(
-                    context,
-                    key,
-                    envelope,
-                    dependencies,
-                    action,
+                (evaluated,) = decide(
+                    store,
                     self._policy,
-                    decision_id=uuid4(),
-                    delegation_unresolved=not delegation_valid,
+                    self._policy.release,
+                    authenticated_id=executor_id,
+                    keys=[key],
+                    action=action,
+                    requested=RequestedScope(frozenset({knowledge_base_id}), (), None, None),
+                    trace_id=trace_id,
+                    delegation_id=delegation_id,
+                    clock=self._clock,
+                    new_id=uuid4,
+                    # The trusted submitter provisions the artifact's security metadata
+                    # before the record exists; an existing record must still agree.
+                    require_record=False,
                 )
+                decision = evaluated.decision
                 # Permission allow is not a completed business effect: the job step
                 # runs after this gate, under its own lease fence.
                 store.append_decision(decision)
@@ -164,19 +133,12 @@ class DocumentJobAuthorization:
             decision = self.decide(
                 executor_id=executor_id,
                 delegation_id=delegation_id,
+                knowledge_base_id=kb,
                 artifact_id=artifact,
                 action=action,
                 trace_id=trace_id,
             )
-            if (
-                not decision.allowed
-                or decision.scope is None
-                or (
-                    decision.scope.tenant_id,
-                    decision.scope.knowledge_base_id,
-                )
-                != (tenant, kb)
-            ):
+            if not decision.allowed:
                 raise PermissionError("document job authorization denied")
 
         return authorize

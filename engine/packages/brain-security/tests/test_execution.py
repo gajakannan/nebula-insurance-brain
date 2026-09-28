@@ -23,7 +23,7 @@ from brain_security.execution import (
 
 
 class FakeStore:
-    """In-memory AuthorityStore that records the order of effects."""
+    """In-memory AuthorityStore + AuthorityReader that records the order of effects."""
 
     def __init__(self, release_id: str) -> None:
         self.pointer: str | None = release_id
@@ -38,29 +38,32 @@ class FakeStore:
         self.fail_reads = False
         self._pending: list = []
 
-    async def current_policy_release(self):
+    def current_policy_release(self):
         if self.fail_reads:
             raise OSError("authority storage down")
         self.log.append("lock:pointer")
         return self.pointer
 
-    async def peek_delegation(self, delegation_id):
+    def peek_delegation(self, delegation_id):
         return self.delegations.get(delegation_id)
 
-    async def lock_authority(self, ids):
+    def lock_authority(self, ids):
         self.log.append("lock:authority")
         return {i: self.authorities[i] for i in ids if i in self.authorities}
 
-    async def lock_delegation(self, delegation_id):
+    def lock_delegation(self, delegation_id):
         self.log.append("lock:delegation")
         return self.delegations.get(delegation_id)
 
-    async def scope_slices(self, principal_id):
+    def scope_slices(self, principal_id):
         return self.slices.get(principal_id, ())
 
-    async def hydrate(self, key):
+    def hydrate(self, key, *, require_record=True):
         self.log.append(f"lock:resource:{key.id}")
         return self.resources.get(key)
+
+    async def run_sync(self, fn):
+        return fn(self)
 
     async def append_decision(self, decision):
         self._pending.append(decision)

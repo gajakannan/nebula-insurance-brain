@@ -5,8 +5,8 @@ from collections.abc import AsyncIterator
 from uuid import UUID, uuid4
 
 import pytest
-from brain_persistence import fixtures
 from brain_persistence.session import make_engine, make_session_factory, session_scope
+from brain_testing import fixtures
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 

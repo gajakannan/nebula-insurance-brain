@@ -15,9 +15,9 @@ from brain_content.config import LocalObjectStoreConfig
 from brain_domain.principal import PrincipalKind
 from brain_ingestion import worker_cli
 from brain_jobs.queue import jobs, metadata
-from brain_persistence import fixtures
 from brain_persistence.base import Base
 from brain_persistence.models import AuditEventRow, ResourceAccessRow
+from brain_testing import fixtures
 from sqlalchemy import create_engine, select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session

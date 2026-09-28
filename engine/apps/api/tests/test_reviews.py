@@ -9,11 +9,11 @@ import pytest
 import pytest_asyncio
 from brain_domain.authx import PilotRole
 from brain_domain.principal import PrincipalKind
-from brain_persistence import fixtures
 from brain_persistence.base import Base, sqlite_test_tables
 from brain_persistence.session import make_engine, make_session_factory, session_scope
 from brain_security.identity_profile import IdentityProfile, IssuerProfile
 from brain_security.verification import VerifiedCredential, decode_verified
+from brain_testing import fixtures
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 from jwt import PyJWK

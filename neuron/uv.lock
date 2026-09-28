@@ -497,6 +497,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "brain-testing" },
     { name = "mypy" },
     { name = "pypdfium2" },
     { name = "pytest" },
@@ -515,6 +516,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "brain-testing", editable = "../engine/packages/brain-testing" },
     { name = "mypy", specifier = ">=1.13" },
     { name = "pypdfium2", specifier = ">=4.0" },
     { name = "pytest", specifier = ">=8.0" },
@@ -608,6 +610,23 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5.0" },
 ]
 provides-extras = ["test"]
+
+[[package]]
+name = "brain-testing"
+version = "0.1.0"
+source = { editable = "../engine/packages/brain-testing" }
+dependencies = [
+    { name = "brain-domain" },
+    { name = "brain-persistence" },
+    { name = "brain-security" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "brain-domain", editable = "../engine/packages/brain-domain" },
+    { name = "brain-persistence", editable = "../engine/packages/brain-persistence" },
+    { name = "brain-security", editable = "../engine/packages/brain-security" },
+]
 
 [[package]]
 name = "brain-worker"

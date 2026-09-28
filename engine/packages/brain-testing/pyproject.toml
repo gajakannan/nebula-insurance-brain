@@ -1,0 +1,25 @@
+[project]
+name = "brain-testing"
+version = "0.1.0"
+description = "Synthetic F0002 fixtures over the trusted provisioning services; development/test only, never a runtime dependency."
+requires-python = ">=3.13"
+dependencies = [
+  "brain-domain",
+  "brain-security",
+  "brain-persistence",
+]
+
+[tool.uv.sources]
+brain-domain = { workspace = true }
+brain-security = { workspace = true }
+brain-persistence = { workspace = true }
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+brain_testing = ["py.typed"]

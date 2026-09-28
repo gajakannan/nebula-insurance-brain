@@ -22,6 +22,7 @@ members = [
     "brain-review",
     "brain-security",
     "brain-temporal",
+    "brain-testing",
     "brain-worker",
 ]
 
@@ -287,6 +288,7 @@ dependencies = [
 dev = [
     { name = "aiosqlite" },
     { name = "alembic" },
+    { name = "brain-testing" },
     { name = "httpx2" },
     { name = "jsonschema" },
     { name = "mypy" },
@@ -314,6 +316,7 @@ requires-dist = [
 dev = [
     { name = "aiosqlite", specifier = ">=0.20" },
     { name = "alembic", specifier = ">=1.13" },
+    { name = "brain-testing", editable = "packages/brain-testing" },
     { name = "httpx2", specifier = ">=2.12" },
     { name = "jsonschema", specifier = ">=4.23" },
     { name = "mypy", specifier = ">=1.13" },
@@ -453,6 +456,23 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5.0" },
 ]
 provides-extras = ["test"]
+
+[[package]]
+name = "brain-testing"
+version = "0.1.0"
+source = { editable = "packages/brain-testing" }
+dependencies = [
+    { name = "brain-domain" },
+    { name = "brain-persistence" },
+    { name = "brain-security" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "brain-persistence", editable = "packages/brain-persistence" },
+    { name = "brain-security", editable = "packages/brain-security" },
+]
 
 [[package]]
 name = "brain-worker"

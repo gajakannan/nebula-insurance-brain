@@ -31,7 +31,6 @@ from brain_extraction.vllm_graph_client import VllmGraphClient
 from brain_ingestion.document_worker import DocumentTask, DocumentWorker
 from brain_interpretation.parsed_content import ParseResult
 from brain_jobs.queue import DocumentJobQueue, JobLease, jobs, metadata, outbox
-from brain_persistence import fixtures
 from brain_persistence.base import Base
 from brain_persistence.models import (
     Assertion,
@@ -41,6 +40,7 @@ from brain_persistence.models import (
     ReviewItemRow,
     SemanticInterpretationRun,
 )
+from brain_testing import fixtures
 from brain_worker.document_delivery import (
     DocumentJobAuthorization,
     DocumentResultImporter,

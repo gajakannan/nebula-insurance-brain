@@ -19,8 +19,8 @@ from pathlib import Path
 from uuid import uuid4
 
 from brain_domain.principal import PrincipalKind
-from brain_persistence import fixtures
 from brain_persistence.grants import revoke_membership
+from brain_testing import fixtures
 from cryptography.hazmat.primitives.asymmetric import rsa
 from sqlalchemy import text
 

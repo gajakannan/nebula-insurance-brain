@@ -12,6 +12,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import uuid4
 
+import pytest
 from brain_domain.authx import (
     ResourceKey,
     ResourceType,
@@ -20,11 +21,12 @@ from brain_domain.authx import (
     Selector,
     SelectorMode,
 )
-from brain_persistence import fixtures
 from brain_persistence.grants import revoke_membership
 from brain_persistence.tenancy import change_resource_restrictions
+from brain_testing import fixtures
 from cryptography.hazmat.primitives.asymmetric import rsa
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 
 from .conftest import (
     bearer,
@@ -153,14 +155,17 @@ async def test_only_server_hydrated_attributes_count_and_missing_metadata_fails_
     )
     other_kb = uuid4()
     await run_sync(client.session_factory, lambda s: fixtures.seed_scope(s, tenant, other_kb))
+    # Moving trusted metadata to another owner is refused by the database itself
+    # (0007 ownership immutability); hydration's own owner cross-check is the
+    # defense-in-depth layer, unit-tested without triggers in brain-persistence.
     async with client.session_factory() as session:
-        # Metadata that disagrees with the record's own ownership is never trusted.
-        await session.execute(
-            text("UPDATE resource_access SET knowledge_base_id = :kb WHERE resource_id = :r"),
-            {"kb": other_kb, "r": moved},
-        )
-        await session.commit()
-    assert (await client.get(f"/content/{moved}", headers=headers)).status_code == 404
+        with pytest.raises(DBAPIError, match="immutable"):
+            await session.execute(
+                text("UPDATE resource_access SET knowledge_base_id = :kb WHERE resource_id = :r"),
+                {"kb": other_kb, "r": moved},
+            )
+        await session.rollback()
+    assert (await client.get(f"/content/{moved}", headers=headers)).status_code == 200
 
 
 async def test_derived_resource_needs_every_evidence_dependency(
