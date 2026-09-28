@@ -8,24 +8,38 @@ from __future__ import annotations
 
 import os
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from uuid import uuid4
 
 import httpx2 as httpx
 import jwt
 import pytest
 import pytest_asyncio
-from brain_persistence.models import FactSlotRow
+from brain_domain.authx import PilotRole
+from brain_domain.principal import PrincipalKind
+from brain_persistence import fixtures
 from brain_persistence.session import make_engine, make_session_factory, session_scope
-from brain_security.verification import VerifiedCredential
+from brain_security.identity_profile import IdentityProfile, IssuerProfile
+from brain_security.verification import VerifiedCredential, decode_verified
 from cryptography.hazmat.primitives.asymmetric import rsa
 from jwt import PyJWK
 from sqlalchemy import text
 
 from brain_api.app import create_app
-from brain_api.deps import get_credential_verifier, get_db_session
+from brain_api.deps import (
+    get_credential_verifier,
+    get_db_session,
+    get_identity_profile,
+    get_session_factory,
+)
 
 ISSUER = "https://authentik.local/application/o/brain/"
 AUDIENCE = "brain"
+ISSUER_PROFILE = IssuerProfile(
+    issuer=ISSUER, audiences=frozenset({AUDIENCE}), human_clients=frozenset({"brain"})
+)
+IDENTITY_PROFILE = IdentityProfile((ISSUER_PROFILE,))
+POLICIES = Path(__file__).resolve().parents[4] / "planning-mds" / "security" / "policies"
 
 
 def _database_url() -> str:
@@ -47,6 +61,7 @@ def _make_token(rsa_key: rsa.RSAPrivateKey, subject: str) -> str:
         "aud": AUDIENCE,
         "iat": now,
         "exp": now + timedelta(minutes=5),
+        "azp": "brain",
     }
     return jwt.encode(claims, rsa_key, algorithm="RS256", headers={"kid": "test-key-1"})
 
@@ -73,17 +88,7 @@ class _FakeVerifier:
             ),
             algorithm="RS256",
         )
-        payload = jwt.decode(
-            bearer_token, signing_key.key, algorithms=["RS256"], audience=AUDIENCE, issuer=ISSUER
-        )
-        return VerifiedCredential(
-            issuer=payload["iss"],
-            subject=payload["sub"],
-            audience=AUDIENCE,
-            expires_at=datetime.fromtimestamp(payload["exp"], tz=UTC),
-            not_before=None,
-            key_id="test-key-1",
-        )
+        return decode_verified(bearer_token, signing_key.key, ISSUER_PROFILE, key_id="test-key-1")
 
 
 @pytest_asyncio.fixture
@@ -96,6 +101,10 @@ async def client(rsa_key: rsa.RSAPrivateKey):
         await engine.dispose()
         pytest.skip(f"Postgres not reachable at {_database_url()}: {exc}")
     session_factory = make_session_factory(engine)
+    async with session_scope(session_factory) as session:
+        await session.run_sync(
+            fixtures.activate_policy, POLICIES / "model.conf", POLICIES / "policy.csv"
+        )
 
     app = create_app()
 
@@ -109,6 +118,8 @@ async def client(rsa_key: rsa.RSAPrivateKey):
 
     app.dependency_overrides[get_db_session] = override_get_db_session
     app.dependency_overrides[get_credential_verifier] = lambda: _FakeVerifier(rsa_key)
+    app.dependency_overrides[get_identity_profile] = lambda: IDENTITY_PROFILE
+    app.dependency_overrides[get_session_factory] = lambda: session_factory
 
     # A synchronous `TestClient` runs the ASGI app on a separate thread's event
     # loop (via an anyio portal); asyncpg's connections are bound tightly to the
@@ -123,48 +134,40 @@ async def client(rsa_key: rsa.RSAPrivateKey):
         await session.execute(
             text(
                 "TRUNCATE TABLE outbox_event, canonical_fact_change, canonical_fact_version, "
-                "fact_slot, membership, principal CASCADE"
+                "canonical_commit, resource_access, fact_slot, membership, external_identity, "
+                "principal_authority, principal, entity_identity, knowledge_base, workspace, "
+                "tenant, policy_release_pointer, policy_release CASCADE"
             )
         )
         await session.commit()
     await engine.dispose()
 
 
-async def _seed_fact_slot(session_factory, *, tenant_id, kb_id) -> object:
-    slot_id = uuid4()
+async def _seed_user(session_factory, *, subject, tenant_id, kb_id, role, kind=PrincipalKind.USER):
     async with session_scope(session_factory) as session:
-        session.add(
-            FactSlotRow(
-                id=slot_id,
-                entity_id=uuid4(),
-                slot_type="each_occurrence_limit",
-                tenant_id=tenant_id,
-                knowledge_base_id=kb_id,
-            )
-        )
-    return slot_id
+
+        def seed(s):
+            principal = fixtures.seed_principal(s, issuer=ISSUER, subject=subject, kind=kind)
+            fixtures.seed_grant(s, principal.id, tenant_id, kb_id, PilotRole(role))
+            return principal.id
+
+        return await session.run_sync(seed)
+
+
+async def _seed_fact_slot(session_factory, *, tenant_id, kb_id) -> object:
+    async with session_scope(session_factory) as session:
+        return await session.run_sync(lambda s: fixtures.seed_fact_slot(s, tenant_id, kb_id))
 
 
 async def _seed_service_principal(session_factory, *, tenant_id, kb_id, subject: str) -> None:
-    from brain_persistence.models import MembershipRow, PrincipalRow
-
-    async with session_scope(session_factory) as session:
-        principal_row = PrincipalRow(
-            id=uuid4(), kind="service", issuer=ISSUER, subject=subject, status="active"
-        )
-        session.add(principal_row)
-        await session.flush()
-        session.add(
-            MembershipRow(
-                id=uuid4(),
-                principal_id=principal_row.id,
-                tenant_id=tenant_id,
-                knowledge_base_id=kb_id,
-                role="ServicePrincipal",
-                grant_revision=1,
-                revoked_at=None,
-            )
-        )
+    await _seed_user(
+        session_factory,
+        subject=subject,
+        tenant_id=tenant_id,
+        kb_id=kb_id,
+        role="ServicePrincipal",
+        kind=PrincipalKind.SERVICE,
+    )
 
 
 async def test_commit_then_get_round_trips_through_http(client, rsa_key: rsa.RSAPrivateKey) -> None:

@@ -22,17 +22,44 @@ from sqlalchemy import (
     select,
     update,
 )
-from sqlalchemy.engine import Connection, Engine
+from sqlalchemy.dialects import postgresql
+from sqlalchemy.engine import Connection, Dialect, Engine
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.types import TypeDecorator, TypeEngine
+
+
+class UUIDText(TypeDecorator[str]):
+    """UUID-valued job identity carried as canonical text in Python.
+
+    PostgreSQL stores a native `uuid` (migration 0005 converts the 0004 text
+    columns, so invalid values cannot exist); SQLite contract tests keep
+    `String(36)`. Binding and results are always the dashed string form, so the
+    queue's fencing comparisons are identical on both dialects (F0002 assembly
+    plan: reconcile job UUID ownership without changing lease/fence behaviour)."""
+
+    impl = String(36)
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect: Dialect) -> TypeEngine[str]:
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(postgresql.UUID(as_uuid=False))
+        return dialect.type_descriptor(String(36))
+
+    def process_bind_param(self, value: object, dialect: Dialect) -> str | None:
+        return None if value is None else str(UUID(str(value)))
+
+    def process_result_value(self, value: object, dialect: Dialect) -> str | None:
+        return None if value is None else str(value)
+
 
 metadata = MetaData()
 jobs = Table(
     "document_job",
     metadata,
-    Column("id", String(36), primary_key=True),
-    Column("tenant_id", String(36), nullable=False),
-    Column("knowledge_base_id", String(36), nullable=False),
-    Column("artifact_id", String(36), nullable=False),
+    Column("id", UUIDText(), primary_key=True),
+    Column("tenant_id", UUIDText(), nullable=False),
+    Column("knowledge_base_id", UUIDText(), nullable=False),
+    Column("artifact_id", UUIDText(), nullable=False),
     Column("request_key", String(128), nullable=False),
     Column("payload", JSON, nullable=False),
     Column("state", String(20), nullable=False),
@@ -49,18 +76,18 @@ jobs = Table(
 leases = Table(
     "document_artifact_lease",
     metadata,
-    Column("artifact_id", String(36), primary_key=True),
-    Column("tenant_id", String(36), nullable=False),
-    Column("knowledge_base_id", String(36), nullable=False),
-    Column("job_id", String(36), nullable=True),
+    Column("artifact_id", UUIDText(), primary_key=True),
+    Column("tenant_id", UUIDText(), nullable=False),
+    Column("knowledge_base_id", UUIDText(), nullable=False),
+    Column("job_id", UUIDText(), nullable=True),
     Column("generation", Integer, nullable=False),
     Column("leased_until", Float, nullable=False),
 )
 events = Table(
     "document_job_event",
     metadata,
-    Column("id", String(36), primary_key=True),
-    Column("job_id", String(36), nullable=False),
+    Column("id", UUIDText(), primary_key=True),
+    Column("job_id", UUIDText(), nullable=False),
     Column("generation", Integer, nullable=False),
     Column("event", String(64), nullable=False),
     Column("occurred_at", Float, nullable=False),
@@ -68,9 +95,9 @@ events = Table(
 outbox = Table(
     "document_job_outbox",
     metadata,
-    Column("job_id", String(36), primary_key=True),
-    Column("tenant_id", String(36), nullable=False),
-    Column("knowledge_base_id", String(36), nullable=False),
+    Column("job_id", UUIDText(), primary_key=True),
+    Column("tenant_id", UUIDText(), nullable=False),
+    Column("knowledge_base_id", UUIDText(), nullable=False),
     Column("result_ref", String, nullable=False),
     Column("created_at", Float, nullable=False),
     Column("delivered_at", Float, nullable=True),

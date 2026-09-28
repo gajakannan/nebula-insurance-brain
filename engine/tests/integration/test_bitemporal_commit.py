@@ -11,9 +11,7 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from brain_domain.facts import ChangeReason, CommitProposal
-from brain_domain.principal import Membership, Principal
 from brain_persistence.repositories import SqlAlchemyFactCommitRepository
-from brain_security.authorization import AuthorizationService
 from brain_temporal.commit import CanonicalCommitService
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -48,9 +46,7 @@ def _proposal(
 
 async def test_section_87_matrix_answered_after_reload_from_postgres(
     pg_session_factory: async_sessionmaker[AsyncSession],
-    authz: AuthorizationService,
-    actor: Principal,
-    membership: Membership,
+    owner: tuple[UUID, UUID],
     slot_id: UUID,
 ) -> None:
     # `recorded` is stamped from the wall clock inside CanonicalCommitService, not
@@ -59,12 +55,11 @@ async def test_section_87_matrix_answered_after_reload_from_postgres(
     # dates the proposals declare.
     async with pg_session_factory() as session:
         repository = SqlAlchemyFactCommitRepository(session)
-        service = CanonicalCommitService(repository, authz)
+        service = CanonicalCommitService(repository)
         first = await service.commit(
-            actor,
-            [membership],
             _proposal(slot_id, value={"amount": "2000000.00"}, valid_from=dt("2026-01-01")),
-            trace_id="t1",
+            authorized_scope=owner,
+            authorization_decision_id=None,
         )
         await session.commit()
     original_version_id = first.fact_version_ids[0]
@@ -72,10 +67,8 @@ async def test_section_87_matrix_answered_after_reload_from_postgres(
 
     async with pg_session_factory() as session:
         repository = SqlAlchemyFactCommitRepository(session)
-        service = CanonicalCommitService(repository, authz)
+        service = CanonicalCommitService(repository)
         second = await service.commit(
-            actor,
-            [membership],
             _proposal(
                 slot_id,
                 value={"amount": "5000000.00"},
@@ -83,7 +76,8 @@ async def test_section_87_matrix_answered_after_reload_from_postgres(
                 expected_current_version_id=original_version_id,
                 change_reason=ChangeReason.SUPERSEDED,
             ),
-            trace_id="t2",
+            authorized_scope=owner,
+            authorization_decision_id=None,
         )
         await session.commit()
     known_after_second_commit = datetime.now(UTC)

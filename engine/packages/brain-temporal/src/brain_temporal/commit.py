@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Protocol
 from uuid import UUID, uuid4
 
 from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
-from brain_domain.principal import Membership, Principal
-from brain_security.authorization import AuthorizationService, ResourceRef
 
 from brain_temporal.ranges import TimeRange, split_remainder
 
@@ -55,47 +53,59 @@ class FactCommitRepository(Protocol):
     ) -> None: ...
 
     async def insert_change(
-        self, *, reason: ChangeReason, from_version_id: UUID | None, to_version_id: UUID
+        self,
+        *,
+        reason: ChangeReason,
+        from_version_id: UUID | None,
+        to_version_id: UUID,
+        tenant_id: UUID,
+        knowledge_base_id: UUID,
+    ) -> None: ...
+
+    async def register_commit(
+        self,
+        *,
+        commit_id: UUID,
+        tenant_id: UUID,
+        knowledge_base_id: UUID,
+        authorization_decision_id: UUID | None,
+        at: datetime,
     ) -> None: ...
 
     async def write_outbox(self, commit_id: UUID, payload: dict) -> None: ...
 
 
 class CanonicalCommitService:
-    """Master blueprint section 109.2, one transaction (F0001-S0005). The caller is
-    responsible for the transaction boundary — every repository call here must run
-    inside one `AsyncSession`/transaction so facts, `canonical_fact_change`,
-    `audit_event` (written by `AuthorizationService.authorize`), and `outbox_event`
-    commit or roll back together (logic flow step 5)."""
+    """Master blueprint section 109.2, one transaction (F0001-S0005).
 
-    def __init__(self, repository: FactCommitRepository, authz: AuthorizationService) -> None:
+    F0002: authorization is no longer performed here. The caller runs `commit`
+    as the operation of `AuthorizationExecution.mutate`, which has already locked
+    current authority and the slot's security metadata inside the same unit of
+    work; facts, `canonical_fact_change`, the commit ownership row, `outbox_event`
+    and the durable authorization decision then commit or roll back together. This
+    service never commits the transaction itself. It still re-checks that the slot
+    it locks belongs to the scope that was authorized (defense in depth)."""
+
+    def __init__(
+        self,
+        repository: FactCommitRepository,
+        *,
+        clock: Callable[[], datetime] | None = None,
+    ) -> None:
         self._repository = repository
-        self._authz = authz
+        self._clock = clock or (lambda: datetime.now(UTC))
 
     async def commit(
         self,
-        actor: Principal,
-        memberships: Sequence[Membership],
         proposal: CommitProposal,
         *,
-        trace_id: str,
+        authorized_scope: tuple[UUID, UUID],
+        authorization_decision_id: UUID | None,
     ) -> CommitResult:
         locked = await self._repository.lock_slot(proposal.slot_id)
-        if locked is None:
+        if locked is None or locked != authorized_scope:
             raise FactSlotNotFound(str(proposal.slot_id))
         tenant_id, knowledge_base_id = locked
-
-        resource = ResourceRef(
-            type="fact_slot",
-            id=proposal.slot_id,
-            tenant_id=tenant_id,
-            knowledge_base_id=knowledge_base_id,
-        )
-        decision = await self._authz.authorize(
-            actor, memberships, resource, "commit", trace_id=trace_id
-        )
-        if not decision.allowed:
-            raise FactSlotNotFound(str(proposal.slot_id))  # denial -> 404, never disclosed
 
         # TimeRange.__post_init__ rejects an empty/inverted range (F0001-S0005 AC).
         new_valid = TimeRange(proposal.valid_from, proposal.valid_to)
@@ -106,8 +116,15 @@ class CanonicalCommitService:
             if proposal.expected_current_version_id not in current_ids:
                 raise StaleVersionError(str(proposal.expected_current_version_id))
 
-        now = datetime.now(UTC)
+        now = self._clock()
         commit_id = uuid4()
+        await self._repository.register_commit(
+            commit_id=commit_id,
+            tenant_id=tenant_id,
+            knowledge_base_id=knowledge_base_id,
+            authorization_decision_id=authorization_decision_id,
+            at=now,
+        )
         version_ids: list[UUID] = []
         superseded_version_ids: list[UUID] = []
 
@@ -164,13 +181,19 @@ class CanonicalCommitService:
             reason = proposal.change_reason or ChangeReason.SUPERSEDED
             for from_id in superseded_version_ids:
                 await self._repository.insert_change(
-                    reason=reason, from_version_id=from_id, to_version_id=new_version_id
+                    reason=reason,
+                    from_version_id=from_id,
+                    to_version_id=new_version_id,
+                    tenant_id=tenant_id,
+                    knowledge_base_id=knowledge_base_id,
                 )
         else:
             await self._repository.insert_change(
                 reason=proposal.change_reason or ChangeReason.SUPERSEDED,
                 from_version_id=None,
                 to_version_id=new_version_id,
+                tenant_id=tenant_id,
+                knowledge_base_id=knowledge_base_id,
             )
 
         await self._repository.write_outbox(

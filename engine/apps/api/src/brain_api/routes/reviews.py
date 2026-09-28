@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from brain_domain.principal import Membership, Principal
+from brain_domain.authx import Action, AuthorizationDecision, ResourceKey, ResourceType
+from brain_domain.principal import Principal
 from brain_domain.review import (
     EvidenceLocator,
     ReviewDecisionAction,
@@ -22,15 +23,15 @@ from brain_review.decisions import (
     ReviewItemNotFound,
     UnresolvedEvidenceRequiresBlocked,
 )
-from brain_security.authorization import AuthorizationService, ResourceRef
+from brain_security.execution import AuthorizationExecution
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from brain_api.deps import (
     current_principal,
-    current_principal_memberships,
-    get_authorization_service,
+    get_authorization_execution,
     get_db_session,
+    new_trace_id,
 )
 from brain_api.errors import NotFoundError, UnprocessableError
 from brain_api.schemas.review import (
@@ -73,33 +74,30 @@ def _to_decision_request(
     )
 
 
+def _task(review_item_id: UUID) -> ResourceKey:
+    return ResourceKey(ResourceType.REVIEW_TASK, review_item_id)
+
+
 @router.get("/{review_item_id}", response_model=ReviewItemOut)
 async def get_review_item(
     review_item_id: UUID,
     principal: Principal = Depends(current_principal),
-    memberships: Sequence[Membership] = Depends(current_principal_memberships),
-    authz: AuthorizationService = Depends(get_authorization_service),
+    execution: AuthorizationExecution = Depends(get_authorization_execution),
     session: AsyncSession = Depends(get_db_session),
 ) -> ReviewItemOut:
     repository = SqlAlchemyReviewItemRepository(session)
-    item = await repository.get(review_item_id)
-    if item is None:
-        raise NotFoundError()
 
-    resource = ResourceRef(
-        type="review_task",
-        id=item.id,
-        tenant_id=item.tenant_id,
-        knowledge_base_id=item.knowledge_base_id,
-    )
-    decision = await authz.authorize(
-        principal, memberships, resource, "read", trace_id=str(uuid4())
-    )
-    if not decision.allowed:
-        raise NotFoundError()  # denial reported as 404, existence never disclosed
+    async def load(_decision: AuthorizationDecision) -> ReviewItemOut:
+        item = await repository.get(review_item_id)
+        if item is None:
+            raise NotFoundError()
+        latest_decision = await repository.get_latest_decision(review_item_id)
+        return ReviewItemOut.from_domain(item, latest_decision)
 
-    latest_decision = await repository.get_latest_decision(review_item_id)
-    return ReviewItemOut.from_domain(item, latest_decision)
+    # Denial reported as 404, existence never disclosed.
+    return await execution.read(
+        principal, _task(review_item_id), Action.READ, trace_id=new_trace_id(), load=load
+    )
 
 
 @router.post("/batches/{review_batch_id}/decisions", response_model=ReviewDecisionReceiptOut)
@@ -107,64 +105,63 @@ async def submit_review_decisions(
     review_batch_id: UUID,
     batch: ReviewDecisionBatchIn,
     principal: Principal = Depends(current_principal),
-    memberships: Sequence[Membership] = Depends(current_principal_memberships),
-    authz: AuthorizationService = Depends(get_authorization_service),
+    execution: AuthorizationExecution = Depends(get_authorization_execution),
     session: AsyncSession = Depends(get_db_session),
 ) -> ReviewDecisionReceiptOut:
-    repository = SqlAlchemyReviewItemRepository(session)
-    audit = ReviewDecisionAuditSink(SqlAlchemyAuditEventRepository(session))
-    service = ReviewDecisionService(repository, audit)
+    """Every item is authorized (current grant, restrictions, `review_task:annotate`)
+    and locked before any decision is written; an inaccessible item is a
+    non-disclosing 404 before any batch-membership check. The whole batch commits
+    with its decisions, or rolls back and durably audits the failure (S0004 AC5/AC6).
+    Annotation never grants `fact_slot:commit` and never promotes to canonical truth."""
+    repository = SqlAlchemyReviewItemRepository(session, actor_id=principal.id)
 
-    decision_ids: list[UUID] = []
-    applied = 0
-    any_duplicate = False
-    stale = 0
-    blocked = 0
+    async def operation(
+        decisions: Sequence[AuthorizationDecision],
+    ) -> ReviewDecisionReceiptOut:
+        authorizations = {d.resource.id: d for d in decisions}
+        audit = ReviewDecisionAuditSink(SqlAlchemyAuditEventRepository(session), authorizations)
+        service = ReviewDecisionService(repository, audit)
+        decision_ids: list[UUID] = []
+        applied = 0
+        any_duplicate = False
+        stale = 0
+        blocked = 0
+        for decision_in in batch.decisions:
+            item = await repository.get(decision_in.review_item_id)
+            if item is None or item.review_batch_id != review_batch_id:
+                raise UnprocessableError()
+            try:
+                outcome = await service.submit(_to_decision_request(decision_in, principal.id))
+            except (
+                ReviewItemNotFound,
+                ReviewItemAlreadyDecided,
+                UnresolvedEvidenceRequiresBlocked,
+                InvalidBlockedReasonCode,
+            ) as exc:
+                raise UnprocessableError() from exc
 
-    for decision_in in batch.decisions:
-        item = await repository.get(decision_in.review_item_id)
-        if item is None or item.review_batch_id != review_batch_id:
-            raise UnprocessableError()
-
-        resource = ResourceRef(
-            type="review_task",
-            id=item.id,
-            tenant_id=item.tenant_id,
-            knowledge_base_id=item.knowledge_base_id,
+            decision_ids.append(outcome.decision.id)
+            if outcome.duplicate:
+                any_duplicate = True
+            elif outcome.decision.stale:
+                stale += 1
+            elif outcome.decision.action == ReviewDecisionAction.BLOCKED:
+                blocked += 1
+                applied += 1
+            elif outcome.applied:
+                applied += 1
+        return ReviewDecisionReceiptOut(
+            decision_ids=decision_ids,
+            applied=applied,
+            duplicate=any_duplicate,
+            stale=stale,
+            blocked=blocked,
         )
-        authz_decision = await authz.authorize(
-            principal, memberships, resource, "annotate", trace_id=str(uuid4())
-        )
-        if not authz_decision.allowed:
-            raise NotFoundError()
 
-        try:
-            outcome = await service.submit(_to_decision_request(decision_in, principal.id))
-        except ReviewItemNotFound as exc:
-            raise UnprocessableError() from exc
-        except (
-            ReviewItemAlreadyDecided,
-            UnresolvedEvidenceRequiresBlocked,
-            InvalidBlockedReasonCode,
-        ) as exc:
-            raise UnprocessableError() from exc
-
-        decision_ids.append(outcome.decision.id)
-        if outcome.duplicate:
-            any_duplicate = True
-        elif outcome.decision.stale:
-            stale += 1
-        elif outcome.decision.action == ReviewDecisionAction.BLOCKED:
-            blocked += 1
-            applied += 1
-        elif outcome.applied:
-            applied += 1
-
-    await session.commit()
-    return ReviewDecisionReceiptOut(
-        decision_ids=decision_ids,
-        applied=applied,
-        duplicate=any_duplicate,
-        stale=stale,
-        blocked=blocked,
+    return await execution.mutate(
+        principal,
+        [_task(d.review_item_id) for d in batch.decisions],
+        Action.ANNOTATE,
+        trace_id=new_trace_id(),
+        operation=operation,
     )

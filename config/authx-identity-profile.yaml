@@ -1,0 +1,18 @@
+# F0002-S0002 trusted identity profile (non-secret). Loaded by brain_api at startup via
+# BRAIN_IDENTITY_PROFILE_PATH or by walking up to config/authx-identity-profile.yaml.
+#
+# - Only the listed issuers are accepted; the API's BRAIN_OIDC_ISSUER must be one of them.
+# - algorithms is the verifier's allow-list; the token's own `alg` header is never trusted.
+# - A token whose `typ` header is present must be one of accepted_token_types.
+# - human_clients are the OIDC client IDs (`azp`/`client_id` claim) whose first verified
+#   sight may self-provision a USER principal with NO grants. Service and agent clients
+#   are never self-provisioned: provision them explicitly to their kind with an approval
+#   reference (brain_persistence.identity.provision_principal / scripts/dev tooling).
+version: 1
+issuers:
+  - issuer: http://localhost:9010/application/o/brain/
+    audiences: [brain]
+    algorithms: [RS256]
+    accepted_token_types: [JWT, at+jwt]
+    required_claims: [iss, sub, aud, exp, iat]
+    human_clients: [brain]

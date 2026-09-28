@@ -2,27 +2,13 @@ from __future__ import annotations
 
 import os
 from collections.abc import AsyncIterator
-from pathlib import Path
 from uuid import UUID, uuid4
 
 import pytest
-from brain_domain.principal import Membership, Principal, PrincipalKind, PrincipalStatus
-from brain_persistence.models import (
-    CanonicalFactChangeRow,
-    CanonicalFactVersionRow,
-    FactSlotRow,
-    OutboxEventRow,
-)
-from brain_persistence.session import make_engine, make_session_factory
-from brain_security.audit import InMemoryAuditEventRepository, RepositoryAuditSink
-from brain_security.authorization import AuthorizationService
-from brain_security.casbin_adapter import CasbinAuthorizationAdapter
+from brain_persistence import fixtures
+from brain_persistence.session import make_engine, make_session_factory, session_scope
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
-REPO_ROOT = Path(__file__).resolve().parents[3]
-MODEL_PATH = REPO_ROOT / "planning-mds" / "security" / "policies" / "model.conf"
-POLICY_PATH = REPO_ROOT / "planning-mds" / "security" / "policies" / "policy.csv"
 
 
 def _database_url() -> str:
@@ -55,17 +41,13 @@ async def _clean_fact_tables(
 ) -> AsyncIterator[None]:
     yield
     async with pg_session_factory() as session:
-        for row in (OutboxEventRow, CanonicalFactChangeRow, CanonicalFactVersionRow, FactSlotRow):
-            await session.execute(text(f"TRUNCATE TABLE {row.__tablename__} CASCADE"))
+        await session.execute(
+            text(
+                "TRUNCATE TABLE outbox_event, canonical_fact_change, canonical_fact_version, "
+                "canonical_commit, resource_access, fact_slot CASCADE"
+            )
+        )
         await session.commit()
-
-
-@pytest.fixture
-def authz() -> AuthorizationService:
-    return AuthorizationService(
-        CasbinAuthorizationAdapter(MODEL_PATH, POLICY_PATH),
-        RepositoryAuditSink(InMemoryAuditEventRepository()),
-    )
 
 
 @pytest.fixture
@@ -79,26 +61,10 @@ def knowledge_base_id() -> UUID:
 
 
 @pytest.fixture
-def actor() -> Principal:
-    return Principal(
-        id=uuid4(),
-        kind=PrincipalKind.SERVICE,
-        issuer="authentik",
-        subject="svc",
-        status=PrincipalStatus.ACTIVE,
-    )
-
-
-@pytest.fixture
-def membership(actor: Principal, tenant_id: UUID, knowledge_base_id: UUID) -> Membership:
-    return Membership(
-        principal_id=actor.id,
-        tenant_id=tenant_id,
-        knowledge_base_id=knowledge_base_id,
-        role="ServicePrincipal",
-        grant_revision=1,
-        revoked_at=None,
-    )
+def owner(tenant_id: UUID, knowledge_base_id: UUID) -> tuple[UUID, UUID]:
+    """The scope `CanonicalCommitService` is told was authorized (F0002: the facade
+    authorizes; these tests prove the temporal algorithm on real PostgreSQL)."""
+    return (tenant_id, knowledge_base_id)
 
 
 @pytest.fixture
@@ -107,16 +73,7 @@ async def slot_id(
     tenant_id: UUID,
     knowledge_base_id: UUID,
 ) -> UUID:
-    new_slot_id = uuid4()
-    async with pg_session_factory() as session:
-        session.add(
-            FactSlotRow(
-                id=new_slot_id,
-                entity_id=uuid4(),
-                slot_type="each_occurrence_limit",
-                tenant_id=tenant_id,
-                knowledge_base_id=knowledge_base_id,
-            )
+    async with session_scope(pg_session_factory) as session:
+        return await session.run_sync(
+            lambda s: fixtures.seed_fact_slot(s, tenant_id, knowledge_base_id)
         )
-        await session.commit()
-    return new_slot_id

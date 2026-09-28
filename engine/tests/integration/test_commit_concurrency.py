@@ -13,9 +13,7 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from brain_domain.facts import CommitProposal
-from brain_domain.principal import Membership, Principal
 from brain_persistence.repositories import SqlAlchemyFactCommitRepository
-from brain_security.authorization import AuthorizationService
 from brain_temporal.commit import CanonicalCommitService, StaleVersionError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -43,17 +41,13 @@ def _proposal(slot_id: UUID, *, value: dict, expected_current_version_id: UUID) 
 
 async def test_two_concurrent_commits_on_the_same_slot_leave_exactly_one_winner(
     pg_session_factory: async_sessionmaker[AsyncSession],
-    authz: AuthorizationService,
-    actor: Principal,
-    membership: Membership,
+    owner: tuple[UUID, UUID],
     slot_id: UUID,
 ) -> None:
     async with pg_session_factory() as session:
         repository = SqlAlchemyFactCommitRepository(session)
-        service = CanonicalCommitService(repository, authz)
+        service = CanonicalCommitService(repository)
         first = await service.commit(
-            actor,
-            [membership],
             CommitProposal(
                 slot_id=slot_id,
                 value={"amount": "1000000.00"},
@@ -68,7 +62,8 @@ async def test_two_concurrent_commits_on_the_same_slot_leave_exactly_one_winner(
                 expected_current_version_id=None,
                 idempotency_key=f"commit-{uuid4()}",
             ),
-            trace_id="t0",
+            authorized_scope=owner,
+            authorization_decision_id=None,
         )
         await session.commit()
     original_version_id = first.fact_version_ids[0]
@@ -77,16 +72,15 @@ async def test_two_concurrent_commits_on_the_same_slot_leave_exactly_one_winner(
         try:
             async with pg_session_factory() as session:
                 repository = SqlAlchemyFactCommitRepository(session)
-                service = CanonicalCommitService(repository, authz)
+                service = CanonicalCommitService(repository)
                 result = await service.commit(
-                    actor,
-                    [membership],
                     _proposal(
                         slot_id,
                         value={"amount": value},
                         expected_current_version_id=original_version_id,
                     ),
-                    trace_id=f"race-{value}",
+                    authorized_scope=owner,
+                    authorization_decision_id=None,
                 )
                 await session.commit()
                 return result

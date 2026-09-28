@@ -36,7 +36,9 @@ async def test_full_row_graph_persists_and_relates(session_factory) -> None:
         session.add(source)
         await session.flush()
 
-        version = DocumentVersion(source_document_id=source.id)
+        version = DocumentVersion(
+            source_document_id=source.id, tenant_id=tenant_id, knowledge_base_id=kb_id
+        )
         session.add(version)
         await session.flush()
 
@@ -46,6 +48,8 @@ async def test_full_row_graph_persists_and_relates(session_factory) -> None:
             artifact_sha256="b" * 64,
             page_count=1,
             extraction_status="complete",
+            tenant_id=tenant_id,
+            knowledge_base_id=kb_id,
         )
         session.add(artifact)
         await session.flush()
@@ -58,6 +62,8 @@ async def test_full_row_graph_persists_and_relates(session_factory) -> None:
             status="complete",
             counters={"model_calls": 1},
             run_configuration={"model_id": "microsoft/Phi-4-mini-instruct"},
+            tenant_id=tenant_id,
+            knowledge_base_id=kb_id,
         )
         session.add(run)
         await session.flush()
@@ -70,6 +76,8 @@ async def test_full_row_graph_persists_and_relates(session_factory) -> None:
             value={"value": "$1,000,000"},
             model_confidence=None,
             interpretation_basis="EXPLICIT",
+            tenant_id=tenant_id,
+            knowledge_base_id=kb_id,
         )
         session.add(assertion)
         await session.flush()
@@ -84,6 +92,8 @@ async def test_full_row_graph_persists_and_relates(session_factory) -> None:
                 char_start=555,
                 char_end=564,
                 precision="span",
+                tenant_id=tenant_id,
+                knowledge_base_id=kb_id,
             )
         )
 

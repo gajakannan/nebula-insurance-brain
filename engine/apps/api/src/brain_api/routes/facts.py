@@ -2,12 +2,19 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import UTC, datetime
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from brain_domain.facts import ChangeReason, CommitProposal
-from brain_domain.principal import Membership, Principal
+from brain_domain.authx import (
+    Action,
+    AuthorizationDecision,
+    RequestedScope,
+    ResourceKey,
+    ResourceType,
+)
+from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
+from brain_domain.principal import Principal
 from brain_persistence.repositories import SqlAlchemyFactCommitRepository
-from brain_security.authorization import AuthorizationService, ResourceRef
+from brain_security.execution import AuthorizationExecution
 from brain_temporal.commit import CanonicalCommitService, FactSlotNotFound, StaleVersionError
 from brain_temporal.ranges import InvalidRangeError
 from fastapi import APIRouter, Depends, Query
@@ -16,9 +23,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from brain_api.deps import (
     current_principal,
-    current_principal_memberships,
-    get_authorization_service,
+    get_authorization_execution,
     get_db_session,
+    new_trace_id,
 )
 from brain_api.errors import (
     ConcurrentCommitApiError,
@@ -31,39 +38,46 @@ from brain_api.schemas.facts import CommitProposalIn, CommitResponseOut, FactVer
 router = APIRouter(prefix="/facts", tags=["Facts"])
 
 
+def _slot(fact_slot_id: UUID) -> ResourceKey:
+    return ResourceKey(ResourceType.FACT_SLOT, fact_slot_id)
+
+
 @router.get("/{fact_slot_id}", response_model=FactVersionOut)
 async def get_fact(
     fact_slot_id: UUID,
     valid_as_of: datetime | None = Query(default=None, alias="validAsOf"),
     known_as_of: datetime | None = Query(default=None, alias="knownAsOf"),
     principal: Principal = Depends(current_principal),
-    memberships: Sequence[Membership] = Depends(current_principal_memberships),
-    authz: AuthorizationService = Depends(get_authorization_service),
+    execution: AuthorizationExecution = Depends(get_authorization_execution),
     session: AsyncSession = Depends(get_db_session),
 ) -> FactVersionOut:
+    """Business valid/known coordinates select history only; authorization always
+    uses current enforcement time and current grants (S0003 AC4)."""
     repository = SqlAlchemyFactCommitRepository(session)
-    slot = await repository.get_slot(fact_slot_id)
-    if slot is None:
-        raise NotFoundError()
-    tenant_id, knowledge_base_id = slot
-
-    resource = ResourceRef(
-        type="fact_slot", id=fact_slot_id, tenant_id=tenant_id, knowledge_base_id=knowledge_base_id
-    )
-    decision = await authz.authorize(
-        principal, memberships, resource, "read", trace_id=str(uuid4())
-    )
-    if not decision.allowed:
-        raise NotFoundError()  # denial -> 404, never disclosed
-
     now = datetime.now(UTC)
-    version = await repository.resolve_at(
-        fact_slot_id,
-        valid_as_of=valid_as_of or now,
-        known_as_of=known_as_of or now,
+    requested = RequestedScope(
+        knowledge_base_ids=None,
+        selectors=(),
+        business_valid_as_of=valid_as_of,
+        business_known_as_of=known_as_of,
     )
-    if version is None:
-        raise NotFoundError()
+
+    async def load(_decision: AuthorizationDecision) -> FactVersion:
+        version = await repository.resolve_at(
+            fact_slot_id, valid_as_of=valid_as_of or now, known_as_of=known_as_of or now
+        )
+        if version is None:
+            raise NotFoundError()
+        return version
+
+    version = await execution.read(
+        principal,
+        _slot(fact_slot_id),
+        Action.READ,
+        trace_id=new_trace_id(),
+        load=load,
+        requested=requested,
+    )
     return FactVersionOut.from_domain(version)
 
 
@@ -72,13 +86,12 @@ async def commit_fact(
     fact_slot_id: UUID,
     proposal_in: CommitProposalIn,
     principal: Principal = Depends(current_principal),
-    memberships: Sequence[Membership] = Depends(current_principal_memberships),
-    authz: AuthorizationService = Depends(get_authorization_service),
+    execution: AuthorizationExecution = Depends(get_authorization_execution),
     session: AsyncSession = Depends(get_db_session),
 ) -> CommitResponseOut:
-    repository = SqlAlchemyFactCommitRepository(session)
-    service = CanonicalCommitService(repository, authz)
-
+    """The commit independently re-checks current `fact_slot:commit` authority inside
+    its own unit of work; a review annotation never implies it (S0006 AC5)."""
+    service = CanonicalCommitService(SqlAlchemyFactCommitRepository(session))
     proposal = CommitProposal(
         slot_id=fact_slot_id,
         value=proposal_in.value,
@@ -96,22 +109,31 @@ async def commit_fact(
         idempotency_key=proposal_in.idempotency_key,
     )
 
+    async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResult:
+        (decision,) = decisions
+        assert decision.scope is not None
+        return await service.commit(
+            proposal,
+            authorized_scope=(decision.scope.tenant_id, decision.scope.knowledge_base_id),
+            authorization_decision_id=decision.decision_id,
+        )
+
     try:
-        result = await service.commit(principal, memberships, proposal, trace_id=str(uuid4()))
+        result = await execution.mutate(
+            principal,
+            [_slot(fact_slot_id)],
+            Action.COMMIT,
+            trace_id=new_trace_id(),
+            operation=operation,
+        )
     except InvalidRangeError as exc:
-        await session.rollback()
         raise InvalidRangeApiError(str(exc)) from exc
     except StaleVersionError as exc:
-        await session.rollback()
         raise StaleVersionApiError(str(exc)) from exc
     except FactSlotNotFound as exc:
-        await session.rollback()
         raise NotFoundError() from exc
     except IntegrityError as exc:
         # The GiST exclusion constraint is the backstop if the row lock somehow
         # didn't serialize a concurrent commit on this slot (F0001-S0005 AC).
-        await session.rollback()
         raise ConcurrentCommitApiError(str(exc)) from exc
-
-    await session.commit()
     return CommitResponseOut.from_domain(result)

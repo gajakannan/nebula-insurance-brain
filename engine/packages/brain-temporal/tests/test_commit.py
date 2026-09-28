@@ -1,31 +1,16 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from pathlib import Path
 from uuid import UUID, uuid4
 
 import pytest
 from brain_domain.facts import ChangeReason, CommitProposal
-from brain_security.audit import InMemoryAuditEventRepository, RepositoryAuditSink
-from brain_security.authorization import AuthorizationService
-from brain_security.casbin_adapter import CasbinAuthorizationAdapter
 from brain_temporal.commit import CanonicalCommitService, FactSlotNotFound, StaleVersionError
 from brain_temporal.ranges import InvalidRangeError
-
-REPO_ROOT = Path(__file__).resolve().parents[4]
-MODEL_PATH = REPO_ROOT / "planning-mds" / "security" / "policies" / "model.conf"
-POLICY_PATH = REPO_ROOT / "planning-mds" / "security" / "policies" / "policy.csv"
 
 
 def dt(s: str) -> datetime:
     return datetime.fromisoformat(s).replace(tzinfo=UTC)
-
-
-def _authz() -> AuthorizationService:
-    return AuthorizationService(
-        CasbinAuthorizationAdapter(MODEL_PATH, POLICY_PATH),
-        RepositoryAuditSink(InMemoryAuditEventRepository()),
-    )
 
 
 def _proposal(
@@ -54,15 +39,17 @@ def _proposal(
     )
 
 
-async def test_first_commit_on_an_empty_slot_creates_one_open_version(
-    repository, actor, membership
-) -> None:
+async def test_first_commit_on_an_empty_slot_creates_one_open_version(repository) -> None:
     slot_id = uuid4()
     repository.seed_slot(slot_id)
-    service = CanonicalCommitService(repository, _authz())
+    service = CanonicalCommitService(repository)
     proposal = _proposal(slot_id, value={"amount": "2000000.00"}, valid_from=dt("2026-01-01"))
 
-    result = await service.commit(actor, [membership], proposal, trace_id="t1")
+    result = await service.commit(
+        proposal,
+        authorized_scope=repository.scope,
+        authorization_decision_id=None,
+    )
 
     assert len(result.fact_version_ids) == 1
     version = repository.versions[result.fact_version_ids[0]]
@@ -72,24 +59,21 @@ async def test_first_commit_on_an_empty_slot_creates_one_open_version(
     assert repository.outbox[0][0] == result.commit_id
 
 
-async def test_endorsement_answers_the_section_87_matrix(repository, actor, membership) -> None:
+async def test_endorsement_answers_the_section_87_matrix(repository) -> None:
     """F0001-S0005 happy path: $2,000,000 valid from 2026-01-01, recorded 2026-01-10;
     an endorsement effective 2026-06-01 sets $5,000,000, accepted 2026-06-14."""
     slot_id = uuid4()
     repository.seed_slot(slot_id)
-    service = CanonicalCommitService(repository, _authz())
+    service = CanonicalCommitService(repository)
 
     first = await service.commit(
-        actor,
-        [membership],
         _proposal(slot_id, value={"amount": "2000000.00"}, valid_from=dt("2026-01-01")),
-        trace_id="t1",
+        authorized_scope=repository.scope,
+        authorization_decision_id=None,
     )
     original_version_id = first.fact_version_ids[0]
 
     second = await service.commit(
-        actor,
-        [membership],
         _proposal(
             slot_id,
             value={"amount": "5000000.00"},
@@ -97,7 +81,8 @@ async def test_endorsement_answers_the_section_87_matrix(repository, actor, memb
             change_reason=ChangeReason.SUPERSEDED,
             expected_current_version_id=original_version_id,
         ),
-        trace_id="t2",
+        authorized_scope=repository.scope,
+        authorization_decision_id=None,
     )
 
     # Bitemporal semantics: the ORIGINAL row's own `valid` range is never rewritten —
@@ -139,29 +124,25 @@ async def test_endorsement_answers_the_section_87_matrix(repository, actor, memb
     assert original_after.recorded_start < new_version.recorded_start
 
 
-async def test_retroactive_correction_splits_the_endorsement_into_two_pieces(
-    repository, actor, membership
-) -> None:
+async def test_retroactive_correction_splits_the_endorsement_into_two_pieces(repository) -> None:
     slot_id = uuid4()
     repository.seed_slot(slot_id)
-    service = CanonicalCommitService(repository, _authz())
+    service = CanonicalCommitService(repository)
 
     first = await service.commit(
-        actor,
-        [membership],
         _proposal(slot_id, value={"amount": "2000000.00"}, valid_from=dt("2026-01-01")),
-        trace_id="t1",
+        authorized_scope=repository.scope,
+        authorization_decision_id=None,
     )
     endorsement = await service.commit(
-        actor,
-        [membership],
         _proposal(
             slot_id,
             value={"amount": "5000000.00"},
             valid_from=dt("2026-06-01"),
             expected_current_version_id=first.fact_version_ids[0],
         ),
-        trace_id="t2",
+        authorized_scope=repository.scope,
+        authorization_decision_id=None,
     )
     endorsement_version_id = endorsement.fact_version_ids[-1]
 
@@ -172,8 +153,6 @@ async def test_retroactive_correction_splits_the_endorsement_into_two_pieces(
     # still carrying the endorsement's $5,000,000 value while [2026-06-03, None)
     # carries the corrected value.
     correction = await service.commit(
-        actor,
-        [membership],
         _proposal(
             slot_id,
             value={"amount": "5000000.00"},
@@ -181,7 +160,8 @@ async def test_retroactive_correction_splits_the_endorsement_into_two_pieces(
             change_reason=ChangeReason.CORRECTED,
             expected_current_version_id=endorsement_version_id,
         ),
-        trace_id="t3",
+        authorized_scope=repository.scope,
+        authorization_decision_id=None,
     )
 
     endorsement_after = repository.versions[endorsement_version_id]
@@ -206,76 +186,71 @@ async def test_retroactive_correction_splits_the_endorsement_into_two_pieces(
     assert ChangeReason.CORRECTED in change_reasons
 
 
-async def test_stale_expected_version_is_rejected(repository, actor, membership) -> None:
+async def test_stale_expected_version_is_rejected(repository) -> None:
     slot_id = uuid4()
     repository.seed_slot(slot_id)
-    service = CanonicalCommitService(repository, _authz())
+    service = CanonicalCommitService(repository)
     await service.commit(
-        actor,
-        [membership],
         _proposal(slot_id, value={"amount": "1"}, valid_from=dt("2026-01-01")),
-        trace_id="t1",
+        authorized_scope=repository.scope,
+        authorization_decision_id=None,
     )
 
     with pytest.raises(StaleVersionError):
         await service.commit(
-            actor,
-            [membership],
             _proposal(
                 slot_id,
                 value={"amount": "2"},
                 valid_from=dt("2026-06-01"),
                 expected_current_version_id=uuid4(),
             ),
-            trace_id="t2",
+            authorized_scope=repository.scope,
+            authorization_decision_id=None,
         )
 
 
-async def test_empty_range_is_rejected_before_any_write(repository, actor, membership) -> None:
+async def test_empty_range_is_rejected_before_any_write(repository) -> None:
     slot_id = uuid4()
     repository.seed_slot(slot_id)
-    service = CanonicalCommitService(repository, _authz())
+    service = CanonicalCommitService(repository)
 
     with pytest.raises(InvalidRangeError):
         await service.commit(
-            actor,
-            [membership],
             _proposal(
                 slot_id,
                 value={"amount": "1"},
                 valid_from=dt("2026-06-01"),
                 valid_to=dt("2026-06-01"),
             ),
-            trace_id="t1",
+            authorized_scope=repository.scope,
+            authorization_decision_id=None,
         )
     assert repository.versions == {}
     assert repository.outbox == []
 
 
-async def test_missing_slot_raises_not_found(repository, actor, membership) -> None:
-    service = CanonicalCommitService(repository, _authz())
+async def test_missing_slot_raises_not_found(repository) -> None:
+    service = CanonicalCommitService(repository)
 
     with pytest.raises(FactSlotNotFound):
         await service.commit(
-            actor,
-            [membership],
             _proposal(uuid4(), value={"amount": "1"}, valid_from=dt("2026-01-01")),
-            trace_id="t1",
+            authorized_scope=repository.scope,
+            authorization_decision_id=None,
         )
 
 
-async def test_actor_without_a_matching_membership_is_denied_as_not_found(
-    repository, actor
-) -> None:
+async def test_slot_outside_the_authorized_scope_is_not_found(repository) -> None:
+    """F0002: authorization happens in `AuthorizationExecution`; the service still
+    refuses a slot whose locked owner differs from the authorized scope."""
     slot_id = uuid4()
     repository.seed_slot(slot_id)
-    service = CanonicalCommitService(repository, _authz())
+    service = CanonicalCommitService(repository)
 
     with pytest.raises(FactSlotNotFound):
         await service.commit(
-            actor,
-            [],
             _proposal(slot_id, value={"amount": "1"}, valid_from=dt("2026-01-01")),
-            trace_id="t1",
+            authorized_scope=(uuid4(), uuid4()),
+            authorization_decision_id=None,
         )
     assert repository.versions == {}

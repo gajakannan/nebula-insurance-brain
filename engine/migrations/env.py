@@ -14,7 +14,9 @@ from sqlalchemy import engine_from_config, pool
 
 config = context.config
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    # Keep loggers the host process already configured (in-process migrations from
+    # tests or tooling must not silence application security logging).
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 target_metadata = [Base.metadata, document_job_metadata]
 

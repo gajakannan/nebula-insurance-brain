@@ -10,6 +10,10 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 # dependency-injection pattern, not the mutable-default-argument bug this rule targets.
 ignore = ["B008"]
 
+[lint.per-file-ignores]
+# Raw SQL fixtures reproducing F0001-era rows read better unwrapped.
+"tests/integration/test_authx_migration.py" = ["E501"]
+
 [lint.isort]
 known-first-party = ["brain_api", "brain_worker"]
 

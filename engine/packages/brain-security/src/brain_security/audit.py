@@ -1,50 +1,52 @@
+"""Durable, non-secret audit projections (F0002-S0006, ADR-0062)."""
+
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import Protocol
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from brain_domain.audit import AuditEvent
+from brain_domain.authx import AuthenticationEvent, AuthorizationDecision
 
-from brain_security.authorization import Decision, ResourceRef
+AUTHORIZATION_DECISION = "authorization_decision"
 
 
 class AuditEventRepository(Protocol):
     async def append(self, event: AuditEvent) -> None: ...
 
 
-class RepositoryAuditSink:
-    """`AuditSink` (F0001-S0006) backed by an append-only `AuditEventRepository`.
-    Written in the same transaction as the read's request log by the caller."""
+class AuthenticationEventSink(Protocol):
+    """Write-only sink for rejected credentials. It never reads principal or
+    protected-resource storage to enrich the event (S0006 AC2)."""
 
-    def __init__(self, repository: AuditEventRepository) -> None:
-        self._repository = repository
+    async def record(self, event: AuthenticationEvent) -> None: ...
 
-    async def record(
-        self,
-        *,
-        actor_principal_id: UUID,
-        delegate_principal_id: UUID | None,
-        resource: ResourceRef,
-        action: str,
-        decision: Decision,
-    ) -> None:
-        await self._repository.append(
-            AuditEvent(
-                id=uuid4(),
-                occurred_at=datetime.now(UTC),
-                actor_principal_id=actor_principal_id,
-                delegate_principal_id=delegate_principal_id,
-                resource_type=resource.type,
-                resource_id=resource.id,
-                action=action,
-                decision=decision.allowed,
-                reason_code=decision.reason_code,
-                policy_hash=decision.policy_hash,
-                grant_revision=decision.grant_revision,
-                trace_id=decision.trace_id,
-            )
-        )
+
+def decision_audit_event(decision: AuthorizationDecision) -> AuditEvent:
+    """Project a schema `Decision` onto one append-only `audit_event` row.
+
+    Legacy columns stay meaningful for F0001 readers: `actor_principal_id` is the
+    accountable (acting) principal and `delegate_principal_id` the executor when a
+    delegation applies. The full v1 decision rides in `payload`; it contains no
+    token, request body or protected payload by construction."""
+    return AuditEvent(
+        id=uuid4(),
+        occurred_at=decision.occurred_at,
+        actor_principal_id=decision.actor_principal_id,
+        delegate_principal_id=decision.executor_principal_id,
+        resource_type=decision.resource.type.value,
+        resource_id=decision.resource.id,
+        action=decision.action,
+        decision=decision.allowed,
+        reason_code=decision.reason_code.value,
+        policy_hash=decision.policy_hash,
+        grant_revision=decision.grant_revision,
+        trace_id=decision.trace_id,
+        decision_id=decision.decision_id,
+        event_type=AUTHORIZATION_DECISION,
+        operation_outcome=decision.operation_outcome.value,
+        payload=decision.to_json(),
+    )
 
 
 class InMemoryAuditEventRepository:

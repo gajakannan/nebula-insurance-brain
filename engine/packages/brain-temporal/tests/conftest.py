@@ -5,7 +5,6 @@ from uuid import UUID, uuid4
 
 import pytest
 from brain_domain.facts import ChangeReason, FactVersion
-from brain_domain.principal import Membership, Principal, PrincipalKind, PrincipalStatus
 from brain_temporal.ranges import TimeRange
 
 
@@ -19,6 +18,7 @@ class FakeFactCommitRepository:
         self.versions: dict[UUID, FactVersion] = {}
         self.changes: list[dict] = []
         self.outbox: list[tuple[UUID, dict]] = []
+        self.commits: list[tuple[UUID, tuple[UUID, UUID], UUID | None]] = []
         self.lock_calls = 0
 
     def seed_slot(self, slot_id: UUID) -> None:
@@ -89,12 +89,38 @@ class FakeFactCommitRepository:
             canonical_accepted_at=canonical_accepted_at,
         )
 
+    @property
+    def scope(self) -> tuple[UUID, UUID]:
+        return (self.tenant_id, self.knowledge_base_id)
+
     async def insert_change(
-        self, *, reason: ChangeReason, from_version_id: UUID | None, to_version_id: UUID
+        self,
+        *,
+        reason: ChangeReason,
+        from_version_id: UUID | None,
+        to_version_id: UUID,
+        tenant_id: UUID,
+        knowledge_base_id: UUID,
     ) -> None:
         self.changes.append(
-            {"reason": reason, "from_version_id": from_version_id, "to_version_id": to_version_id}
+            {
+                "reason": reason,
+                "from_version_id": from_version_id,
+                "to_version_id": to_version_id,
+                "scope": (tenant_id, knowledge_base_id),
+            }
         )
+
+    async def register_commit(
+        self,
+        *,
+        commit_id: UUID,
+        tenant_id: UUID,
+        knowledge_base_id: UUID,
+        authorization_decision_id: UUID | None,
+        at: datetime,
+    ) -> None:
+        self.commits.append((commit_id, (tenant_id, knowledge_base_id), authorization_decision_id))
 
     async def write_outbox(self, commit_id: UUID, payload: dict) -> None:
         self.outbox.append((commit_id, payload))
@@ -113,26 +139,3 @@ def knowledge_base_id() -> UUID:
 @pytest.fixture
 def repository(tenant_id: UUID, knowledge_base_id: UUID) -> FakeFactCommitRepository:
     return FakeFactCommitRepository(tenant_id=tenant_id, knowledge_base_id=knowledge_base_id)
-
-
-@pytest.fixture
-def actor() -> Principal:
-    return Principal(
-        id=uuid4(),
-        kind=PrincipalKind.SERVICE,
-        issuer="authentik",
-        subject="svc",
-        status=PrincipalStatus.ACTIVE,
-    )
-
-
-@pytest.fixture
-def membership(actor: Principal, tenant_id: UUID, knowledge_base_id: UUID) -> Membership:
-    return Membership(
-        principal_id=actor.id,
-        tenant_id=tenant_id,
-        knowledge_base_id=knowledge_base_id,
-        role="ServicePrincipal",
-        grant_revision=1,
-        revoked_at=None,
-    )

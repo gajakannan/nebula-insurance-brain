@@ -1,41 +1,63 @@
+"""Verified credential -> one stable typed principal (F0002-S0002, ADR-0049/0061).
+
+Runs only after `CredentialVerifier.verify` succeeded. Identity is the exact,
+case-sensitive `(issuer, subject)` alias in `external_identity`; subjects are never
+normalized and email is never an identity. First sight provisions a USER with no
+grants only for a trusted human client; service/agent identities must already be
+provisioned to their kind. A concurrent first resolution returns the single winner.
+"""
+
 from __future__ import annotations
 
 from typing import Protocol
 from uuid import UUID
 
-from brain_domain.principal import Membership, Principal, PrincipalKind, PrincipalStatus
+from brain_domain.principal import Principal, PrincipalKind, PrincipalStatus
 
+from brain_security.identity_profile import IdentityProfile
 from brain_security.verification import CredentialError, VerifiedCredential
 
 
-class PrincipalRepository(Protocol):
-    async def find_by_issuer_subject(self, issuer: str, subject: str) -> Principal | None: ...
+class AliasConflict(ValueError):
+    """The `(issuer, subject)` pair is already linked to a different principal."""
 
-    async def create(self, *, issuer: str, subject: str, kind: PrincipalKind) -> Principal: ...
 
-    async def memberships(self, principal_id: UUID) -> tuple[Membership, ...]: ...
+class IdentityRepository(Protocol):
+    async def find_by_alias(self, issuer: str, subject: str) -> Principal | None: ...
+
+    async def resolve_or_create(self, issuer: str, subject: str, kind: PrincipalKind) -> Principal:
+        """Unique insert-or-read: exactly one principal survives concurrent first sight;
+        creates the principal, its alias and its authority revision (1), no grants."""
+        ...
+
+    async def link_identity(
+        self,
+        principal_id: UUID,
+        issuer: str,
+        subject: str,
+        approval_ref: str,
+        operator_id: UUID,
+    ) -> None: ...
 
 
 class PrincipalResolver:
-    """(issuer, subject) -> a stable internal principal; creates on first sight
-    (F0001-S0006 logic flow step 3)."""
+    """Resolve a verified credential; never consult roles, kinds or actor fields a
+    client or model supplies (S0002 AC5/AC7)."""
 
-    def __init__(self, repository: PrincipalRepository) -> None:
+    def __init__(self, repository: IdentityRepository, profile: IdentityProfile) -> None:
         self._repository = repository
+        self._profile = profile
 
     async def resolve(self, credential: VerifiedCredential) -> Principal:
-        principal = await self._repository.find_by_issuer_subject(
-            credential.issuer, credential.subject
-        )
+        principal = await self._repository.find_by_alias(credential.issuer, credential.subject)
         if principal is None:
-            principal = await self._repository.create(
-                issuer=credential.issuer, subject=credential.subject, kind=PrincipalKind.USER
+            kind = self._profile.self_provision_kind(credential.issuer, credential.client_id)
+            if kind is None:
+                # An unprovisioned non-human (or unknown) client cannot become a USER.
+                raise CredentialError("unsupported_token_type", "client not provisioned")
+            principal = await self._repository.resolve_or_create(
+                credential.issuer, credential.subject, kind
             )
-        if principal.status == PrincipalStatus.DISABLED:
+        if principal.status != PrincipalStatus.ACTIVE:
             raise CredentialError("disabled_principal")
         return principal
-
-    async def memberships(self, principal: Principal) -> tuple[Membership, ...]:
-        """Current grants only; revoked rows excluded."""
-        all_memberships = await self._repository.memberships(principal.id)
-        return tuple(m for m in all_memberships if m.revoked_at is None)

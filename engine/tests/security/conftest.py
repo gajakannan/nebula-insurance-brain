@@ -16,37 +16,44 @@ import os
 import socket
 from contextlib import suppress
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlsplit
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import httpx2 as httpx
 import jwt
 import pytest
 import pytest_asyncio
-from brain_persistence.models import (
-    Assertion,
-    ContentArtifact,
-    DocumentVersion,
-    FactSlotRow,
-    MembershipRow,
-    PrincipalRow,
-    ReviewBatchRow,
-    ReviewItemRow,
-    SourceDocument,
-)
+from brain_domain.authx import PilotRole
+from brain_domain.principal import PrincipalKind
+from brain_persistence import fixtures
 from brain_persistence.session import make_engine, make_session_factory, session_scope
-from brain_security.verification import VerifiedCredential
+from brain_security.identity_profile import IdentityProfile, IssuerProfile
+from brain_security.verification import VerifiedCredential, decode_verified
 from cryptography.hazmat.primitives.asymmetric import rsa
 from jwt import PyJWK
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from brain_api.app import create_app
-from brain_api.deps import get_content_store, get_credential_verifier, get_db_session
+from brain_api.deps import (
+    get_content_store,
+    get_credential_verifier,
+    get_db_session,
+    get_identity_profile,
+    get_session_factory,
+)
 
 ISSUER = "https://authentik.local/application/o/brain/"
 AUDIENCE = "brain"
+HUMAN_CLIENT = "brain"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+POLICIES = REPO_ROOT / "planning-mds" / "security" / "policies"
+ISSUER_PROFILE = IssuerProfile(
+    issuer=ISSUER, audiences=frozenset({AUDIENCE}), human_clients=frozenset({HUMAN_CLIENT})
+)
+IDENTITY_PROFILE = IdentityProfile((ISSUER_PROFILE,))
 
 
 def _database_url() -> str:
@@ -63,8 +70,10 @@ def make_token(rsa_key: rsa.RSAPrivateKey, subject: str, **claim_overrides: obje
         "aud": AUDIENCE,
         "iat": now,
         "exp": now + timedelta(minutes=5),
+        "azp": HUMAN_CLIENT,
     }
     claims.update(claim_overrides)
+    claims = {k: v for k, v in claims.items() if v is not None}
     return jwt.encode(claims, rsa_key, algorithm="RS256", headers={"kid": "test-key-1"})
 
 
@@ -94,48 +103,32 @@ class FakeVerifier:
         )
 
     async def verify(self, bearer_token: str) -> VerifiedCredential:
-        from brain_security.verification import CredentialError
-
-        try:
-            signing_key = self._signing_key()
-            payload = jwt.decode(
-                bearer_token,
-                signing_key.key,
-                algorithms=["RS256"],
-                audience=AUDIENCE,
-                issuer=ISSUER,
-            )
-        except jwt.ExpiredSignatureError as exc:
-            raise CredentialError("expired", str(exc)) from exc
-        except jwt.InvalidAudienceError as exc:
-            raise CredentialError("wrong_audience", str(exc)) from exc
-        except jwt.InvalidIssuerError as exc:
-            raise CredentialError("wrong_issuer", str(exc)) from exc
-        except jwt.ImmatureSignatureError as exc:
-            raise CredentialError("not_yet_valid", str(exc)) from exc
-        except jwt.InvalidTokenError as exc:
-            raise CredentialError("invalid_signature", str(exc)) from exc
-        return VerifiedCredential(
-            issuer=payload["iss"],
-            subject=payload["sub"],
-            audience=AUDIENCE,
-            expires_at=datetime.fromtimestamp(payload["exp"], tz=UTC),
-            not_before=None,
-            key_id="test-key-1",
+        # Real signature/issuer/audience/time/required-claim checks via the same
+        # `decode_verified` the production verifier uses; only JWKS fetch is faked.
+        return decode_verified(
+            bearer_token, self._signing_key().key, ISSUER_PROFILE, key_id="test-key-1"
         )
 
 
 class FakeContentStore:
     """Enough of `ContentArtifactStore` to prove a 200/404 without touching a
-    real filesystem — the object-store adapter itself is proven in S0002/S0004."""
+    real filesystem — the object-store adapter itself is proven in S0002/S0004.
+    Records every manifest/byte access so tests can prove nothing protected is
+    opened before an allow decision (F0002-S0004 AC7)."""
 
     def __init__(self) -> None:
         self._files: dict[str, bytes] = {"source.pdf": b"%PDF-1.4 fake bytes"}
+        self.manifest_reads: list[UUID] = []
+        self.file_reads: list[tuple[UUID, str]] = []
 
     async def get_manifest(self, artifact_id: UUID) -> SimpleNamespace:
-        return SimpleNamespace(files=[SimpleNamespace(path=path) for path in self._files])
+        self.manifest_reads.append(artifact_id)
+        files = [SimpleNamespace(path=path) for path in self._files]
+        body = json.dumps({"artifact_id": str(artifact_id), "files": sorted(self._files)})
+        return SimpleNamespace(files=files, model_dump_json=lambda: body)
 
     async def open_file(self, artifact_id: UUID, path: str) -> bytes:
+        self.file_reads.append((artifact_id, path))
         return self._files[path]
 
 
@@ -167,14 +160,22 @@ async def pg_session_factory() -> async_sessionmaker[AsyncSession]:
             await asyncio.wait_for(engine.dispose(), timeout=5)
         pytest.skip(f"Postgres not reachable at {_database_url()}: {exc}")
     session_factory = make_session_factory(engine)
+    async with session_scope(session_factory) as session:
+        await session.run_sync(
+            fixtures.activate_policy, POLICIES / "model.conf", POLICIES / "policy.csv"
+        )
     yield session_factory
 
     async with session_factory() as session:
         await session.execute(
             text(
                 "TRUNCATE TABLE outbox_event, canonical_fact_change, canonical_fact_version, "
-                "fact_slot, review_decision, review_item, review_batch, content_artifact, "
-                "document_version, source_document, membership, principal CASCADE"
+                "canonical_commit, fact_slot, review_decision, review_item, review_batch, "
+                "assertion_evidence, assertion, semantic_interpretation_run, content_artifact, "
+                "document_version, source_document, resource_access, delegation, membership, "
+                "entity_knowledge_base, entity_identity, external_identity, principal_authority, "
+                "principal, knowledge_base, workspace, tenant, authentication_event, "
+                "policy_release_pointer, policy_release CASCADE"
             )
         )
         await session.commit()
@@ -190,13 +191,49 @@ async def client(rsa_key: rsa.RSAPrivateKey, pg_session_factory: async_sessionma
             yield session
 
     app.dependency_overrides[get_db_session] = override_get_db_session
+    app.dependency_overrides[get_session_factory] = lambda: pg_session_factory
     app.dependency_overrides[get_credential_verifier] = lambda: FakeVerifier(rsa_key)
-    app.dependency_overrides[get_content_store] = lambda: FakeContentStore()
+    app.dependency_overrides[get_identity_profile] = lambda: IDENTITY_PROFILE
+    content_store = FakeContentStore()
+    app.dependency_overrides[get_content_store] = lambda: content_store
 
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as test_client:
         test_client.session_factory = pg_session_factory  # type: ignore[attr-defined]
+        test_client.content_store = content_store  # type: ignore[attr-defined]
+        test_client.app = app  # type: ignore[attr-defined]
         yield test_client
+
+
+async def seed_principal(
+    session_factory: async_sessionmaker[AsyncSession],
+    *,
+    issuer: str = ISSUER,
+    subject: str,
+    kind: PrincipalKind = PrincipalKind.USER,
+) -> UUID:
+    async with session_scope(session_factory) as session:
+        principal = await session.run_sync(
+            lambda s: fixtures.seed_principal(s, issuer=issuer, subject=subject, kind=kind)
+        )
+        return principal.id
+
+
+async def seed_grant(
+    session_factory: async_sessionmaker[AsyncSession],
+    principal_id: UUID,
+    *,
+    tenant_id: UUID,
+    knowledge_base_id: UUID,
+    role: str = "TenantMember",
+    **slice_fields: object,
+) -> UUID:
+    async with session_scope(session_factory) as session:
+        return await session.run_sync(
+            lambda s: fixtures.seed_grant(
+                s, principal_id, tenant_id, knowledge_base_id, PilotRole(role), **slice_fields
+            )
+        )
 
 
 async def seed_principal_and_membership(
@@ -207,49 +244,32 @@ async def seed_principal_and_membership(
     tenant_id: UUID,
     knowledge_base_id: UUID,
     role: str = "TenantMember",
+    kind: PrincipalKind = PrincipalKind.USER,
 ) -> UUID:
-    async with session_scope(session_factory) as session:
-        principal_row = PrincipalRow(
-            id=uuid4(), kind="user", issuer=issuer, subject=subject, status="active"
-        )
-        session.add(principal_row)
-        await session.flush()
-        session.add(
-            MembershipRow(
-                id=uuid4(),
-                principal_id=principal_row.id,
-                tenant_id=tenant_id,
-                knowledge_base_id=knowledge_base_id,
-                role=role,
-                grant_revision=1,
-                revoked_at=None,
-            )
-        )
-        return principal_row.id
+    principal_id = await seed_principal(session_factory, issuer=issuer, subject=subject, kind=kind)
+    await seed_grant(
+        session_factory,
+        principal_id,
+        tenant_id=tenant_id,
+        knowledge_base_id=knowledge_base_id,
+        role=role,
+    )
+    return principal_id
 
 
 async def seed_content_artifact(
-    session_factory: async_sessionmaker[AsyncSession], *, tenant_id: UUID, knowledge_base_id: UUID
+    session_factory: async_sessionmaker[AsyncSession],
+    *,
+    tenant_id: UUID,
+    knowledge_base_id: UUID,
+    **restrictions: object,
 ) -> UUID:
     async with session_scope(session_factory) as session:
-        source = SourceDocument(
-            tenant_id=tenant_id, knowledge_base_id=knowledge_base_id, source_sha256=uuid4().hex
+        return await session.run_sync(
+            lambda s: fixtures.seed_content_artifact(
+                s, tenant_id, knowledge_base_id, **restrictions
+            )
         )
-        session.add(source)
-        await session.flush()
-        version = DocumentVersion(source_document_id=source.id)
-        session.add(version)
-        await session.flush()
-        artifact = ContentArtifact(
-            id=uuid4(),
-            document_version_id=version.id,
-            artifact_sha256=uuid4().hex,
-            page_count=1,
-            extraction_status="complete",
-        )
-        session.add(artifact)
-        await session.flush()
-        return artifact.id
 
 
 async def seed_review_item(
@@ -258,49 +278,103 @@ async def seed_review_item(
     tenant_id: UUID,
     knowledge_base_id: UUID,
     assembling_principal_id: UUID,
+    **restrictions: object,
 ) -> UUID:
+    item_id, _ = await seed_review_item_in_batch(
+        session_factory,
+        tenant_id=tenant_id,
+        knowledge_base_id=knowledge_base_id,
+        assembling_principal_id=assembling_principal_id,
+        **restrictions,
+    )
+    return item_id
+
+
+async def seed_review_item_in_batch(
+    session_factory: async_sessionmaker[AsyncSession],
+    *,
+    tenant_id: UUID,
+    knowledge_base_id: UUID,
+    assembling_principal_id: UUID,
+    batch_id: UUID | None = None,
+    **restrictions: object,
+) -> tuple[UUID, UUID]:
     async with session_scope(session_factory) as session:
-        assertion = Assertion(
-            id=uuid4(),
-            run_id=None,
-            origin="MACHINE_EXTRACTION",
-            subject_type="Policy",
-            slot_type="each_occurrence_limit",
-            value={"value": "$20,000,000"},
-            model_confidence=0.41,
-            interpretation_basis="EXPLICIT",
+        return await session.run_sync(
+            lambda s: fixtures.seed_review_item(
+                s,
+                tenant_id,
+                knowledge_base_id,
+                assembling_principal_id=assembling_principal_id,
+                batch_id=batch_id,
+                **restrictions,
+            )
         )
-        session.add(assertion)
-        await session.flush()
-        batch = ReviewBatchRow(id=uuid4(), assembling_principal_id=assembling_principal_id)
-        session.add(batch)
-        await session.flush()
-        item = ReviewItemRow(
-            id=uuid4(),
-            type="LOW_CONFIDENCE_ASSERTION",
-            status="open",
-            assertion_id=assertion.id,
-            assertion_version=1,
-            tenant_id=tenant_id,
-            knowledge_base_id=knowledge_base_id,
-            review_batch_id=batch.id,
-        )
-        session.add(item)
-        await session.flush()
-        return item.id
 
 
 async def seed_fact_slot(
-    session_factory: async_sessionmaker[AsyncSession], *, tenant_id: UUID, knowledge_base_id: UUID
+    session_factory: async_sessionmaker[AsyncSession],
+    *,
+    tenant_id: UUID,
+    knowledge_base_id: UUID,
+    **restrictions: object,
 ) -> UUID:
     async with session_scope(session_factory) as session:
-        slot = FactSlotRow(
-            id=uuid4(),
-            entity_id=uuid4(),
-            slot_type="each_occurrence_limit",
-            tenant_id=tenant_id,
-            knowledge_base_id=knowledge_base_id,
+        return await session.run_sync(
+            lambda s: fixtures.seed_fact_slot(s, tenant_id, knowledge_base_id, **restrictions)
         )
-        session.add(slot)
-        await session.flush()
-        return slot.id
+
+
+def bearer(rsa_key: rsa.RSAPrivateKey, subject: str, **claims: object) -> dict[str, str]:
+    return {"Authorization": f"Bearer {make_token(rsa_key, subject, **claims)}"}
+
+
+async def run_sync(session_factory: async_sessionmaker[AsyncSession], fn):  # noqa: ANN001, ANN201
+    """Run a trusted operational function in its own committed transaction."""
+    async with session_scope(session_factory) as session:
+        return await session.run_sync(fn)
+
+
+async def decisions_for(
+    session_factory: async_sessionmaker[AsyncSession], resource_id: UUID
+) -> list[dict]:
+    """Durable v1 authorization decisions for one resource, oldest first."""
+    async with session_factory() as session:
+        rows = await session.execute(
+            text(
+                "SELECT payload FROM audit_event WHERE event_type = 'authorization_decision' "
+                "AND resource_id = :rid ORDER BY occurred_at, payload->>'decision_id'"
+            ),
+            {"rid": resource_id},
+        )
+        return [row.payload for row in rows]
+
+
+class StatementLog:
+    """Captures SQL issued on the test engine (instrumented repository proof)."""
+
+    def __init__(self) -> None:
+        self.statements: list[str] = []
+
+    def __call__(self, conn, cursor, statement, parameters, context, executemany) -> None:  # noqa: ANN001
+        self.statements.append(" ".join(statement.split()).lower())
+
+    def touching(self, *tables: str) -> list[str]:
+        return [s for s in self.statements if any(f" {t}" in s for t in tables)]
+
+
+def sync_engine_of(session_factory: async_sessionmaker[AsyncSession]):  # noqa: ANN201
+    return session_factory.kw["bind"].sync_engine
+
+
+class FailOn:
+    """`before_cursor_execute` hook that raises for statements starting with a prefix
+    (failure injection for audit/authority storage)."""
+
+    def __init__(self, prefix: str) -> None:
+        self.prefix = prefix.lower()
+        self.armed = True
+
+    def __call__(self, conn, cursor, statement, parameters, context, executemany) -> None:  # noqa: ANN001
+        if self.armed and " ".join(statement.split()).lower().startswith(self.prefix):
+            raise RuntimeError(f"injected failure: {self.prefix}")

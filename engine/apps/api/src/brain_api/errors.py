@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 
+from brain_security.execution import AuthorizationDenied, AuthorizationUnavailable
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -76,6 +77,15 @@ class ConcurrentCommitApiError(BrainError):
     title = "Concurrent Commit"
 
 
+class ServiceUnavailableError(BrainError):
+    """Current authority, identity or durable audit storage is unavailable
+    (F0002-S0006). Sanitized: no reason, tenant, KB or resource detail."""
+
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    code = "unavailable"
+    title = "Service Unavailable"
+
+
 def _problem_response(
     *,
     status_code: int,
@@ -110,6 +120,28 @@ def install_problem_details_handlers(app: FastAPI) -> None:
             title=exc.title,
             code=exc.code,
             detail=exc.detail,
+            instance=str(request.url.path),
+        )
+
+    @app.exception_handler(AuthorizationDenied)
+    async def _handle_denied(request: Request, exc: AuthorizationDenied) -> JSONResponse:
+        # Denied and nonexistent resources are indistinguishable; the reason code
+        # lives only in the durable decision audit (S0004 AC7).
+        return _problem_response(
+            status_code=NotFoundError.status_code,
+            title=NotFoundError.title,
+            code=NotFoundError.code,
+            detail=None,
+            instance=str(request.url.path),
+        )
+
+    @app.exception_handler(AuthorizationUnavailable)
+    async def _handle_unavailable(request: Request, exc: AuthorizationUnavailable) -> JSONResponse:
+        return _problem_response(
+            status_code=ServiceUnavailableError.status_code,
+            title=ServiceUnavailableError.title,
+            code=ServiceUnavailableError.code,
+            detail=None,
             instance=str(request.url.path),
         )
 

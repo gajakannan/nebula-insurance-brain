@@ -1,0 +1,60 @@
+session:
+  started: '2026-09-27T23:09:21+00:00'
+  role: architect
+  scope: F0002
+  run_id: 2026-09-27-bb7c8d1d
+  mode: null
+  scope_label: F0002
+  scope_id: feature:F0002
+decisions:
+- decision_id: 0
+  timestamp: '2026-09-27T23:09:21+00:00'
+  summary: Worker ingest/interpret hydrate content_artifact security metadata from a resource_access row provisioned by the
+    trusted submitter before the artifact row exists; the API requires both rows with agreeing ownership
+  topic: plan-story-reconcile
+  supersedes: []
+  rationale: Plan says missing metadata denies and ingest precedes artifact registration; the trusted submitter is the only
+    non-inferred source of restrictions
+- decision_id: 1
+  timestamp: '2026-09-27T23:09:21+00:00'
+  summary: Membership restriction columns (selectors, classifications, source ACL) have no defaults; rows must carry explicit
+    values from reconciliation or trusted provisioning, and 0006 enforces NOT NULL
+  topic: authx-defaults
+  supersedes: []
+  rationale: 'Plan: no default internal value may silently imply enforcement or grant'
+- decision_id: 2
+  timestamp: '2026-09-27T23:09:21+00:00'
+  summary: Policy release = sha256 over length-prefixed model bytes, policy bytes, and contract version; immutable policy_release
+    rows plus a singleton pointer read FOR SHARE per decision; an absent or mismatched pointer fails closed (503)
+  topic: policy-release
+  supersedes: []
+- decision_id: 3
+  timestamp: '2026-09-27T23:09:21+00:00'
+  summary: Authority revision lives in principal_authority; evaluation takes FOR SHARE on authority rows in principal-ID order
+    and grant changes take FOR UPDATE, which linearizes revoke against the next operation
+  topic: lock-protocol
+  supersedes: []
+- decision_id: 4
+  timestamp: '2026-09-27T23:09:21+00:00'
+  summary: brain_jobs keeps str-valued ids through a UUIDText TypeDecorator (native uuid on PostgreSQL, String(36) on SQLite);
+    ownership FKs for job tables live only in the migration, not queue metadata
+  topic: jobs-uuid
+  supersedes: []
+  rationale: Preserves the F0005 SQLite contract tests and random-schema PG proofs that create_all without a KB registry
+- decision_id: 5
+  timestamp: '2026-09-27T23:09:21+00:00'
+  summary: AuthorizationService/ResourceRef (the caller-supplied snapshot API) are removed rather than kept alongside the
+    new facade
+  topic: legacy-authz
+  supersedes: []
+  rationale: Keeping the unchecked path invites bypass; all three consumers migrate in this feature
+- decision_id: 6
+  timestamp: '2026-09-27T23:09:21+00:00'
+  summary: Orchestration (lock, load, hydrate) is written once each for the async API adapter and the sync worker adapter;
+    every allow/deny rule lives only in the pure brain_security.evaluation.evaluate
+  topic: sync-async-parity
+  supersedes: []
+  rationale: Plan forbids asyncio.run in the worker callback and forbids duplicated evaluation rules
+files_touched: []
+open_questions: []
+escalations: []

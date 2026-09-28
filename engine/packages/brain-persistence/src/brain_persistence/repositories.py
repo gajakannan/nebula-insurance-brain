@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from brain_domain.audit import AuditEvent
+from brain_domain.authx import AuthorizationDecision, ResourceKey, ResourceType
 from brain_domain.facts import ChangeReason, FactVersion
-from brain_domain.principal import Membership, Principal, PrincipalKind, PrincipalStatus
 from brain_domain.review import (
     EvidenceLocator,
     ReviewDecision,
@@ -22,109 +22,60 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import Range
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from brain_persistence.authx import audit_timestamp
 from brain_persistence.models import (
     Assertion,
     AuditEventRow,
+    CanonicalCommitRow,
     CanonicalFactChangeRow,
     CanonicalFactVersionRow,
-    ContentArtifact,
-    DocumentVersion,
     FactSlotRow,
-    MembershipRow,
     OutboxEventRow,
-    PrincipalRow,
     ReviewDecisionRow,
     ReviewItemRow,
-    SourceDocument,
 )
-
-
-def _principal_from_row(row: PrincipalRow) -> Principal:
-    return Principal(
-        id=row.id,
-        kind=PrincipalKind(row.kind),
-        issuer=row.issuer,
-        subject=row.subject,
-        status=PrincipalStatus(row.status),
-    )
-
-
-def _membership_from_row(row: MembershipRow) -> Membership:
-    return Membership(
-        principal_id=row.principal_id,
-        tenant_id=row.tenant_id,
-        knowledge_base_id=row.knowledge_base_id,
-        role=row.role,
-        grant_revision=row.grant_revision,
-        revoked_at=row.revoked_at,
-    )
-
-
-class SqlAlchemyPrincipalRepository:
-    """`brain_security.principals.PrincipalRepository` over SQLAlchemy (F0001-S0006)."""
-
-    def __init__(self, session: AsyncSession) -> None:
-        self._session = session
-
-    async def find_by_issuer_subject(self, issuer: str, subject: str) -> Principal | None:
-        row = (
-            await self._session.execute(
-                select(PrincipalRow).where(
-                    PrincipalRow.issuer == issuer, PrincipalRow.subject == subject
-                )
-            )
-        ).scalar_one_or_none()
-        return _principal_from_row(row) if row is not None else None
-
-    async def create(self, *, issuer: str, subject: str, kind: PrincipalKind) -> Principal:
-        row = PrincipalRow(
-            id=uuid4(),
-            kind=kind.value,
-            issuer=issuer,
-            subject=subject,
-            status=PrincipalStatus.ACTIVE.value,
-        )
-        self._session.add(row)
-        await self._session.flush()
-        return _principal_from_row(row)
-
-    async def memberships(self, principal_id: UUID) -> tuple[Membership, ...]:
-        rows = (
-            (
-                await self._session.execute(
-                    select(MembershipRow).where(MembershipRow.principal_id == principal_id)
-                )
-            )
-            .scalars()
-            .all()
-        )
-        return tuple(_membership_from_row(row) for row in rows)
+from brain_persistence.tenancy import inherit_resource_access
 
 
 class ReviewDecisionAuditSink:
-    """`brain_review.decisions.AuditRecorder` over an `AuditEventRepository`. Distinct
-    from `brain_security.audit.RepositoryAuditSink` (F0001-S0006), which audits
-    authorization decisions (allow/deny an action) — this audits the *outcome* of a
-    review decision itself (F0001-S0004), a different event with a different shape."""
+    """`brain_review.decisions.AuditRecorder` over an `AuditEventRepository`. Audits
+    the *outcome* of a review decision (F0001-S0004) and references the durable
+    authorization decision that permitted it (F0002-S0006): the authorization's
+    policy hash, authority revision and decision ID replace the F0001 placeholder
+    "n/a"/0 values, and the reviewer is the authenticated principal."""
 
-    def __init__(self, repository: AuditEventRepository) -> None:
+    def __init__(
+        self,
+        repository: AuditEventRepository,
+        authorizations: dict[UUID, AuthorizationDecision],
+    ) -> None:
         self._repository = repository
+        self._authorizations = authorizations
 
     async def record_decision(self, decision: ReviewDecision) -> None:
+        authorization = self._authorizations[decision.review_item_id]
         await self._repository.append(
             AuditEvent(
                 id=uuid4(),
                 occurred_at=decision.decided_at,
                 actor_principal_id=decision.reviewer_principal_id,
-                delegate_principal_id=None,
+                delegate_principal_id=authorization.executor_principal_id,
                 resource_type="review_item",
                 resource_id=decision.review_item_id,
                 action=decision.action.value,
                 decision=not decision.stale,
                 reason_code=decision.reason_code.value if decision.reason_code else "n/a",
-                policy_hash="n/a",
-                grant_revision=0,
+                policy_hash=authorization.policy_hash,
+                grant_revision=authorization.grant_revision,
                 trace_id=decision.event_sha256,
+                decision_id=authorization.decision_id,
+                event_type="review_decision_recorded",
+                operation_outcome="succeeded",
+                payload={
+                    "review_decision_id": str(decision.id),
+                    "authorization_decision_id": str(authorization.decision_id),
+                    "stale": decision.stale,
+                },
             )
         )
 
@@ -139,6 +90,7 @@ class SqlAlchemyAuditEventRepository:
         self._session.add(
             AuditEventRow(
                 id=event.id,
+                occurred_at=audit_timestamp(event.occurred_at),
                 actor_principal_id=event.actor_principal_id,
                 delegate_principal_id=event.delegate_principal_id,
                 resource_type=event.resource_type,
@@ -149,6 +101,10 @@ class SqlAlchemyAuditEventRepository:
                 policy_hash=event.policy_hash,
                 grant_revision=event.grant_revision,
                 trace_id=event.trace_id,
+                decision_id=event.decision_id,
+                event_type=event.event_type,
+                operation_outcome=event.operation_outcome,
+                payload=event.payload,
             )
         )
         await self._session.flush()
@@ -212,33 +168,13 @@ def _decision_from_row(row: ReviewDecisionRow) -> ReviewDecision:
     )
 
 
-class SqlAlchemyContentArtifactLookup:
-    """Resolves a `content_artifact`'s owning tenant/knowledge base for
-    authorization (F0001-S0004: streamed authorized artifact reads, settling the
-    story's open question over a signed short-lived URL — no public URL is ever
-    issued; every byte read goes through the same principal/authz path as any
-    other protected read)."""
-
-    def __init__(self, session: AsyncSession) -> None:
-        self._session = session
-
-    async def get_tenant_and_kb(self, artifact_id: UUID) -> tuple[UUID, UUID] | None:
-        row = (
-            await self._session.execute(
-                select(SourceDocument.tenant_id, SourceDocument.knowledge_base_id)
-                .join(DocumentVersion, DocumentVersion.source_document_id == SourceDocument.id)
-                .join(ContentArtifact, ContentArtifact.document_version_id == DocumentVersion.id)
-                .where(ContentArtifact.id == artifact_id)
-            )
-        ).first()
-        return (row.tenant_id, row.knowledge_base_id) if row is not None else None
-
-
 class SqlAlchemyReviewItemRepository:
-    """`brain_review.decisions.ReviewItemRepository` over SQLAlchemy (F0001-S0004)."""
+    """`brain_review.decisions.ReviewItemRepository` over SQLAlchemy (F0001-S0004).
+    `actor_id` attributes derived security metadata to the authenticated reviewer."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, *, actor_id: UUID | None = None) -> None:
         self._session = session
+        self._actor_id = actor_id
 
     async def get(self, review_item_id: UUID) -> ReviewItem | None:
         row = await self._session.get(ReviewItemRow, review_item_id)
@@ -283,6 +219,9 @@ class SqlAlchemyReviewItemRepository:
         return row.version if row is not None else 1
 
     async def save_decision(self, decision: ReviewDecision) -> None:
+        item = await self._session.get(ReviewItemRow, decision.review_item_id)
+        if item is None:
+            raise ValueError(f"review item {decision.review_item_id} not found")
         self._session.add(
             ReviewDecisionRow(
                 id=decision.id,
@@ -298,6 +237,8 @@ class SqlAlchemyReviewItemRepository:
                 assertion_version=decision.assertion_version,
                 stale=decision.stale,
                 event_sha256=decision.event_sha256,
+                tenant_id=item.tenant_id,
+                knowledge_base_id=item.knowledge_base_id,
             )
         )
         await self._session.flush()
@@ -319,6 +260,9 @@ class SqlAlchemyReviewItemRepository:
             value=value,
             model_confidence=None,
             interpretation_basis="EXPLICIT",
+            # A correction inherits its original's ownership (assembly plan Step 1).
+            tenant_id=original.tenant_id,
+            knowledge_base_id=original.knowledge_base_id,
         )
         self._session.add(corrected)
         await self._session.flush()
@@ -333,9 +277,10 @@ class SqlAlchemyReviewItemRepository:
     async def open_new_review_item_for_new_version(
         self, original_item: ReviewItem, new_version: int
     ) -> None:
+        new_item_id = uuid4()
         self._session.add(
             ReviewItemRow(
-                id=uuid4(),
+                id=new_item_id,
                 type=original_item.type.value,
                 status=ReviewItemStatus.OPEN.value,
                 assertion_id=original_item.assertion_id,
@@ -346,6 +291,19 @@ class SqlAlchemyReviewItemRepository:
             )
         )
         await self._session.flush()
+        # The re-opened task carries its original's security metadata (F0002-S0004).
+        actor_id = self._actor_id
+        if actor_id is None:
+            raise ValueError("re-opening a review task requires the authenticated actor")
+        await self._session.run_sync(
+            lambda session: inherit_resource_access(
+                session,
+                ResourceKey(ResourceType.REVIEW_TASK, original_item.id),
+                ResourceKey(ResourceType.REVIEW_TASK, new_item_id),
+                actor_id=actor_id,
+                at=datetime.now(UTC),
+            )
+        )
 
 
 def _to_pg_range(span: TimeRange) -> Range:
@@ -487,7 +445,13 @@ class SqlAlchemyFactCommitRepository:
         await self._session.flush()
 
     async def insert_change(
-        self, *, reason: ChangeReason, from_version_id: UUID | None, to_version_id: UUID
+        self,
+        *,
+        reason: ChangeReason,
+        from_version_id: UUID | None,
+        to_version_id: UUID,
+        tenant_id: UUID,
+        knowledge_base_id: UUID,
     ) -> None:
         self._session.add(
             CanonicalFactChangeRow(
@@ -495,6 +459,29 @@ class SqlAlchemyFactCommitRepository:
                 reason=reason.value,
                 from_version_id=from_version_id,
                 to_version_id=to_version_id,
+                tenant_id=tenant_id,
+                knowledge_base_id=knowledge_base_id,
+            )
+        )
+        await self._session.flush()
+
+    async def register_commit(
+        self,
+        *,
+        commit_id: UUID,
+        tenant_id: UUID,
+        knowledge_base_id: UUID,
+        authorization_decision_id: UUID | None,
+        at: datetime,
+    ) -> None:
+        """Commit ownership registry row; the outbox references it (F0002-S0001)."""
+        self._session.add(
+            CanonicalCommitRow(
+                id=commit_id,
+                tenant_id=tenant_id,
+                knowledge_base_id=knowledge_base_id,
+                authorization_decision_id=authorization_decision_id,
+                created_at=at,
             )
         )
         await self._session.flush()
