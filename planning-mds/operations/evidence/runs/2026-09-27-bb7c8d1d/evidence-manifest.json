@@ -70,6 +70,16 @@
       "required": true,
       "result": "PASS",
       "artifact": "g1-runtime-preflight.md"
+    },
+    "self_review": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g2-self-review.md"
+    },
+    "deployability": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "deployability-check.md"
     }
   },
   "files": {
@@ -80,9 +90,42 @@
     "commands_log": "commands.log",
     "lifecycle_gates_log": "lifecycle-gates.log",
     "assembly_plan_validation": "g0-assembly-plan-validation.md",
-    "runtime_preflight": "g1-runtime-preflight.md"
+    "runtime_preflight": "g1-runtime-preflight.md",
+    "self_review": "g2-self-review.md",
+    "test_plan": "test-plan.md",
+    "test_execution_report": "test-execution-report.md",
+    "coverage_report": "coverage-report.md",
+    "deployability_check": "deployability-check.md"
   },
-  "role_results": {},
+  "role_results": {
+    "Architect": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g0-assembly-plan-validation.md"
+      ],
+      "verdict_artifact": "g0-assembly-plan-validation.md"
+    },
+    "Quality Engineer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "test-plan.md",
+        "test-execution-report.md",
+        "coverage-report.md"
+      ],
+      "verdict_artifact": "test-execution-report.md"
+    },
+    "DevOps": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "required_artifacts": [
+        "g1-runtime-preflight.md",
+        "deployability-check.md"
+      ],
+      "verdict_artifact": "deployability-check.md"
+    }
+  },
   "token_usage": {
     "artifact": "token-usage.json",
     "agent_tool": null,
@@ -101,30 +144,38 @@
     "dependency": {
       "ran": true,
       "result": "PASS",
-      "artifact": "artifacts/security/g1-engine-pip-audit.json",
-      "stage": "G1 baseline (pre-change); re-run at G2"
+      "artifact": "artifacts/security/g2-engine-pip-audit.json",
+      "stage": "G2 final code; engine 57 and neuron 177 dependencies, 0 known vulnerabilities (neuron: artifacts/security/g2-neuron-pip-audit.json)"
     },
     "secrets": {
       "ran": true,
       "result": "PASS",
-      "artifact": "artifacts/security/g1-gitleaks-engine-packages.json",
-      "stage": "G1 baseline (pre-change); re-run at G2"
+      "artifact": "artifacts/security/g2-gitleaks-branch.json",
+      "stage": "G2: branch commits origin/main..HEAD plus filesystem scans of every source root, no leaks"
     },
     "sast": {
       "ran": true,
       "result": "PASS WITH RECOMMENDATIONS",
-      "artifact": "artifacts/security/g1-semgrep-report.json",
-      "stage": "G1 baseline; 1 pre-existing WARNING outside F0002 (scripts/dev/seed_principals.py:37)"
+      "artifact": "artifacts/security/g2-semgrep-report.json",
+      "stage": "G2 re-scan after hardening; 1 pre-existing WARNING outside F0002 (scripts/dev/seed_principals.py:37)"
     },
     "dast": {
       "ran": true,
       "result": "PASS WITH RECOMMENDATIONS",
-      "artifact": "artifacts/security/g1-zap-report.json",
-      "stage": "G1 baseline; 0 FAIL, 2 pre-existing header WARNs on /health and /openapi.json"
+      "artifact": "artifacts/security/g2-zap-report.json",
+      "stage": "G2: 0 FAIL / 116 PASS; 2 pre-existing header WARNs on /health and /openapi.json"
     }
   },
   "omissions": [],
   "waivers": {},
   "global_evidence_refs": {},
-  "run_scope": "feature-completion"
+  "run_scope": "feature-completion",
+  "test_results": {
+    "artifacts": [
+      "artifacts/test-results/g2-engine-junit.xml",
+      "artifacts/test-results/g2-neuron-junit.xml"
+    ],
+    "coverage_pct": 93.74,
+    "coverage_artifact": "artifacts/coverage/g2-engine-coverage.json"
+  }
 }

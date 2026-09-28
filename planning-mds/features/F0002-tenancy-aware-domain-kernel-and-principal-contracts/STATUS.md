@@ -1,7 +1,8 @@
 # F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts — Status
 
-**Overall Status:** Draft
-**Last Updated:** 2026-09-25
+**Overall Status:** In Progress
+**Last Updated:** 2026-09-27
+**Feature run:** `2026-09-27-bb7c8d1d` (branch `feature/F0002-tenancy-kernel`)
 **Planning:** Phase A approved; G1–G3 passed. Phase B design approved by user (`approve-phase-b`, 2026-09-25); G4 and all automated G5 checks passed.
 **Plan run:** `2026-09-25-3c64470a`
 
@@ -18,21 +19,23 @@
 
 ## Story × Role Progress
 
+Live during feature run `2026-09-27-bb7c8d1d`. Implementation, QA and DevOps cells flipped at G2; Code Review and Security resolve at G3.
+
 | Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
 |---|---|---|---|---|---|---|---|---|
-| F0002-S0001 | Not Started | — | — | Not Started | Pending | Pending | Pending | Not Started |
-| F0002-S0002 | Not Started | — | — | Not Started | Pending | Pending | Pending | Not Started |
-| F0002-S0003 | Not Started | — | — | Not Started | Pending | Pending | Pending | Not Started |
-| F0002-S0004 | Not Started | — | — | Not Started | Pending | Pending | Pending | Not Started |
-| F0002-S0005 | Not Started | — | — | Not Started | Pending | Pending | Pending | Not Started |
-| F0002-S0006 | Not Started | — | — | Not Started | Pending | Pending | Pending | Not Started |
+| F0002-S0001 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
+| F0002-S0002 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
+| F0002-S0003 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
+| F0002-S0004 | done | not-in-scope | done (worker CLI trusted submission) | done | Pending | Pending | done | In Progress |
+| F0002-S0005 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
+| F0002-S0006 | done | not-in-scope | not-in-scope | done | Pending | Pending | done | In Progress |
 
 ## Backend Progress
 
-- [ ] Ownership and stable principal contracts implemented with compatible migration.
-- [ ] Current scope and conjunctive resource checks integrated.
-- [ ] Bounded delegation and durable audit implemented.
-- [ ] Existing consumers and negative cases reproduce contract outcomes.
+- [x] Ownership and stable principal contracts implemented with compatible migration (0005 expand / 0006 constrain; reviewed reconciliation script).
+- [x] Current scope and conjunctive resource checks integrated (shared pure evaluator; content/fact/review/commit/worker consumers).
+- [x] Bounded delegation and durable audit implemented (execution facade; authentication-event sink).
+- [x] Existing consumers and negative cases reproduce contract outcomes (EX-AUTHX-001–018 ledger in run `2026-09-27-bb7c8d1d` test-execution-report.md).
 
 ## Frontend Progress
 
@@ -43,8 +46,20 @@ N/A — no UI changes in F0002.
 - [x] Phase A approved by user (`approve-phase-a`, 2026-09-25).
 - [x] Phase B contracts, assembly plan and ontology synchronized; automated exit validation passed.
 - [x] Phase B explicitly approved by user at G5 (`approve-phase-b`, 2026-09-25).
-- [ ] Regression and acceptance tests pass; changed kernel coverage at least 80%.
+- [x] Regression and acceptance tests pass; changed kernel coverage at least 80% (93.74%; engine 277 passed, neuron 75 passed — run `2026-09-27-bb7c8d1d`).
 - [ ] Implementation evidence and required review provenance captured in a later feature run.
+
+## Required Role Matrix
+
+Validator-read matrix (mirrors the planning table below; unchanged by the feature run).
+
+| Role | Required |
+|---|---|
+| Quality Engineer | Yes |
+| Code Reviewer | Yes |
+| Security Reviewer | Yes |
+| DevOps | Yes |
+| Architect | Yes |
 
 ## Required Signoff Roles (Set in Planning)
 

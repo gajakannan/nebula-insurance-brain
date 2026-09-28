@@ -74,9 +74,10 @@ def _jobs_uuid_preflight() -> None:
     problems: list[str] = []
     for table, columns in JOB_UUID_COLUMNS.items():
         for column in columns:
+            # Identifiers come only from the JOB_UUID_COLUMNS constant; the value is bound.
             count = bind.execute(
-                sa.text(
-                    f"SELECT count(*) FROM {table} WHERE {column} IS NOT NULL "  # noqa: S608
+                sa.text(  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+                    f"SELECT count(*) FROM {table} WHERE {column} IS NOT NULL "
                     f"AND {column} !~ :pattern"
                 ),
                 {"pattern": UUID_TEXT},

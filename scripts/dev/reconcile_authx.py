@@ -70,7 +70,7 @@ from brain_persistence.tenancy import (
     record_operational_event,
 )
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import TextClause, create_engine, select, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Session
 
@@ -123,6 +123,31 @@ OWNED_TABLES = {
 }
 
 
+_IDENTIFIERS = frozenset(
+    {
+        *CHECKSUM_TABLES,
+        *OWNED_TABLES,
+        "membership",
+        "content_artifact",
+        "review_item",
+        "fact_slot",
+        *(c for _child, c, _parent in DERIVATIONS if c),
+        *(p for _c, _col, p in DERIVATIONS if p),
+    }
+)
+
+
+def _sql(statement: str, *identifiers: str) -> TextClause:
+    """Build SQL whose *identifiers* come only from this module's constants; every
+    operator-supplied value is a bind parameter. Anything else is refused."""
+    unknown = [i for i in identifiers if i not in _IDENTIFIERS]
+    if unknown:
+        raise ValueError(f"refusing unlisted SQL identifier(s): {unknown}")
+    return text(
+        statement
+    )  # nosemgrep: python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+
+
 def _database_url() -> str:
     url = os.environ.get(
         "BRAIN_DATABASE_URL", "postgresql+psycopg://brain:brain@localhost:5432/brain"
@@ -155,9 +180,8 @@ def _checksums(conn: Connection) -> dict[str, str]:
     """ID (and ownership, where present) digest per table — no content."""
     result: dict[str, str] = {}
     for table in CHECKSUM_TABLES:
-        column = "id"
         rows = (
-            conn.execute(text(f"SELECT {column}::text FROM {table} ORDER BY 1"))
+            conn.execute(_sql(f"SELECT id::text FROM {table} ORDER BY 1", table))
             .scalars()
             .all()
         )
@@ -177,9 +201,10 @@ def _ownership_checksums(conn: Connection) -> dict[str, str]:
     ):
         rows = (
             conn.execute(
-                text(
+                _sql(
                     f"SELECT id::text || ':' || tenant_id::text || ':' || knowledge_base_id::text "
-                    f"FROM {table} ORDER BY 1"
+                    f"FROM {table} ORDER BY 1",
+                    table,
                 )
             )
             .scalars()
@@ -200,22 +225,27 @@ def inventory(conn: Connection, mapping: dict[str, Any]) -> dict[str, Any]:
         "proposed": {},
     }
 
-    def ids(sql: str, **params: Any) -> list[str]:
-        return [str(v) for v in conn.execute(text(sql), params).scalars().all()]
+    def ids(sql: str, *identifiers: str, **params: Any) -> list[str]:
+        return [
+            str(v)
+            for v in conn.execute(_sql(sql, *identifiers), params).scalars().all()
+        ]
 
     for table in ("source_document", "review_item", "fact_slot", "membership"):
         report["counts"][table] = conn.execute(
-            text(f"SELECT count(*) FROM {table}")
+            _sql(f"SELECT count(*) FROM {table}", table)
         ).scalar_one()
         report["orphans"][f"{table}_unmapped_kb"] = ids(
             f"SELECT id FROM {table} WHERE NOT (knowledge_base_id::text = ANY(:kbs))",
+            table,
             kbs=mapped_kbs,
         )
         report["conflicts"][f"{table}_tenant_mismatch"] = [
             row
             for row in ids(
                 f"SELECT id::text || '|' || tenant_id::text || '|' || knowledge_base_id::text "
-                f"FROM {table}"
+                f"FROM {table}",
+                table,
             )
             for rid, tenant, kb in [row.split("|")]
             if UUID(kb) in owners and owners[UUID(kb)][0] != UUID(tenant)
@@ -248,6 +278,7 @@ def inventory(conn: Connection, mapping: dict[str, Any]) -> dict[str, Any]:
                 f"""SELECT t.id FROM {table} t WHERE NOT EXISTS (
                     SELECT 1 FROM resource_access r
                     WHERE r.resource_type = :rt AND r.resource_id = t.id)""",
+                table,
                 rt=resource_type,
             )
             if (resource_type, rid) not in mapped_resources
@@ -287,10 +318,13 @@ def _derive_child_ownership(conn: Connection) -> None:
             )
             continue
         conn.execute(
-            text(
+            _sql(
                 f"""UPDATE {child} c SET tenant_id = p.tenant_id,
                         knowledge_base_id = p.knowledge_base_id
-                    FROM {parent} p WHERE p.id = c.{column} AND c.tenant_id IS NULL"""
+                    FROM {parent} p WHERE p.id = c.{column} AND c.tenant_id IS NULL""",
+                child,
+                parent,
+                column,
             )
         )
     # Human-review corrections without a run inherit from their original assertion.
@@ -397,8 +431,9 @@ def apply(
             "fact_slot": "fact_slot",
         }[key.type.value]
         owner = conn.execute(
-            text(
-                f"SELECT tenant_id, knowledge_base_id FROM {model_table} WHERE id = :id"
+            _sql(
+                f"SELECT tenant_id, knowledge_base_id FROM {model_table} WHERE id = :id",
+                model_table,
             ),
             {"id": key.id},
         ).first()
@@ -455,11 +490,12 @@ def apply(
         )
     pending = (
         conn.execute(
-            text(
+            _sql(
                 " UNION ALL ".join(
                     f"SELECT count(*) FROM {t} WHERE tenant_id IS NULL"
                     for t in sorted(OWNED_TABLES)
-                )
+                ),
+                *OWNED_TABLES,
             )
         )
         .scalars()
