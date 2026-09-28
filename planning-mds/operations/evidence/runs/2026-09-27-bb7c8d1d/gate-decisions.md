@@ -10,9 +10,12 @@
 | G3 | PASS WITH RECOMMENDATIONS | Code Reviewer + Security Reviewer (parallel) | 2026-09-28T00:55:00+00:00 | Code review APPROVED WITH RECOMMENDATIONS (0 critical/high; 3 low fixed in-cycle, re-verified 279 passed); security PASS WITH RECOMMENDATIONS (0 critical/high; 1 medium, 2 low); all four scan classes ran | No | Medium: edge rate limiting for authentication events (F0021/F0026) |
 | G4 (cycle 1) | FIX ISSUES | User; recorded by Product Manager | 2026-09-28T00:55:49+00:00 | gate_policy standard ACCEPTABLE (0 critical, 0 high; options approve / fix issues). User selected "Fix issues" with scope: code hygiene (shared sync/async orchestration, remove unused DelegationService protocol, distinct worker scope-mismatch reason), BLUEPRINT §4.11 DB safeguards (ownership immutability, append-only audit/authentication events, deferrable self-references), move test fixtures out of the runtime package | No | Return to G3 review after fixes |
 | G3 (cycle 2) | PASS WITH RECOMMENDATIONS | Code Reviewer + Security Reviewer (parallel) | 2026-09-28T01:30:00+00:00 | Re-review after the G4 fix-issues cycle (89f5dd5): code review APPROVED (all cycle-1 recommendations fixed); security PASS WITH RECOMMENDATIONS (0 critical/high; append-only low resolved by 0007; 1 medium + 1 low remain); engine 282 / neuron 75 passed; scans re-run clean | No | Medium: edge rate limiting for authentication events (F0021/F0026) |
+| G4 | PASS | User (explicit "Approve" at the cycle-2 approval prompt); recorded by Product Manager | 2026-09-28T01:20:59+00:00 | gate_policy standard ACCEPTABLE (critical 0, high 0; artifacts/test-results/g4-gate-policy-cycle2.json); no high findings, so no mitigation token is required | No | Medium edge rate limiting (F0021/F0026), low JWKS metric, low isolated test DB carried to closeout |
 
 ## User decisions
 
 - 2026-09-28T00:55:49+00:00 — G4 cycle 1: user chose **Fix issues** (explicit selection via the approval prompt). The §4.11 safeguards are an **operator scope amendment**: BLUEPRINT §4.11 recorded them as follow-ups outside the approved F0002 plan, and the user explicitly brought them into this run.
+
+- 2026-09-28T01:20:59+00:00 — G4 cycle 2: user chose **Approve**.
 
 Decisions: `PASS`, `PASS WITH RECOMMENDATIONS`, `FAIL`, `SKIP`. Blocking values: `Yes` / `No`.
