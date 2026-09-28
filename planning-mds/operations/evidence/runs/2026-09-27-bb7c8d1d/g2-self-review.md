@@ -46,4 +46,12 @@ Per role:
 
 The only in-run SAST findings (dynamic-identifier `text()` in the reconcile script and the 0005 preflight) were hardened with an identifier allow-list before G2. The re-scan shows only the pre-existing `seed_principals.py` WARNING.
 
+## Review-cycle 2 addendum (G4 fix-issues, commit 89f5dd5)
+
+At the user's G4 selection: the shared `decide` orchestration (the API and worker no longer duplicate lock/load steps); the unused delegation protocol removed; the worker lease KB applied as a request filter; the synthetic fixtures moved to the dev-only `brain-testing` package; and migration 0007 (BLUEPRINT §4.11 safeguards, an explicit operator scope amendment). All self-review checks were re-run: engine 282 passed, neuron 75 passed, static gates clean, changed-kernel coverage 94.04%, every package ≥ 80%, and the round trip and restore drill pass through 0007.
+
+artifacts/test-results/g3r-engine-pytest.txt
+artifacts/test-results/g3r-neuron-pytest.txt
+artifacts/test-results/g3r-devops-restore-drill.txt
+
 Result: PASS

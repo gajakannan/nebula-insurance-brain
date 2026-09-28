@@ -7,7 +7,8 @@
 
 ## Scope
 
-- Schema: migrations 0005 (expand) and 0006 (constrain), down_revision chain 0004 → 0005 → 0006.
+- Schema: migrations 0005 (expand), 0006 (constrain) and 0007 (§4.11 safeguards, added at the user's G4 fix-issues selection), down_revision chain 0004 → 0005 → 0006 → 0007.
+- Dev-only package `engine/packages/brain-testing` (engine and neuron dev groups; locks updated; added to the CI mypy roots in `.github/workflows/ci-gates.yml`). It is not a runtime dependency.
 - Configuration: new non-secret `config/authx-identity-profile.yaml`. The API also accepts `BRAIN_IDENTITY_PROFILE_PATH`, and `BRAIN_OIDC_ISSUER` must be one of its issuers or the API refuses to start.
 - Operational scripts: `scripts/dev/reconcile_authx.py`, `scripts/dev/provision_delegation.py`, `scripts/dev/revoke_membership.py` (same CLI arguments; now also requires an operator ID and approval reference, via flags or `BRAIN_OPERATOR_PRINCIPAL_ID`/`BRAIN_APPROVAL_REF`).
 - No new container, service, port, secret, or image. `docker-compose.yml` is unchanged.
@@ -24,10 +25,14 @@
 | 0006 refuses un-reconciled data without changing the schema; invalid job UUID text stops 0005 before any change | proven | artifacts/test-results/g2-engine-pytest.txt |
 | Operator runbook on the dev database: reviewed mapping, then dry-run, then digest-bound apply with `--activate-policy` | applied; policy release `sha256:059497cd…168ee` active | artifacts/test-results/g2-dev-reconcile-dryrun.json and artifacts/test-results/g2-dev-reconcile-apply.json |
 | API process starts with the committed identity profile and serves under ZAP | started; 0 FAIL | artifacts/security/g2-api-server.log and artifacts/security/g2-zap-report.json |
+| Cycle 2: dev database migrated 0006 → 0007 | head 0007 | artifacts/test-results/g3r-dev-db-migrate-0007.txt |
+| Cycle 2: round trip 0001 → 0007 → 0004 → 0007 on a throwaway database | clean (13 steps) | artifacts/test-results/g3r-devops-migration-roundtrip.txt |
+| Cycle 2: restore drill from the pre-migration snapshot to head 0007 | restored at 0003; migrated to 0007; legacy audit digest unchanged (e12f16345b695146d21b22f2436d7578) | artifacts/test-results/g3r-devops-restore-drill.txt |
 | Lockfiles consistent for CI `uv sync --locked` | engine and neuron `uv lock --check` pass | artifacts/test-results/g2-devops-lock-check.txt |
 
 ## Rollback and operations notes
 
+- 0007 downgrade drops only triggers/functions and restores NOT DEFERRABLE self-references. Once 0007 is applied, audit rows cannot be deleted or updated through normal roles. Retention is an explicit DBA path (F0026).
 - Before 0006 is applied, rollback means restoring the pre-migration snapshot or downgrading the unused expansion. After records depend on the contract, use a forward repair (ADR-0061). 0006's downgrade drops only constraints.
 - A fresh environment needs the reconciliation apply with `--activate-policy` once after `alembic upgrade head`. Until then every protected route returns a sanitized 503 (fail closed), by design.
 - The engine security suites share the local dev database and truncate F0002 registries and the policy pointer between tests (a pre-existing F0001 pattern). After running them locally, re-run the activation step. This is carried as a low follow-up: move those suites to an isolated database.

@@ -9,8 +9,8 @@ Phases A and B are approved (2026-09-25). The implementation is delivered on bra
 - Domain carriers: `engine/packages/brain-domain/src/brain_domain/{tenancy,authx}.py`
 - The only allow/deny rules: `engine/packages/brain-security/src/brain_security/evaluation.py`
 - Transaction and audit facade: `brain_security/execution.py`. Identity: `verification.py`, `principals.py`, `identity_profile.py`. Delegation rules: `delegation.py`
-- Persistence: `engine/packages/brain-persistence/src/brain_persistence/{authx,tenancy,identity,grants,fixtures}.py`
-- Migrations: `engine/migrations/versions/0005_tenancy_authx_expand.py`, `0006_tenancy_authx_constrain.py`
+- Persistence: `engine/packages/brain-persistence/src/brain_persistence/{authx,tenancy,identity,grants}.py`; synthetic test fixtures in the dev-only `engine/packages/brain-testing` package
+- Migrations: `engine/migrations/versions/0005_tenancy_authx_expand.py`, `0006_tenancy_authx_constrain.py`, `0007_tenancy_authx_safeguards.py` (BLUEPRINT §4.11: immutable ownership, append-only audit, deferrable self-references)
 - Consumers: `engine/apps/api/src/brain_api/{deps.py,routes/*}`, `brain_temporal/commit.py`, and `engine/apps/worker/src/brain_worker/document_delivery.py` (sync adapter over the same evaluator)
 - Operational scripts: `scripts/dev/reconcile_authx.py`, `provision_delegation.py`, `revoke_membership.py`
 - Config: `config/authx-identity-profile.yaml` (non-secret; `BRAIN_OIDC_ISSUER` must be listed)
@@ -21,7 +21,7 @@ Phases A and B are approved (2026-09-25). The implementation is delivered on bra
 2. Write a reviewed mapping (format in the `reconcile_authx.py` docstring): tenants, workspaces and KBs for every existing KB; entity tenants; one complete restriction slice per existing membership; security metadata for every protected record. Nothing is inferred.
 3. Run `uv run --project engine python scripts/dev/reconcile_authx.py --mapping <file> --dry-run`, which prints counts, orphans, conflicts, and the mapping digest. Resolve every `blocking` entry.
 4. Run the same command with `--apply --expected-digest <digest> --actor-id <operator uuid> --approval-ref <ref> --activate-policy`. It is one audited transaction; re-applying the same digest is a no-op.
-5. Run `uv run alembic upgrade 0006` (it refuses with a counts-only report if anything is still unreconciled).
+5. Run `uv run alembic upgrade 0006` (it refuses with a counts-only report if anything is still unreconciled), then `uv run alembic upgrade head` for the 0007 safeguards.
 
 Protected routes return a sanitized 503 until a policy release is active (fail closed). Service and agent identities must be provisioned to their kind (`brain_persistence.identity.provision_principal`). Only human clients listed in the identity profile self-provision, and they get no grants. `worker_cli --enqueue` now requires at least one `--classification` (and optional `--source-acl`) for the artifact's security metadata.
 
@@ -48,7 +48,7 @@ python3 agents/scripts/project_context.py --product-root /home/gajap/uSandbox/re
 - Preserve principal/resource UUIDs. Inventory existing data before migrations; supply an explicitly reviewed workspace/restriction mapping. Never infer missing grants from email, KB IDs or entity references.
 - Reuse TenantMember, Reviewer and ServicePrincipal permissions exactly. A principal kind is not a role. Reviewer-only does not imply content_artifact:read.
 - Existing worker authorization is synchronous and independently commits audit. Share the evaluator through adapters without removing lease/fencing or adding a second event loop.
-- Migrations 0005/0006, the operational scripts, and the tests listed in the assembly plan now exist and pass (run `2026-09-27-bb7c8d1d`).
+- Migrations 0005/0006/0007, the operational scripts, and the tests listed in the assembly plan now exist and pass (run `2026-09-27-bb7c8d1d`).
 
 ## Verify
 
@@ -57,7 +57,7 @@ From `engine/`:
 ```bash
 export BRAIN_TEST_POSTGRES_URL=postgresql+psycopg://brain:brain@localhost:5432/brain
 uv run pytest -q tests/contract tests/integration tests/security   # contract, migration, EX-AUTHX suites
-uv run pytest -q                                                   # full engine suite (277 in the run)
+uv run pytest -q                                                   # full engine suite (282 in the run)
 ```
 
 From `neuron/`: `BRAIN_TEST_POSTGRES_URL=... uv run pytest -q tests/integration` (worker delivery, recovery, CLI enqueue).

@@ -2,7 +2,7 @@
 
 **Reviewer role:** Code Reviewer (agents/code-reviewer/SKILL.md)
 **Date:** 2026-09-28
-**Reviewed revision:** feature/F0002-tenancy-kernel at ade364c, plus the review-cycle changes listed below
+**Reviewed revision:** feature/F0002-tenancy-kernel, cycle 1 at ade364c/4777949 and cycle 2 at 89f5dd5 (G4 fix-issues)
 
 ## Reviewed Files
 
@@ -11,7 +11,8 @@ The canonical changed-file set is artifacts/diffs/changed-files.txt. Every runti
 - engine/packages/brain-security/src/brain_security/{evaluation,execution,delegation,identity_profile,verification,principals,casbin_adapter,audit}.py
 - engine/packages/brain-domain/src/brain_domain/{authx,tenancy,audit}.py
 - engine/packages/brain-persistence/src/brain_persistence/{authx,tenancy,identity,grants,fixtures,repositories,models}.py
-- engine/migrations/versions/0005_tenancy_authx_expand.py, 0006_tenancy_authx_constrain.py, engine/migrations/env.py
+- engine/migrations/versions/0005_tenancy_authx_expand.py, 0006_tenancy_authx_constrain.py, 0007_tenancy_authx_safeguards.py, engine/migrations/env.py
+- engine/packages/brain-testing/ (dev-only fixtures package) and .github/workflows/ci-gates.yml (mypy roots)
 - engine/apps/api/src/brain_api/{deps,errors,config}.py and routes/{content,facts,reviews}.py
 - engine/packages/brain-temporal/src/brain_temporal/commit.py, engine/packages/brain-jobs/src/brain_jobs/queue.py
 - engine/apps/worker/src/brain_worker/document_delivery.py, neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py
@@ -27,6 +28,12 @@ artifacts/test-results/g2-neuron-pytest.txt
 artifacts/coverage/g2-engine-coverage.json
 artifacts/coverage/g2-package-coverage-gates.txt
 artifacts/security/g2-semgrep-report.json
+artifacts/test-results/g3r-engine-pytest.txt
+artifacts/test-results/g3r-engine-static.txt
+artifacts/test-results/g3r-neuron-pytest.txt
+artifacts/coverage/g3r-engine-coverage.json
+artifacts/coverage/g3r-package-coverage-gates.txt
+artifacts/security/g3r-semgrep-report.json
 
 ## Severity-Ranked Findings
 
@@ -42,10 +49,16 @@ Review-cycle findings fixed in this pass (re-verified: 279 passed; ruff, format,
 
 ## Non-Blocking Recommendations With Owner/Follow-up
 
-- [medium] Lock/load orchestration is written twice, once in `AuthorizationExecution._decide` (async) and once in `DocumentJobAuthorization.decide` (sync). All allow/deny rules are shared through `evaluate`, as ADR-0062 requires, but a future change to lock order or delegation binding must be made in both places. Extract a shared orchestration step parameterized by a sync store when the next consumer needs it. — owner: Backend Developer; follow-up: deferred-no-followup
-- [low] `brain_security.delegation.DelegationService` is an unused protocol kept to mirror the assembly plan's port list; the implemented operations are `brain_persistence.grants.issue_delegation`/`revoke_delegation`. Remove it or implement it when a runtime delegation service is introduced (F0047). — owner: Backend Developer; follow-up: deferred-no-followup
-- [low] `brain_persistence.fixtures` (synthetic builders) ships inside the runtime package so the engine, neuron, and scripts can share it. It only composes the trusted services and is unreachable from the API, but it would sit better in a test-support package. — owner: Backend Developer; follow-up: deferred-no-followup
-- [low] When the worker's decision allows the artifact but its hydrated scope differs from the lease's tenant/KB, the step is refused after the decision was recorded as `allowed`/`attempted`. The audit is not wrong (attempted, never succeeded), but a distinct reason would be clearer. — owner: Backend Developer; follow-up: deferred-no-followup
+None open after review cycle 2. The cycle-1 recommendations were fixed at the user's G4 selection:
+
+| Cycle-1 item | Cycle-2 resolution (89f5dd5) |
+|---|---|
+| medium: lock/load orchestration duplicated in the async facade and the sync worker | One `brain_security.execution.decide` over a sync `AuthorityReader`; the facade reaches it through `AuthorityStore.run_sync`, and the worker calls it directly. Lock order and delegation binding now live in one place |
+| low: unused `DelegationService` protocol | Removed |
+| low: synthetic fixtures inside the runtime `brain_persistence` package | Moved to the dev-only `brain-testing` workspace package (engine and neuron dev groups; added to CI mypy roots) |
+| low: worker allowed-then-refused on a lease/metadata KB mismatch | The lease KB is a request-scope filter, so a mismatch is a recorded `scope_denied` (test_authx_delegation.py::test_worker_lease_scope_must_match_the_artifact_metadata) |
+
+The user's scope amendment added BLUEPRINT §4.11 migration 0007. It was reviewed: the trigger function quotes column names with `format('%I')` and receives trigger arguments only from migration constants; a NULL owner may be filled once (backfill), and any later rewrite raises `check_violation`; append-only guards cover row UPDATE/DELETE; assertion self-references are DEFERRABLE INITIALLY IMMEDIATE, so normal writes are unchanged. The proof is tests/integration/test_authx_migration.py::test_safeguards_make_ownership_immutable_audit_append_only_and_restore_deferrable.
 
 ## Vertical-Slice Completeness
 
@@ -71,10 +84,10 @@ All 41 ACs map to executed tests (test-plan.md). Each denial is tested independe
 
 ## Coverage Verification
 
-coverage-report.md matches artifacts/coverage/g2-engine-coverage.json. Changed-kernel lines total 2457/2621 = 93.74%, recomputed from the JSON. Per-package gate output matches artifacts/coverage/g2-package-coverage-gates.txt.
+coverage-report.md (cycle 2) matches artifacts/coverage/g3r-engine-coverage.json. Changed-kernel lines total 2366/2516 = 94.04%, recomputed from the JSON (the fixtures moved out of the measured runtime set). Per-package gate output matches artifacts/coverage/g3r-package-coverage-gates.txt.
 
 ## Recommendation
 
-Approve. The remaining items are maintainability recommendations with owners and do not block.
+Approve. Cycle 2 closed every open code-review recommendation. Re-verified: engine 282 passed; neuron 75 passed (3 opt-in live-inference skips); ruff, format, and mypy clean across the 9 source roots.
 
-Result: APPROVED WITH RECOMMENDATIONS
+Result: APPROVED

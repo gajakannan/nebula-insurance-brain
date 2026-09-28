@@ -2,7 +2,7 @@
 
 **Owner:** Quality Engineer
 **Date:** 2026-09-27
-**Code under test:** branch feature/F0002-tenancy-kernel (implementation commit a446d85, plus the reviewed G2 hardening recorded in this run)
+**Code under test:** branch feature/F0002-tenancy-kernel. Cycle 1 at ade364c/4777949; cycle 2 (G4 fix-issues) at 89f5dd5. The results table reports cycle 2.
 
 ## Environment
 
@@ -14,12 +14,12 @@
 
 | Suite | Command (full text in commands.log) | Result |
 |---|---|---|
-| Engine: all tests (unit, contract, integration, migration, security) | `uv run pytest -q -rs --junitxml ... --cov ...` in engine/ | 277 passed, 0 failed, 0 skipped |
-| Engine static gates | `ruff check .`, `ruff format --check .`, `mypy <8 source roots>` | clean |
+| Engine: all tests (unit, contract, integration, migration, security) | `uv run pytest -q -rs --junitxml ... --cov ...` in engine/ | 282 passed, 0 failed, 0 skipped (cycle 1: 277) |
+| Engine static gates | `ruff check .`, `ruff format --check .`, `mypy <9 source roots incl. brain-testing>` | clean |
 | Engine per-package coverage gates (CI-equivalent, ≥ 80%) | loop over 8 packages with `--cov-fail-under=80` | all pass (see coverage-report.md) |
 | Neuron: all tests + static gates | `ruff check`, `ruff format --check`, `mypy`, `pytest` in neuron/ | 75 passed, 3 skipped (opt-in live vLLM/Graph inference, not F0002 scope), 0 failed |
-| Migration proof on throwaway PostgreSQL databases | tests/integration/test_authx_migration.py | 3 passed (re-run after G2 hardening) |
-| Measured local latency | test_authx_consumers.py::test_measured_local_decision_latency | p50 13.15 ms, p95 14.38 ms, max 20.77 ms (60 samples, 1 grant slice, 0 dependencies); no SLO claimed |
+| Migration proof on throwaway PostgreSQL databases | tests/integration/test_authx_migration.py | 4 passed (0005/0006 proofs plus the 0007 safeguards proof) |
+| Measured local latency | test_authx_consumers.py::test_measured_local_decision_latency | p50 12.94 ms, p95 14.14 ms, max 19.55 ms (60 samples, 1 grant slice, 0 dependencies; cycle 1: 13.15/14.38/20.77); no SLO claimed |
 
 The first neuron run failed on mypy (an unannotated helper in the new CLI test). It was fixed and re-run; both runs are in commands.log. No product-code failure occurred during G2.
 
@@ -46,7 +46,26 @@ The first neuron run failed on mypy (an unannotated helper in the new CLI test).
 | EX-AUTHX-017 | Outcome and audit agree; versions and trace recorded; no token/payload; denied mutation leaves no state | 6 calls across content/fact/review: each decision validates against schema `Decision` and carries policy hash, release, grant revision ≥ 1, and trace. No token, PDF bytes, or fact value in the payload. The allowed commit is referenced by `canonical_commit.authorization_decision_id`; the denied commit and denied annotation wrote 0 rows |
 | EX-AUTHX-018 | Audit persistence failure yields no success | Injected failure on `INSERT INTO audit_event` gives 503 `unavailable` for content, commit, and review; 0 bytes, 0 fact versions/outbox/commit rows, 0 review decisions, 0 decisions persisted |
 
+## Cycle 2 (G4 fix-issues) additions
+
+- 0007 safeguards: 8 ownership/audit rewrite attempts, each refused with `check_violation` (document_version, review_item, resource_access, membership principal, knowledge_base workspace, external_identity principal, audit_event UPDATE, audit_event DELETE). Non-ownership updates (revocation, review status) still succeed. A correction assertion loads before its original only under `SET CONSTRAINTS ALL DEFERRED`; immediately it raises ForeignKeyViolation.
+- Worker lease/metadata KB mismatch is recorded as `scope_denied`, and the matching lease is allowed.
+- Hydration refuses metadata that disagrees with the record owner (SQLite unit, beneath the 0007 trigger); the PostgreSQL tamper attempt is refused by the trigger.
+- The EX-AUTHX ledger above was re-executed unchanged in cycle 2 (all 18 as expected).
+
 ## Evidence artifacts
+
+artifacts/test-results/g3r-engine-pytest.txt
+artifacts/test-results/g3r-engine-junit.xml
+artifacts/test-results/g3r-engine-static.txt
+artifacts/test-results/g3r-neuron-pytest.txt
+artifacts/test-results/g3r-neuron-junit.xml
+artifacts/test-results/g3r-authx-latency.json
+artifacts/test-results/g3r-dev-db-migrate-0007.txt
+artifacts/coverage/g3r-package-coverage-gates.txt
+artifacts/coverage/g3r-engine-coverage.json
+
+Cycle 1:
 
 artifacts/test-results/g2-engine-pytest.txt
 artifacts/test-results/g2-engine-junit.xml

@@ -12,6 +12,7 @@
   "feature_state": "In Progress",
   "rerun_of": null,
   "changed_paths": [
+    ".github/workflows/ci-gates.yml",
     "config/authx-identity-profile.yaml",
     "engine/apps/api/src/brain_api/config.py",
     "engine/apps/api/src/brain_api/deps.py",
@@ -26,6 +27,7 @@
     "engine/migrations/env.py",
     "engine/migrations/versions/0005_tenancy_authx_expand.py",
     "engine/migrations/versions/0006_tenancy_authx_constrain.py",
+    "engine/migrations/versions/0007_tenancy_authx_safeguards.py",
     "engine/packages/brain-domain/src/brain_domain/audit.py",
     "engine/packages/brain-domain/src/brain_domain/authx.py",
     "engine/packages/brain-domain/src/brain_domain/tenancy.py",
@@ -33,7 +35,6 @@
     "engine/packages/brain-domain/tests/test_tenancy.py",
     "engine/packages/brain-jobs/src/brain_jobs/queue.py",
     "engine/packages/brain-persistence/src/brain_persistence/authx.py",
-    "engine/packages/brain-persistence/src/brain_persistence/fixtures.py",
     "engine/packages/brain-persistence/src/brain_persistence/grants.py",
     "engine/packages/brain-persistence/src/brain_persistence/identity.py",
     "engine/packages/brain-persistence/src/brain_persistence/models.py",
@@ -64,6 +65,10 @@
     "engine/packages/brain-temporal/src/brain_temporal/commit.py",
     "engine/packages/brain-temporal/tests/conftest.py",
     "engine/packages/brain-temporal/tests/test_commit.py",
+    "engine/packages/brain-testing/pyproject.toml",
+    "engine/packages/brain-testing/src/brain_testing/__init__.py",
+    "engine/packages/brain-testing/src/brain_testing/fixtures.py",
+    "engine/packages/brain-testing/src/brain_testing/py.typed",
     "engine/pyproject.toml",
     "engine/ruff.toml",
     "engine/tests/contract/test_authx_kernel.py",
@@ -82,6 +87,7 @@
     "engine/tests/security/test_credential_verification.py",
     "engine/uv.lock",
     "neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py",
+    "neuron/pyproject.toml",
     "neuron/tests/integration/test_document_delivery.py",
     "neuron/tests/integration/test_document_process_recovery.py",
     "neuron/tests/integration/test_worker_cli_enqueue.py",
@@ -94,6 +100,9 @@
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/coverage/g2-engine-coverage.json",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/coverage/g2-engine-coverage.xml",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/coverage/g2-package-coverage-gates.txt",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/coverage/g3r-engine-coverage.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/coverage/g3r-engine-coverage.xml",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/coverage/g3r-package-coverage-gates.txt",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/diffs/changed-files.txt",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g1-api-server.log",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g1-engine-pip-audit.json",
@@ -128,6 +137,25 @@
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g2-zap-report.html",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g2-zap-report.json",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g2-zap.log",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-api-server.log",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-engine-pip-audit.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-branch.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-config.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-engine-apps.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-engine-migrations.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-engine-packages.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-engine-tests.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-neuron-packages-brain-ingestion.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-neuron-tests.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks-scripts.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-gitleaks.log",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-neuron-pip-audit.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-pip-audit.log",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-semgrep-report.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-semgrep.log",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-zap-report.html",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-zap-report.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/security/g3r-zap.log",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g1-authentik-health.txt",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g1-compose-ps.txt",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g1-engine-baseline.txt",
@@ -149,6 +177,16 @@
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g2-neuron-pytest.txt",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3-engine-junit.xml",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3-engine-pytest.txt",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-authx-latency.json",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-dev-db-migrate-0007.txt",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-devops-migration-roundtrip.txt",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-devops-restore-drill.txt",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-engine-junit.xml",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-engine-pytest.txt",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-engine-static.txt",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-neuron-junit.xml",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g3r-neuron-pytest.txt",
+    "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g4-gate-policy.json",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/code-review-report.md",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/commands.log",
     "planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/coverage-report.md",
@@ -253,7 +291,7 @@
     },
     "Code Reviewer": {
       "required": true,
-      "result": "APPROVED WITH RECOMMENDATIONS",
+      "result": "APPROVED",
       "required_artifacts": [
         "code-review-report.md"
       ],
@@ -286,26 +324,26 @@
     "dependency": {
       "ran": true,
       "result": "PASS",
-      "artifact": "artifacts/security/g2-engine-pip-audit.json",
-      "stage": "G2 final code; engine 57 and neuron 177 dependencies, 0 known vulnerabilities (neuron: artifacts/security/g2-neuron-pip-audit.json)"
+      "artifact": "artifacts/security/g3r-engine-pip-audit.json",
+      "stage": "cycle 2 final code; engine 57 and neuron 178 dependencies, 0 known vulnerabilities (neuron: artifacts/security/g3r-neuron-pip-audit.json)"
     },
     "secrets": {
       "ran": true,
       "result": "PASS",
-      "artifact": "artifacts/security/g2-gitleaks-branch.json",
-      "stage": "G2: branch commits origin/main..HEAD plus filesystem scans of every source root, no leaks"
+      "artifact": "artifacts/security/g3r-gitleaks-branch.json",
+      "stage": "cycle 2: 4 branch commits plus filesystem scans of every source root, no leaks"
     },
     "sast": {
       "ran": true,
       "result": "PASS WITH RECOMMENDATIONS",
-      "artifact": "artifacts/security/g2-semgrep-report.json",
-      "stage": "G2 re-scan after hardening; 1 pre-existing WARNING outside F0002 (scripts/dev/seed_principals.py:37)"
+      "artifact": "artifacts/security/g3r-semgrep-report.json",
+      "stage": "cycle 2; 1 pre-existing WARNING outside F0002 (scripts/dev/seed_principals.py:37)"
     },
     "dast": {
       "ran": true,
       "result": "PASS WITH RECOMMENDATIONS",
-      "artifact": "artifacts/security/g2-zap-report.json",
-      "stage": "G2: 0 FAIL / 116 PASS; 2 pre-existing header WARNs on /health and /openapi.json"
+      "artifact": "artifacts/security/g3r-zap-report.json",
+      "stage": "cycle 2: 0 FAIL / 116 PASS; 2 pre-existing header WARNs on /health and /openapi.json"
     }
   },
   "omissions": [],
@@ -314,10 +352,10 @@
   "run_scope": "feature-completion",
   "test_results": {
     "artifacts": [
-      "artifacts/test-results/g2-engine-junit.xml",
-      "artifacts/test-results/g2-neuron-junit.xml"
+      "artifacts/test-results/g3r-engine-junit.xml",
+      "artifacts/test-results/g3r-neuron-junit.xml"
     ],
-    "coverage_pct": 93.74,
-    "coverage_artifact": "artifacts/coverage/g2-engine-coverage.json"
+    "coverage_pct": 94.04,
+    "coverage_artifact": "artifacts/coverage/g3r-engine-coverage.json"
   }
 }

@@ -4,7 +4,7 @@
 
 - Feature ID: F0002
 - Run ID: 2026-09-27-bb7c8d1d
-- Date: 2026-09-28
+- Date: 2026-09-28 (cycle 2 re-review after the G4 fix-issues cycle, commit 89f5dd5)
 - Reviewer: Security Reviewer (agents/security/SKILL.md)
 
 ## Reviewed Surfaces
@@ -51,12 +51,17 @@ No secret was introduced. `config/authx-identity-profile.yaml` is non-secret (is
 
 | Class | Ran | Result / Finding summary | Artifact or waiver reason |
 |-------|-----|--------------------------|---------------------------|
-| dependency | yes | PASS: engine 57 and neuron 177 dependencies, 0 known vulnerabilities (pip-audit) | artifacts/security/g2-engine-pip-audit.json |
-| secrets | yes | PASS: 0 leaks (gitleaks, branch commits and filesystem) | artifacts/security/g2-gitleaks-branch.json |
-| sast | yes | PASS WITH RECOMMENDATIONS: 1 pre-existing WARNING outside F0002 (scripts/dev/seed_principals.py:37, dynamic urllib in a dev verifier); the in-run dynamic-SQL findings were fixed before the re-scan | artifacts/security/g2-semgrep-report.json |
-| dast | yes | PASS WITH RECOMMENDATIONS: ZAP API scan 0 FAIL / 116 PASS; 2 pre-existing header WARNs on /health and /openapi.json | artifacts/security/g2-zap-report.json |
+| dependency | yes | PASS: engine 57 and neuron 178 dependencies, 0 known vulnerabilities (pip-audit, cycle 2) | artifacts/security/g3r-engine-pip-audit.json |
+| secrets | yes | PASS: 0 leaks (gitleaks over 4 branch commits and all source roots, cycle 2) | artifacts/security/g3r-gitleaks-branch.json |
+| sast | yes | PASS WITH RECOMMENDATIONS: 1 pre-existing WARNING outside F0002 (scripts/dev/seed_principals.py:37, dynamic urllib in a dev verifier); no F0002 finding | artifacts/security/g3r-semgrep-report.json |
+| dast | yes | PASS WITH RECOMMENDATIONS: ZAP API scan 0 FAIL / 116 PASS; 2 pre-existing header WARNs on /health and /openapi.json | artifacts/security/g3r-zap-report.json |
 
-Neuron dependency audit: artifacts/security/g2-neuron-pip-audit.json
+Neuron dependency audit: artifacts/security/g3r-neuron-pip-audit.json
+
+Cycle-1 (G2) scan artifacts remain for comparison:
+
+artifacts/security/g2-semgrep-report.json
+artifacts/security/g2-zap-report.json
 G1 pre-change baselines:
 
 artifacts/security/g1-semgrep-report.json
@@ -82,8 +87,13 @@ artifacts/security/g1-zap-report.json
 - Critical: none
 - High: none
 - [medium] Each unauthenticated request now causes one durable `authentication_event` insert. Without edge rate limiting this is a storage-amplification vector. Mitigate with rate limiting at the BFF/edge (F0021) and retention in production hardening (F0026). — owner: DevOps / F0026 owner; follow-up: deferred-no-followup
-- [low] `audit_event` and `authentication_event` are append-only by service contract; the database does not yet block UPDATE/DELETE. This is part of the BLUEPRINT §4.11 immutability safeguards carried as a follow-up. — owner: Architect; follow-up: deferred-no-followup
 - [low] JWKS unavailability yields a 401 deny (correct per plan: deny without fallback), indistinguishable in metrics from bad credentials. Add a distinct operational metric when observability lands. — owner: DevOps; follow-up: deferred-no-followup
+
+## Cycle 2 (G4 fix-issues) review
+
+- **Resolved (0007):** the cycle-1 low finding that audit tables were append-only only by contract. `audit_event` and `authentication_event` now reject row UPDATE/DELETE at the database. Ownership columns (and the principal links of memberships, aliases and delegations) are immutable once set, so a record can no longer be silently moved between tenants or KBs, and a verified alias can no longer be re-pointed to another principal. Proven on PostgreSQL across 8 rewrite attempts, each refused with `check_violation`.
+- **Residual (info):** a database superuser can still bypass triggers (for example `session_replication_role`) or TRUNCATE. That is the DBA trust boundary, and retention/deletion of audit rows is an explicit DBA path to design with F0026.
+- The shared `decide` orchestration was re-reviewed: lock order, post-lock clock read, and delegation binding are unchanged. The worker's KB filter makes a lease/metadata mismatch a recorded `scope_denied`.
 
 ## Recommendation
 
