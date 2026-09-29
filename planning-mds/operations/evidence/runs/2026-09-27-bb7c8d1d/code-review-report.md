@@ -6,18 +6,89 @@
 
 ## Reviewed Files
 
-The canonical changed-file set is artifacts/diffs/changed-files.txt. Every runtime and test file in it was read. Focus areas:
+The canonical changed-file set is artifacts/diffs/changed-files.txt. Every runtime, migration, script, config and test file in it was read:
 
-- engine/packages/brain-security/src/brain_security/{evaluation,execution,delegation,identity_profile,verification,principals,casbin_adapter,audit}.py
-- engine/packages/brain-domain/src/brain_domain/{authx,tenancy,audit}.py
-- engine/packages/brain-persistence/src/brain_persistence/{authx,tenancy,identity,grants,fixtures,repositories,models}.py
-- engine/migrations/versions/0005_tenancy_authx_expand.py, 0006_tenancy_authx_constrain.py, 0007_tenancy_authx_safeguards.py, engine/migrations/env.py
-- engine/packages/brain-testing/ (dev-only fixtures package) and .github/workflows/ci-gates.yml (mypy roots)
-- engine/apps/api/src/brain_api/{deps,errors,config}.py and routes/{content,facts,reviews}.py
-- engine/packages/brain-temporal/src/brain_temporal/commit.py, engine/packages/brain-jobs/src/brain_jobs/queue.py
-- engine/apps/worker/src/brain_worker/document_delivery.py, neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py
-- scripts/dev/{reconcile_authx,provision_delegation,revoke_membership}.py, config/authx-identity-profile.yaml
-- every new or changed test module (contract, integration/migration, six EX-AUTHX security suites, package units, neuron worker tests)
+.github/workflows/ci-gates.yml
+config/authx-identity-profile.yaml
+engine/apps/api/src/brain_api/config.py
+engine/apps/api/src/brain_api/deps.py
+engine/apps/api/src/brain_api/errors.py
+engine/apps/api/src/brain_api/routes/content.py
+engine/apps/api/src/brain_api/routes/facts.py
+engine/apps/api/src/brain_api/routes/reviews.py
+engine/apps/api/tests/test_content.py
+engine/apps/api/tests/test_facts.py
+engine/apps/api/tests/test_reviews.py
+engine/apps/worker/src/brain_worker/document_delivery.py
+engine/migrations/env.py
+engine/migrations/versions/0005_tenancy_authx_expand.py
+engine/migrations/versions/0006_tenancy_authx_constrain.py
+engine/migrations/versions/0007_tenancy_authx_safeguards.py
+engine/packages/brain-domain/src/brain_domain/audit.py
+engine/packages/brain-domain/src/brain_domain/authx.py
+engine/packages/brain-domain/src/brain_domain/tenancy.py
+engine/packages/brain-domain/tests/test_authx.py
+engine/packages/brain-domain/tests/test_tenancy.py
+engine/packages/brain-jobs/src/brain_jobs/queue.py
+engine/packages/brain-persistence/src/brain_persistence/authx.py
+engine/packages/brain-persistence/src/brain_persistence/grants.py
+engine/packages/brain-persistence/src/brain_persistence/identity.py
+engine/packages/brain-persistence/src/brain_persistence/models.py
+engine/packages/brain-persistence/src/brain_persistence/repositories.py
+engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+engine/packages/brain-persistence/tests/test_models.py
+engine/packages/brain-persistence/tests/test_repositories.py
+engine/packages/brain-persistence/tests/test_tenancy_and_grants.py
+engine/packages/brain-security/pyproject.toml
+engine/packages/brain-security/src/brain_security/audit.py
+engine/packages/brain-security/src/brain_security/authorization.py
+engine/packages/brain-security/src/brain_security/casbin_adapter.py
+engine/packages/brain-security/src/brain_security/delegation.py
+engine/packages/brain-security/src/brain_security/evaluation.py
+engine/packages/brain-security/src/brain_security/execution.py
+engine/packages/brain-security/src/brain_security/identity_profile.py
+engine/packages/brain-security/src/brain_security/principals.py
+engine/packages/brain-security/src/brain_security/verification.py
+engine/packages/brain-security/tests/conftest.py
+engine/packages/brain-security/tests/test_authorization.py
+engine/packages/brain-security/tests/test_casbin_adapter.py
+engine/packages/brain-security/tests/test_delegation.py
+engine/packages/brain-security/tests/test_evaluation.py
+engine/packages/brain-security/tests/test_execution.py
+engine/packages/brain-security/tests/test_identity_profile.py
+engine/packages/brain-security/tests/test_principals.py
+engine/packages/brain-security/tests/test_verification.py
+engine/packages/brain-temporal/src/brain_temporal/commit.py
+engine/packages/brain-temporal/tests/conftest.py
+engine/packages/brain-temporal/tests/test_commit.py
+engine/packages/brain-testing/pyproject.toml
+engine/packages/brain-testing/src/brain_testing/__init__.py
+engine/packages/brain-testing/src/brain_testing/fixtures.py
+engine/packages/brain-testing/src/brain_testing/py.typed
+engine/pyproject.toml
+engine/ruff.toml
+engine/tests/contract/test_authx_kernel.py
+engine/tests/integration/conftest.py
+engine/tests/integration/test_authx_migration.py
+engine/tests/integration/test_bitemporal_commit.py
+engine/tests/integration/test_commit_concurrency.py
+engine/tests/integration/test_outbox_replay.py
+engine/tests/security/conftest.py
+engine/tests/security/test_authx_audit.py
+engine/tests/security/test_authx_consumers.py
+engine/tests/security/test_authx_delegation.py
+engine/tests/security/test_authx_principals.py
+engine/tests/security/test_authx_restrictions.py
+engine/tests/security/test_authx_scope.py
+engine/tests/security/test_credential_verification.py
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py
+neuron/pyproject.toml
+neuron/tests/integration/test_document_delivery.py
+neuron/tests/integration/test_document_process_recovery.py
+neuron/tests/integration/test_worker_cli_enqueue.py
+scripts/dev/provision_delegation.py
+scripts/dev/reconcile_authx.py
+scripts/dev/revoke_membership.py
 
 ## Validation Artifacts
 
