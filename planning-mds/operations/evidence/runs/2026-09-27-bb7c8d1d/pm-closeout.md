@@ -22,9 +22,9 @@ All 30 story × role signoffs are passing (signoff-ledger.md; STATUS.md Story Si
 
 ## Deferred Follow-ups
 
-- [medium] Edge rate limiting for rejected-credential authentication events. Owner: DevOps; target: F0021 BFF / F0026 hardening.
-- [low] A distinct operational metric for JWKS unavailability. Owner: DevOps; target: the observability work in F0026.
-- [low] An isolated per-run database for the engine PostgreSQL security/integration suites. Owner: DevOps; target: the next engine test-infrastructure change.
+- [medium] Edge rate limiting for rejected-credential authentication events. Owner: DevOps; target: F0021 BFF (rate limiting) / F0026 hardening (retention). Carried into both feature READMEs ("F0002 closeout carry-in", 2026-09-28).
+- [low] A distinct operational metric for JWKS unavailability. Owner: DevOps; target: the observability work in F0026. Carried into the F0026 README.
+- [low] An isolated per-run database for the engine PostgreSQL security/integration suites. Owner: DevOps; target: F0026 AuthX tests. Carried into the F0026 README.
 - Framework findings for nebula-agents (not product work): `feature.yaml` names `g2-deployability-check.md` but the validator requires `deployability-check.md`; the validator reads only a STATUS section titled exactly `Required Role Matrix`; early `security_sensitive_scope` forces scans at G1; greedy artifact-path capture includes trailing commas; `- [x]` and severity-tagged "fixed" bullets are parsed as open recommendations; `resume-brief.py` reported "all gates complete" after G4. Owner: framework maintainer.
 
 ## Recommendation Acceptances

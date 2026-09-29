@@ -140,7 +140,7 @@ New business-role grants are not included. Session/BFF is F0021; full review UI 
 - **Delivered:** all six stories through every existing consumer (content, fact, review, commit, F0005 worker). EX-AUTHX-001–018 were observed as expected. Engine 282 and neuron 75 tests pass. Changed-kernel coverage is 94.04%. Migrations 0005–0007 were applied, round-tripped and restore-drilled.
 - **Scope amendment:** BLUEPRINT §4.11 safeguards (immutable ownership, append-only audit, deferrable self-references), implemented as migration 0007 at the user's G4 selection.
 - **Decisions:** ADR-0061/0062 accepted for the bounded F0002 scope; ADR-0042/0052/0053 remain Proposed.
-- **Deferred follow-ups (accepted in pm-closeout.md):**
-  - [medium] Edge rate limiting for authentication events (F0021/F0026).
-  - [low] JWKS-outage metric.
-  - [low] Isolated per-run database for the engine PostgreSQL suites.
+- **Deferred follow-ups (accepted in pm-closeout.md; carried into the F0021 and F0026 READMEs):**
+  - [medium] Edge rate limiting for authentication events (F0021), with retention in F0026.
+  - [low] JWKS-outage metric (F0026).
+  - [low] Isolated per-run database for the engine PostgreSQL suites (F0026).
