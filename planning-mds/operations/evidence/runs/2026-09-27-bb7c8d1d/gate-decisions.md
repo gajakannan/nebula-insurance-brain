@@ -13,6 +13,7 @@
 | G4 | PASS | User (explicit "Approve" at the cycle-2 approval prompt); recorded by Product Manager | 2026-09-28T01:20:59+00:00 | gate_policy standard ACCEPTABLE (critical 0, high 0; artifacts/test-results/g4-gate-policy-cycle2.json); no high findings, so no mitigation token is required | No | Medium edge rate limiting (F0021/F0026), low JWKS metric, low isolated test DB carried to closeout |
 | G5 | PASS | Product Manager | 2026-09-28T02:00:00+00:00 | 30/30 story × role signoffs passing with reviewer, ISO date and run-folder evidence; ledger consistent with STATUS.md | No | WITH RECOMMENDATIONS acceptances recorded at G8 |
 | G6 | PASS | Quality Engineer | 2026-09-28T02:10:00+00:00 | Pre-closeout candidate: G0–G5 evidence present and passing, changed_paths populated, scope booleans match path classes, no omissions; validate-feature-evidence --stage G6 and scoped validate-trackers pass | No | - |
+| G7 | PASS | Architect | 2026-09-28T02:30:00+00:00 | As-built bindings authored (f0002.yaml new, f0001.yaml updated; stale authorization.py binding removed); no new canonical nodes; ADR-0061/0062 accepted for the bounded F0002 scope; SOLUTION-PATTERNS §1 updated; compile, symbol/decision regen+check and drift all exit 0 | No | Coverage regeneration deferred to G8 after archive move |
 
 ## User decisions
 

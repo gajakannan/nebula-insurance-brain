@@ -7,9 +7,9 @@ node_bindings:
   - id: capability:authorization-enforcement
     paths:
       backend:
-        - engine/packages/brain-security/src/brain_security/audit.py
-        - engine/packages/brain-security/src/brain_security/authorization.py
+        - engine/packages/brain-domain/src/brain_domain/authx.py
         - engine/packages/brain-security/src/brain_security/casbin_adapter.py
+        - engine/packages/brain-security/src/brain_security/evaluation.py
       infra:
         - planning-mds/security/policies/**
   - id: capability:backup-and-restore
@@ -21,11 +21,34 @@ node_bindings:
       backend:
         - engine/migrations/versions/0003_fact_slots_and_commits.py
         - engine/packages/brain-temporal/src/**
+  - id: capability:bounded-delegation
+    paths:
+      backend:
+        - engine/packages/brain-security/src/brain_security/delegation.py
+      infra:
+        - scripts/dev/provision_delegation.py
   - id: capability:credential-verification-and-principal-resolution
     paths:
       backend:
+        - engine/packages/brain-persistence/src/brain_persistence/identity.py
+        - engine/packages/brain-security/src/brain_security/identity_profile.py
         - engine/packages/brain-security/src/brain_security/principals.py
         - engine/packages/brain-security/src/brain_security/verification.py
+      infra:
+        - config/authx-identity-profile.yaml
+  - id: capability:current-resource-scope
+    paths:
+      backend:
+        - engine/packages/brain-persistence/src/brain_persistence/authx.py
+        - engine/packages/brain-persistence/src/brain_persistence/grants.py
+      infra:
+        - scripts/dev/revoke_membership.py
+  - id: capability:durable-authorization-decisions
+    paths:
+      backend:
+        - engine/packages/brain-domain/src/brain_domain/audit.py
+        - engine/packages/brain-security/src/brain_security/audit.py
+        - engine/packages/brain-security/src/brain_security/execution.py
   - id: capability:evidence-review-round-trip
     paths:
       backend:
@@ -68,3 +91,13 @@ node_bindings:
         - neuron/packages/brain-interpretation/src/**
       backend:
         - engine/packages/brain-contracts/src/**
+  - id: capability:structural-tenancy-and-entity-identity
+    paths:
+      backend:
+        - engine/migrations/versions/0005_tenancy_authx_expand.py
+        - engine/migrations/versions/0006_tenancy_authx_constrain.py
+        - engine/migrations/versions/0007_tenancy_authx_safeguards.py
+        - engine/packages/brain-domain/src/brain_domain/tenancy.py
+        - engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+      infra:
+        - scripts/dev/reconcile_authx.py

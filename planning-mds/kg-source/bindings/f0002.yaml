@@ -1,0 +1,33 @@
+# F0002 as-built bindings (G7, run 2026-09-27-bb7c8d1d). The F0001 shard carries the
+# two capabilities F0001 introduced (credential verification, authorization
+# enforcement), updated in place for F0002's replacement of the snapshot authorizer.
+bindings:
+- id: capability:structural-tenancy-and-entity-identity
+  paths:
+    backend:
+    - engine/packages/brain-domain/src/brain_domain/tenancy.py
+    - engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+    - engine/migrations/versions/0005_tenancy_authx_expand.py
+    - engine/migrations/versions/0006_tenancy_authx_constrain.py
+    - engine/migrations/versions/0007_tenancy_authx_safeguards.py
+    infra:
+    - scripts/dev/reconcile_authx.py
+- id: capability:current-resource-scope
+  paths:
+    backend:
+    - engine/packages/brain-persistence/src/brain_persistence/authx.py
+    - engine/packages/brain-persistence/src/brain_persistence/grants.py
+    infra:
+    - scripts/dev/revoke_membership.py
+- id: capability:bounded-delegation
+  paths:
+    backend:
+    - engine/packages/brain-security/src/brain_security/delegation.py
+    infra:
+    - scripts/dev/provision_delegation.py
+- id: capability:durable-authorization-decisions
+  paths:
+    backend:
+    - engine/packages/brain-security/src/brain_security/execution.py
+    - engine/packages/brain-security/src/brain_security/audit.py
+    - engine/packages/brain-domain/src/brain_domain/audit.py

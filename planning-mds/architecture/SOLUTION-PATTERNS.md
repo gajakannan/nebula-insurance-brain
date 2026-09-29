@@ -6,7 +6,7 @@ Project-level implementation conventions every role follows. Seeded by the Archi
 
 - Project: Nebula Insurance Brain
 - Version: 0.1
-- Last Updated: 2026-09-06
+- Last Updated: 2026-09-28 (F0002: authorization enforcement point, ADR-0062)
 - Owners: Architect (patterns), Security (pattern 1 co-sign)
 - Scope: `engine/`, `neuron/`, `experience/` (from F0021), runtime assets, contracts under `planning-mds/`
 
@@ -32,13 +32,13 @@ Project-level implementation conventions every role follows. Seeded by the Archi
 
 ### Decision
 - Policy model: verified `(issuer, subject)` → stable internal principal; structural tenancy (tenant, knowledge base) resolved from current grants; Casbin evaluates `(role, resource type, action, condition)` over server-hydrated typed attributes; authorization is the conjunction of membership, action, resource or parent scope, classification, and delegation limits.
-- Enforcement point: every API route through `brain_api.deps.current_principal` plus `AuthorizationService.authorize`; commit services re-authorize; search, vector, and graph paths filter before rows, counts, facets, and snippets; MCP uses the same path.
+- Enforcement point: every API route authenticates through `brain_api.deps.current_principal` and runs its protected operation through `brain_security.execution.AuthorizationExecution` (`read` / `mutate`), which locks current authority, evaluates with the pure `brain_security.evaluation.evaluate`, and commits the decision audit before any payload or together with the mutation. Background workers use the same `execution.decide` orchestration over a sync store. No consumer assembles its own resource snapshot. Commit services run inside the facade's unit of work. Search, vector, and graph paths filter before rows, counts, facets, and snippets; MCP uses the same path.
 
 ### Rationale
 - Master blueprint sections 66, 118 to 120; ADR-0030; proposed ADR-0049, ADR-0050, ADR-0053. The CRM gaps in section 119 are not copied.
 
 ### Applied In
-- Backend: `brain_security` (verifier, resolver, adapter, audit); routes in `brain_api.routes.*`
+- Backend: `brain_security` (verifier, identity profile, resolver, Casbin adapter, evaluator, execution facade, delegation rules, audit); trusted state in `brain_persistence` (`authx`, `tenancy`, `identity`, `grants`); routes in `brain_api.routes.*`
 - Frontend: renders what the API returns; never derives permissions client-side (F0021)
 - AI layer: `neuron/` calls the engine as the acting principal; the model server receives no identity data
 

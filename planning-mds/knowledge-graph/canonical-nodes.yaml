@@ -316,9 +316,10 @@ api_contracts:
 capabilities:
   - id: capability:authorization-enforcement
     label: Authorization enforcement
-    notes: Native Casbin adapter over typed, server-hydrated resource attributes with structural tenancy
-      resolved first; every decision audited with policy hash, grant revision, and reason code; denials
-      never disclose existence.
+    notes: F0002 replaced the F0001 snapshot authorizer with the pure conjunctive evaluator (brain_security/evaluation.py)
+      over complete current grant slices and server-hydrated resource envelopes (parent, classification,
+      source, evidence dependencies, delegation ceiling); the unchanged Casbin pilot policy evaluates
+      role/resource/action; denials never disclose existence.
     related_nodes:
       - adr:0050
       - adr:0062
@@ -361,7 +362,9 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:bounded-delegation
     label: Bounded delegation
-    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): server-owned expiring delegation bound to
+      one agent/service executor, ceiling cannot exceed the acting principal''s current authority, no
+      onward delegation; re-intersected with current grants and rechecked before every effect.'
     rationale:
       - adr: adr:0062
         section: Decision
@@ -391,7 +394,9 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:current-resource-scope
     label: Current resource scope
-    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): complete grant slices (role + parent selectors
+      + classification/source labels, no defaults) under a monotonic principal_authority revision; evaluation
+      locks authority FOR SHARE, grant changes FOR UPDATE; request filters only narrow.'
     rationale:
       - adr: adr:0062
         section: Decision
@@ -407,7 +412,10 @@ capabilities:
       - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:durable-authorization-decisions
     label: Durable authorization decisions
-    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): AuthorizationExecution commits a schema-v1
+      Decision to append-only audit_event before any payload or with the mutation atomically; denials/failures
+      audited in a fresh transaction; audit failure is a sanitized 503. The single lock/load orchestration
+      is execution.decide (API and worker).'
     rationale:
       - adr: adr:0062
         section: Decision
@@ -527,7 +535,10 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:structural-tenancy-and-entity-identity
     label: Structural tenancy and entity identity
-    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): Tenant/Workspace/KB registries with composite
+      ownership FKs (migrations 0005 expand, 0006 constrain after a digest-bound reviewed reconciliation,
+      0007 immutable ownership); tenant-scoped entity identity with explicit KB associations that never
+      grant access.'
     rationale:
       - adr: adr:0061
         section: Decision

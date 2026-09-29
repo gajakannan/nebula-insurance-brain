@@ -51,12 +51,16 @@ bindings:
     backend:
     - engine/packages/brain-security/src/brain_security/verification.py
     - engine/packages/brain-security/src/brain_security/principals.py
+    - engine/packages/brain-security/src/brain_security/identity_profile.py
+    - engine/packages/brain-persistence/src/brain_persistence/identity.py
+    infra:
+    - config/authx-identity-profile.yaml
 - id: capability:authorization-enforcement
   paths:
     backend:
-    - engine/packages/brain-security/src/brain_security/authorization.py
+    - engine/packages/brain-security/src/brain_security/evaluation.py
     - engine/packages/brain-security/src/brain_security/casbin_adapter.py
-    - engine/packages/brain-security/src/brain_security/audit.py
+    - engine/packages/brain-domain/src/brain_domain/authx.py
     infra:
     - planning-mds/security/policies/**
 - id: capability:backup-and-restore
