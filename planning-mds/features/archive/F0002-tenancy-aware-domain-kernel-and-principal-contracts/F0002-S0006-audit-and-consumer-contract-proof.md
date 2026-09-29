@@ -5,7 +5,7 @@
 **Title:** Prove audited kernel behavior through existing consumers
 **Priority:** Critical
 **Phase:** MVP
-**Status:** Not Started
+**Status:** Done
 
 ## User Story
 
@@ -20,13 +20,13 @@ Source requirements: [PRD](PRD.md), master blueprint sections 65–66 and 120–
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Given an allow or deny decision, when recorded, then audit includes current time, verified actor, actor kind, delegate when applicable, resource/action, tenant/KB context when safely resolved, policy hash/version, grant revision, decision/reason code and trace ID; unresolved identity is explicitly marked rather than fabricated.
-- [ ] **AC2:** Given a rejected credential, when authentication audit is inspected, then no access token or protected payload is present and neither principal nor protected resource storage was used to enrich the rejection.
-- [ ] **AC3:** Given a protected mutation succeeds, when domain state and audit are reread, then the mutation has a durable decision reference and authenticated actor; an audit persistence failure cannot produce an unaudited successful protected operation.
-- [ ] **AC4:** Given content/fact/review reads, review submission and the existing commit boundary, when the shared allow/deny fixtures run through each applicable consumer, then the outcomes match the contract and denied calls produce zero protected mutations.
-- [ ] **AC5:** Given a Reviewer annotation and a separate ServicePrincipal commit attempt, when tested, then annotation does not grant commit authority; commit independently rechecks current authorization and preserves its existing audit/outbox transaction. F0002 does not automatically promote an annotation to truth.
-- [ ] **AC6:** Given the EX-AUTHX cases and the section 121.2 matrix, when acceptance is reported, then each applicable case records actual output against the independently authored expectation, and every deferred category names an owning feature instead of being counted as passed.
-- [ ] **AC7:** Given the completed implementation candidate, when security and regression checks run, then all scoped negative cases pass with zero unauthorized disclosures, existing F0001 boundary tests pass, and changed kernel code meets the 80% coverage floor. Record measured latency; no unmeasured production latency SLO is claimed.
+- [x] **AC1:** Given an allow or deny decision, when recorded, then audit includes current time, verified actor, actor kind, delegate when applicable, resource/action, tenant/KB context when safely resolved, policy hash/version, grant revision, decision/reason code and trace ID; unresolved identity is explicitly marked rather than fabricated.
+- [x] **AC2:** Given a rejected credential, when authentication audit is inspected, then no access token or protected payload is present and neither principal nor protected resource storage was used to enrich the rejection.
+- [x] **AC3:** Given a protected mutation succeeds, when domain state and audit are reread, then the mutation has a durable decision reference and authenticated actor; an audit persistence failure cannot produce an unaudited successful protected operation.
+- [x] **AC4:** Given content/fact/review reads, review submission and the existing commit boundary, when the shared allow/deny fixtures run through each applicable consumer, then the outcomes match the contract and denied calls produce zero protected mutations.
+- [x] **AC5:** Given a Reviewer annotation and a separate ServicePrincipal commit attempt, when tested, then annotation does not grant commit authority; commit independently rechecks current authorization and preserves its existing audit/outbox transaction. F0002 does not automatically promote an annotation to truth.
+- [x] **AC6:** Given the EX-AUTHX cases and the section 121.2 matrix, when acceptance is reported, then each applicable case records actual output against the independently authored expectation, and every deferred category names an owning feature instead of being counted as passed.
+- [x] **AC7:** Given the completed implementation candidate, when security and regression checks run, then all scoped negative cases pass with zero unauthorized disclosures, existing F0001 boundary tests pass, and changed kernel code meets the 80% coverage floor. Record measured latency; no unmeasured production latency SLO is claimed.
 
 **Edge cases and error scenarios:** Each denial criterion is tested independently from the happy path. Invalid credentials use the existing generic 401 contract; inaccessible protected resources use the existing non-disclosing 404 contract. Trusted provisioning validation errors return an explicit safe failure with no partial write. Infrastructure errors never become an allow.
 
@@ -68,13 +68,13 @@ No open product question: the operator selected tenant-scoped entity identity wi
 
 ## Definition of Done
 
-- [ ] All acceptance criteria and independent deny cases pass through the stated entry point.
-- [ ] Permissions and current scope are enforced; persisted state and audit are checked after mutations.
-- [ ] Regression tests pass and changed kernel coverage meets the feature’s 80% floor.
-- [ ] Exact reproduction commands, actual results and documentation are recorded in the implementation run.
-- [ ] Story filename matches Story ID; generated story index is current.
-- [ ] Required reviewers record evidence-backed signoff in STATUS.md.
+- [x] All acceptance criteria and independent deny cases pass through the stated entry point.
+- [x] Permissions and current scope are enforced; persisted state and audit are checked after mutations.
+- [x] Regression tests pass and changed kernel coverage meets the feature’s 80% floor.
+- [x] Exact reproduction commands, actual results and documentation are recorded in the implementation run.
+- [x] Story filename matches Story ID; generated story index is current.
+- [x] Required reviewers record evidence-backed signoff in STATUS.md.
 
 ## Review Provenance
 
-See [STATUS.md](STATUS.md), Required Signoff Roles and Story Signoff Provenance. No implementation or reviewer signoff is asserted by this planning draft.
+Implemented and signed off in feature run `2026-09-27-bb7c8d1d` (2026-09-28): Quality Engineer PASS, Code Reviewer APPROVED, Security Reviewer PASS WITH RECOMMENDATIONS, DevOps PASS WITH RECOMMENDATIONS, Architect PASS. Rows are in [STATUS.md](STATUS.md) Story Signoff Provenance, and the per-AC test map is in the run's test-plan.md.

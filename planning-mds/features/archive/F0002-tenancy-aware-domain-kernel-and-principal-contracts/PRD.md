@@ -6,7 +6,7 @@
 **Feature Name:** Tenancy-aware domain kernel + verified stable principal and scope contracts
 **Priority:** Critical
 **Phase:** MVP — v0.1A
-**Status:** Draft
+**Status:** Done (feature run `2026-09-27-bb7c8d1d`, archived 2026-09-28)
 **Planning run:** 2026-09-25-3c64470a (Plan A+B, new)
 **Approval:** Phase A approved by user (`approve-phase-a`, 2026-09-25); Phase B approved by user (`approve-phase-b`, 2026-09-25).
 
@@ -54,12 +54,12 @@ Reuse Dana (platform/security), Ingrid (persistence) and Rosa (business review),
 
 ## Acceptance Criteria Overview
 
-- [ ] Tenant/workspace/KB ownership cannot be crossed by parent references or supplied identifiers (S0001).
-- [ ] Verified issuer/subject resolves to one stable typed principal, with no pre-verification protected lookup (S0002).
-- [ ] Current grants determine effective scope; filters and past business dates cannot add authority (S0003).
-- [ ] Every required resource restriction participates in authorization, including evidence dependencies (S0004).
-- [ ] Delegated authority is bounded by current actor grants and explicit delegation limits; autonomous services use their own grants (S0005).
-- [ ] Existing consumers reproduce all applicable fixture outcomes with durable, non-secret audit and no role widening (S0006).
+- [x] Tenant/workspace/KB ownership cannot be crossed by parent references or supplied identifiers (S0001).
+- [x] Verified issuer/subject resolves to one stable typed principal, with no pre-verification protected lookup (S0002).
+- [x] Current grants determine effective scope; filters and past business dates cannot add authority (S0003).
+- [x] Every required resource restriction participates in authorization, including evidence dependencies (S0004).
+- [x] Delegated authority is bounded by current actor grants and explicit delegation limits; autonomous services use their own grants (S0005).
+- [x] Existing consumers reproduce all applicable fixture outcomes with durable, non-secret audit and no role widening (S0006).
 
 Detailed acceptance review: [acceptance-criteria-checklist.md](acceptance-criteria-checklist.md). Independent expected cases: [worked-examples.md](worked-examples.md).
 
@@ -84,11 +84,11 @@ No UI — shared backend domain/security contracts and bounded integration throu
 | Delegation | Explicit acting identities, action/resource ceiling, expiry and revocation; not a new role grant |
 | Decision audit | Actor/delegate, scope where resolved, resource/action, policy/grant revision, outcome/reason, trace and timestamp; no tokens or protected content |
 
-Existing definitions: [glossary](../../domain/glossary.md). These rows state requirements; Phase B must settle schema fields, lifecycle representation, migration/backfill and audit failure semantics, and add missing glossary/contract references. Synthetic examples below define the expected behavior independently of those implementation choices.
+Existing definitions: [glossary](../../../domain/glossary.md). These rows state requirements; Phase B must settle schema fields, lifecycle representation, migration/backfill and audit failure semantics, and add missing glossary/contract references. Synthetic examples below define the expected behavior independently of those implementation choices.
 
 ## Role-Based Access
 
-Operator decision: reuse the existing pilot grants in [policy.csv](../../security/policies/policy.csv). Each allow still requires current membership, authoritative restrictions and any delegation ceiling.
+Operator decision: reuse the existing pilot grants in [policy.csv](../../../security/policies/policy.csv). Each allow still requires current membership, authoritative restrictions and any delegation ceiling.
 
 | Role | Permitted pilot resource/actions | Explicit limits |
 |---|---|---|
@@ -114,7 +114,7 @@ Six unstarted stories define observable behavior across valid and denied operati
 
 ## Dependencies
 
-- **Direct:** archived [F0001](../archive/F0001-repository-and-engineering-foundation/README.md), accepted foundation. Its latest-run pointer identifies approved run `2026-09-12-855d2b93`; scoped raw ADR-0049/0050 results supply the identity/authorization baseline. Full dependency revalidation is audit pending for the implementation action.
+- **Direct:** archived [F0001](../F0001-repository-and-engineering-foundation/README.md), accepted foundation. Its latest-run pointer identifies approved run `2026-09-12-855d2b93`; scoped raw ADR-0049/0050 results supply the identity/authorization baseline. Full dependency revalidation is audit pending for the implementation action.
 - **Impacted consumers:** F0003–F0017 semantic storage/ingestion/identity; F0018 commit; F0020 queries; F0021 session; F0022 review; F0023 views; F0026 qualification; F0033–F0040 retrieval/conversation; F0047 MCP; F0065 assessment. These are contract consumers, not delivered prerequisites. KG lookup explicitly records F0065’s dependency; other impact is derived from their raw blueprint scope.
 - Dependency evidence and unresolved reconciliation are recorded in the run’s artifact-trace.md and gate-decisions.md. No repo-wide feature-evidence validation is substituted for this audit.
 
@@ -133,4 +133,4 @@ Plan approval authorizes architecture design only at G3, then implementation rea
 
 ## Architecture Traceability (Phase B)
 
-The [assembly plan](feature-assembly-plan.md) maps all six stories to files, service contracts, persistence, authorization and tests. [ADR-0061](../../architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md) specifies ownership/identity; [ADR-0062](../../architecture/decisions/ADR-0062-current-authorization-and-durable-decisions.md) specifies current authorization, audit and the explicit review-to-commit ownership reconciliation. These design additions do not change the approved requirements. Architecture design approved by user on 2026-09-25; runtime proof remains pending.
+The [assembly plan](feature-assembly-plan.md) maps all six stories to files, service contracts, persistence, authorization and tests. [ADR-0061](../../../architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md) specifies ownership/identity; [ADR-0062](../../../architecture/decisions/ADR-0062-current-authorization-and-durable-decisions.md) specifies current authorization, audit and the explicit review-to-commit ownership reconciliation. These design additions do not change the approved requirements. Architecture design approved by user on 2026-09-25; runtime proof remains pending.

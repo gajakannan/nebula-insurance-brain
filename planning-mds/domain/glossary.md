@@ -246,7 +246,7 @@ Existing Assertion, FactSlot, Canonical Fact Version, Derivation, and Review Dec
 
 ## F0002 identity and authorization refinements (proposed design)
 
-These definitions refine the existing Tenant/Workspace/Knowledge Base/Principal terms for the approved F0002 requirements. Runtime proof and Phase B approval remain pending. Contract: [AuthX v1 schema](../schemas/authx-kernel.schema.json), [assembly plan](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md); worked and boundary examples: [EX-AUTHX](../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md).
+These definitions refine the existing Tenant/Workspace/Knowledge Base/Principal terms for the approved F0002 requirements. Runtime proof and Phase B approval remain pending. Contract: [AuthX v1 schema](../schemas/authx-kernel.schema.json), [assembly plan](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md); worked and boundary examples: [EX-AUTHX](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md).
 
 ### Tenant entity identity
 A stable entity identity within one tenant, which may have explicit associations to several KBs of that tenant. An association is not a membership or access grant. F0002-S0001; EX-AUTHX-002/003; ADR-0061. Distinct from the globally stable verified principal identity.

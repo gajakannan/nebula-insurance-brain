@@ -142,3 +142,81 @@ Exit Code: 0
 Result: PASS
 Output References: -
 Skipped Gates: -
+
+### G8
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 agents/product-manager/scripts/patch-prior-manifest.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0002 --new-run-id 2026-09-27-bb7c8d1d
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --write-coverage-report
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 agents/scripts/capture-run-telemetry.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-09-27-bb7c8d1d
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G8
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0002 --stage closeout
+Stage: G8
+Exit Code: 1
+Result: FAIL
+Output References: -
+Skipped Gates: -
+
+## Lifecycle Gate Run
+
+### G8 (direct; run-gate blocked by checkpoint_output_changed — see gate-decisions.md)
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0002 --stage closeout
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+## Lifecycle Gate Run
+
+### G8 (direct; run-gate blocked by checkpoint_output_changed — see gate-decisions.md)
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0002 --run-id 2026-09-27-bb7c8d1d
+Stage: G8
+Exit Code: 1
+Result: FAIL
+Output References: -
+Skipped Gates: -
+
+## Lifecycle Gate Run
+
+### G8 (direct; run-gate blocked by checkpoint_output_changed — see gate-decisions.md)
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0002 --run-id 2026-09-27-bb7c8d1d
+Stage: G8
+Exit Code: 0
+Result: PASS
+Output References: planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/artifacts/test-results/g8-validate-trackers.txt
+Skipped Gates: -

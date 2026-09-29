@@ -30,7 +30,6 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:planned -->
 | Feature ID | Name | Status | Phase | Folder |
 |------------|------|--------|-------|--------|
-| F0002 | Tenancy-aware domain kernel + verified stable principal and scope contracts | Planned | v0.1A | `F0002-tenancy-aware-domain-kernel-and-principal-contracts/` |
 | F0003 | PostgreSQL persistence | Planned | v0.1A | `F0003-postgresql-persistence/` |
 | F0004 | Content artifact model | Planned | v0.1A | `F0004-content-artifact-model/` |
 | F0005 | One-time document ingestion | Planned | v0.1A | `F0005-one-time-docling-ingestion/` |
@@ -102,6 +101,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:archived -->
 | Feature ID | Name | Archived Date | Evidence Reentry Date | Folder |
 |------------|------|---------------|-----------------------|--------|
+| F0002 | Tenancy-aware domain kernel + verified stable principal and scope contracts | 2026-09-28 |  | `archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/` |
 | F0001 | Repository and engineering foundation | 2026-09-11 |  | `archive/F0001-repository-and-engineering-foundation/` |
 <!-- generated:end registry:archived -->
 

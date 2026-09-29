@@ -6,7 +6,7 @@
 
 ## Continuing insurance case
 
-Reuse [EX-GL-001](../../examples/neurosymbolic-gl/README.md): an account/policy may be referenced by two KBs within one tenant. Its tenant-scoped identity does not make all policy facts, source documents or assessment evidence visible in both KBs. An underwriter with access only to the first KB cannot read a restricted loss-note-derived result through the shared account. F0065 owns actual assessment behavior; F0002 supplies the authorization contract and bounded synthetic dependency fixture.
+Reuse [EX-GL-001](../../../examples/neurosymbolic-gl/README.md): an account/policy may be referenced by two KBs within one tenant. Its tenant-scoped identity does not make all policy facts, source documents or assessment evidence visible in both KBs. An underwriter with access only to the first KB cannot read a restricted loss-note-derived result through the shared account. F0065 owns actual assessment behavior; F0002 supplies the authorization contract and bounded synthetic dependency fixture.
 
 Tenant A/B, workspace A/B, KB A1/A2 and issuer X/Y are fixture labels. Every positive operation also needs the exact applicable pilot role grant; no persona name implies a grant.
 
@@ -35,7 +35,7 @@ Tenant A/B, workspace A/B, KB A1/A2 and issuer X/Y are fixture labels. Every pos
 
 ## Definitions and ownership
 
-Tenant, Workspace, Knowledge Base and Principal use the existing [glossary](../../domain/glossary.md). Membership is a current trusted scope association; ResourceScope is permitted resources; delegation is an explicit expiring authority ceiling; all are requirements in the PRD data table pending Phase B schema/glossary completion. Entity identity is separate from visibility. Authorization time is current enforcement time; business valid/known time selects business history and cannot restore grants.
+Tenant, Workspace, Knowledge Base and Principal use the existing [glossary](../../../domain/glossary.md). Membership is a current trusted scope association; ResourceScope is permitted resources; delegation is an explicit expiring authority ceiling; all are requirements in the PRD data table pending Phase B schema/glossary completion. Entity identity is separate from visibility. Authorization time is current enforcement time; business valid/known time selects business history and cannot restore grants.
 
 ## Runtime reproduction obligation
 

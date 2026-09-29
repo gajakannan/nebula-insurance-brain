@@ -24,12 +24,12 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0002-S0001](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md) | Preserve structural tenancy and tenant-scoped entity identity | Critical | MVP | Ingrid the Persistence Engineer |
-| [F0002-S0002](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md) | Resolve verified credentials to stable typed principals | Critical | MVP | Dana the Platform Engineer |
-| [F0002-S0003](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md) | Resolve current memberships and intersect requested scope | Critical | MVP | Dana the Platform Engineer |
-| [F0002-S0004](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) | Enforce parent, classification and source restrictions together | Critical | MVP | Rosa the Business Reviewer |
-| [F0002-S0005](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) | Bound delegated and autonomous service authority | Critical | MVP | Dana the Platform Engineer |
-| [F0002-S0006](./F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) | Prove audited kernel behavior through existing consumers | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0001](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md) | Preserve structural tenancy and tenant-scoped entity identity | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0002-S0002](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md) | Resolve verified credentials to stable typed principals | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0003](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md) | Resolve current memberships and intersect requested scope | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0004](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) | Enforce parent, classification and source restrictions together | Critical | MVP | Rosa the Business Reviewer |
+| [F0002-S0005](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) | Bound delegated and autonomous service authority | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0006](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) | Prove audited kernel behavior through existing consumers | Critical | MVP | Dana the Platform Engineer |
 
 ---
 

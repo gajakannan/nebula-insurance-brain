@@ -44,6 +44,6 @@ Before constraints are enabled, rollback restores the pre-migration snapshot or 
 
 ## References
 
-- [Approved F0002 PRD](../../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md)
-- [Assembly plan](../../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md)
+- [Approved F0002 PRD](../../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md)
+- [Assembly plan](../../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md)
 - [ADR-0030](ADR-0030-tenancy-is-structural.md), [ADR-0049](ADR-0049-shared-identity-and-verified-principal-boundary.md)

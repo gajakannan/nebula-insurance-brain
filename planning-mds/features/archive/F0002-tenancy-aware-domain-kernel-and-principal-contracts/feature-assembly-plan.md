@@ -2,12 +2,12 @@
 
 **Author:** Architect
 **Date:** 2026-09-25
-**Status:** Approved design; Phase A and Phase B approved by user on 2026-09-25; runtime proof pending
+**Status:** Approved design (2026-09-25); implemented and proven by feature run `2026-09-27-bb7c8d1d` (2026-09-28); see that run's g0-assembly-plan-validation.md for the reconciliation deltas R1–R5 and the G4 scope amendment (migration 0007)
 **Plan run:** `2026-09-25-3c64470a`
 
 ## Overview and authority
 
-Extend the existing Python kernel, preserving stable IDs and current pilot grants. Introduce structural ownership, complete current grant slices, typed resource restrictions and bounded delegation; integrate them with the existing content, review, commit and worker boundaries. The [PRD](PRD.md) remains the approved product scope. [ADR-0061](../../architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md) and [ADR-0062](../../architecture/decisions/ADR-0062-current-authorization-and-durable-decisions.md) record the design, alternatives and acceptance requirements. Both remain Proposed until their stated approval/proof conditions are met.
+Extend the existing Python kernel, preserving stable IDs and current pilot grants. Introduce structural ownership, complete current grant slices, typed resource restrictions and bounded delegation; integrate them with the existing content, review, commit and worker boundaries. The [PRD](PRD.md) remains the approved product scope. [ADR-0061](../../../architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md) and [ADR-0062](../../../architecture/decisions/ADR-0062-current-authorization-and-durable-decisions.md) record the design, alternatives and acceptance requirements. Both remain Proposed until their stated approval/proof conditions are met.
 
 This is an implementation specification, not implementation evidence. New paths below are planned files unless explicitly listed as existing. No runtime code, migrations, IdP settings or policy grants were changed by this plan.
 
@@ -67,7 +67,7 @@ Unit tests are colocated with the changed packages. No frontend module or AI inf
 
 ## Contract types and service signatures
 
-[authx-kernel.schema.json](../../schemas/authx-kernel.schema.json) defines the exact serialized v1 fields, required/nullable values, enums and closed-object structure. Generate/validate matching frozen Python dataclasses or Pydantic boundary DTOs; domain types remain free of I/O. Structural validation cannot establish trust or relational consistency.
+[authx-kernel.schema.json](../../../schemas/authx-kernel.schema.json) defines the exact serialized v1 fields, required/nullable values, enums and closed-object structure. Generate/validate matching frozen Python dataclasses or Pydantic boundary DTOs; domain types remain free of I/O. Structural validation cannot establish trust or relational consistency.
 
 | Schema definition | Python representation | Domain constraint beyond JSON Schema |
 |---|---|---|
@@ -232,7 +232,7 @@ Lock order: policy pointer, authority rows by principal ID, delegation row, reso
 
 ## Endpoints and error compatibility
 
-OpenAPI is [brain-api.yaml](../../api/brain-api.yaml), design version 0.2.0. Existing payloads and successful receipts remain unchanged; no public endpoint accepts the internal schema. New documented file operation already exists in code. All affected protected operations add sanitized 503 availability behavior. 403 remains a reserved shared catalog entry, not the denial response on these routes.
+OpenAPI is [brain-api.yaml](../../../api/brain-api.yaml), design version 0.2.0. Existing payloads and successful receipts remain unchanged; no public endpoint accepts the internal schema. New documented file operation already exists in code. All affected protected operations add sanitized 503 availability behavior. 403 remains a reserved shared catalog entry, not the denial response on these routes.
 
 | Entry point | Required existing action | Success | Failures |
 |---|---|---|---|

@@ -5,7 +5,7 @@
 **Title:** Bound delegated and autonomous service authority
 **Priority:** Critical
 **Phase:** MVP
-**Status:** Not Started
+**Status:** Done
 
 ## User Story
 
@@ -20,13 +20,13 @@ Source requirements: [PRD](PRD.md), master blueprint sections 65–66 and 120–
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Given an agent acting for a user, when a protected operation is requested, then the verified agent identity, acting user, delegation reference, allowed actions/resources and expiry are resolved from trusted state.
-- [ ] **AC2:** Given an operation allowed by the delegation but denied by the actor’s current grant, or allowed by the actor but outside the delegation ceiling, when evaluated, then it is denied; authority is the intersection, never a union.
-- [ ] **AC3:** Given an expired/revoked delegation or a revoked user membership during a job, when the next protected operation executes, then access is denied even if an earlier job step succeeded.
-- [ ] **AC4:** Given a forged actor/delegation identifier, when supplied by a client/model, then it cannot replace authenticated identities or trusted delegation state.
-- [ ] **AC5:** Given an autonomous ServicePrincipal without a human delegate, when it performs a pilot action, then it uses only its own explicit grant and is audited as a service; it never impersonates a human or gains an implicit tenant-wide bypass.
-- [ ] **AC6:** Given an agent asks for an unregistered action, wider scope, onward delegation or a direct canonical write outside an authorized commit boundary, when processed, then it is rejected without widening authority or mutating canonical state.
-- [ ] **AC7:** Given an allowed delegated fixture operation, when persisted output is inspected, then both identities, delegation reference, policy and grant revisions are traceable; the same operation outside its ceiling leaves no protected mutation.
+- [x] **AC1:** Given an agent acting for a user, when a protected operation is requested, then the verified agent identity, acting user, delegation reference, allowed actions/resources and expiry are resolved from trusted state.
+- [x] **AC2:** Given an operation allowed by the delegation but denied by the actor’s current grant, or allowed by the actor but outside the delegation ceiling, when evaluated, then it is denied; authority is the intersection, never a union.
+- [x] **AC3:** Given an expired/revoked delegation or a revoked user membership during a job, when the next protected operation executes, then access is denied even if an earlier job step succeeded.
+- [x] **AC4:** Given a forged actor/delegation identifier, when supplied by a client/model, then it cannot replace authenticated identities or trusted delegation state.
+- [x] **AC5:** Given an autonomous ServicePrincipal without a human delegate, when it performs a pilot action, then it uses only its own explicit grant and is audited as a service; it never impersonates a human or gains an implicit tenant-wide bypass.
+- [x] **AC6:** Given an agent asks for an unregistered action, wider scope, onward delegation or a direct canonical write outside an authorized commit boundary, when processed, then it is rejected without widening authority or mutating canonical state.
+- [x] **AC7:** Given an allowed delegated fixture operation, when persisted output is inspected, then both identities, delegation reference, policy and grant revisions are traceable; the same operation outside its ceiling leaves no protected mutation.
 
 **Edge cases and error scenarios:** Each denial criterion is tested independently from the happy path. Invalid credentials use the existing generic 401 contract; inaccessible protected resources use the existing non-disclosing 404 contract. Trusted provisioning validation errors return an explicit safe failure with no partial write. Infrastructure errors never become an allow.
 
@@ -68,13 +68,13 @@ No open product question: the operator selected tenant-scoped entity identity wi
 
 ## Definition of Done
 
-- [ ] All acceptance criteria and independent deny cases pass through the stated entry point.
-- [ ] Permissions and current scope are enforced; persisted state and audit are checked after mutations.
-- [ ] Regression tests pass and changed kernel coverage meets the feature’s 80% floor.
-- [ ] Exact reproduction commands, actual results and documentation are recorded in the implementation run.
-- [ ] Story filename matches Story ID; generated story index is current.
-- [ ] Required reviewers record evidence-backed signoff in STATUS.md.
+- [x] All acceptance criteria and independent deny cases pass through the stated entry point.
+- [x] Permissions and current scope are enforced; persisted state and audit are checked after mutations.
+- [x] Regression tests pass and changed kernel coverage meets the feature’s 80% floor.
+- [x] Exact reproduction commands, actual results and documentation are recorded in the implementation run.
+- [x] Story filename matches Story ID; generated story index is current.
+- [x] Required reviewers record evidence-backed signoff in STATUS.md.
 
 ## Review Provenance
 
-See [STATUS.md](STATUS.md), Required Signoff Roles and Story Signoff Provenance. No implementation or reviewer signoff is asserted by this planning draft.
+Implemented and signed off in feature run `2026-09-27-bb7c8d1d` (2026-09-28): Quality Engineer PASS, Code Reviewer APPROVED, Security Reviewer PASS WITH RECOMMENDATIONS, DevOps PASS WITH RECOMMENDATIONS, Architect PASS. Rows are in [STATUS.md](STATUS.md) Story Signoff Provenance, and the per-AC test map is in the run's test-plan.md.

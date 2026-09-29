@@ -14,6 +14,7 @@
 | G5 | PASS | Product Manager | 2026-09-28T02:00:00+00:00 | 30/30 story × role signoffs passing with reviewer, ISO date and run-folder evidence; ledger consistent with STATUS.md | No | WITH RECOMMENDATIONS acceptances recorded at G8 |
 | G6 | PASS | Quality Engineer | 2026-09-28T02:10:00+00:00 | Pre-closeout candidate: G0–G5 evidence present and passing, changed_paths populated, scope booleans match path classes, no omissions; validate-feature-evidence --stage G6 and scoped validate-trackers pass | No | - |
 | G7 | PASS | Architect | 2026-09-28T02:30:00+00:00 | As-built bindings authored (f0002.yaml new, f0001.yaml updated; stale authorization.py binding removed); no new canonical nodes; ADR-0061/0062 accepted for the bounded F0002 scope; SOLUTION-PATTERNS §1 updated; compile, symbol/decision regen+check and drift all exit 0 | No | Coverage regeneration deferred to G8 after archive move |
+| G8 | APPROVED | Product Manager | 2026-09-28T03:00:00+00:00 | Feature Done and Archived; trackers synchronized (REGISTRY/ROADMAP/STORY-INDEX/BLUEPRINT/STATUS); prior plan-run manifest superseded before latest-run.json; coverage regenerated after the archive move; closeout and tracker validation pass | No | Medium/low follow-ups accepted in pm-closeout.md |
 
 ## User decisions
 
@@ -22,3 +23,8 @@
 - 2026-09-28T01:20:59+00:00 — G4 cycle 2: user chose **Approve**.
 
 Decisions: `PASS`, `PASS WITH RECOMMENDATIONS`, `FAIL`, `SKIP`. Blocking values: `Yes` / `No`.
+
+## G8 process notes (framework findings)
+
+- **run-gate cannot re-attest a changed checkpoint output.** The G8 driver attested `pm-closeout.md`. A later edit, which was needed to make recommendation acceptances match the validator's parser, then tripped `checkpoint_output_changed`. The first attestation wins, and `--force` keeps attestations, so there is no supported re-attest path. `gate-state.json` was **not** hand-edited, and its G8 journal stays `failed` at validate-closeout. The remaining G8 operations ran directly. Each one is logged in commands.log and in lifecycle-gates.log under "G8 (direct …)", and the final `validate-feature-evidence --stage closeout` and `validate-trackers` both exit 0.
+- **Verdict-set mismatch between validators.** `validate-feature-evidence` accepts `PASS WITH RECOMMENDATIONS`, provided the PM accepts the recommendations at closeout. `validate-trackers` (`_is_pass_verdict`) counts only `PASS`/`APPROVED` story provenance, so it failed 12 Security Reviewer/DevOps story×role pairs. It was resolved by appending G8 closeout PASS rows to STATUS.md Story Signoff Provenance, each citing the PM acceptance. The G5 rows are unchanged. No validator was bypassed, and no earlier `--evidence-effective-date` was used.

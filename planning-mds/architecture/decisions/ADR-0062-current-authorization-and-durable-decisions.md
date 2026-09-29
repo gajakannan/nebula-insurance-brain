@@ -48,6 +48,6 @@ S0003–S0006 prove each restriction independently, all-grant selection, no mixe
 
 ## References
 
-- [F0002 assembly plan](../../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md)
+- [F0002 assembly plan](../../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md)
 - [ADR-0050](ADR-0050-native-policy-evaluation-and-resource-scope.md)
 - [ADR-0052](ADR-0052-delegated-agents-and-review-authority.md), [ADR-0053](ADR-0053-permission-safe-retrieval-and-historical-access.md)

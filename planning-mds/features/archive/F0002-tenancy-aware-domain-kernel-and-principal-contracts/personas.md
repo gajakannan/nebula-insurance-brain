@@ -4,9 +4,9 @@ These are scoped uses of existing product personas, not newly invented job roles
 
 | Persona | Priority | Job in F0002 | Success / boundary |
 |---|---|---|---|
-| [Dana the Platform Engineer](../../examples/personas/platform-engineer.md) | Primary | Verify identity, provision trusted grants and reproduce scope/delegation/audit decisions | Invalid credentials never select protected records; current-grant and delegation cases have zero unauthorized results |
-| [Ingrid the Persistence Engineer](../../examples/personas/persistence-engineer.md) | Primary | Preserve ownership and stable identity across records and migration | No cross-tenant/KB parent association; existing identifiers retained; failed writes leave no partial ownership |
-| [Rosa the Business Reviewer](../../examples/personas/business-reviewer.md) | Secondary | Annotate only authorized review evidence under current grants | A review annotation never confers canonical business approval; changed authority blocks submission |
+| [Dana the Platform Engineer](../../../examples/personas/platform-engineer.md) | Primary | Verify identity, provision trusted grants and reproduce scope/delegation/audit decisions | Invalid credentials never select protected records; current-grant and delegation cases have zero unauthorized results |
+| [Ingrid the Persistence Engineer](../../../examples/personas/persistence-engineer.md) | Primary | Preserve ownership and stable identity across records and migration | No cross-tenant/KB parent association; existing identifiers retained; failed writes leave no partial ownership |
+| [Rosa the Business Reviewer](../../../examples/personas/business-reviewer.md) | Secondary | Annotate only authorized review evidence under current grants | A review annotation never confers canonical business approval; changed authority blocks submission |
 
 ## Jobs-to-be-Done
 

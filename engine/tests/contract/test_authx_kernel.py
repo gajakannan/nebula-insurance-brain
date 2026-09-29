@@ -41,7 +41,7 @@ SCHEMA = json.loads((REPO_ROOT / "planning-mds/schemas/authx-kernel.schema.json"
 EXAMPLES = json.loads(
     (
         REPO_ROOT
-        / "planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts"
+        / "planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts"
         / "contract-examples.json"
     ).read_text()
 )

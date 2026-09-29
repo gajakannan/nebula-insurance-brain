@@ -15,7 +15,7 @@ def main() -> int:
     schema = json.loads((planning / "schemas/authx-kernel.schema.json").read_text())
     examples_path = (
         planning
-        / "features/F0002-tenancy-aware-domain-kernel-and-principal-contracts"
+        / "features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts"
         / "contract-examples.json"
     )
     examples = json.loads(examples_path.read_text())

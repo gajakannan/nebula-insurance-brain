@@ -5,7 +5,7 @@
 **Title:** Preserve structural tenancy and tenant-scoped entity identity
 **Priority:** Critical
 **Phase:** MVP
-**Status:** Not Started
+**Status:** Done
 
 ## User Story
 
@@ -20,12 +20,12 @@ Source requirements: [PRD](PRD.md), master blueprint sections 65–66 and 120–
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Given two tenants, two workspaces in one tenant, and two KBs in one workspace, when ownership is resolved, then each KB resolves to exactly one workspace and tenant; a workspace or KB reference from a different tenant is rejected without a persisted partial association.
-- [ ] **AC2:** Given an authoritative semantic record, when it is accepted, then its tenant and KB agree with the authoritative ownership hierarchy and its parent references; missing or conflicting ownership is rejected, including through worker entry points.
-- [ ] **AC3:** Given the same entity is explicitly referenced in two KBs within one tenant, when its identity is resolved, then the tenant-scoped identity can be the same while each KB retains separate grants and KB-owned semantic records; the reference creates no membership or grant.
-- [ ] **AC4:** Given identical external entity identifiers in different tenants, when identity is resolved, then they cannot select a shared tenant-owned entity or expose whether the other tenant has a matching entity.
-- [ ] **AC5:** Given F0001 principal, membership, and semantic records, when the new tenancy contracts are introduced, then existing valid ownership and principal identifiers remain unchanged; inconsistent legacy ownership produces an explicit reconciliation failure instead of guessed grants.
-- [ ] **AC6:** Given any rejected ownership mutation, when persisted state is queried again, then no cross-scope association exists and the denied operation is auditable without returning another tenant’s identifiers.
+- [x] **AC1:** Given two tenants, two workspaces in one tenant, and two KBs in one workspace, when ownership is resolved, then each KB resolves to exactly one workspace and tenant; a workspace or KB reference from a different tenant is rejected without a persisted partial association.
+- [x] **AC2:** Given an authoritative semantic record, when it is accepted, then its tenant and KB agree with the authoritative ownership hierarchy and its parent references; missing or conflicting ownership is rejected, including through worker entry points.
+- [x] **AC3:** Given the same entity is explicitly referenced in two KBs within one tenant, when its identity is resolved, then the tenant-scoped identity can be the same while each KB retains separate grants and KB-owned semantic records; the reference creates no membership or grant.
+- [x] **AC4:** Given identical external entity identifiers in different tenants, when identity is resolved, then they cannot select a shared tenant-owned entity or expose whether the other tenant has a matching entity.
+- [x] **AC5:** Given F0001 principal, membership, and semantic records, when the new tenancy contracts are introduced, then existing valid ownership and principal identifiers remain unchanged; inconsistent legacy ownership produces an explicit reconciliation failure instead of guessed grants.
+- [x] **AC6:** Given any rejected ownership mutation, when persisted state is queried again, then no cross-scope association exists and the denied operation is auditable without returning another tenant’s identifiers.
 
 **Edge cases and error scenarios:** Each denial criterion is tested independently from the happy path. Invalid credentials use the existing generic 401 contract; inaccessible protected resources use the existing non-disclosing 404 contract. Trusted provisioning validation errors return an explicit safe failure with no partial write. Infrastructure errors never become an allow.
 
@@ -67,13 +67,13 @@ No open product question: the operator selected tenant-scoped entity identity wi
 
 ## Definition of Done
 
-- [ ] All acceptance criteria and independent deny cases pass through the stated entry point.
-- [ ] Permissions and current scope are enforced; persisted state and audit are checked after mutations.
-- [ ] Regression tests pass and changed kernel coverage meets the feature’s 80% floor.
-- [ ] Exact reproduction commands, actual results and documentation are recorded in the implementation run.
-- [ ] Story filename matches Story ID; generated story index is current.
-- [ ] Required reviewers record evidence-backed signoff in STATUS.md.
+- [x] All acceptance criteria and independent deny cases pass through the stated entry point.
+- [x] Permissions and current scope are enforced; persisted state and audit are checked after mutations.
+- [x] Regression tests pass and changed kernel coverage meets the feature’s 80% floor.
+- [x] Exact reproduction commands, actual results and documentation are recorded in the implementation run.
+- [x] Story filename matches Story ID; generated story index is current.
+- [x] Required reviewers record evidence-backed signoff in STATUS.md.
 
 ## Review Provenance
 
-See [STATUS.md](STATUS.md), Required Signoff Roles and Story Signoff Provenance. No implementation or reviewer signoff is asserted by this planning draft.
+Implemented and signed off in feature run `2026-09-27-bb7c8d1d` (2026-09-28): Quality Engineer PASS, Code Reviewer APPROVED, Security Reviewer PASS WITH RECOMMENDATIONS, DevOps PASS WITH RECOMMENDATIONS, Architect PASS. Rows are in [STATUS.md](STATUS.md) Story Signoff Provenance, and the per-AC test map is in the run's test-plan.md.

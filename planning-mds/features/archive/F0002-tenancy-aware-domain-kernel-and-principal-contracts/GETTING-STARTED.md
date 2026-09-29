@@ -2,7 +2,7 @@
 
 ## Current state
 
-Phases A and B are approved (2026-09-25). The implementation is delivered on branch `feature/F0002-tenancy-kernel` by feature run `2026-09-27-bb7c8d1d`. Evidence is in `planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/`. Start with PRD.md, feature-assembly-plan.md, ADR-0061/0062 (still Proposed), the v1 internal schema, and the run's test-plan.md.
+Done and archived (2026-09-28). The implementation was delivered on branch `feature/F0002-tenancy-kernel` by feature run `2026-09-27-bb7c8d1d`. Evidence is in `planning-mds/operations/evidence/runs/2026-09-27-bb7c8d1d/`. Start with PRD.md, feature-assembly-plan.md, ADR-0061/0062 (accepted for the bounded F0002 scope), the v1 internal schema, and the run's test-plan.md.
 
 ## Key implemented files
 

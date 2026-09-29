@@ -5,7 +5,7 @@
 **Title:** Resolve verified credentials to stable typed principals
 **Priority:** Critical
 **Phase:** MVP
-**Status:** Not Started
+**Status:** Done
 
 ## User Story
 
@@ -20,13 +20,13 @@ Source requirements: [PRD](PRD.md), master blueprint sections 65–66 and 120–
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Given a valid receiving-service credential, when the verified issuer/subject pair is resolved repeatedly or concurrently, then exactly one stable internal principal is selected; process restart and new sessions do not replace that ID.
-- [ ] **AC2:** Given equal subject text from two different issuers, when resolution occurs, then different principals are returned unless an explicitly approved identity link exists; email address equality never links identities or grants membership.
-- [ ] **AC3:** Given missing, malformed, expired, not-yet-valid, wrong-signature, wrong-issuer, wrong-audience or unsupported credential type, when a protected entry point is called, then it returns the existing generic unauthenticated response before principal provisioning, membership lookup or protected resource access.
-- [ ] **AC4:** Given a disabled principal, when otherwise valid credentials are presented, then protected access is denied; the internal reason is audited and no resource existence is disclosed.
-- [ ] **AC5:** Given a client or model submits principal ID, principal kind, roles or acting-user fields, when trusted context is built, then those values cannot override verified identity and trusted principal records.
-- [ ] **AC6:** Given an identity-provider migration or proposed identity link, when no approved mapping exists, then the system does not silently merge existing owners or reassign audit history; the operator receives a reconciliation requirement.
-- [ ] **AC7:** Given existing user, service and agent fixtures, when the context is consumed, then principal kind and identity are explicit and cannot be inferred from a requested role or changed by request payload.
+- [x] **AC1:** Given a valid receiving-service credential, when the verified issuer/subject pair is resolved repeatedly or concurrently, then exactly one stable internal principal is selected; process restart and new sessions do not replace that ID.
+- [x] **AC2:** Given equal subject text from two different issuers, when resolution occurs, then different principals are returned unless an explicitly approved identity link exists; email address equality never links identities or grants membership.
+- [x] **AC3:** Given missing, malformed, expired, not-yet-valid, wrong-signature, wrong-issuer, wrong-audience or unsupported credential type, when a protected entry point is called, then it returns the existing generic unauthenticated response before principal provisioning, membership lookup or protected resource access.
+- [x] **AC4:** Given a disabled principal, when otherwise valid credentials are presented, then protected access is denied; the internal reason is audited and no resource existence is disclosed.
+- [x] **AC5:** Given a client or model submits principal ID, principal kind, roles or acting-user fields, when trusted context is built, then those values cannot override verified identity and trusted principal records.
+- [x] **AC6:** Given an identity-provider migration or proposed identity link, when no approved mapping exists, then the system does not silently merge existing owners or reassign audit history; the operator receives a reconciliation requirement.
+- [x] **AC7:** Given existing user, service and agent fixtures, when the context is consumed, then principal kind and identity are explicit and cannot be inferred from a requested role or changed by request payload.
 
 **Edge cases and error scenarios:** Each denial criterion is tested independently from the happy path. Invalid credentials use the existing generic 401 contract; inaccessible protected resources use the existing non-disclosing 404 contract. Trusted provisioning validation errors return an explicit safe failure with no partial write. Infrastructure errors never become an allow.
 
@@ -68,13 +68,13 @@ No open product question: the operator selected tenant-scoped entity identity wi
 
 ## Definition of Done
 
-- [ ] All acceptance criteria and independent deny cases pass through the stated entry point.
-- [ ] Permissions and current scope are enforced; persisted state and audit are checked after mutations.
-- [ ] Regression tests pass and changed kernel coverage meets the feature’s 80% floor.
-- [ ] Exact reproduction commands, actual results and documentation are recorded in the implementation run.
-- [ ] Story filename matches Story ID; generated story index is current.
-- [ ] Required reviewers record evidence-backed signoff in STATUS.md.
+- [x] All acceptance criteria and independent deny cases pass through the stated entry point.
+- [x] Permissions and current scope are enforced; persisted state and audit are checked after mutations.
+- [x] Regression tests pass and changed kernel coverage meets the feature’s 80% floor.
+- [x] Exact reproduction commands, actual results and documentation are recorded in the implementation run.
+- [x] Story filename matches Story ID; generated story index is current.
+- [x] Required reviewers record evidence-backed signoff in STATUS.md.
 
 ## Review Provenance
 
-See [STATUS.md](STATUS.md), Required Signoff Roles and Story Signoff Provenance. No implementation or reviewer signoff is asserted by this planning draft.
+Implemented and signed off in feature run `2026-09-27-bb7c8d1d` (2026-09-28): Quality Engineer PASS, Code Reviewer APPROVED, Security Reviewer PASS WITH RECOMMENDATIONS, DevOps PASS WITH RECOMMENDATIONS, Architect PASS. Rows are in [STATUS.md](STATUS.md) Story Signoff Provenance, and the per-AC test map is in the run's test-plan.md.

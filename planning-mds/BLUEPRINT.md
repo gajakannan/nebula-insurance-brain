@@ -210,18 +210,18 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 **Completed**
 
 - [F0001 — Repository and engineering foundation](features/archive/F0001-repository-and-engineering-foundation/README.md) - Done and archived 2026-09-11; remediation evidence refreshed 2026-09-12
+- [F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md) - Done and archived 2026-09-28 (feature run 2026-09-27-bb7c8d1d; six stories; ADR-0061/0062 accepted for the bounded F0002 scope)
+  - [F0002-S0001](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md) - Done
+  - [F0002-S0002](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md) - Done
+  - [F0002-S0003](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md) - Done
+  - [F0002-S0004](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) - Done
+  - [F0002-S0005](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) - Done
+  - [F0002-S0006](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) - Done
 
 **Pre-build (Now)**
 
 **v0.1A (Next)**
 
-- [F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md) - Planned (six stories; Phase A and Phase B approved; implementation not started)
-  - [F0002-S0001](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md) - Not Started
-  - [F0002-S0002](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md) - Not Started
-  - [F0002-S0003](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md) - Not Started
-  - [F0002-S0004](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) - Not Started
-  - [F0002-S0005](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) - Not Started
-  - [F0002-S0006](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) - Not Started
 - [F0003 — PostgreSQL persistence](features/F0003-postgresql-persistence/README.md) - Planned
 - [F0004 — Content artifact model](features/F0004-content-artifact-model/README.md) - Planned
 - [F0005 — One-time document ingestion](features/F0005-one-time-docling-ingestion/README.md) - Planned
@@ -385,11 +385,11 @@ Assembly plan: `features/archive/F0001-repository-and-engineering-foundation/fea
 
 ---
 
-### 4.10 F0002 Phase B design (2026-09-25; design approved)
+### 4.10 F0002 Phase B design (2026-09-25; design approved; implemented 2026-09-28)
 
-[Assembly plan](features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md): structural Tenant/Workspace/KB ownership, tenant-scoped entity identity with explicit KB grants, stable verified principal aliases, complete current grant slices, conjunctive resource restrictions, bounded delegation and durable decision audit. User confirmed the entity/KB identity choice and reuse of the three existing pilot roles, then approved Phase A with `approve-phase-a` and Phase B with `approve-phase-b`. This resolves section 117.1 item 2 for the F0002 pilot scope; broader production rollout remains open.
+[Assembly plan](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md): structural Tenant/Workspace/KB ownership, tenant-scoped entity identity with explicit KB grants, stable verified principal aliases, complete current grant slices, conjunctive resource restrictions, bounded delegation and durable decision audit. User confirmed the entity/KB identity choice and reuse of the three existing pilot roles, then approved Phase A with `approve-phase-a` and Phase B with `approve-phase-b`. This resolves section 117.1 item 2 for the F0002 pilot scope; broader production rollout remains open.
 
-Proposed ADR-0061/0062, AuthX v1 schema and OpenAPI design version 0.2.0 specify compatible migrations and existing-consumer integration. No new runtime or policy grants are delivered. F0002 proves review and canonical commit authorization independently; F0018 owns full review-to-canonical orchestration and F0022 owns review UI. This explicitly reconciles the old master-blueprint §116.1 F0002 wiring shorthand without broadening the approved PRD. Existing C4 deployment topology is unchanged; the feature README adds its ERD and component diagram. ADR-0042/0052/0053 remain Proposed for broader obligations.
+ADR-0061/0062 (accepted 2026-09-28 for the bounded F0002 scope after feature run `2026-09-27-bb7c8d1d`; originally Proposed), AuthX v1 schema and OpenAPI design version 0.2.0 specify compatible migrations and existing-consumer integration. No new runtime or policy grants are delivered. F0002 proves review and canonical commit authorization independently; F0018 owns full review-to-canonical orchestration and F0022 owns review UI. This explicitly reconciles the old master-blueprint §116.1 F0002 wiring shorthand without broadening the approved PRD. Existing C4 deployment topology is unchanged; the feature README adds its ERD and component diagram. ADR-0042/0052/0053 remain Proposed for broader obligations.
 
 ### 4.11 Statements, time, and governance amendments (2026-09-25)
 
@@ -423,11 +423,11 @@ Anything beyond this guard needs a new operator scope amendment.
 
 Scope amendments are recorded in each feature README. Master blueprint sections 3, 11, 14, 17, 29, 53, 56, 62, 64, 75, 76, 78, 95, and 99 were revised in place, and the glossary and [examples EX-SEM-001–011](examples/statements-time-and-governance.md) were added.
 
-**Not changed:** F0002's approved plan. Utopia's same-knowledge-base provenance record (0048) matches F0002's composite ownership keys. Its extra safeguards are left as a follow-up for the F0002 implementation run, not an amendment to the approved plan:
+**Not changed:** F0002's approved plan. Utopia's same-knowledge-base provenance record (0048) matches F0002's composite ownership keys. Its extra safeguards were left as a follow-up for the F0002 implementation run, and the operator brought them into that run at its G4 approval gate (2026-09-28, scope amendment recorded in run `2026-09-27-bb7c8d1d` gate-decisions.md). Engine migration 0007 implements them:
 
-- ownership columns made immutable by trigger;
-- triggers for link tables that have no owner column;
-- deferred self-references for restore.
+- ownership columns made immutable by trigger (plus the principal links of memberships, identity aliases and delegations), with append-only `audit_event` and `authentication_event`;
+- link tables without an owner column (`outbox_event`, `document_job_event`) have a single parent whose foreign key fixes their ownership, and every multi-parent link table carries owner columns with composite keys since 0006, so no separate link trigger is needed;
+- deferrable (initially immediate) self-references on the assertion correction chain for restore.
 
 ---
 
