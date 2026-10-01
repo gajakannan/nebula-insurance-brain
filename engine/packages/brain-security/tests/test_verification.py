@@ -110,3 +110,61 @@ async def test_signature_from_a_different_key_is_rejected(rsa_key: rsa.RSAPrivat
     with pytest.raises(CredentialError) as exc_info:
         await verifier.verify(token)
     assert exc_info.value.code == "invalid_signature"
+
+
+async def test_required_claims_and_types_fail_as_sanitized_invalid_claims(
+    rsa_key: rsa.RSAPrivateKey,
+) -> None:
+    """F0002-S0002: missing/mistyped claims are `invalid_claims`, never KeyError/500."""
+    verifier = _verifier_with_fixed_key(rsa_key)
+    now = datetime.now(UTC)
+    no_iat = jwt.encode(
+        {"iss": ISSUER, "sub": "a", "aud": AUDIENCE, "exp": now + timedelta(minutes=5)},
+        rsa_key,
+        algorithm="RS256",
+        headers={"kid": "test-key-1"},
+    )
+    numeric_sub = _make_token(rsa_key, sub=12345)
+    for token in (no_iat, numeric_sub):
+        with pytest.raises(CredentialError) as exc:
+            await verifier.verify(token)
+        assert exc.value.code in {"invalid_claims", "malformed"}
+        assert token not in str(exc.value)
+
+
+async def test_unaccepted_token_type_and_non_jws_are_rejected(rsa_key: rsa.RSAPrivateKey) -> None:
+    verifier = _verifier_with_fixed_key(rsa_key)
+    now = datetime.now(UTC)
+    id_token_type = jwt.encode(
+        {"iss": ISSUER, "sub": "a", "aud": AUDIENCE, "iat": now, "exp": now + timedelta(minutes=5)},
+        rsa_key,
+        algorithm="RS256",
+        headers={"kid": "test-key-1", "typ": "logout+jwt"},
+    )
+    with pytest.raises(CredentialError) as exc:
+        await verifier.verify(id_token_type)
+    assert exc.value.code == "unsupported_token_type"
+    with pytest.raises(CredentialError) as exc:
+        await verifier.verify("not-a-jwt")
+    assert exc.value.code == "malformed"
+
+
+async def test_symmetric_algorithm_confusion_is_rejected(rsa_key: rsa.RSAPrivateKey) -> None:
+    """The profile's algorithm allow-list wins over the token's own `alg` header."""
+    verifier = _verifier_with_fixed_key(rsa_key)
+    now = datetime.now(UTC)
+    forged = jwt.encode(
+        {"iss": ISSUER, "sub": "a", "aud": AUDIENCE, "iat": now, "exp": now + timedelta(minutes=5)},
+        "shared-secret-guess",
+        algorithm="HS256",
+        headers={"kid": "test-key-1"},
+    )
+    with pytest.raises(CredentialError) as exc:
+        await verifier.verify(forged)
+    assert exc.value.code in {"invalid_signature", "malformed"}
+
+
+async def test_client_claim_is_carried_for_self_provisioning(rsa_key: rsa.RSAPrivateKey) -> None:
+    verifier = _verifier_with_fixed_key(rsa_key)
+    credential = await verifier.verify(_make_token(rsa_key, azp="brain"))
+    assert credential.client_id == "brain"

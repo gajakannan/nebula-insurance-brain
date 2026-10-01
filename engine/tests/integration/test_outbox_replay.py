@@ -11,9 +11,7 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from brain_domain.facts import CommitProposal
-from brain_domain.principal import Membership, Principal
 from brain_persistence.repositories import SqlAlchemyFactCommitRepository, SqlAlchemyOutboxReader
-from brain_security.authorization import AuthorizationService
 from brain_temporal.commit import CanonicalCommitService
 from brain_temporal.outbox import OutboxProjector
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -25,17 +23,13 @@ def dt(s: str) -> datetime:
 
 async def test_replay_after_a_simulated_worker_kill_processes_each_event_once(
     pg_session_factory: async_sessionmaker[AsyncSession],
-    authz: AuthorizationService,
-    actor: Principal,
-    membership: Membership,
+    owner: tuple[UUID, UUID],
     slot_id: UUID,
 ) -> None:
     async with pg_session_factory() as session:
         repository = SqlAlchemyFactCommitRepository(session)
-        service = CanonicalCommitService(repository, authz)
+        service = CanonicalCommitService(repository)
         result = await service.commit(
-            actor,
-            [membership],
             CommitProposal(
                 slot_id=slot_id,
                 value={"amount": "1000000.00"},
@@ -50,7 +44,8 @@ async def test_replay_after_a_simulated_worker_kill_processes_each_event_once(
                 expected_current_version_id=None,
                 idempotency_key=f"commit-{uuid4()}",
             ),
-            trace_id="t0",
+            authorized_scope=owner,
+            authorization_decision_id=None,
         )
         # Commits the fact version, the change record, the audit event, and the
         # outbox event together — simulating the worker being killed right after

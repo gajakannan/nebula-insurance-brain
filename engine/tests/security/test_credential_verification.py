@@ -79,7 +79,9 @@ async def test_garbage_token_is_401_and_reason_not_disclosed(client, caplog) -> 
     assert "invalid_signature" not in response.text
     assert "signature" not in (body.get("detail") or "")
     event = next(record for record in caplog.records if record.name == "brain_api.deps")
-    assert event.reason_code == "invalid_signature"
+    # F0002-S0002: a bearer that is not a compact JWS is classified `malformed`
+    # (schema AuthenticationEvent reason) before any key lookup is attempted.
+    assert event.reason_code == "malformed"
     assert "not-a-real-jwt" not in event.getMessage()
 
 

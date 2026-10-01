@@ -10,47 +10,117 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 from dataclasses import asdict
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import UUID, uuid4, uuid5
 
 from brain_content.checkpoints import ArtifactIntegrityError, CheckpointStore
 from brain_content.manifest import ArtifactManifest
 from brain_contracts.result import InterpretationResult
+from brain_domain.authx import (
+    AuthorizationDecision,
+    RequestedScope,
+    ResourceKey,
+    ResourceType,
+)
 from brain_jobs.queue import JobLease, jobs, leases, outbox
+from brain_persistence.authx import SyncAuthorityStore
 from brain_persistence.models import (
     Assertion,
     AssertionEvidence,
-    AuditEventRow,
     ContentArtifact,
     DocumentVersion,
-    MembershipRow,
-    PrincipalRow,
     ReviewItemRow,
     SemanticInterpretationRun,
     SourceDocument,
 )
+from brain_persistence.tenancy import inherit_resource_access
 from brain_review.evidence import combine_evidence_locators, evidence_binding_to_locator
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter
+from brain_security.execution import AuthorizationUnavailable, decide
 from sqlalchemy import func, select, update
 from sqlalchemy.engine import Connection, Engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 Authorizer = Callable[[UUID, UUID, UUID, str], None]
+WORKER_ACTIONS = frozenset({"ingest", "interpret"})
 
 
 class DocumentJobAuthorization:
-    """Re-read actor status, current grants, and policy at every sensitive boundary.
+    """Sync worker adapter over the shared F0002 evaluator (ADR-0062 parity).
 
-    Jobs are submitted by a trusted service, not with an unverified caller-supplied
-    identity. Neither the service identity nor old membership snapshots are grants.
-    Every decision commits its audit record, including denials.
+    Before every sensitive job step it reloads, inside its own transaction: the
+    current policy-release pointer, the executor's (and, for delegated work, the
+    acting user's) status and authority revision, the trusted delegation, the
+    acting principal's current grant slices and the artifact's security metadata;
+    then it calls the same pure `evaluate` the API uses and commits the decision
+    audit (allow and deny) before returning. A durable job carries only trusted
+    references (`actor_id` = executor, optional `delegation_id`) created by its
+    trusted submitter — never an allow result — so no stale context can authorize
+    the next step. Storage failures raise `AuthorizationUnavailable`, which the
+    existing job policy retries; they never become an allow.
     """
 
-    def __init__(self, engine: Engine, model_path: Path, policy_path: Path) -> None:
-        self.engine, self.model_path, self.policy_path = engine, model_path, policy_path
+    def __init__(
+        self,
+        engine: Engine,
+        model_path: Path,
+        policy_path: Path,
+        *,
+        clock: Callable[[], datetime] | None = None,
+    ) -> None:
+        self.engine = engine
+        self._policy = CasbinAuthorizationAdapter(model_path, policy_path)
+        self._clock = clock or (lambda: datetime.now(UTC))
+
+    def decide(
+        self,
+        *,
+        executor_id: UUID,
+        delegation_id: UUID | None,
+        knowledge_base_id: UUID,
+        artifact_id: UUID,
+        action: str,
+        trace_id: str,
+    ) -> AuthorizationDecision:
+        """Same `brain_security.execution.decide` orchestration the API uses. The
+        lease's KB is a request-scope filter, so an artifact whose trusted metadata
+        names another KB is a recorded `scope_denied`, not an allow refused later.
+        A KB has exactly one tenant, and migration 0006 constrains the job row's
+        tenant/KB pair to the KB registry, so the KB filter also pins the tenant."""
+        key = ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact_id)
+        try:
+            with Session(self.engine) as session, session.begin():
+                store = SyncAuthorityStore(session)
+                (evaluated,) = decide(
+                    store,
+                    self._policy,
+                    self._policy.release,
+                    authenticated_id=executor_id,
+                    keys=[key],
+                    action=action,
+                    requested=RequestedScope(frozenset({knowledge_base_id}), (), None, None),
+                    trace_id=trace_id,
+                    delegation_id=delegation_id,
+                    clock=self._clock,
+                    new_id=uuid4,
+                    # The trusted submitter provisions the artifact's security metadata
+                    # before the record exists; an existing record must still agree.
+                    require_record=False,
+                )
+                decision = evaluated.decision
+                # Permission allow is not a completed business effect: the job step
+                # runs after this gate, under its own lease fence.
+                store.append_decision(decision)
+                return decision
+        except SQLAlchemyError as exc:
+            raise AuthorizationUnavailable("current authority unavailable") from exc
 
     def for_job(self, lease: JobLease) -> Authorizer:
-        actor_id = UUID(lease.payload["actor_id"])
+        executor_id = UUID(lease.payload["actor_id"])
+        delegation_ref = lease.payload.get("delegation_id")
+        delegation_id = UUID(delegation_ref) if delegation_ref else None
         trace_id = str(UUID(lease.payload["correlation_id"]))
 
         def authorize(tenant: UUID, kb: UUID, artifact: UUID, action: str) -> None:
@@ -58,45 +128,17 @@ class DocumentJobAuthorization:
                 lease.tenant_id,
                 lease.knowledge_base_id,
                 lease.artifact_id,
-            ) or action not in {"ingest", "interpret"}:
+            ) or action not in WORKER_ACTIONS:
                 raise PermissionError("job authorization scope mismatch")
-            enforcer = CasbinAuthorizationAdapter(self.model_path, self.policy_path)
-            allowed, revision, reason = False, 0, "inactive_principal"
-            with Session(self.engine) as session, session.begin():
-                actor = session.get(PrincipalRow, actor_id)
-                if actor is not None and actor.status == "active":
-                    grants = session.scalars(
-                        select(MembershipRow).where(
-                            MembershipRow.principal_id == actor_id,
-                            MembershipRow.tenant_id == tenant,
-                            MembershipRow.knowledge_base_id == kb,
-                            MembershipRow.revoked_at.is_(None),
-                        )
-                    ).all()
-                    reason = "no_membership" if not grants else "policy_denied"
-                    for grant in grants:
-                        revision = max(revision, grant.grant_revision)
-                        if enforcer.enforce(
-                            grant.role, str(kb), "content_artifact", str(kb), action
-                        ):
-                            allowed, revision, reason = True, grant.grant_revision, "allowed"
-                            break
-                session.add(
-                    AuditEventRow(
-                        id=uuid4(),
-                        actor_principal_id=actor_id,
-                        delegate_principal_id=None,
-                        resource_type="content_artifact",
-                        resource_id=artifact,
-                        action=action,
-                        decision=allowed,
-                        reason_code=reason,
-                        policy_hash=enforcer.policy_hash,
-                        grant_revision=revision,
-                        trace_id=trace_id,
-                    )
-                )
-            if not allowed:
+            decision = self.decide(
+                executor_id=executor_id,
+                delegation_id=delegation_id,
+                knowledge_base_id=kb,
+                artifact_id=artifact,
+                action=action,
+                trace_id=trace_id,
+            )
+            if not decision.allowed:
                 raise PermissionError("document job authorization denied")
 
         return authorize
@@ -120,8 +162,9 @@ def _register_artifact(session: Session, manifest: ArtifactManifest) -> None:
     ):
         raise ArtifactIntegrityError("source identity conflict")
     version = session.get(DocumentVersion, manifest.version_id)
+    owner = {"tenant_id": manifest.tenant_id, "knowledge_base_id": manifest.knowledge_base_id}
     if version is None:
-        session.add(DocumentVersion(id=manifest.version_id, source_document_id=source.id))
+        session.add(DocumentVersion(id=manifest.version_id, source_document_id=source.id, **owner))
         session.flush()
     elif version.source_document_id != source.id:
         raise ArtifactIntegrityError("version identity conflict")
@@ -134,6 +177,7 @@ def _register_artifact(session: Session, manifest: ArtifactManifest) -> None:
                 artifact_sha256=manifest.artifact_sha256,
                 page_count=manifest.page_count,
                 extraction_status=manifest.extraction_quality.status,
+                **owner,
             )
         )
         session.flush()
@@ -267,6 +311,8 @@ class DocumentResultImporter:
                         counters=result.counters.model_dump(),
                         run_configuration=config,
                         created_at=result.created_at,
+                        tenant_id=manifest.tenant_id,
+                        knowledge_base_id=manifest.knowledge_base_id,
                     )
                 )
                 session.flush()
@@ -286,6 +332,8 @@ class DocumentResultImporter:
                             value=candidate.value,
                             model_confidence=candidate.model_confidence,
                             interpretation_basis=candidate.interpretation_basis,
+                            tenant_id=manifest.tenant_id,
+                            knowledge_base_id=manifest.knowledge_base_id,
                         )
                     )
                     session.flush()
@@ -296,6 +344,8 @@ class DocumentResultImporter:
                                 assertion_id=candidate.id,
                                 **evidence.model_dump(exclude={"bbox"}),
                                 bbox=evidence.bbox.model_dump() if evidence.bbox else None,
+                                tenant_id=manifest.tenant_id,
+                                knowledge_base_id=manifest.knowledge_base_id,
                             )
                         )
                     locator = combine_evidence_locators(
@@ -330,6 +380,17 @@ class DocumentResultImporter:
                                 knowledge_base_id=manifest.knowledge_base_id,
                                 evidence=asdict(locator),
                             )
+                        )
+                        session.flush()
+                        # The review task inherits the artifact's restrictions and
+                        # depends on it as evidence (F0002-S0004).
+                        inherit_resource_access(
+                            session,
+                            ResourceKey(ResourceType.CONTENT_ARTIFACT, manifest.artifact_id),
+                            ResourceKey(ResourceType.REVIEW_TASK, uuid5(candidate.id, "review")),
+                            actor_id=UUID(lease.payload["actor_id"]),
+                            at=datetime.now(UTC),
+                            add_dependency_on_source=True,
                         )
                 session.flush()
             conn.execute(

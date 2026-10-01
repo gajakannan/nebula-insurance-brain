@@ -1,6 +1,6 @@
 id: capability:durable-authorization-decisions
 label: Durable authorization decisions
-notes: F0002 planning contract only; no runtime completion or code binding asserted.
+notes: "Implemented in F0002 (run 2026-09-27-bb7c8d1d): AuthorizationExecution commits a schema-v1 Decision to append-only audit_event before any payload or with the mutation atomically; denials/failures audited in a fresh transaction; audit failure is a sanitized 503. The single lock/load orchestration is execution.decide (API and worker)."
 source_docs:
 - F0002/PRD.md
 - F0002/feature-assembly-plan.md

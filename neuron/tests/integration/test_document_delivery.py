@@ -315,32 +315,35 @@ def _engine_schema(engine: Engine) -> None:
 
 
 def test_job_authorization_reloads_revocations_and_audits_denials(tmp_path: Path) -> None:
+    """F0005 regression over the F0002 shared evaluator: current grants are reread
+    before every step, and allow/deny decisions are both durably audited."""
     from datetime import UTC, datetime
 
+    from brain_domain.authx import ResourceKey, ResourceType
+    from brain_domain.principal import PrincipalKind
     from brain_jobs.queue import JobLease
-    from brain_persistence.models import AuditEventRow, MembershipRow, PrincipalRow
+    from brain_persistence.grants import revoke_membership
+    from brain_persistence.models import AuditEventRow
+    from brain_testing import fixtures
     from brain_worker.document_delivery import DocumentJobAuthorization
     from sqlalchemy.orm import Session
 
     engine = create_engine(f"sqlite:///{tmp_path / 'auth.db'}")
     _engine_schema(engine)
-    actor, tenant, kb, artifact = uuid4(), uuid4(), uuid4(), uuid4()
+    tenant, kb, artifact = uuid4(), uuid4(), uuid4()
     policy = Path(__file__).resolve().parents[3] / "planning-mds/security/policies"
     with Session(engine) as session, session.begin():
-        session.add(
-            PrincipalRow(
-                id=actor, kind="service", issuer="local", subject="worker", status="active"
-            )
-        )
-        session.flush()
-        session.add(
-            MembershipRow(
-                principal_id=actor,
-                tenant_id=tenant,
-                knowledge_base_id=kb,
-                role="ServicePrincipal",
-                grant_revision=1,
-            )
+        fixtures.activate_policy(session, policy / "model.conf", policy / "policy.csv")
+        actor = fixtures.seed_principal(
+            session, issuer="local", subject="worker", kind=PrincipalKind.SERVICE
+        ).id
+        membership = fixtures.seed_grant(session, actor, tenant, kb, "ServicePrincipal")
+        fixtures.protect(
+            session,
+            ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),
+            tenant,
+            kb,
+            before_record=True,
         )
     lease = JobLease(
         uuid4(),
@@ -356,17 +359,26 @@ def test_job_authorization_reloads_revocations_and_audits_denials(tmp_path: Path
     ).for_job(lease)
     authorize(tenant, kb, artifact, "ingest")
     with Session(engine) as session, session.begin():
-        grant = session.scalars(select(MembershipRow)).one()
-        grant.revoked_at = datetime.now(UTC)
-        grant.grant_revision += 1
+        revoke_membership(
+            session,
+            membership,
+            operator_id=fixtures.SYNTHETIC_OPERATOR,
+            approval_ref="test-revoke",
+            at=datetime.now(UTC),
+        )
     with pytest.raises(PermissionError):
         authorize(tenant, kb, artifact, "interpret")
     with pytest.raises(PermissionError):
         authorize(uuid4(), kb, artifact, "ingest")
     with Session(engine) as session:
-        decisions = session.scalars(select(AuditEventRow).order_by(AuditEventRow.occurred_at)).all()
+        decisions = session.scalars(
+            select(AuditEventRow)
+            .where(AuditEventRow.event_type == "authorization_decision")
+            .order_by(AuditEventRow.occurred_at)
+        ).all()
         assert sorted(d.decision for d in decisions) == [False, True]
         assert all(d.actor_principal_id == actor for d in decisions)
+        assert {d.reason_code for d in decisions} == {"allowed", "no_membership"}
     engine.dispose()
 
 
@@ -399,12 +411,24 @@ def test_outbox_import_is_atomic_idempotent_and_never_commits_facts(
     metadata.create_all(engine)
     _engine_schema(engine)
     queue = DocumentJobQueue(engine, clock=lambda: 100.0)
+    from brain_domain.authx import ResourceKey, ResourceType
+    from brain_testing import fixtures
+
+    with Session(engine) as session, session.begin():
+        fixtures.protect(
+            session,
+            ResourceKey(ResourceType.CONTENT_ARTIFACT, manifest.artifact_id),
+            manifest.tenant_id,
+            manifest.knowledge_base_id,
+            before_record=True,
+        )
     queue.enqueue(
         tenant_id=manifest.tenant_id,
         knowledge_base_id=manifest.knowledge_base_id,
         artifact_id=manifest.artifact_id,
         request_key="import",
         payload={
+            "actor_id": str(fixtures.SYNTHETIC_OPERATOR),
             "document_id": str(manifest.document_id),
             "version_id": str(manifest.version_id),
             "source_sha256": manifest.source_sha256,

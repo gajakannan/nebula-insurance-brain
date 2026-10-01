@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import signal
+from datetime import UTC, datetime
 from importlib.metadata import version
 from pathlib import Path
 from threading import BoundedSemaphore, Event
@@ -15,15 +16,18 @@ from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 from brain_content.checkpoints import CheckpointStore
 from brain_content.config import load_local_object_store_config
 from brain_content.object_store import LocalFilesystemObjectStore, ObjectAlreadyExistsError
+from brain_domain.authx import ResourceKey, ResourceType
 from brain_extraction.profiles import load_profile
 from brain_extraction.vllm_graph_client import VllmGraphClient, cached_model_token_counter
 from brain_jobs.queue import DocumentJobQueue, JobLease
+from brain_persistence.tenancy import provision_resource_access
 from brain_worker.document_delivery import (
     DocumentJobAuthorization,
     DocumentResultImporter,
     register_document_artifact,
 )
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 from brain_ingestion.document_worker import DocumentTask, DocumentWorker
 
@@ -37,6 +41,10 @@ def main() -> int:
     parser.add_argument("--tenant", type=UUID)
     parser.add_argument("--knowledge-base", type=UUID)
     parser.add_argument("--profile", default="gl-limits-a")
+    # F0002-S0004: the trusted submitter declares the artifact's restrictions; there
+    # is no default label, and missing metadata denies every later job step.
+    parser.add_argument("--classification", action="append", default=[])
+    parser.add_argument("--source-acl", action="append", default=[])
     args = parser.parse_args()
     if os.environ.get("BRAIN_ENABLE_GRAPH_CANDIDATE") != "1":
         parser.error(
@@ -59,6 +67,8 @@ def main() -> int:
         if args.enqueue:
             if not args.tenant or not args.knowledge_base or args.enqueue.suffix.lower() != ".pdf":
                 parser.error("enqueue requires a PDF, --tenant, and --knowledge-base")
+            if not args.classification:
+                parser.error("enqueue requires at least one --classification")
             actor = UUID(os.environ["BRAIN_WORKER_PRINCIPAL_ID"])
             profile = load_profile(args.profile)
             # Version the effective physical recipe independently of the extraction profile.
@@ -95,6 +105,18 @@ def main() -> int:
                 0,
                 task.model_dump(mode="json"),
             )
+            with Session(engine) as session, session.begin():
+                provision_resource_access(
+                    session,
+                    ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact_id),
+                    tenant_id=args.tenant,
+                    knowledge_base_id=args.knowledge_base,
+                    classifications=args.classification,
+                    source_acl_ids=args.source_acl,
+                    actor_id=actor,
+                    at=datetime.now(UTC),
+                    allow_before_record=True,
+                )
             authorization.for_job(lease)(args.tenant, args.knowledge_base, artifact_id, "ingest")
             authorization.for_job(lease)(args.tenant, args.knowledge_base, artifact_id, "interpret")
             source_key = f"sources/{args.tenant}/{args.knowledge_base}/{source_sha}.pdf"

@@ -4,6 +4,13 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
+from brain_domain.authx import (
+    AuthorizationDecision,
+    OperationOutcome,
+    ReasonCode,
+    ResourceKey,
+    ResourceType,
+)
 from brain_domain.principal import PrincipalKind
 from brain_domain.review import (
     EvidenceLocator,
@@ -12,24 +19,27 @@ from brain_domain.review import (
     ReviewItemStatus,
     ReviewItemType,
 )
+from brain_domain.tenancy import OwnedScope
 from brain_persistence.base import Base, sqlite_test_tables
+from brain_persistence.identity import SqlAlchemyIdentityRepository
 from brain_persistence.models import (
     Assertion,
+    AuditEventRow,
     ContentArtifact,
     DocumentVersion,
+    ExternalIdentityRow,
+    PrincipalAuthorityRow,
     ReviewItemRow,
     SourceDocument,
 )
 from brain_persistence.repositories import (
     ReviewDecisionAuditSink,
     SqlAlchemyAuditEventRepository,
-    SqlAlchemyPrincipalRepository,
     SqlAlchemyReviewItemRepository,
 )
 from brain_persistence.session import make_engine, make_session_factory, session_scope
 from brain_review.decisions import DecisionRequest, ReviewDecisionService
-from brain_security.principals import PrincipalResolver
-from brain_security.verification import VerifiedCredential
+from sqlalchemy import select
 
 
 @pytest.fixture
@@ -42,10 +52,11 @@ async def session_factory():
 
 
 async def _seed_assertion(session, *, confidence: float = 0.41) -> tuple:
-    source = SourceDocument(tenant_id=uuid4(), knowledge_base_id=uuid4(), source_sha256="a" * 64)
+    owner = {"tenant_id": uuid4(), "knowledge_base_id": uuid4()}
+    source = SourceDocument(source_sha256="a" * 64, **owner)
     session.add(source)
     await session.flush()
-    version = DocumentVersion(source_document_id=source.id)
+    version = DocumentVersion(source_document_id=source.id, **owner)
     session.add(version)
     await session.flush()
     artifact = ContentArtifact(
@@ -54,6 +65,7 @@ async def _seed_assertion(session, *, confidence: float = 0.41) -> tuple:
         artifact_sha256="b" * 64,
         page_count=1,
         extraction_status="complete",
+        **owner,
     )
     session.add(artifact)
     await session.flush()
@@ -66,33 +78,35 @@ async def _seed_assertion(session, *, confidence: float = 0.41) -> tuple:
         value={"value": "$20,000,000"},
         model_confidence=confidence,
         interpretation_basis="EXPLICIT",
+        **owner,
     )
     session.add(assertion)
     await session.flush()
     return source, artifact, assertion
 
 
-async def test_principal_repository_creates_and_finds(session_factory) -> None:
+async def test_identity_repository_resolves_one_stable_principal(session_factory) -> None:
+    """F0002-S0002 AC1/AC2: first verified sight creates principal + alias + authority
+    revision 1 with no grants; later sessions return the same ID; the same subject
+    at another issuer is a different principal."""
     async with session_scope(session_factory) as session:
-        repo = SqlAlchemyPrincipalRepository(session)
-        resolver = PrincipalResolver(repo)
-        credential = VerifiedCredential(
-            issuer="https://authentik.local",
-            subject="alice.tenant-a",
-            audience="brain",
-            expires_at=datetime.now(UTC),
-            not_before=None,
-            key_id="k1",
+        first = await SqlAlchemyIdentityRepository(session).resolve_or_create(
+            "https://issuer-x", "alice.tenant-a", PrincipalKind.USER
         )
-        first = await resolver.resolve(credential)
-
     async with session_scope(session_factory) as session:
-        repo = SqlAlchemyPrincipalRepository(session)
-        resolver = PrincipalResolver(repo)
-        second = await resolver.resolve(credential)
+        repo = SqlAlchemyIdentityRepository(session)
+        second = await repo.find_by_alias("https://issuer-x", "alice.tenant-a")
+        other = await repo.resolve_or_create(
+            "https://issuer-y", "alice.tenant-a", PrincipalKind.USER
+        )
+        authority = await session.get(PrincipalAuthorityRow, first.id)
+        alias = await session.get(ExternalIdentityRow, ("https://issuer-x", "alice.tenant-a"))
 
-    assert first.id == second.id
+    assert second is not None and second.id == first.id
     assert first.kind == PrincipalKind.USER
+    assert other.id != first.id
+    assert authority is not None and authority.revision == 1
+    assert alias is not None and alias.approval_ref is None
 
 
 async def test_full_review_round_trip_across_two_transactions(session_factory) -> None:
@@ -106,8 +120,8 @@ async def test_full_review_round_trip_across_two_transactions(session_factory) -
             status=ReviewItemStatus.OPEN.value,
             assertion_id=assertion.id,
             assertion_version=1,
-            tenant_id=uuid4(),
-            knowledge_base_id=uuid4(),
+            tenant_id=assertion.tenant_id,
+            knowledge_base_id=assertion.knowledge_base_id,
             review_batch_id=None,
         )
         session.add(review_item)
@@ -117,9 +131,34 @@ async def test_full_review_round_trip_across_two_transactions(session_factory) -
         review_item_id = review_item.id
 
     reviewer_id = uuid4()
+    authorization = AuthorizationDecision(
+        decision_id=uuid4(),
+        occurred_at=datetime.now(UTC),
+        authenticated_principal_id=reviewer_id,
+        actor_principal_id=reviewer_id,
+        actor_kind=PrincipalKind.USER,
+        executor_principal_id=None,
+        delegation_id=None,
+        delegation_revision=None,
+        scope=OwnedScope(assertion.tenant_id, uuid4(), assertion.knowledge_base_id),
+        resource=ResourceKey(ResourceType.REVIEW_TASK, review_item_id),
+        resource_revision=1,
+        restriction_revision=1,
+        action="annotate",
+        allowed=True,
+        reason_code=ReasonCode.ALLOWED,
+        policy_hash="a" * 64,
+        policy_release="sha256:" + "b" * 64,
+        grant_revision=3,
+        matched_membership_ids=(uuid4(),),
+        trace_id="trace-review",
+        operation_outcome=OperationOutcome.ATTEMPTED,
+    )
     async with session_scope(session_factory) as session:
         repository = SqlAlchemyReviewItemRepository(session)
-        audit = ReviewDecisionAuditSink(SqlAlchemyAuditEventRepository(session))
+        audit = ReviewDecisionAuditSink(
+            SqlAlchemyAuditEventRepository(session), {review_item_id: authorization}
+        )
         service = ReviewDecisionService(repository, audit)
         outcome = await service.submit(
             DecisionRequest(
@@ -152,3 +191,18 @@ async def test_full_review_round_trip_across_two_transactions(session_factory) -
         original_row = await session.get(Assertion, assertion.id)
         assert original_row.value == {"value": "$20,000,000"}
         assert original_row.model_confidence == 0.41
+        # A correction inherits its original's ownership (F0002-S0001).
+        assert (corrected_row.tenant_id, corrected_row.knowledge_base_id) == (
+            original_row.tenant_id,
+            original_row.knowledge_base_id,
+        )
+        # The review-outcome audit references the durable authorization decision and
+        # carries its policy hash and authority revision, not "n/a"/0 (F0002-S0006).
+        review_audit = (
+            await session.execute(
+                select(AuditEventRow).where(AuditEventRow.event_type == "review_decision_recorded")
+            )
+        ).scalar_one()
+        assert review_audit.decision_id == authorization.decision_id
+        assert review_audit.policy_hash == "a" * 64
+        assert review_audit.grant_revision == 3

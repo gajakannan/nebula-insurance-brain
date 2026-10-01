@@ -1,137 +1,102 @@
+"""F0002-S0002: verified credential -> one stable typed principal."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-from brain_domain.principal import Membership, Principal, PrincipalKind, PrincipalStatus
+from brain_domain.principal import Principal, PrincipalKind, PrincipalStatus
+from brain_security.identity_profile import IdentityProfile, IssuerProfile
 from brain_security.principals import PrincipalResolver
 from brain_security.verification import CredentialError, VerifiedCredential
 
+ISSUER_X, ISSUER_Y = "https://issuer-x", "https://issuer-y"
+PROFILE = IdentityProfile(
+    (
+        IssuerProfile(ISSUER_X, frozenset({"brain"}), human_clients=frozenset({"brain-web"})),
+        IssuerProfile(ISSUER_Y, frozenset({"brain"}), human_clients=frozenset({"brain-web"})),
+    )
+)
 
-class _FakeRepository:
+
+class _FakeIdentities:
     def __init__(self) -> None:
-        self.principals: dict[tuple[str, str], Principal] = {}
-        self._memberships: dict[object, list[Membership]] = {}
+        self.aliases: dict[tuple[str, str], Principal] = {}
         self.created = 0
 
-    async def find_by_issuer_subject(self, issuer: str, subject: str) -> Principal | None:
-        return self.principals.get((issuer, subject))
+    async def find_by_alias(self, issuer: str, subject: str) -> Principal | None:
+        return self.aliases.get((issuer, subject))
 
-    async def create(self, *, issuer: str, subject: str, kind: PrincipalKind) -> Principal:
+    async def resolve_or_create(self, issuer: str, subject: str, kind: PrincipalKind) -> Principal:
+        existing = self.aliases.get((issuer, subject))
+        if existing is not None:
+            return existing
         self.created += 1
-        principal = Principal(
-            id=uuid4(), kind=kind, issuer=issuer, subject=subject, status=PrincipalStatus.ACTIVE
-        )
-        self.principals[(issuer, subject)] = principal
+        principal = Principal(uuid4(), kind, issuer, subject, PrincipalStatus.ACTIVE)
+        self.aliases[(issuer, subject)] = principal
         return principal
 
-    async def memberships(self, principal_id) -> tuple[Membership, ...]:
-        return tuple(self._memberships.get(principal_id, []))
+    async def link_identity(self, *args: object) -> None:  # pragma: no cover - unused here
+        raise NotImplementedError
 
 
-def _credential(subject: str = "alice") -> VerifiedCredential:
+def _credential(subject: str = "alice", issuer: str = ISSUER_X, client: str | None = "brain-web"):
     return VerifiedCredential(
-        issuer="https://authentik.local",
+        issuer=issuer,
         subject=subject,
         audience="brain",
         expires_at=datetime.now(UTC),
         not_before=None,
         key_id="key-1",
+        client_id=client,
     )
 
 
-async def test_resolve_creates_a_principal_on_first_sight() -> None:
-    repo = _FakeRepository()
-    resolver = PrincipalResolver(repo)
-
-    principal = await resolver.resolve(_credential())
-
-    assert repo.created == 1
-    assert principal.subject == "alice"
-
-
-async def test_resolve_returns_the_same_principal_on_second_sight() -> None:
-    repo = _FakeRepository()
-    resolver = PrincipalResolver(repo)
-
+async def test_first_sight_from_a_human_client_provisions_one_user() -> None:
+    repo = _FakeIdentities()
+    resolver = PrincipalResolver(repo, PROFILE)
     first = await resolver.resolve(_credential())
     second = await resolver.resolve(_credential())
-
-    assert repo.created == 1
-    assert first.id == second.id
+    assert first.id == second.id and first.kind == PrincipalKind.USER and repo.created == 1
 
 
-async def test_resolve_raises_for_a_disabled_principal() -> None:
-    repo = _FakeRepository()
-    disabled = Principal(
-        id=uuid4(),
-        kind=PrincipalKind.USER,
-        issuer="https://authentik.local",
-        subject="bob",
-        status=PrincipalStatus.DISABLED,
+async def test_same_subject_at_another_issuer_is_a_different_principal() -> None:
+    """EX-AUTHX-004 boundary: no cross-issuer link without an approved mapping."""
+    resolver = PrincipalResolver(_FakeIdentities(), PROFILE)
+    x = await resolver.resolve(_credential(issuer=ISSUER_X))
+    y = await resolver.resolve(_credential(issuer=ISSUER_Y))
+    assert x.id != y.id
+
+
+async def test_unprovisioned_non_human_client_is_never_a_user() -> None:
+    """Assembly plan Step 2.4: an unknown service/agent client cannot fall through."""
+    repo = _FakeIdentities()
+    resolver = PrincipalResolver(repo, PROFILE)
+    for client in ("brain-worker", None):
+        with pytest.raises(CredentialError) as exc:
+            await resolver.resolve(_credential(subject="svc", client=client))
+        assert exc.value.code == "unsupported_token_type"
+    assert repo.created == 0
+
+
+async def test_provisioned_service_resolves_to_its_trusted_kind() -> None:
+    repo = _FakeIdentities()
+    service = Principal(uuid4(), PrincipalKind.SERVICE, ISSUER_X, "svc", PrincipalStatus.ACTIVE)
+    repo.aliases[(ISSUER_X, "svc")] = service
+    resolved = await PrincipalResolver(repo, PROFILE).resolve(
+        _credential(subject="svc", client="brain-worker")
     )
-    repo.principals[("https://authentik.local", "bob")] = disabled
-    resolver = PrincipalResolver(repo)
-
-    with pytest.raises(CredentialError) as exc_info:
-        await resolver.resolve(_credential(subject="bob"))
-    assert exc_info.value.code == "disabled_principal"
+    assert resolved == service
 
 
-async def test_same_subject_from_a_different_issuer_resolves_to_a_different_principal() -> None:
-    """F0001-S0006 AC: issuer-namespaced identity — `(issuer, subject)` is the key,
-    not `subject` alone, so two IdPs never collide on a shared username."""
-    repo = _FakeRepository()
-    resolver = PrincipalResolver(repo)
-
-    from_authentik = await resolver.resolve(
-        VerifiedCredential(
-            issuer="https://authentik.local",
-            subject="shared-username",
-            audience="brain",
-            expires_at=datetime.now(UTC),
-            not_before=None,
-            key_id="key-1",
-        )
-    )
-    from_other_issuer = await resolver.resolve(
-        VerifiedCredential(
-            issuer="https://other-idp.example",
-            subject="shared-username",
-            audience="brain",
-            expires_at=datetime.now(UTC),
-            not_before=None,
-            key_id="key-1",
-        )
-    )
-
-    assert from_authentik.id != from_other_issuer.id
-    assert repo.created == 2
-
-
-async def test_memberships_excludes_revoked_rows() -> None:
-    repo = _FakeRepository()
-    resolver = PrincipalResolver(repo)
-    principal = await resolver.resolve(_credential())
-    active = Membership(
-        principal_id=principal.id,
-        tenant_id=uuid4(),
-        knowledge_base_id=uuid4(),
-        role="TenantMember",
-        grant_revision=1,
-        revoked_at=None,
-    )
-    revoked = Membership(
-        principal_id=principal.id,
-        tenant_id=uuid4(),
-        knowledge_base_id=uuid4(),
-        role="TenantMember",
-        grant_revision=1,
-        revoked_at=datetime.now(UTC),
-    )
-    repo._memberships[principal.id] = [active, revoked]
-
-    result = await resolver.memberships(principal)
-
-    assert result == (active,)
+async def test_disabled_principal_is_rejected_even_through_an_alias() -> None:
+    """EX-AUTHX-006."""
+    repo = _FakeIdentities()
+    disabled = Principal(uuid4(), PrincipalKind.USER, ISSUER_X, "bob", PrincipalStatus.DISABLED)
+    repo.aliases[(ISSUER_X, "bob")] = disabled
+    repo.aliases[(ISSUER_Y, "bob-new")] = disabled
+    for credential in (_credential("bob"), _credential("bob-new", ISSUER_Y)):
+        with pytest.raises(CredentialError) as exc:
+            await PrincipalResolver(repo, PROFILE).resolve(credential)
+        assert exc.value.code == "disabled_principal"

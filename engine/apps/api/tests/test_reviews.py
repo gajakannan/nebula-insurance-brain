@@ -1,34 +1,38 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from uuid import uuid4
 
 import jwt
 import pytest
 import pytest_asyncio
-from brain_domain.review import ReviewItemStatus, ReviewItemType
+from brain_domain.authx import PilotRole
+from brain_domain.principal import PrincipalKind
 from brain_persistence.base import Base, sqlite_test_tables
-from brain_persistence.models import (
-    Assertion,
-    ContentArtifact,
-    DocumentVersion,
-    MembershipRow,
-    PrincipalRow,
-    ReviewBatchRow,
-    ReviewItemRow,
-    SourceDocument,
-)
 from brain_persistence.session import make_engine, make_session_factory, session_scope
-from brain_security.verification import VerifiedCredential
+from brain_security.identity_profile import IdentityProfile, IssuerProfile
+from brain_security.verification import VerifiedCredential, decode_verified
+from brain_testing import fixtures
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 from jwt import PyJWK
 
 from brain_api.app import create_app
-from brain_api.deps import get_credential_verifier, get_db_session
+from brain_api.deps import (
+    get_credential_verifier,
+    get_db_session,
+    get_identity_profile,
+    get_session_factory,
+)
 
 ISSUER = "https://authentik.local/application/o/brain/"
 AUDIENCE = "brain"
+ISSUER_PROFILE = IssuerProfile(
+    issuer=ISSUER, audiences=frozenset({AUDIENCE}), human_clients=frozenset({"brain"})
+)
+IDENTITY_PROFILE = IdentityProfile((ISSUER_PROFILE,))
+POLICIES = Path(__file__).resolve().parents[4] / "planning-mds" / "security" / "policies"
 
 
 @pytest.fixture(scope="module")
@@ -44,6 +48,7 @@ def _make_token(rsa_key: rsa.RSAPrivateKey, subject: str) -> str:
         "aud": AUDIENCE,
         "iat": now,
         "exp": now + timedelta(minutes=5),
+        "azp": "brain",
     }
     return jwt.encode(claims, rsa_key, algorithm="RS256", headers={"kid": "test-key-1"})
 
@@ -70,17 +75,7 @@ class _FakeVerifier:
             ),
             algorithm="RS256",
         )
-        payload = jwt.decode(
-            bearer_token, signing_key.key, algorithms=["RS256"], audience=AUDIENCE, issuer=ISSUER
-        )
-        return VerifiedCredential(
-            issuer=payload["iss"],
-            subject=payload["sub"],
-            audience=AUDIENCE,
-            expires_at=datetime.fromtimestamp(payload["exp"], tz=UTC),
-            not_before=None,
-            key_id="test-key-1",
-        )
+        return decode_verified(bearer_token, signing_key.key, ISSUER_PROFILE, key_id="test-key-1")
 
 
 @pytest_asyncio.fixture
@@ -89,6 +84,10 @@ async def client(rsa_key: rsa.RSAPrivateKey):
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all, tables=sqlite_test_tables())
     session_factory = make_session_factory(engine)
+    async with session_scope(session_factory) as session:
+        await session.run_sync(
+            fixtures.activate_policy, POLICIES / "model.conf", POLICIES / "policy.csv"
+        )
 
     app = create_app()
 
@@ -98,6 +97,8 @@ async def client(rsa_key: rsa.RSAPrivateKey):
 
     app.dependency_overrides[get_db_session] = override_get_db_session
     app.dependency_overrides[get_credential_verifier] = lambda: _FakeVerifier(rsa_key)
+    app.dependency_overrides[get_identity_profile] = lambda: IDENTITY_PROFILE
+    app.dependency_overrides[get_session_factory] = lambda: session_factory
 
     with TestClient(app) as test_client:
         test_client.session_factory = session_factory  # type: ignore[attr-defined]
@@ -106,70 +107,31 @@ async def client(rsa_key: rsa.RSAPrivateKey):
     await engine.dispose()
 
 
-async def _seed_review_item(session_factory, *, tenant_id, kb_id, role: str, subject: str) -> tuple:
+async def _seed_user(session_factory, *, subject, tenant_id, kb_id, role, kind=PrincipalKind.USER):
     async with session_scope(session_factory) as session:
-        principal_row = PrincipalRow(
-            id=uuid4(), kind="user", issuer=ISSUER, subject=subject, status="active"
-        )
-        session.add(principal_row)
-        await session.flush()
-        session.add(
-            MembershipRow(
-                id=uuid4(),
-                principal_id=principal_row.id,
-                tenant_id=tenant_id,
-                knowledge_base_id=kb_id,
-                role=role,
-                grant_revision=1,
-                revoked_at=None,
-            )
-        )
 
-        source = SourceDocument(
-            tenant_id=tenant_id, knowledge_base_id=kb_id, source_sha256="a" * 64
-        )
-        session.add(source)
-        await session.flush()
-        version = DocumentVersion(source_document_id=source.id)
-        session.add(version)
-        await session.flush()
-        artifact = ContentArtifact(
-            id=uuid4(),
-            document_version_id=version.id,
-            artifact_sha256="b" * 64,
-            page_count=1,
-            extraction_status="complete",
-        )
-        session.add(artifact)
-        await session.flush()
-        assertion = Assertion(
-            id=uuid4(),
-            run_id=None,
-            origin="MACHINE_EXTRACTION",
-            subject_type="Policy",
-            slot_type="each_occurrence_limit",
-            value={"value": "$20,000,000"},
-            model_confidence=0.41,
-            interpretation_basis="EXPLICIT",
-        )
-        session.add(assertion)
-        await session.flush()
-        batch = ReviewBatchRow(id=uuid4(), assembling_principal_id=principal_row.id)
-        session.add(batch)
-        await session.flush()
-        item = ReviewItemRow(
-            id=uuid4(),
-            type=ReviewItemType.LOW_CONFIDENCE_ASSERTION.value,
-            status=ReviewItemStatus.OPEN.value,
-            assertion_id=assertion.id,
-            assertion_version=1,
-            tenant_id=tenant_id,
-            knowledge_base_id=kb_id,
-            review_batch_id=batch.id,
-        )
-        session.add(item)
-        await session.flush()
-        return item.id, batch.id, artifact.id
+        def seed(s):
+            principal = fixtures.seed_principal(s, issuer=ISSUER, subject=subject, kind=kind)
+            fixtures.seed_grant(s, principal.id, tenant_id, kb_id, PilotRole(role))
+            return principal.id
+
+        return await session.run_sync(seed)
+
+
+async def _seed_review_item(session_factory, *, tenant_id, kb_id, role: str, subject: str) -> tuple:
+    principal_id = await _seed_user(
+        session_factory, subject=subject, tenant_id=tenant_id, kb_id=kb_id, role=role
+    )
+    async with session_scope(session_factory) as session:
+
+        def seed(s):
+            artifact_id = fixtures.seed_content_artifact(s, tenant_id, kb_id)
+            item_id, batch_id = fixtures.seed_review_item(
+                s, tenant_id, kb_id, assembling_principal_id=principal_id
+            )
+            return item_id, batch_id, artifact_id
+
+        return await session.run_sync(seed)
 
 
 async def test_get_review_item_requires_authentication(client) -> None:

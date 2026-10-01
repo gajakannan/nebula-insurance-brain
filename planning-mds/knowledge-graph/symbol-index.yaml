@@ -1,11 +1,16 @@
 version: 0
+generated_at: '2026-09-29T01:27:02+00:00'
 summary:
-  total_symbols: 260
+  total_symbols: 486
   by_language:
     python:
-      files: 49
-      parsed: 6
-      cached: 43
+      files: 65
+      parsed: 26
+      cached: 39
+    typescript:
+      files: 8
+      parsed: 8
+      cached: 0
   disambiguated_ids: 0
   compilation_roots_by_language:
     python:
@@ -24,187 +29,608 @@ summary:
   sidecar_authoritative_languages:
   - python
 symbols:
-- id: symbol:capability-authorization-enforcement:audit-event-repository.append
+- id: symbol:capability-authorization-enforcement:action-ceiling.post-init
   node: capability:authorization-enforcement
   kind: method
-  name: append
-  file: engine/packages/brain-security/src/brain_security/audit.py
-  line: 13
-  signature: 'async def append(self, event: AuditEvent)'
-  visibility: public
-  language: python
-  container: AuditEventRepository
-  end_line: 13
-  callers:
-  - symbol:capability-authorization-enforcement:in-memory-audit-event-repository.append
-  - symbol:capability-authorization-enforcement:repository-audit-sink.record
-  callees: []
-- id: symbol:capability-authorization-enforcement:audit-sink.record
-  node: capability:authorization-enforcement
-  kind: method
-  name: record
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 44
-  signature: 'async def record(self, *, actor_principal_id: UUID, delegate_principal_id:
-    UUID | None, resource: ResourceRef, action: str, decision: Decision)'
-  visibility: public
-  language: python
-  container: AuditSink
-  end_line: 52
-  callers:
-  - symbol:capability-authorization-enforcement:authorization-service.authorize
-  callees: []
-- id: symbol:capability-authorization-enforcement:audit.audit-event-repository
-  node: capability:authorization-enforcement
-  kind: class
-  name: AuditEventRepository
-  file: engine/packages/brain-security/src/brain_security/audit.py
-  line: 12
-  signature: class AuditEventRepository
-  visibility: public
-  language: python
-  end_line: 13
-  callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:audit.in-memory-audit-event-repository
-  node: capability:authorization-enforcement
-  kind: class
-  name: InMemoryAuditEventRepository
-  file: engine/packages/brain-security/src/brain_security/audit.py
-  line: 50
-  signature: class InMemoryAuditEventRepository
-  visibility: public
-  language: python
-  end_line: 57
-  callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:audit.repository-audit-sink
-  node: capability:authorization-enforcement
-  kind: class
-  name: RepositoryAuditSink
-  file: engine/packages/brain-security/src/brain_security/audit.py
-  line: 16
-  signature: class RepositoryAuditSink
-  visibility: public
-  language: python
-  end_line: 47
-  callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:authorization-service.authorize
-  node: capability:authorization-enforcement
-  kind: method
-  name: authorize
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 63
-  signature: 'async def authorize(self, principal: Principal, memberships: Sequence[Membership],
-    resource: ResourceRef, action: str, *, trace_id: str)'
-  visibility: public
-  language: python
-  container: AuthorizationService
-  end_line: 110
-  callers: []
-  callees:
-  - symbol:capability-authorization-enforcement:audit-sink.record
-  - symbol:capability-authorization-enforcement:authorization.decision
-  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
-  - symbol:capability-authorization-enforcement:casbin-enforcer.enforce
-  - symbol:capability-authorization-enforcement:repository-audit-sink.record
-- id: symbol:capability-authorization-enforcement:authorization-service.init
-  node: capability:authorization-enforcement
-  kind: method
-  name: __init__
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 59
-  signature: 'def __init__(self, enforcer: CasbinEnforcer, audit: AuditSink)'
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 339
+  signature: def __post_init__(self)
   visibility: private
   language: python
-  container: AuthorizationService
-  end_line: 61
+  container: ActionCeiling
+  end_line: 343
   callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:authorization.audit-sink
+  callees:
+  - symbol:capability-authorization-enforcement:authx.action
+- id: symbol:capability-authorization-enforcement:action-ceiling.to-json
   node: capability:authorization-enforcement
-  kind: class
-  name: AuditSink
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 43
-  signature: class AuditSink
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 345
+  signature: def to_json(self)
   visibility: public
   language: python
-  end_line: 52
-  callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:authorization.authorization-service
-  node: capability:authorization-enforcement
-  kind: class
-  name: AuthorizationService
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 55
-  signature: class AuthorizationService
-  visibility: public
-  language: python
-  end_line: 110
-  callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:authorization.casbin-enforcer
-  node: capability:authorization-enforcement
-  kind: class
-  name: CasbinEnforcer
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 29
-  signature: class CasbinEnforcer
-  visibility: public
-  language: python
-  end_line: 40
-  callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:authorization.decision
-  node: capability:authorization-enforcement
-  kind: class
-  name: Decision
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 21
-  signature: class Decision
-  visibility: public
-  language: python
-  end_line: 26
+  container: ActionCeiling
+  end_line: 350
   callers:
-  - symbol:capability-authorization-enforcement:authorization-service.authorize
-  callees: []
-- id: symbol:capability-authorization-enforcement:authorization.resource-ref
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees:
+  - symbol:capability-authorization-enforcement:authentication-event.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:resource-key.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  - symbol:capability-authorization-enforcement:scoped-id.to-json
+  - symbol:capability-authorization-enforcement:selector.to-json
+- id: symbol:capability-authorization-enforcement:authentication-event.post-init
   node: capability:authorization-enforcement
-  kind: class
-  name: ResourceRef
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 12
-  signature: class ResourceRef
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 598
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: AuthenticationEvent
+  end_line: 602
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.authentication-reason
+  - symbol:capability-authorization-enforcement:authx.require-aware
+- id: symbol:capability-authorization-enforcement:authentication-event.to-json
+  node: capability:authorization-enforcement
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 604
+  signature: def to_json(self)
   visibility: public
   language: python
-  end_line: 17
+  container: AuthenticationEvent
+  end_line: 614
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees: []
+- id: symbol:capability-authorization-enforcement:authorization-context.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 461
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: AuthorizationContext
+  end_line: 479
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.require-aware
+- id: symbol:capability-authorization-enforcement:authorization-context.to-json
+  node: capability:authorization-enforcement
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 481
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: AuthorizationContext
+  end_line: 493
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authentication-event.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:authx.principal-to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:resource-key.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  - symbol:capability-authorization-enforcement:scoped-id.to-json
+  - symbol:capability-authorization-enforcement:selector.to-json
+- id: symbol:capability-authorization-enforcement:authorization-decision.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 527
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: AuthorizationDecision
+  end_line: 550
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.operation-outcome
+  - symbol:capability-authorization-enforcement:authx.reason-code
+  - symbol:capability-authorization-enforcement:authx.require-aware
+- id: symbol:capability-authorization-enforcement:authorization-decision.to-json
+  node: capability:authorization-enforcement
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 558
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: AuthorizationDecision
+  end_line: 584
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authentication-event.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:resource-key.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  - symbol:capability-authorization-enforcement:scoped-id.to-json
+  - symbol:capability-authorization-enforcement:selector.to-json
+- id: symbol:capability-authorization-enforcement:authorization-decision.with-outcome
+  node: capability:authorization-enforcement
+  kind: method
+  name: with_outcome
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 552
+  signature: 'def with_outcome(self, outcome: OperationOutcome)'
+  visibility: public
+  language: python
+  container: AuthorizationDecision
+  end_line: 556
   callers: []
   callees: []
+- id: symbol:capability-authorization-enforcement:authx.action
+  node: capability:authorization-enforcement
+  kind: class
+  name: Action
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 32
+  signature: class Action
+  visibility: public
+  language: python
+  end_line: 37
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.post-init
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.action-ceiling
+  node: capability:authorization-enforcement
+  kind: class
+  name: ActionCeiling
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 332
+  signature: class ActionCeiling
+  visibility: public
+  language: python
+  end_line: 350
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.admits
+  node: capability:authorization-enforcement
+  kind: function
+  name: admits
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 115
+  signature: 'def admits(allowance: LabelSet, required: Iterable[str])'
+  visibility: public
+  language: python
+  end_line: 119
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.filter-admits
+  - symbol:capability-authorization-enforcement:evaluation.slice-admits-restrictions
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.authentication-event
+  node: capability:authorization-enforcement
+  kind: class
+  name: AuthenticationEvent
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 588
+  signature: class AuthenticationEvent
+  visibility: public
+  language: python
+  end_line: 614
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.authentication-reason
+  node: capability:authorization-enforcement
+  kind: class
+  name: AuthenticationReason
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 84
+  signature: class AuthenticationReason
+  visibility: public
+  language: python
+  end_line: 93
+  callers:
+  - symbol:capability-authorization-enforcement:authentication-event.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.authorization-context
+  node: capability:authorization-enforcement
+  kind: class
+  name: AuthorizationContext
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 443
+  signature: class AuthorizationContext
+  visibility: public
+  language: python
+  end_line: 493
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.authorization-decision
+  node: capability:authorization-enforcement
+  kind: class
+  name: AuthorizationDecision
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 497
+  signature: class AuthorizationDecision
+  visibility: public
+  language: python
+  end_line: 584
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.decision
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.delegation
+  node: capability:authorization-enforcement
+  kind: class
+  name: Delegation
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 354
+  signature: class Delegation
+  visibility: public
+  language: python
+  end_line: 415
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.is-active
+  node: capability:authorization-enforcement
+  kind: function
+  name: is_active
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 617
+  signature: 'def is_active(principal: Principal)'
+  visibility: public
+  language: python
+  end_line: 618
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.iso
+  node: capability:authorization-enforcement
+  kind: function
+  name: _iso
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 131
+  signature: 'def _iso(value: datetime | None)'
+  visibility: private
+  language: python
+  end_line: 132
+  callers:
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.labels
+  node: capability:authorization-enforcement
+  kind: function
+  name: labels
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 100
+  signature: 'def labels(values: Iterable[str] | Literal[''*''])'
+  visibility: public
+  language: python
+  end_line: 112
+  callers:
+  - symbol:capability-authorization-enforcement:scope-slice.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.labels-to-json
+  node: capability:authorization-enforcement
+  kind: function
+  name: _labels_to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 122
+  signature: 'def _labels_to_json(value: LabelSet)'
+  visibility: private
+  language: python
+  end_line: 123
+  callers:
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.one-selector-per-kind
+  node: capability:authorization-enforcement
+  kind: function
+  name: _one_selector_per_kind
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 195
+  signature: 'def _one_selector_per_kind(selectors: Iterable[Selector])'
+  visibility: private
+  language: python
+  end_line: 200
+  callers:
+  - symbol:capability-authorization-enforcement:scope-slice.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.operation-outcome
+  node: capability:authorization-enforcement
+  kind: class
+  name: OperationOutcome
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 77
+  signature: class OperationOutcome
+  visibility: public
+  language: python
+  end_line: 81
+  callers:
+  - symbol:capability-authorization-enforcement:authorization-decision.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.pilot-role
+  node: capability:authorization-enforcement
+  kind: class
+  name: PilotRole
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 40
+  signature: class PilotRole
+  visibility: public
+  language: python
+  end_line: 45
+  callers:
+  - symbol:capability-authorization-enforcement:scope-slice.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.policy-release
+  node: capability:authorization-enforcement
+  kind: class
+  name: PolicyRelease
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 419
+  signature: class PolicyRelease
+  visibility: public
+  language: python
+  end_line: 429
+  callers:
+  - symbol:capability-authorization-enforcement:casbin-adapter.compute-policy-release
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.principal-to-json
+  node: capability:authorization-enforcement
+  kind: function
+  name: principal_to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 432
+  signature: 'def principal_to_json(principal: Principal)'
+  visibility: public
+  language: python
+  end_line: 439
+  callers:
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.reason-code
+  node: capability:authorization-enforcement
+  kind: class
+  name: ReasonCode
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 59
+  signature: class ReasonCode
+  visibility: public
+  language: python
+  end_line: 74
+  callers:
+  - symbol:capability-authorization-enforcement:authorization-decision.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.requested-scope
+  node: capability:authorization-enforcement
+  kind: class
+  name: RequestedScope
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 293
+  signature: class RequestedScope
+  visibility: public
+  language: python
+  end_line: 325
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.require-aware
+  node: capability:authorization-enforcement
+  kind: function
+  name: _require_aware
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 126
+  signature: 'def _require_aware(value: datetime | None, name: str)'
+  visibility: private
+  language: python
+  end_line: 128
+  callers:
+  - symbol:capability-authorization-enforcement:authentication-event.post-init
+  - symbol:capability-authorization-enforcement:authorization-context.post-init
+  - symbol:capability-authorization-enforcement:authorization-decision.post-init
+  - symbol:capability-authorization-enforcement:delegation.post-init
+  - symbol:capability-authorization-enforcement:requested-scope.post-init
+  - symbol:capability-authorization-enforcement:scope-slice.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.resource-envelope
+  node: capability:authorization-enforcement
+  kind: class
+  name: ResourceEnvelope
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 260
+  signature: class ResourceEnvelope
+  visibility: public
+  language: python
+  end_line: 289
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.resource-key
+  node: capability:authorization-enforcement
+  kind: class
+  name: ResourceKey
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 136
+  signature: class ResourceKey
+  visibility: public
+  language: python
+  end_line: 144
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.resource-type
+  node: capability:authorization-enforcement
+  kind: class
+  name: ResourceType
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 26
+  signature: class ResourceType
+  visibility: public
+  language: python
+  end_line: 29
+  callers:
+  - symbol:capability-authorization-enforcement:resource-key.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.scope-slice
+  node: capability:authorization-enforcement
+  kind: class
+  name: ScopeSlice
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 204
+  signature: class ScopeSlice
+  visibility: public
+  language: python
+  end_line: 256
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.scoped-id
+  node: capability:authorization-enforcement
+  kind: class
+  name: ScopedId
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 148
+  signature: class ScopedId
+  visibility: public
+  language: python
+  end_line: 158
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.scoped-kind
+  node: capability:authorization-enforcement
+  kind: class
+  name: ScopedKind
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 48
+  signature: class ScopedKind
+  visibility: public
+  language: python
+  end_line: 51
+  callers:
+  - symbol:capability-authorization-enforcement:scoped-id.post-init
+  - symbol:capability-authorization-enforcement:selector.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.selector
+  node: capability:authorization-enforcement
+  kind: class
+  name: Selector
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 162
+  signature: class Selector
+  visibility: public
+  language: python
+  end_line: 185
+  callers:
+  - symbol:capability-authorization-enforcement:authx.unrestricted-selectors
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.selector-mode
+  node: capability:authorization-enforcement
+  kind: class
+  name: SelectorMode
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 54
+  signature: class SelectorMode
+  visibility: public
+  language: python
+  end_line: 56
+  callers:
+  - symbol:capability-authorization-enforcement:selector.post-init
+  callees: []
+- id: symbol:capability-authorization-enforcement:authx.unrestricted-selectors
+  node: capability:authorization-enforcement
+  kind: function
+  name: unrestricted_selectors
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 188
+  signature: def unrestricted_selectors()
+  visibility: public
+  language: python
+  end_line: 192
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.selector
 - id: symbol:capability-authorization-enforcement:casbin-adapter.casbin-authorization-adapter
   node: capability:authorization-enforcement
   kind: class
   name: CasbinAuthorizationAdapter
   file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
-  line: 22
+  line: 46
   signature: class CasbinAuthorizationAdapter
   visibility: public
   language: python
-  end_line: 47
+  end_line: 100
   callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:casbin-adapter.compute-policy-release
+  node: capability:authorization-enforcement
+  kind: function
+  name: compute_policy_release
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 29
+  signature: 'def compute_policy_release(model_bytes: bytes, policy_bytes: bytes,
+    contract_version: str=CONTRACT_VERSION)'
+  visibility: public
+  language: python
+  end_line: 43
+  callers:
+  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.init
+  callees:
+  - symbol:capability-authorization-enforcement:authx.policy-release
+  - symbol:capability-authorization-enforcement:casbin-adapter.length-prefixed
+- id: symbol:capability-authorization-enforcement:casbin-adapter.length-prefixed
+  node: capability:authorization-enforcement
+  kind: function
+  name: _length_prefixed
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 24
+  signature: 'def _length_prefixed(*parts: bytes)'
+  visibility: private
+  language: python
+  end_line: 26
+  callers:
+  - symbol:capability-authorization-enforcement:casbin-adapter.compute-policy-release
   callees: []
 - id: symbol:capability-authorization-enforcement:casbin-adapter.obj
   node: capability:authorization-enforcement
   kind: class
   name: _Obj
   file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
-  line: 17
+  line: 19
   signature: class _Obj
   visibility: private
   language: python
-  end_line: 19
+  end_line: 21
   callers:
   - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
   callees: []
@@ -213,11 +639,11 @@ symbols:
   kind: class
   name: _Sub
   file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
-  line: 11
+  line: 13
   signature: class _Sub
   visibility: private
   language: python
-  end_line: 13
+  end_line: 15
   callers:
   - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
   callees: []
@@ -226,132 +652,561 @@ symbols:
   kind: method
   name: enforce
   file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
-  line: 33
+  line: 63
   signature: 'def enforce(self, role: str, sub_knowledge_base_id: str, resource_type:
     str, obj_knowledge_base_id: str, action: str)'
   visibility: public
   language: python
   container: CasbinAuthorizationAdapter
-  end_line: 43
+  end_line: 73
   callers:
-  - symbol:capability-authorization-enforcement:authorization-service.authorize
+  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.permits
   callees:
   - symbol:capability-authorization-enforcement:casbin-adapter.obj
   - symbol:capability-authorization-enforcement:casbin-adapter.sub
-  - symbol:capability-authorization-enforcement:casbin-enforcer.enforce
 - id: symbol:capability-authorization-enforcement:casbin-authorization-adapter.init
   node: capability:authorization-enforcement
   kind: method
   name: __init__
   file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
-  line: 28
+  line: 57
   signature: 'def __init__(self, model_path: str | Path, policy_path: str | Path)'
   visibility: private
   language: python
   container: CasbinAuthorizationAdapter
-  end_line: 31
+  end_line: 61
   callers: []
-  callees: []
+  callees:
+  - symbol:capability-authorization-enforcement:casbin-adapter.compute-policy-release
+- id: symbol:capability-authorization-enforcement:casbin-authorization-adapter.permits
+  node: capability:authorization-enforcement
+  kind: method
+  name: permits
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 75
+  signature: 'def permits(self, role: str, grant_scope: OwnedScope, resource_scope:
+    OwnedScope, resource: ResourceKey, action: str)'
+  visibility: public
+  language: python
+  container: CasbinAuthorizationAdapter
+  end_line: 92
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees:
+  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
 - id: symbol:capability-authorization-enforcement:casbin-authorization-adapter.policy-hash
   node: capability:authorization-enforcement
   kind: method
   name: policy_hash
   file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
-  line: 46
+  line: 95
   signature: def policy_hash(self)
   visibility: public
   language: python
   container: CasbinAuthorizationAdapter
-  end_line: 47
+  end_line: 96
   callers: []
   callees: []
-- id: symbol:capability-authorization-enforcement:casbin-enforcer.enforce
+- id: symbol:capability-authorization-enforcement:casbin-authorization-adapter.release
   node: capability:authorization-enforcement
   kind: method
-  name: enforce
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 30
-  signature: 'def enforce(self, role: str, sub_knowledge_base_id: str, resource_type:
-    str, obj_knowledge_base_id: str, action: str)'
+  name: release
+  file: engine/packages/brain-security/src/brain_security/casbin_adapter.py
+  line: 99
+  signature: def release(self)
   visibility: public
   language: python
-  container: CasbinEnforcer
-  end_line: 37
-  callers:
-  - symbol:capability-authorization-enforcement:authorization-service.authorize
-  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.enforce
-  callees: []
-- id: symbol:capability-authorization-enforcement:casbin-enforcer.policy-hash
-  node: capability:authorization-enforcement
-  kind: method
-  name: policy_hash
-  file: engine/packages/brain-security/src/brain_security/authorization.py
-  line: 40
-  signature: def policy_hash(self)
-  visibility: public
-  language: python
-  container: CasbinEnforcer
-  end_line: 40
+  container: CasbinAuthorizationAdapter
+  end_line: 100
   callers: []
   callees: []
-- id: symbol:capability-authorization-enforcement:in-memory-audit-event-repository.append
+- id: symbol:capability-authorization-enforcement:delegation.active-at
   node: capability:authorization-enforcement
   kind: method
-  name: append
-  file: engine/packages/brain-security/src/brain_security/audit.py
-  line: 56
-  signature: 'async def append(self, event: AuditEvent)'
+  name: active_at
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 391
+  signature: 'def active_at(self, at: datetime)'
   visibility: public
   language: python
-  container: InMemoryAuditEventRepository
-  end_line: 57
+  container: Delegation
+  end_line: 394
   callers:
-  - symbol:capability-authorization-enforcement:repository-audit-sink.record
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees: []
+- id: symbol:capability-authorization-enforcement:delegation.permits
+  node: capability:authorization-enforcement
+  kind: method
+  name: permits
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 396
+  signature: 'def permits(self, scope: OwnedScope, resource: ResourceKey, action:
+    Action)'
+  visibility: public
+  language: python
+  container: Delegation
+  end_line: 400
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees: []
+- id: symbol:capability-authorization-enforcement:delegation.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 372
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: Delegation
+  end_line: 389
+  callers: []
   callees:
-  - symbol:capability-authorization-enforcement:audit-event-repository.append
-- id: symbol:capability-authorization-enforcement:in-memory-audit-event-repository.init
+  - symbol:capability-authorization-enforcement:authx.require-aware
+- id: symbol:capability-authorization-enforcement:delegation.to-json
   node: capability:authorization-enforcement
   kind: method
-  name: __init__
-  file: engine/packages/brain-security/src/brain_security/audit.py
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 402
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: Delegation
+  end_line: 415
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authentication-event.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:authx.iso
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:resource-key.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  - symbol:capability-authorization-enforcement:scoped-id.to-json
+  - symbol:capability-authorization-enforcement:selector.to-json
+- id: symbol:capability-authorization-enforcement:evaluation.collect-dependencies
+  node: capability:authorization-enforcement
+  kind: function
+  name: collect_dependencies
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 246
+  signature: 'def collect_dependencies(root: ResourceEnvelope, hydrated: Mapping[ResourceKey,
+    ResourceEnvelope | None])'
+  visibility: public
+  language: python
+  end_line: 276
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:evaluation.dependency-set
+- id: symbol:capability-authorization-enforcement:evaluation.decision
+  node: capability:authorization-enforcement
+  kind: function
+  name: _decision
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 124
+  signature: 'def _decision(context: AuthorizationContext, decision_id: UUID, key:
+    ResourceKey, resource: ResourceEnvelope | None, action: str, reason: ReasonCode,
+    matched: tuple[UUID, ...]=())'
+  visibility: private
+  language: python
+  end_line: 157
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees:
+  - symbol:capability-authorization-enforcement:authx.authorization-decision
+- id: symbol:capability-authorization-enforcement:evaluation.dependency-admitted
+  node: capability:authorization-enforcement
+  kind: function
+  name: _dependency_admitted
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 105
+  signature: 'def _dependency_admitted(grant: ScopeSlice, dependency: ResourceEnvelope,
+    resource: ResourceEnvelope, current: Iterable[ScopeSlice])'
+  visibility: private
+  language: python
+  end_line: 121
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees:
+  - symbol:capability-authorization-enforcement:evaluation.slice-admits-restrictions
+- id: symbol:capability-authorization-enforcement:evaluation.dependency-set
+  node: capability:authorization-enforcement
+  kind: class
+  name: DependencySet
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 64
+  signature: class DependencySet
+  visibility: public
+  language: python
+  end_line: 72
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.collect-dependencies
+  callees: []
+- id: symbol:capability-authorization-enforcement:evaluation.evaluate
+  node: capability:authorization-enforcement
+  kind: function
+  name: evaluate
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 160
+  signature: 'def evaluate(context: AuthorizationContext, key: ResourceKey, resource:
+    ResourceEnvelope | None, dependencies: DependencySet, action: str, policy: PolicyEvaluator,
+    *, decision_id: UUID, delegation_unresolved: bool=False)'
+  visibility: public
+  language: python
+  end_line: 243
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.action
+  - symbol:capability-authorization-enforcement:authx.is-active
+  - symbol:capability-authorization-enforcement:casbin-authorization-adapter.permits
+  - symbol:capability-authorization-enforcement:delegation.active-at
+  - symbol:capability-authorization-enforcement:delegation.permits
+  - symbol:capability-authorization-enforcement:evaluation.decision
+  - symbol:capability-authorization-enforcement:evaluation.dependency-admitted
+  - symbol:capability-authorization-enforcement:evaluation.filter-admits
+  - symbol:capability-authorization-enforcement:evaluation.slice-admits-restrictions
+  - symbol:capability-authorization-enforcement:policy-evaluator.permits
+  - symbol:capability-authorization-enforcement:scope-slice.current-at
+- id: symbol:capability-authorization-enforcement:evaluation.filter-admits
+  node: capability:authorization-enforcement
+  kind: function
+  name: _filter_admits
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 90
+  signature: 'def _filter_admits(requested: RequestedScope, resource: ResourceEnvelope)'
+  visibility: private
+  language: python
+  end_line: 102
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees:
+  - symbol:capability-authorization-enforcement:authx.admits
+  - symbol:capability-authorization-enforcement:resource-envelope.parents
+  - symbol:capability-authorization-enforcement:selector.admits
+- id: symbol:capability-authorization-enforcement:evaluation.pending-dependency-keys
+  node: capability:authorization-enforcement
+  kind: function
+  name: pending_dependency_keys
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 279
+  signature: 'def pending_dependency_keys(root: ResourceEnvelope, hydrated: Mapping[ResourceKey,
+    ResourceEnvelope | None])'
+  visibility: public
+  language: python
+  end_line: 308
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:evaluation.policy-evaluator
+  node: capability:authorization-enforcement
+  kind: class
+  name: PolicyEvaluator
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 50
+  signature: class PolicyEvaluator
+  visibility: public
+  language: python
+  end_line: 60
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:evaluation.slice-admits-restrictions
+  node: capability:authorization-enforcement
+  kind: function
+  name: _slice_admits_restrictions
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
+  line: 78
+  signature: 'def _slice_admits_restrictions(slice_: ScopeSlice, resource: ResourceEnvelope)'
+  visibility: private
+  language: python
+  end_line: 87
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.dependency-admitted
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees:
+  - symbol:capability-authorization-enforcement:authx.admits
+  - symbol:capability-authorization-enforcement:resource-envelope.parents
+  - symbol:capability-authorization-enforcement:scope-slice.selector
+  - symbol:capability-authorization-enforcement:selector.admits
+- id: symbol:capability-authorization-enforcement:policy-evaluator.permits
+  node: capability:authorization-enforcement
+  kind: method
+  name: permits
+  file: engine/packages/brain-security/src/brain_security/evaluation.py
   line: 53
-  signature: def __init__(self)
-  visibility: private
-  language: python
-  container: InMemoryAuditEventRepository
-  end_line: 54
-  callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:repository-audit-sink.init
-  node: capability:authorization-enforcement
-  kind: method
-  name: __init__
-  file: engine/packages/brain-security/src/brain_security/audit.py
-  line: 20
-  signature: 'def __init__(self, repository: AuditEventRepository)'
-  visibility: private
-  language: python
-  container: RepositoryAuditSink
-  end_line: 21
-  callers: []
-  callees: []
-- id: symbol:capability-authorization-enforcement:repository-audit-sink.record
-  node: capability:authorization-enforcement
-  kind: method
-  name: record
-  file: engine/packages/brain-security/src/brain_security/audit.py
-  line: 23
-  signature: 'async def record(self, *, actor_principal_id: UUID, delegate_principal_id:
-    UUID | None, resource: ResourceRef, action: str, decision: Decision)'
+  signature: 'def permits(self, role: str, grant_scope: OwnedScope, resource_scope:
+    OwnedScope, resource: ResourceKey, action: str)'
   visibility: public
   language: python
-  container: RepositoryAuditSink
-  end_line: 47
+  container: PolicyEvaluator
+  end_line: 60
   callers:
-  - symbol:capability-authorization-enforcement:authorization-service.authorize
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees: []
+- id: symbol:capability-authorization-enforcement:requested-scope.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 303
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: RequestedScope
+  end_line: 313
+  callers: []
   callees:
-  - symbol:capability-authorization-enforcement:audit-event-repository.append
-  - symbol:capability-authorization-enforcement:in-memory-audit-event-repository.append
+  - symbol:capability-authorization-enforcement:authx.require-aware
+- id: symbol:capability-authorization-enforcement:requested-scope.to-json
+  node: capability:authorization-enforcement
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 315
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: RequestedScope
+  end_line: 325
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authentication-event.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:authx.iso
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:resource-key.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  - symbol:capability-authorization-enforcement:scoped-id.to-json
+  - symbol:capability-authorization-enforcement:selector.to-json
+- id: symbol:capability-authorization-enforcement:resource-envelope.parents
+  node: capability:authorization-enforcement
+  kind: method
+  name: parents
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 288
+  signature: 'def parents(self, kind: ScopedKind)'
+  visibility: public
+  language: python
+  container: ResourceEnvelope
+  end_line: 289
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.filter-admits
+  - symbol:capability-authorization-enforcement:evaluation.slice-admits-restrictions
+  callees: []
+- id: symbol:capability-authorization-enforcement:resource-envelope.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 276
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: ResourceEnvelope
+  end_line: 286
+  callers: []
+  callees: []
+- id: symbol:capability-authorization-enforcement:resource-key.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 140
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: ResourceKey
+  end_line: 141
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.resource-type
+- id: symbol:capability-authorization-enforcement:resource-key.to-json
+  node: capability:authorization-enforcement
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 143
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: ResourceKey
+  end_line: 144
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees: []
+- id: symbol:capability-authorization-enforcement:scope-slice.current-at
+  node: capability:authorization-enforcement
+  kind: method
+  name: current_at
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 234
+  signature: 'def current_at(self, at: datetime)'
+  visibility: public
+  language: python
+  container: ScopeSlice
+  end_line: 239
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.evaluate
+  callees: []
+- id: symbol:capability-authorization-enforcement:scope-slice.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 221
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: ScopeSlice
+  end_line: 232
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.labels
+  - symbol:capability-authorization-enforcement:authx.one-selector-per-kind
+  - symbol:capability-authorization-enforcement:authx.pilot-role
+  - symbol:capability-authorization-enforcement:authx.require-aware
+- id: symbol:capability-authorization-enforcement:scope-slice.selector
+  node: capability:authorization-enforcement
+  kind: method
+  name: selector
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 241
+  signature: 'def selector(self, kind: ScopedKind)'
+  visibility: public
+  language: python
+  container: ScopeSlice
+  end_line: 242
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.slice-admits-restrictions
+  callees: []
+- id: symbol:capability-authorization-enforcement:scope-slice.to-json
+  node: capability:authorization-enforcement
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 244
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: ScopeSlice
+  end_line: 256
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  callees:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authentication-event.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:authx.iso
+  - symbol:capability-authorization-enforcement:authx.labels-to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:resource-key.to-json
+  - symbol:capability-authorization-enforcement:scoped-id.to-json
+  - symbol:capability-authorization-enforcement:selector.to-json
+- id: symbol:capability-authorization-enforcement:scoped-id.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 154
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: ScopedId
+  end_line: 155
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.scoped-kind
+- id: symbol:capability-authorization-enforcement:scoped-id.to-json
+  node: capability:authorization-enforcement
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 157
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: ScopedId
+  end_line: 158
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees: []
+- id: symbol:capability-authorization-enforcement:selector.admits
+  node: capability:authorization-enforcement
+  kind: method
+  name: admits
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 177
+  signature: 'def admits(self, value: UUID)'
+  visibility: public
+  language: python
+  container: Selector
+  end_line: 178
+  callers:
+  - symbol:capability-authorization-enforcement:evaluation.filter-admits
+  - symbol:capability-authorization-enforcement:evaluation.slice-admits-restrictions
+  callees: []
+- id: symbol:capability-authorization-enforcement:selector.post-init
+  node: capability:authorization-enforcement
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 170
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: Selector
+  end_line: 175
+  callers: []
+  callees:
+  - symbol:capability-authorization-enforcement:authx.scoped-kind
+  - symbol:capability-authorization-enforcement:authx.selector-mode
+- id: symbol:capability-authorization-enforcement:selector.to-json
+  node: capability:authorization-enforcement
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/authx.py
+  line: 180
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: Selector
+  end_line: 185
+  callers:
+  - symbol:capability-authorization-enforcement:action-ceiling.to-json
+  - symbol:capability-authorization-enforcement:authorization-context.to-json
+  - symbol:capability-authorization-enforcement:authorization-decision.to-json
+  - symbol:capability-authorization-enforcement:delegation.to-json
+  - symbol:capability-authorization-enforcement:requested-scope.to-json
+  - symbol:capability-authorization-enforcement:scope-slice.to-json
+  callees: []
 - id: symbol:capability-backup-and-restore:verify-citations.bundle-dir
   node: capability:backup-and-restore
   kind: function
@@ -435,13 +1290,13 @@ symbols:
   kind: method
   name: commit
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 75
-  signature: 'async def commit(self, actor: Principal, memberships: Sequence[Membership],
-    proposal: CommitProposal, *, trace_id: str)'
+  line: 98
+  signature: 'async def commit(self, proposal: CommitProposal, *, authorized_scope:
+    tuple[UUID, UUID], authorization_decision_id: UUID | None)'
   visibility: public
   language: python
   container: CanonicalCommitService
-  end_line: 187
+  end_line: 210
   callers: []
   callees:
   - symbol:capability-bitemporal-canonical-commit:commit.fact-slot-not-found
@@ -451,6 +1306,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.insert-change
   - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.insert-version
   - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.lock-slot
+  - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.register-commit
   - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.write-outbox
   - symbol:capability-bitemporal-canonical-commit:ranges.split-remainder
   - symbol:capability-bitemporal-canonical-commit:ranges.time-range
@@ -460,12 +1316,13 @@ symbols:
   kind: method
   name: __init__
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 71
-  signature: 'def __init__(self, repository: FactCommitRepository, authz: AuthorizationService)'
+  line: 89
+  signature: 'def __init__(self, repository: FactCommitRepository, *, clock: Callable[[],
+    datetime] | None=None)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 73
+  end_line: 96
   callers: []
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:commit.canonical-commit-service
@@ -473,11 +1330,11 @@ symbols:
   kind: class
   name: CanonicalCommitService
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 64
+  line: 78
   signature: class CanonicalCommitService
   visibility: public
   language: python
-  end_line: 187
+  end_line: 210
   callers: []
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:commit.fact-commit-repository
@@ -485,11 +1342,11 @@ symbols:
   kind: class
   name: FactCommitRepository
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 24
+  line: 22
   signature: class FactCommitRepository
   visibility: public
   language: python
-  end_line: 61
+  end_line: 75
   callers: []
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:commit.fact-slot-not-found
@@ -497,11 +1354,11 @@ symbols:
   kind: class
   name: FactSlotNotFound
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 15
+  line: 13
   signature: class FactSlotNotFound
   visibility: public
   language: python
-  end_line: 16
+  end_line: 14
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -510,11 +1367,11 @@ symbols:
   kind: class
   name: StaleVersionError
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 19
+  line: 17
   signature: class StaleVersionError
   visibility: public
   language: python
-  end_line: 21
+  end_line: 19
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -523,12 +1380,12 @@ symbols:
   kind: method
   name: close_recorded
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 35
+  line: 33
   signature: 'async def close_recorded(self, version_id: UUID, at: datetime)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 35
+  end_line: 33
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -537,12 +1394,12 @@ symbols:
   kind: method
   name: current_versions
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 31
+  line: 29
   signature: 'async def current_versions(self, slot_id: UUID)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 33
+  end_line: 31
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -551,13 +1408,13 @@ symbols:
   kind: method
   name: insert_change
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 57
+  line: 55
   signature: 'async def insert_change(self, *, reason: ChangeReason, from_version_id:
-    UUID | None, to_version_id: UUID)'
+    UUID | None, to_version_id: UUID, tenant_id: UUID, knowledge_base_id: UUID)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 59
+  end_line: 63
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -566,7 +1423,7 @@ symbols:
   kind: method
   name: insert_version
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 37
+  line: 35
   signature: 'async def insert_version(self, *, version_id: UUID, slot_id: UUID, tenant_id:
     UUID, knowledge_base_id: UUID, value: dict, valid: TimeRange, recorded: TimeRange,
     change_reason: ChangeReason | None, evidence_refs: tuple[UUID, ...], review_decision_id:
@@ -575,7 +1432,7 @@ symbols:
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 55
+  end_line: 53
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -584,12 +1441,27 @@ symbols:
   kind: method
   name: lock_slot
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 25
+  line: 23
   signature: 'async def lock_slot(self, slot_id: UUID)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 29
+  end_line: 27
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  callees: []
+- id: symbol:capability-bitemporal-canonical-commit:fact-commit-repository.register-commit
+  node: capability:bitemporal-canonical-commit
+  kind: method
+  name: register_commit
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 65
+  signature: 'async def register_commit(self, *, commit_id: UUID, tenant_id: UUID,
+    knowledge_base_id: UUID, authorization_decision_id: UUID | None, at: datetime)'
+  visibility: public
+  language: python
+  container: FactCommitRepository
+  end_line: 73
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -598,12 +1470,12 @@ symbols:
   kind: method
   name: write_outbox
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 61
+  line: 75
   signature: 'async def write_outbox(self, commit_id: UUID, payload: dict)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 61
+  end_line: 75
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -783,159 +1655,470 @@ symbols:
   callers: []
   callees:
   - symbol:capability-bitemporal-canonical-commit:ranges.invalid-range-error
+- id: symbol:capability-bounded-delegation:delegation.delegation-rejected
+  node: capability:bounded-delegation
+  kind: class
+  name: DelegationRejected
+  file: engine/packages/brain-security/src/brain_security/delegation.py
+  line: 21
+  signature: class DelegationRejected
+  visibility: public
+  language: python
+  end_line: 22
+  callers:
+  - symbol:capability-bounded-delegation:delegation.validate-issuance
+  callees: []
+- id: symbol:capability-bounded-delegation:delegation.validate-issuance
+  node: capability:bounded-delegation
+  kind: function
+  name: validate_issuance
+  file: engine/packages/brain-security/src/brain_security/delegation.py
+  line: 25
+  signature: 'def validate_issuance(delegation: Delegation, *, acting: Principal,
+    executor: Principal, acting_slices: Sequence[ScopeSlice], policy: PolicyEvaluator,
+    now: datetime)'
+  visibility: public
+  language: python
+  end_line: 59
+  callers: []
+  callees:
+  - symbol:capability-bounded-delegation:delegation.delegation-rejected
+- id: symbol:capability-bounded-delegation:provision-delegation.database-url
+  node: capability:bounded-delegation
+  kind: function
+  name: _database_url
+  file: scripts/dev/provision_delegation.py
+  line: 41
+  signature: def _database_url()
+  visibility: private
+  language: python
+  end_line: 45
+  callers:
+  - symbol:capability-bounded-delegation:provision-delegation.main
+  callees: []
+- id: symbol:capability-bounded-delegation:provision-delegation.main
+  node: capability:bounded-delegation
+  kind: function
+  name: main
+  file: scripts/dev/provision_delegation.py
+  line: 48
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 151
+  callers: []
+  callees:
+  - symbol:capability-bounded-delegation:provision-delegation.database-url
 - id: symbol:capability-credential-verification-and-principal-resolution:credential-error.init
   node: capability:credential-verification-and-principal-resolution
   kind: method
   name: __init__
   file: engine/packages/brain-security/src/brain_security/verification.py
-  line: 15
+  line: 19
   signature: 'def __init__(self, code: str, message: str | None=None)'
   visibility: private
   language: python
   container: CredentialError
-  end_line: 17
+  end_line: 21
   callers: []
   callees:
   - symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.init
   - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.init
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-authentication-event-sink.init
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.init
 - id: symbol:capability-credential-verification-and-principal-resolution:credential-verifier.verify
   node: capability:credential-verification-and-principal-resolution
   kind: method
   name: verify
   file: engine/packages/brain-security/src/brain_security/verification.py
-  line: 31
+  line: 36
   signature: 'async def verify(self, bearer_token: str)'
   visibility: public
   language: python
   container: CredentialVerifier
-  end_line: 31
+  end_line: 36
   callers: []
   callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-profile.for-issuer
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: for_issuer
+  file: engine/packages/brain-security/src/brain_security/identity_profile.py
+  line: 52
+  signature: 'def for_issuer(self, issuer: str)'
+  visibility: public
+  language: python
+  container: IdentityProfile
+  end_line: 53
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.self-provision-kind
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-profile.identity-profile
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: IdentityProfile
+  file: engine/packages/brain-security/src/brain_security/identity_profile.py
+  line: 49
+  signature: class IdentityProfile
+  visibility: public
+  language: python
+  end_line: 60
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.load-identity-profile
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-profile.identity-profile-error
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: IdentityProfileError
+  file: engine/packages/brain-security/src/brain_security/identity_profile.py
+  line: 22
+  signature: class IdentityProfileError
+  visibility: public
+  language: python
+  end_line: 23
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.issuer-from-mapping
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.load-identity-profile
+  - symbol:capability-credential-verification-and-principal-resolution:issuer-profile.post-init
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-profile.issuer-from-mapping
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: _issuer_from_mapping
+  file: engine/packages/brain-security/src/brain_security/identity_profile.py
+  line: 63
+  signature: 'def _issuer_from_mapping(data: dict[str, Any])'
+  visibility: private
+  language: python
+  end_line: 79
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.load-identity-profile
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.identity-profile-error
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.issuer-profile
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-profile.issuer-profile
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: IssuerProfile
+  file: engine/packages/brain-security/src/brain_security/identity_profile.py
+  line: 27
+  signature: class IssuerProfile
+  visibility: public
+  language: python
+  end_line: 45
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.issuer-from-mapping
+  - symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.init
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-profile.load-identity-profile
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: load_identity_profile
+  file: engine/packages/brain-security/src/brain_security/identity_profile.py
+  line: 82
+  signature: 'def load_identity_profile(path: str | Path)'
+  visibility: public
+  language: python
+  end_line: 92
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.identity-profile
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.identity-profile-error
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.issuer-from-mapping
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-profile.self-provision-kind
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: self_provision_kind
+  file: engine/packages/brain-security/src/brain_security/identity_profile.py
+  line: 55
+  signature: 'def self_provision_kind(self, issuer: str, client_id: str | None)'
+  visibility: public
+  language: python
+  container: IdentityProfile
+  end_line: 60
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.for-issuer
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-repository.find-by-alias
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: find_by_alias
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 26
+  signature: 'async def find_by_alias(self, issuer: str, subject: str)'
+  visibility: public
+  language: python
+  container: IdentityRepository
+  end_line: 26
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity.provision-principal
+  - symbol:capability-credential-verification-and-principal-resolution:identity.resolve-or-create
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-repository.link-identity
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: link_identity
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 33
+  signature: 'async def link_identity(self, principal_id: UUID, issuer: str, subject:
+    str, approval_ref: str, operator_id: UUID)'
+  visibility: public
+  language: python
+  container: IdentityRepository
+  end_line: 40
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity-repository.resolve-or-create
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: resolve_or_create
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 28
+  signature: 'async def resolve_or_create(self, issuer: str, subject: str, kind: PrincipalKind)'
+  visibility: public
+  language: python
+  container: IdentityRepository
+  end_line: 31
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity.find-by-alias
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: find_by_alias
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 32
+  signature: 'def find_by_alias(session: Session, issuer: str, subject: str)'
+  visibility: public
+  language: python
+  end_line: 39
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity.provision-principal
+  - symbol:capability-credential-verification-and-principal-resolution:identity.resolve-or-create
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity.insert-principal
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: _insert_principal
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 42
+  signature: 'def _insert_principal(session: Session, *, issuer: str, subject: str,
+    kind: PrincipalKind, at: datetime, linked_by: UUID | None, approval_ref: str |
+    None)'
+  visibility: private
+  language: python
+  end_line: 75
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity.provision-principal
+  - symbol:capability-credential-verification-and-principal-resolution:identity.resolve-or-create
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity.link-identity
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: link_identity
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 155
+  signature: 'def link_identity(session: Session, principal_id: UUID, issuer: str,
+    subject: str, *, approval_ref: str, operator_id: UUID, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 198
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:principals.alias-conflict
+- id: symbol:capability-credential-verification-and-principal-resolution:identity.provision-principal
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: provision_principal
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 114
+  signature: 'def provision_principal(session: Session, *, issuer: str, subject: str,
+    kind: PrincipalKind, operator_id: UUID, approval_ref: str, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 152
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-repository.find-by-alias
+  - symbol:capability-credential-verification-and-principal-resolution:identity.find-by-alias
+  - symbol:capability-credential-verification-and-principal-resolution:identity.insert-principal
+  - symbol:capability-credential-verification-and-principal-resolution:principals.alias-conflict
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.find-by-alias
+- id: symbol:capability-credential-verification-and-principal-resolution:identity.resolve-or-create
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: resolve_or_create
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 78
+  signature: 'def resolve_or_create(session: Session, issuer: str, subject: str, kind:
+    PrincipalKind, *, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 111
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-repository.find-by-alias
+  - symbol:capability-credential-verification-and-principal-resolution:identity.find-by-alias
+  - symbol:capability-credential-verification-and-principal-resolution:identity.insert-principal
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.find-by-alias
+- id: symbol:capability-credential-verification-and-principal-resolution:identity.set-principal-status
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: set_principal_status
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 201
+  signature: 'def set_principal_status(session: Session, principal_id: UUID, status:
+    PrincipalStatus, *, operator_id: UUID, approval_ref: str, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 234
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity.sql-alchemy-authentication-event-sink
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: SqlAlchemyAuthenticationEventSink
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 269
+  signature: class SqlAlchemyAuthenticationEventSink
+  visibility: public
+  language: python
+  end_line: 279
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:identity.sql-alchemy-identity-repository
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: SqlAlchemyIdentityRepository
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 237
+  signature: class SqlAlchemyIdentityRepository
+  visibility: public
+  language: python
+  end_line: 266
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:issuer-profile.post-init
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-security/src/brain_security/identity_profile.py
+  line: 36
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: IssuerProfile
+  end_line: 45
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.identity-profile-error
 - id: symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.init
   node: capability:credential-verification-and-principal-resolution
   kind: method
   name: __init__
   file: engine/packages/brain-security/src/brain_security/verification.py
-  line: 39
-  signature: 'def __init__(self, *, issuer: str, audience: str, jwks_url: str | None=None)'
+  line: 128
+  signature: 'def __init__(self, *, issuer: str | None=None, audience: str | None=None,
+    jwks_url: str | None=None, profile: IssuerProfile | None=None)'
   visibility: private
   language: python
   container: OidcJwksVerifier
-  end_line: 42
+  end_line: 142
   callers:
   - symbol:capability-credential-verification-and-principal-resolution:credential-error.init
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.issuer-profile
+- id: symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.profile
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: profile
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 145
+  signature: def profile(self)
+  visibility: public
+  language: python
+  container: OidcJwksVerifier
+  end_line: 146
+  callers: []
   callees: []
 - id: symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.verify
   node: capability:credential-verification-and-principal-resolution
   kind: method
   name: verify
   file: engine/packages/brain-security/src/brain_security/verification.py
-  line: 44
+  line: 148
   signature: 'async def verify(self, bearer_token: str)'
   visibility: public
   language: python
   container: OidcJwksVerifier
-  end_line: 78
+  end_line: 159
   callers: []
   callees:
   - symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
-  - symbol:capability-credential-verification-and-principal-resolution:verification.verified-credential
-- id: symbol:capability-credential-verification-and-principal-resolution:principal-repository.create
-  node: capability:credential-verification-and-principal-resolution
-  kind: method
-  name: create
-  file: engine/packages/brain-security/src/brain_security/principals.py
-  line: 14
-  signature: 'async def create(self, *, issuer: str, subject: str, kind: PrincipalKind)'
-  visibility: public
-  language: python
-  container: PrincipalRepository
-  end_line: 14
-  callers:
-  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
-  callees: []
-- id: symbol:capability-credential-verification-and-principal-resolution:principal-repository.find-by-issuer-subject
-  node: capability:credential-verification-and-principal-resolution
-  kind: method
-  name: find_by_issuer_subject
-  file: engine/packages/brain-security/src/brain_security/principals.py
-  line: 12
-  signature: 'async def find_by_issuer_subject(self, issuer: str, subject: str)'
-  visibility: public
-  language: python
-  container: PrincipalRepository
-  end_line: 12
-  callers:
-  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
-  callees: []
-- id: symbol:capability-credential-verification-and-principal-resolution:principal-repository.memberships
-  node: capability:credential-verification-and-principal-resolution
-  kind: method
-  name: memberships
-  file: engine/packages/brain-security/src/brain_security/principals.py
-  line: 16
-  signature: 'async def memberships(self, principal_id: UUID)'
-  visibility: public
-  language: python
-  container: PrincipalRepository
-  end_line: 16
-  callers:
-  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.memberships
-  callees: []
+  - symbol:capability-credential-verification-and-principal-resolution:verification.decode-verified
 - id: symbol:capability-credential-verification-and-principal-resolution:principal-resolver.init
   node: capability:credential-verification-and-principal-resolution
   kind: method
   name: __init__
   file: engine/packages/brain-security/src/brain_security/principals.py
-  line: 23
-  signature: 'def __init__(self, repository: PrincipalRepository)'
+  line: 47
+  signature: 'def __init__(self, repository: IdentityRepository, profile: IdentityProfile)'
   visibility: private
   language: python
   container: PrincipalResolver
-  end_line: 24
+  end_line: 49
   callers:
   - symbol:capability-credential-verification-and-principal-resolution:credential-error.init
   callees: []
-- id: symbol:capability-credential-verification-and-principal-resolution:principal-resolver.memberships
-  node: capability:credential-verification-and-principal-resolution
-  kind: method
-  name: memberships
-  file: engine/packages/brain-security/src/brain_security/principals.py
-  line: 38
-  signature: 'async def memberships(self, principal: Principal)'
-  visibility: public
-  language: python
-  container: PrincipalResolver
-  end_line: 41
-  callers: []
-  callees:
-  - symbol:capability-credential-verification-and-principal-resolution:principal-repository.memberships
 - id: symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
   node: capability:credential-verification-and-principal-resolution
   kind: method
   name: resolve
   file: engine/packages/brain-security/src/brain_security/principals.py
-  line: 26
+  line: 51
   signature: 'async def resolve(self, credential: VerifiedCredential)'
   visibility: public
   language: python
   container: PrincipalResolver
-  end_line: 36
+  end_line: 63
   callers: []
   callees:
-  - symbol:capability-credential-verification-and-principal-resolution:principal-repository.create
-  - symbol:capability-credential-verification-and-principal-resolution:principal-repository.find-by-issuer-subject
+  - symbol:capability-credential-verification-and-principal-resolution:identity-profile.self-provision-kind
+  - symbol:capability-credential-verification-and-principal-resolution:identity-repository.find-by-alias
+  - symbol:capability-credential-verification-and-principal-resolution:identity-repository.resolve-or-create
+  - symbol:capability-credential-verification-and-principal-resolution:identity.find-by-alias
+  - symbol:capability-credential-verification-and-principal-resolution:identity.resolve-or-create
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.find-by-alias
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.resolve-or-create
   - symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
-- id: symbol:capability-credential-verification-and-principal-resolution:principals.principal-repository
+- id: symbol:capability-credential-verification-and-principal-resolution:principals.alias-conflict
   node: capability:credential-verification-and-principal-resolution
   kind: class
-  name: PrincipalRepository
+  name: AliasConflict
   file: engine/packages/brain-security/src/brain_security/principals.py
-  line: 11
-  signature: class PrincipalRepository
+  line: 21
+  signature: class AliasConflict
   visibility: public
   language: python
-  end_line: 16
+  end_line: 22
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity.link-identity
+  - symbol:capability-credential-verification-and-principal-resolution:identity.provision-principal
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:principals.identity-repository
+  node: capability:credential-verification-and-principal-resolution
+  kind: class
+  name: IdentityRepository
+  file: engine/packages/brain-security/src/brain_security/principals.py
+  line: 25
+  signature: class IdentityRepository
+  visibility: public
+  language: python
+  end_line: 40
   callers: []
   callees: []
 - id: symbol:capability-credential-verification-and-principal-resolution:principals.principal-resolver
@@ -943,49 +2126,220 @@ symbols:
   kind: class
   name: PrincipalResolver
   file: engine/packages/brain-security/src/brain_security/principals.py
-  line: 19
+  line: 43
   signature: class PrincipalResolver
   visibility: public
   language: python
-  end_line: 41
+  end_line: 63
   callers: []
   callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-authentication-event-sink.init
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: __init__
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 273
+  signature: 'def __init__(self, session_factory: async_sessionmaker[AsyncSession])'
+  visibility: private
+  language: python
+  container: SqlAlchemyAuthenticationEventSink
+  end_line: 274
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:credential-error.init
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-authentication-event-sink.record
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: record
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 276
+  signature: 'async def record(self, event: AuthenticationEvent)'
+  visibility: public
+  language: python
+  container: SqlAlchemyAuthenticationEventSink
+  end_line: 279
+  callers: []
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.find-by-alias
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: find_by_alias
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 249
+  signature: 'async def find_by_alias(self, issuer: str, subject: str)'
+  visibility: public
+  language: python
+  container: SqlAlchemyIdentityRepository
+  end_line: 250
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:identity.provision-principal
+  - symbol:capability-credential-verification-and-principal-resolution:identity.resolve-or-create
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.run
+- id: symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.init
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: __init__
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 240
+  signature: 'def __init__(self, session: AsyncSession, *, clock: Callable[[], datetime]
+    | None=None)'
+  visibility: private
+  language: python
+  container: SqlAlchemyIdentityRepository
+  end_line: 244
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:credential-error.init
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.link-identity
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: link_identity
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 255
+  signature: 'async def link_identity(self, principal_id: UUID, issuer: str, subject:
+    str, approval_ref: str, operator_id: UUID)'
+  visibility: public
+  language: python
+  container: SqlAlchemyIdentityRepository
+  end_line: 266
+  callers: []
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.run
+- id: symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.resolve-or-create
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: resolve_or_create
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 252
+  signature: 'async def resolve_or_create(self, issuer: str, subject: str, kind: PrincipalKind)'
+  visibility: public
+  language: python
+  container: SqlAlchemyIdentityRepository
+  end_line: 253
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.run
+- id: symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.run
+  node: capability:credential-verification-and-principal-resolution
+  kind: method
+  name: _run
+  file: engine/packages/brain-persistence/src/brain_persistence/identity.py
+  line: 246
+  signature: 'async def _run(self, fn: Callable[..., T], *args: Any, **kwargs: Any)'
+  visibility: private
+  language: python
+  container: SqlAlchemyIdentityRepository
+  end_line: 247
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.find-by-alias
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.link-identity
+  - symbol:capability-credential-verification-and-principal-resolution:sql-alchemy-identity-repository.resolve-or-create
+  callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:verification.claim-str
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: _claim_str
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 39
+  signature: 'def _claim_str(payload: dict[str, Any], name: str)'
+  visibility: private
+  language: python
+  end_line: 43
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-from-claims
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
+- id: symbol:capability-credential-verification-and-principal-resolution:verification.claim-time
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: _claim_time
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 46
+  signature: 'def _claim_time(payload: dict[str, Any], name: str)'
+  visibility: private
+  language: python
+  end_line: 52
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-from-claims
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
 - id: symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
   node: capability:credential-verification-and-principal-resolution
   kind: class
   name: CredentialError
   file: engine/packages/brain-security/src/brain_security/verification.py
-  line: 11
+  line: 13
   signature: class CredentialError
   visibility: public
   language: python
-  end_line: 17
+  end_line: 21
   callers:
   - symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.verify
   - symbol:capability-credential-verification-and-principal-resolution:principal-resolver.resolve
+  - symbol:capability-credential-verification-and-principal-resolution:verification.claim-str
+  - symbol:capability-credential-verification-and-principal-resolution:verification.claim-time
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-from-claims
+  - symbol:capability-credential-verification-and-principal-resolution:verification.decode-verified
   callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:verification.credential-from-claims
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: credential_from_claims
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 55
+  signature: 'def credential_from_claims(payload: dict[str, Any], *, audience: str,
+    key_id: str)'
+  visibility: public
+  language: python
+  end_line: 75
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:verification.decode-verified
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:verification.claim-str
+  - symbol:capability-credential-verification-and-principal-resolution:verification.claim-time
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
+  - symbol:capability-credential-verification-and-principal-resolution:verification.verified-credential
 - id: symbol:capability-credential-verification-and-principal-resolution:verification.credential-verifier
   node: capability:credential-verification-and-principal-resolution
   kind: class
   name: CredentialVerifier
   file: engine/packages/brain-security/src/brain_security/verification.py
-  line: 30
+  line: 35
   signature: class CredentialVerifier
   visibility: public
   language: python
-  end_line: 31
+  end_line: 36
   callers: []
   callees: []
+- id: symbol:capability-credential-verification-and-principal-resolution:verification.decode-verified
+  node: capability:credential-verification-and-principal-resolution
+  kind: function
+  name: decode_verified
+  file: engine/packages/brain-security/src/brain_security/verification.py
+  line: 78
+  signature: 'def decode_verified(bearer_token: str, key: Any, profile: IssuerProfile,
+    *, key_id: str)'
+  visibility: public
+  language: python
+  end_line: 118
+  callers:
+  - symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.verify
+  callees:
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-error
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-from-claims
 - id: symbol:capability-credential-verification-and-principal-resolution:verification.oidc-jwks-verifier
   node: capability:credential-verification-and-principal-resolution
   kind: class
   name: OidcJwksVerifier
   file: engine/packages/brain-security/src/brain_security/verification.py
-  line: 34
+  line: 121
   signature: class OidcJwksVerifier
   visibility: public
   language: python
-  end_line: 78
+  end_line: 159
   callers: []
   callees: []
 - id: symbol:capability-credential-verification-and-principal-resolution:verification.verified-credential
@@ -993,13 +2347,1229 @@ symbols:
   kind: class
   name: VerifiedCredential
   file: engine/packages/brain-security/src/brain_security/verification.py
-  line: 21
+  line: 25
   signature: class VerifiedCredential
   visibility: public
   language: python
-  end_line: 27
+  end_line: 32
   callers:
-  - symbol:capability-credential-verification-and-principal-resolution:oidc-jwks-verifier.verify
+  - symbol:capability-credential-verification-and-principal-resolution:verification.credential-from-claims
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.append-audit-event
+  node: capability:current-resource-scope
+  kind: function
+  name: append_audit_event
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 274
+  signature: 'def append_audit_event(session: Session, event: Any)'
+  visibility: public
+  language: python
+  end_line: 295
+  callers:
+  - symbol:capability-current-resource-scope:authx.append-decision
+  callees:
+  - symbol:capability-current-resource-scope:authx.audit-timestamp
+- id: symbol:capability-current-resource-scope:authx.append-authentication-event
+  node: capability:current-resource-scope
+  kind: function
+  name: append_authentication_event
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 298
+  signature: 'def append_authentication_event(session: Session, event: AuthenticationEvent)'
+  visibility: public
+  language: python
+  end_line: 309
+  callers: []
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.append-decision
+  node: capability:current-resource-scope
+  kind: function
+  name: append_decision
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 264
+  signature: 'def append_decision(session: Session, decision: AuthorizationDecision)'
+  visibility: public
+  language: python
+  end_line: 265
+  callers:
+  - symbol:capability-current-resource-scope:sql-alchemy-authority-store.append-decision
+  - symbol:capability-current-resource-scope:sync-authority-store.append-decision
+  callees:
+  - symbol:capability-current-resource-scope:authx.append-audit-event
+- id: symbol:capability-current-resource-scope:authx.audit-timestamp
+  node: capability:current-resource-scope
+  kind: function
+  name: audit_timestamp
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 268
+  signature: 'def audit_timestamp(value: datetime)'
+  visibility: public
+  language: python
+  end_line: 271
+  callers:
+  - symbol:capability-current-resource-scope:authx.append-audit-event
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.aware
+  node: capability:current-resource-scope
+  kind: function
+  name: _aware
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 121
+  signature: 'def _aware(value: datetime)'
+  visibility: private
+  language: python
+  end_line: 123
+  callers:
+  - symbol:capability-current-resource-scope:authx.delegation-from-row
+  - symbol:capability-current-resource-scope:authx.scope-slices
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.ceilings-from-json
+  node: capability:current-resource-scope
+  kind: function
+  name: ceilings_from_json
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 91
+  signature: 'def ceilings_from_json(data: Sequence[dict[str, Any]])'
+  visibility: public
+  language: python
+  end_line: 103
+  callers:
+  - symbol:capability-current-resource-scope:authx.delegation-from-row
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.current-policy-release
+  node: capability:current-resource-scope
+  kind: function
+  name: current_policy_release
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 133
+  signature: 'def current_policy_release(session: Session)'
+  visibility: public
+  language: python
+  end_line: 139
+  callers:
+  - symbol:capability-current-resource-scope:sync-authority-store.current-policy-release
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.delegation-from-row
+  node: capability:current-resource-scope
+  kind: function
+  name: delegation_from_row
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 106
+  signature: 'def delegation_from_row(row: DelegationRow)'
+  visibility: public
+  language: python
+  end_line: 118
+  callers:
+  - symbol:capability-current-resource-scope:authx.lock-delegation
+  - symbol:capability-current-resource-scope:authx.peek-delegation
+  - symbol:capability-current-resource-scope:grants.revoke-delegation
+  callees:
+  - symbol:capability-current-resource-scope:authx.aware
+  - symbol:capability-current-resource-scope:authx.ceilings-from-json
+- id: symbol:capability-current-resource-scope:authx.hydrate
+  node: capability:current-resource-scope
+  kind: function
+  name: hydrate
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 221
+  signature: 'def hydrate(session: Session, key: ResourceKey, *, require_record: bool=True)'
+  visibility: public
+  language: python
+  end_line: 261
+  callers:
+  - symbol:capability-current-resource-scope:sync-authority-store.hydrate
+  callees:
+  - symbol:capability-current-resource-scope:authx.resource-key-from-json
+  - symbol:capability-current-resource-scope:authx.semantic-owner
+- id: symbol:capability-current-resource-scope:authx.labels-to-json
+  node: capability:current-resource-scope
+  kind: function
+  name: labels_to_json
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 86
+  signature: 'def labels_to_json(value: object)'
+  visibility: public
+  language: python
+  end_line: 88
+  callers:
+  - symbol:capability-current-resource-scope:grants.grant-membership
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.lock-authority
+  node: capability:current-resource-scope
+  kind: function
+  name: lock_authority
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 157
+  signature: 'def lock_authority(session: Session, principal_ids: Sequence[UUID])'
+  visibility: public
+  language: python
+  end_line: 175
+  callers:
+  - symbol:capability-current-resource-scope:sync-authority-store.lock-authority
+  callees:
+  - symbol:capability-current-resource-scope:authx.principal-from-row
+- id: symbol:capability-current-resource-scope:authx.lock-delegation
+  node: capability:current-resource-scope
+  kind: function
+  name: lock_delegation
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 147
+  signature: 'def lock_delegation(session: Session, delegation_id: UUID)'
+  visibility: public
+  language: python
+  end_line: 154
+  callers:
+  - symbol:capability-current-resource-scope:sync-authority-store.lock-delegation
+  callees:
+  - symbol:capability-current-resource-scope:authx.delegation-from-row
+- id: symbol:capability-current-resource-scope:authx.peek-delegation
+  node: capability:current-resource-scope
+  kind: function
+  name: peek_delegation
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 142
+  signature: 'def peek_delegation(session: Session, delegation_id: UUID)'
+  visibility: public
+  language: python
+  end_line: 144
+  callers:
+  - symbol:capability-current-resource-scope:sync-authority-store.peek-delegation
+  callees:
+  - symbol:capability-current-resource-scope:authx.delegation-from-row
+- id: symbol:capability-current-resource-scope:authx.principal-from-row
+  node: capability:current-resource-scope
+  kind: function
+  name: principal_from_row
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 65
+  signature: 'def principal_from_row(row: PrincipalRow)'
+  visibility: public
+  language: python
+  end_line: 72
+  callers:
+  - symbol:capability-current-resource-scope:authx.lock-authority
+  - symbol:capability-current-resource-scope:grants.issue-delegation
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.resource-key-from-json
+  node: capability:current-resource-scope
+  kind: function
+  name: resource_key_from_json
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 126
+  signature: 'def resource_key_from_json(item: dict[str, str])'
+  visibility: public
+  language: python
+  end_line: 127
+  callers:
+  - symbol:capability-current-resource-scope:authx.hydrate
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.scope-slices
+  node: capability:current-resource-scope
+  kind: function
+  name: scope_slices
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 178
+  signature: 'def scope_slices(session: Session, principal_id: UUID)'
+  visibility: public
+  language: python
+  end_line: 206
+  callers:
+  - symbol:capability-current-resource-scope:grants.issue-delegation
+  - symbol:capability-current-resource-scope:sync-authority-store.scope-slices
+  callees:
+  - symbol:capability-current-resource-scope:authx.aware
+  - symbol:capability-current-resource-scope:authx.selectors-from-json
+- id: symbol:capability-current-resource-scope:authx.selectors-from-json
+  node: capability:current-resource-scope
+  kind: function
+  name: selectors_from_json
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 75
+  signature: 'def selectors_from_json(data: Sequence[dict[str, Any]])'
+  visibility: public
+  language: python
+  end_line: 79
+  callers:
+  - symbol:capability-current-resource-scope:authx.scope-slices
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.selectors-to-json
+  node: capability:current-resource-scope
+  kind: function
+  name: selectors_to_json
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 82
+  signature: 'def selectors_to_json(selectors: Sequence[Selector])'
+  visibility: public
+  language: python
+  end_line: 83
+  callers:
+  - symbol:capability-current-resource-scope:grants.grant-membership
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.semantic-owner
+  node: capability:current-resource-scope
+  kind: function
+  name: _semantic_owner
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 209
+  signature: 'def _semantic_owner(session: Session, key: ResourceKey)'
+  visibility: private
+  language: python
+  end_line: 218
+  callers:
+  - symbol:capability-current-resource-scope:authx.hydrate
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.sql-alchemy-authority-store
+  node: capability:current-resource-scope
+  kind: class
+  name: SqlAlchemyAuthorityStore
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 344
+  signature: class SqlAlchemyAuthorityStore
+  visibility: public
+  language: python
+  end_line: 362
+  callers: []
+  callees: []
+- id: symbol:capability-current-resource-scope:authx.sync-authority-store
+  node: capability:current-resource-scope
+  kind: class
+  name: SyncAuthorityStore
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 315
+  signature: class SyncAuthorityStore
+  visibility: public
+  language: python
+  end_line: 341
+  callers:
+  - symbol:capability-current-resource-scope:sql-alchemy-authority-store.run-sync
+  callees: []
+- id: symbol:capability-current-resource-scope:grants.activate-policy-release
+  node: capability:current-resource-scope
+  kind: function
+  name: activate_policy_release
+  file: engine/packages/brain-persistence/src/brain_persistence/grants.py
+  line: 194
+  signature: 'def activate_policy_release(session: Session, release: PolicyRelease,
+    *, operator_id: UUID, approval_ref: str, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 228
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:grants.register-policy-release
+- id: symbol:capability-current-resource-scope:grants.grant-membership
+  node: capability:current-resource-scope
+  kind: function
+  name: grant_membership
+  file: engine/packages/brain-persistence/src/brain_persistence/grants.py
+  line: 61
+  signature: 'def grant_membership(session: Session, *, principal_id: UUID, tenant_id:
+    UUID, knowledge_base_id: UUID, role: PilotRole | str, selectors: Sequence[Selector],
+    classifications: LabelSet | Iterable[str], source_acl_ids: LabelSet | Iterable[str],
+    valid_from: datetime, expires_at: datetime | None=None, operator_id: UUID, approval_ref:
+    str, at: datetime, expected_authority_revision: int | None=None, membership_id:
+    UUID | None=None)'
+  visibility: public
+  language: python
+  end_line: 123
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:authx.labels-to-json
+  - symbol:capability-current-resource-scope:authx.selectors-to-json
+  - symbol:capability-current-resource-scope:grants.lock-authority
+- id: symbol:capability-current-resource-scope:grants.issue-delegation
+  node: capability:current-resource-scope
+  kind: function
+  name: issue_delegation
+  file: engine/packages/brain-persistence/src/brain_persistence/grants.py
+  line: 231
+  signature: 'def issue_delegation(session: Session, delegation: Delegation, *, operator_id:
+    UUID, approval_ref: str, policy: PolicyEvaluator, at: datetime, expected_authority_revision:
+    int | None=None)'
+  visibility: public
+  language: python
+  end_line: 291
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:authx.principal-from-row
+  - symbol:capability-current-resource-scope:authx.scope-slices
+  - symbol:capability-current-resource-scope:grants.lock-authority
+  - symbol:capability-current-resource-scope:sync-authority-store.scope-slices
+- id: symbol:capability-current-resource-scope:grants.lock-authority
+  node: capability:current-resource-scope
+  kind: function
+  name: _lock_authority
+  file: engine/packages/brain-persistence/src/brain_persistence/grants.py
+  line: 49
+  signature: 'def _lock_authority(session: Session, principal_id: UUID)'
+  visibility: private
+  language: python
+  end_line: 58
+  callers:
+  - symbol:capability-current-resource-scope:grants.grant-membership
+  - symbol:capability-current-resource-scope:grants.issue-delegation
+  - symbol:capability-current-resource-scope:grants.revoke-membership
+  callees: []
+- id: symbol:capability-current-resource-scope:grants.register-policy-release
+  node: capability:current-resource-scope
+  kind: function
+  name: register_policy_release
+  file: engine/packages/brain-persistence/src/brain_persistence/grants.py
+  line: 170
+  signature: 'def register_policy_release(session: Session, release: PolicyRelease,
+    *, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 191
+  callers:
+  - symbol:capability-current-resource-scope:grants.activate-policy-release
+  callees: []
+- id: symbol:capability-current-resource-scope:grants.revoke-delegation
+  node: capability:current-resource-scope
+  kind: function
+  name: revoke_delegation
+  file: engine/packages/brain-persistence/src/brain_persistence/grants.py
+  line: 294
+  signature: 'def revoke_delegation(session: Session, delegation_id: UUID, *, operator_id:
+    UUID, approval_ref: str, at: datetime, expected_revision: int | None=None)'
+  visibility: public
+  language: python
+  end_line: 329
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:authx.delegation-from-row
+- id: symbol:capability-current-resource-scope:grants.revoke-membership
+  node: capability:current-resource-scope
+  kind: function
+  name: revoke_membership
+  file: engine/packages/brain-persistence/src/brain_persistence/grants.py
+  line: 126
+  signature: 'def revoke_membership(session: Session, membership_id: UUID, *, operator_id:
+    UUID, approval_ref: str, at: datetime, expected_grant_revision: int | None=None)'
+  visibility: public
+  language: python
+  end_line: 167
+  callers:
+  - symbol:capability-current-resource-scope:revoke-membership.revoke
+  callees:
+  - symbol:capability-current-resource-scope:grants.lock-authority
+- id: symbol:capability-current-resource-scope:revoke-membership.main
+  node: capability:current-resource-scope
+  kind: function
+  name: main
+  file: scripts/dev/revoke_membership.py
+  line: 80
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 124
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:revoke-membership.revoke
+- id: symbol:capability-current-resource-scope:revoke-membership.revoke
+  node: capability:current-resource-scope
+  kind: function
+  name: revoke
+  file: scripts/dev/revoke_membership.py
+  line: 34
+  signature: 'def revoke(*, database_url: str, issuer: str, subject: str, tenant_id:
+    str, knowledge_base_id: str, operator_id: UUID, approval_ref: str)'
+  visibility: public
+  language: python
+  end_line: 77
+  callers:
+  - symbol:capability-current-resource-scope:revoke-membership.main
+  callees:
+  - symbol:capability-current-resource-scope:grants.revoke-membership
+- id: symbol:capability-current-resource-scope:sql-alchemy-authority-store.append-decision
+  node: capability:current-resource-scope
+  kind: method
+  name: append_decision
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 355
+  signature: 'async def append_decision(self, decision: AuthorizationDecision)'
+  visibility: public
+  language: python
+  container: SqlAlchemyAuthorityStore
+  end_line: 356
+  callers:
+  - symbol:capability-current-resource-scope:sync-authority-store.append-decision
+  callees:
+  - symbol:capability-current-resource-scope:authx.append-decision
+  - symbol:capability-current-resource-scope:sql-alchemy-authority-store.run-sync
+  - symbol:capability-current-resource-scope:sync-authority-store.append-decision
+- id: symbol:capability-current-resource-scope:sql-alchemy-authority-store.commit
+  node: capability:current-resource-scope
+  kind: method
+  name: commit
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 358
+  signature: async def commit(self)
+  visibility: public
+  language: python
+  container: SqlAlchemyAuthorityStore
+  end_line: 359
+  callers: []
+  callees: []
+- id: symbol:capability-current-resource-scope:sql-alchemy-authority-store.init
+  node: capability:current-resource-scope
+  kind: method
+  name: __init__
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 349
+  signature: 'def __init__(self, session: AsyncSession)'
+  visibility: private
+  language: python
+  container: SqlAlchemyAuthorityStore
+  end_line: 350
+  callers: []
+  callees: []
+- id: symbol:capability-current-resource-scope:sql-alchemy-authority-store.rollback
+  node: capability:current-resource-scope
+  kind: method
+  name: rollback
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 361
+  signature: async def rollback(self)
+  visibility: public
+  language: python
+  container: SqlAlchemyAuthorityStore
+  end_line: 362
+  callers: []
+  callees: []
+- id: symbol:capability-current-resource-scope:sql-alchemy-authority-store.run-sync
+  node: capability:current-resource-scope
+  kind: method
+  name: run_sync
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 352
+  signature: 'async def run_sync(self, fn: Callable[[SyncAuthorityStore], T])'
+  visibility: public
+  language: python
+  container: SqlAlchemyAuthorityStore
+  end_line: 353
+  callers:
+  - symbol:capability-current-resource-scope:sql-alchemy-authority-store.append-decision
+  callees:
+  - symbol:capability-current-resource-scope:authx.sync-authority-store
+- id: symbol:capability-current-resource-scope:sync-authority-store.append-decision
+  node: capability:current-resource-scope
+  kind: method
+  name: append_decision
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 340
+  signature: 'def append_decision(self, decision: AuthorizationDecision)'
+  visibility: public
+  language: python
+  container: SyncAuthorityStore
+  end_line: 341
+  callers:
+  - symbol:capability-current-resource-scope:sql-alchemy-authority-store.append-decision
+  callees:
+  - symbol:capability-current-resource-scope:authx.append-decision
+  - symbol:capability-current-resource-scope:sql-alchemy-authority-store.append-decision
+- id: symbol:capability-current-resource-scope:sync-authority-store.current-policy-release
+  node: capability:current-resource-scope
+  kind: method
+  name: current_policy_release
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 322
+  signature: def current_policy_release(self)
+  visibility: public
+  language: python
+  container: SyncAuthorityStore
+  end_line: 323
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:authx.current-policy-release
+- id: symbol:capability-current-resource-scope:sync-authority-store.hydrate
+  node: capability:current-resource-scope
+  kind: method
+  name: hydrate
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 337
+  signature: 'def hydrate(self, key: ResourceKey, *, require_record: bool=True)'
+  visibility: public
+  language: python
+  container: SyncAuthorityStore
+  end_line: 338
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:authx.hydrate
+- id: symbol:capability-current-resource-scope:sync-authority-store.init
+  node: capability:current-resource-scope
+  kind: method
+  name: __init__
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 319
+  signature: 'def __init__(self, session: Session)'
+  visibility: private
+  language: python
+  container: SyncAuthorityStore
+  end_line: 320
+  callers: []
+  callees: []
+- id: symbol:capability-current-resource-scope:sync-authority-store.lock-authority
+  node: capability:current-resource-scope
+  kind: method
+  name: lock_authority
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 328
+  signature: 'def lock_authority(self, principal_ids: Sequence[UUID])'
+  visibility: public
+  language: python
+  container: SyncAuthorityStore
+  end_line: 329
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:authx.lock-authority
+- id: symbol:capability-current-resource-scope:sync-authority-store.lock-delegation
+  node: capability:current-resource-scope
+  kind: method
+  name: lock_delegation
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 331
+  signature: 'def lock_delegation(self, delegation_id: UUID)'
+  visibility: public
+  language: python
+  container: SyncAuthorityStore
+  end_line: 332
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:authx.lock-delegation
+- id: symbol:capability-current-resource-scope:sync-authority-store.peek-delegation
+  node: capability:current-resource-scope
+  kind: method
+  name: peek_delegation
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 325
+  signature: 'def peek_delegation(self, delegation_id: UUID)'
+  visibility: public
+  language: python
+  container: SyncAuthorityStore
+  end_line: 326
+  callers: []
+  callees:
+  - symbol:capability-current-resource-scope:authx.peek-delegation
+- id: symbol:capability-current-resource-scope:sync-authority-store.scope-slices
+  node: capability:current-resource-scope
+  kind: method
+  name: scope_slices
+  file: engine/packages/brain-persistence/src/brain_persistence/authx.py
+  line: 334
+  signature: 'def scope_slices(self, principal_id: UUID)'
+  visibility: public
+  language: python
+  container: SyncAuthorityStore
+  end_line: 335
+  callers:
+  - symbol:capability-current-resource-scope:grants.issue-delegation
+  callees:
+  - symbol:capability-current-resource-scope:authx.scope-slices
+- id: symbol:capability-durable-authorization-decisions:audit-event-repository.append
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: append
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 15
+  signature: 'async def append(self, event: AuditEvent)'
+  visibility: public
+  language: python
+  container: AuditEventRepository
+  end_line: 15
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.append
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:audit.audit-event
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: AuditEvent
+  file: engine/packages/brain-domain/src/brain_domain/audit.py
+  line: 9
+  signature: class AuditEvent
+  visibility: public
+  language: python
+  end_line: 34
+  callers:
+  - symbol:capability-durable-authorization-decisions:audit.decision-audit-event
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:audit.audit-event-repository
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: AuditEventRepository
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 14
+  signature: class AuditEventRepository
+  visibility: public
+  language: python
+  end_line: 15
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:audit.authentication-event-sink
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: AuthenticationEventSink
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 18
+  signature: class AuthenticationEventSink
+  visibility: public
+  language: python
+  end_line: 22
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:audit.decision-audit-event
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: decision_audit_event
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 25
+  signature: 'def decision_audit_event(decision: AuthorizationDecision)'
+  visibility: public
+  language: python
+  end_line: 49
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:audit.audit-event
+- id: symbol:capability-durable-authorization-decisions:audit.in-memory-audit-event-repository
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: InMemoryAuditEventRepository
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 52
+  signature: class InMemoryAuditEventRepository
+  visibility: public
+  language: python
+  end_line: 59
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authentication-event-sink.record
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: record
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 22
+  signature: 'async def record(self, event: AuthenticationEvent)'
+  visibility: public
+  language: python
+  container: AuthenticationEventSink
+  end_line: 22
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-reader.current-policy-release
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: current_policy_release
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 81
+  signature: def current_policy_release(self)
+  visibility: public
+  language: python
+  container: AuthorityReader
+  end_line: 83
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-reader.hydrate
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: hydrate
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 99
+  signature: 'def hydrate(self, key: ResourceKey, *, require_record: bool=True)'
+  visibility: public
+  language: python
+  container: AuthorityReader
+  end_line: 102
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-reader.lock-authority
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: lock_authority
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 89
+  signature: 'def lock_authority(self, principal_ids: Sequence[UUID])'
+  visibility: public
+  language: python
+  container: AuthorityReader
+  end_line: 91
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-reader.lock-delegation
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: lock_delegation
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 93
+  signature: 'def lock_delegation(self, delegation_id: UUID)'
+  visibility: public
+  language: python
+  container: AuthorityReader
+  end_line: 93
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-reader.peek-delegation
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: peek_delegation
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 85
+  signature: 'def peek_delegation(self, delegation_id: UUID)'
+  visibility: public
+  language: python
+  container: AuthorityReader
+  end_line: 87
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-reader.scope-slices
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: scope_slices
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 95
+  signature: 'def scope_slices(self, principal_id: UUID)'
+  visibility: public
+  language: python
+  container: AuthorityReader
+  end_line: 97
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-store.append-decision
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: append_decision
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 112
+  signature: 'async def append_decision(self, decision: AuthorizationDecision)'
+  visibility: public
+  language: python
+  container: AuthorityStore
+  end_line: 112
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-store.commit
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: commit
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 114
+  signature: async def commit(self)
+  visibility: public
+  language: python
+  container: AuthorityStore
+  end_line: 114
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-store.rollback
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: rollback
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 116
+  signature: async def rollback(self)
+  visibility: public
+  language: python
+  container: AuthorityStore
+  end_line: 116
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authority-store.run-sync
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: run_sync
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 108
+  signature: 'async def run_sync(self, fn: Callable[[AuthorityReader], T])'
+  visibility: public
+  language: python
+  container: AuthorityStore
+  end_line: 110
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authorization-denied.init
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 60
+  signature: 'def __init__(self, decision: AuthorizationDecision)'
+  visibility: private
+  language: python
+  container: AuthorizationDenied
+  end_line: 62
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.init
+  - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.init
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.decide
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: _decide
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 279
+  signature: 'async def _decide(self, authenticated: Principal, keys: Sequence[ResourceKey],
+    action: str, requested: RequestedScope, trace_id: str, delegation_id: UUID | None)'
+  visibility: private
+  language: python
+  container: AuthorizationExecution
+  end_line: 302
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide
+  callees:
+  - symbol:capability-durable-authorization-decisions:authority-store.run-sync
+  - symbol:capability-durable-authorization-decisions:execution.decide
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.deny
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: _deny
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 340
+  signature: 'async def _deny(self, evaluated: Sequence[Evaluated])'
+  visibility: private
+  language: python
+  container: AuthorizationExecution
+  end_line: 349
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  callees:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:execution.authorization-denied
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: _guarded_decide
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 304
+  signature: 'async def _guarded_decide(self, authenticated: Principal, keys: Sequence[ResourceKey],
+    action: str, requested: RequestedScope, trace_id: str, delegation_id: UUID | None)'
+  visibility: private
+  language: python
+  container: AuthorizationExecution
+  end_line: 322
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  callees:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.decide
+  - symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback
+  - symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.init
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 264
+  signature: 'def __init__(self, store: AuthorityStore, policy: PolicyEvaluator, release:
+    PolicyRelease, *, clock: Callable[[], datetime]=utc_now, new_id: Callable[[],
+    UUID]=uuid4)'
+  visibility: private
+  language: python
+  container: AuthorizationExecution
+  end_line: 277
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-denied.init
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: mutate
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 388
+  signature: 'async def mutate(self, authenticated: Principal, keys: Sequence[ResourceKey],
+    action: str, *, trace_id: str, operation: Callable[[Sequence[AuthorizationDecision]],
+    Awaitable[T]], requested: RequestedScope=NO_FILTER, delegation_id: UUID | None=None)'
+  visibility: public
+  language: python
+  container: AuthorizationExecution
+  end_line: 424
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:authority-store.append-decision
+  - symbol:capability-durable-authorization-decisions:authority-store.commit
+  - symbol:capability-durable-authorization-decisions:authorization-execution.deny
+  - symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:authorization-execution.recheck-all
+  - symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback
+  - symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: _persist_fresh
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 329
+  signature: 'async def _persist_fresh(self, decisions: Sequence[AuthorizationDecision])'
+  visibility: private
+  language: python
+  container: AuthorizationExecution
+  end_line: 338
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.deny
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  callees:
+  - symbol:capability-durable-authorization-decisions:authority-store.append-decision
+  - symbol:capability-durable-authorization-decisions:authority-store.commit
+  - symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback
+  - symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.read
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: read
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 355
+  signature: 'async def read(self, authenticated: Principal, key: ResourceKey, action:
+    str, *, trace_id: str, load: Callable[[AuthorizationDecision], Awaitable[T]],
+    requested: RequestedScope=NO_FILTER, delegation_id: UUID | None=None)'
+  visibility: public
+  language: python
+  container: AuthorizationExecution
+  end_line: 386
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:authority-store.append-decision
+  - symbol:capability-durable-authorization-decisions:authority-store.commit
+  - symbol:capability-durable-authorization-decisions:authorization-execution.deny
+  - symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:authorization-execution.recheck-all
+  - symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback
+  - symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.recheck-all
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: _recheck_all
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 351
+  signature: 'def _recheck_all(self, evaluated: Sequence[Evaluated])'
+  visibility: private
+  language: python
+  container: AuthorizationExecution
+  end_line: 353
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  callees:
+  - symbol:capability-durable-authorization-decisions:execution.recheck
+- id: symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: _safe_rollback
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 324
+  signature: async def _safe_rollback(self)
+  visibility: private
+  language: python
+  container: AuthorizationExecution
+  end_line: 327
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  callees:
+  - symbol:capability-durable-authorization-decisions:authority-store.rollback
+- id: symbol:capability-durable-authorization-decisions:execution.assemble-context
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: assemble_context
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 131
+  signature: 'def assemble_context(*, authenticated: PrincipalAuthority, acting: PrincipalAuthority,
+    delegation: Delegation | None, at: datetime, release: PolicyRelease, slices: tuple[ScopeSlice,
+    ...], requested: RequestedScope, trace_id: str)'
+  visibility: public
+  language: python
+  end_line: 153
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.authority-reader
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: AuthorityReader
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 76
+  signature: class AuthorityReader
+  visibility: public
+  language: python
+  end_line: 102
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.authority-store
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: AuthorityStore
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 105
+  signature: class AuthorityStore
+  visibility: public
+  language: python
+  end_line: 116
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.authorization-denied
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: AuthorizationDenied
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 56
+  signature: class AuthorizationDenied
+  visibility: public
+  language: python
+  end_line: 62
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.deny
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.authorization-execution
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: AuthorizationExecution
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 263
+  signature: class AuthorizationExecution
+  visibility: public
+  language: python
+  end_line: 424
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: AuthorizationUnavailable
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 65
+  signature: class AuthorizationUnavailable
+  visibility: public
+  language: python
+  end_line: 67
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.decide
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: decide
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 179
+  signature: 'def decide(reader: AuthorityReader, policy: PolicyEvaluator, release:
+    PolicyRelease, *, authenticated_id: UUID, keys: Sequence[ResourceKey], action:
+    str, requested: RequestedScope, trace_id: str, delegation_id: UUID | None, clock:
+    Callable[[], datetime], new_id: Callable[[], UUID], require_record: bool=True)'
+  visibility: public
+  language: python
+  end_line: 260
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.decide
+  callees:
+  - symbol:capability-durable-authorization-decisions:audit-event-repository.append
+  - symbol:capability-durable-authorization-decisions:authority-reader.current-policy-release
+  - symbol:capability-durable-authorization-decisions:authority-reader.hydrate
+  - symbol:capability-durable-authorization-decisions:authority-reader.lock-authority
+  - symbol:capability-durable-authorization-decisions:authority-reader.lock-delegation
+  - symbol:capability-durable-authorization-decisions:authority-reader.peek-delegation
+  - symbol:capability-durable-authorization-decisions:authority-reader.scope-slices
+  - symbol:capability-durable-authorization-decisions:execution.assemble-context
+  - symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
+  - symbol:capability-durable-authorization-decisions:execution.evaluated
+  - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.append
+- id: symbol:capability-durable-authorization-decisions:execution.evaluated
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: Evaluated
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 120
+  signature: class Evaluated
+  visibility: public
+  language: python
+  end_line: 128
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.principal-authority
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: PrincipalAuthority
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 71
+  signature: class PrincipalAuthority
+  visibility: public
+  language: python
+  end_line: 73
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.recheck
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: recheck
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 156
+  signature: 'def recheck(evaluated: Evaluated, policy: PolicyEvaluator, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 172
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.recheck-all
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:execution.utc-now
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: utc_now
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 175
+  signature: def utc_now()
+  visibility: public
+  language: python
+  end_line: 176
+  callers: []
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.append
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: append
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 58
+  signature: 'async def append(self, event: AuditEvent)'
+  visibility: public
+  language: python
+  container: InMemoryAuditEventRepository
+  end_line: 59
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees:
+  - symbol:capability-durable-authorization-decisions:audit-event-repository.append
+- id: symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.init
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/src/brain_security/audit.py
+  line: 55
+  signature: def __init__(self)
+  visibility: private
+  language: python
+  container: InMemoryAuditEventRepository
+  end_line: 56
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-denied.init
   callees: []
 - id: symbol:capability-evidence-review-round-trip:audit-recorder.record-decision
   node: capability:evidence-review-round-trip
@@ -1888,11 +4458,11 @@ symbols:
   kind: class
   name: DocumentJobAuthorization
   file: engine/apps/worker/src/brain_worker/document_delivery.py
-  line: 41
+  line: 50
   signature: class DocumentJobAuthorization
   visibility: public
   language: python
-  end_line: 102
+  end_line: 144
   callers:
   - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees: []
@@ -1901,11 +4471,11 @@ symbols:
   kind: class
   name: DocumentResultImporter
   file: engine/apps/worker/src/brain_worker/document_delivery.py
-  line: 157
+  line: 201
   signature: class DocumentResultImporter
   visibility: public
   language: python
-  end_line: 344
+  end_line: 405
   callers:
   - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees: []
@@ -1914,11 +4484,11 @@ symbols:
   kind: function
   name: _register_artifact
   file: engine/apps/worker/src/brain_worker/document_delivery.py
-  line: 105
+  line: 147
   signature: 'def _register_artifact(session: Session, manifest: ArtifactManifest)'
   visibility: private
   language: python
-  end_line: 144
+  end_line: 188
   callers:
   - symbol:capability-parse-once-content-artifact:document-delivery.register-document-artifact
   - symbol:capability-parse-once-content-artifact:document-result-importer.run-one
@@ -1929,39 +4499,56 @@ symbols:
   kind: function
   name: register_document_artifact
   file: engine/apps/worker/src/brain_worker/document_delivery.py
-  line: 147
+  line: 191
   signature: 'def register_document_artifact(connection: Connection, manifest: ArtifactManifest)'
   visibility: public
   language: python
-  end_line: 154
+  end_line: 198
   callers: []
   callees:
   - symbol:capability-parse-once-content-artifact:document-delivery.register-artifact
+- id: symbol:capability-parse-once-content-artifact:document-job-authorization.decide
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: decide
+  file: engine/apps/worker/src/brain_worker/document_delivery.py
+  line: 77
+  signature: 'def decide(self, *, executor_id: UUID, delegation_id: UUID | None, knowledge_base_id:
+    UUID, artifact_id: UUID, action: str, trace_id: str)'
+  visibility: public
+  language: python
+  container: DocumentJobAuthorization
+  end_line: 118
+  callers:
+  - symbol:capability-parse-once-content-artifact:document-job-authorization.for-job
+  callees: []
 - id: symbol:capability-parse-once-content-artifact:document-job-authorization.for-job
   node: capability:parse-once-content-artifact
   kind: method
   name: for_job
   file: engine/apps/worker/src/brain_worker/document_delivery.py
-  line: 52
+  line: 120
   signature: 'def for_job(self, lease: JobLease)'
   visibility: public
   language: python
   container: DocumentJobAuthorization
-  end_line: 102
+  end_line: 144
   callers:
   - symbol:capability-parse-once-content-artifact:worker-cli.main
-  callees: []
+  callees:
+  - symbol:capability-parse-once-content-artifact:document-job-authorization.decide
 - id: symbol:capability-parse-once-content-artifact:document-job-authorization.init
   node: capability:parse-once-content-artifact
   kind: method
   name: __init__
   file: engine/apps/worker/src/brain_worker/document_delivery.py
-  line: 49
-  signature: 'def __init__(self, engine: Engine, model_path: Path, policy_path: Path)'
+  line: 65
+  signature: 'def __init__(self, engine: Engine, model_path: Path, policy_path: Path,
+    *, clock: Callable[[], datetime] | None=None)'
   visibility: private
   language: python
   container: DocumentJobAuthorization
-  end_line: 50
+  end_line: 75
   callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:document-job-queue.cancel
@@ -1969,12 +4556,12 @@ symbols:
   kind: method
   name: cancel
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 381
+  line: 408
   signature: 'def cancel(self, job_id: UUID, tenant_id: UUID, knowledge_base_id: UUID)'
   visibility: public
   language: python
   container: DocumentJobQueue
-  end_line: 403
+  end_line: 430
   callers: []
   callees:
   - symbol:capability-parse-once-content-artifact:document-job-queue.event
@@ -1983,12 +4570,12 @@ symbols:
   kind: method
   name: claim
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 216
+  line: 243
   signature: def claim(self)
   visibility: public
   language: python
   container: DocumentJobQueue
-  end_line: 275
+  end_line: 302
   callers:
   - symbol:capability-parse-once-content-artifact:document-worker.run-one
   callees:
@@ -2000,13 +4587,13 @@ symbols:
   kind: method
   name: enqueue
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 142
+  line: 169
   signature: 'def enqueue(self, *, tenant_id: UUID, knowledge_base_id: UUID, artifact_id:
     UUID, request_key: str, payload: dict[str, Any], max_attempts: int=3)'
   visibility: public
   language: python
   container: DocumentJobQueue
-  end_line: 214
+  end_line: 241
   callers:
   - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees:
@@ -2017,13 +4604,13 @@ symbols:
   kind: method
   name: _event
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 131
+  line: 158
   signature: 'def _event(self, conn: Connection, job_id: str, generation: int, event:
     str)'
   visibility: private
   language: python
   container: DocumentJobQueue
-  end_line: 140
+  end_line: 167
   callers:
   - symbol:capability-parse-once-content-artifact:document-job-queue.cancel
   - symbol:capability-parse-once-content-artifact:document-job-queue.claim
@@ -2038,12 +4625,12 @@ symbols:
   kind: method
   name: _fence
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 277
+  line: 304
   signature: 'def _fence(self, conn: Connection, lease: JobLease)'
   visibility: private
   language: python
   container: DocumentJobQueue
-  end_line: 315
+  end_line: 342
   callers:
   - symbol:capability-parse-once-content-artifact:document-job-queue.finish
   - symbol:capability-parse-once-content-artifact:document-job-queue.heartbeat
@@ -2057,12 +4644,12 @@ symbols:
   kind: method
   name: finish
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 340
+  line: 367
   signature: 'def finish(self, lease: JobLease, result_ref: str)'
   visibility: public
   language: python
   container: DocumentJobQueue
-  end_line: 362
+  end_line: 389
   callers:
   - symbol:capability-parse-once-content-artifact:document-worker.execute
   callees:
@@ -2074,12 +4661,12 @@ symbols:
   kind: method
   name: heartbeat
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 317
+  line: 344
   signature: 'def heartbeat(self, lease: JobLease)'
   visibility: public
   language: python
   container: DocumentJobQueue
-  end_line: 328
+  end_line: 355
   callers:
   - symbol:capability-parse-once-content-artifact:document-worker.run-one
   callees:
@@ -2090,13 +4677,13 @@ symbols:
   kind: method
   name: __init__
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 104
+  line: 131
   signature: 'def __init__(self, engine: Engine, *, lease_seconds: float=120, clock:
     Callable[[], float] | None=None)'
   visibility: private
   language: python
   container: DocumentJobQueue
-  end_line: 115
+  end_line: 142
   callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:document-job-queue.now
@@ -2104,12 +4691,12 @@ symbols:
   kind: method
   name: _now
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 117
+  line: 144
   signature: 'def _now(self, connection: Connection)'
   visibility: private
   language: python
   container: DocumentJobQueue
-  end_line: 129
+  end_line: 156
   callers:
   - symbol:capability-parse-once-content-artifact:document-job-queue.claim
   - symbol:capability-parse-once-content-artifact:document-job-queue.enqueue
@@ -2124,12 +4711,12 @@ symbols:
   kind: method
   name: publish
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 330
+  line: 357
   signature: 'def publish(self, lease: JobLease, operation: Callable[[], T])'
   visibility: public
   language: python
   container: DocumentJobQueue
-  end_line: 331
+  end_line: 358
   callers:
   - symbol:capability-parse-once-content-artifact:checkpoint-store.publish
   - symbol:capability-parse-once-content-artifact:document-worker.execute
@@ -2140,13 +4727,13 @@ symbols:
   kind: method
   name: publish_transaction
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 333
+  line: 360
   signature: 'def publish_transaction(self, lease: JobLease, operation: Callable[[Connection],
     T])'
   visibility: public
   language: python
   container: DocumentJobQueue
-  end_line: 338
+  end_line: 365
   callers:
   - symbol:capability-parse-once-content-artifact:document-job-queue.publish
   - symbol:capability-parse-once-content-artifact:document-worker.execute
@@ -2158,12 +4745,12 @@ symbols:
   kind: method
   name: retry
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 364
+  line: 391
   signature: 'def retry(self, lease: JobLease, *, delay_seconds: float=5)'
   visibility: public
   language: python
   container: DocumentJobQueue
-  end_line: 379
+  end_line: 406
   callers:
   - symbol:capability-parse-once-content-artifact:document-worker.execute
   - symbol:capability-parse-once-content-artifact:document-worker.run-one
@@ -2176,13 +4763,13 @@ symbols:
   kind: method
   name: __init__
   file: engine/apps/worker/src/brain_worker/document_delivery.py
-  line: 158
+  line: 202
   signature: 'def __init__(self, engine: Engine, store: CheckpointStore, authorize_for_job:
     Callable[[JobLease], Authorizer])'
   visibility: private
   language: python
   container: DocumentResultImporter
-  end_line: 164
+  end_line: 208
   callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:document-result-importer.run-one
@@ -2190,12 +4777,12 @@ symbols:
   kind: method
   name: run_one
   file: engine/apps/worker/src/brain_worker/document_delivery.py
-  line: 166
+  line: 210
   signature: def run_one(self)
   visibility: public
   language: python
   container: DocumentResultImporter
-  end_line: 344
+  end_line: 405
   callers:
   - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees:
@@ -2662,11 +5249,11 @@ symbols:
   kind: class
   name: DocumentJobQueue
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 96
+  line: 123
   signature: class DocumentJobQueue
   visibility: public
   language: python
-  end_line: 403
+  end_line: 430
   callers:
   - symbol:capability-parse-once-content-artifact:worker-cli.main
   callees: []
@@ -2675,11 +5262,11 @@ symbols:
   kind: class
   name: JobLease
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 86
+  line: 113
   signature: class JobLease
   visibility: public
   language: python
-  end_line: 93
+  end_line: 120
   callers:
   - symbol:capability-parse-once-content-artifact:document-job-queue.claim
   - symbol:capability-parse-once-content-artifact:document-result-importer.run-one
@@ -2690,13 +5277,25 @@ symbols:
   kind: class
   name: LeaseLost
   file: engine/packages/brain-jobs/src/brain_jobs/queue.py
-  line: 81
+  line: 108
   signature: class LeaseLost
   visibility: public
   language: python
-  end_line: 82
+  end_line: 109
   callers:
   - symbol:capability-parse-once-content-artifact:document-job-queue.fence
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:queue.uuid-text
+  node: capability:parse-once-content-artifact
+  kind: class
+  name: UUIDText
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 31
+  signature: class UUIDText
+  visibility: public
+  language: python
+  end_line: 52
+  callers: []
   callees: []
 - id: symbol:capability-parse-once-content-artifact:store.artifact-exists
   node: capability:parse-once-content-artifact
@@ -2749,16 +5348,55 @@ symbols:
   end_line: 86
   callers: []
   callees: []
+- id: symbol:capability-parse-once-content-artifact:uuid-text.load-dialect-impl
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: load_dialect_impl
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 43
+  signature: 'def load_dialect_impl(self, dialect: Dialect)'
+  visibility: public
+  language: python
+  container: UUIDText
+  end_line: 46
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:uuid-text.process-bind-param
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: process_bind_param
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 48
+  signature: 'def process_bind_param(self, value: object, dialect: Dialect)'
+  visibility: public
+  language: python
+  container: UUIDText
+  end_line: 49
+  callers: []
+  callees: []
+- id: symbol:capability-parse-once-content-artifact:uuid-text.process-result-value
+  node: capability:parse-once-content-artifact
+  kind: method
+  name: process_result_value
+  file: engine/packages/brain-jobs/src/brain_jobs/queue.py
+  line: 51
+  signature: 'def process_result_value(self, value: object, dialect: Dialect)'
+  visibility: public
+  language: python
+  container: UUIDText
+  end_line: 52
+  callers: []
+  callees: []
 - id: symbol:capability-parse-once-content-artifact:worker-cli.main
   node: capability:parse-once-content-artifact
   kind: function
   name: main
   file: neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py
-  line: 31
+  line: 35
   signature: def main()
   visibility: public
   language: python
-  end_line: 162
+  end_line: 184
   callers: []
   callees:
   - symbol:capability-parse-once-content-artifact:checkpoints.checkpoint-store
@@ -2796,12 +5434,12 @@ symbols:
   kind: method
   name: __init__
   file: engine/apps/api/src/brain_api/errors.py
-  line: 31
+  line: 32
   signature: 'def __init__(self, detail: str | None=None)'
   visibility: private
   language: python
   container: BrainError
-  end_line: 33
+  end_line: 34
   callers: []
   callees: []
 - id: symbol:capability-runtime-roots-and-toolchain:errors.brain-error
@@ -2809,11 +5447,11 @@ symbols:
   kind: class
   name: BrainError
   file: engine/apps/api/src/brain_api/errors.py
-  line: 24
+  line: 25
   signature: class BrainError
   visibility: public
   language: python
-  end_line: 33
+  end_line: 34
   callers: []
   callees: []
 - id: symbol:capability-runtime-roots-and-toolchain:errors.concurrent-commit-api-error
@@ -2821,11 +5459,11 @@ symbols:
   kind: class
   name: ConcurrentCommitApiError
   file: engine/apps/api/src/brain_api/errors.py
-  line: 70
+  line: 71
   signature: class ConcurrentCommitApiError
   visibility: public
   language: python
-  end_line: 76
+  end_line: 77
   callers: []
   callees: []
 - id: symbol:capability-runtime-roots-and-toolchain:errors.install-problem-details-handlers
@@ -2833,11 +5471,11 @@ symbols:
   kind: function
   name: install_problem_details_handlers
   file: engine/apps/api/src/brain_api/errors.py
-  line: 103
+  line: 113
   signature: 'def install_problem_details_handlers(app: FastAPI)'
   visibility: public
   language: python
-  end_line: 126
+  end_line: 158
   callers:
   - symbol:capability-runtime-roots-and-toolchain:app.create-app
   callees:
@@ -2847,11 +5485,11 @@ symbols:
   kind: class
   name: InvalidRangeApiError
   file: engine/apps/api/src/brain_api/errors.py
-  line: 53
+  line: 54
   signature: class InvalidRangeApiError
   visibility: public
   language: python
-  end_line: 58
+  end_line: 59
   callers: []
   callees: []
 - id: symbol:capability-runtime-roots-and-toolchain:errors.not-found-error
@@ -2859,11 +5497,11 @@ symbols:
   kind: class
   name: NotFoundError
   file: engine/apps/api/src/brain_api/errors.py
-  line: 36
+  line: 37
   signature: class NotFoundError
   visibility: public
   language: python
-  end_line: 42
+  end_line: 43
   callers: []
   callees: []
 - id: symbol:capability-runtime-roots-and-toolchain:errors.problem-details
@@ -2871,11 +5509,11 @@ symbols:
   kind: class
   name: ProblemDetails
   file: engine/apps/api/src/brain_api/errors.py
-  line: 11
+  line: 12
   signature: class ProblemDetails
   visibility: public
   language: python
-  end_line: 21
+  end_line: 22
   callers:
   - symbol:capability-runtime-roots-and-toolchain:errors.problem-response
   callees: []
@@ -2884,26 +5522,38 @@ symbols:
   kind: function
   name: _problem_response
   file: engine/apps/api/src/brain_api/errors.py
-  line: 79
+  line: 89
   signature: 'def _problem_response(*, status_code: int, title: str, code: str, detail:
     str | None, instance: str | None)'
   visibility: private
   language: python
-  end_line: 100
+  end_line: 110
   callers:
   - symbol:capability-runtime-roots-and-toolchain:errors.install-problem-details-handlers
   callees:
   - symbol:capability-runtime-roots-and-toolchain:errors.problem-details
+- id: symbol:capability-runtime-roots-and-toolchain:errors.service-unavailable-error
+  node: capability:runtime-roots-and-toolchain
+  kind: class
+  name: ServiceUnavailableError
+  file: engine/apps/api/src/brain_api/errors.py
+  line: 80
+  signature: class ServiceUnavailableError
+  visibility: public
+  language: python
+  end_line: 86
+  callers: []
+  callees: []
 - id: symbol:capability-runtime-roots-and-toolchain:errors.stale-version-api-error
   node: capability:runtime-roots-and-toolchain
   kind: class
   name: StaleVersionApiError
   file: engine/apps/api/src/brain_api/errors.py
-  line: 61
+  line: 62
   signature: class StaleVersionApiError
   visibility: public
   language: python
-  end_line: 67
+  end_line: 68
   callers: []
   callees: []
 - id: symbol:capability-runtime-roots-and-toolchain:errors.unprocessable-error
@@ -2911,11 +5561,11 @@ symbols:
   kind: class
   name: UnprocessableError
   file: engine/apps/api/src/brain_api/errors.py
-  line: 45
+  line: 46
   signature: class UnprocessableError
   visibility: public
   language: python
-  end_line: 50
+  end_line: 51
   callers: []
   callees: []
 - id: symbol:capability-runtime-roots-and-toolchain:health.check-storage-round-trip
@@ -3770,3 +6420,775 @@ symbols:
   end_line: 331
   callers: []
   callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:0005-tenancy-authx-expand.downgrade
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: downgrade
+  file: engine/migrations/versions/0005_tenancy_authx_expand.py
+  line: 311
+  signature: def downgrade()
+  visibility: public
+  language: python
+  end_line: 348
+  callers: []
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:0005-tenancy-authx-expand.jobs-uuid-preflight
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _jobs_uuid_preflight
+  file: engine/migrations/versions/0005_tenancy_authx_expand.py
+  line: 72
+  signature: def _jobs_uuid_preflight()
+  visibility: private
+  language: python
+  end_line: 88
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:0005-tenancy-authx-expand.upgrade
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:0005-tenancy-authx-expand.upgrade
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: upgrade
+  file: engine/migrations/versions/0005_tenancy_authx_expand.py
+  line: 91
+  signature: def upgrade()
+  visibility: public
+  language: python
+  end_line: 308
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:0005-tenancy-authx-expand.jobs-uuid-preflight
+- id: symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.count
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _count
+  file: engine/migrations/versions/0006_tenancy_authx_constrain.py
+  line: 86
+  signature: 'def _count(sql: str)'
+  visibility: private
+  language: python
+  end_line: 87
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.preflight
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.downgrade
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: downgrade
+  file: engine/migrations/versions/0006_tenancy_authx_constrain.py
+  line: 212
+  signature: def downgrade()
+  visibility: public
+  language: python
+  end_line: 229
+  callers: []
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.fk
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _fk
+  file: engine/migrations/versions/0006_tenancy_authx_constrain.py
+  line: 161
+  signature: 'def _fk(name: str, table: str, columns: list[str], referent: str, remote:
+    list[str])'
+  visibility: private
+  language: python
+  end_line: 163
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.upgrade
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.preflight
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _preflight
+  file: engine/migrations/versions/0006_tenancy_authx_constrain.py
+  line: 90
+  signature: def _preflight()
+  visibility: private
+  language: python
+  end_line: 158
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.upgrade
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.count
+- id: symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.upgrade
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: upgrade
+  file: engine/migrations/versions/0006_tenancy_authx_constrain.py
+  line: 166
+  signature: def upgrade()
+  visibility: public
+  language: python
+  end_line: 209
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.fk
+  - symbol:capability-structural-tenancy-and-entity-identity:0006-tenancy-authx-constrain.preflight
+- id: symbol:capability-structural-tenancy-and-entity-identity:0007-tenancy-authx-safeguards.downgrade
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: downgrade
+  file: engine/migrations/versions/0007_tenancy_authx_safeguards.py
+  line: 127
+  signature: def downgrade()
+  visibility: public
+  language: python
+  end_line: 135
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:0007-tenancy-authx-safeguards.owner-columns
+- id: symbol:capability-structural-tenancy-and-entity-identity:0007-tenancy-authx-safeguards.owner-columns
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _owner_columns
+  file: engine/migrations/versions/0007_tenancy_authx_safeguards.py
+  line: 72
+  signature: def _owner_columns()
+  visibility: private
+  language: python
+  end_line: 73
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:0007-tenancy-authx-safeguards.downgrade
+  - symbol:capability-structural-tenancy-and-entity-identity:0007-tenancy-authx-safeguards.upgrade
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:0007-tenancy-authx-safeguards.upgrade
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: upgrade
+  file: engine/migrations/versions/0007_tenancy_authx_safeguards.py
+  line: 76
+  signature: def upgrade()
+  visibility: public
+  language: python
+  end_line: 124
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:0007-tenancy-authx-safeguards.owner-columns
+- id: symbol:capability-structural-tenancy-and-entity-identity:knowledge-base.post-init
+  node: capability:structural-tenancy-and-entity-identity
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 74
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: KnowledgeBase
+  end_line: 75
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-aware
+- id: symbol:capability-structural-tenancy-and-entity-identity:knowledge-base.scope
+  node: capability:structural-tenancy-and-entity-identity
+  kind: method
+  name: scope
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 78
+  signature: def scope(self)
+  visibility: public
+  language: python
+  container: KnowledgeBase
+  end_line: 79
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.owned-scope
+- id: symbol:capability-structural-tenancy-and-entity-identity:owned-scope.to-json
+  node: capability:structural-tenancy-and-entity-identity
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 37
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: OwnedScope
+  end_line: 42
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.to-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.change-resource-restrictions
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.key-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: apply
+  file: scripts/dev/reconcile_authx.py
+  line: 339
+  signature: 'def apply(conn: Connection, mapping: dict[str, Any], digest: str, actor_id:
+    UUID, approval_ref: str, activate_policy: bool)'
+  visibility: public
+  language: python
+  end_line: 526
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.main
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:owned-scope.to-json
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.checksums
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.derive-child-ownership
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.inventory
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.kb-owners
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.ownership-checksums
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.sql
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.to-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-knowledge-base
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-tenant
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-workspace
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.checksums
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _checksums
+  file: scripts/dev/reconcile_authx.py
+  line: 179
+  signature: 'def _checksums(conn: Connection)'
+  visibility: private
+  language: python
+  end_line: 189
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.sql
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.database-url
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _database_url
+  file: scripts/dev/reconcile_authx.py
+  line: 151
+  signature: def _database_url()
+  visibility: private
+  language: python
+  end_line: 155
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.main
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.derive-child-ownership
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _derive_child_ownership
+  file: scripts/dev/reconcile_authx.py
+  line: 307
+  signature: 'def _derive_child_ownership(conn: Connection)'
+  visibility: private
+  language: python
+  end_line: 336
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.sql
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.inventory
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: inventory
+  file: scripts/dev/reconcile_authx.py
+  line: 217
+  signature: 'def inventory(conn: Connection, mapping: dict[str, Any])'
+  visibility: public
+  language: python
+  end_line: 304
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.main
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.kb-owners
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.sql
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.kb-owners
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _kb_owners
+  file: scripts/dev/reconcile_authx.py
+  line: 167
+  signature: 'def _kb_owners(mapping: dict[str, Any])'
+  visibility: private
+  language: python
+  end_line: 176
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.inventory
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.load-mapping
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: load_mapping
+  file: scripts/dev/reconcile_authx.py
+  line: 158
+  signature: 'def load_mapping(path: Path)'
+  visibility: public
+  language: python
+  end_line: 164
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.main
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.main
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: main
+  file: scripts/dev/reconcile_authx.py
+  line: 529
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 573
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.database-url
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.inventory
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.load-mapping
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.ownership-checksums
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _ownership_checksums
+  file: scripts/dev/reconcile_authx.py
+  line: 192
+  signature: 'def _ownership_checksums(conn: Connection)'
+  visibility: private
+  language: python
+  end_line: 214
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.sql
+- id: symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.sql
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _sql
+  file: scripts/dev/reconcile_authx.py
+  line: 140
+  signature: 'def _sql(statement: str, *identifiers: str)'
+  visibility: private
+  language: python
+  end_line: 148
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.checksums
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.derive-child-ownership
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.inventory
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.ownership-checksums
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.post-init
+  node: capability:structural-tenancy-and-entity-identity
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 113
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: TenancyIdentity
+  end_line: 118
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-aware
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.to-json
+  node: capability:structural-tenancy-and-entity-identity
+  kind: method
+  name: to_json
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 120
+  signature: def to_json(self)
+  visibility: public
+  language: python
+  container: TenancyIdentity
+  end_line: 128
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.change-resource-restrictions
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.key-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:owned-scope.to-json
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.associate-entity
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: associate_entity
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 251
+  signature: 'def associate_entity(session: Session, entity_id: UUID, tenant_id: UUID,
+    knowledge_base_id: UUID, *, actor_id: UUID, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 287
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.change-resource-restrictions
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: change_resource_restrictions
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 397
+  signature: 'def change_resource_restrictions(session: Session, key: ResourceKey,
+    *, expected_revision: int, actor_id: UUID, at: datetime, classifications: Iterable[str]
+    | None=None, source_acl_ids: Iterable[str] | None=None, parent_chain: Sequence[ScopedId]
+    | None=None, approval_ref: str)'
+  visibility: public
+  language: python
+  end_line: 446
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:owned-scope.to-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.to-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.revision-conflict
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.inherit-resource-access
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: inherit_resource_access
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 453
+  signature: 'def inherit_resource_access(session: Session, source: ResourceKey, target:
+    ResourceKey, *, actor_id: UUID, at: datetime, add_dependency_on_source: bool=False)'
+  visibility: public
+  language: python
+  end_line: 484
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.key-json
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _key_json
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 313
+  signature: 'def _key_json(key: ResourceKey)'
+  visibility: private
+  language: python
+  end_line: 314
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:owned-scope.to-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.to-json
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.knowledge-base
+  node: capability:structural-tenancy-and-entity-identity
+  kind: class
+  name: KnowledgeBase
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 67
+  signature: class KnowledgeBase
+  visibility: public
+  language: python
+  end_line: 79
+  callers: []
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.owned-scope
+  node: capability:structural-tenancy-and-entity-identity
+  kind: class
+  name: OwnedScope
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 30
+  signature: class OwnedScope
+  visibility: public
+  language: python
+  end_line: 42
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:knowledge-base.scope
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  node: capability:structural-tenancy-and-entity-identity
+  kind: class
+  name: OwnershipConflict
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 16
+  signature: class OwnershipConflict
+  visibility: public
+  language: python
+  end_line: 21
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.post-init
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.associate-entity
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.change-resource-restrictions
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.inherit-resource-access
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-knowledge-base
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-workspace
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-knowledge-base-in-workspace
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-same-owner
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.resolve-entity
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-knowledge-base
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: provision_knowledge_base
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 135
+  signature: 'def provision_knowledge_base(session: Session, knowledge_base_id: UUID,
+    workspace_id: UUID, tenant_id: UUID, *, actor_id: UUID, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 172
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-scope
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: provision_resource_access
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 328
+  signature: 'def provision_resource_access(session: Session, key: ResourceKey, *,
+    tenant_id: UUID, knowledge_base_id: UUID, classifications: Iterable[str], source_acl_ids:
+    Iterable[str]=(), parent_chain: Iterable[ScopedId]=(), dependency_keys: Iterable[ResourceKey]=(),
+    actor_id: UUID, at: datetime, allow_before_record: bool=False)'
+  visibility: public
+  language: python
+  end_line: 394
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.inherit-resource-access
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:owned-scope.to-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.to-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.key-json
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-owner
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-scope
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: provision_scope
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 175
+  signature: 'def provision_scope(session: Session, *, tenant_id: UUID, workspace_id:
+    UUID, knowledge_base_id: UUID, actor_id: UUID, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 189
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-knowledge-base
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-tenant
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-workspace
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-tenant
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: provision_tenant
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 94
+  signature: 'def provision_tenant(session: Session, tenant_id: UUID, *, actor_id:
+    UUID, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 107
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-scope
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-workspace
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: provision_workspace
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 110
+  signature: 'def provision_workspace(session: Session, workspace_id: UUID, tenant_id:
+    UUID, *, actor_id: UUID, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 132
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-scope
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: record_operational_event
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 42
+  signature: 'def record_operational_event(session: Session, *, event_type: str, actor_id:
+    UUID, resource_type: str, resource_id: UUID, at: datetime, applied: bool=True,
+    reason_code: str=''applied'', before_revision: int | None=None, after_revision:
+    int=1, approval_ref: str | None=None, input_digest: str | None=None, affected_ids:
+    Iterable[UUID]=())'
+  visibility: public
+  language: python
+  end_line: 91
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:reconcile-authx.apply
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.associate-entity
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.change-resource-restrictions
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-knowledge-base
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-tenant
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-workspace
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-rejected-ownership
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.resolve-entity
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-owner
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _record_owner
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 317
+  signature: 'def _record_owner(session: Session, key: ResourceKey)'
+  visibility: private
+  language: python
+  end_line: 325
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.provision-resource-access
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-rejected-ownership
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: record_rejected_ownership
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 290
+  signature: 'def record_rejected_ownership(session: Session, *, event_type: str,
+    actor_id: UUID, resource_type: str, resource_id: UUID, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 310
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-aware
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: _require_aware
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 24
+  signature: 'def _require_aware(value: datetime, name: str)'
+  visibility: private
+  language: python
+  end_line: 26
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:knowledge-base.post-init
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy-identity.post-init
+  - symbol:capability-structural-tenancy-and-entity-identity:tenant.post-init
+  - symbol:capability-structural-tenancy-and-entity-identity:workspace.post-init
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-knowledge-base-in-workspace
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: require_knowledge_base_in_workspace
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 82
+  signature: 'def require_knowledge_base_in_workspace(workspace: Workspace, knowledge_base:
+    KnowledgeBase)'
+  visibility: public
+  language: python
+  end_line: 90
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-same-owner
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: require_same_owner
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 93
+  signature: 'def require_same_owner(child: OwnedScope, parent: OwnedScope)'
+  visibility: public
+  language: python
+  end_line: 96
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.resolve-entity
+  node: capability:structural-tenancy-and-entity-identity
+  kind: function
+  name: resolve_entity
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 192
+  signature: 'def resolve_entity(session: Session, tenant_id: UUID, *, namespace:
+    str, external_key: str, actor_id: UUID, at: datetime)'
+  visibility: public
+  language: python
+  end_line: 248
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.ownership-conflict
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-operational-event
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.revision-conflict
+  node: capability:structural-tenancy-and-entity-identity
+  kind: class
+  name: RevisionConflict
+  file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+  line: 449
+  signature: class RevisionConflict
+  visibility: public
+  language: python
+  end_line: 450
+  callers:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.change-resource-restrictions
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.tenancy-identity
+  node: capability:structural-tenancy-and-entity-identity
+  kind: class
+  name: TenancyIdentity
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 100
+  signature: class TenancyIdentity
+  visibility: public
+  language: python
+  end_line: 128
+  callers: []
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.tenant
+  node: capability:structural-tenancy-and-entity-identity
+  kind: class
+  name: Tenant
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 46
+  signature: class Tenant
+  visibility: public
+  language: python
+  end_line: 52
+  callers: []
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenancy.workspace
+  node: capability:structural-tenancy-and-entity-identity
+  kind: class
+  name: Workspace
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 56
+  signature: class Workspace
+  visibility: public
+  language: python
+  end_line: 63
+  callers: []
+  callees: []
+- id: symbol:capability-structural-tenancy-and-entity-identity:tenant.post-init
+  node: capability:structural-tenancy-and-entity-identity
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 51
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: Tenant
+  end_line: 52
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-aware
+- id: symbol:capability-structural-tenancy-and-entity-identity:workspace.post-init
+  node: capability:structural-tenancy-and-entity-identity
+  kind: method
+  name: __post_init__
+  file: engine/packages/brain-domain/src/brain_domain/tenancy.py
+  line: 62
+  signature: def __post_init__(self)
+  visibility: private
+  language: python
+  container: Workspace
+  end_line: 63
+  callers: []
+  callees:
+  - symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-aware

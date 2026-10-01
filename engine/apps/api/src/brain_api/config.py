@@ -20,6 +20,7 @@ class Settings:
     oidc_audience: str
     casbin_model_path: str
     casbin_policy_path: str
+    identity_profile_path: str
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -29,6 +30,9 @@ class Settings:
         )
         policy_path = os.environ.get("BRAIN_CASBIN_POLICY_PATH") or _find_upward(
             repo_search_root, "planning-mds/security/policies/policy.csv"
+        )
+        identity_profile_path = os.environ.get("BRAIN_IDENTITY_PROFILE_PATH") or _find_upward(
+            repo_search_root, "config/authx-identity-profile.yaml"
         )
         return cls(
             database_url=os.environ.get(
@@ -40,4 +44,5 @@ class Settings:
             oidc_audience=os.environ.get("BRAIN_OIDC_AUDIENCE", "brain"),
             casbin_model_path=model_path,
             casbin_policy_path=policy_path,
+            identity_profile_path=identity_profile_path,
         )

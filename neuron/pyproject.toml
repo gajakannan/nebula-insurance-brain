@@ -12,12 +12,15 @@ package = false
 brain-ingestion = { workspace = true }
 brain-interpretation = { workspace = true }
 brain-extraction = { workspace = true }
+# Engine test-support fixtures (dev only; path dependency like the engine runtime packages).
+brain-testing = { path = "../engine/packages/brain-testing", editable = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]
 
 [dependency-groups]
 dev = [
+  "brain-testing",
   "pytest>=8.0",
   "pytest-cov>=5.0",
   "pytest-asyncio>=0.24",

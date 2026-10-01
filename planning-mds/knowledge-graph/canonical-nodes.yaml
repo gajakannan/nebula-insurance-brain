@@ -316,9 +316,10 @@ api_contracts:
 capabilities:
   - id: capability:authorization-enforcement
     label: Authorization enforcement
-    notes: Native Casbin adapter over typed, server-hydrated resource attributes with structural tenancy
-      resolved first; every decision audited with policy hash, grant revision, and reason code; denials
-      never disclose existence.
+    notes: F0002 replaced the F0001 snapshot authorizer with the pure conjunctive evaluator (brain_security/evaluation.py)
+      over complete current grant slices and server-hydrated resource envelopes (parent, classification,
+      source, evidence dependencies, delegation ceiling); the unchanged Casbin pilot policy evaluates
+      role/resource/action; denials never disclose existence.
     related_nodes:
       - adr:0050
       - adr:0062
@@ -329,9 +330,9 @@ capabilities:
       - policy_rule:review-task-annotate
       - policy_rule:review-task-read
     source_docs:
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:backup-and-restore
     label: Backup and restore
     notes: Timed backup of relational state, content objects, artifact manifests, and review evidence,
@@ -361,7 +362,9 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:bounded-delegation
     label: Bounded delegation
-    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): server-owned expiring delegation bound to
+      one agent/service executor, ceiling cannot exceed the acting principal''s current authority, no
+      onward delegation; re-intersected with current grants and rechecked before every effect.'
     rationale:
       - adr: adr:0062
         section: Decision
@@ -372,8 +375,8 @@ capabilities:
       - entity:principal
       - schema:authx-kernel
     source_docs:
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:credential-verification-and-principal-resolution
     label: Credential verification and principal resolution
     notes: OIDC token verification (issuer, audience, signature, expiry) before any storage read; verified
@@ -386,12 +389,14 @@ capabilities:
       - role:service-principal
       - role:tenant-member
     source_docs:
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:current-resource-scope
     label: Current resource scope
-    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): complete grant slices (role + parent selectors
+      + classification/source labels, no defaults) under a monotonic principal_authority revision; evaluation
+      locks authority FOR SHARE, grant changes FOR UPDATE; request filters only narrow.'
     rationale:
       - adr: adr:0062
         section: Decision
@@ -403,11 +408,14 @@ capabilities:
       - entity:resource-scope
       - schema:authx-kernel
     source_docs:
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:durable-authorization-decisions
     label: Durable authorization decisions
-    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): AuthorizationExecution commits a schema-v1
+      Decision to append-only audit_event before any payload or with the mutation atomically; denials/failures
+      audited in a fresh transaction; audit failure is a sanitized 503. The single lock/load orchestration
+      is execution.decide (API and worker).'
     rationale:
       - adr: adr:0062
         section: Decision
@@ -419,8 +427,8 @@ capabilities:
       - entity:audit-event
       - schema:authx-kernel
     source_docs:
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:evidence-review-round-trip
     label: Evidence review round trip
     notes: ReviewItem routing into a review batch, rendering and anchor resolution in the native Review
@@ -527,7 +535,10 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:structural-tenancy-and-entity-identity
     label: Structural tenancy and entity identity
-    notes: F0002 planning contract only; no runtime completion or code binding asserted.
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): Tenant/Workspace/KB registries with composite
+      ownership FKs (migrations 0005 expand, 0006 constrain after a digest-bound reviewed reconciliation,
+      0007 immutable ownership); tenant-scoped entity identity with explicit KB associations that never
+      grant access.'
     rationale:
       - adr: adr:0061
         section: Decision
@@ -541,8 +552,8 @@ capabilities:
       - entity:workspace
       - schema:authx-kernel
     source_docs:
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
 endpoints:
   - id: endpoint:content-artifact-file-get
     label: GET /content/{artifactId}/files/{path}
@@ -554,7 +565,7 @@ endpoints:
     route: /content/{artifactId}/files/{path}
     source_docs:
       - planning-mds/api/brain-api.yaml
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: endpoint:content-artifact-get
     label: GET /content/{artifactId}
     method: GET
@@ -664,9 +675,9 @@ entities:
       - capability:authorization-enforcement
     source_docs:
       - planning-mds/architecture/master-blueprint.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:canonical-fact-version
     label: Canonical fact version
     notes: Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references,
@@ -705,7 +716,7 @@ entities:
       - adr:0062
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:fact-slot
     label: Fact slot
     notes: Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit
@@ -750,7 +761,7 @@ entities:
       - adr:0061
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:membership
     label: Membership
     notes: Proposed F0002 design; implementation pending. Current complete tenant/KB role and restriction
@@ -764,7 +775,7 @@ entities:
       - adr:0062
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:outbox-event
     label: Outbox event
     notes: Transactional outbox row written with every canonical commit and consumed idempotently by projectors;
@@ -790,8 +801,8 @@ entities:
       - role:tenant-member
     source_docs:
       - planning-mds/architecture/master-blueprint.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:resource-scope
     label: Resource scope
     notes: Proposed F0002 design; implementation pending. Trusted resource/parent/classification/source
@@ -804,7 +815,7 @@ entities:
       - adr:0062
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:review-decision
     label: Review decision
     notes: Governed outcome of a review (ACCEPT, CORRECT, REJECT) bound to the authenticated reviewer
@@ -858,7 +869,7 @@ entities:
       - adr:0061
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:tenant-entity-identity
     label: Tenant entity identity
     notes: Proposed F0002 design; implementation pending. Tenant-scoped identity can have explicit KB
@@ -872,7 +883,7 @@ entities:
       - adr:0061
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:workspace
     label: Workspace
     notes: Proposed F0002 design; implementation pending. Exactly one tenant owner; groups KBs without
@@ -885,7 +896,7 @@ entities:
       - adr:0061
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
 policy_rules:
   - id: policy_rule:content-artifact-ingest
     label: content_artifact:ingest

@@ -2,8 +2,8 @@
 
 ## Status
 
-- [x] Proposed — F0002 Phase B design; design approved by user 2026-09-25; runtime/security proof pending
-- [ ] Accepted
+- [ ] Proposed — F0002 Phase B design; design approved by user 2026-09-25
+- [x] Accepted — 2026-09-28, bounded to the F0002 scope: acceptance conditions met in feature run `2026-09-27-bb7c8d1d` (PostgreSQL proofs, EX-AUTHX-001–018, QE/Security/Architect/DevOps signoffs; see that run's signoff-ledger.md). Broader surfaces remain with ADR-0042/0052/0053 (Proposed) and F0026 production qualification.
 - [ ] Superseded
 - [ ] Rejected
 
@@ -48,6 +48,6 @@ S0003–S0006 prove each restriction independently, all-grant selection, no mixe
 
 ## References
 
-- [F0002 assembly plan](../../features/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md)
+- [F0002 assembly plan](../../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md)
 - [ADR-0050](ADR-0050-native-policy-evaluation-and-resource-scope.md)
 - [ADR-0052](ADR-0052-delegated-agents-and-review-authority.md), [ADR-0053](ADR-0053-permission-safe-retrieval-and-historical-access.md)

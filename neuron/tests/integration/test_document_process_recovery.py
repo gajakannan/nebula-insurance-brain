@@ -24,6 +24,8 @@ from brain_content.checkpoints import CheckpointStore
 from brain_content.config import LocalObjectStoreConfig
 from brain_content.manifest import ArtifactManifest
 from brain_content.object_store import LocalFilesystemObjectStore
+from brain_domain.authx import ResourceKey, ResourceType
+from brain_domain.principal import PrincipalKind
 from brain_extraction.profiles import load_profile
 from brain_extraction.vllm_graph_client import VllmGraphClient
 from brain_ingestion.document_worker import DocumentTask, DocumentWorker
@@ -35,11 +37,10 @@ from brain_persistence.models import (
     AssertionEvidence,
     AuditEventRow,
     ContentArtifact,
-    MembershipRow,
-    PrincipalRow,
     ReviewItemRow,
     SemanticInterpretationRun,
 )
+from brain_testing import fixtures
 from brain_worker.document_delivery import (
     DocumentJobAuthorization,
     DocumentResultImporter,
@@ -213,22 +214,22 @@ def test_process_recovery_delivers_one_reviewed_assertion(
     recovery_database: tuple[Engine, str, str | None], tmp_path: Path, crash_at: str
 ) -> None:
     engine, url, schema = recovery_database
-    actor, tenant, kb, artifact = uuid4(), uuid4(), uuid4(), uuid4()
+    tenant, kb, artifact = uuid4(), uuid4(), uuid4()
+    policy = ROOT / "planning-mds/security/policies"
     with Session(engine) as session, session.begin():
-        session.add(
-            PrincipalRow(
-                id=actor, kind="service", issuer="local", subject="worker", status="active"
-            )
-        )
-        session.flush()
-        session.add(
-            MembershipRow(
-                principal_id=actor,
-                tenant_id=tenant,
-                knowledge_base_id=kb,
-                role="ServicePrincipal",
-                grant_revision=1,
-            )
+        # Trusted submitter state (F0002): policy release, service identity, its
+        # explicit grant, and the artifact's security metadata before ingestion.
+        fixtures.activate_policy(session, policy / "model.conf", policy / "policy.csv")
+        actor = fixtures.seed_principal(
+            session, issuer="local", subject="worker", kind=PrincipalKind.SERVICE
+        ).id
+        fixtures.seed_grant(session, actor, tenant, kb, "ServicePrincipal")
+        fixtures.protect(
+            session,
+            ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),
+            tenant,
+            kb,
+            before_record=True,
         )
     source = b"synthetic source; converter returns native fixture"
     task = DocumentTask(
@@ -291,7 +292,9 @@ def test_process_recovery_delivers_one_reviewed_assertion(
         assert review.assertion_id == assertion.id and review.status == "open"
         assert session.scalar(select(func.count()).select_from(outbox)) == 1
         assert session.scalar(select(outbox.c.delivered_at)) is not None
-        audits = session.scalars(select(AuditEventRow)).all()
+        audits = session.scalars(
+            select(AuditEventRow).where(AuditEventRow.event_type == "authorization_decision")
+        ).all()
         assert audits and all(row.decision and row.actor_principal_id == actor for row in audits)
 
 
