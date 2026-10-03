@@ -34,4 +34,4 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 ## Planning Status
 
-Phase A requirements are approved in plan run 2026-09-30-6632006b. Phase B architecture approval remains pending. F0003 owns the full §78 inventory and shared persistence boundary; each feature retains its domain behavior and delivery phase.
+Phase A and Phase B are approved in plan run 2026-09-30-6632006b. G4 and ordered G5 validation passed. F0003 owns the full §78 inventory and shared persistence boundary; each feature retains its domain behavior and delivery phase. Runtime implementation has not started.

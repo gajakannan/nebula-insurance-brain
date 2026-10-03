@@ -1,7 +1,7 @@
 # F0003 — PostgreSQL persistence — Status
 
-**Overall Status:** Draft  
-**Last Updated:** 2026-10-01  
+**Overall Status:** Phase A/B plan approved; implementation not started  
+**Last Updated:** 2026-10-02
 **Planning Run:** 2026-09-30-6632006b
 
 ## Story Checklist
@@ -15,15 +15,15 @@
 
 ## Required Signoff Roles (Set in Planning)
 
-The Architect assigns the required role matrix during Phase B. No signoff decision is made in this Phase A skeleton.
+The Architect assigned the required implementation role matrix during Phase B. No implementation signoff has occurred.
 
 | Role | Required | Why Required | Set By | Date |
 |---|---|---|---|---|
-| Quality Engineer | Pending | Architect to confirm | Architect | Pending Phase B |
-| Code Reviewer | Pending | Architect to confirm | Architect | Pending Phase B |
-| Security Reviewer | Pending | Architect to assess ownership and data-boundary risk | Architect | Pending Phase B |
-| DevOps | Pending | Architect to assess migration/runtime scope | Architect | Pending Phase B |
-| Architect | Pending | Architect to assess architecture exceptions | Architect | Pending Phase B |
+| Quality Engineer | Yes | PostgreSQL ownership, temporal, transaction, and migration proof | Architect | 2026-10-02 |
+| Code Reviewer | Yes | Persistence boundary and compatible schema evolution | Architect | 2026-10-02 |
+| Security Reviewer | Yes | Tenant ownership, authorization boundary, and data handling | Architect | 2026-10-02 |
+| DevOps | Yes | Alembic deployment, recovery, and PostgreSQL 18 operations | Architect | 2026-10-02 |
+| Architect | Yes | Contract ownership, cross-feature dependencies, and ADR alignment | Architect | 2026-10-02 |
 
 ## Story Signoff Provenance
 

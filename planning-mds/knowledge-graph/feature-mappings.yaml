@@ -4,10 +4,6 @@ coverage_note: Feature mappings are compiled from planning-mds/kg-source/feature
   explicit coverage exclusions until implementation exists.
 coverage:
   excluded_features:
-    - id: feature:F0003
-      path: planning-mds/features/F0003-postgresql-persistence
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0004
       path: planning-mds/features/F0004-content-artifact-model
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -393,6 +389,40 @@ features:
       - schema:problem-details
       - schema:review-decision
   - status: planned
+    id: feature:F0003
+    path: planning-mds/features/F0003-postgresql-persistence
+    affects:
+      - capability:bitemporal-canonical-commit
+      - capability:postgresql-persistence-contract
+      - capability:structural-tenancy-and-entity-identity
+      - entity:assertion
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:content-artifact
+      - entity:fact-slot
+      - entity:knowledge-base
+      - entity:membership
+      - entity:outbox-event
+      - entity:principal
+      - entity:review-decision
+      - entity:review-item
+      - entity:semantic-interpretation-run
+      - entity:tenant
+      - entity:workspace
+      - workflow:canonical-commit
+    depends_on:
+      - feature:F0001
+      - feature:F0002
+    governed_by:
+      - adr:0002
+      - adr:0003
+      - adr:0007
+      - adr:0008
+      - adr:0009
+      - adr:0010
+      - adr:0030
+      - adr:0059
+  - status: planned
     id: feature:F0005
     path: planning-mds/features/F0005-one-time-docling-ingestion
     affects:
@@ -640,6 +670,52 @@ stories:
       - adr:0062
     uses_schema:
       - schema:authx-kernel
+  - id: story:F0003-S0001
+    feature: feature:F0003
+    path: planning-mds/features/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md
+    affects:
+      - capability:postgresql-persistence-contract
+    governed_by:
+      - adr:0002
+      - adr:0030
+  - id: story:F0003-S0002
+    feature: feature:F0003
+    path: planning-mds/features/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md
+    affects:
+      - capability:postgresql-persistence-contract
+      - capability:structural-tenancy-and-entity-identity
+      - entity:knowledge-base
+      - entity:membership
+      - entity:tenant
+      - entity:workspace
+    governed_by:
+      - adr:0030
+  - id: story:F0003-S0003
+    feature: feature:F0003
+    path: planning-mds/features/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md
+    affects:
+      - capability:bitemporal-canonical-commit
+      - capability:postgresql-persistence-contract
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:outbox-event
+      - workflow:canonical-commit
+    governed_by:
+      - adr:0007
+      - adr:0008
+      - adr:0009
+      - adr:0010
+  - id: story:F0003-S0004
+    feature: feature:F0003
+    path: planning-mds/features/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
+    affects:
+      - capability:postgresql-persistence-contract
+      - entity:content-artifact
+      - entity:semantic-interpretation-run
+    governed_by:
+      - adr:0003
+      - adr:0030
+      - adr:0059
   - id: story:F0005-S0001
     feature: feature:F0005
     path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md

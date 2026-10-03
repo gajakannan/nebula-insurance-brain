@@ -51,9 +51,47 @@
 - No tests or runtime proof commands were run.
 - Product-code browsing used scripts/kg/hint.py for engine/packages/brain-persistence/ before inspecting the persistence paths.
 
+## Phase B Artifacts And G4
+
+- Authored `planning-mds/features/F0003-postgresql-persistence/feature-assembly-plan.md` with the full §78 owner/phase inventory, existing revision provenance, shared persistence boundary, migration sequence, and implementation signoffs.
+- Authored `planning-mds/features/F0003-postgresql-persistence/GETTING-STARTED.md`; updated PRD architecture traceability, README planning status, STATUS signoff matrix, and Phase B handoff checklist.
+- Updated only the authored KG source shards `planning-mds/kg-source/features/F0003.yaml` and `planning-mds/kg-source/nodes/capabilities/postgresql-persistence-contract.yaml`. `scripts/kg/compile.py` regenerated `canonical-nodes.yaml`, `feature-mappings.yaml`, and the generated ROADMAP region.
+- G4 passed: `compile.py` exit 0; `validate.py --check-drift` exit 0. G5 remains pending.
+- Resolved architecture observation: §78 lists `role` and `permission`, but F0002's accepted policy contract and current migrations do not materialize separate tables. The assembly plan assigns their v0.1A ownership to F0002 and records the representation reconciliation; F0003 does not create these tables or silently modify F0002.
+- Phase A commit `006a988` was pushed to `origin/main` before beginning Phase B, as requested.
+
+## Phase B Plan Review Checklist
+
+Architect review follows the product checklist. These outcomes apply to the planning package; they do not certify runtime implementation or proof results.
+
+| Rule | Outcome | Planning evidence |
+|---|---|---|
+| BRAIN-SCOPE | Addressed | F0003 PRD scope/exclusions and F0003-S0001–S0004 acceptance criteria |
+| BRAIN-AUTHORITY | Addressed; Proposed decisions stay Proposed | `feature-assembly-plan.md` separates accepted ADR-0002/0007/0008/0010/0030/0059 from Proposed ADR-0064–0069 and limits their use to owner evaluation |
+| BRAIN-EVIDENCE | Addressed | F0003-S0003 and the assembly plan retain ADR-0010 lineage; future owner rows require an approved contract before a migration |
+| BRAIN-PARSE-ONCE | Addressed at the persistence boundary | PRD and assembly plan leave parsing with F0005/F0016 and keep immutable source bytes behind the ADR-0059 storage port |
+| BRAIN-TEMPORAL | Addressed | F0003-S0003 and the assembly plan preserve separate valid/recorded ranges and the accepted PostgreSQL GiST rule |
+| BRAIN-AUTHORIZATION | Addressed with an owner reconciliation | F0003-S0002 and the assembly plan preserve F0002 composite ownership and policy boundaries; the §78 `role`/`permission` representation remains with F0002 and no table is invented here |
+| BRAIN-BUILDABILITY | Addressed for planning; physical role/permission representation remains open | Assembly plan identifies owner, phase, source contract, migration provenance/boundary, sequence, PostgreSQL proof checkpoints, and signoffs; no owner creates future-phase rows early |
+| BRAIN-EXAMPLES | No new semantic concept | PRD cites F0001-S0005, EX-GL-001/EX-SEM-003, and F0002 EX-AUTHX-001–003; no new domain concept is introduced |
+
+## G5 Exit Validation
+
+The final ordered G5 run, after the final feature-plan wording update, passed all seven operations with exit 0:
+
+1. `validate-stories.py` — pass; the existing non-blocking infrastructure-story focus warning remains.
+2. `generate-story-index.py` — pass; the index contains 27 stories.
+3. `validate-trackers.py --skip-feature-evidence` — pass; zero errors and warnings.
+4. `kg/validate.py --write-coverage-report` — pass; report regenerated.
+5. `kg/validate.py --check-drift` — pass.
+6. `kg/validate.py --check-reproducible` — pass.
+7. `validate_templates.py` — pass.
+
+G5 reached the required manual checkpoint `approve-phase-b`; the user supplied that exact token after all seven exit validations passed, and the approval is recorded in `gate-decisions.md`. The complete ordered G5 validation was rerun after the approved status fields were updated and again passed. No feature-evidence validator, runtime tests, role reports, or feature evidence package were produced.
+
 ## Plan Review Checklist — Phase A
 
-This records Phase A planning evidence only. Architect-owned design and buildability findings remain subject to Phase B review and G5 validation.
+This records the checklist review of Phase A requirements. Architect-owned planning findings are recorded in the Phase B review above; G4 and ordered G5 validation results are recorded below.
 
 | Rule | Phase A outcome | Planning evidence |
 |---|---|---|

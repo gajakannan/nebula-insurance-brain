@@ -6,9 +6,9 @@
 **Feature Name:** PostgreSQL persistence  
 **Priority:** Critical  
 **Phase:** MVP — v0.1A  
-**Status:** Phase A requirements approved — Phase B design pending
+**Status:** Phase A and Phase B approved — implementation not started
 **Planning run:** 2026-09-30-6632006b (Plan A+B, existing)  
-**Approval:** Phase A approved with `approve-phase-a`; Phase B approval pending.
+**Approval:** Phase A approved with `approve-phase-a`; Phase B approved with `approve-phase-b`.
 
 ## Feature Statement
 
@@ -119,8 +119,8 @@ Existing semantic examples remain authoritative: the valid/recorded-time and con
 
 ## Rollout & Enablement
 
-Phase B defines the migration and integration sequence. Runtime migrations, restore proof, deployment qualification, and implementation evidence belong to the later feature action.
+The migration and integration sequence is defined in `feature-assembly-plan.md`. Runtime migrations, restore proof, deployment qualification, and implementation evidence belong to the later feature action.
 
 ## Architecture Traceability (Phase B)
 
-Pending Architect design and explicit Phase B approval. Accepted baseline decisions include ADR-0002 (PostgreSQL authority), ADR-0007 (full bitemporality), ADR-0008 (database-level temporal integrity), ADR-0010 (mandatory provenance), and ADR-0059 (provider-neutral content-artifact storage).
+The Architect's design is in `feature-assembly-plan.md`; G4 and ordered G5 exit validation are green, and the user approved Phase B with `approve-phase-b`. The design confirms accepted ADR-0002 (PostgreSQL authority), ADR-0007 (full bitemporality), ADR-0008 (database-level temporal integrity), ADR-0010 (mandatory provenance), ADR-0030 (structural tenancy), and ADR-0059 (provider-neutral content-artifact storage). It introduces no new ADR, API surface, or runtime schema contract.

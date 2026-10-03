@@ -32,3 +32,90 @@ Attestation: PASS — user explicitly supplied token `approve-phase-a` on 2026-1
 Re-run: `python3 agents/scripts/run-gate.py --product-root {NEBULA_PRODUCT_ROOT} --action plan --stage G3 --feature F0003 --run-id 2026-09-30-6632006b`
 Re-run Exit Code: 0
 Re-run Result: PASS
+
+### G4 — Ontology sync (Phase B)
+Commands:
+- python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/compile.py
+- python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --check-drift
+Stage: G4
+Exit Code: 0 for each command
+Result: PASS
+Output References: planning-mds/kg-source/features/F0003.yaml, planning-mds/kg-source/nodes/capabilities/postgresql-persistence-contract.yaml, generated KG projections and ROADMAP.md
+Notes: The F0002 `role`/`permission` physical representation remains an explicit reconciliation in the assembly plan; no F0002 contract or generated projection was hand-edited.
+Skipped Gates: -
+
+### G4
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G4
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-stories.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/F0003-postgresql-persistence
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/generate-story-index.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --skip-feature-evidence
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --write-coverage-report
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-reproducible
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/scripts/validate_templates.py
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+Pre-approval G5 rerun after architecture wording refinement: all seven ordered operations again exited 0; the runner paused at `approve-phase-b` pending user review.
+Attestation: PASS — user explicitly supplied `approve-phase-b` on 2026-10-02; recorded in gate-decisions.md and gate-state.json.
+Post-attestation G5 rerun after updating the feature approval-status fields: all seven ordered operations again exited 0; runner result PASS.

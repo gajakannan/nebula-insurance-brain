@@ -3,17 +3,84 @@ name: PostgreSQL persistence
 path: planning-mds/features/F0003-postgresql-persistence
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
 phase: v0.1A
 roadmap_section: Next
 roadmap_order: 2
-rationale: PostgreSQL is the authoritative runtime store; the core tables, range types, and exclusion constraints
-  underpin every later feature (section 78).
-validation_gate: F0001 accepted; plan action Phase A and Phase B approved for this feature.
+rationale: The shared PostgreSQL 18 persistence boundary preserves the accepted F0001 bitemporal baseline and F0002
+  structural ownership while assigning every section 78 table to one domain owner and delivery phase. Feature owners
+  define their own table contracts and additive migrations; F0003 does not activate future-phase behavior.
+validation_gate: G4 compile and drift checks plus all ordered G5 exit validations pass; user explicitly approves Phase B.
 depends_on:
 - feature:F0001
+- feature:F0002
 governed_by:
 - adr:0002
+- adr:0003
+- adr:0007
 - adr:0008
+- adr:0009
+- adr:0010
+- adr:0030
+- adr:0059
+affects:
+- capability:postgresql-persistence-contract
+- capability:bitemporal-canonical-commit
+- capability:structural-tenancy-and-entity-identity
+- entity:tenant
+- entity:workspace
+- entity:knowledge-base
+- entity:principal
+- entity:membership
+- entity:content-artifact
+- entity:semantic-interpretation-run
+- entity:assertion
+- entity:fact-slot
+- entity:canonical-fact-version
+- entity:review-item
+- entity:review-decision
+- entity:audit-event
+- entity:outbox-event
+- workflow:canonical-commit
+story_mappings:
+- id: story:F0003-S0001
+  path: planning-mds/features/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md
+  affects:
+  - capability:postgresql-persistence-contract
+  governed_by:
+  - adr:0002
+  - adr:0030
+- id: story:F0003-S0002
+  path: planning-mds/features/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md
+  affects:
+  - capability:postgresql-persistence-contract
+  - capability:structural-tenancy-and-entity-identity
+  - entity:tenant
+  - entity:workspace
+  - entity:knowledge-base
+  - entity:membership
+  governed_by:
+  - adr:0030
+- id: story:F0003-S0003
+  path: planning-mds/features/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md
+  affects:
+  - capability:postgresql-persistence-contract
+  - capability:bitemporal-canonical-commit
+  - entity:canonical-fact-version
+  - entity:audit-event
+  - entity:outbox-event
+  - workflow:canonical-commit
+  governed_by:
+  - adr:0007
+  - adr:0008
+  - adr:0009
+  - adr:0010
+- id: story:F0003-S0004
+  path: planning-mds/features/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
+  affects:
+  - capability:postgresql-persistence-contract
+  - entity:content-artifact
+  - entity:semantic-interpretation-run
+  governed_by:
+  - adr:0003
+  - adr:0030
+  - adr:0059

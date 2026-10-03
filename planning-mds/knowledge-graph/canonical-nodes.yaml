@@ -506,6 +506,37 @@ capabilities:
       - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:postgresql-persistence-contract
+    label: PostgreSQL persistence contract and migration boundary
+    notes: Shared PostgreSQL 18 persistence boundary. Preserves existing migration and identifier history,
+      enforces declared ownership and two-axis temporal integrity at the database boundary, and routes
+      section 78 schema ownership by feature and release phase. Domain-specific records are added by their
+      owning features, not pre-created by F0003. The physical representation of F0002 role and permission
+      concepts remains an explicit reconciliation item.
+    related_nodes:
+      - adr:0002
+      - adr:0007
+      - adr:0008
+      - adr:0009
+      - adr:0010
+      - adr:0030
+      - adr:0059
+      - capability:bitemporal-canonical-commit
+      - capability:structural-tenancy-and-entity-identity
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:content-artifact
+      - entity:knowledge-base
+      - entity:outbox-event
+      - entity:semantic-interpretation-run
+      - entity:tenant
+      - entity:workspace
+    source_docs:
+      - planning-mds/features/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md
+      - planning-mds/features/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md
+      - planning-mds/features/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md
+      - planning-mds/features/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
+      - planning-mds/features/F0003-postgresql-persistence/feature-assembly-plan.md
   - id: capability:runtime-roots-and-toolchain
     label: Runtime roots and toolchain
     notes: engine/ and neuron/ uv workspaces, FastAPI application factory with /health, Alembic, lint
