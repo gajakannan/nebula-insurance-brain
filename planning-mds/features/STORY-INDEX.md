@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 23
+**Total Stories:** 27
 
 ---
 
@@ -30,6 +30,17 @@ Auto-generated index of all user stories across feature folders.
 | [F0002-S0004](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) | Enforce parent, classification and source restrictions together | Critical | MVP | Rosa the Business Reviewer |
 | [F0002-S0005](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) | Bound delegated and autonomous service authority | Critical | MVP | Dana the Platform Engineer |
 | [F0002-S0006](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) | Prove audited kernel behavior through existing consumers | Critical | MVP | Dana the Platform Engineer |
+
+---
+
+## F0003 — PostgreSQL persistence
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0003-S0001](./F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md) | Inventory core persistence ownership and phase boundaries | Critical | v0.1A | persistence engineer |
+| [F0003-S0002](./F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md) | Enforce persisted ownership and reference integrity | Critical | v0.1A | persistence engineer |
+| [F0003-S0003](./F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) | Preserve temporal and transactional integrity | Critical | v0.1A | persistence engineer |
+| [F0003-S0004](./F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) | Evolve the schema without losing accepted state | High | v0.1A | persistence engineer |
 
 ---
 
@@ -63,7 +74,7 @@ Auto-generated index of all user stories across feature folders.
 |-------|-------|
 | Infrastructure | 7 |
 | MVP | 6 |
-| v0.1A | 4 |
+| v0.1A | 8 |
 | v0.1B | 6 |
 
 ---
@@ -72,8 +83,8 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
-| Critical | 8 |
-| High | 15 |
+| Critical | 11 |
+| High | 16 |
 
 ---
 

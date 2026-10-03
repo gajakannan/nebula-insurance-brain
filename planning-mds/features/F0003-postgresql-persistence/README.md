@@ -12,11 +12,26 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 ## Documents
 
-The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0003.yaml`.
+| Document | Purpose |
+|---|---|
+| [PRD.md](./PRD.md) | Phase A requirements and scope |
+| [personas.md](./personas.md) | Reused persistence-engineer persona |
+| [acceptance-criteria-checklist.md](./acceptance-criteria-checklist.md) | Phase A requirement-quality review |
+| [STATUS.md](./STATUS.md) | Planning status and Architect-owned signoff matrix |
+| [feature-assembly-plan.md](./feature-assembly-plan.md) | Phase B implementation sequence |
+| [GETTING-STARTED.md](./GETTING-STARTED.md) | Phase B implementation entry point |
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
+| [F0003-S0001](./F0003-S0001-persistence-inventory-and-ownership.md) | Inventory core persistence ownership and phase boundaries | Not Started |
+| [F0003-S0002](./F0003-S0002-persisted-ownership-and-reference-integrity.md) | Enforce persisted ownership and reference integrity | Not Started |
+| [F0003-S0003](./F0003-S0003-temporal-and-transaction-integrity.md) | Preserve temporal and transactional integrity | Not Started |
+| [F0003-S0004](./F0003-S0004-safe-schema-evolution.md) | Evolve the schema without losing accepted state | Not Started |
 
-**Total Stories:** 0
+**Total Stories:** 4
+
+## Planning Status
+
+Phase A requirements are approved in plan run 2026-09-30-6632006b. Phase B architecture approval remains pending. F0003 owns the full §78 inventory and shared persistence boundary; each feature retains its domain behavior and delivery phase.
