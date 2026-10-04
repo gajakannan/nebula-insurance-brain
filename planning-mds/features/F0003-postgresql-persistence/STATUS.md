@@ -13,6 +13,15 @@
 | F0003-S0003 | Preserve temporal and transactional integrity | Not Started |
 | F0003-S0004 | Evolve the schema without losing accepted state | Not Started |
 
+## Story x Role Progress
+
+| Story | Backend | Frontend | AI | QA | DevOps | Code Review | Security | Overall |
+|---|---|---|---|---|---|---|---|---|
+| F0003-S0001 | in-progress | not-in-scope | not-in-scope | not-started | not-started | not-started | not-started | not-started |
+| F0003-S0002 | not-started | not-in-scope | not-in-scope | not-started | not-started | not-started | not-started | not-started |
+| F0003-S0003 | not-started | not-in-scope | not-in-scope | not-started | not-started | not-started | not-started | not-started |
+| F0003-S0004 | not-started | not-in-scope | not-in-scope | not-started | not-started | not-started | not-started | not-started |
+
 ## Required Signoff Roles (Set in Planning)
 
 The Architect assigned the required implementation role matrix during Phase B. No implementation signoff has occurred.

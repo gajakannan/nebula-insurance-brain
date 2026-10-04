@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "feature_id": "F0003",
+  "feature_slug": "postgresql-persistence",
+  "run_id": "2026-10-03-57d14a51",
+  "status": "in-progress",
+  "recorded_on": "2026-10-03",
+  "contract_version": "2026-07-11",
+  "contract_effective_date": "2026-07-11",
+  "feature_path_at_run_start": "planning-mds/features/F0003-postgresql-persistence",
+  "feature_path_at_closeout": null,
+  "feature_state": "In Progress",
+  "rerun_of": null,
+  "changed_paths": [
+    "planning-mds/features/F0003-postgresql-persistence/STATUS.md",
+    "engine/tests/integration/test_persistence_contract.py"
+  ],
+  "scm": {
+    "base_ref": "main",
+    "head_ref": "feature/F0003-postgresql-persistence-run-57d14a51",
+    "diff_artifact": "artifacts/diffs/changed-files.txt"
+  },
+  "runtime_bearing": true,
+  "deployment_config_changed": false,
+  "frontend_in_scope": false,
+  "security_sensitive_scope": false,
+  "required_roles": [
+    "Quality Engineer",
+    "Code Reviewer",
+    "Security Reviewer",
+    "DevOps",
+    "Architect"
+  ],
+  "gate_results": {
+    "assembly_plan_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g0-assembly-plan-validation.md"
+    },
+    "runtime_preflight": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g1-runtime-preflight.md"
+    },
+    "self_review": {
+      "required": true,
+      "result": "FAIL",
+      "artifact": "g2-self-review.md"
+    },
+    "deployability": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "deployability-check.md"
+    }
+  },
+  "files": {
+    "readme": "README.md",
+    "action_context": "action-context.md",
+    "artifact_trace": "artifact-trace.md",
+    "gate_decisions": "gate-decisions.md",
+    "commands_log": "commands.log",
+    "lifecycle_gates_log": "lifecycle-gates.log",
+    "assembly_plan_validation": "g0-assembly-plan-validation.md",
+    "g1_runtime_preflight": "g1-runtime-preflight.md",
+    "self_review": "g2-self-review.md",
+    "test_plan": "test-plan.md",
+    "test_execution_report": "test-execution-report.md",
+    "coverage_report": "coverage-report.md",
+    "deployability_check": "deployability-check.md"
+  },
+  "role_results": {
+    "Quality Engineer": {
+      "required": true,
+      "result": "FAIL",
+      "required_artifacts": [
+        "test-plan.md",
+        "test-execution-report.md",
+        "coverage-report.md"
+      ],
+      "verdict_artifact": "test-execution-report.md"
+    },
+    "DevOps": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g1-runtime-preflight.md",
+        "deployability-check.md"
+      ],
+      "verdict_artifact": "deployability-check.md"
+    }
+  },
+  "token_usage": {
+    "artifact": "token-usage.json",
+    "agent_tool": null,
+    "turns": null,
+    "context_tokens": null,
+    "uncached_input_tokens": null,
+    "cached_input_tokens": null,
+    "cache_creation_input_tokens": null,
+    "cache_creation_1h_input_tokens": null,
+    "cache_creation_5m_input_tokens": null,
+    "output_tokens": null,
+    "cache_hit_ratio": null,
+    "compactions": null
+  },
+  "security_scans": {
+    "dependency": {},
+    "secrets": {},
+    "sast": {},
+    "dast": {}
+  },
+  "omissions": [],
+  "waivers": {},
+  "global_evidence_refs": {},
+  "run_scope": "feature-completion"
+}
