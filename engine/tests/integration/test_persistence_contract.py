@@ -59,27 +59,26 @@ async def test_database_exclusion_rejects_overlapping_valid_and_recorded_ranges(
     tenant_id, knowledge_base_id = owner
     first_commit_id, second_commit_id = uuid4(), uuid4()
 
-    async with pg_session_factory() as session:
-        async with session.begin():
-            session.add(
-                CanonicalCommitRow(
-                    id=first_commit_id,
-                    tenant_id=tenant_id,
-                    knowledge_base_id=knowledge_base_id,
-                    authorization_decision_id=None,
-                    created_at=datetime(2026, 3, 1, tzinfo=UTC),
-                )
+    async with pg_session_factory() as session, session.begin():
+        session.add(
+            CanonicalCommitRow(
+                id=first_commit_id,
+                tenant_id=tenant_id,
+                knowledge_base_id=knowledge_base_id,
+                authorization_decision_id=None,
+                created_at=datetime(2026, 3, 1, tzinfo=UTC),
             )
-            await session.flush()
-            session.add(
-                _version(
-                    version_id=uuid4(),
-                    slot_id=slot_id,
-                    tenant_id=tenant_id,
-                    knowledge_base_id=knowledge_base_id,
-                    commit_id=first_commit_id,
-                )
+        )
+        await session.flush()
+        session.add(
+            _version(
+                version_id=uuid4(),
+                slot_id=slot_id,
+                tenant_id=tenant_id,
+                knowledge_base_id=knowledge_base_id,
+                commit_id=first_commit_id,
             )
+        )
 
     with pytest.raises(IntegrityError) as raised:
         async with pg_session_factory() as session:
