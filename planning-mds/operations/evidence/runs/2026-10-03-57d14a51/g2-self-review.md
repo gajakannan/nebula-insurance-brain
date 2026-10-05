@@ -13,11 +13,11 @@ The approved assembly plan remains the scope authority. G0 found no plan drift. 
 | F0003-S0003 — temporal and transaction integrity | `engine/tests/integration/test_bitemporal_commit.py`, `test_commit_concurrency.py`, `test_outbox_replay.py`, `engine/tests/security/test_authx_audit.py`, and the new `test_persistence_contract.py` | The direct exclusion-constraint test and existing integration/security tests did not complete against PostgreSQL. |
 | F0003-S0004 — safe schema evolution | `engine/tests/integration/test_authx_migration.py`; migrations `0001`–`0007` | No new migration was justified by the reviewed baseline. Migration acceptance tests were not executed in this run. |
 
-The database-independent contract suite passed 15 tests. The PostgreSQL test command timed out, the broader persistence suite was interrupted after it stopped producing output, and Docker API access from this sandbox was denied. These results do not establish S0002–S0004 acceptance.
+The database-independent contract suite passed 15 tests. Hosted CI on the squash commit passed focused PostgreSQL job tests (4 engine tests and 5 recovery tests), but its general runtime suite stopped at Ruff before pytest or coverage ran. Those focused tests do not establish S0002–S0004 acceptance. The Ruff issue was corrected in continuation commit `038a87d`; hosted results for that commit are pending.
 
 ## Implementation Risks
 
-- PostgreSQL-backed ownership, exclusion, migration, and transaction guarantees remain unverified in this run. A PostgreSQL-capable test runner must execute the integration suite before the feature can pass G2.
+- PostgreSQL-backed ownership, exclusion, migration, and transaction guarantees remain only partially verified in this run. A PostgreSQL-capable runner must execute the planned integration suite and generate current-run coverage before the feature can pass G2.
 - The repo contains an existing `.coverage` file dated before this run. It is not current feature evidence and is not used as a coverage result.
 - No production schema or runtime change was made; no rollback or deployment delta is introduced by this test-only change.
 
@@ -30,6 +30,7 @@ The database-independent contract suite passed 15 tests. The PostgreSQL test com
 - `artifacts/test-results/g2-persistence-integration.log` — interrupted broader integration run; incomplete output.
 - `artifacts/test-results/g2-uv-offline.log` — offline workspace build blocked by missing cached `setuptools>=68`.
 - `artifacts/test-results/g2-environment-blocker.md` — host socket and Docker API restrictions observed in this session.
+- `artifacts/test-results/g2-ci-37241111686.md` — hosted PostgreSQL smoke results and runtime-suite interruption details.
 - `test-execution-report.md` and `coverage-report.md` — G2 remains blocked; no current PostgreSQL coverage claim is made.
 
 ## Result

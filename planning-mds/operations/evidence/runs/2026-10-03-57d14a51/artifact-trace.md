@@ -29,7 +29,7 @@
 - `planning-mds/features/F0003-postgresql-persistence/STATUS.md` — Story × Role Progress matrix to be initialized at G0
 - `planning-mds/operations/evidence/runs/2026-10-03-57d14a51/g0-assembly-plan-validation.md` — Architect assembly-plan review
 - `planning-mds/operations/evidence/runs/2026-10-03-57d14a51/g1-runtime-preflight.md` — DevOps runtime preflight
-- `planning-mds/operations/evidence/runs/2026-10-03-57d14a51/g2-self-review.md`, `test-plan.md`, `test-execution-report.md`, `coverage-report.md`, and `deployability-check.md` — G2 quality and deployability evidence
+- `planning-mds/operations/evidence/runs/2026-10-03-57d14a51/g2-self-review.md`, `test-plan.md`, `test-execution-report.md`, `coverage-report.md`, `g2-deployability-check.md`, and `deployability-check.md` — G2 quality and deployability evidence
 - `engine/tests/integration/test_persistence_contract.py` — direct PostgreSQL exclusion-constraint test added for F0003-S0003
 - `artifacts/test-results/g2-contract.log`, `g2-persistence-contract.log`, `g2-persistence-integration.log`, `g2-uv-offline.log`, `g2-environment-blocker.md`, `g2-validator.log`, and `g2-diagnostic.json` — G2 test outputs, validator result, and environment limitation record
 
