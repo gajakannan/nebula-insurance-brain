@@ -20,7 +20,7 @@ The Ruff issue was corrected in continuation commit `038a87d`; engine-scoped Ruf
 | Lane | Total | Pass | Fail | Skip | Retries |
 |---|---:|---:|---:|---:|---:|
 | Contract (`test_authx_kernel.py`) | 15 | 15 | 0 | 0 | 0 |
-| Hosted PostgreSQL smoke subsets (CI run 37241111686) | 9 | 9 | 0 | 5 | 0 |
+| Hosted PostgreSQL smoke subsets (CI run 37241111686) | 14 | 9 | 0 | 5 | 0 |
 | PostgreSQL integration | Not completed | Not established | Not established | Not established | 0 |
 | Engine package suites and coverage | Not run | Not established | Not established | Not established | 0 |
 
