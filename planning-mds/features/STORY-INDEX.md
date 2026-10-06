@@ -37,10 +37,10 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0003-S0001](./F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md) | Inventory core persistence ownership and phase boundaries | Critical | v0.1A | persistence engineer |
-| [F0003-S0002](./F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md) | Enforce persisted ownership and reference integrity | Critical | v0.1A | persistence engineer |
-| [F0003-S0003](./F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) | Preserve temporal and transactional integrity | Critical | v0.1A | persistence engineer |
-| [F0003-S0004](./F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) | Evolve the schema without losing accepted state | High | v0.1A | persistence engineer |
+| [F0003-S0001](./archive/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md) | Inventory core persistence ownership and phase boundaries | Critical | v0.1A | persistence engineer |
+| [F0003-S0002](./archive/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md) | Enforce persisted ownership and reference integrity | Critical | v0.1A | persistence engineer |
+| [F0003-S0003](./archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) | Preserve temporal and transactional integrity | Critical | v0.1A | persistence engineer |
+| [F0003-S0004](./archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) | Evolve the schema without losing accepted state | High | v0.1A | persistence engineer |
 
 ---
 

@@ -3,13 +3,13 @@
   "feature_id": "F0003",
   "feature_slug": "postgresql-persistence",
   "run_id": "2026-10-03-57d14a51",
-  "status": "in-progress",
+  "status": "approved",
   "recorded_on": "2026-10-03",
   "contract_version": "2026-07-11",
   "contract_effective_date": "2026-07-11",
   "feature_path_at_run_start": "planning-mds/features/F0003-postgresql-persistence",
-  "feature_path_at_closeout": null,
-  "feature_state": "In Progress",
+  "feature_path_at_closeout": "planning-mds/features/archive/F0003-postgresql-persistence",
+  "feature_state": "Archived",
   "rerun_of": null,
   "changed_paths": [
     "planning-mds/features/F0003-postgresql-persistence/STATUS.md",
@@ -44,8 +44,28 @@
     },
     "self_review": {
       "required": true,
-      "result": "FAIL",
+      "result": "PASS",
       "artifact": "g2-self-review.md"
+    },
+    "signoff": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "signoff-ledger.md"
+    },
+    "kg_reconciliation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "kg-reconciliation.md"
+    },
+    "pm_closeout": {
+      "required": true,
+      "result": "APPROVED",
+      "artifact": "pm-closeout.md"
+    },
+    "tracker_sync": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "lifecycle-gates.log"
     },
     "deployability": {
       "required": true,
@@ -67,12 +87,20 @@
     "test_execution_report": "test-execution-report.md",
     "coverage_report": "coverage-report.md",
     "deployability_check": "deployability-check.md",
-    "g2_deployability_check": "g2-deployability-check.md"
+    "g2_deployability_check": "g2-deployability-check.md",
+    "code_review_report": "code-review-report.md",
+    "security_review_report": "security-review-report.md",
+    "signoff_ledger": "signoff-ledger.md",
+    "pm_closeout": "pm-closeout.md",
+    "feature_action_execution": "feature-action-execution.md",
+    "kg_reconciliation": "kg-reconciliation.md",
+    "migration_run_record": "artifacts/test-results/f0003-migration-run-record.md",
+    "token_usage": "token-usage.json"
   },
   "role_results": {
     "Quality Engineer": {
       "required": true,
-      "result": "FAIL",
+      "result": "PASS",
       "required_artifacts": [
         "test-plan.md",
         "test-execution-report.md",
@@ -88,21 +116,45 @@
         "deployability-check.md"
       ],
       "verdict_artifact": "deployability-check.md"
+    },
+    "Code Reviewer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "code-review-report.md"
+      ],
+      "verdict_artifact": "code-review-report.md"
+    },
+    "Security Reviewer": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "required_artifacts": [
+        "security-review-report.md"
+      ],
+      "verdict_artifact": "security-review-report.md"
+    },
+    "Architect": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g0-assembly-plan-validation.md"
+      ],
+      "verdict_artifact": "g0-assembly-plan-validation.md"
     }
   },
   "token_usage": {
     "artifact": "token-usage.json",
-    "agent_tool": null,
-    "turns": null,
-    "context_tokens": null,
-    "uncached_input_tokens": null,
-    "cached_input_tokens": null,
+    "agent_tool": "codex",
+    "turns": 436,
+    "context_tokens": 45921889,
+    "uncached_input_tokens": 2046049,
+    "cached_input_tokens": 43875840,
     "cache_creation_input_tokens": null,
     "cache_creation_1h_input_tokens": null,
     "cache_creation_5m_input_tokens": null,
-    "output_tokens": null,
-    "cache_hit_ratio": null,
-    "compactions": null
+    "output_tokens": 473953,
+    "cache_hit_ratio": 0.9554,
+    "compactions": 5
   },
   "security_scans": {
     "dependency": {},
@@ -110,7 +162,32 @@
     "sast": {},
     "dast": {}
   },
-  "omissions": [],
+  "omissions": [
+    {
+      "artifact": "artifacts/security/dependency-scan.md",
+      "reason": "Not required: security_sensitive_scope=false and no dependency manifest changed.",
+      "approved_by": "Product Manager (Codex)",
+      "approved_on": "2026-10-04"
+    },
+    {
+      "artifact": "artifacts/security/secrets-scan.md",
+      "reason": "Not required: security_sensitive_scope=false and no secret or configuration path changed.",
+      "approved_by": "Product Manager (Codex)",
+      "approved_on": "2026-10-04"
+    },
+    {
+      "artifact": "artifacts/security/sast-scan.md",
+      "reason": "Not required: security_sensitive_scope=false and no runtime source or policy implementation path changed.",
+      "approved_by": "Product Manager (Codex)",
+      "approved_on": "2026-10-04"
+    },
+    {
+      "artifact": "artifacts/security/dast-scan.md",
+      "reason": "Not required: security_sensitive_scope=false and no endpoint or deployable application surface changed.",
+      "approved_by": "Product Manager (Codex)",
+      "approved_on": "2026-10-04"
+    }
+  ],
   "waivers": {},
   "global_evidence_refs": {},
   "run_scope": "feature-completion"

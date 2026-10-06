@@ -4,6 +4,8 @@ notes: Shared PostgreSQL 18 persistence boundary. Preserves existing migration a
   ownership and two-axis temporal integrity at the database boundary, and routes section 78 schema ownership by
   feature and release phase. Domain-specific records are added by their owning features, not pre-created by F0003.
   The physical representation of F0002 role and permission concepts remains an explicit reconciliation item.
+  F0003's direct PostgreSQL exclusion test at engine/tests/integration/test_persistence_contract.py verifies that
+  overlapping valid and recorded ranges are rejected by the database and the failed commit is absent afterward.
 source_docs:
 - F0003/feature-assembly-plan.md
 - F0003/F0003-S0001-persistence-inventory-and-ownership.md

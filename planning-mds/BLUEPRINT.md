@@ -217,16 +217,16 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0002-S0004](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) - Done
   - [F0002-S0005](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) - Done
   - [F0002-S0006](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) - Done
+- [F0003 — PostgreSQL persistence](features/archive/F0003-postgresql-persistence/README.md) - Done and archived 2026-10-04 (feature run 2026-10-03-57d14a51; four stories verified; PostgreSQL upgrade and acceptance evidence passed; all five required roles signed off)
+  - [F0003-S0001](features/archive/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md) - Done
+  - [F0003-S0002](features/archive/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md) - Done
+  - [F0003-S0003](features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) - Done
+  - [F0003-S0004](features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) - Done
 
 **Pre-build (Now)**
 
 **v0.1A (Next)**
 
-- [F0003 — PostgreSQL persistence](features/F0003-postgresql-persistence/README.md) - Planned
-  - [F0003-S0001](features/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md) — Not Started
-  - [F0003-S0002](features/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md) — Not Started
-  - [F0003-S0003](features/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) — Not Started
-  - [F0003-S0004](features/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) — Not Started
 - [F0004 — Content artifact model](features/F0004-content-artifact-model/README.md) - Planned
 - [F0005 — One-time document ingestion](features/F0005-one-time-docling-ingestion/README.md) - Planned
   - [F0005-S0001](features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) — In Progress

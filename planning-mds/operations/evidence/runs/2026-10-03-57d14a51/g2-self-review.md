@@ -2,37 +2,37 @@
 
 ## Scope Review
 
-The approved assembly plan remains the scope authority. G0 found no plan drift. This run did not alter production persistence code or migrations; the only code change is a new PostgreSQL integration test for the existing same-slot valid/recorded exclusion constraint. The feature stories remain unaccepted because required live PostgreSQL evidence could not be collected in this environment.
+The approved assembly plan remains the scope authority. G0 found no plan drift. This run's only code change is a PostgreSQL integration test for the same-slot valid/recorded exclusion constraint; no production persistence code or migration changed. Scope booleans remain `runtime_bearing=true`, `deployment_config_changed=false`, `frontend_in_scope=false`, and `security_sensitive_scope=false`. The required role set remains unchanged.
 
 ## Acceptance Criteria Review
 
 | Story | Evidence reviewed | Result |
 |---|---|---|
-| F0003-S0001 — inventory and ownership | `g0-assembly-plan-validation.md`; `planning-mds/features/F0003-postgresql-persistence/feature-assembly-plan.md` | Plan ownership and phase mapping pass G0. Runtime story acceptance is not signed off. |
-| F0003-S0002 — persisted ownership and reference integrity | `engine/tests/integration/test_authx_migration.py` | Existing tests were inspected but not executed; PostgreSQL results are unverified. |
-| F0003-S0003 — temporal and transaction integrity | `engine/tests/integration/test_bitemporal_commit.py`, `test_commit_concurrency.py`, `test_outbox_replay.py`, `engine/tests/security/test_authx_audit.py`, and the new `test_persistence_contract.py` | The direct exclusion-constraint test and existing integration/security tests did not complete against PostgreSQL. |
-| F0003-S0004 — safe schema evolution | `engine/tests/integration/test_authx_migration.py`; migrations `0001`–`0007` | No new migration was justified by the reviewed baseline. Migration acceptance tests were not executed in this run. |
+| F0003-S0001 — inventory and ownership | `g0-assembly-plan-validation.md`; feature assembly plan; ADR-0059 boundary review | PASS: table ownership, phase boundary, and storage-port constraints remain aligned. |
+| F0003-S0002 — persisted ownership and reference integrity | `artifacts/test-results/f0003-postgres.xml`, `test_authx_migration.py` | PASS: live PostgreSQL migration tests preserved IDs/history and rejected cross-owner references. |
+| F0003-S0003 — temporal and transaction integrity | `artifacts/test-results/f0003-postgres.xml`, `test_bitemporal_commit.py`, `test_persistence_contract.py`, `test_commit_concurrency.py`, `test_outbox_replay.py`, `test_authx_audit.py` | PASS: all planned live PostgreSQL temporal, concurrency, replay, and audit cases passed. |
+| F0003-S0004 — safe schema evolution | `artifacts/test-results/f0003-postgres-run.md`, `test_authx_migration.py`, revisions `0001`–`0007` | PASS: a clean PostgreSQL database reached `0007`; existing migration cases prove fail-closed reconciliation, no partial writes, preserved history, and audit recording. |
 
-The database-independent contract suite passed 15 tests. Hosted CI on the squash commit passed focused PostgreSQL job tests (4 engine tests and 5 recovery tests), but its general runtime suite stopped at Ruff before pytest or coverage ran. Those focused tests do not establish S0002–S0004 acceptance. The Ruff issue was corrected in continuation commit `038a87d`; hosted results for that commit are pending.
+The missing focused migration case identified in the test plan is covered by existing tests: `test_mixed_kb_batch_blocks_reconciliation_without_partial_writes` proves the ambiguous mixed-KB batch is rejected without partial changes; `test_expand_reconcile_constrain_preserves_ids_and_enforces_ownership` checks the successful `scope_reconciled` audit is recorded exactly once.
 
 ## Implementation Risks
 
-- PostgreSQL-backed ownership, exclusion, migration, and transaction guarantees remain only partially verified in this run. A PostgreSQL-capable runner must execute the planned integration suite and generate current-run coverage before the feature can pass G2.
-- The repo contains an existing `.coverage` file dated before this run. It is not current feature evidence and is not used as a coverage result.
-- No production schema or runtime change was made; no rollback or deployment delta is introduced by this test-only change.
+- The first local migration attempt exposed a missing database-local `btree_gist` extension; after installing it in the disposable database, the full upgrade and acceptance tests passed.
+- The direct acceptance selection's standalone coverage diagnostic is lower than the package suite metric because it exercises only the six selected feature acceptance modules. The repository package coverage gate passed for the persistence business-logic package; see `coverage-report.md`.
+- The local Alembic configuration emitted a `path_separator` deprecation warning. It did not affect migration or test results.
+- No production schema or runtime change was made, so this run adds no deployment delta.
 
 ## Validation Evidence
 
 - `g0-assembly-plan-validation.md` — PASS.
-- `g1-runtime-preflight.md` — PASS; Compose PostgreSQL was healthy from the preflight environment.
-- `artifacts/test-results/g2-contract.log` — 15 passed.
-- `artifacts/test-results/g2-persistence-contract.log` — timed out before a pytest summary.
-- `artifacts/test-results/g2-persistence-integration.log` — interrupted broader integration run; incomplete output.
-- `artifacts/test-results/g2-uv-offline.log` — offline workspace build blocked by missing cached `setuptools>=68`.
-- `artifacts/test-results/g2-environment-blocker.md` — host socket and Docker API restrictions observed in this session.
-- `artifacts/test-results/g2-ci-37241111686.md` — hosted PostgreSQL smoke results and runtime-suite interruption details.
-- `test-execution-report.md` and `coverage-report.md` — G2 remains blocked; no current PostgreSQL coverage claim is made.
+- `g1-runtime-preflight.md` — PASS.
+- `artifacts/test-results/f0003-postgres.xml` — 12 passed, no skips.
+- `artifacts/test-results/f0003-postgres-run.md` — clean PostgreSQL migration through `0007` and acceptance output summary.
+- `artifacts/coverage/brain-persistence-ci-coverage.log` — package coverage gate passed on the same PR head.
+- `artifacts/coverage/f0003-postgres.xml` — raw coverage for the focused PostgreSQL acceptance selection.
+- `g2-deployability-check.md` and `deployability-check.md` — PASS.
 
 ## Result
 
-Result: FAIL
+Result: PASS
+
