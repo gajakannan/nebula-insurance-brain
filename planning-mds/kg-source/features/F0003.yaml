@@ -1,11 +1,14 @@
 id: feature:F0003
 name: PostgreSQL persistence
-path: planning-mds/features/F0003-postgresql-persistence
-status: planned
-registry_section: Planned
+path: planning-mds/features/archive/F0003-postgresql-persistence
+status: archived-done
+registry_section: Archived
 phase: v0.1A
-roadmap_section: Next
+roadmap_section: Completed
 roadmap_order: 2
+completed_date: '2026-10-04'
+archived_date: '2026-10-04'
+completion_state: 'All four stories verified in feature run 2026-10-03-57d14a51: the approved persistence ownership and phase boundaries are recorded; clean PostgreSQL upgrade reached revision 0007; all 12 live PostgreSQL acceptance tests and the 11-test persistence package CI coverage gate passed; G7 bound the as-built persistence contract to source; signoff is complete for all five required roles. No implementation source files changed in this feature run.'
 rationale: The shared PostgreSQL 18 persistence boundary preserves the accepted F0001 bitemporal baseline and F0002
   structural ownership while assigning every section 78 table to one domain owner and delivery phase. Feature owners
   define their own table contracts and additive migrations; F0003 does not activate future-phase behavior.
@@ -43,14 +46,14 @@ affects:
 - workflow:canonical-commit
 story_mappings:
 - id: story:F0003-S0001
-  path: planning-mds/features/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md
+  path: planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md
   affects:
   - capability:postgresql-persistence-contract
   governed_by:
   - adr:0002
   - adr:0030
 - id: story:F0003-S0002
-  path: planning-mds/features/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md
+  path: planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md
   affects:
   - capability:postgresql-persistence-contract
   - capability:structural-tenancy-and-entity-identity
@@ -61,7 +64,7 @@ story_mappings:
   governed_by:
   - adr:0030
 - id: story:F0003-S0003
-  path: planning-mds/features/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md
+  path: planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md
   affects:
   - capability:postgresql-persistence-contract
   - capability:bitemporal-canonical-commit
@@ -75,7 +78,7 @@ story_mappings:
   - adr:0009
   - adr:0010
 - id: story:F0003-S0004
-  path: planning-mds/features/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
+  path: planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
   affects:
   - capability:postgresql-persistence-contract
   - entity:content-artifact

@@ -1,4 +1,4 @@
-# Deployability Check — F0003-postgresql-persistence run 2026-10-03-57d14a51
+# G2 Deployability Check — F0003-postgresql-persistence run 2026-10-03-57d14a51
 
 ## Runtime / Deployment Config Changes
 

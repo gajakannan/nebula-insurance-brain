@@ -1,0 +1,29 @@
+Source: GitHub Actions run 37251703741, runtime-suites job 111580493891
+Run URL: https://github.com/gajakannan/nebula-insurance-brain/actions/runs/37251703741
+PR head: 1e9db3381d63c8634b52d8e172ccd36a1e3cdf73
+Workflow merge ref: f4a68a16c1ceb89fe562590d4a8e4592bb698c01
+Step: engine/ — pytest brain_persistence coverage gate
+Command: uv run pytest packages/brain-persistence/tests --cov=brain_persistence --cov-fail-under=80
+Environment: Linux, Python 3.14.6, pytest 9.1.1, pytest-cov 7.1.0
+
+============================= test session starts ==============================
+collected 11 items
+packages/brain-persistence/tests/test_models.py ..                       [ 18%]
+packages/brain-persistence/tests/test_repositories.py ..                 [ 36%]
+packages/brain-persistence/tests/test_tenancy_and_grants.py .......      [100%]
+
+Name                                                               Stmts   Miss  Cover
+--------------------------------------------------------------------------------------
+packages/brain-persistence/src/brain_persistence/__init__.py           0      0   100%
+packages/brain-persistence/src/brain_persistence/authx.py            120     40    67%
+packages/brain-persistence/src/brain_persistence/base.py               8      0   100%
+packages/brain-persistence/src/brain_persistence/grants.py            99      1    99%
+packages/brain-persistence/src/brain_persistence/identity.py          95     13    86%
+packages/brain-persistence/src/brain_persistence/models.py           319      0   100%
+packages/brain-persistence/src/brain_persistence/repositories.py     139     46    67%
+packages/brain-persistence/src/brain_persistence/session.py           17      0   100%
+packages/brain-persistence/src/brain_persistence/tenancy.py          144     15    90%
+--------------------------------------------------------------------------------------
+TOTAL                                                                941    115    88%
+Required test coverage of 80% reached. Total coverage: 87.78%
+============================== 11 passed in 0.91s ==============================

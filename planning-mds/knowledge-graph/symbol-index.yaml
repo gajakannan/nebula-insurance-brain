@@ -1,16 +1,16 @@
 version: 0
-generated_at: '2026-09-29T01:27:02+00:00'
+generated_at: '2026-10-05T03:11:01+00:00'
 summary:
-  total_symbols: 486
+  total_symbols: 489
   by_language:
     python:
-      files: 65
-      parsed: 26
-      cached: 39
+      files: 66
+      parsed: 0
+      cached: 66
     typescript:
       files: 8
-      parsed: 8
-      cached: 0
+      parsed: 0
+      cached: 8
   disambiguated_ids: 0
   compilation_roots_by_language:
     python:
@@ -26,8 +26,7 @@ summary:
     python: 0b86e437fc52203bf021904b96d9cb9878531be5ad42bee5d58cdffa650fee9e
     typescript: 6599d91ca234bbd991550f63cf08a7d3d0a8a259913b85478e311307d8c1e499
     csharp: f1e324c369f84d91c7fc9babd3fbb3df5352bd259db0a2d31fe5c8f61f74ce96
-  sidecar_authoritative_languages:
-  - python
+  sidecar_authoritative_languages: []
 symbols:
 - id: symbol:capability-authorization-enforcement:action-ceiling.post-init
   node: capability:authorization-enforcement
@@ -5416,6 +5415,48 @@ symbols:
   - symbol:capability-parse-once-content-artifact:object-store.read
   - symbol:capability-parse-once-content-artifact:queue.document-job-queue
   - symbol:capability-parse-once-content-artifact:queue.job-lease
+- id: symbol:capability-postgresql-persistence-contract:test-persistence-contract.range
+  node: capability:postgresql-persistence-contract
+  kind: function
+  name: _range
+  file: engine/tests/integration/test_persistence_contract.py
+  line: 20
+  signature: 'def _range(start: str, end: str | None)'
+  visibility: private
+  language: python
+  end_line: 23
+  callers:
+  - symbol:capability-postgresql-persistence-contract:test-persistence-contract.version
+  callees: []
+- id: symbol:capability-postgresql-persistence-contract:test-persistence-contract.test-database-exclusion-rejects-overlapping-valid-and-recorded-ranges
+  node: capability:postgresql-persistence-contract
+  kind: function
+  name: test_database_exclusion_rejects_overlapping_valid_and_recorded_ranges
+  file: engine/tests/integration/test_persistence_contract.py
+  line: 54
+  signature: 'async def test_database_exclusion_rejects_overlapping_valid_and_recorded_ranges(pg_session_factory:
+    async_sessionmaker[AsyncSession], owner: tuple[UUID, UUID], slot_id: UUID)'
+  visibility: public
+  language: python
+  end_line: 110
+  callers: []
+  callees:
+  - symbol:capability-postgresql-persistence-contract:test-persistence-contract.version
+- id: symbol:capability-postgresql-persistence-contract:test-persistence-contract.version
+  node: capability:postgresql-persistence-contract
+  kind: function
+  name: _version
+  file: engine/tests/integration/test_persistence_contract.py
+  line: 26
+  signature: 'def _version(*, version_id: UUID, slot_id: UUID, tenant_id: UUID, knowledge_base_id:
+    UUID, commit_id: UUID)'
+  visibility: private
+  language: python
+  end_line: 51
+  callers:
+  - symbol:capability-postgresql-persistence-contract:test-persistence-contract.test-database-exclusion-rejects-overlapping-valid-and-recorded-ranges
+  callees:
+  - symbol:capability-postgresql-persistence-contract:test-persistence-contract.range
 - id: symbol:capability-runtime-roots-and-toolchain:app.create-app
   node: capability:runtime-roots-and-toolchain
   kind: function
