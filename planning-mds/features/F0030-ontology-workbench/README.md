@@ -12,6 +12,8 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 ## Documents
 
+The [ontology planning handoff](../../architecture/ontology-planning-handoff.md) records the release prerequisites and deferred tooling scope. Future crosswalk analysis retains source namespace/version, match type, evidence and unresolved contradictions; it is distinct from F0066 source-phrase alignment. Module packaging must carry shapes, profile requirements and evidence obligations. First-assessment lineage is already required by F0065 and is not deferred to this workbench. This is planning context; PRD and phase approvals remain pending.
+
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0030.yaml`.
 
 ## Stories

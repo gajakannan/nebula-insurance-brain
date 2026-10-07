@@ -3,9 +3,14 @@ name: Advanced reasoners
 path: planning-mds/features/F0062-advanced-reasoners
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
+affects:
+- capability:ontology-release-compatibility
+- glossary_term:constraint-execution-context
+notes:
+- Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD, stories,
+  assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending at formal plan.
+- Optional RDF/OWL checkers must report supported fragment, bounds and unsupported/undecided results. PostgreSQL stays authoritative under ADR-0002; external reasoning stores are projections. Full formal proofs are optional.
+- Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval verification.
 phase: v0.4+
 roadmap_section: Later
 roadmap_order: 45
@@ -18,3 +23,5 @@ depends_on:
   confidence: 0.7
 governed_by:
 - adr:0001
+- adr:0002
+- adr:0045

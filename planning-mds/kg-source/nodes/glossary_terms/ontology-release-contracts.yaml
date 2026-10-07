@@ -1,0 +1,59 @@
+glossary_terms:
+- id: glossary_term:stable-term-iri
+  label: Stable term IRI
+  notes: Proposed stable identity with deterministic namespace mapping. Labels may change and an IRI is never
+    reassigned, but meaning changes still need release classification and migration records. Production
+    namespace and mapping rules remain F0012 PRD decisions; example.invalid is illustrative only.
+  source_docs:
+  - F0012/README.md
+  - planning-mds/domain/glossary.md
+  - planning-mds/architecture/ontology-planning-handoff.md
+  rationale:
+  - adr: adr:0045
+    section: Identity and release records
+    summary: Stable identity and explicit semantic-change classes must be specified together.
+  related_nodes:
+  - entity:ontology-module-version
+  - entity:ontology-release
+  - adr:0045
+- id: glossary_term:constraint-execution-context
+  label: Constraint execution context
+  notes: Proposed authoring metadata names lifecycle stage, consumer, applicability, severity/action and
+    asserted or inferred data basis, including the supported inference ruleset. Missing limit inputs produce
+    UNKNOWN for a requesting F0065 assessment; they are not a universal canonical-commit rejection.
+  source_docs:
+  - F0012/README.md
+  - F0013/README.md
+  - F0065/assessment-contract.md
+  - planning-mds/domain/glossary.md
+  - planning-mds/architecture/ontology-planning-handoff.md
+  rationale:
+  - adr: adr:0045
+    section: Semantics and constraint execution
+    summary: Inference, validation and consumer completeness require distinct execution contracts.
+  related_nodes:
+  - entity:ontology-module-version
+  - capability:ontology-release-compatibility
+  - adr:0045
+  - adr:0056
+- id: glossary_term:ontology-projection-mapping
+  label: Ontology projection mapping
+  notes: Proposed versioned release artifact mapping predicate IRIs to directed AGE edges or properties,
+    with endpoint identity, qualifiers, exact source lineage, ownership, time and explicit omissions.
+    Mapping changes require projection impact and rebuild analysis. Synthetic examples do not establish
+    an implemented exporter or graph writer; the production schema remains a F0012/F0013 decision.
+  source_docs:
+  - F0012/README.md
+  - F0013/README.md
+  - F0015/README.md
+  - planning-mds/domain/glossary.md
+  - planning-mds/architecture/data-model.md
+  - planning-mds/architecture/ontology-planning-handoff.md
+  rationale:
+  - adr: adr:0045
+    section: Identity and release records
+    summary: Pin predicate-to-projection mapping versions and digests so impact analysis can identify changed projections.
+  related_nodes:
+  - entity:ontology-release
+  - capability:ontology-release-compatibility
+  - adr:0045

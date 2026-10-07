@@ -1,0 +1,27 @@
+{
+  "@context": {
+    "ins": "https://example.invalid/nebula/ont/insurance/",
+    "cov": "https://example.invalid/nebula/ont/insurance/coverage/",
+    "lim": "https://example.invalid/nebula/ont/insurance/limit/",
+    "basis": "https://example.invalid/nebula/ont/insurance/limit/basis/",
+    "trigger": "https://example.invalid/nebula/ont/insurance/trigger/",
+    "data": "https://example.invalid/nebula/data/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "label": "http://www.w3.org/2000/01/rdf-schema#label",
+    "hasLimit": {"@id": "cov:has-limit", "@type": "@id"},
+    "hasForm": {"@id": "cov:has-form", "@type": "@id"},
+    "hasTrigger": {"@id": "cov:has-trigger", "@type": "@id"},
+    "amount": {"@id": "lim:amount", "@type": "xsd:decimal"},
+    "currency": "lim:currency",
+    "basisOfLimit": {"@id": "lim:has-basis", "@type": "@id"}
+  },
+  "@graph": [
+    {"@id": "data:EX-COV-001", "@type": "cov:general-liability",
+     "hasLimit": "data:EX-LIMIT-001", "hasForm": "data:EX-FORM-001", "hasTrigger": "trigger:occurrence"},
+    {"@id": "data:EX-LIMIT-001", "@type": "ins:limit",
+     "amount": "500000.00", "currency": "USD", "basisOfLimit": "basis:each-occurrence"},
+    {"@id": "basis:each-occurrence", "@type": "lim:basis"},
+    {"@id": "data:EX-FORM-001", "@type": "ins:form", "label": "Example GL form"},
+    {"@id": "trigger:occurrence", "@type": "ins:trigger"}
+  ]
+}

@@ -28,4 +28,10 @@ Baseline architecture decision carried verbatim from the master blueprint. The s
 
 ## References
 
+### Pending format-scope reconciliation (2026-10-07)
+
+The accepted decision above is preserved. Master blueprint section 112 treats undefined `OKF` as optional pending specification, ownership and a round-trip example. [ADR-0045's proposed clarification](ADR-0045-ontology-release-compatibility.md#proposed-clarification-of-adr-0012-format-scope) records the scoped reconciliation; it remains Proposed and does not yet supersede this record. The format list is not evidence of implemented import/export support.
+
+### Sources
+
 - `planning-mds/architecture/master-blueprint.md` section 76

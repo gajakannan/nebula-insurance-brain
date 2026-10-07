@@ -244,6 +244,21 @@ These definitions accompany the [worked example](../examples/neurosymbolic-gl/RE
 
 Existing Assertion, FactSlot, Canonical Fact Version, Derivation, and Review Decision definitions are illustrated by the source-to-fact and temporal sections of EX-GL-001. Every changed or new concept must link a worked/boundary example and owning story/contract before its plan is considered ready.
 
+## Ontology release vocabulary (proposed ADR-0045 contract)
+
+These planning definitions are governed by [ADR-0045](../architecture/decisions/ADR-0045-ontology-release-compatibility.md) and the [proposed release records](../architecture/data-model.md#proposed-ontology-release-records-f0012f0013-adr-0045). F0012/F0013 PRDs must assign their stories before readiness approval.
+
+| Term | Meaning in the Brain | Concrete example / boundary | Owning feature |
+|---|---|---|---|
+| Stable term IRI | Persistent identity of a term, distinct from its mutable label and release-specific definition; never reassigned | [EX-ONT-001](../examples/ontology-release-contracts.md#stable-term-identity): an unchanged IRI alone does not prove unchanged meaning | F0012/F0013, v0.1A |
+| Constraint execution context | Declared stage, consumer, applicability, severity/action, and asserted or inferred data basis for a constraint | [EX-ONT-002](../examples/ontology-release-contracts.md#constraint-execution-and-missing-values): a missing limit produces an assessment gap without a universal commit rejection | F0012/F0013, v0.1A; F0065, v0.1B |
+| Ontology module version | Immutable revision of one module with its definitions, semantics, constraints, and dependency declarations | [EX-ONT-005](../examples/ontology-release-contracts.md#composed-releases-and-packages): GL version 2 declares its foundation dependency | F0012/F0013, v0.1A |
+| Ontology release | Immutable composition of exact module versions and associated artifact/contract references | [EX-ONT-005](../examples/ontology-release-contracts.md#composed-releases-and-packages): an interpretation pins the composed release, not floating latest modules | F0012/F0013/F0015, v0.1A |
+| Historical reproducibility | Reconstruction using retained releases, exact inputs/rules, and original valid/known coordinates | [EX-ONT-003](../examples/ontology-release-contracts.md#reproducibility-and-compatibility): R1 remains interpretable even when R2 changes conclusions | F0012/F0013/F0065, v0.1 |
+| Release compatibility | Preservation of declared consumer contracts, considering inference, validation, profiles, applicability, and evidence requirements | [EX-ONT-004](../examples/ontology-release-contracts.md#reproducibility-and-compatibility): unchanged inference does not make shape tightening compatible | F0012/F0013/F0015; ADR-0045 |
+| Conservative extension check | Analysis of whether an extension changes conclusions over a specified existing vocabulary within a declared logic and scope | [EX-ONT-003](../examples/ontology-release-contracts.md#reproducibility-and-compatibility): bounded success is not unrestricted proof or complete compatibility | ADR-0045; optional tooling F0030/F0062 |
+| Ontology projection mapping | Versioned rule mapping a predicate to a graph edge or property, retaining endpoint identity, qualifiers, exact source lineage, ownership and time, or explicitly omitting it | [EX-INTEROP-001](../examples/ontology-interchange/README.md#evidence-time-and-projection-boundaries): hasLimit maps to HAS_LIMIT; the inferred inverse is explicitly omitted | F0012/F0013 and projection consumer; proposed ADR-0045 |
+
 ## F0002 identity and authorization refinements (proposed design)
 
 These definitions refine the existing Tenant/Workspace/Knowledge Base/Principal terms for the approved F0002 requirements. Runtime proof and Phase B approval remain pending. Contract: [AuthX v1 schema](../schemas/authx-kernel.schema.json), [assembly plan](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md); worked and boundary examples: [EX-AUTHX](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md).

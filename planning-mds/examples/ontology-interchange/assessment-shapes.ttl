@@ -1,0 +1,15 @@
+# Completeness at the assessment boundary; not a canonical-commit gate.
+@prefix cov: <https://example.invalid/nebula/ont/insurance/coverage/> .
+@prefix lim: <https://example.invalid/nebula/ont/insurance/limit/> .
+@prefix shape: <https://example.invalid/nebula/shapes/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+shape:CompleteLimit a sh:NodeShape ;
+    sh:targetClass cov:general-liability ;
+    sh:property [ sh:path cov:has-limit ; sh:minCount 1 ;
+                  sh:message "The selected assessment needs limit input." ;
+                  sh:node shape:RequiredLimitInputs ] .
+shape:RequiredLimitInputs a sh:NodeShape ;
+    sh:property [ sh:path lim:amount ; sh:minCount 1 ] ;
+    sh:property [ sh:path lim:currency ; sh:minCount 1 ] ;
+    sh:property [ sh:path lim:has-basis ; sh:minCount 1 ] .

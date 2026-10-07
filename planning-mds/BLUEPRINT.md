@@ -336,6 +336,8 @@ Minimal Entity 360 and Document 360 (sections 70, 71) and the constrained chat s
 
 Status: the architecture baseline exists in the master blueprint; each subsection below summarizes it and points to the authoritative sections. Per-feature Phase B produces assembly plans, contract files, and ADR confirmations.
 
+Ontology prerequisite amendment: read the [planning handoff](architecture/ontology-planning-handoff.md) before planning F0012/F0013/F0015. It records release identities, constraint execution, missingness, dependency links, and deferred F0030/F0062 work. The six affected features have planning-only KG mappings so lookup exposes their context; PRDs, stories, assembly plans and Phase A/B approvals remain pending, and ADR-0045 stays Proposed.
+
 ### 4.1 Service Boundaries
 
 Eight architectural planes (section 4) implemented as a modular monolith across `engine/` (semantic kernel, commit services, governance, review, search, security), `neuron/` (interpretation, conversation, learning, agent tools), and `experience/` (native semantic UX, including the Review Panel), with Docling, Docling-Graph, PostgreSQL extensions, and Temporal as engines around the semantic core (ADR-0001 as amended by ADR-0057, sections 100 and 125). The deployable topology and dependency matrix are a P0 pre-build requirement (section 106.2).

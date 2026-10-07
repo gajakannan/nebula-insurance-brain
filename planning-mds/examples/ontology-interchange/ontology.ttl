@@ -1,0 +1,30 @@
+# Same illustrative vocabulary as ontology.yaml; Turtle serializes RDF/OWL.
+@prefix ins: <https://example.invalid/nebula/ont/insurance/> .
+@prefix cov: <https://example.invalid/nebula/ont/insurance/coverage/> .
+@prefix lim: <https://example.invalid/nebula/ont/insurance/limit/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# The version IRI identifies this module revision. The composed release that selects it
+# (https://example.invalid/nebula/releases/gl/v1) is application metadata in ontology.yaml.
+<https://example.invalid/nebula/ont/insurance> a owl:Ontology ;
+    owl:versionIRI <https://example.invalid/nebula/modules/insurance.general-liability.example/1> .
+
+ins:coverage a owl:Class .
+cov:general-liability a owl:Class ; rdfs:subClassOf ins:coverage .
+ins:limit a owl:Class .
+lim:basis a owl:Class .
+ins:form a owl:Class .
+ins:trigger a owl:Class .
+
+cov:has-limit a owl:ObjectProperty ;
+    rdfs:domain ins:coverage ; rdfs:range ins:limit ;
+    owl:inverseOf lim:of-coverage .
+lim:of-coverage a owl:ObjectProperty ;
+    rdfs:domain ins:limit ; rdfs:range ins:coverage .
+cov:has-form a owl:ObjectProperty ; rdfs:domain ins:coverage ; rdfs:range ins:form .
+cov:has-trigger a owl:ObjectProperty ; rdfs:domain ins:coverage ; rdfs:range ins:trigger .
+lim:has-basis a owl:ObjectProperty ; rdfs:domain ins:limit ; rdfs:range lim:basis .
+lim:amount a owl:DatatypeProperty ; rdfs:domain ins:limit ; rdfs:range xsd:decimal .
+lim:currency a owl:DatatypeProperty ; rdfs:domain ins:limit ; rdfs:range xsd:string .

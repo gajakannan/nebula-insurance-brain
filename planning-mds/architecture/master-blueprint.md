@@ -1230,7 +1230,7 @@ Datatype
 Constraint
 ```
 
-Initial reasoning semantics:
+Initial ontology constructs (inference semantics and validation behavior must be specified separately under section 112):
 
 ```text
 subClassOf
@@ -3515,6 +3515,8 @@ document_classification_assertion
 ontology
 ontology_version
 ontology_module
+ontology_release                proposed composed release (ADR-0045)
+ontology_release_module         proposed exact module-version membership (ADR-0045)
 ontology_concept
 ontology_property
 ontology_relation
@@ -3627,6 +3629,9 @@ SUBMITTED_BY
 INSURED_BY
 BROKERED_BY
 HAS_COVERAGE
+HAS_LIMIT
+HAS_FORM
+HAS_TRIGGER
 HAS_LOCATION
 ARISES_UNDER
 DERIVED_FROM
@@ -3636,6 +3641,8 @@ PART_OF
 ```
 
 Graph labels are ontology-mapped semantic relationships.
+
+The proposed GL mappings are `insurance.coverage.has-limit` (`hasLimit`) → `HAS_LIMIT`, `insurance.coverage.has-form` (`hasForm`) → `HAS_FORM`, and `insurance.coverage.has-trigger` (`hasTrigger`) → `HAS_TRIGGER`, directed from coverage to the corresponding limit/form/trigger. Freeze predicate IRIs, endpoint identity, qualifiers, exact canonical source/evidence lineage, ownership/time context, omissions and rebuild behavior in a versioned release mapping. See [data model](data-model.md#age-graph-labels-master-blueprint-section-79); these are proposed labels pending F0012/F0013 and projection-consumer contracts.
 
 ---
 
@@ -3726,6 +3733,8 @@ constraints:
     property: insurance.coverage.has-limit
     min_cardinality: 1
 ```
+
+This is an illustrative authoring fragment, not an executable constraint contract. F0012/F0013 must specify each constraint's lifecycle stage, consumer, applicability, severity/action, and asserted or inferred data basis. Here the cardinality requirement belongs to a consumer requesting a complete limit; it is not a universal canonical-commit gate. Missing required limit inputs produce `UNKNOWN` under the [F0065 assessment contract](../features/F0065-grounded-gl-guideline-assessment/assessment-contract.md), not false or zero. See section 112 and the [release examples](../examples/ontology-release-contracts.md).
 
 ---
 
@@ -4981,15 +4990,27 @@ Versioning is present, but the release contract needs definition before building
 
 Add immutable module releases, dependency locks, profile/template/compiler hashes, stable semantic identifiers, deprecation aliases, and permitted tenant-specific extensions. A concept identifier must not silently change meaning between versions.
 
+F0012 must specify a stable namespace and deterministic ID-to-IRI mapping before vocabulary authoring. An IRI is never reassigned; a label change does not change identity. Stable identifiers alone cannot prevent meaning changes: pair them with the change classes below and explicit migration mappings. The proposed `ontology_release` and `ontology_release_module` records distinguish a composed release from an individual module version; see [data model](data-model.md#proposed-ontology-release-records-f0012f0013-adr-0045).
+
 Classify changes as additive, constraint tightening, rename/alias, semantic change, split, merge, or retirement. Each class defines compatibility, migration mapping, affected FactSlots, required reinterpretation, evaluation, and rollback behavior.
 
 Pin each interpretation run to an ontology/profile release. Existing facts retain their original interpretation context; activating a new release does not imply every old document was reinterpreted.
 
+Historical reproducibility depends on pinned releases, exact input/rule versions, and valid/known coordinates. Compatibility is a separate consumer contract. A conservative-extension check can expose new conclusions about existing terms in an allegedly additive change, within its declared supported fragment and scope. It does not establish compatibility by itself: tightening a validation constraint can break a consumer without changing inference. Preserve unsupported, incomplete, and undecided results; a bounded successful check is not a universal proof.
+
+Before activation, require a reviewed release impact report under [ADR-0045](decisions/ADR-0045-ontology-release-compatibility.md): changed definitions and constraints; affected FactSlots, assertions, profiles/templates, guideline rules, derived results, and projections; scoped replay results; migration/rollback actions; and explicit unknowns. Distinguish structural dependency reach from measured changes in conclusions or validation outcomes. The ADR remains Proposed until its acceptance evidence is recorded.
+
+Projection impact requires a versioned predicate-to-edge/property mapping in release metadata, including direction, endpoint identity, qualifiers, source lineage, ownership and temporal context, and explicit non-projection rules. Hash that mapping with the release. A mapping change identifies the affected projection consumer and rebuild/invalidation action; missing mapping coverage is an unknown impact, not zero impact.
+
 **Important semantic distinction:** Decide which ontology constructs are inference rules and which are validation constraints. For example, a domain/range statement used for inference is not automatically equivalent to rejecting data as structurally invalid. Specify the supported reasoning subset and reject unsupported constructs explicitly rather than silently approximating them.
+
+The authoring schema must also declare each constraint's lifecycle stage, consumer, applicability, severity/action, and asserted or inferred data basis (including the inference provider/ruleset where used). Missing information can make a consumer's assessment `UNKNOWN` without blocking unrelated canonical acceptance. Keep missingness, explicit negatives, conflicts, and non-applicability distinct. Every stored derived assessment requires exact rule/input lineage from its first release under ADR-0026 and F0065; this is not deferred to ontology evolution tooling.
 
 Keep JSON Schema as the structural contract, while testing shared AJV/Python behavior. Define a supported schema subset, custom annotation handling, defaults/coercion policy, references, decimal representation, and generated Pydantic conformance. JSON Schema validity alone does not establish insurance applicability or evidence quality.
 
 Add a machine-readable domain-pack manifest for ontology modules, document profiles, extraction templates, validation rules, test examples, owners, and license/usage restrictions. External vocabulary mappings should retain namespace and version and require suitable usage rights. The undefined `OKF` interchange reference should remain optional until a precise specification, owner, and example round trip are selected.
+
+Future module extraction must preserve the package's shapes, profile requirements, and evidence obligations as well as its declared logical scope. It does not introduce ontology content into OPEN prompts (F0066); TEMPLATE compilation remains F0015. External mapping analysis and module tooling belong with F0030/F0062. A reasoner's store may be a disposable projection, while PostgreSQL remains authoritative under ADR-0002.
 
 **Acceptance:** A coverage concept splits into two more precise concepts. A dry run identifies affected assertions, slots, profiles, embeddings, and derived results; historical queries retain their original meaning; new extraction uses the new release; rollback stops new processing without erasing history.
 

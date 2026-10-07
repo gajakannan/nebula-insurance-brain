@@ -1,0 +1,46 @@
+status: synthetic-authored-expectations
+owners: [F0012, F0013, F0015, F0065]
+ontology_release: https://example.invalid/nebula/releases/gl/v1
+ontology_module_version: https://example.invalid/nebula/modules/insurance.general-liability.example/1
+context:
+  namespace_status: illustrative; production namespace is an F0012 decision
+  source_fixture: ../neurosymbolic-gl/records.json
+  source_excerpt: ../neurosymbolic-gl/source-package.md
+  tenant_id: EX-TENANT-001
+  knowledge_base_id: EX-KB-001
+  valid_as_of: '2026-02-01T00:00:00Z'
+  known_as_of: '2026-02-02T00:00:00Z'
+  exact_limit_fact_version: EX-F-001
+  slot: EX-SLOT-001
+  assertion: EX-A-001
+  evidence: EX-EV-001
+  source_ontology_release: example-insurance/v1
+  rule_version: EX-RULE-001-v1
+  decimal_minimum: '1000000.00'
+  basis: EachOccurrence
+  currency: USD
+  qualification: only the complete-case amount reuses EX-F-001; other cases are independent hypothetical fixtures
+  auxiliary_relations: form and trigger are synthetic extensions without claimed source evidence
+  release_mapping: the illustrative interchange release describes an export view; it does not relabel source records
+cases:
+- id: EX-INTEROP-001
+  file: facts.ttl
+  equivalent_jsonld: facts.jsonld
+  supplied_value_conforms: true
+  assessment_completeness_conforms: true
+  application_expectation: BELOW_GUIDELINE
+- id: EX-INTEROP-002
+  file: missing-limit.ttl
+  supplied_value_conforms: true
+  assessment_completeness_conforms: false
+  application_expectation: UNKNOWN
+- id: EX-INTEROP-003
+  file: malformed-amount.ttl
+  supplied_value_conforms: false
+  assessment_completeness_conforms: null
+  application_expectation: reject malformed candidate; assessment is not run on it
+inference_case:
+  id: EX-INTEROP-004
+  input: facts.ttl
+  expected_subset: expected-inferences.ttl
+  scope: subclass typing and inverse-property consequences only

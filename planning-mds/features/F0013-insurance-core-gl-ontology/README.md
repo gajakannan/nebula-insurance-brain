@@ -10,6 +10,17 @@ The General Liability module of the insurance core ontology supplies the coverag
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0011](../../architecture/decisions/ADR-0011-ontology-is-versioned-and-modular.md), [ADR-0039](../../architecture/decisions/ADR-0039-typed-insurance-values-and-completeness.md).
 
+## GL authoring prerequisites (2026-10-06)
+
+This feature depends on [F0012](../F0012-foundation-ontology/README.md), in addition to F0001. Author the GL vocabulary against its stable identity, semantics, constraint execution, and release contracts. [ADR-0045](../../architecture/decisions/ADR-0045-ontology-release-compatibility.md) remains Proposed.
+
+- Pin the exact foundation module version in each GL release. Define GL terms, typed values, applicability, qualifiers, and missing-value behavior with worked and boundary cases.
+- State which GL rules infer conclusions and which validate data for a named consumer and lifecycle stage. The section 82 `min_cardinality` example is a completeness requirement for the consumer requesting a complete limit; it does not reject every commit with no extracted limit. F0065 returns `UNKNOWN` when required limit inputs are missing.
+- Include constraint and profile/evidence requirements in release metadata. A logical ontology module alone is insufficient to package a GL extraction profile. Ontology material stays out of OPEN extraction prompts under F0066; F0015 governs TEMPLATE compilation.
+- Specify the GL relation-to-AGE projection mapping with F0012's release contract; `hasLimit`, `hasForm` and `hasTrigger` need declared predicate IDs, edge labels, direction and source lineage. Review the [interchange examples](../../examples/ontology-interchange/README.md) before freezing vocabulary or mappings.
+
+Contracts and examples: [release records](../../architecture/data-model.md#proposed-ontology-release-records-f0012f0013-adr-0045), [assessment contract](../F0065-grounded-gl-guideline-assessment/assessment-contract.md), and [ontology release cases](../../examples/ontology-release-contracts.md). The PRD must assign the owning stories; this amendment does not change feature status or delivery phase.
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0013.yaml`.

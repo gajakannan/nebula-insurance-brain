@@ -1,0 +1,10 @@
+# EX-INTEROP-003: supplied string instead of a decimal. Reject the value candidate.
+@prefix ins: <https://example.invalid/nebula/ont/insurance/> .
+@prefix cov: <https://example.invalid/nebula/ont/insurance/coverage/> .
+@prefix lim: <https://example.invalid/nebula/ont/insurance/limit/> .
+@prefix basis: <https://example.invalid/nebula/ont/insurance/limit/basis/> .
+@prefix data: <https://example.invalid/nebula/data/> .
+data:EX-COV-001 a cov:general-liability ; cov:has-limit data:EX-LIMIT-001 .
+data:EX-LIMIT-001 a ins:limit ; lim:amount "five hundred thousand" ;
+    lim:currency "USD" ; lim:has-basis basis:each-occurrence .
+basis:each-occurrence a lim:basis .

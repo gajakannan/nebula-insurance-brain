@@ -16,6 +16,12 @@ Documentation/development examples remain outside the frozen evaluation holdout.
 |---|---|---|
 | Neural interpretation plus symbolic evaluation | [EX-GL-001](neurosymbolic-gl/README.md) | F0065 S0001–S0006, v0.1B |
 | Concept versus instance; relationship versus requirement | [Representation notes](neurosymbolic-gl/README.md#representation-notes) | F0012/F0013/F0065, v0.1 |
+| Stable ontology identities and explicit meaning changes | [EX-ONT-001](ontology-release-contracts.md#stable-term-identity) | F0012/F0013, v0.1A; proposed ADR-0045 |
+| Constraint execution context and missing inputs | [EX-ONT-002](ontology-release-contracts.md#constraint-execution-and-missing-values) | F0012/F0013, v0.1A; F0065, v0.1B |
+| Historical reproducibility versus inference and consumer compatibility | [EX-ONT-003/004](ontology-release-contracts.md#reproducibility-and-compatibility) | F0012/F0013/F0015, v0.1A; proposed ADR-0045 |
+| Module versions, composed releases, and package completeness | [EX-ONT-005](ontology-release-contracts.md#composed-releases-and-packages) | F0012/F0013/F0015, v0.1A; advanced tooling F0030/F0062 |
+| Lineage with the first stored assessment | [EX-ONT-006](ontology-release-contracts.md#first-stored-assessment-lineage) | F0065, v0.1B; ADR-0026 |
+| RDF/OWL vocabulary, Turtle/JSON-LD equivalence, SHACL consumer boundaries, projection mapping | [EX-INTEROP-001–004](ontology-interchange/README.md) | F0012/F0013/F0015, v0.1A; F0065, v0.1B; synthetic proposed fixtures; RDF/SHACL checks observed 2026-10-07 (Python 3.14.4), no Nebula component executed |
 | Source, artifact, assertion, review, canonical fact, confidence | [Source to fact](neurosymbolic-gl/README.md#source-to-fact) and CASE-05/06 | F0004–F0018/F0022, v0.1 |
 | FactSlot, typed money, basis, currency | CASE-01/02/03/09/10 | F0007/F0011/F0013/F0065 S0002, v0.1 |
 | Valid time, recorded time, correction, retraction | [Temporal walkthrough](neurosymbolic-gl/README.md#temporal-walkthrough), CASE-11–15 | F0008/F0010/F0019/F0025/F0065 S0004, v0.1 |

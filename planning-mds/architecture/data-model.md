@@ -4,7 +4,7 @@
 
 PostgreSQL is the authoritative runtime store (ADR-0002). Graph and vector stores are projections (ADR-0022, ADR-0023). Semantics of the tables below are defined in the master blueprint: canonical world model (section 12), FactSlot (section 13), bitemporal facts (sections 14 to 16), provenance (section 17), content versus evidence identity (section 18), and flexible schema representation (section 20). Every authoritative row carries `tenant_id` and `knowledge_base_id` (ADR-0030) and audit fields (`created_at`, `recorded_at`, actor).
 
-The baseline sections below are reproduced from the master blueprint so implementers have one file to read; when they diverge, the master blueprint plus accepted ADRs win until this document is promoted by a Phase B decision. The F0065 addition below is explicitly a proposed feature contract rather than an existing runtime schema.
+The baseline sections below are reproduced from the master blueprint so implementers have one file to read; when they diverge, the master blueprint plus accepted ADRs win until this document is promoted by a Phase B decision. The ontology release and F0065 additions below are explicitly proposed contracts rather than existing runtime schema.
 
 ## Core PostgreSQL Tables (master blueprint section 78)
 
@@ -30,6 +30,8 @@ document_classification_assertion
 ontology
 ontology_version
 ontology_module
+ontology_release                proposed composed release (ADR-0045)
+ontology_release_module         proposed exact module-version membership (ADR-0045)
 ontology_concept
 ontology_property
 ontology_relation
@@ -117,6 +119,23 @@ audit_event
 outbox_event
 ```
 
+## Proposed ontology release records (F0012/F0013, ADR-0045)
+
+An authored module version and a composed release have different identities. A release fixes the complete set of module versions used together. F0012/F0013 Phase B must settle the following logical records and ownership constraints under [ADR-0045](decisions/ADR-0045-ontology-release-compatibility.md), which remains Proposed. These are planning targets, not persistence migrations.
+
+| Record | Proposed contract |
+|---|---|
+| `ontology_module` | Stable module identity and namespace; labels are separate from immutable term identities. |
+| `ontology_version` | Immutable revision of one module, with its module reference, version, content digest, authoring-schema version, supported semantics, constraints and dependency declarations. F0012 must make this module-version role explicit in its schema. |
+| `ontology_release` | Immutable composed release ID, ownership scope, manifest/dependency-lock digest, references and hashes for ontology and associated profile/template/compiler/validation/projection-mapping artifacts, and creation actor/time. Retain the compatibility report and migration mappings for each reviewed predecessor-to-candidate comparison. |
+| `ontology_release_module` | Exact release-to-module-version membership; one selected version per module per release. Every declared dependency resolves to a member at an exact version and digest. No runtime resolution of a floating `latest` reference. |
+
+Semantic content retains tenant/KB ownership and audit requirements under ADR-0002/ADR-0030, subject to the identity-control exceptions in ADR-0061. Shared vocabulary distribution must not bypass scoped release installation or tenant-extension isolation; F0012 Phase B settles those references. Content hashes establish artifact identity, not authorization or semantic compatibility.
+
+Interpretation runs pin the composed ontology release and exact profile/template/compiler versions. Typed assertions and canonical fact versions retain their producing interpretation/release context; rule versions, derived results, and saved assessments retain the exact releases and inputs used. Do not resolve historical records through the currently active release. Activation and rollback are separately audited selections for future processing; neither edits published release contents nor rewrites earlier facts or assessments.
+
+Term IRIs identify concepts across releases, while the release identifies their definitions at a specific revision. Pair stable IRIs with explicit semantic-change, split, merge, retirement, and migration records. Worked and boundary examples: [ontology release contracts](../examples/ontology-release-contracts.md).
+
 ## AGE Graph Labels (master blueprint section 79)
 
 Potential vertices:
@@ -140,6 +159,9 @@ SUBMITTED_BY
 INSURED_BY
 BROKERED_BY
 HAS_COVERAGE
+HAS_LIMIT
+HAS_FORM
+HAS_TRIGGER
 HAS_LOCATION
 ARISES_UNDER
 DERIVED_FROM
@@ -149,6 +171,16 @@ PART_OF
 ```
 
 Graph labels are ontology-mapped semantic relationships.
+
+The following proposed GL mapping makes that phrase concrete. F0012/F0013 and the projection consumer must freeze a mapping version in the release manifest before computing projection impact; these are planning labels, not claims that AGE edges exist today.
+
+| Ontology relation ID | Blueprint shorthand | Proposed AGE label | Direction |
+|---|---|---|---|
+| `insurance.coverage.has-limit` | `hasLimit` | `HAS_LIMIT` | coverage → limit |
+| `insurance.coverage.has-form` | `hasForm` | `HAS_FORM` | coverage → form |
+| `insurance.coverage.has-trigger` | `hasTrigger` | `HAS_TRIGGER` | coverage → trigger |
+
+Each mapping records the predicate IRI, source/target type and identity rules, projected qualifiers, and mapping version/digest. It specifies how each projected record retains exact source fact/relationship versions and evidence references, tenant/KB scope, valid/recorded context and asserted/derived basis. Those per-record values belong to the projection's lineage context, not the immutable mapping definition. Scalar properties and inverse predicates explicitly declare their projection or omission. A flat edge must not erase conflicts, time, qualifiers, provenance or ownership. Changes to labels/direction/payload require declared rebuild/invalidation behavior in the release impact report; unknown mappings cannot be reported as unaffected. The [interchange manifest](../examples/ontology-interchange/ontology.yaml) shows a small proposed mapping, with synthetic evidence context in [expected results](../examples/ontology-interchange/expected-results.yaml).
 
 ## Content Storage Format (master blueprint section 80)
 
