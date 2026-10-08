@@ -1,0 +1,23 @@
+id: entity:policy-term
+label: Insurance policy term
+notes: A particular period of an identified policy. Preserve issuer-scoped policy
+  identifiers, scoped party roles, qualified coverage terms and bitemporal endorsement
+  facts. The example's shared policy-number string does not merge the GL and auto
+  contracts. Runtime contracts remain owned by the feature plans; synthetic examples
+  are not accepted runtime records.
+source_docs:
+- F0013/README.md
+- planning-mds/domain/glossary.md
+- planning-mds/architecture/commercial-pc-example-handoff.md
+rationale:
+- adr: adr:0045
+  section: Identity and release records
+  summary: Preserve exact ontology context for policy, coverage and historical fact
+    interpretations.
+related_entities:
+- entity:account
+- entity:insurance-party-role-assignment
+- entity:ontology-release
+related_nodes:
+- schema:commercial-pc-example
+- adr:0007

@@ -1,0 +1,23 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.invalid/nebula/modules/pc-foundation> a owl:Ontology ; owl:versionIRI <https://example.invalid/nebula/modules/pc-foundation/1> .
+
+pc:Party a owl:Class .
+pc:Organization a owl:Class ; rdfs:subClassOf pc:Party .
+pc:Person a owl:Class ; rdfs:subClassOf pc:Party .
+pc:Account a owl:Class .
+pc:Location a owl:Class .
+pc:Vehicle a owl:Class .
+pc:RoleKind a owl:Class .
+pc:RoleAssignment a owl:Class .
+pc:groupsParty a owl:ObjectProperty ; rdfs:domain pc:Account ; rdfs:range pc:Party .
+pc:operatesAt a owl:ObjectProperty ; rdfs:domain pc:Organization ; rdfs:range pc:Location .
+pc:roleParty a owl:ObjectProperty ; rdfs:domain pc:RoleAssignment ; rdfs:range pc:Party .
+pc:roleKind a owl:ObjectProperty ; rdfs:domain pc:RoleAssignment ; rdfs:range pc:RoleKind .
+pc:roleScope a owl:ObjectProperty ; rdfs:domain pc:RoleAssignment .
+pc:actsFor a owl:ObjectProperty ; rdfs:domain pc:RoleAssignment ; rdfs:range pc:Organization .

@@ -167,6 +167,21 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 
 ## Terms
 
+### Commercial P&C teaching refinements (proposed)
+
+The [Cedar Bridge walkthrough](../examples/commercial-pc-account/README.md) gives these concepts worked and boundary cases. Its account grouping and role assignment are draft refinements for F0012/F0013, not accepted runtime schema changes. The existing Account/Insured definitions above remain the planning baseline to reconcile in their PRDs.
+
+| Term | Example meaning and boundary | Worked/boundary case | Owner |
+|---|---|---|---|
+| Scoped insurance party role | A party acts as named insured, broker, carrier, MGA or underwriter in a specific account/submission/policy-term context; this is not an access grant | [EX-PC-001/011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0012/F0013; F0002 owns authorization |
+| Broker | Organization in an account-servicing or policy-placement role; shared broker does not merge accounts or permissions | [EX-PC-001](../examples/commercial-pc-account/cases.md#ex-pc-001--account-versus-insured) | F0012/F0013 |
+| Carrier | Organization identified as insurer for a particular policy term; distinguish it from the MGA that handled the submission | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0013 |
+| MGA and underwriter | A submission-handling organization and a person acting in a scoped underwriting role; the fixture establishes no delegated authority or authenticated principal | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0012/F0013 |
+| Insurance product composition | Product/package classification differs from its coverage lines; a BOP may package property and liability while standalone GL reuses common liability concepts | [EX-PC-002](../examples/commercial-pc-account/cases.md#ex-pc-002--package-versus-coverage) | F0012/F0013 contract; additional LOB runtime ownership unassigned |
+| Qualified monetary provision | Limit or deductible with coverage, basis, currency and applicable location/term context; it is not an account-wide total | [EX-PC-004](../examples/commercial-pc-account/cases.md#ex-pc-004--money-needs-context) | F0013, ADR-0039; F0065 for GL comparison |
+| Scheduled underlying term | Explicit reference from an umbrella's supplied schedule to an exact underlying policy term; not a claim attachment or exhaustion result | [EX-PC-007](../examples/commercial-pc-account/cases.md#ex-pc-007--underlying-schedule-is-not-attachment) | F0012 relation contract; umbrella runtime ownership unassigned |
+| Requested line | A source request for quotations/coverage, which does not prove an issued policy or global absence of coverage | [EX-PC-005](../examples/commercial-pc-account/cases.md#ex-pc-005--requested-is-not-issued) | F0014/F0016, ADR-0065 |
+
 ### Valid Time
 **Type:** Term
 **Definition:** When a fact is true in the world (14)

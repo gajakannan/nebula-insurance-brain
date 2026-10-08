@@ -14,6 +14,9 @@ Documentation/development examples remain outside the frozen evaluation holdout.
 
 | Concept / boundary | Example | Owner / release |
 |---|---|---|
+| Commercial account, insured parties, broker/carrier/MGA/underwriter roles | [EX-PC-001/003/011](commercial-pc-account/README.md) | F0012/F0013/F0017; proposed synthetic teaching model |
+| BOP package versus GL/property coverages; auto and umbrella context; unissued WC/inland-marine requests | [EX-PC-002/004/005/007](commercial-pc-account/cases.md) | F0012/F0013 shared/core contracts; non-GL runtime delivery unassigned |
+| Evidence-backed relationship projection, bitemporal property endorsement, separate consumer completeness | [EX-PC-006/008/009/010/012](commercial-pc-account/cases.md) | F0008/F0010/F0015/F0018/F0034/F0065 contracts as scoped in the handoff; new RDF execution pending |
 | Neural interpretation plus symbolic evaluation | [EX-GL-001](neurosymbolic-gl/README.md) | F0065 S0001–S0006, v0.1B |
 | Concept versus instance; relationship versus requirement | [Representation notes](neurosymbolic-gl/README.md#representation-notes) | F0012/F0013/F0065, v0.1 |
 | Stable ontology identities and explicit meaning changes | [EX-ONT-001](ontology-release-contracts.md#stable-term-identity) | F0012/F0013, v0.1A; proposed ADR-0045 |

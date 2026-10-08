@@ -1,0 +1,27 @@
+status: synthetic-authored-expectations
+example_id: EX-PC-001
+semantic_execution: pending; optional RDF tools could not be installed because of DNS failure
+scope: document-to-graph teaching fixtures; no Nebula runtime, insurance eligibility or claim determination
+queries:
+- file: queries/account-program.rq
+  rows: 6
+  boundary: shared account membership does not make both organizations named insureds on every policy
+- file: queries/coverage-money.rq
+  rows: 8
+  boundary: eight qualified values are not an account-wide total
+- file: queries/umbrella-schedule.rq
+  rows: 2
+  boundary: BOP omitted from the supplied schedule; actual attachment remains undetermined
+shacl:
+- {shape: shapes.ttl, data: snapshot.ttl, conforms: true}
+- {shape: gl-completeness.ttl, data: snapshot.ttl, conforms: true}
+- {shape: property-completeness.ttl, data: snapshot.ttl, conforms: true}
+- {shape: shapes.ttl, data: boundaries/missing-occurrence.ttl, conforms: true}
+- {shape: gl-completeness.ttl, data: boundaries/missing-occurrence.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/malformed-amount.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/missing-location.ttl, conforms: true}
+- {shape: property-completeness.ttl, data: boundaries/missing-location.ttl, conforms: false}
+timeline:
+- {case: EX-PC-006-A, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-08T00:00:00Z', fact: EX-PC-F-BPP-ORIGINAL, amount: '150000.00'}
+- {case: EX-PC-006-B, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', fact: EX-PC-F-BPP-REVISED, amount: '200000.00'}
+- {case: EX-PC-006-C, valid_as_of: '2026-06-30T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', fact: EX-PC-F-BPP-RETAINED, amount: '150000.00'}

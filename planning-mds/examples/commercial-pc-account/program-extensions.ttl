@@ -1,0 +1,13 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.invalid/nebula/modules/pc-program-extensions> a owl:Ontology ; owl:versionIRI <https://example.invalid/nebula/modules/pc-program-extensions/1> .
+
+pc:AutoLiabilityCoverage a owl:Class ; rdfs:subClassOf pc:LiabilityCoverage .
+pc:UmbrellaCoverage a owl:Class ; rdfs:subClassOf pc:LiabilityCoverage .
+pc:scheduledVehicle a owl:ObjectProperty ; rdfs:domain pc:AutoLiabilityCoverage ; rdfs:range pc:Vehicle .
+pc:scheduledUnderlying a owl:ObjectProperty ; rdfs:domain pc:UmbrellaCoverage ; rdfs:range pc:PolicyTerm .

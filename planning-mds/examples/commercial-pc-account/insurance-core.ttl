@@ -1,0 +1,35 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://example.invalid/nebula/modules/pc-insurance-core> a owl:Ontology ; owl:versionIRI <https://example.invalid/nebula/modules/pc-insurance-core/1> .
+
+pc:Policy a owl:Class .
+pc:PolicyTerm a owl:Class .
+pc:ProductType a owl:Class .
+pc:Submission a owl:Class .
+pc:Coverage a owl:Class .
+pc:LiabilityCoverage a owl:Class ; rdfs:subClassOf pc:Coverage .
+pc:MonetaryTerm a owl:Class .
+pc:Limit a owl:Class ; rdfs:subClassOf pc:MonetaryTerm .
+pc:Deductible a owl:Class ; rdfs:subClassOf pc:MonetaryTerm .
+pc:LossNotice a owl:Class .
+pc:forAccount a owl:ObjectProperty ; rdfs:range pc:Account .
+pc:productType a owl:ObjectProperty ; rdfs:domain pc:Policy ; rdfs:range pc:ProductType .
+pc:termOf a owl:ObjectProperty ; rdfs:domain pc:PolicyTerm ; rdfs:range pc:Policy ; owl:inverseOf pc:hasTerm .
+pc:hasTerm a owl:ObjectProperty ; rdfs:domain pc:Policy ; rdfs:range pc:PolicyTerm .
+pc:coverageOf a owl:ObjectProperty ; rdfs:domain pc:Coverage ; rdfs:range pc:PolicyTerm ; owl:inverseOf pc:hasCoverage .
+pc:hasCoverage a owl:ObjectProperty ; rdfs:domain pc:PolicyTerm ; rdfs:range pc:Coverage .
+pc:hasMonetaryTerm a owl:ObjectProperty ; rdfs:domain pc:Coverage ; rdfs:range pc:MonetaryTerm .
+pc:reportsPolicy a owl:ObjectProperty ; rdfs:domain pc:LossNotice ; rdfs:range pc:Policy .
+pc:policyNumber a owl:DatatypeProperty ; rdfs:domain pc:Policy ; rdfs:range xsd:string .
+pc:periodStart a owl:DatatypeProperty ; rdfs:domain pc:PolicyTerm ; rdfs:range xsd:dateTime .
+pc:periodEnd a owl:DatatypeProperty ; rdfs:domain pc:PolicyTerm ; rdfs:range xsd:dateTime .
+pc:basis a owl:DatatypeProperty ; rdfs:domain pc:MonetaryTerm ; rdfs:range xsd:string .
+pc:amount a owl:DatatypeProperty ; rdfs:domain pc:MonetaryTerm ; rdfs:range xsd:decimal .
+pc:currency a owl:DatatypeProperty ; rdfs:domain pc:MonetaryTerm ; rdfs:range xsd:string .
+pc:requestedLine a owl:DatatypeProperty ; rdfs:domain pc:Submission ; rdfs:range xsd:string .
+pc:reportedLossDate a owl:DatatypeProperty ; rdfs:domain pc:LossNotice ; rdfs:range xsd:dateTime .

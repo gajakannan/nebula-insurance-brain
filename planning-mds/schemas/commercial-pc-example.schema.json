@@ -1,0 +1,466 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "example_id",
+    "synthetic",
+    "status",
+    "schema_ref",
+    "tenant_id",
+    "knowledge_base_id",
+    "ontology_release",
+    "snapshot",
+    "entities",
+    "evidence",
+    "runs",
+    "slots",
+    "assertions",
+    "reviews",
+    "commits",
+    "facts"
+  ],
+  "properties": {
+    "example_id": {
+      "const": "EX-PC-001"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "status": {
+      "const": "illustrative-not-runtime-evidence"
+    },
+    "schema_ref": {
+      "const": "../../schemas/commercial-pc-example.schema.json"
+    },
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "knowledge_base_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ontology_release": {
+      "type": "string",
+      "minLength": 1
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "valid_as_of",
+        "known_as_of"
+      ],
+      "properties": {
+        "valid_as_of": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "known_as_of": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/entity"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/evidence"
+      }
+    },
+    "runs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/run"
+      }
+    },
+    "slots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/slot"
+      }
+    },
+    "assertions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/assertion"
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/review"
+      }
+    },
+    "commits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/commit"
+      }
+    },
+    "facts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/fact"
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/nebula/schemas/commercial-pc-example.schema.json",
+  "title": "Synthetic commercial P&C teaching records; not a runtime schema",
+  "$defs": {
+    "entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "label",
+        "evidence_ref"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_ref",
+        "artifact_id",
+        "precision",
+        "quote"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "precision": {
+          "const": "illustrative_excerpt"
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "artifact_id",
+        "route",
+        "model",
+        "ontology_release"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route": {
+          "enum": [
+            "TEMPLATE",
+            "OPEN"
+          ]
+        },
+        "model": {
+          "const": "authored-output-no-model-executed"
+        },
+        "ontology_release": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subject_ref",
+        "predicate",
+        "object",
+        "evidence_ref",
+        "mood",
+        "origin",
+        "run_ref"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "ref"
+              ],
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "value",
+                "datatype"
+              ],
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "datatype": {
+                  "enum": [
+                    "xsd:string",
+                    "xsd:decimal",
+                    "xsd:dateTime"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mood": {
+          "enum": [
+            "ASSERTION",
+            "REQUEST"
+          ]
+        },
+        "origin": {
+          "const": "DOCUMENT_INTERPRETATION"
+        },
+        "run_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "decision",
+        "assertion_refs"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "const": "ACCEPT_SOURCE_READING"
+        },
+        "assertion_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "commit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "review_ref",
+        "accepted_at",
+        "actor_ref",
+        "authority_ref",
+        "reason"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accepted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slot_id",
+        "assertion_ref",
+        "commit_ref",
+        "valid_from",
+        "valid_to",
+        "recorded_from",
+        "recorded_to"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "slot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assertion_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recorded_to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "subject_ref",
+        "predicate",
+        "qualifiers"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predicate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "qualifiers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "target_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "basis": {
+              "type": "string",
+              "minLength": 1
+            },
+            "currency": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

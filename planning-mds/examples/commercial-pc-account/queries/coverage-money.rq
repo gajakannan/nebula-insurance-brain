@@ -1,0 +1,7 @@
+PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
+# Expected: eight rows; BPP is 200000.00 at the committed fixture snapshot.
+# This query deliberately keeps coverage, term and basis. It never sums unlike values.
+SELECT ?term ?coverage ?kind ?basis ?amount ?currency WHERE {
+  ?coverage pc:coverageOf ?term ; pc:hasMonetaryTerm ?money .
+  ?money a ?kind ; pc:basis ?basis ; pc:amount ?amount ; pc:currency ?currency .
+} ORDER BY ?term ?coverage ?basis

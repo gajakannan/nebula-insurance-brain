@@ -1,0 +1,11 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# A separate property-summary consumer, not the F0065 GL assessment contract.
+pc:BPPSummaryInputs a sh:NodeShape ; sh:targetClass pc:PropertyCoverage ;
+    sh:property [ sh:path pc:atLocation ; sh:minCount 1 ; sh:class pc:Location ] ;
+    sh:property [ sh:path pc:hasMonetaryTerm ; sh:qualifiedMinCount 1 ;
+        sh:qualifiedValueShape [ sh:class pc:Limit ;
+            sh:property [ sh:path pc:basis ; sh:hasValue "BusinessPersonalProperty" ] ;
+            sh:property [ sh:path pc:amount ; sh:minCount 1 ] ;
+            sh:property [ sh:path pc:currency ; sh:minCount 1 ] ] ] .

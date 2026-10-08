@@ -1,0 +1,194 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Accepted illustrative projection at the coordinates in records.json. Not an authorization boundary.
+d:EX-PC-ACCOUNT a pc:Account ; rdfs:label "Cedar Bridge commercial account" .
+d:EX-PC-WORKSHOP a pc:Organization ; rdfs:label "Cedar Bridge Workshop LLC" .
+d:EX-PC-CONTRACTOR a pc:Organization ; rdfs:label "Cedar Bridge Contracting LLC" .
+d:EX-PC-BROKER a pc:Organization ; rdfs:label "Harbor Example Brokerage" .
+d:EX-PC-MAPLE a pc:Organization ; rdfs:label "Example Maple Mutual" .
+d:EX-PC-GRANITE a pc:Organization ; rdfs:label "Example Granite Casualty" .
+d:EX-PC-MGA a pc:Organization ; rdfs:label "Example Delegated Underwriting MGA" .
+d:EX-PC-UNDERWRITER a pc:Person ; rdfs:label "Rowan Example" .
+d:EX-PC-LOCATION-SHOP a pc:Location ; rdfs:label "Leased workshop" .
+d:EX-PC-LOCATION-YARD a pc:Location ; rdfs:label "Contracting yard" .
+d:EX-PC-VEHICLE-VAN a pc:Vehicle ; rdfs:label "Illustrative company van" .
+d:EX-PC-SUBMISSION a pc:Submission ; rdfs:label "Contracting submission" .
+d:EX-PC-LOSS-NOTICE a pc:LossNotice ; rdfs:label "Reported trip-and-fall notice" .
+d:EX-PC-ROLE-NamedInsured a pc:RoleKind ; rdfs:label "NamedInsured" .
+d:EX-PC-ROLE-PlacementBroker a pc:RoleKind ; rdfs:label "PlacementBroker" .
+d:EX-PC-ROLE-ServicingBroker a pc:RoleKind ; rdfs:label "ServicingBroker" .
+d:EX-PC-ROLE-Carrier a pc:RoleKind ; rdfs:label "Carrier" .
+d:EX-PC-ROLE-MGA a pc:RoleKind ; rdfs:label "MGA" .
+d:EX-PC-ROLE-Underwriter a pc:RoleKind ; rdfs:label "Underwriter" .
+d:EX-PC-ASSIGN-SERVICING a pc:RoleAssignment ; rdfs:label "Assign Servicing" .
+d:EX-PC-ASSIGN-MGA a pc:RoleAssignment ; rdfs:label "Assign Mga" .
+d:EX-PC-ASSIGN-UNDERWRITER a pc:RoleAssignment ; rdfs:label "Assign Underwriter" .
+d:EX-PC-PRODUCT-BOP a pc:ProductType ; rdfs:label "BOP" .
+d:EX-PC-PRODUCT-StandaloneGL a pc:ProductType ; rdfs:label "StandaloneGL" .
+d:EX-PC-PRODUCT-CommercialAuto a pc:ProductType ; rdfs:label "CommercialAuto" .
+d:EX-PC-PRODUCT-Umbrella a pc:ProductType ; rdfs:label "Umbrella" .
+d:EX-PC-POLICY-BOP a pc:Policy ; rdfs:label "BOP policy" .
+d:EX-PC-TERM-BOP a pc:PolicyTerm ; rdfs:label "BOP 2026 term" .
+d:EX-PC-ASSIGN-BOP-CARRIER a pc:RoleAssignment ; rdfs:label "Assign Bop Carrier" .
+d:EX-PC-ASSIGN-BOP-BROKER a pc:RoleAssignment ; rdfs:label "Assign Bop Broker" .
+d:EX-PC-ASSIGN-BOP-WORKSHOP a pc:RoleAssignment ; rdfs:label "Assign Bop Workshop" .
+d:EX-PC-POLICY-GL a pc:Policy ; rdfs:label "GL policy" .
+d:EX-PC-TERM-GL a pc:PolicyTerm ; rdfs:label "GL 2026 term" .
+d:EX-PC-ASSIGN-GL-CARRIER a pc:RoleAssignment ; rdfs:label "Assign Gl Carrier" .
+d:EX-PC-ASSIGN-GL-BROKER a pc:RoleAssignment ; rdfs:label "Assign Gl Broker" .
+d:EX-PC-ASSIGN-GL-CONTRACTOR a pc:RoleAssignment ; rdfs:label "Assign Gl Contractor" .
+d:EX-PC-POLICY-AUTO a pc:Policy ; rdfs:label "AUTO policy" .
+d:EX-PC-TERM-AUTO a pc:PolicyTerm ; rdfs:label "AUTO 2026 term" .
+d:EX-PC-ASSIGN-AUTO-CARRIER a pc:RoleAssignment ; rdfs:label "Assign Auto Carrier" .
+d:EX-PC-ASSIGN-AUTO-BROKER a pc:RoleAssignment ; rdfs:label "Assign Auto Broker" .
+d:EX-PC-ASSIGN-AUTO-WORKSHOP a pc:RoleAssignment ; rdfs:label "Assign Auto Workshop" .
+d:EX-PC-ASSIGN-AUTO-CONTRACTOR a pc:RoleAssignment ; rdfs:label "Assign Auto Contractor" .
+d:EX-PC-POLICY-UMBRELLA a pc:Policy ; rdfs:label "UMBRELLA policy" .
+d:EX-PC-TERM-UMBRELLA a pc:PolicyTerm ; rdfs:label "UMBRELLA 2026 term" .
+d:EX-PC-ASSIGN-UMBRELLA-CARRIER a pc:RoleAssignment ; rdfs:label "Assign Umbrella Carrier" .
+d:EX-PC-ASSIGN-UMBRELLA-BROKER a pc:RoleAssignment ; rdfs:label "Assign Umbrella Broker" .
+d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP a pc:RoleAssignment ; rdfs:label "Assign Umbrella Workshop" .
+d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR a pc:RoleAssignment ; rdfs:label "Assign Umbrella Contractor" .
+d:EX-PC-COV-GL a pc:GLCoverage ; rdfs:label "GL coverage" .
+d:EX-PC-COV-BOP-GL a pc:GLCoverage ; rdfs:label "BOP-GL coverage" .
+d:EX-PC-COV-BOP-PROPERTY a pc:PropertyCoverage ; rdfs:label "BOP-PROPERTY coverage" .
+d:EX-PC-COV-AUTO a pc:AutoLiabilityCoverage ; rdfs:label "AUTO coverage" .
+d:EX-PC-COV-UMBRELLA a pc:UmbrellaCoverage ; rdfs:label "UMBRELLA coverage" .
+d:EX-PC-MONEY-GL-OCC a pc:Limit ; rdfs:label "EachOccurrence Limit" .
+d:EX-PC-MONEY-GL-AGG a pc:Limit ; rdfs:label "GeneralAggregate Limit" .
+d:EX-PC-MONEY-BOP-OCC a pc:Limit ; rdfs:label "EachOccurrence Limit" .
+d:EX-PC-MONEY-BOP-AGG a pc:Limit ; rdfs:label "GeneralAggregate Limit" .
+d:EX-PC-MONEY-BPP a pc:Limit ; rdfs:label "BusinessPersonalProperty Limit" .
+d:EX-PC-MONEY-PROP-DED a pc:Deductible ; rdfs:label "PerLoss Deductible" .
+d:EX-PC-MONEY-AUTO-CSL a pc:Limit ; rdfs:label "CombinedSingleLimitPerAccident Limit" .
+d:EX-PC-MONEY-UMB-OCC a pc:Limit ; rdfs:label "EachOccurrence Limit" .
+d:EX-PC-ACCOUNT pc:groupsParty d:EX-PC-WORKSHOP .
+d:EX-PC-WORKSHOP pc:operatesAt d:EX-PC-LOCATION-SHOP .
+d:EX-PC-ACCOUNT pc:groupsParty d:EX-PC-CONTRACTOR .
+d:EX-PC-CONTRACTOR pc:operatesAt d:EX-PC-LOCATION-YARD .
+d:EX-PC-SUBMISSION pc:forAccount d:EX-PC-ACCOUNT .
+d:EX-PC-ASSIGN-SERVICING pc:roleParty d:EX-PC-BROKER .
+d:EX-PC-ASSIGN-SERVICING pc:roleKind d:EX-PC-ROLE-ServicingBroker .
+d:EX-PC-ASSIGN-SERVICING pc:roleScope d:EX-PC-ACCOUNT .
+d:EX-PC-ASSIGN-MGA pc:roleParty d:EX-PC-MGA .
+d:EX-PC-ASSIGN-MGA pc:roleKind d:EX-PC-ROLE-MGA .
+d:EX-PC-ASSIGN-MGA pc:roleScope d:EX-PC-SUBMISSION .
+d:EX-PC-ASSIGN-UNDERWRITER pc:roleParty d:EX-PC-UNDERWRITER .
+d:EX-PC-ASSIGN-UNDERWRITER pc:roleKind d:EX-PC-ROLE-Underwriter .
+d:EX-PC-ASSIGN-UNDERWRITER pc:roleScope d:EX-PC-SUBMISSION .
+d:EX-PC-ASSIGN-UNDERWRITER pc:actsFor d:EX-PC-MGA .
+d:EX-PC-POLICY-BOP pc:forAccount d:EX-PC-ACCOUNT .
+d:EX-PC-POLICY-BOP pc:productType d:EX-PC-PRODUCT-BOP .
+d:EX-PC-POLICY-BOP pc:policyNumber "EX-BOP-100"^^xsd:string .
+d:EX-PC-TERM-BOP pc:termOf d:EX-PC-POLICY-BOP .
+d:EX-PC-TERM-BOP pc:periodStart "2026-01-01T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-TERM-BOP pc:periodEnd "2027-01-01T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-ASSIGN-BOP-CARRIER pc:roleParty d:EX-PC-MAPLE .
+d:EX-PC-ASSIGN-BOP-CARRIER pc:roleKind d:EX-PC-ROLE-Carrier .
+d:EX-PC-ASSIGN-BOP-CARRIER pc:roleScope d:EX-PC-TERM-BOP .
+d:EX-PC-ASSIGN-BOP-BROKER pc:roleParty d:EX-PC-BROKER .
+d:EX-PC-ASSIGN-BOP-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
+d:EX-PC-ASSIGN-BOP-BROKER pc:roleScope d:EX-PC-TERM-BOP .
+d:EX-PC-ASSIGN-BOP-WORKSHOP pc:roleParty d:EX-PC-WORKSHOP .
+d:EX-PC-ASSIGN-BOP-WORKSHOP pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-BOP-WORKSHOP pc:roleScope d:EX-PC-TERM-BOP .
+d:EX-PC-POLICY-GL pc:forAccount d:EX-PC-ACCOUNT .
+d:EX-PC-POLICY-GL pc:productType d:EX-PC-PRODUCT-StandaloneGL .
+d:EX-PC-POLICY-GL pc:policyNumber "EX-2042"^^xsd:string .
+d:EX-PC-TERM-GL pc:termOf d:EX-PC-POLICY-GL .
+d:EX-PC-TERM-GL pc:periodStart "2026-01-01T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-TERM-GL pc:periodEnd "2027-01-01T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-ASSIGN-GL-CARRIER pc:roleParty d:EX-PC-GRANITE .
+d:EX-PC-ASSIGN-GL-CARRIER pc:roleKind d:EX-PC-ROLE-Carrier .
+d:EX-PC-ASSIGN-GL-CARRIER pc:roleScope d:EX-PC-TERM-GL .
+d:EX-PC-ASSIGN-GL-BROKER pc:roleParty d:EX-PC-BROKER .
+d:EX-PC-ASSIGN-GL-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
+d:EX-PC-ASSIGN-GL-BROKER pc:roleScope d:EX-PC-TERM-GL .
+d:EX-PC-ASSIGN-GL-CONTRACTOR pc:roleParty d:EX-PC-CONTRACTOR .
+d:EX-PC-ASSIGN-GL-CONTRACTOR pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-GL-CONTRACTOR pc:roleScope d:EX-PC-TERM-GL .
+d:EX-PC-POLICY-AUTO pc:forAccount d:EX-PC-ACCOUNT .
+d:EX-PC-POLICY-AUTO pc:productType d:EX-PC-PRODUCT-CommercialAuto .
+d:EX-PC-POLICY-AUTO pc:policyNumber "EX-2042"^^xsd:string .
+d:EX-PC-TERM-AUTO pc:termOf d:EX-PC-POLICY-AUTO .
+d:EX-PC-TERM-AUTO pc:periodStart "2026-01-01T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-TERM-AUTO pc:periodEnd "2027-01-01T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-ASSIGN-AUTO-CARRIER pc:roleParty d:EX-PC-MAPLE .
+d:EX-PC-ASSIGN-AUTO-CARRIER pc:roleKind d:EX-PC-ROLE-Carrier .
+d:EX-PC-ASSIGN-AUTO-CARRIER pc:roleScope d:EX-PC-TERM-AUTO .
+d:EX-PC-ASSIGN-AUTO-BROKER pc:roleParty d:EX-PC-BROKER .
+d:EX-PC-ASSIGN-AUTO-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
+d:EX-PC-ASSIGN-AUTO-BROKER pc:roleScope d:EX-PC-TERM-AUTO .
+d:EX-PC-ASSIGN-AUTO-WORKSHOP pc:roleParty d:EX-PC-WORKSHOP .
+d:EX-PC-ASSIGN-AUTO-WORKSHOP pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-AUTO-WORKSHOP pc:roleScope d:EX-PC-TERM-AUTO .
+d:EX-PC-ASSIGN-AUTO-CONTRACTOR pc:roleParty d:EX-PC-CONTRACTOR .
+d:EX-PC-ASSIGN-AUTO-CONTRACTOR pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-AUTO-CONTRACTOR pc:roleScope d:EX-PC-TERM-AUTO .
+d:EX-PC-POLICY-UMBRELLA pc:forAccount d:EX-PC-ACCOUNT .
+d:EX-PC-POLICY-UMBRELLA pc:productType d:EX-PC-PRODUCT-Umbrella .
+d:EX-PC-POLICY-UMBRELLA pc:policyNumber "EX-UMB-100"^^xsd:string .
+d:EX-PC-TERM-UMBRELLA pc:termOf d:EX-PC-POLICY-UMBRELLA .
+d:EX-PC-TERM-UMBRELLA pc:periodStart "2026-01-01T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-TERM-UMBRELLA pc:periodEnd "2027-01-01T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-ASSIGN-UMBRELLA-CARRIER pc:roleParty d:EX-PC-GRANITE .
+d:EX-PC-ASSIGN-UMBRELLA-CARRIER pc:roleKind d:EX-PC-ROLE-Carrier .
+d:EX-PC-ASSIGN-UMBRELLA-CARRIER pc:roleScope d:EX-PC-TERM-UMBRELLA .
+d:EX-PC-ASSIGN-UMBRELLA-BROKER pc:roleParty d:EX-PC-BROKER .
+d:EX-PC-ASSIGN-UMBRELLA-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
+d:EX-PC-ASSIGN-UMBRELLA-BROKER pc:roleScope d:EX-PC-TERM-UMBRELLA .
+d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP pc:roleParty d:EX-PC-WORKSHOP .
+d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP pc:roleScope d:EX-PC-TERM-UMBRELLA .
+d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR pc:roleParty d:EX-PC-CONTRACTOR .
+d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR pc:roleScope d:EX-PC-TERM-UMBRELLA .
+d:EX-PC-COV-GL pc:coverageOf d:EX-PC-TERM-GL .
+d:EX-PC-COV-BOP-GL pc:coverageOf d:EX-PC-TERM-BOP .
+d:EX-PC-COV-BOP-PROPERTY pc:coverageOf d:EX-PC-TERM-BOP .
+d:EX-PC-COV-AUTO pc:coverageOf d:EX-PC-TERM-AUTO .
+d:EX-PC-COV-UMBRELLA pc:coverageOf d:EX-PC-TERM-UMBRELLA .
+d:EX-PC-COV-BOP-PROPERTY pc:atLocation d:EX-PC-LOCATION-SHOP .
+d:EX-PC-COV-AUTO pc:scheduledVehicle d:EX-PC-VEHICLE-VAN .
+d:EX-PC-COV-UMBRELLA pc:scheduledUnderlying d:EX-PC-TERM-GL .
+d:EX-PC-COV-UMBRELLA pc:scheduledUnderlying d:EX-PC-TERM-AUTO .
+d:EX-PC-COV-GL pc:trigger "Occurrence"^^xsd:string .
+d:EX-PC-COV-GL pc:hasMonetaryTerm d:EX-PC-MONEY-GL-OCC .
+d:EX-PC-MONEY-GL-OCC pc:basis "EachOccurrence"^^xsd:string .
+d:EX-PC-MONEY-GL-OCC pc:currency "USD"^^xsd:string .
+d:EX-PC-MONEY-GL-OCC pc:amount "1000000.00"^^xsd:decimal .
+d:EX-PC-COV-GL pc:hasMonetaryTerm d:EX-PC-MONEY-GL-AGG .
+d:EX-PC-MONEY-GL-AGG pc:basis "GeneralAggregate"^^xsd:string .
+d:EX-PC-MONEY-GL-AGG pc:currency "USD"^^xsd:string .
+d:EX-PC-MONEY-GL-AGG pc:amount "2000000.00"^^xsd:decimal .
+d:EX-PC-COV-BOP-GL pc:hasMonetaryTerm d:EX-PC-MONEY-BOP-OCC .
+d:EX-PC-MONEY-BOP-OCC pc:basis "EachOccurrence"^^xsd:string .
+d:EX-PC-MONEY-BOP-OCC pc:currency "USD"^^xsd:string .
+d:EX-PC-MONEY-BOP-OCC pc:amount "1000000.00"^^xsd:decimal .
+d:EX-PC-COV-BOP-GL pc:hasMonetaryTerm d:EX-PC-MONEY-BOP-AGG .
+d:EX-PC-MONEY-BOP-AGG pc:basis "GeneralAggregate"^^xsd:string .
+d:EX-PC-MONEY-BOP-AGG pc:currency "USD"^^xsd:string .
+d:EX-PC-MONEY-BOP-AGG pc:amount "2000000.00"^^xsd:decimal .
+d:EX-PC-COV-BOP-PROPERTY pc:hasMonetaryTerm d:EX-PC-MONEY-BPP .
+d:EX-PC-MONEY-BPP pc:basis "BusinessPersonalProperty"^^xsd:string .
+d:EX-PC-MONEY-BPP pc:currency "USD"^^xsd:string .
+d:EX-PC-COV-BOP-PROPERTY pc:hasMonetaryTerm d:EX-PC-MONEY-PROP-DED .
+d:EX-PC-MONEY-PROP-DED pc:basis "PerLoss"^^xsd:string .
+d:EX-PC-MONEY-PROP-DED pc:currency "USD"^^xsd:string .
+d:EX-PC-MONEY-PROP-DED pc:amount "1000.00"^^xsd:decimal .
+d:EX-PC-COV-AUTO pc:hasMonetaryTerm d:EX-PC-MONEY-AUTO-CSL .
+d:EX-PC-MONEY-AUTO-CSL pc:basis "CombinedSingleLimitPerAccident"^^xsd:string .
+d:EX-PC-MONEY-AUTO-CSL pc:currency "USD"^^xsd:string .
+d:EX-PC-MONEY-AUTO-CSL pc:amount "1000000.00"^^xsd:decimal .
+d:EX-PC-COV-UMBRELLA pc:hasMonetaryTerm d:EX-PC-MONEY-UMB-OCC .
+d:EX-PC-MONEY-UMB-OCC pc:basis "EachOccurrence"^^xsd:string .
+d:EX-PC-MONEY-UMB-OCC pc:currency "USD"^^xsd:string .
+d:EX-PC-MONEY-UMB-OCC pc:amount "2000000.00"^^xsd:decimal .
+d:EX-PC-LOSS-NOTICE pc:reportsPolicy d:EX-PC-POLICY-GL .
+d:EX-PC-LOSS-NOTICE pc:reportedLossDate "2026-06-20T00:00:00Z"^^xsd:dateTime .
+d:EX-PC-MONEY-BPP pc:amount "200000.00"^^xsd:decimal .

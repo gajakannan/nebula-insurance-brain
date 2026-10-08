@@ -1,0 +1,79 @@
+status: illustrative-unpublished-manifest
+release_iri: https://example.invalid/nebula/releases/commercial-example/1
+namespace_status: separate illustrative draft; production F0012 alignment not selected
+modules:
+- id: pc-foundation
+  version: 1
+  version_iri: https://example.invalid/nebula/modules/pc-foundation/1
+  file: foundation.ttl
+  sha256: b064c7e16a55b77bcd7c8b8660387d26e3a39568f9b1d473dccbd3ff4c7a95d5
+  dependencies: []
+- id: pc-insurance-core
+  version: 1
+  version_iri: https://example.invalid/nebula/modules/pc-insurance-core/1
+  file: insurance-core.ttl
+  sha256: d3d928e3368e9fa00c0586663c4b8dc7b81ef1e923f07f4e083fa3ddf9af0b17
+  dependencies:
+  - https://example.invalid/nebula/modules/pc-foundation/1
+- id: pc-general-liability
+  version: 1
+  version_iri: https://example.invalid/nebula/modules/pc-general-liability/1
+  file: general-liability.ttl
+  sha256: f9cfe02157b325c803f0f36c2536a0533ab89cd96cd4111251309947e6c3cadf
+  dependencies:
+  - https://example.invalid/nebula/modules/pc-insurance-core/1
+- id: pc-property
+  version: 1
+  version_iri: https://example.invalid/nebula/modules/pc-property/1
+  file: property.ttl
+  sha256: a110eef9978d3b41f17c22eba76fa3e563901176dd8c6e4ff4001742d2cd0e2e
+  dependencies:
+  - https://example.invalid/nebula/modules/pc-insurance-core/1
+- id: pc-program-extensions
+  version: 1
+  version_iri: https://example.invalid/nebula/modules/pc-program-extensions/1
+  file: program-extensions.ttl
+  sha256: 8f8b2a779a00a6258fc4b9357c3427b01af4e758634dc1c86e9a76e9da00d5ff
+  dependencies:
+  - https://example.invalid/nebula/modules/pc-insurance-core/1
+artifacts:
+- file: ontology.yaml
+  sha256: 69afe6597e86fe8ba51c9a52eda62245f2d35b7bdee77204a49bb5d740ae968b
+- file: projection-mapping.yaml
+  sha256: 413fde4d2e78041a0829ace2c3931a20239dbc5c23d1e56b71af9a48a1a67ea5
+- file: shapes.ttl
+  sha256: eff3f1dde1a0fb84115838a60714652fc17aa4fdef3964674c049fdbd6082d21
+- file: gl-completeness.ttl
+  sha256: 27c854091a5d94816d96f2c3378219215d2c884d07d43f9bddd748e741bfa925
+- file: property-completeness.ttl
+  sha256: 1cd9e38d868581d1aa827b9cef6f5959a37bc0d26684ff39571fbb787a554558
+- file: records.json
+  sha256: 21b3cede8e6946ed853920013dab6d0614b570c9f33bf5a59123bef1dc8fc8d9
+- file: snapshot.ttl
+  sha256: 75776c6a405e11f9ca32f09603896b50c3d70e5e8a75593a25181cc4d96336f8
+- file: snapshot.jsonld
+  sha256: ed369de5bd6f8c95c24aec5487ddf3f7ae78e9b90452f7b01eb589c9b9f15409
+- file: snapshot-index.json
+  sha256: ec9553792c6884ad63641391171f9edfdfef76a5e2de8195235279a0917a1163
+- file: source-package.md
+  sha256: 3a027ae895f1d427b6705dd0e39d0eea074ab833a58d1493b8a649985f2dff76
+- file: expected-inferences.ttl
+  sha256: b8c6a5730f7f76dc707f018b68f2d84c2c6260dd2362d0b8647dc0d7017f58d3
+- file: expected-results.yaml
+  sha256: 9c02a8e86648e7c65c25494102de4bbd1c5808304d01a7c295765c9acf3be010
+- file: ../../schemas/commercial-pc-example.schema.json
+  sha256: 04e3996d7f811e85eeecfa2267e1b11e3c95c0f5c3ef812fd0f2d7d70611debc
+- file: queries/account-program.rq
+  sha256: 24b8b315d445ca2288b233d80b6eb6e9dfe466928576142ce8cb773fbfcd5bab
+- file: queries/coverage-money.rq
+  sha256: 92004c2667cad583e45ae79a9ce3e63678e91be715b71eac1aa28d93da4b9182
+- file: queries/umbrella-schedule.rq
+  sha256: b0b702a1309ce53541280c7a867ce0abbfbca19ccb394a153296a5264232a7b0
+- file: boundaries/malformed-amount.ttl
+  sha256: ef64c70198c58c5e30650fa6eb788b6623963304c9586ae9ea8e7d0f5e81bdba
+- file: boundaries/missing-location.ttl
+  sha256: 3fa8d825d12928b4e2843c6da4499d1a32dd2661e255e8d73d55f3edc0a78997
+- file: boundaries/missing-occurrence.ttl
+  sha256: 2d4368579be5f614cfeda1d643b54fc70f718a03d6191a3a541db75d9594ae8c
+activation: none; teaching fixtures never install canonical runtime data
+scope: F0012/F0013/F0015 planning examples; additional LOB runtime scope unassigned

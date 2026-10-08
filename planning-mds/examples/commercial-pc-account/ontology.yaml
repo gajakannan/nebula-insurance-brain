@@ -1,0 +1,495 @@
+status: illustrative-authoring-proposal
+namespace: https://example.invalid/nebula/ont/commercial-example/
+id_to_iri: 'Expand the pc: prefix; local names are case-sensitive. This separate example
+  namespace is not the production namespace.'
+classes:
+- id: pc:Party
+  module: foundation
+  parents: []
+  definition: Person or organization capable of participating in a scoped insurance
+    relationship.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Organization
+  module: foundation
+  parents:
+  - pc:Party
+  definition: An identified organization; broker, MGA and insurer describe scoped
+    roles rather than mutually exclusive organization types.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Person
+  module: foundation
+  parents:
+  - pc:Party
+  definition: An individual; an underwriting relationship alone does not identify
+    an authenticated application principal.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Account
+  module: foundation
+  parents: []
+  definition: Illustrative business relationship grouping parties and policies; distinct
+    from a named insured and a structural tenant.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Location
+  module: foundation
+  parents: []
+  definition: A referenced place whose relationship to an organization differs from
+    its insured property scope.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Vehicle
+  module: foundation
+  parents: []
+  definition: A referenced vehicle; scheduled coverage needs an explicit relationship.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:RoleKind
+  module: foundation
+  parents: []
+  definition: A named domain role such as Carrier or NamedInsured; not an authorization
+    role.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:RoleAssignment
+  module: foundation
+  parents: []
+  definition: A relationship identifying one party, role kind and account, submission
+    or policy-term scope.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Policy
+  module: insurance-core
+  parents: []
+  definition: An insurance contract identity; a policy number needs its issuer/context
+    rather than a global string join.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:PolicyTerm
+  module: insurance-core
+  parents: []
+  definition: A particular period of a policy; endorsements can change its facts at
+    separate valid and recorded times.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:ProductType
+  module: insurance-core
+  parents: []
+  definition: The product or package classification, distinct from the coverage lines
+    within the contract.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Submission
+  module: insurance-core
+  parents: []
+  definition: An insurance placement context that may contain requests without proving
+    issuance.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Coverage
+  module: insurance-core
+  parents: []
+  definition: A scoped coverage section of a policy term; its existence does not decide
+    a particular claim.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:LiabilityCoverage
+  module: insurance-core
+  parents:
+  - pc:Coverage
+  definition: A coverage section describing liability protection, subject to its own
+    terms and applicability.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:MonetaryTerm
+  module: insurance-core
+  parents: []
+  definition: A qualified monetary provision with basis, currency and its coverage
+    context.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Limit
+  module: insurance-core
+  parents:
+  - pc:MonetaryTerm
+  definition: A monetary provision describing a coverage limit; unlike bases and layers
+    cannot be summed automatically.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:Deductible
+  module: insurance-core
+  parents:
+  - pc:MonetaryTerm
+  definition: A retained amount with its own basis; not additional coverage capacity.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:LossNotice
+  module: insurance-core
+  parents: []
+  definition: A document reporting an event and a policy reference; not a claim adjudication
+    or payment record.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:GLCoverage
+  module: general-liability
+  parents:
+  - pc:LiabilityCoverage
+  definition: A general liability coverage section, reusable across products without
+    equating policy wording.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:PropertyCoverage
+  module: property
+  parents:
+  - pc:Coverage
+  definition: A property coverage section whose summary requires the relevant insured
+    property/location context.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:AutoLiabilityCoverage
+  module: program-extensions
+  parents:
+  - pc:LiabilityCoverage
+  definition: A commercial auto liability section; this example does not define physical
+    damage or coverage symbols.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:UmbrellaCoverage
+  module: program-extensions
+  parents:
+  - pc:LiabilityCoverage
+  definition: A liability layer with scheduled underlying term references; attachment/exhaustion
+    needs separate evidence.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+properties:
+- id: pc:groupsParty
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Links an account grouping to a legal party; does not imply named-insured
+    status.
+- id: pc:operatesAt
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Links an organization to an operating location; does not by itself establish
+    insured property.
+- id: pc:roleParty
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Identifies the party participating in this particular scoped role.
+- id: pc:roleKind
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Identifies the domain role kind, independent of application permissions.
+- id: pc:roleScope
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Identifies the account, submission or policy term in which the role
+    applies.
+- id: pc:actsFor
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Identifies the organization represented by an underwriting role; no
+    grant or delegation authority is implied.
+- id: pc:forAccount
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Links a policy or submission to its business account grouping.
+- id: pc:productType
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Identifies a policy product/package classification, not a guarantee
+    of individual coverage terms.
+- id: pc:termOf
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Links a policy term to its policy identity.
+- id: pc:hasTerm
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Logical inverse of termOf, without a duplicate projected edge.
+- id: pc:coverageOf
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Links a coverage section to its policy term.
+- id: pc:hasCoverage
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Logical inverse of coverageOf, without inventing an unobserved coverage
+    section.
+- id: pc:hasMonetaryTerm
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Links a coverage section to a separately qualified limit or deductible.
+- id: pc:reportsPolicy
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Records a loss notice policy reference; does not establish claim coverage
+    or liability.
+- id: pc:atLocation
+  module: property
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Scopes this property coverage to a referenced location.
+- id: pc:scheduledVehicle
+  module: program-extensions
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: References the vehicle identified in this coverage schedule.
+- id: pc:scheduledUnderlying
+  module: program-extensions
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: References an exact policy term named in the supplied underlying schedule;
+    not an attachment decision.
+- id: pc:policyNumber
+  module: insurance-core
+  kind: datatype
+  datatype: xsd:string
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: A source identifier interpreted within the carrier and contract context.
+- id: pc:periodStart
+  module: insurance-core
+  kind: datatype
+  datatype: xsd:dateTime
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Start of the illustrated policy term in explicit UTC.
+- id: pc:periodEnd
+  module: insurance-core
+  kind: datatype
+  datatype: xsd:dateTime
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Exclusive end of the illustrated policy term in explicit UTC.
+- id: pc:basis
+  module: insurance-core
+  kind: datatype
+  datatype: xsd:string
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: The stated basis of a monetary term; unlike bases are not interchangeable.
+- id: pc:amount
+  module: insurance-core
+  kind: datatype
+  datatype: xsd:decimal
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: A decimal monetary amount whose currency and basis are separate qualified
+    facts.
+- id: pc:currency
+  module: insurance-core
+  kind: datatype
+  datatype: xsd:string
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: The stated currency of a monetary term; no implicit conversion.
+- id: pc:requestedLine
+  module: insurance-core
+  kind: datatype
+  datatype: xsd:string
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: A line requested by a source; the source mood must be preserved and
+    issuance is not implied.
+- id: pc:reportedLossDate
+  module: insurance-core
+  kind: datatype
+  datatype: xsd:dateTime
+  temporal_kind: EVENT
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: The event date claimed by the loss notice, distinct from receipt and
+    acceptance.
+- id: pc:trigger
+  module: general-liability
+  kind: datatype
+  datatype: xsd:string
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: The supplied coverage-trigger description; missing source text stays
+    unknown.
+semantics:
+  rules:
+  - rdfs-subclass-type
+  - rdfs-domain-type
+  - rdfs-range-type
+  - owl-inverse-property
+  automatic_coverage_or_authorization_inference: false
+constraints:
+- file: shapes.ttl
+  stage: supplied-value-and-reference-validation
+  consumer: example-projection-reader
+  applicability: supplied Limit/Deductible values, scoped RoleAssignment records, and supplied coverageOf references
+  data_basis: asserted snapshot; no inference
+  severity: Violation
+  action: reject malformed supplied values or malformed scoped-role records
+- file: gl-completeness.ttl
+  stage: assessment-preconditions
+  consumer: GL-each-occurrence-input
+  applicability: GLCoverage instances selected for the each-occurrence input consumer
+  data_basis: asserted accepted authorized applicable conflict-free snapshot; no inference
+  severity: Violation
+  action: missing required input is an assessment gap; expected UNKNOWN outside SHACL
+- file: property-completeness.ttl
+  stage: example-property-summary
+  consumer: BPP-at-location-summary
+  applicability: PropertyCoverage instances selected for this fixture's BPP-at-location summary
+  data_basis: asserted accepted authorized applicable conflict-free snapshot; no inference
+  severity: Violation
+  action: show incomplete property summary; no F0065 money comparison

@@ -1,0 +1,9 @@
+PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
+PREFIX d: <https://example.invalid/nebula/data/>
+# Expected: six rows (BOP/Workshop, GL/Contractor, Auto/both, Umbrella/both).
+SELECT ?policy ?number ?product ?carrier ?insured WHERE {
+  ?policy pc:forAccount d:EX-PC-ACCOUNT ; pc:policyNumber ?number ; pc:productType ?product .
+  ?term pc:termOf ?policy .
+  ?carrierAssignment pc:roleScope ?term ; pc:roleKind d:EX-PC-ROLE-Carrier ; pc:roleParty ?carrier .
+  ?insuredAssignment pc:roleScope ?term ; pc:roleKind d:EX-PC-ROLE-NamedInsured ; pc:roleParty ?insured .
+} ORDER BY ?policy ?insured

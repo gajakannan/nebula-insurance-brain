@@ -431,12 +431,16 @@ features:
     path: planning-mds/features/F0012-foundation-ontology
     affects:
       - capability:ontology-release-compatibility
+      - entity:account
+      - entity:insurance-party-role-assignment
       - entity:ontology-module-version
       - entity:ontology-release
       - entity:ontology-release-module
       - glossary_term:constraint-execution-context
+      - glossary_term:insurance-product-composition
       - glossary_term:ontology-projection-mapping
       - glossary_term:stable-term-iri
+      - schema:commercial-pc-example
     depends_on:
       - feature:F0001
     governed_by:
@@ -457,16 +461,24 @@ features:
       - Resolve blueprint sections 20/82 parents versus parent before authoring. The synthetic interchange
         examples illustrate proposed predicate-to-projection mappings, not a frozen schema or implemented
         compiler.
+      - The commercial P&C handoff introduces a synthetic contractor account and scoped party roles. Settle
+        the account/party/product representation in the PRD; non-GL examples are future breadth, not expanded
+        delivery scope.
   - status: planned
     id: feature:F0013
     path: planning-mds/features/F0013-insurance-core-gl-ontology
     affects:
+      - entity:account
+      - entity:insurance-party-role-assignment
       - entity:ontology-module-version
       - entity:ontology-release
       - entity:ontology-release-module
+      - entity:policy-term
       - glossary_term:constraint-execution-context
+      - glossary_term:insurance-product-composition
       - glossary_term:ontology-projection-mapping
       - glossary_term:stable-term-iri
+      - schema:commercial-pc-example
     depends_on:
       - feature:F0001
       - feature:F0012
@@ -483,6 +495,9 @@ features:
       - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
         stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
         at formal plan.
+      - Read planning-mds/architecture/commercial-pc-example-handoff.md for BOP/GL product composition,
+        carrier-scoped identifiers, qualified monetary terms and endorsement examples. F0013 remains insurance
+        core plus GL; additional lines are illustrative future breadth.
       - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
         verification.
       - Version GL predicate-to-projection mappings with the release; proposed HAS_LIMIT/HAS_FORM/HAS_TRIGGER
@@ -495,6 +510,7 @@ features:
       - entity:ontology-release
       - glossary_term:constraint-execution-context
       - glossary_term:ontology-projection-mapping
+      - schema:commercial-pc-example
     depends_on:
       - feature:F0001
       - feature:F0005
@@ -519,6 +535,8 @@ features:
         verification.
       - TEMPLATE compilation consumes F0011 contracts and F0012/F0013 vocabulary releases. Preserve constraint
         context and evidence requirements; OPEN prompts exclude ontology under F0066.
+      - The commercial P&C example shows module composition and separate GL/property consumer completeness.
+        It does not introduce ontology into OPEN prompts or commit additional LOB runtime delivery.
   - status: planned
     id: feature:F0024
     path: planning-mds/features/F0024-gl-vertical-slice

@@ -1,0 +1,968 @@
+{
+  "@context": {
+    "pc": "https://example.invalid/nebula/ont/commercial-example/",
+    "d": "https://example.invalid/nebula/data/",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "d:EX-PC-ACCOUNT",
+      "@type": "pc:Account",
+      "rdfs:label": "Cedar Bridge commercial account",
+      "pc:groupsParty": [
+        {
+          "@id": "d:EX-PC-WORKSHOP"
+        },
+        {
+          "@id": "d:EX-PC-CONTRACTOR"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-WORKSHOP",
+      "@type": "pc:Organization",
+      "rdfs:label": "Cedar Bridge Workshop LLC",
+      "pc:operatesAt": [
+        {
+          "@id": "d:EX-PC-LOCATION-SHOP"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-CONTRACTOR",
+      "@type": "pc:Organization",
+      "rdfs:label": "Cedar Bridge Contracting LLC",
+      "pc:operatesAt": [
+        {
+          "@id": "d:EX-PC-LOCATION-YARD"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-BROKER",
+      "@type": "pc:Organization",
+      "rdfs:label": "Harbor Example Brokerage"
+    },
+    {
+      "@id": "d:EX-PC-MAPLE",
+      "@type": "pc:Organization",
+      "rdfs:label": "Example Maple Mutual"
+    },
+    {
+      "@id": "d:EX-PC-GRANITE",
+      "@type": "pc:Organization",
+      "rdfs:label": "Example Granite Casualty"
+    },
+    {
+      "@id": "d:EX-PC-MGA",
+      "@type": "pc:Organization",
+      "rdfs:label": "Example Delegated Underwriting MGA"
+    },
+    {
+      "@id": "d:EX-PC-UNDERWRITER",
+      "@type": "pc:Person",
+      "rdfs:label": "Rowan Example"
+    },
+    {
+      "@id": "d:EX-PC-LOCATION-SHOP",
+      "@type": "pc:Location",
+      "rdfs:label": "Leased workshop"
+    },
+    {
+      "@id": "d:EX-PC-LOCATION-YARD",
+      "@type": "pc:Location",
+      "rdfs:label": "Contracting yard"
+    },
+    {
+      "@id": "d:EX-PC-VEHICLE-VAN",
+      "@type": "pc:Vehicle",
+      "rdfs:label": "Illustrative company van"
+    },
+    {
+      "@id": "d:EX-PC-SUBMISSION",
+      "@type": "pc:Submission",
+      "rdfs:label": "Contracting submission",
+      "pc:forAccount": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-LOSS-NOTICE",
+      "@type": "pc:LossNotice",
+      "rdfs:label": "Reported trip-and-fall notice",
+      "pc:reportsPolicy": [
+        {
+          "@id": "d:EX-PC-POLICY-GL"
+        }
+      ],
+      "pc:reportedLossDate": [
+        {
+          "@value": "2026-06-20T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ROLE-NamedInsured",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "NamedInsured"
+    },
+    {
+      "@id": "d:EX-PC-ROLE-PlacementBroker",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "PlacementBroker"
+    },
+    {
+      "@id": "d:EX-PC-ROLE-ServicingBroker",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "ServicingBroker"
+    },
+    {
+      "@id": "d:EX-PC-ROLE-Carrier",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "Carrier"
+    },
+    {
+      "@id": "d:EX-PC-ROLE-MGA",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "MGA"
+    },
+    {
+      "@id": "d:EX-PC-ROLE-Underwriter",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "Underwriter"
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-SERVICING",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Servicing",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-BROKER"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-ServicingBroker"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-MGA",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Mga",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-MGA"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-MGA"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-SUBMISSION"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-UNDERWRITER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Underwriter",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-UNDERWRITER"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-Underwriter"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-SUBMISSION"
+        }
+      ],
+      "pc:actsFor": [
+        {
+          "@id": "d:EX-PC-MGA"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-PRODUCT-BOP",
+      "@type": "pc:ProductType",
+      "rdfs:label": "BOP"
+    },
+    {
+      "@id": "d:EX-PC-PRODUCT-StandaloneGL",
+      "@type": "pc:ProductType",
+      "rdfs:label": "StandaloneGL"
+    },
+    {
+      "@id": "d:EX-PC-PRODUCT-CommercialAuto",
+      "@type": "pc:ProductType",
+      "rdfs:label": "CommercialAuto"
+    },
+    {
+      "@id": "d:EX-PC-PRODUCT-Umbrella",
+      "@type": "pc:ProductType",
+      "rdfs:label": "Umbrella"
+    },
+    {
+      "@id": "d:EX-PC-POLICY-BOP",
+      "@type": "pc:Policy",
+      "rdfs:label": "BOP policy",
+      "pc:forAccount": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ],
+      "pc:productType": [
+        {
+          "@id": "d:EX-PC-PRODUCT-BOP"
+        }
+      ],
+      "pc:policyNumber": [
+        {
+          "@value": "EX-BOP-100",
+          "@type": "xsd:string"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-TERM-BOP",
+      "@type": "pc:PolicyTerm",
+      "rdfs:label": "BOP 2026 term",
+      "pc:termOf": [
+        {
+          "@id": "d:EX-PC-POLICY-BOP"
+        }
+      ],
+      "pc:periodStart": [
+        {
+          "@value": "2026-01-01T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ],
+      "pc:periodEnd": [
+        {
+          "@value": "2027-01-01T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-BOP-CARRIER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Bop Carrier",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-MAPLE"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-Carrier"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-BOP"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-BOP-BROKER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Bop Broker",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-BROKER"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-PlacementBroker"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-BOP"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-BOP-WORKSHOP",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Bop Workshop",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-WORKSHOP"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-NamedInsured"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-BOP"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-POLICY-GL",
+      "@type": "pc:Policy",
+      "rdfs:label": "GL policy",
+      "pc:forAccount": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ],
+      "pc:productType": [
+        {
+          "@id": "d:EX-PC-PRODUCT-StandaloneGL"
+        }
+      ],
+      "pc:policyNumber": [
+        {
+          "@value": "EX-2042",
+          "@type": "xsd:string"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-TERM-GL",
+      "@type": "pc:PolicyTerm",
+      "rdfs:label": "GL 2026 term",
+      "pc:termOf": [
+        {
+          "@id": "d:EX-PC-POLICY-GL"
+        }
+      ],
+      "pc:periodStart": [
+        {
+          "@value": "2026-01-01T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ],
+      "pc:periodEnd": [
+        {
+          "@value": "2027-01-01T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-GL-CARRIER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Gl Carrier",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-GRANITE"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-Carrier"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-GL"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-GL-BROKER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Gl Broker",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-BROKER"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-PlacementBroker"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-GL"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-GL-CONTRACTOR",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Gl Contractor",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-CONTRACTOR"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-NamedInsured"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-GL"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-POLICY-AUTO",
+      "@type": "pc:Policy",
+      "rdfs:label": "AUTO policy",
+      "pc:forAccount": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ],
+      "pc:productType": [
+        {
+          "@id": "d:EX-PC-PRODUCT-CommercialAuto"
+        }
+      ],
+      "pc:policyNumber": [
+        {
+          "@value": "EX-2042",
+          "@type": "xsd:string"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-TERM-AUTO",
+      "@type": "pc:PolicyTerm",
+      "rdfs:label": "AUTO 2026 term",
+      "pc:termOf": [
+        {
+          "@id": "d:EX-PC-POLICY-AUTO"
+        }
+      ],
+      "pc:periodStart": [
+        {
+          "@value": "2026-01-01T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ],
+      "pc:periodEnd": [
+        {
+          "@value": "2027-01-01T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-AUTO-CARRIER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Auto Carrier",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-MAPLE"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-Carrier"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-AUTO"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-AUTO-BROKER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Auto Broker",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-BROKER"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-PlacementBroker"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-AUTO"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-AUTO-WORKSHOP",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Auto Workshop",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-WORKSHOP"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-NamedInsured"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-AUTO"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-AUTO-CONTRACTOR",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Auto Contractor",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-CONTRACTOR"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-NamedInsured"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-AUTO"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-POLICY-UMBRELLA",
+      "@type": "pc:Policy",
+      "rdfs:label": "UMBRELLA policy",
+      "pc:forAccount": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ],
+      "pc:productType": [
+        {
+          "@id": "d:EX-PC-PRODUCT-Umbrella"
+        }
+      ],
+      "pc:policyNumber": [
+        {
+          "@value": "EX-UMB-100",
+          "@type": "xsd:string"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-TERM-UMBRELLA",
+      "@type": "pc:PolicyTerm",
+      "rdfs:label": "UMBRELLA 2026 term",
+      "pc:termOf": [
+        {
+          "@id": "d:EX-PC-POLICY-UMBRELLA"
+        }
+      ],
+      "pc:periodStart": [
+        {
+          "@value": "2026-01-01T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ],
+      "pc:periodEnd": [
+        {
+          "@value": "2027-01-01T00:00:00Z",
+          "@type": "xsd:dateTime"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-UMBRELLA-CARRIER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Umbrella Carrier",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-GRANITE"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-Carrier"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-UMBRELLA"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-UMBRELLA-BROKER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Umbrella Broker",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-BROKER"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-PlacementBroker"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-UMBRELLA"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Umbrella Workshop",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-WORKSHOP"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-NamedInsured"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-UMBRELLA"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Umbrella Contractor",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-CONTRACTOR"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-NamedInsured"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-UMBRELLA"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-COV-GL",
+      "@type": "pc:GLCoverage",
+      "rdfs:label": "GL coverage",
+      "pc:coverageOf": [
+        {
+          "@id": "d:EX-PC-TERM-GL"
+        }
+      ],
+      "pc:trigger": [
+        {
+          "@value": "Occurrence",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:hasMonetaryTerm": [
+        {
+          "@id": "d:EX-PC-MONEY-GL-OCC"
+        },
+        {
+          "@id": "d:EX-PC-MONEY-GL-AGG"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-COV-BOP-GL",
+      "@type": "pc:GLCoverage",
+      "rdfs:label": "BOP-GL coverage",
+      "pc:coverageOf": [
+        {
+          "@id": "d:EX-PC-TERM-BOP"
+        }
+      ],
+      "pc:hasMonetaryTerm": [
+        {
+          "@id": "d:EX-PC-MONEY-BOP-OCC"
+        },
+        {
+          "@id": "d:EX-PC-MONEY-BOP-AGG"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-COV-BOP-PROPERTY",
+      "@type": "pc:PropertyCoverage",
+      "rdfs:label": "BOP-PROPERTY coverage",
+      "pc:coverageOf": [
+        {
+          "@id": "d:EX-PC-TERM-BOP"
+        }
+      ],
+      "pc:atLocation": [
+        {
+          "@id": "d:EX-PC-LOCATION-SHOP"
+        }
+      ],
+      "pc:hasMonetaryTerm": [
+        {
+          "@id": "d:EX-PC-MONEY-BPP"
+        },
+        {
+          "@id": "d:EX-PC-MONEY-PROP-DED"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-COV-AUTO",
+      "@type": "pc:AutoLiabilityCoverage",
+      "rdfs:label": "AUTO coverage",
+      "pc:coverageOf": [
+        {
+          "@id": "d:EX-PC-TERM-AUTO"
+        }
+      ],
+      "pc:scheduledVehicle": [
+        {
+          "@id": "d:EX-PC-VEHICLE-VAN"
+        }
+      ],
+      "pc:hasMonetaryTerm": [
+        {
+          "@id": "d:EX-PC-MONEY-AUTO-CSL"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-COV-UMBRELLA",
+      "@type": "pc:UmbrellaCoverage",
+      "rdfs:label": "UMBRELLA coverage",
+      "pc:coverageOf": [
+        {
+          "@id": "d:EX-PC-TERM-UMBRELLA"
+        }
+      ],
+      "pc:scheduledUnderlying": [
+        {
+          "@id": "d:EX-PC-TERM-GL"
+        },
+        {
+          "@id": "d:EX-PC-TERM-AUTO"
+        }
+      ],
+      "pc:hasMonetaryTerm": [
+        {
+          "@id": "d:EX-PC-MONEY-UMB-OCC"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-MONEY-GL-OCC",
+      "@type": "pc:Limit",
+      "rdfs:label": "EachOccurrence Limit",
+      "pc:basis": [
+        {
+          "@value": "EachOccurrence",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:currency": [
+        {
+          "@value": "USD",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:amount": [
+        {
+          "@value": "1000000.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-MONEY-GL-AGG",
+      "@type": "pc:Limit",
+      "rdfs:label": "GeneralAggregate Limit",
+      "pc:basis": [
+        {
+          "@value": "GeneralAggregate",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:currency": [
+        {
+          "@value": "USD",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:amount": [
+        {
+          "@value": "2000000.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-MONEY-BOP-OCC",
+      "@type": "pc:Limit",
+      "rdfs:label": "EachOccurrence Limit",
+      "pc:basis": [
+        {
+          "@value": "EachOccurrence",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:currency": [
+        {
+          "@value": "USD",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:amount": [
+        {
+          "@value": "1000000.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-MONEY-BOP-AGG",
+      "@type": "pc:Limit",
+      "rdfs:label": "GeneralAggregate Limit",
+      "pc:basis": [
+        {
+          "@value": "GeneralAggregate",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:currency": [
+        {
+          "@value": "USD",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:amount": [
+        {
+          "@value": "2000000.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-MONEY-BPP",
+      "@type": "pc:Limit",
+      "rdfs:label": "BusinessPersonalProperty Limit",
+      "pc:basis": [
+        {
+          "@value": "BusinessPersonalProperty",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:currency": [
+        {
+          "@value": "USD",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:amount": [
+        {
+          "@value": "200000.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-MONEY-PROP-DED",
+      "@type": "pc:Deductible",
+      "rdfs:label": "PerLoss Deductible",
+      "pc:basis": [
+        {
+          "@value": "PerLoss",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:currency": [
+        {
+          "@value": "USD",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:amount": [
+        {
+          "@value": "1000.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-MONEY-AUTO-CSL",
+      "@type": "pc:Limit",
+      "rdfs:label": "CombinedSingleLimitPerAccident Limit",
+      "pc:basis": [
+        {
+          "@value": "CombinedSingleLimitPerAccident",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:currency": [
+        {
+          "@value": "USD",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:amount": [
+        {
+          "@value": "1000000.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-MONEY-UMB-OCC",
+      "@type": "pc:Limit",
+      "rdfs:label": "EachOccurrence Limit",
+      "pc:basis": [
+        {
+          "@value": "EachOccurrence",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:currency": [
+        {
+          "@value": "USD",
+          "@type": "xsd:string"
+        }
+      ],
+      "pc:amount": [
+        {
+          "@value": "2000000.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    }
+  ]
+}

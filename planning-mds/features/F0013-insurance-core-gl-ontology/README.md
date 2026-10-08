@@ -23,6 +23,10 @@ Contracts and examples: [release records](../../architecture/data-model.md#propo
 
 ## Documents
 
+### Commercial P&C teaching expansion (2026-10-08)
+
+The [Cedar Bridge example](../../examples/commercial-pc-account/README.md) compares standalone GL with a BOP's liability and property sections, alongside auto/umbrella and unissued WC/inland-marine requests. Carry its distinction between product/package and coverage line, scoped party roles, carrier-qualified policy identity, qualified money and source lineage into the insurance-core/GL plan. The additional lines are illustrative future breadth, with runtime owners/releases still to be assigned; they do not widen F0013's GL delivery commitment or F0065's operation. See [the planning handoff](../../architecture/commercial-pc-example-handoff.md).
+
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0013.yaml`.
 
 ## Stories

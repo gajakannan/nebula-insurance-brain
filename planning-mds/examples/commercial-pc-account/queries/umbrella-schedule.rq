@@ -1,0 +1,9 @@
+PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
+PREFIX d: <https://example.invalid/nebula/data/>
+# Expected: exactly the GL and Auto terms. BOP has no supplied schedule edge.
+# A schedule link is not a coverage or attachment decision.
+SELECT ?underlying ?policy ?number WHERE {
+  d:EX-PC-COV-UMBRELLA pc:scheduledUnderlying ?underlying .
+  ?underlying pc:termOf ?policy .
+  ?policy pc:policyNumber ?number .
+} ORDER BY ?underlying

@@ -26,6 +26,10 @@ Worked and boundary cases: [ontology release contracts](../../examples/ontology-
 
 ## Documents
 
+### Commercial P&C teaching expansion (2026-10-08)
+
+Use the [Cedar Bridge contractor account](../../examples/commercial-pc-account/README.md) to exercise shared Party/Organization/Person, Account, scoped domain roles, policy identity and product composition before freezing the authoring schema. The proposed account grouping and role-assignment representation must be reconciled with the production contracts in this PRD. Broker/carrier/MGA/underwriter roles do not grant application access. The [handoff](../../architecture/commercial-pc-example-handoff.md) distinguishes example data from planning KG nodes and preserves the delivery scope; broader LOB content remains illustrative.
+
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0012.yaml`.
 
 ## Stories

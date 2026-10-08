@@ -1,0 +1,45 @@
+id: example-commercial-pc-age
+version: 1
+status: proposed; no AGE writer or production mapping schema
+source: authorized accepted snapshot at explicit valid/known coordinates
+per_record_context:
+- tenant_id
+- knowledge_base_id
+- ontology_release
+- mapping_version_and_digest
+- exact_fact_versions_for_relationships_and_qualifiers
+- assertion_evidence_review_commit_references
+- valid_and_recorded_intervals
+- asserted_or_derived_basis
+relations:
+- {predicate: 'pc:groupsParty', edge: GROUPS_PARTY, direction: subject-to-object}
+- {predicate: 'pc:operatesAt', edge: OPERATES_AT, direction: subject-to-object}
+- {predicate: 'pc:roleParty', edge: ROLE_PARTY, direction: subject-to-object}
+- {predicate: 'pc:roleKind', edge: ROLE_KIND, direction: subject-to-object}
+- {predicate: 'pc:roleScope', edge: ROLE_SCOPE, direction: subject-to-object}
+- {predicate: 'pc:actsFor', edge: ACTS_FOR, direction: subject-to-object}
+- {predicate: 'pc:forAccount', edge: FOR_ACCOUNT, direction: subject-to-object}
+- {predicate: 'pc:productType', edge: PRODUCT_TYPE, direction: subject-to-object}
+- {predicate: 'pc:termOf', edge: HAS_TERM, direction: object-to-subject}
+- {predicate: 'pc:coverageOf', edge: HAS_COVERAGE, direction: object-to-subject}
+- {predicate: 'pc:hasMonetaryTerm', edge: HAS_MONETARY_TERM, direction: subject-to-object}
+- {predicate: 'pc:atLocation', edge: AT_LOCATION, direction: subject-to-object}
+- {predicate: 'pc:scheduledVehicle', edge: SCHEDULED_VEHICLE, direction: subject-to-object}
+- {predicate: 'pc:scheduledUnderlying', edge: SCHEDULED_UNDERLYING, direction: subject-to-object}
+- {predicate: 'pc:reportsPolicy', edge: REPORTS_POLICY, direction: subject-to-object}
+scalar_properties:
+- {predicate: 'pc:amount', encoding: decimal-string}
+- {predicate: 'pc:currency', encoding: string}
+- {predicate: 'pc:basis', encoding: string}
+- {predicate: 'pc:policyNumber', encoding: scoped-identifier-string}
+- {predicate: 'pc:periodStart', encoding: date-time}
+- {predicate: 'pc:periodEnd', encoding: date-time}
+- {predicate: 'pc:reportedLossDate', encoding: date-time}
+- {predicate: 'pc:trigger', encoding: string}
+omissions:
+- {predicate: 'pc:hasTerm', reason: inverse of termOf; no duplicate edge}
+- {predicate: 'pc:hasCoverage', reason: inverse of coverageOf; no duplicate edge}
+- {predicate: 'pc:requestedLine', reason: request assertions have no accepted projection in this fixture}
+identity_metadata: preserve authored types and labels with their entity evidence references; not extra committed business facts
+scope_boundary: role assignments remain scoped nodes; never flatten them into global party types or access grants
+rebuild: mapping changes require scoped impact analysis and rebuild; retain previous release and lineage

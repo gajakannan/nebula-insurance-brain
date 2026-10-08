@@ -1,0 +1,11 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+# Consumer preconditions only, after supplied-value, authority, applicability and conflict checks.
+# An aggregate or an umbrella limit does not supply the GL each-occurrence input.
+pc:GLEachOccurrenceInputs a sh:NodeShape ; sh:targetClass pc:GLCoverage ;
+    sh:property [ sh:path pc:hasMonetaryTerm ; sh:qualifiedMinCount 1 ;
+        sh:qualifiedValueShape [ sh:class pc:Limit ;
+            sh:property [ sh:path pc:basis ; sh:hasValue "EachOccurrence" ] ;
+            sh:property [ sh:path pc:amount ; sh:minCount 1 ] ;
+            sh:property [ sh:path pc:currency ; sh:minCount 1 ] ] ] .

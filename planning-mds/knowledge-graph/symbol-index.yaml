@@ -1,11 +1,11 @@
 version: 0
-generated_at: '2026-10-05T03:11:01+00:00'
+generated_at: '2026-10-08T05:12:40+00:00'
 summary:
-  total_symbols: 489
+  total_symbols: 495
   by_language:
     python:
-      files: 66
-      parsed: 0
+      files: 67
+      parsed: 1
       cached: 66
     typescript:
       files: 8
@@ -26,7 +26,8 @@ summary:
     python: 0b86e437fc52203bf021904b96d9cb9878531be5ad42bee5d58cdffa650fee9e
     typescript: 6599d91ca234bbd991550f63cf08a7d3d0a8a259913b85478e311307d8c1e499
     csharp: f1e324c369f84d91c7fc9babd3fbb3df5352bd259db0a2d31fe5c8f61f74ce96
-  sidecar_authoritative_languages: []
+  sidecar_authoritative_languages:
+  - python
 symbols:
 - id: symbol:capability-authorization-enforcement:action-ceiling.post-init
   node: capability:authorization-enforcement
@@ -7233,3 +7234,87 @@ symbols:
   callers: []
   callees:
   - symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-aware
+- id: symbol:schema-commercial-pc-example:validate-semantic-examples.check-local-link
+  node: schema:commercial-pc-example
+  kind: function
+  name: check_local_link
+  file: scripts/validation/validate_semantic_examples.py
+  line: 45
+  signature: 'def check_local_link(root: Path, source: Path, link: str)'
+  visibility: public
+  language: python
+  end_line: 60
+  callers:
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate-commercial-example
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate-records
+  callees: []
+- id: symbol:schema-commercial-pc-example:validate-semantic-examples.check-timestamp
+  node: schema:commercial-pc-example
+  kind: function
+  name: check_timestamp
+  file: scripts/validation/validate_semantic_examples.py
+  line: 23
+  signature: 'def check_timestamp(value: object)'
+  visibility: public
+  language: python
+  end_line: 30
+  callers: []
+  callees: []
+- id: symbol:schema-commercial-pc-example:validate-semantic-examples.main
+  node: schema:commercial-pc-example
+  kind: function
+  name: main
+  file: scripts/validation/validate_semantic_examples.py
+  line: 248
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 262
+  callers: []
+  callees:
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate
+- id: symbol:schema-commercial-pc-example:validate-semantic-examples.validate
+  node: schema:commercial-pc-example
+  kind: function
+  name: validate
+  file: scripts/validation/validate_semantic_examples.py
+  line: 102
+  signature: 'def validate(root: Path)'
+  visibility: public
+  language: python
+  end_line: 114
+  callers:
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.main
+  callees:
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.check-local-link
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate-commercial-example
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate-records
+- id: symbol:schema-commercial-pc-example:validate-semantic-examples.validate-commercial-example
+  node: schema:commercial-pc-example
+  kind: function
+  name: validate_commercial_example
+  file: scripts/validation/validate_semantic_examples.py
+  line: 117
+  signature: 'def validate_commercial_example(root: Path)'
+  visibility: public
+  language: python
+  end_line: 245
+  callers:
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate
+  callees:
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.check-local-link
+- id: symbol:schema-commercial-pc-example:validate-semantic-examples.validate-records
+  node: schema:commercial-pc-example
+  kind: function
+  name: validate_records
+  file: scripts/validation/validate_semantic_examples.py
+  line: 63
+  signature: 'def validate_records(root: Path, data: dict, schema: dict)'
+  visibility: public
+  language: python
+  end_line: 99
+  callers:
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate
+  callees:
+  - symbol:schema-commercial-pc-example:validate-semantic-examples.check-local-link
