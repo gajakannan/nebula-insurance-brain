@@ -1,0 +1,15 @@
+# Supplied-value checks only. Absence is handled by a named assessment consumer.
+@prefix ins: <https://example.invalid/nebula/ont/insurance/> .
+@prefix cov: <https://example.invalid/nebula/ont/insurance/coverage/> .
+@prefix lim: <https://example.invalid/nebula/ont/insurance/limit/> .
+@prefix shape: <https://example.invalid/nebula/shapes/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+shape:SuppliedLimit a sh:NodeShape ;
+    sh:targetClass ins:limit ; sh:targetObjectsOf cov:has-limit ;
+    sh:nodeKind sh:IRI ; sh:class ins:limit ;
+    sh:property [ sh:path lim:amount ; sh:datatype xsd:decimal ; sh:minInclusive 0 ;
+                  sh:message "A supplied amount must be a non-negative decimal." ] ;
+    sh:property [ sh:path lim:currency ; sh:datatype xsd:string ; sh:pattern "^[A-Z]{3}$" ] ;
+    sh:property [ sh:path lim:has-basis ; sh:nodeKind sh:IRI ; sh:class lim:basis ] .

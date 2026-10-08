@@ -14,6 +14,7 @@ Read `planning-mds/BLUEPRINT.md` for process, scope, technology, and phase statu
 - Keep the blueprint, feature status, and trackers aligned under `planning-mds/features/TRACKER-GOVERNANCE.md`.
 - Edit `planning-mds/kg-source/**` as the authored graph source. Generate projections and tracker tables with `scripts/kg/compile.py`; do not hand-edit generated regions.
 - Use KG lookup for routing. Inspect the source planning artifacts before making readiness judgments.
+- KG coverage means a feature has retrieval mappings, including planning-only stubs. It does not imply a PRD, completed Phase B, approval, or implementation; read status and mapping notes before making readiness claims.
 - Honor `.agentignore` for broad searches. Read exact evidence references when a review requires them.
 - Proposed ADRs stay proposed until their stated proof and acceptance conditions are met. Structural readiness checks do not settle them.
 

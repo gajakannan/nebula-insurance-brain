@@ -1,0 +1,21 @@
+# EX-INTEROP-001 complete case. Synthetic view; never import as canonical truth.
+@prefix ins: <https://example.invalid/nebula/ont/insurance/> .
+@prefix cov: <https://example.invalid/nebula/ont/insurance/coverage/> .
+@prefix lim: <https://example.invalid/nebula/ont/insurance/limit/> .
+@prefix basis: <https://example.invalid/nebula/ont/insurance/limit/basis/> .
+@prefix trigger: <https://example.invalid/nebula/ont/insurance/trigger/> .
+@prefix data: <https://example.invalid/nebula/data/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+data:EX-COV-001 a cov:general-liability ;
+    cov:has-limit data:EX-LIMIT-001 ;
+    cov:has-form data:EX-FORM-001 ;
+    cov:has-trigger trigger:occurrence .
+data:EX-LIMIT-001 a ins:limit ;
+    lim:amount "500000.00"^^xsd:decimal ;
+    lim:currency "USD" ;
+    lim:has-basis basis:each-occurrence .
+basis:each-occurrence a lim:basis .
+data:EX-FORM-001 a ins:form ; rdfs:label "Example GL form" .
+trigger:occurrence a ins:trigger .

@@ -1,0 +1,80 @@
+# EX-INTEROP-001: synthetic proposal, not the F0012 authoring schema or a compiler input.
+example_id: EX-INTEROP-001
+status: illustrative-proposed
+namespace: https://example.invalid/nebula/ont/
+id_to_iri: namespace + id.replace('.', '/')
+module:
+  id: insurance.general-liability.example
+  version: 1
+  version_iri: https://example.invalid/nebula/modules/insurance.general-liability.example/1
+# A composed release selects exact module versions; it is not the module's identity.
+release:
+  iri: https://example.invalid/nebula/releases/gl/v1
+  modules:
+  - https://example.invalid/nebula/modules/insurance.general-liability.example/1
+classes:
+- {id: insurance.coverage, parents: []}
+- {id: insurance.coverage.general-liability, parents: [insurance.coverage]}
+- {id: insurance.limit, parents: []}
+- {id: insurance.limit.basis, parents: []}
+- {id: insurance.form, parents: []}
+- {id: insurance.trigger, parents: []}
+semantics:
+  demonstrated_rules: [rdfs-subclass-type, owl-inverse-property]
+  object_properties:
+  - {id: insurance.coverage.has-limit, domain: insurance.coverage, range: insurance.limit,
+     inverse: insurance.limit.of-coverage, temporal_kind: STATE}
+  - {id: insurance.limit.of-coverage, domain: insurance.limit, range: insurance.coverage, temporal_kind: STATE}
+  - {id: insurance.coverage.has-form, domain: insurance.coverage, range: insurance.form, temporal_kind: STATE}
+  - {id: insurance.coverage.has-trigger, domain: insurance.coverage, range: insurance.trigger, temporal_kind: STATE}
+  - {id: insurance.limit.has-basis, domain: insurance.limit, range: insurance.limit.basis, temporal_kind: STATE}
+  datatype_properties:
+  - {id: insurance.limit.amount, domain: insurance.limit, range: 'http://www.w3.org/2001/XMLSchema#decimal', temporal_kind: STATE}
+  - {id: insurance.limit.currency, domain: insurance.limit, range: 'http://www.w3.org/2001/XMLSchema#string', temporal_kind: STATE}
+shapes:
+- file: shapes.ttl
+  lifecycle_stage: candidate-value-validation
+  consumer: supplied-limit-value-check
+  applicability: supplied limit nodes in this synthetic GL fixture
+  data_basis: asserted graph; no inference
+  severity: Violation
+  on_nonconformance: reject malformed supplied value; not a policy decision
+- file: assessment-shapes.ttl
+  lifecycle_stage: assessment-preconditions
+  consumer: complete-limit-assessment
+  applicability: selected coverage after authorization, scope and conflict checks
+  data_basis: selected accepted-input projection; no inference
+  severity: Violation
+  on_nonconformance: missing required inputs maps to UNKNOWN in this fixture
+projection_mapping:
+  version: example-age/v1
+  status: proposed; no AGE writer exists in this example
+  source: authorized canonical snapshot; never import this fixture as canonical data
+  direction: subject-to-object
+  identity: preserve source entity IDs; this fixture introduces EX-LIMIT-001 as an illustrative value node
+  required_context:
+  - tenant_id
+  - knowledge_base_id
+  - valid_as_of
+  - known_as_of
+  - exact_source_fact_or_relationship_versions
+  - assertion_and_evidence_references
+  - ontology_release
+  - projection_mapping_version
+  - asserted_or_derived_basis
+  - basis_and_currency_qualifiers
+  # IRIs follow the illustrative mapping above. F0012 must freeze production rules.
+  relations:
+  - {predicate: insurance.coverage.has-limit, shorthand: hasLimit, edge: HAS_LIMIT,
+     subject_type: insurance.coverage, object_type: insurance.limit}
+  - {predicate: insurance.coverage.has-form, shorthand: hasForm, edge: HAS_FORM,
+     subject_type: insurance.coverage, object_type: insurance.form}
+  - {predicate: insurance.coverage.has-trigger, shorthand: hasTrigger, edge: HAS_TRIGGER,
+     subject_type: insurance.coverage, object_type: insurance.trigger}
+  value_properties:
+  - {predicate: insurance.limit.amount, owner_type: insurance.limit, property: amount, encoding: decimal-string}
+  - {predicate: insurance.limit.currency, owner_type: insurance.limit, property: currency, encoding: string}
+  - {predicate: insurance.limit.has-basis, owner_type: insurance.limit, property: basis, encoding: iri}
+  omitted_predicates:
+  - {predicate: insurance.limit.of-coverage, reason: inverse is derived; do not materialize a duplicate edge}
+  rebuild_policy: mapping changes require scoped rebuild; retain old mapping and canonical lineage

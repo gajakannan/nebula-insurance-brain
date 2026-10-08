@@ -3,21 +3,30 @@ name: GL vertical slice
 path: planning-mds/features/F0024-gl-vertical-slice
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
+affects:
+- entity:ontology-release
+- entity:assessment-record
+- entity:guideline-rule-version
+notes:
+- Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD, stories,
+  assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending at formal plan.
+- The GL slice consumes F0013 and F0065. The first stored assessment needs exact release, rule, fact-version and evidence lineage; propagation tooling is separately phased.
+- Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval verification.
 phase: v0.1B
 roadmap_section: Later
 roadmap_order: 7
 rationale: The GL vertical slice proves actual model interpretation through evidence review and canonical acceptance to the bounded F0065 guideline assessment, with exact rule/fact/evidence lineage and explicit time context (sections 86, 124). The integrated slice must exercise the accepted Docling-Graph path (ADR-0060).
 depends_on:
 - feature:F0001
+- feature:F0013
 - id: feature:F0065
-  provenance: explicit
+  provenance: extracted
   confidence: 1.0
 governed_by:
 - adr:0060
 - adr:0005
 - adr:0006
 - adr:0010
+- adr:0045
+- adr:0026
 - adr:0056

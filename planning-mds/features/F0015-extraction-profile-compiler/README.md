@@ -12,6 +12,10 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 ## Documents
 
+Planning prerequisites include F0011's JSON Schema contracts, F0012's foundation ontology, and F0013's GL ontology, alongside the existing F0014, F0005, and F0001 dependencies. The compiler must consume exact releases and preserve constraint execution context, profile requirements, and evidence obligations. Settle the [proposed release contract](../../architecture/decisions/ADR-0045-ontology-release-compatibility.md) before implementation; compilation applies to the TEMPLATE route, with ontology excluded from OPEN prompts under F0066.
+
+Packaged artifacts must preserve the release reference to the versioned predicate-to-projection mapping, including its digest and declared omissions. Graph writing remains the projection consumer's responsibility. The [synthetic interchange examples](../../examples/ontology-interchange/README.md) illustrate that boundary; they are not a compiler schema.
+
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0015.yaml`.
 
 ## Stories

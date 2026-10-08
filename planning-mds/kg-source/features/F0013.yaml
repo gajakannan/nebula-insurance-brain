@@ -3,9 +3,19 @@ name: Insurance Core GL ontology
 path: planning-mds/features/F0013-insurance-core-gl-ontology
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
+affects:
+- entity:ontology-module-version
+- entity:ontology-release
+- entity:ontology-release-module
+- glossary_term:stable-term-iri
+- glossary_term:constraint-execution-context
+- glossary_term:ontology-projection-mapping
+notes:
+- Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD, stories,
+  assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending at formal plan.
+- GL composes exact foundation versions. Missing limit inputs produce UNKNOWN for the requesting assessment, not a universal commit failure. Carry constraint, profile and evidence obligations with the package.
+- Version GL predicate-to-projection mappings with the release; proposed HAS_LIMIT/HAS_FORM/HAS_TRIGGER labels in data-model.md and the teaching examples do not establish runtime projections.
+- Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval verification.
 phase: v0.1A
 roadmap_section: Next
 roadmap_order: 12
@@ -14,8 +24,10 @@ rationale: The General Liability module of the insurance core ontology supplies 
 validation_gate: F0001 accepted; plan action Phase A and Phase B approved for this feature.
 depends_on:
 - feature:F0001
+- feature:F0012
 governed_by:
 - adr:0011
 - adr:0039
+- adr:0045
 - adr:0064
 - adr:0066

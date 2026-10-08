@@ -12,6 +12,8 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 ## Documents
 
+The integrated slice depends directly on F0013's GL vocabulary, alongside the existing F0001 and F0065 dependencies. Its interpretation and assessment must identify the ontology release used, preserve missing inputs as `UNKNOWN` where required by F0065, and retain exact fact/rule/evidence lineage from the first stored assessment.
+
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0024.yaml`.
 
 ## Stories

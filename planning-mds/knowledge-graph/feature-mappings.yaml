@@ -32,20 +32,8 @@ coverage:
       path: planning-mds/features/F0011-json-schema-contract-system
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
-    - id: feature:F0012
-      path: planning-mds/features/F0012-foundation-ontology
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
-    - id: feature:F0013
-      path: planning-mds/features/F0013-insurance-core-gl-ontology
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0014
       path: planning-mds/features/F0014-document-profile-model
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
-    - id: feature:F0015
-      path: planning-mds/features/F0015-extraction-profile-compiler
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0016
@@ -80,10 +68,6 @@ coverage:
       path: planning-mds/features/F0023-minimal-entity-360
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
-    - id: feature:F0024
-      path: planning-mds/features/F0024-gl-vertical-slice
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0025
       path: planning-mds/features/F0025-endorsement-bitemporal-slice
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -102,10 +86,6 @@ coverage:
         to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0029
       path: planning-mds/features/F0029-ontology-discovery
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
-    - id: feature:F0030
-      path: planning-mds/features/F0030-ontology-workbench
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0031
@@ -230,10 +210,6 @@ coverage:
         to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0061
       path: planning-mds/features/F0061-advanced-retrieval
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
-    - id: feature:F0062
-      path: planning-mds/features/F0062-advanced-reasoners
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0063
@@ -450,6 +426,180 @@ features:
     uses_schema:
       - schema:content-artifact-manifest
       - schema:interpretation-result
+  - status: planned
+    id: feature:F0012
+    path: planning-mds/features/F0012-foundation-ontology
+    affects:
+      - capability:ontology-release-compatibility
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:constraint-execution-context
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    depends_on:
+      - feature:F0001
+    governed_by:
+      - adr:0011
+      - adr:0012
+      - adr:0045
+      - adr:0063
+      - adr:0064
+    notes:
+      - Authoring contract precedes vocabulary content. Stable IRIs and meaning-change classes are paired;
+        constraint stage/consumer/severity/data basis and missingness are explicit. Release records are
+        proposed in data-model.md under ADR-0045.
+      - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
+        stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
+        at formal plan.
+      - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
+        verification.
+      - Resolve blueprint sections 20/82 parents versus parent before authoring. The synthetic interchange
+        examples illustrate proposed predicate-to-projection mappings, not a frozen schema or implemented
+        compiler.
+  - status: planned
+    id: feature:F0013
+    path: planning-mds/features/F0013-insurance-core-gl-ontology
+    affects:
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:constraint-execution-context
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    depends_on:
+      - feature:F0001
+      - feature:F0012
+    governed_by:
+      - adr:0011
+      - adr:0039
+      - adr:0045
+      - adr:0064
+      - adr:0066
+    notes:
+      - GL composes exact foundation versions. Missing limit inputs produce UNKNOWN for the requesting
+        assessment, not a universal commit failure. Carry constraint, profile and evidence obligations
+        with the package.
+      - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
+        stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
+        at formal plan.
+      - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
+        verification.
+      - Version GL predicate-to-projection mappings with the release; proposed HAS_LIMIT/HAS_FORM/HAS_TRIGGER
+        labels in data-model.md and the teaching examples do not establish runtime projections.
+  - status: planned
+    id: feature:F0015
+    path: planning-mds/features/F0015-extraction-profile-compiler
+    affects:
+      - capability:ontology-release-compatibility
+      - entity:ontology-release
+      - glossary_term:constraint-execution-context
+      - glossary_term:ontology-projection-mapping
+    depends_on:
+      - feature:F0001
+      - feature:F0005
+      - feature:F0011
+      - feature:F0012
+      - feature:F0013
+      - feature:F0014
+    governed_by:
+      - adr:0015
+      - adr:0016
+      - adr:0045
+      - adr:0060
+      - adr:0063
+      - adr:0065
+    notes:
+      - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
+        stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
+        at formal plan.
+      - Preserve the release reference to projection mappings in packaged artifacts; graph writing remains
+        the projection consumer's responsibility.
+      - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
+        verification.
+      - TEMPLATE compilation consumes F0011 contracts and F0012/F0013 vocabulary releases. Preserve constraint
+        context and evidence requirements; OPEN prompts exclude ontology under F0066.
+  - status: planned
+    id: feature:F0024
+    path: planning-mds/features/F0024-gl-vertical-slice
+    affects:
+      - entity:assessment-record
+      - entity:guideline-rule-version
+      - entity:ontology-release
+    depends_on:
+      - feature:F0001
+      - feature:F0013
+      - id: feature:F0065
+        confidence: 1.0
+        provenance: extracted
+    governed_by:
+      - adr:0005
+      - adr:0006
+      - adr:0010
+      - adr:0026
+      - adr:0045
+      - adr:0056
+      - adr:0060
+    notes:
+      - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
+        stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
+        at formal plan.
+      - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
+        verification.
+      - The GL slice consumes F0013 and F0065. The first stored assessment needs exact release, rule,
+        fact-version and evidence lineage; propagation tooling is separately phased.
+  - status: planned
+    id: feature:F0030
+    path: planning-mds/features/F0030-ontology-workbench
+    affects:
+      - capability:ontology-release-compatibility
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    depends_on:
+      - feature:F0001
+      - id: feature:F0012
+        confidence: 0.7
+        provenance: inferred
+    governed_by:
+      - adr:0011
+      - adr:0012
+      - adr:0045
+      - adr:0063
+    notes:
+      - Deferred work includes evidence-backed crosswalks and complete module packaging. Historical replay,
+        consumer compatibility and bounded conservativity are distinct. Crosswalk mapping is distinct
+        from F0066 source-phrase alignment.
+      - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
+        stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
+        at formal plan.
+      - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
+        verification.
+  - status: planned
+    id: feature:F0062
+    path: planning-mds/features/F0062-advanced-reasoners
+    affects:
+      - capability:ontology-release-compatibility
+      - glossary_term:constraint-execution-context
+    depends_on:
+      - feature:F0001
+      - id: feature:F0055
+        confidence: 0.7
+        provenance: inferred
+    governed_by:
+      - adr:0001
+      - adr:0002
+      - adr:0045
+    notes:
+      - Optional RDF/OWL checkers must report supported fragment, bounds and unsupported/undecided results.
+        PostgreSQL stays authoritative under ADR-0002; external reasoning stores are projections. Full
+        formal proofs are optional.
+      - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
+        stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
+        at formal plan.
+      - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
+        verification.
   - status: planned
     id: feature:F0065
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment

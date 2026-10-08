@@ -40,6 +40,10 @@ adrs:
   - id: adr:0012
     label: Flexible Authoring, Normalized Runtime
     path: planning-mds/architecture/decisions/ADR-0012-flexible-authoring-normalized-runtime.md
+    notes: Accepted authoring/runtime boundary remains unchanged. ADR-0045 proposes a scoped reconciliation
+      of the undefined OKF format with blueprint section 112; that clarification is not yet accepted.
+    related_nodes:
+      - adr:0045
   - id: adr:0013
     label: JSON Schema Is the Structural Contract
     path: planning-mds/architecture/decisions/ADR-0013-json-schema-is-the-structural-contract.md
@@ -141,6 +145,21 @@ adrs:
   - id: adr:0045
     label: Ontology Release Compatibility
     path: planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
+    notes: Proposed contract; architecture prerequisites and retrieval bindings only. Phase approvals
+      and runtime acceptance evidence remain pending. See ontology-planning-handoff.md before planning
+      F0012/F0013/F0015.
+    related_nodes:
+      - adr:0012
+      - capability:ontology-release-compatibility
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:constraint-execution-context
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
   - id: adr:0046
     label: Grounded Answer and Analytic Query Contract
     path: planning-mds/architecture/decisions/ADR-0046-grounded-answer-and-analytic-query-contract.md
@@ -490,6 +509,37 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:ontology-release-compatibility
+    label: Ontology release compatibility analysis
+    notes: Proposed contract and future tooling, not implemented. Historical reproducibility uses pinned
+      releases and exact inputs. Consumer compatibility also covers constraints, applicability, profiles
+      and evidence obligations. Bounded conservativity is one input; unsupported or undecided is not a
+      pass. F0012/F0013 settle contracts; F0030/F0062 add later tooling. First-assessment lineage is already
+      required by F0065/ADR-0026 and must not wait for these tools. See the handoff for formal plan prerequisites.
+    rationale:
+      - adr: adr:0045
+        section: Compatibility and impact gate
+        summary: Proposed release gate requires change classification, scoped impact, replay, migration
+          and rollback evidence.
+    related_nodes:
+      - adr:0026
+      - adr:0045
+      - entity:assessment-record
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:constraint-execution-context
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0015-extraction-profile-compiler/README.md
+      - planning-mds/features/F0030-ontology-workbench/README.md
+      - planning-mds/features/F0062-advanced-reasoners/README.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
   - id: capability:parse-once-content-artifact
     label: Parse-once content artifact
     notes: 'Target: Docling-Graph coordinates Docling conversion; Nebula publishes the immutable native
@@ -685,6 +735,7 @@ entities:
       - entity:audit-event
       - entity:canonical-fact-version
       - entity:guideline-rule-version
+      - entity:ontology-release
       - entity:principal
     related_nodes:
       - adr:0026
@@ -772,6 +823,7 @@ entities:
     related_entities:
       - entity:assessment-record
       - entity:audit-event
+      - entity:ontology-release
       - entity:principal
     related_nodes:
       - adr:0056
@@ -809,6 +861,79 @@ entities:
     source_docs:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:ontology-module-version
+    label: Ontology module version
+    notes: Proposed immutable revision of one authored module, represented by ontology_version in the
+      proposed data model. Locks content, authoring schema, supported semantics, constraints and dependency
+      declarations. Physical schema and ownership details remain F0012/F0013 Phase B decisions; no runtime
+      implementation is claimed.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Proposed contract distinguishes an authored module version from a composed release.
+    related_entities:
+      - entity:ontology-release
+      - entity:ontology-release-module
+    related_nodes:
+      - adr:0011
+      - adr:0045
+      - glossary_term:constraint-execution-context
+      - glossary_term:stable-term-iri
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+  - id: entity:ontology-release
+    label: Ontology release
+    notes: Proposed immutable composition of exact module versions with dependency locks and associated
+      profile/template/compiler/validation/projection-mapping artifact references. PostgreSQL remains
+      authoritative. Historical runs and assessments retain their original release; activation and rollback
+      govern future processing. Stable term identity alone does not freeze meaning. Phase B schema and
+      ADR-0045 acceptance remain pending.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Proposed composed-release identity preserves exact interpretation and assessment context.
+    related_entities:
+      - entity:assessment-record
+      - entity:guideline-rule-version
+      - entity:ontology-module-version
+      - entity:ontology-release-module
+      - entity:semantic-interpretation-run
+    related_nodes:
+      - adr:0002
+      - adr:0045
+      - capability:ontology-release-compatibility
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0015-extraction-profile-compiler/README.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: entity:ontology-release-module
+    label: Ontology release module membership
+    notes: Proposed exact release-to-module-version membership. A release selects one version per module;
+      dependencies resolve within that locked composition at exact versions and digests. Floating latest
+      dependencies cannot define a reproducible release. Physical persistence remains a Phase B decision.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Proposed membership record makes module composition and dependency locks explicit.
+    related_entities:
+      - entity:ontology-module-version
+      - entity:ontology-release
+    related_nodes:
+      - adr:0045
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
   - id: entity:outbox-event
     label: Outbox event
     notes: Transactional outbox row written with every canonical commit and consumed idempotently by projectors;
@@ -884,6 +1009,7 @@ entities:
     related_entities:
       - entity:assertion
       - entity:content-artifact
+      - entity:ontology-release
     related_nodes:
       - capability:semantic-interpretation-run
       - schema:interpretation-result
@@ -930,6 +1056,67 @@ entities:
     source_docs:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+glossary_terms:
+  - id: glossary_term:constraint-execution-context
+    label: Constraint execution context
+    notes: Proposed authoring metadata names lifecycle stage, consumer, applicability, severity/action
+      and asserted or inferred data basis, including the supported inference ruleset. Missing limit inputs
+      produce UNKNOWN for a requesting F0065 assessment; they are not a universal canonical-commit rejection.
+    rationale:
+      - adr: adr:0045
+        section: Semantics and constraint execution
+        summary: Inference, validation and consumer completeness require distinct execution contracts.
+    related_nodes:
+      - adr:0045
+      - adr:0056
+      - capability:ontology-release-compatibility
+      - entity:ontology-module-version
+    source_docs:
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: glossary_term:ontology-projection-mapping
+    label: Ontology projection mapping
+    notes: Proposed versioned release artifact mapping predicate IRIs to directed AGE edges or properties,
+      with endpoint identity, qualifiers, exact source lineage, ownership, time and explicit omissions.
+      Mapping changes require projection impact and rebuild analysis. Synthetic examples do not establish
+      an implemented exporter or graph writer; the production schema remains a F0012/F0013 decision.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Pin predicate-to-projection mapping versions and digests so impact analysis can identify
+          changed projections.
+    related_nodes:
+      - adr:0045
+      - capability:ontology-release-compatibility
+      - entity:ontology-release
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0015-extraction-profile-compiler/README.md
+  - id: glossary_term:stable-term-iri
+    label: Stable term IRI
+    notes: Proposed stable identity with deterministic namespace mapping. Labels may change and an IRI
+      is never reassigned, but meaning changes still need release classification and migration records.
+      Production namespace and mapping rules remain F0012 PRD decisions; example.invalid is illustrative
+      only.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Stable identity and explicit semantic-change classes must be specified together.
+    related_nodes:
+      - adr:0045
+      - entity:ontology-module-version
+      - entity:ontology-release
+    source_docs:
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
 policy_rules:
   - id: policy_rule:content-artifact-ingest
     label: content_artifact:ingest

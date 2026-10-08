@@ -3,9 +3,20 @@ name: Foundation ontology
 path: planning-mds/features/F0012-foundation-ontology
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
+affects:
+- entity:ontology-module-version
+- entity:ontology-release
+- entity:ontology-release-module
+- glossary_term:stable-term-iri
+- glossary_term:constraint-execution-context
+- glossary_term:ontology-projection-mapping
+- capability:ontology-release-compatibility
+notes:
+- Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD, stories,
+  assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending at formal plan.
+- Authoring contract precedes vocabulary content. Stable IRIs and meaning-change classes are paired; constraint stage/consumer/severity/data basis and missingness are explicit. Release records are proposed in data-model.md under ADR-0045.
+- Resolve blueprint sections 20/82 parents versus parent before authoring. The synthetic interchange examples illustrate proposed predicate-to-projection mappings, not a frozen schema or implemented compiler.
+- Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval verification.
 phase: v0.1A
 roadmap_section: Next
 roadmap_order: 11
@@ -17,5 +28,6 @@ depends_on:
 governed_by:
 - adr:0011
 - adr:0012
+- adr:0045
 - adr:0063
 - adr:0064

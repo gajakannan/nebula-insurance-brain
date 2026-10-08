@@ -68,6 +68,24 @@ node_bindings:
         - neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
       infra:
         - docker/local-inference-runbook.md
+  - id: capability:ontology-release-compatibility
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
+        - planning-mds/architecture/ontology-planning-handoff.md
+      examples:
+        - planning-mds/examples/ontology-interchange/README.md
+        - planning-mds/examples/ontology-interchange/assessment-shapes.ttl
+        - planning-mds/examples/ontology-interchange/expected-inferences.ttl
+        - planning-mds/examples/ontology-interchange/expected-results.yaml
+        - planning-mds/examples/ontology-interchange/facts.jsonld
+        - planning-mds/examples/ontology-interchange/facts.ttl
+        - planning-mds/examples/ontology-interchange/malformed-amount.ttl
+        - planning-mds/examples/ontology-interchange/missing-limit.ttl
+        - planning-mds/examples/ontology-interchange/ontology.ttl
+        - planning-mds/examples/ontology-interchange/ontology.yaml
+        - planning-mds/examples/ontology-interchange/shapes.ttl
+        - planning-mds/examples/ontology-release-contracts.md
   - id: capability:parse-once-content-artifact
     paths:
       ai:
@@ -105,3 +123,7 @@ node_bindings:
         - engine/packages/brain-persistence/src/brain_persistence/tenancy.py
       infra:
         - scripts/dev/reconcile_authx.py
+  - id: entity:ontology-release
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
