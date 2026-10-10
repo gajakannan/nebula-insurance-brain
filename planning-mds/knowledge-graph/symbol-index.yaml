@@ -1,12 +1,12 @@
 version: 0
-generated_at: '2026-10-08T05:12:40+00:00'
+generated_at: '2026-10-10T02:19:26+00:00'
 summary:
-  total_symbols: 495
+  total_symbols: 531
   by_language:
     python:
-      files: 67
-      parsed: 1
-      cached: 66
+      files: 70
+      parsed: 0
+      cached: 70
     typescript:
       files: 8
       parsed: 0
@@ -5650,6 +5650,629 @@ symbols:
   callers:
   - symbol:capability-runtime-roots-and-toolchain:health.get-health
   callees: []
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+  node: capability:semantic-example-validation
+  kind: function
+  name: build
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 133
+  signature: 'def build(data: dict)'
+  visibility: public
+  language: python
+  end_line: 158
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.main
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-projections-are-generated-from-records
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-typed-string-literals-break-completeness-shapes
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.jsonld-object
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.statements
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.turtle-object
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.integrity-interval
+  node: capability:semantic-example-validation
+  kind: function
+  name: integrity_interval
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 75
+  signature: 'def integrity_interval(valid_time: dict)'
+  visibility: public
+  language: python
+  end_line: 85
+  callers:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.stamp
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.jsonld-object
+  node: capability:semantic-example-validation
+  kind: function
+  name: _jsonld_object
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 124
+  signature: 'def _jsonld_object(value: dict)'
+  visibility: private
+  language: python
+  end_line: 130
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+  callees: []
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.main
+  node: capability:semantic-example-validation
+  kind: function
+  name: main
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 179
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 199
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-drift-is-reported
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.refresh-digests
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read
+  node: capability:semantic-example-validation
+  kind: function
+  name: read
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 88
+  signature: 'def read(fact: dict, valid: datetime, known: datetime)'
+  visibility: public
+  language: python
+  end_line: 89
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.select-facts
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read-valid
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.recorded-at
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read-valid
+  node: capability:semantic-example-validation
+  kind: function
+  name: read_valid
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 51
+  signature: 'def read_valid(valid_time: dict, valid: datetime)'
+  visibility: public
+  language: python
+  end_line: 72
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-valid-time-readings-follow-adr-0064
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.stamp
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.recorded-at
+  node: capability:semantic-example-validation
+  kind: function
+  name: recorded_at
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 47
+  signature: 'def recorded_at(fact: dict, known: datetime)'
+  visibility: public
+  language: python
+  end_line: 48
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.stamp
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.refresh-digests
+  node: capability:semantic-example-validation
+  kind: function
+  name: refresh_digests
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 161
+  signature: 'def refresh_digests(folder: Path)'
+  visibility: public
+  language: python
+  end_line: 176
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.main
+  callees: []
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.select-facts
+  node: capability:semantic-example-validation
+  kind: function
+  name: select_facts
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 92
+  signature: 'def select_facts(data: dict)'
+  visibility: public
+  language: python
+  end_line: 96
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.statements
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.stamp
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.stamp
+  node: capability:semantic-example-validation
+  kind: function
+  name: stamp
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 43
+  signature: 'def stamp(text: str)'
+  visibility: public
+  language: python
+  end_line: 44
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.integrity-interval
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read-valid
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.recorded-at
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.select-facts
+  - symbol:capability-semantic-example-validation:test-semantic-examples.at
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+  callees: []
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.statements
+  node: capability:semantic-example-validation
+  kind: function
+  name: _statements
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 99
+  signature: 'def _statements(data: dict)'
+  visibility: private
+  language: python
+  end_line: 113
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.select-facts
+- id: symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.turtle-object
+  node: capability:semantic-example-validation
+  kind: function
+  name: _turtle_object
+  file: scripts/validation/build_commercial_pc_snapshot.py
+  line: 116
+  signature: 'def _turtle_object(value: dict)'
+  visibility: private
+  language: python
+  end_line: 121
+  callers:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+  callees: []
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.at
+  node: capability:semantic-example-validation
+  kind: function
+  name: _at
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 137
+  signature: 'def _at(day: str)'
+  visibility: private
+  language: python
+  end_line: 138
+  is_test: true
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-valid-time-readings-follow-adr-0064
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.stamp
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.load
+  node: capability:semantic-example-validation
+  kind: function
+  name: _load
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 81
+  signature: 'def _load(name: str)'
+  visibility: private
+  language: python
+  end_line: 85
+  is_test: true
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.mutate-records
+  node: capability:semantic-example-validation
+  kind: function
+  name: _mutate_records
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 172
+  signature: def _mutate_records(root, change)
+  visibility: private
+  language: python
+  end_line: 177
+  is_test: true
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-document-date-must-be-stated-in-the-source
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-policy-year-cannot-be-assumed-for-eternal-properties
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-unknown-end-requires-an-undated-ending-reading
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.pc-root
+  node: capability:semantic-example-validation
+  kind: function
+  name: pc_root
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 163
+  signature: def pc_root(tmp_path)
+  visibility: public
+  language: python
+  end_line: 169
+  is_test: true
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.records
+  node: capability:semantic-example-validation
+  kind: function
+  name: records
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 17
+  signature: def records()
+  visibility: public
+  language: python
+  end_line: 18
+  is_test: true
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-fixture-copy-is-clean
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_commercial_fixture_copy_is_clean
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 180
+  signature: def test_commercial_fixture_copy_is_clean(pc_root)
+  visibility: public
+  language: python
+  end_line: 181
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-rdf-expectations-hold
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_commercial_rdf_expectations_hold
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 115
+  signature: def test_commercial_rdf_expectations_hold()
+  visibility: public
+  language: python
+  end_line: 119
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-rdf.check-bundle
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-drift-is-reported
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_commercial_snapshot_drift_is_reported
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 102
+  signature: def test_commercial_snapshot_drift_is_reported(tmp_path, monkeypatch,
+    capsys)
+  visibility: public
+  language: python
+  end_line: 112
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.main
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.main
+  - symbol:capability-semantic-example-validation:validate-semantic-rdf.main
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-projections-are-generated-from-records
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_commercial_snapshot_projections_are_generated_from_records
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 93
+  signature: def test_commercial_snapshot_projections_are_generated_from_records()
+  visibility: public
+  language: python
+  end_line: 99
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-dangling-assessment-lineage-is-rejected
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_dangling_assessment_lineage_is_rejected
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 35
+  signature: def test_dangling_assessment_lineage_is_rejected(records, field, value)
+  visibility: public
+  language: python
+  end_line: 37
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.validate-gl-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-document-date-must-be-stated-in-the-source
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_document_date_must_be_stated_in_the_source
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 199
+  signature: def test_document_date_must_be_stated_in_the_source(pc_root)
+  visibility: public
+  language: python
+  end_line: 204
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.mutate-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-duplicate-identity-is-rejected
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_duplicate_identity_is_rejected
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 40
+  signature: def test_duplicate_identity_is_rejected(records)
+  visibility: public
+  language: python
+  end_line: 42
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.validate-gl-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-malformed-or-misleading-records-fail-schema
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_malformed_or_misleading_records_fail_schema
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 46
+  signature: def test_malformed_or_misleading_records_fail_schema(records, mutation)
+  visibility: public
+  language: python
+  end_line: 59
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.validate-gl-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-policy-year-cannot-be-assumed-for-eternal-properties
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_policy_year_cannot_be_assumed_for_eternal_properties
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 184
+  signature: def test_policy_year_cannot_be_assumed_for_eternal_properties(pc_root)
+  visibility: public
+  language: python
+  end_line: 190
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.mutate-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-quoted-teaching-evidence-must-exist
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_quoted_teaching_evidence_must_exist
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 69
+  signature: def test_quoted_teaching_evidence_must_exist(records)
+  visibility: public
+  language: python
+  end_line: 71
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.validate-gl-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-repository-example-and-markdown-links-resolve
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_repository_example_and_markdown_links_resolve
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 26
+  signature: def test_repository_example_and_markdown_links_resolve()
+  visibility: public
+  language: python
+  end_line: 27
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-examples
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-source-and-provenance-links-are-not-silently-accepted
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_source_and_provenance_links_are_not_silently_accepted
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 62
+  signature: def test_source_and_provenance_links_are_not_silently_accepted(records)
+  visibility: public
+  language: python
+  end_line: 66
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.validate-gl-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-structure-check-does-not-claim-to-execute-reasoning
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_structure_check_does_not_claim_to_execute_reasoning
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 74
+  signature: def test_structure_check_does_not_claim_to_execute_reasoning(records)
+  visibility: public
+  language: python
+  end_line: 78
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.validate-gl-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-typed-string-literals-break-completeness-shapes
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_typed_string_literals_break_completeness_shapes
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 122
+  signature: def test_typed_string_literals_break_completeness_shapes(tmp_path, monkeypatch)
+  visibility: public
+  language: python
+  end_line: 134
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+  - symbol:capability-semantic-example-validation:validate-semantic-rdf.check-bundle
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-unknown-end-requires-an-undated-ending-reading
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_unknown_end_requires_an_undated_ending_reading
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 193
+  signature: def test_unknown_end_requires_an_undated_ending_reading(pc_root)
+  visibility: public
+  language: python
+  end_line: 196
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.mutate-records
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-valid-time-readings-follow-adr-0064
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_valid_time_readings_follow_adr_0064
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 158
+  signature: def test_valid_time_readings_follow_adr_0064(valid_time, day, expected)
+  visibility: public
+  language: python
+  end_line: 159
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read-valid
+  - symbol:capability-semantic-example-validation:test-semantic-examples.at
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.validate-gl-records
+  node: capability:semantic-example-validation
+  kind: function
+  name: validate_gl_records
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 21
+  signature: def validate_gl_records(records)
+  visibility: public
+  language: python
+  end_line: 23
+  is_test: true
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-dangling-assessment-lineage-is-rejected
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-duplicate-identity-is-rejected
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-malformed-or-misleading-records-fail-schema
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-quoted-teaching-evidence-must-exist
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-source-and-provenance-links-are-not-silently-accepted
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-structure-check-does-not-claim-to-execute-reasoning
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-records
+- id: symbol:capability-semantic-example-validation:validate-semantic-examples.check-local-link
+  node: capability:semantic-example-validation
+  kind: function
+  name: check_local_link
+  file: scripts/validation/validate_semantic_examples.py
+  line: 49
+  signature: 'def check_local_link(root: Path, source: Path, link: str)'
+  visibility: public
+  language: python
+  end_line: 64
+  callers:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-examples
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-records
+  callees: []
+- id: symbol:capability-semantic-example-validation:validate-semantic-examples.check-timestamp
+  node: capability:semantic-example-validation
+  kind: function
+  name: check_timestamp
+  file: scripts/validation/validate_semantic_examples.py
+  line: 27
+  signature: 'def check_timestamp(value: object)'
+  visibility: public
+  language: python
+  end_line: 34
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-example-validation:validate-semantic-examples.main
+  node: capability:semantic-example-validation
+  kind: function
+  name: main
+  file: scripts/validation/validate_semantic_examples.py
+  line: 274
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 288
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-drift-is-reported
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-examples
+- id: symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+  node: capability:semantic-example-validation
+  kind: function
+  name: validate_commercial_example
+  file: scripts/validation/validate_semantic_examples.py
+  line: 121
+  signature: 'def validate_commercial_example(root: Path)'
+  visibility: public
+  language: python
+  end_line: 271
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.mutate-records
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-fixture-copy-is-clean
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-examples
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.integrity-interval
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.read
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.select-facts
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.stamp
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.check-local-link
+- id: symbol:capability-semantic-example-validation:validate-semantic-examples.validate-examples
+  node: capability:semantic-example-validation
+  kind: function
+  name: validate_examples
+  file: scripts/validation/validate_semantic_examples.py
+  line: 106
+  signature: 'def validate_examples(root: Path)'
+  visibility: public
+  language: python
+  end_line: 118
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-repository-example-and-markdown-links-resolve
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.main
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.check-local-link
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-records
+- id: symbol:capability-semantic-example-validation:validate-semantic-examples.validate-records
+  node: capability:semantic-example-validation
+  kind: function
+  name: validate_records
+  file: scripts/validation/validate_semantic_examples.py
+  line: 67
+  signature: 'def validate_records(root: Path, data: dict, schema: dict)'
+  visibility: public
+  language: python
+  end_line: 103
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.validate-gl-records
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-examples
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-examples.check-local-link
+- id: symbol:capability-semantic-example-validation:validate-semantic-rdf.check-bundle
+  node: capability:semantic-example-validation
+  kind: function
+  name: check_bundle
+  file: scripts/validation/validate_semantic_rdf.py
+  line: 25
+  signature: 'def check_bundle(folder: Path)'
+  visibility: public
+  language: python
+  end_line: 61
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-rdf-expectations-hold
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-typed-string-literals-break-completeness-shapes
+  - symbol:capability-semantic-example-validation:validate-semantic-rdf.main
+  callees: []
+- id: symbol:capability-semantic-example-validation:validate-semantic-rdf.main
+  node: capability:semantic-example-validation
+  kind: function
+  name: main
+  file: scripts/validation/validate_semantic_rdf.py
+  line: 64
+  signature: def main()
+  visibility: public
+  language: python
+  end_line: 85
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-drift-is-reported
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-rdf.check-bundle
 - id: symbol:capability-semantic-interpretation-run:context-guard.check
   node: capability:semantic-interpretation-run
   kind: method
@@ -7234,87 +7857,3 @@ symbols:
   callers: []
   callees:
   - symbol:capability-structural-tenancy-and-entity-identity:tenancy.require-aware
-- id: symbol:schema-commercial-pc-example:validate-semantic-examples.check-local-link
-  node: schema:commercial-pc-example
-  kind: function
-  name: check_local_link
-  file: scripts/validation/validate_semantic_examples.py
-  line: 45
-  signature: 'def check_local_link(root: Path, source: Path, link: str)'
-  visibility: public
-  language: python
-  end_line: 60
-  callers:
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate-commercial-example
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate-records
-  callees: []
-- id: symbol:schema-commercial-pc-example:validate-semantic-examples.check-timestamp
-  node: schema:commercial-pc-example
-  kind: function
-  name: check_timestamp
-  file: scripts/validation/validate_semantic_examples.py
-  line: 23
-  signature: 'def check_timestamp(value: object)'
-  visibility: public
-  language: python
-  end_line: 30
-  callers: []
-  callees: []
-- id: symbol:schema-commercial-pc-example:validate-semantic-examples.main
-  node: schema:commercial-pc-example
-  kind: function
-  name: main
-  file: scripts/validation/validate_semantic_examples.py
-  line: 248
-  signature: def main()
-  visibility: public
-  language: python
-  end_line: 262
-  callers: []
-  callees:
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate
-- id: symbol:schema-commercial-pc-example:validate-semantic-examples.validate
-  node: schema:commercial-pc-example
-  kind: function
-  name: validate
-  file: scripts/validation/validate_semantic_examples.py
-  line: 102
-  signature: 'def validate(root: Path)'
-  visibility: public
-  language: python
-  end_line: 114
-  callers:
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.main
-  callees:
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.check-local-link
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate-commercial-example
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate-records
-- id: symbol:schema-commercial-pc-example:validate-semantic-examples.validate-commercial-example
-  node: schema:commercial-pc-example
-  kind: function
-  name: validate_commercial_example
-  file: scripts/validation/validate_semantic_examples.py
-  line: 117
-  signature: 'def validate_commercial_example(root: Path)'
-  visibility: public
-  language: python
-  end_line: 245
-  callers:
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate
-  callees:
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.check-local-link
-- id: symbol:schema-commercial-pc-example:validate-semantic-examples.validate-records
-  node: schema:commercial-pc-example
-  kind: function
-  name: validate_records
-  file: scripts/validation/validate_semantic_examples.py
-  line: 63
-  signature: 'def validate_records(root: Path, data: dict, schema: dict)'
-  visibility: public
-  language: python
-  end_line: 99
-  callers:
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.validate
-  callees:
-  - symbol:schema-commercial-pc-example:validate-semantic-examples.check-local-link

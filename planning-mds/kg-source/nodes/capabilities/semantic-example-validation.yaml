@@ -1,0 +1,17 @@
+id: capability:semantic-example-validation
+label: Teaching-example validation
+notes: >-
+  Planning tooling, not runtime. validate_semantic_examples.py checks both teaching bundles
+  (EX-GL-001 and Cedar Bridge) for schema, references, evidence quotes, lineage and fixture digests.
+  build_commercial_pc_snapshot.py generates the Cedar Bridge snapshot.ttl/.jsonld/index from
+  records.json, and the structural check fails when they drift. validate_semantic_rdf.py executes the
+  Cedar Bridge RDF/OWL-RL/SHACL/query expectations; it skips locally without the optional
+  semantic-rdf tools and is strict in CI. Gotcha that motivated the generator change: rdflib and
+  pySHACL compare literal terms, so sh:hasValue "X" does not match "X"^^xsd:string even though RDF 1.1
+  treats them as one value; generated snapshots emit strings as simple literals.
+source_docs:
+- planning-mds/architecture/commercial-pc-example-handoff.md
+- planning-mds/architecture/ontology-planning-handoff.md
+related_nodes:
+- schema:semantic-example
+- schema:commercial-pc-example

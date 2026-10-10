@@ -1,6 +1,17 @@
 status: synthetic-authored-expectations
 example_id: EX-PC-001
-semantic_execution: pending; optional RDF tools could not be installed because of DNS failure
+semantic_execution:
+  status: observed
+  observed_on: '2026-10-09'
+  executor: scripts/validation/validate_semantic_rdf.py (lifecycle gate semantic_rdf; CI runs it with --require)
+  environments: [Python 3.12.13, Python 3.14.4]
+  tools: {rdflib: 7.1.4, pyshacl: 0.30.1, owlrl: 7.1.4}
+  result: every isomorphism, inference, SHACL and query expectation below matched
+  history: >-
+    The first execution found the snapshot failing gl-completeness.ttl and property-completeness.ttl.
+    The generated snapshot typed strings as xsd:string, and rdflib/pySHACL do not match those against
+    the shapes' simple-literal sh:hasValue terms. The generator now emits simple literals; the
+    authored expectations were right and are unchanged.
 scope: document-to-graph teaching fixtures; no Nebula runtime, insurance eligibility or claim determination
 queries:
 - file: queries/account-program.rq
@@ -12,6 +23,9 @@ queries:
 - file: queries/umbrella-schedule.rq
   rows: 2
   boundary: BOP omitted from the supplied schedule; actual attachment remains undetermined
+- file: queries/umbrella-schedule-review.rq
+  rows: 1
+  boundary: Workshop's BOP liability is a review prompt (EX-PC-013), not a finding that the umbrella excludes it
 shacl:
 - {shape: shapes.ttl, data: snapshot.ttl, conforms: true}
 - {shape: gl-completeness.ttl, data: snapshot.ttl, conforms: true}
@@ -22,6 +36,14 @@ shacl:
 - {shape: shapes.ttl, data: boundaries/missing-location.ttl, conforms: true}
 - {shape: property-completeness.ttl, data: boundaries/missing-location.ttl, conforms: false}
 timeline:
-- {case: EX-PC-006-A, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-08T00:00:00Z', fact: EX-PC-F-BPP-ORIGINAL, amount: '150000.00'}
-- {case: EX-PC-006-B, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', fact: EX-PC-F-BPP-REVISED, amount: '200000.00'}
-- {case: EX-PC-006-C, valid_as_of: '2026-06-30T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', fact: EX-PC-F-BPP-RETAINED, amount: '150000.00'}
+# result: VALUE (holds), UNKNOWN (ADR-0064 unknown start or end), ABSENT (does not hold or not yet recorded).
+- {case: EX-PC-006-A, slot: EX-PC-SLOT-BPP-ORIGINAL, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-08T00:00:00Z', result: VALUE, fact: EX-PC-F-BPP-ORIGINAL, value: '150000.00'}
+- {case: EX-PC-006-B, slot: EX-PC-SLOT-BPP-ORIGINAL, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', result: VALUE, fact: EX-PC-F-BPP-REVISED, value: '200000.00'}
+- {case: EX-PC-006-C, slot: EX-PC-SLOT-BPP-ORIGINAL, valid_as_of: '2026-06-30T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', result: VALUE, fact: EX-PC-F-BPP-RETAINED, value: '150000.00'}
+- {case: EX-PC-006-D, slot: EX-PC-SLOT-BPP-ORIGINAL, valid_as_of: '2025-12-31T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', result: ABSENT}
+- {case: EX-PC-014-A, slot: EX-PC-SLOT-004, valid_as_of: '2026-03-01T00:00:00Z', known_as_of: '2026-04-01T00:00:00Z', result: VALUE, fact: EX-PC-F-004}
+- {case: EX-PC-014-B, slot: EX-PC-SLOT-004, valid_as_of: '2025-06-01T00:00:00Z', known_as_of: '2026-04-01T00:00:00Z', result: UNKNOWN, fact: EX-PC-F-004}
+- {case: EX-PC-014-C, slot: EX-PC-SLOT-004, valid_as_of: '2026-03-01T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', result: UNKNOWN, fact: EX-PC-F-YARD-ENDED}
+- {case: EX-PC-014-D, slot: EX-PC-SLOT-004, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', result: ABSENT}
+- {case: EX-PC-010-A, slot: EX-PC-SLOT-126, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-06-21T00:00:00Z', result: ABSENT}
+- {case: EX-PC-010-B, slot: EX-PC-SLOT-126, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-11T00:00:00Z', result: VALUE, fact: EX-PC-F-126}

@@ -111,7 +111,10 @@ def test_bad_args_raise_tool_error(bundle):
 def test_result_is_minified(bundle):
     payload = mcp_server.build_context({"target": FEATURE, "fields": "ids"}, bundle)
     minified = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-    assert "\n" not in minified and ", " not in minified
+    # nebula-insurance-brain: check separators structurally. The framework test
+    # asserted no ", " anywhere, which fails when node notes contain ", " in prose.
+    assert "\n" not in minified
+    assert minified == json.dumps(json.loads(minified), ensure_ascii=False, separators=(",", ":"))
     # CLI keeps indent=2 (byte-different) but parses to the same dict
     cli_bytes = json.dumps(_run_cli("lookup.py", FEATURE, "--fields", "ids"), indent=2)
     assert minified != cli_bytes

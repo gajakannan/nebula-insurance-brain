@@ -132,6 +132,7 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 ### Account
 **Type:** Entity
 **Definition:** The business entity seeking or holding insurance coverage; the root of Entity 360 (70, 86)
+**Open decision:** party versus grouping of several legal organizations, and what an account-scoped grant reaches; see [BLUEPRINT section 4.8](../BLUEPRINT.md#48-open-decisions)
 
 ### Insured
 **Type:** Entity
@@ -166,21 +167,6 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 **Definition:** The retained amount per claim or occurrence, recorded with its basis where present in the policy (86, 107.3)
 
 ## Terms
-
-### Commercial P&C teaching refinements (proposed)
-
-The [Cedar Bridge walkthrough](../examples/commercial-pc-account/README.md) gives these concepts worked and boundary cases. Its account grouping and role assignment are draft refinements for F0012/F0013, not accepted runtime schema changes. The existing Account/Insured definitions above remain the planning baseline to reconcile in their PRDs.
-
-| Term | Example meaning and boundary | Worked/boundary case | Owner |
-|---|---|---|---|
-| Scoped insurance party role | A party acts as named insured, broker, carrier, MGA or underwriter in a specific account/submission/policy-term context; this is not an access grant | [EX-PC-001/011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0012/F0013; F0002 owns authorization |
-| Broker | Organization in an account-servicing or policy-placement role; shared broker does not merge accounts or permissions | [EX-PC-001](../examples/commercial-pc-account/cases.md#ex-pc-001--account-versus-insured) | F0012/F0013 |
-| Carrier | Organization identified as insurer for a particular policy term; distinguish it from the MGA that handled the submission | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0013 |
-| MGA and underwriter | A submission-handling organization and a person acting in a scoped underwriting role; the fixture establishes no delegated authority or authenticated principal | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0012/F0013 |
-| Insurance product composition | Product/package classification differs from its coverage lines; a BOP may package property and liability while standalone GL reuses common liability concepts | [EX-PC-002](../examples/commercial-pc-account/cases.md#ex-pc-002--package-versus-coverage) | F0012/F0013 contract; additional LOB runtime ownership unassigned |
-| Qualified monetary provision | Limit or deductible with coverage, basis, currency and applicable location/term context; it is not an account-wide total | [EX-PC-004](../examples/commercial-pc-account/cases.md#ex-pc-004--money-needs-context) | F0013, ADR-0039; F0065 for GL comparison |
-| Scheduled underlying term | Explicit reference from an umbrella's supplied schedule to an exact underlying policy term; not a claim attachment or exhaustion result | [EX-PC-007](../examples/commercial-pc-account/cases.md#ex-pc-007--underlying-schedule-is-not-attachment) | F0012 relation contract; umbrella runtime ownership unassigned |
-| Requested line | A source request for quotations/coverage, which does not prove an issued policy or global absence of coverage | [EX-PC-005](../examples/commercial-pc-account/cases.md#ex-pc-005--requested-is-not-issued) | F0014/F0016, ADR-0065 |
 
 ### Valid Time
 **Type:** Term
@@ -274,6 +260,22 @@ These planning definitions are governed by [ADR-0045](../architecture/decisions/
 | Conservative extension check | Analysis of whether an extension changes conclusions over a specified existing vocabulary within a declared logic and scope | [EX-ONT-003](../examples/ontology-release-contracts.md#reproducibility-and-compatibility): bounded success is not unrestricted proof or complete compatibility | ADR-0045; optional tooling F0030/F0062 |
 | Ontology projection mapping | Versioned rule mapping a predicate to a graph edge or property, retaining endpoint identity, qualifiers, exact source lineage, ownership and time, or explicitly omitting it | [EX-INTEROP-001](../examples/ontology-interchange/README.md#evidence-time-and-projection-boundaries): hasLimit maps to HAS_LIMIT; the inferred inverse is explicitly omitted | F0012/F0013 and projection consumer; proposed ADR-0045 |
 
+## Commercial P&C teaching refinements (proposed)
+
+The [Cedar Bridge walkthrough](../examples/commercial-pc-account/README.md) gives these concepts worked and boundary cases. Its account grouping and role assignment are draft refinements for F0012/F0013, not accepted runtime schema changes. The existing Account/Insured definitions above remain the planning baseline; the account question is an open decision in [BLUEPRINT section 4.8](../BLUEPRINT.md#48-open-decisions).
+
+| Term | Example meaning and boundary | Worked/boundary case | Owner |
+|---|---|---|---|
+| Scoped insurance party role | A party acts as named insured, broker, carrier, MGA or underwriter in a specific account/submission/policy-term context; this is not an access grant | [EX-PC-001/011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0012/F0013; F0002 owns authorization |
+| Broker | Organization in an account-servicing or policy-placement role; shared broker does not merge accounts or permissions | [EX-PC-001](../examples/commercial-pc-account/cases.md#ex-pc-001--account-versus-insured) | F0012/F0013 |
+| Carrier | Organization identified as insurer for a particular policy term; distinguish it from the MGA that handled the submission | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0013 |
+| MGA and underwriter | A submission-handling organization and a person acting in a scoped underwriting role; the fixture establishes no delegated authority or authenticated principal | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0012/F0013 |
+| Insurance product composition | Product/package classification differs from its coverage lines; a BOP may package property and liability while standalone GL reuses common liability concepts | [EX-PC-002](../examples/commercial-pc-account/cases.md#ex-pc-002--package-versus-coverage) | F0012/F0013 contract; additional LOB runtime ownership unassigned |
+| Qualified monetary provision | Limit or deductible with coverage, basis, currency and applicable location/term context; it is not an account-wide total | [EX-PC-004](../examples/commercial-pc-account/cases.md#ex-pc-004--money-needs-context) | F0013, ADR-0039; F0065 for GL comparison |
+| Scheduled underlying term | Explicit reference from an umbrella's supplied schedule to an exact underlying policy term; not a claim attachment or exhaustion result | [EX-PC-007](../examples/commercial-pc-account/cases.md#ex-pc-007--underlying-schedule-is-not-attachment) | F0012 relation contract; umbrella runtime ownership unassigned |
+| Requested line | A source request for quotations/coverage, which does not prove an issued policy or global absence of coverage | [EX-PC-005](../examples/commercial-pc-account/cases.md#ex-pc-005--requested-is-not-issued) | F0014/F0016, ADR-0065 |
+| Unscheduled primary liability | A named insured's primary liability term that the umbrella's supplied schedule omits; a prompt for underwriter review, never a coverage conclusion | [EX-PC-013](../examples/commercial-pc-account/cases.md#ex-pc-013--an-unscheduled-primary-is-a-review-prompt) | F0012 relation contract; umbrella runtime ownership unassigned |
+
 ## F0002 identity and authorization refinements (proposed design)
 
 These definitions refine the existing Tenant/Workspace/Knowledge Base/Principal terms for the approved F0002 requirements. Runtime proof and Phase B approval remain pending. Contract: [AuthX v1 schema](../schemas/authx-kernel.schema.json), [assembly plan](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md); worked and boundary examples: [EX-AUTHX](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md).
@@ -318,7 +320,7 @@ These definitions come from the 2026-09-25 architecture amendments, which were i
 | Document time context | A document's own date and its source, the periods and calendars it defines, its narrative anchors, and its time-of-day/time-zone conventions; never upload or receipt time | EX-SEM-003b: "as of inception" waits without the policy period | F0004/F0016 |
 | Resolution grade | `A` absolute, `B` anchored, `C` unanchored; only `A`/`B` starts may close a predecessor in a single-valued FactSlot | A grade-C successor opens review instead of closing | F0008/F0019 |
 | Valid-time precision | The granularity stored on each valid-time bound, with values truncated to it | "July 2026" is month precision, not July 1 | F0008 |
-| Unknown end | `valid_to_state = UNKNOWN` with `attested_to`: the fact ended, but the source gives no date; distinct from an open end | EX-SEM-004: "no longer on the account" | F0008 |
+| Unknown end | `valid_to_state = UNKNOWN` with `attested_to`: the fact ended, but the source gives no date; distinct from an open end | EX-SEM-004: "no longer on the account"; [EX-PC-014](../examples/commercial-pc-account/cases.md#ex-pc-014--unknown-start-and-unknown-end): the yard | F0008 |
 | Temporal kind | A property's declared `STATE`, `EVENT`, or `ETERNAL`, which normalizes writes and reads | A loss occurrence is an `EVENT`; a limit is a `STATE` | F0012/F0013 |
 | Admission check | A server-side structural check on interpretation output before persistence: the quote is in the block, names are in their quote, time words are in their quote; offsets are computed by the server | EX-SEM-005b: a fabricated quote is dropped | F0006/F0016 |
 | Interpretation drop | A persisted record of a rejected, malformed, truncated, or uninterpreted item with its reason code; drops make a run `PARTIAL` and feed `NOT_PROCESSED` | `QUOTE_NOT_IN_SOURCE`, `BLOCK_UNINTERPRETED` | F0016/F0022 |

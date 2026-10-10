@@ -199,6 +199,85 @@ def _py_signature(node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
     return f"{prefix} {node.name}({args})"
 
 
+def _py_module(rel: str) -> str:
+    """Dotted import path for a repo-relative file: after the last `src/`, else from the repo root."""
+    parts = rel.removesuffix(".py").split("/")
+    if "src" in parts:
+        parts = parts[len(parts) - parts[::-1].index("src"):]
+    if parts and parts[-1] == "__init__":
+        parts = parts[:-1]
+    return ".".join(parts)
+
+
+def _module_match(imported: str, modules: dict[str, dict[str, set[str]]]) -> str | None:
+    """Bound module for an imported dotted path (exact, or the bound path ends with it)."""
+    if imported in modules:
+        return imported
+    hits = sorted(m for m in modules if m.endswith("." + imported))
+    return hits[0] if len(hits) == 1 else None
+
+
+def _resolved_bound_calls(
+    tree: ast.Module, own_module: str, modules: dict[str, dict[str, set[str]]]
+) -> list[tuple[int, str, str | None]]:
+    """(line, target name, target container) for calls that imports resolve to bound symbols."""
+    module_aliases: dict[str, str] = {}
+    symbol_aliases: dict[str, tuple[str, str]] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.asname:
+                    module_aliases[alias.asname] = alias.name
+                else:
+                    head = alias.name.split(".")[0]
+                    module_aliases[head] = head
+        elif isinstance(node, ast.ImportFrom):
+            base = node.module or ""
+            if node.level:
+                package = own_module.split(".")[: -node.level] if own_module else []
+                base = ".".join(package + ([base] if base else []))
+            for alias in node.names:
+                bind = alias.asname or alias.name
+                as_module = _module_match(f"{base}.{alias.name}" if base else alias.name, modules)
+                if as_module:
+                    module_aliases[bind] = as_module
+                    continue
+                source = _module_match(base, modules) if base else None
+                if source and alias.name in modules[source]:
+                    symbol_aliases[bind] = (source, alias.name)
+
+    def dotted(expr: ast.expr) -> str | None:
+        if isinstance(expr, ast.Name):
+            return expr.id
+        if isinstance(expr, ast.Attribute):
+            head = dotted(expr.value)
+            return f"{head}.{expr.attr}" if head else None
+        return None
+
+    found: list[tuple[int, str, str | None]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        line = getattr(node, "lineno", 0) or 0
+        func = node.func
+        if isinstance(func, ast.Name) and func.id in symbol_aliases:
+            found.append((line, symbol_aliases[func.id][1], None))
+        elif isinstance(func, ast.Attribute):
+            receiver = dotted(func.value)
+            if receiver is None:
+                continue
+            head, _, rest = receiver.partition(".")
+            if head in symbol_aliases and not rest:
+                module, cls = symbol_aliases[head]
+                if func.attr in modules[module].get(cls, set()):
+                    found.append((line, func.attr, cls))
+            elif head in module_aliases:
+                module = _module_match(".".join(filter(None, [module_aliases[head], rest])), modules)
+                if module and func.attr in modules[module]:
+                    found.append((line, func.attr, None))
+    return found
+
+
 class PythonAstExtractor(BaseExtractor):
     language = "python"
     # Forward-compat seam for product opt-in. Per memo §7 the default is
@@ -240,28 +319,36 @@ class PythonAstExtractor(BaseExtractor):
 
             self._walk(tree, rel, node_id, records)
 
-        # Compilation-root walk for the sidecar. Best-effort name-matching
-        # only — Python AST has no semantic resolution, so we record every
-        # bare-name Call from unbound files; the orchestrator filters at
-        # aggregation time to entries that resolve to a bound symbol.
-        # Default compilation_roots is empty so this branch is a no-op
-        # unless a product opted in.
-        if self.compilation_roots and files:
-            bound_rels = {p.relative_to(REPO_ROOT).as_posix() for p in files}
-            bound_names: set[str] = set()
-            for rec in records:
-                bound_names.add(rec.name)
-            self._collect_sidecar(bound_rels, bound_names)
-
-        self.last_sidecar_authoritative = self.supports_sidecar
+        # nebula-insurance-brain: the sidecar walk moved to collect_sidecar(),
+        # which the orchestrator calls with cached + parsed records. Collecting
+        # here saw only cache misses, so the output depended on cache state.
         return records
 
-    def _collect_sidecar(
-        self, bound_rels: set[str], bound_names: set[str]
-    ) -> None:
-        # Skip well-known noise directories so a product opting into
-        # --compilation-root scripts/ doesn't drown reviewers in
-        # site-packages-style entries.
+    def collect_sidecar(self, bound_records: list[SymbolRecord]) -> None:
+        """Record calls from unbound files under compilation_roots into bound symbols.
+
+        nebula-insurance-brain patch (upstream candidate): runs on every
+        invocation with the full bound record set (cached and parsed), so the
+        result no longer depends on which files missed the cache. A call is
+        recorded only when the caller's imports resolve it to a bound module,
+        function, or class: `f()` for an imported bound function or class,
+        `mod.f()` for an imported bound module, `Cls.m()` for an imported bound
+        class. Calls on local variables (`repo.get()`) need type information and
+        are skipped rather than matched by bare name, which matched every
+        `dict.get` to a bound `get`.
+        """
+        self.last_sidecar = []
+        self.last_sidecar_authoritative = False
+        if not self.compilation_roots or not bound_records:
+            return
+        bound_rels = {rec.file for rec in bound_records}
+        modules: dict[str, dict[str, set[str]]] = {}
+        for rec in bound_records:
+            entry = modules.setdefault(_py_module(rec.file), {})
+            if rec.container is None:
+                entry.setdefault(rec.name, set())
+            elif rec.kind == "method":
+                entry.setdefault(rec.container, set()).add(rec.name)
         skip_dirs = {
             "node_modules", "dist", "bin", "obj", ".kg-state",
             "__pycache__", ".venv", "venv", ".tox", ".mypy_cache",
@@ -270,46 +357,28 @@ class PythonAstExtractor(BaseExtractor):
         for root in self.compilation_roots:
             root_path = REPO_ROOT / root
             if not root_path.is_dir():
-                print(
-                    f"[symbols] python compilation root missing: {root}",
-                    file=sys.stderr,
-                )
+                print(f"[symbols] python compilation root missing: {root}", file=sys.stderr)
                 continue
-            for py in root_path.rglob("*.py"):
+            for py in sorted(root_path.rglob("*.py")):
                 if any(part in skip_dirs for part in py.parts):
                     continue
                 rel = py.relative_to(REPO_ROOT).as_posix()
                 if rel in bound_rels:
                     continue
                 try:
-                    source = py.read_text(encoding="utf-8")
-                    tree = ast.parse(source, filename=str(py))
+                    tree = ast.parse(py.read_text(encoding="utf-8"), filename=str(py))
                 except (OSError, SyntaxError):
                     continue
-                for child in ast.walk(tree):
-                    if not isinstance(child, ast.Call):
+                for line, name, container in _resolved_bound_calls(tree, _py_module(rel), modules):
+                    if (rel, line, name) in seen:
                         continue
-                    func = child.func
-                    name: str | None = None
-                    if isinstance(func, ast.Name):
-                        name = func.id
-                    elif isinstance(func, ast.Attribute):
-                        name = func.attr
-                    if not name or name not in bound_names:
-                        continue
-                    line = getattr(child, "lineno", 0) or 0
-                    key = (rel, line, name)
-                    if key in seen:
-                        continue
-                    seen.add(key)
-                    # container=None since the AST extractor can't resolve
-                    # the declaring type without a type checker. The
-                    # orchestrator's by_name fallback resolves the entry.
+                    seen.add((rel, line, name))
                     self.last_sidecar.append({
                         "source_file": rel,
                         "source_line": line,
-                        "target": {"name": name, "container": None},
+                        "target": {"name": name, "container": container},
                     })
+        self.last_sidecar_authoritative = self.supports_sidecar
 
     def _walk(
         self,
@@ -1299,9 +1368,15 @@ def build_symbol_bundle(
         stats = parse_stats.setdefault(
             lang, {"files": 0, "parsed": 0, "cached": 0}
         )
-        all_records.extend(
-            run_extractor(extractor, files, file_to_node, cache, new_cache, force, stats)
+        language_records = run_extractor(
+            extractor, files, file_to_node, cache, new_cache, force, stats
         )
+        all_records.extend(language_records)
+        # nebula-insurance-brain: extractors that expose collect_sidecar() get
+        # the full bound set every run, so their sidecar is cache-independent.
+        collect_sidecar = getattr(extractor, "collect_sidecar", None)
+        if collect_sidecar is not None:
+            collect_sidecar(language_records)
         if getattr(extractor, "last_sidecar_authoritative", False):
             sidecar_authoritative.add(lang)
             sidecar_by_language[lang] = getattr(extractor, "last_sidecar", [])

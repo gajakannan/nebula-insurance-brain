@@ -29,11 +29,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install -e '.[test]'
+      - run: python -m pip install -e '.[test,semantic-rdf]'
       - name: Local planning validator regression tests
         run: python -m pytest -q scripts/validation/tests
       - name: Local planning readiness (structural checks only)
         run: python scripts/validation/validate_plan_readiness.py --plan-scope project --target project
+      - name: Teaching RDF/OWL/SHACL expectations (strict; tools installed above)
+        run: python scripts/validation/validate_semantic_rdf.py --require
       - name: Show configured lifecycle stages
         run: python3 scripts/run-lifecycle-gates.py --list
       - name: Run required gates for the current lifecycle stage

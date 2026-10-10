@@ -1,10 +1,12 @@
 id: entity:account
 label: Insurance account
-notes: Existing insurance-core concept. The Cedar Bridge example proposes an account
-  grouping distinct legal parties and policies; F0012/F0013 must settle its production
-  identity/cardinality contract. Account membership does not imply named-insured status
-  or tenant/KB authorization. No fictional Cedar Bridge instance belongs in the planning
-  KG.
+notes: Glossary baseline is the business entity seeking or holding coverage and the root of Entity
+  360. The Cedar Bridge example proposes an account that groups several legal organizations, with
+  named-insured status held by policy-term role assignments. Which model applies, and whether an
+  account-scoped grant follows the grouping or the named insureds, is an open decision in BLUEPRINT
+  section 4.8 (F0012 representation, ADR-0062 scope, F0017 identity, F0023 Entity 360 root). Account
+  membership never implies named-insured status or tenant/KB authorization. No fictional Cedar Bridge
+  instance belongs in the planning KG.
 source_docs:
 - F0012/README.md
 - F0013/README.md
@@ -14,9 +16,14 @@ rationale:
 - adr: adr:0011
   section: Decision
   summary: Shared account and party concepts compose with line-specific coverage modules.
+- adr: adr:0062
+  section: Decision
+  summary: Account is also a trusted resource scope; the account model decides what an account-scoped grant reaches.
 related_entities:
 - entity:policy-term
 - entity:insurance-party-role-assignment
+- entity:resource-scope
 related_nodes:
 - schema:commercial-pc-example
 - glossary_term:insurance-product-composition
+- adr:0062

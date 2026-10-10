@@ -36,6 +36,8 @@ def _lookup_target(
     )
 
 
+# nebula-insurance-brain: assertions target this product's archived F0001 graph;
+# the framework copy asserted the framework's own F0001 nodes (upstream test data).
 def _find_node(entries: list[dict[str, object]], node_id: str) -> dict[str, object]:
     return next(entry for entry in entries if entry["id"] == node_id)
 
@@ -43,20 +45,20 @@ def _find_node(entries: list[dict[str, object]], node_id: str) -> dict[str, obje
 def test_tier_1_returns_ids_and_labels_only(bundle: dict[str, object]) -> None:
     payload = _lookup_target(bundle, tier=1)
 
-    capability = _find_node(payload["affects"], "capability:local-run-registry")
+    capability = _find_node(payload["affects"], "capability:local-dependency-stack")
     assert capability == {
-        "id": "capability:local-run-registry",
-        "label": "Local run registry",
+        "id": "capability:local-dependency-stack",
+        "label": "Local dependency stack",
     }
 
-    schema = _find_node(payload["uses_schema"], "schema:f0001-run-record")
-    assert schema == {"id": "schema:f0001-run-record", "label": "F0001 run record"}
+    schema = _find_node(payload["uses_schema"], "schema:content-artifact-manifest")
+    assert schema == {"id": "schema:content-artifact-manifest", "label": "ContentArtifactManifest"}
 
 
 def test_tier_2_adds_summary_without_source_docs(bundle: dict[str, object]) -> None:
     payload = _lookup_target(bundle, tier=2)
 
-    capability = _find_node(payload["affects"], "capability:local-run-registry")
+    capability = _find_node(payload["affects"], "capability:local-dependency-stack")
     assert "notes" in capability
     assert "source_docs" not in capability
 
@@ -64,19 +66,19 @@ def test_tier_2_adds_summary_without_source_docs(bundle: dict[str, object]) -> N
 def test_tier_3_adds_source_docs_without_reading_file_contents(bundle: dict[str, object]) -> None:
     payload = _lookup_target(bundle, tier=3)
 
-    capability = _find_node(payload["affects"], "capability:local-run-registry")
+    capability = _find_node(payload["affects"], "capability:local-dependency-stack")
     # Match on basename: the F0001 story doc moved under `features/archive/` when the
     # feature was archived, and doc refs are deliberately move-invariant.
     docs = capability["source_docs"]
     assert [path.rsplit("/", 1)[-1] for path in docs] == [
-        "ADR-002-f0001-runtime-persistence.md",
-        "F0001-S0003-run-registry-and-evidence-watchers.md",
+        "F0001-S0002-local-runtime-containers-and-dependency-matrix.md",
+        "PRD.md",
     ]
     assert all(isinstance(path, str) and "/" in path for path in docs)
     assert all((REPO_ROOT / path).exists() for path in docs), (
         f"tier-3 source_docs must resolve to real files: {docs}"
     )
-    assert "Persists typed run state" not in capability["source_docs"][0]
+    assert "Docker Compose stack" not in capability["source_docs"][0]
 
 
 def test_tier_4_matches_prechange_behavior(bundle: dict[str, object]) -> None:
@@ -148,10 +150,10 @@ def test_untested_lookup_is_node_scoped(bundle: dict[str, object]) -> None:
 def test_fields_ids_strip_rationale_and_source_docs(bundle: dict[str, object]) -> None:
     payload = _lookup_target(bundle, tier=3, fields="ids")
 
-    capability = _find_node(payload["affects"], "capability:local-run-registry")
+    capability = _find_node(payload["affects"], "capability:local-dependency-stack")
     assert capability == {
-        "id": "capability:local-run-registry",
-        "label": "Local run registry",
+        "id": "capability:local-dependency-stack",
+        "label": "Local dependency stack",
     }
 
 

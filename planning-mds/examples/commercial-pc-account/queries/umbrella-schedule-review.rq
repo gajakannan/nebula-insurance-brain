@@ -1,0 +1,13 @@
+PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
+PREFIX d: <https://example.invalid/nebula/data/>
+# Expected: one row, Workshop's BOP liability. A review prompt, not a coverage conclusion:
+# the umbrella names Workshop but its supplied schedule lists no liability term on which Workshop is named.
+SELECT ?insured ?term ?coverage WHERE {
+  d:EX-PC-COV-UMBRELLA pc:coverageOf ?umbrellaTerm .
+  ?umbrellaRole pc:roleScope ?umbrellaTerm ; pc:roleKind d:EX-PC-ROLE-NamedInsured ; pc:roleParty ?insured .
+  ?primaryRole pc:roleScope ?term ; pc:roleKind d:EX-PC-ROLE-NamedInsured ; pc:roleParty ?insured .
+  ?coverage pc:coverageOf ?term ; a ?type .
+  VALUES ?type { pc:GLCoverage pc:AutoLiabilityCoverage }
+  FILTER (?term != ?umbrellaTerm)
+  FILTER NOT EXISTS { d:EX-PC-COV-UMBRELLA pc:scheduledUnderlying ?term }
+} ORDER BY ?insured ?term

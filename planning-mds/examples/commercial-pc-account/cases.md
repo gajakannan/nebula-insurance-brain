@@ -24,7 +24,7 @@ The broker requests WC/employers-liability and inland-marine quotations. Both as
 
 ## EX-PC-006 — endorsement with two clocks
 
-At July 5 as known July 8, BPP is USD 150k. At July 5 as known July 11, it is USD 200k. At June 30 as known July 11, it remains USD 150k. The original version closes in recorded time; retained and revised intervals carry exact source assertions and a new commit. Liability limits remain unchanged. See the three independent expectations in [expected-results.yaml](expected-results.yaml). Owner: F0008/F0010; F0025 owns integrated endorsement proof, not this fixture.
+The endorsement shows ADR-0064's three times: valid from July 1, attested July 8 (its document date), recorded July 10. At July 5 as known July 8, BPP is USD 150k. At July 5 as known July 11, it is USD 200k. At June 30 as known July 11, it remains USD 150k. Before the policy term starts, the BPP limit does not hold. The original version closes in recorded time; retained and revised intervals carry exact source assertions and a new commit. Liability limits remain unchanged. See the three independent expectations in [expected-results.yaml](expected-results.yaml). Owner: F0008/F0010; F0025 owns integrated endorsement proof, not this fixture.
 
 ## EX-PC-007 — underlying schedule is not attachment
 
@@ -40,7 +40,7 @@ Umbrella references exact GL and auto terms. The BOP is not in the supplied sche
 
 ## EX-PC-010 — reported loss is not coverage adjudication
 
-A loss notice reports an event and a GL policy reference. It does not prove insurer acceptance, coverage, liability, a reserve or payment. The notice is accepted in June, so its business facts cannot appear in a January-known snapshot. The identity catalog is authored metadata and must not be treated as a historical disclosure API. Owner: F0012's document/event distinction; claims runtime scope remains separately planned.
+A loss notice reports an event and a GL policy reference. It does not prove insurer acceptance, coverage, liability, a reserve or payment. The notice is an `EVENT` fact on its June 21 document date, recorded June 22. It is absent when known as of June 21 and present when known as of July 11 (EX-PC-010-A/B). The identity catalog is authored metadata and must not be treated as a historical disclosure API. Owner: F0012's document/event distinction; claims runtime scope remains separately planned.
 
 ## EX-PC-011 — role and access are separate
 
@@ -49,3 +49,12 @@ The MGA handled a submission while Granite issued the GL policy. Underwriter Row
 ## EX-PC-012 — conflict is not absence
 
 Hypothetical extension, not present in the accepted snapshot: two unresolved source readings claim USD 1M and USD 2M for the same GL occurrence slot and overlapping context. Preserve both assertions and conflict state; do not choose the larger amount or higher model score. Applicable assessment handling is `CONFLICT`, not a missing-input `UNKNOWN`. Owner: F0018/F0065. The fixture validator rejects conflicting accepted versions in both time dimensions; it is not the runtime conflict workflow.
+
+## EX-PC-013 — an unscheduled primary is a review prompt
+
+The umbrella names both organizations. Its supplied schedule lists the GL and auto terms, but not the BOP on which Workshop is the only named insured. [umbrella-schedule-review.rq](queries/umbrella-schedule-review.rq) returns that BOP liability coverage as one row. An underwriter would ask whether the BOP liability should be scheduled, or whether the umbrella form addresses it another way. The fixture records neither answer. Employers liability, which umbrella carriers often require underneath, cannot be checked: the WC/EL line is only requested (EX-PC-005). Owner: F0012's relation contract; umbrella runtime semantics remain unassigned.
+
+## EX-PC-014 — unknown start and unknown end
+
+The account record (dated 2025-12-15) says Contracting operates at the yard but not since when. Its fact has `from: null`, `attested_from: 2025-12-15` and an `OPEN` end. Before December 15 the reading is `UNKNOWN`, not "since always" (EX-PC-014-B). The broker's request (dated 2026-05-15, accepted May 18) says Contracting no longer operates there, without a date. That reading has time shape `ENDED_UNDATED`. It closes the open version in recorded time and adds a version whose end is `UNKNOWN` with `attested_to: 2026-05-15`. Known as of July 11, March reads `UNKNOWN` (014-C) and July reads absent (014-D). Known as of April 1, March still reads the open version (014-A). The yard relationship is therefore missing from the July snapshot. Nothing here invents an end date. Owner: F0008 (`valid_to_state`, attestation bounds), F0016 (time mentions), ADR-0064.
+

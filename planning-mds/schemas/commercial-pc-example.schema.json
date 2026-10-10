@@ -159,7 +159,9 @@
         "source_ref",
         "artifact_id",
         "precision",
-        "quote"
+        "quote",
+        "document_date",
+        "document_date_source"
       ],
       "properties": {
         "id": {
@@ -180,6 +182,25 @@
         "quote": {
           "type": "string",
           "minLength": 1
+        },
+        "document_date": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "document_date_source": {
+          "enum": [
+            "CONTENT",
+            "SOURCE_METADATA",
+            "HUMAN"
+          ],
+          "description": "ADR-0064 section 3. Receipt, upload and acceptance times never stand in for a document date."
         }
       }
     },
@@ -297,6 +318,12 @@
         "run_ref": {
           "type": "string",
           "minLength": 1
+        },
+        "time_shape": {
+          "enum": [
+            "ENDED_UNDATED"
+          ],
+          "description": "ADR-0064 time-mention shape when the source reports an ending without a date."
         }
       }
     },
@@ -372,8 +399,7 @@
         "slot_id",
         "assertion_ref",
         "commit_ref",
-        "valid_from",
-        "valid_to",
+        "valid_time",
         "recorded_from",
         "recorded_to"
       ],
@@ -394,13 +420,8 @@
           "type": "string",
           "minLength": 1
         },
-        "valid_from": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "valid_to": {
-          "type": "string",
-          "format": "date-time"
+        "valid_time": {
+          "$ref": "#/$defs/valid_time"
         },
         "recorded_from": {
           "type": "string",
@@ -461,6 +482,249 @@
           }
         }
       }
+    },
+    "valid_time": {
+      "description": "ADR-0064 valid time. Kind comes from the property's temporal_kind in ontology.yaml.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind"
+          ],
+          "properties": {
+            "kind": {
+              "const": "ETERNAL"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "at",
+            "granularity"
+          ],
+          "properties": {
+            "kind": {
+              "const": "EVENT"
+            },
+            "at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "granularity": {
+              "enum": [
+                "YEAR",
+                "QUARTER",
+                "MONTH",
+                "DAY",
+                "HOUR",
+                "MINUTE",
+                "SECOND"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "from",
+            "from_granularity",
+            "attested_from",
+            "to",
+            "to_state",
+            "to_granularity"
+          ],
+          "properties": {
+            "kind": {
+              "const": "STATE"
+            },
+            "from": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "from_granularity": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "YEAR",
+                    "QUARTER",
+                    "MONTH",
+                    "DAY",
+                    "HOUR",
+                    "MINUTE",
+                    "SECOND"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "attested_from": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Earliest document date attesting the state; the lower bound when from is unknown"
+            },
+            "to": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "to_state": {
+              "enum": [
+                "OPEN",
+                "BOUNDED",
+                "UNKNOWN"
+              ]
+            },
+            "to_granularity": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "YEAR",
+                    "QUARTER",
+                    "MONTH",
+                    "DAY",
+                    "HOUR",
+                    "MINUTE",
+                    "SECOND"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "attested_to": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Date of the document reporting an undated end (to_state UNKNOWN)"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "to_state": {
+                    "const": "BOUNDED"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "to": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "to_granularity": {
+                    "enum": [
+                      "YEAR",
+                      "QUARTER",
+                      "MONTH",
+                      "DAY",
+                      "HOUR",
+                      "MINUTE",
+                      "SECOND"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "to_state": {
+                    "enum": [
+                      "OPEN",
+                      "UNKNOWN"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "to": {
+                    "type": "null"
+                  },
+                  "to_granularity": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "to_state": {
+                    "const": "UNKNOWN"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "attested_to"
+                ]
+              },
+              "else": {
+                "not": {
+                  "required": [
+                    "attested_to"
+                  ]
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "from": {
+                    "type": "string"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "from_granularity": {
+                    "enum": [
+                      "YEAR",
+                      "QUARTER",
+                      "MONTH",
+                      "DAY",
+                      "HOUR",
+                      "MINUTE",
+                      "SECOND"
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "from_granularity": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
     }
   }
 }
