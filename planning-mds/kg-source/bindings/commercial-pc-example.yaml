@@ -4,8 +4,6 @@ bindings:
   paths:
     schemas:
     - planning-mds/schemas/commercial-pc-example.schema.json
-    validation:
-    - scripts/validation/validate_semantic_examples.py
     architecture:
     - planning-mds/architecture/commercial-pc-example-handoff.md
     examples:
@@ -35,3 +33,11 @@ bindings:
     - planning-mds/examples/commercial-pc-account/snapshot.jsonld
     - planning-mds/examples/commercial-pc-account/snapshot.ttl
     - planning-mds/examples/commercial-pc-account/source-package.md
+- id: capability:semantic-example-validation
+  paths:
+    validation:
+    - scripts/validation/validate_semantic_examples.py
+    - scripts/validation/build_commercial_pc_snapshot.py
+    - scripts/validation/validate_semantic_rdf.py
+    tests:
+    - scripts/validation/tests/test_semantic_examples.py

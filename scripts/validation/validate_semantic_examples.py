@@ -6,12 +6,16 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 
 import yaml
 from jsonschema import Draft202012Validator, FormatChecker
 from jsonschema.exceptions import SchemaError
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_commercial_pc_snapshot  # noqa: E402  sibling script, also loaded when tests import this file by path
 
 ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = Path("planning-mds/examples/neurosymbolic-gl/records.json")
@@ -99,7 +103,7 @@ def validate_records(root: Path, data: dict, schema: dict) -> list[str]:
     return findings
 
 
-def validate(root: Path) -> list[str]:
+def validate_examples(root: Path) -> list[str]:
     data = json.loads((root / BUNDLE).read_text(encoding="utf-8"))
     schema = json.loads((root / SCHEMA).read_text(encoding="utf-8"))
     findings = validate_records(root, data, schema)
@@ -117,8 +121,8 @@ def validate(root: Path) -> list[str]:
 def validate_commercial_example(root: Path) -> list[str]:
     """Check the authored P&C bundle and projection lineage; do not run a reasoner."""
     folder = root / "planning-mds/examples/commercial-pc-account"
-    data = json.loads((folder / "records.json").read_text())
-    schema = json.loads((root / "planning-mds/schemas/commercial-pc-example.schema.json").read_text())
+    data = json.loads((folder / "records.json").read_text(encoding="utf-8"))
+    schema = json.loads((root / "planning-mds/schemas/commercial-pc-example.schema.json").read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)
     errors = list(Draft202012Validator(schema, format_checker=FORMATS).iter_errors(data))
     if errors:
@@ -157,66 +161,86 @@ def validate_commercial_example(root: Path) -> list[str]:
         link_errors = check_local_link(root, folder / "records.json", evidence["source_ref"])
         findings.extend(link_errors)
         if not link_errors:
-            path = folder / evidence["source_ref"].split("#")[0]
-            if evidence["quote"] not in path.read_text():
+            path, _, anchor = evidence["source_ref"].partition("#")
+            text = (folder / path).read_text(encoding="utf-8")
+            if evidence["quote"] not in text:
                 findings.append(f"{evidence['id']}: quote missing from synthetic source")
+            section = re.split(r"^## ", text, flags=re.M)
+            section = next((part for part in section if part.startswith(anchor + "\n")), "")
+            date = evidence["document_date"]
+            if date and f"Document date: {date[:10]}." not in section:
+                findings.append(f"{evidence['id']}: document date not stated in its source section")
     for assertion in data["assertions"]:
         run = groups["runs"][assertion["run_ref"]]
         evidence = groups["evidence"][assertion["evidence_ref"]]
         if run["artifact_id"] != evidence["artifact_id"]:
             findings.append(f"{assertion['id']}: run and evidence use different artifacts")
 
-    def stamp(text: str) -> datetime:
-        return datetime.fromisoformat(text.replace("Z", "+00:00"))
-
-    def contains(fact: dict, valid: str, known: str) -> bool:
-        return (stamp(fact["valid_from"]) <= stamp(valid) < stamp(fact["valid_to"])
-                and stamp(fact["recorded_from"]) <= stamp(known)
-                and (fact["recorded_to"] is None or stamp(known) < stamp(fact["recorded_to"])))
-
+    stamp = build_commercial_pc_snapshot.stamp
+    ontology = yaml.safe_load((folder / "ontology.yaml").read_text(encoding="utf-8"))
+    temporal_kinds = {prop["id"]: prop["temporal_kind"] for prop in ontology["properties"]}
     for fact in data["facts"]:
         assertion = groups["assertions"][fact["assertion_ref"]]
+        evidence = groups["evidence"][assertion["evidence_ref"]]
         slot = groups["slots"][fact["slot_id"]]
         commit = groups["commits"][fact["commit_ref"]]
         review = groups["reviews"][commit["review_ref"]]
+        valid_time = fact["valid_time"]
         if (slot["subject_ref"], slot["predicate"]) != (assertion["subject_ref"], assertion["predicate"]):
             findings.append(f"{fact['id']}: slot and assertion disagree")
         if slot["qualifiers"].get("target_ref") != assertion["object"].get("ref"):
             findings.append(f"{fact['id']}: relationship target differs from slot qualifier")
         if assertion["id"] not in review["assertion_refs"] or assertion["mood"] != "ASSERTION":
             findings.append(f"{fact['id']}: missing source-reading review or a request promoted in this fixture")
-        if stamp(fact["valid_from"]) >= stamp(fact["valid_to"]):
-            findings.append(f"{fact['id']}: empty/reversed valid interval")
+        if valid_time["kind"] != temporal_kinds.get(assertion["predicate"]):
+            findings.append(f"{fact['id']}: valid-time kind differs from the property's temporal_kind")
+        if valid_time["kind"] == "STATE":
+            ended_undated = valid_time["to_state"] == "UNKNOWN"
+            if ended_undated != (assertion.get("time_shape") == "ENDED_UNDATED"):
+                findings.append(f"{fact['id']}: UNKNOWN end must come from an ENDED_UNDATED source reading")
+            attested = valid_time["attested_to"] if ended_undated else valid_time["attested_from"]
+            if evidence["document_date"] is None or stamp(attested) != stamp(evidence["document_date"]):
+                findings.append(f"{fact['id']}: attestation differs from its evidence document date")
+            if ended_undated and stamp(valid_time["attested_from"]) >= stamp(valid_time["attested_to"]):
+                findings.append(f"{fact['id']}: undated end reported before the state was attested")
+            start, end = build_commercial_pc_snapshot.integrity_interval(valid_time)
+            if start >= end:
+                findings.append(f"{fact['id']}: empty/reversed valid interval")
         if fact["recorded_to"] and stamp(fact["recorded_from"]) >= stamp(fact["recorded_to"]):
             findings.append(f"{fact['id']}: empty/reversed recorded interval")
         if stamp(commit["accepted_at"]) != stamp(fact["recorded_from"]):
             findings.append(f"{fact['id']}: commit and recorded time disagree")
+        if evidence["document_date"] and stamp(fact["recorded_from"]) < stamp(evidence["document_date"]):
+            findings.append(f"{fact['id']}: recorded before its source document existed")
     for index, left in enumerate(data["facts"]):
         for right in data["facts"][index + 1:]:
             if left["slot_id"] != right["slot_id"]:
                 continue
-            valid_overlap = max(stamp(left["valid_from"]), stamp(right["valid_from"])) < min(stamp(left["valid_to"]), stamp(right["valid_to"]))
+            left_valid = build_commercial_pc_snapshot.integrity_interval(left["valid_time"])
+            right_valid = build_commercial_pc_snapshot.integrity_interval(right["valid_time"])
+            valid_overlap = max(left_valid[0], right_valid[0]) < min(left_valid[1], right_valid[1])
             recorded_overlap = ((right["recorded_to"] is None or stamp(left["recorded_from"]) < stamp(right["recorded_to"]))
                                 and (left["recorded_to"] is None or stamp(right["recorded_from"]) < stamp(left["recorded_to"])))
             if valid_overlap and recorded_overlap:
                 findings.append(f"{left['id']}/{right['id']}: overlapping versions in both time dimensions")
 
-    snapshot = data["snapshot"]
-    selected = [f for f in data["facts"] if contains(f, snapshot["valid_as_of"], snapshot["known_as_of"])]
     expected = []
-    for fact in selected:
+    for fact in build_commercial_pc_snapshot.select_facts(data):
         assertion = groups["assertions"][fact["assertion_ref"]]
         expected.append({"subject_ref": assertion["subject_ref"], "predicate": assertion["predicate"],
                          "object": assertion["object"], "fact_ref": fact["id"], "assertion_ref": assertion["id"],
                          "evidence_ref": assertion["evidence_ref"], "commit_ref": fact["commit_ref"]})
-    projection = json.loads((folder / "snapshot-index.json").read_text())
+    projection = json.loads((folder / "snapshot-index.json").read_text(encoding="utf-8"))
     for field in ("tenant_id", "knowledge_base_id", "ontology_release", "snapshot"):
         if projection.get(field) != data[field]:
             findings.append(f"EX-PC-001: projection {field} differs from source context")
     if projection.get("statements") != expected:
         findings.append("EX-PC-001: snapshot lineage does not match selected fact versions")
-    outcomes = yaml.safe_load((folder / "expected-results.yaml").read_text())
-    manifest = yaml.safe_load((folder / "release.yaml").read_text())
+    for name, text in build_commercial_pc_snapshot.build(data).items():
+        if (folder / name).read_text(encoding="utf-8") != text:
+            findings.append(f"EX-PC-001: {name} differs from records.json; run scripts/validation/build_commercial_pc_snapshot.py")
+    outcomes = yaml.safe_load((folder / "expected-results.yaml").read_text(encoding="utf-8"))
+    manifest = yaml.safe_load((folder / "release.yaml").read_text(encoding="utf-8"))
     if manifest["release_iri"] != data["ontology_release"]:
         findings.append("EX-PC-001: release manifest identity mismatch")
     versions = {m["version_iri"] for m in manifest["modules"]}
@@ -231,12 +255,14 @@ def validate_commercial_example(root: Path) -> list[str]:
         if not link_errors and hashlib.sha256((folder / artifact["file"]).read_bytes()).hexdigest() != artifact["sha256"]:
             findings.append(f"EX-PC-001: stale fixture digest: {artifact['file']}")
     for row in outcomes["timeline"]:
-        matches = [f for f in data["facts"] if f["slot_id"] == "EX-PC-SLOT-BPP-ORIGINAL"
-                   and contains(f, row["valid_as_of"], row["known_as_of"])]
-        if len(matches) != 1 or matches[0]["id"] != row["fact"]:
-            findings.append(f"{row['case']}: unexpected authored timeline selection")
-        elif groups["assertions"][matches[0]["assertion_ref"]]["object"]["value"] != row["amount"]:
-            findings.append(f"{row['case']}: unexpected authored amount")
+        valid, known = stamp(row["valid_as_of"]), stamp(row["known_as_of"])
+        readings = [(f, build_commercial_pc_snapshot.read(f, valid, known)) for f in data["facts"] if f["slot_id"] == row["slot"]]
+        readings = [(f, result) for f, result in readings if result]
+        result = readings[0][1] if len(readings) == 1 else ("ABSENT" if not readings else "AMBIGUOUS")
+        if result != row["result"] or (readings and readings[0][0]["id"] != row.get("fact")):
+            findings.append(f"{row['case']}: expected {row['result']} {row.get('fact', '')}, read {result}")
+        elif "value" in row and groups["assertions"][readings[0][0]["assertion_ref"]]["object"].get("value") != row["value"]:
+            findings.append(f"{row['case']}: unexpected authored value")
     for row in outcomes["shacl"]:
         for key in ("shape", "data"):
             findings.extend(check_local_link(root, folder / "expected-results.yaml", row[key]))
@@ -250,7 +276,7 @@ def main() -> int:
     parser.add_argument("--product-root", type=Path, default=ROOT)
     args = parser.parse_args()
     try:
-        findings = validate(args.product_root.resolve())
+        findings = validate_examples(args.product_root.resolve())
     except (OSError, ValueError, SchemaError, yaml.YAMLError) as error:
         findings = [str(error)]
     print(json.dumps({

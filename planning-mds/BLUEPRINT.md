@@ -223,8 +223,6 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0003-S0003](features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) - Done
   - [F0003-S0004](features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) - Done
 
-**Pre-build (Now)**
-
 **v0.1A (Next)**
 
 - [F0004 — Content artifact model](features/F0004-content-artifact-model/README.md) - Planned
@@ -370,7 +368,7 @@ Performance, availability, scalability, and security targets are proposed gates 
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
 - `api/brain-api.yaml` — OpenAPI 3.1 (F0001 scope: health, protected reads, webhook, commit)
-- `schemas/*.schema.json` — shared JSON Schemas (manifest, interpretation result, review decision, commit request and response, problem details); `semantic-example.schema.json` is explicitly an educational fixture contract, not a runtime DTO
+- `schemas/*.schema.json` — shared JSON Schemas (manifest, interpretation result, review decision, commit request and response, problem details); `semantic-example.schema.json` and `commercial-pc-example.schema.json` are educational fixture contracts, not runtime DTOs
 - `security/policies/` — Casbin model and policy; `security/` — AuthX contract and pending security artifacts
 - `testing/evaluation-strategy.md` — Golden Corpus, metrics, regression suites, release gates
 
@@ -379,6 +377,15 @@ Performance, availability, scalability, and security targets are proposed gates 
 Section 117.1 tracks the decisions for implementation and production acceptance: source-authority owner, tenant and knowledge-base identity scope, production host, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18) and the proof model policy (self-hosted), and ADR-0057 (2026-09-08) settled the review surface. F0005 pins Docling-Graph 1.9.1 and Docling 2.126.0; its synthetic development proof is complete, while production qualification remains open.
 
 **Time-interpretation dependency for v0.1 (2026-09-25, validate finding P-1):** F0019 and F0025 take endorsement valid time from the template route's typed effective-date field. F0016 stores time mentions and document time context alongside. Resolution from time mentions (ADR-0064, Proposed) replaces the template field only after ADR-0064 passes its proof gates, which F0026 qualifies. v0.1 acceptance does not depend on a Proposed ADR.
+
+**Account identity and account scope (opened 2026-10-09, from the Cedar Bridge example review).** The [glossary](domain/glossary.md#account) defines Account as the business entity seeking or holding coverage and the root of Entity 360. The [commercial P&C example](architecture/commercial-pc-example-handoff.md) instead models an account as a grouping of separate legal organizations, with named-insured status carried by policy-term role assignments. The master blueprint also treats account as an authorization scope (sections 66, 118, 120). Under the grouping model, an account-scoped grant would reach every grouped organization's policies, evidence and history. Decide before F0012/F0013 Phase B:
+
+- whether Account is a party or a grouping, and its cardinality to legal organizations (F0012);
+- whether account scope in ResourceScope follows the grouping or the named-insured parties (ADR-0062; F0002 is archived, so a change needs its own scope amendment);
+- the Entity 360 root for a multi-organization account (F0023);
+- how account identity resolves separately from organization identity (F0017).
+
+Until then the glossary definition is the baseline and the example's grouping is a proposal.
 
 **Local proof decisions from F0001-S0007, updated for ADR-0060 (2026-09-15):**
 
@@ -454,8 +461,9 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Init completed on 2026-09-05 (run `2026-09-05-6823e66e`, gates I0 to I6 green; evidence under `operations/evidence/runs/`).
+Current position (2026-10-09): F0001 to F0003 are done and archived. F0005's synthetic Docling-Graph proof is complete, with production qualification deferred (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
 
-1. Seed `kg-source/features/F0001.yaml` to `F0026.yaml` as planned from section 95 and ADR node shards from `architecture/decisions/`, then run `python3 scripts/kg/compile.py` and `python3 scripts/run-lifecycle-gates.py`.
-2. Run the `plan` action for F0001 (the four section 115.4 pre-build proofs as its stories), then the `feature` action for F0001.
-3. Activate the local KG hook once per clone: `git config core.hooksPath .githooks`.
+1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
+2. Before F0012/F0013 Phase B, settle the account identity and scope decision in section 4.8.
+3. For F0012, run the `plan` action as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
+4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.

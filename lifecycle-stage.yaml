@@ -26,12 +26,14 @@ stages:
       - knowledge_graph_sync
       - kg_reproducibility
       - semantic_examples
+      - semantic_rdf
   implementation:
     description: Runtime artifacts exist in engine/, experience/, or neuron/ and implementation quality gates run.
     required_gates:
       - knowledge_graph_sync
       - kg_reproducibility
       - semantic_examples
+      - semantic_rdf
       - symbol_index_sync
       - inline_decisions_check
   release-readiness:
@@ -40,6 +42,7 @@ stages:
       - knowledge_graph_sync
       - kg_reproducibility
       - semantic_examples
+      - semantic_rdf
       - symbol_index_sync
       - inline_decisions_check
       - kg_orphan_check
@@ -50,6 +53,11 @@ gates:
     command:
       - python3
       - scripts/validation/validate_semantic_examples.py
+  semantic_rdf:
+    description: Execute the Cedar Bridge RDF equivalence, OWL-RL, SHACL and query expectations; reports skipped when the optional semantic-rdf tools are absent (CI runs it with --require).
+    command:
+      - python3
+      - scripts/validation/validate_semantic_rdf.py
   knowledge_graph_sync:
     description: Validate knowledge-graph integrity (IDs, references, paths, feature coverage, code-index bindings, coverage-report freshness).
     command:

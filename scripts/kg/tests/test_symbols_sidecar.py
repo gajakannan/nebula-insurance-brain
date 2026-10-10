@@ -83,3 +83,42 @@ def test_unbound_sidecar_preserves_non_refreshed_languages(
         "new-csharp.cs",
         "existing-ts.ts",
     }
+
+
+def test_python_module_paths_follow_src_layout() -> None:
+    assert symbols._py_module("engine/packages/brain-content/src/brain_content/store.py") == "brain_content.store"
+    assert symbols._py_module("engine/packages/brain-content/src/brain_content/__init__.py") == "brain_content"
+    assert symbols._py_module("scripts/validation/check.py") == "scripts.validation.check"
+
+
+def test_python_sidecar_resolves_calls_through_imports_only() -> None:
+    import ast
+
+    modules = {
+        "brain_content.store": {"save": set(), "Store": {"get", "put"}},
+        "brain_api.errors": {"NotFoundError": set()},
+    }
+    source = """
+from brain_content.store import save, Store
+from brain_content import store as store_module
+import brain_api.errors
+from .errors import NotFoundError
+
+def handler(validator, payload):
+    save(payload)                      # imported bound function
+    Store.get("key")                   # imported bound class method
+    store_module.save(payload)         # imported bound module
+    brain_api.errors.NotFoundError()   # dotted module path
+    NotFoundError()                    # relative import
+    payload.get("key")                 # local variable: no type, skipped
+    validator.validate(payload)        # local variable: skipped
+    print(payload)                     # unbound builtin: skipped
+"""
+    found = symbols._resolved_bound_calls(ast.parse(source), "brain_api.routes", modules)
+    assert sorted((name, container) for _, name, container in found) == [
+        ("NotFoundError", None),
+        ("NotFoundError", None),
+        ("get", "Store"),
+        ("save", None),
+        ("save", None),
+    ]

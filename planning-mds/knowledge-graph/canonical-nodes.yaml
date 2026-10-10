@@ -599,6 +599,22 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:semantic-example-validation
+    label: Teaching-example validation
+    notes: 'Planning tooling, not runtime. validate_semantic_examples.py checks both teaching bundles
+      (EX-GL-001 and Cedar Bridge) for schema, references, evidence quotes, lineage and fixture digests.
+      build_commercial_pc_snapshot.py generates the Cedar Bridge snapshot.ttl/.jsonld/index from records.json,
+      and the structural check fails when they drift. validate_semantic_rdf.py executes the Cedar Bridge
+      RDF/OWL-RL/SHACL/query expectations; it skips locally without the optional semantic-rdf tools and
+      is strict in CI. Gotcha that motivated the generator change: rdflib and pySHACL compare literal
+      terms, so sh:hasValue "X" does not match "X"^^xsd:string even though RDF 1.1 treats them as one
+      value; generated snapshots emit strings as simple literals.'
+    related_nodes:
+      - schema:commercial-pc-example
+      - schema:semantic-example
+    source_docs:
+      - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/architecture/ontology-planning-handoff.md
   - id: capability:semantic-interpretation-run
     label: Semantic interpretation run
     notes: 'Target: Docling-Graph extracts from saved native content, producing run-owned graph/provenance
@@ -709,18 +725,27 @@ endpoints:
 entities:
   - id: entity:account
     label: Insurance account
-    notes: Existing insurance-core concept. The Cedar Bridge example proposes an account grouping distinct
-      legal parties and policies; F0012/F0013 must settle its production identity/cardinality contract.
-      Account membership does not imply named-insured status or tenant/KB authorization. No fictional
-      Cedar Bridge instance belongs in the planning KG.
+    notes: Glossary baseline is the business entity seeking or holding coverage and the root of Entity
+      360. The Cedar Bridge example proposes an account that groups several legal organizations, with
+      named-insured status held by policy-term role assignments. Which model applies, and whether an account-scoped
+      grant follows the grouping or the named insureds, is an open decision in BLUEPRINT section 4.8 (F0012
+      representation, ADR-0062 scope, F0017 identity, F0023 Entity 360 root). Account membership never
+      implies named-insured status or tenant/KB authorization. No fictional Cedar Bridge instance belongs
+      in the planning KG.
     rationale:
       - adr: adr:0011
         section: Decision
         summary: Shared account and party concepts compose with line-specific coverage modules.
+      - adr: adr:0062
+        section: Decision
+        summary: Account is also a trusted resource scope; the account model decides what an account-scoped
+          grant reaches.
     related_entities:
       - entity:insurance-party-role-assignment
       - entity:policy-term
+      - entity:resource-scope
     related_nodes:
+      - adr:0062
       - glossary_term:insurance-product-composition
       - schema:commercial-pc-example
     source_docs:
@@ -1337,10 +1362,12 @@ schemas:
     label: Commercial P&C teaching records
     path: planning-mds/schemas/commercial-pc-example.schema.json
     notes: Schema and reference checks for synthetic contractor-account records, scoped party roles, product
-      composition, exact source lineage and a two-time endorsement. Not a production import/API schema
-      or feature acceptance. New RDF/OWL/SHACL/query execution remains pending; existing GL fixture evidence
-      does not qualify this expanded bundle.
+      composition, exact source lineage, ADR-0064 valid-time kinds with unknown bounds, and a two-time
+      endorsement. Not a production import/API schema or feature acceptance. RDF/OWL/SHACL/query expectations
+      are executed by capability:semantic-example-validation; existing GL fixture evidence does not qualify
+      this bundle.
     related_nodes:
+      - adr:0064
       - entity:account
       - entity:insurance-party-role-assignment
       - entity:ontology-release
