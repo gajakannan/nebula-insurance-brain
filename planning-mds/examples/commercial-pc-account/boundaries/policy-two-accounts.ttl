@@ -1,0 +1,10 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+# Independent hypothetical input: one policy naming two organizations is filed under both of
+# their accounts. A policy belongs to exactly one account; the other organization stays a named
+# insured on the term (ADR-0070).
+d:EX-PC-GAP-ORG-A a pc:Organization .
+d:EX-PC-GAP-ORG-B a pc:Organization .
+d:EX-PC-GAP-ACCOUNT-A a pc:Account ; pc:accountOrganization d:EX-PC-GAP-ORG-A .
+d:EX-PC-GAP-ACCOUNT-B a pc:Account ; pc:accountOrganization d:EX-PC-GAP-ORG-B .
+d:EX-PC-GAP-POLICY a pc:Policy ; pc:forAccount d:EX-PC-GAP-ACCOUNT-A, d:EX-PC-GAP-ACCOUNT-B .

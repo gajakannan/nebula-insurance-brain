@@ -25,6 +25,11 @@ d:EX-PC-OWN-CONTRACTOR-RIDGE a pc:OwnershipInterest ; rdfs:label "Ridge Builders
 d:EX-PC-BROKER-RIVERSIDE a pc:Organization ; rdfs:label "Harbor Example Brokerage, Riverside branch" .
 d:EX-PC-LOCATION-RIVERSIDE a pc:Location ; rdfs:label "Riverside branch office" .
 d:EX-PC-BROKER-CONTACT a pc:Person ; rdfs:label "Jordan Example" .
+d:EX-PC-BROKER-CONTACT-HQ a pc:Person ; rdfs:label "Sam Example" .
+d:EX-PC-ASSIGN-BOR-WORKSHOP a pc:RoleAssignment ; rdfs:label "Assign Workshop Broker Of Record" .
+d:EX-PC-ASSIGN-BOR-CONTRACTOR a pc:RoleAssignment ; rdfs:label "Assign Contracting Broker Of Record" .
+d:EX-PC-ASSIGN-WORKSHOP-BROKER-CONTACT a pc:RoleAssignment ; rdfs:label "Assign Workshop Broker Contact" .
+d:EX-PC-ASSIGN-CONTRACTOR-BROKER-CONTACT a pc:RoleAssignment ; rdfs:label "Assign Contracting Broker Contact" .
 d:EX-PC-RISK-MANAGER a pc:Person ; rdfs:label "Casey Example" .
 d:EX-PC-ROLE-BrokerContact a pc:RoleKind ; rdfs:label "BrokerContact" .
 d:EX-PC-ROLE-RiskManager a pc:RoleKind ; rdfs:label "RiskManager" .
@@ -44,11 +49,11 @@ d:EX-PC-SUBMISSION a pc:Submission ; rdfs:label "Contracting submission" .
 d:EX-PC-LOSS-NOTICE a pc:LossNotice ; rdfs:label "Reported trip-and-fall notice" .
 d:EX-PC-ROLE-NamedInsured a pc:RoleKind ; rdfs:label "NamedInsured" .
 d:EX-PC-ROLE-PlacementBroker a pc:RoleKind ; rdfs:label "PlacementBroker" .
-d:EX-PC-ROLE-ServicingBroker a pc:RoleKind ; rdfs:label "ServicingBroker" .
+d:EX-PC-ROLE-BrokerOfRecord a pc:RoleKind ; rdfs:label "BrokerOfRecord" .
 d:EX-PC-ROLE-Carrier a pc:RoleKind ; rdfs:label "Carrier" .
 d:EX-PC-ROLE-MGA a pc:RoleKind ; rdfs:label "MGA" .
 d:EX-PC-ROLE-Underwriter a pc:RoleKind ; rdfs:label "Underwriter" .
-d:EX-PC-ASSIGN-SERVICING a pc:RoleAssignment ; rdfs:label "Assign Servicing" .
+d:EX-PC-ASSIGN-BOR-HOLDINGS a pc:RoleAssignment ; rdfs:label "Assign Holdings Broker Of Record" .
 d:EX-PC-ASSIGN-MGA a pc:RoleAssignment ; rdfs:label "Assign Mga" .
 d:EX-PC-ASSIGN-UNDERWRITER a pc:RoleAssignment ; rdfs:label "Assign Underwriter" .
 d:EX-PC-PRODUCT-BOP a pc:ProductType ; rdfs:label "BOP" .
@@ -92,9 +97,9 @@ d:EX-PC-MONEY-AUTO-CSL a pc:Limit ; rdfs:label "CombinedSingleLimitPerAccident L
 d:EX-PC-MONEY-UMB-OCC a pc:Limit ; rdfs:label "EachOccurrence Limit" .
 d:EX-PC-WORKSHOP pc:operatesAt d:EX-PC-LOCATION-SHOP .
 d:EX-PC-SUBMISSION pc:forAccount d:EX-PC-ACCOUNT-CONTRACTOR .
-d:EX-PC-ASSIGN-SERVICING pc:roleParty d:EX-PC-BROKER .
-d:EX-PC-ASSIGN-SERVICING pc:roleKind d:EX-PC-ROLE-ServicingBroker .
-d:EX-PC-ASSIGN-SERVICING pc:roleScope d:EX-PC-ACCOUNT .
+d:EX-PC-ASSIGN-BOR-HOLDINGS pc:roleParty d:EX-PC-BROKER .
+d:EX-PC-ASSIGN-BOR-HOLDINGS pc:roleKind d:EX-PC-ROLE-BrokerOfRecord .
+d:EX-PC-ASSIGN-BOR-HOLDINGS pc:roleScope d:EX-PC-ACCOUNT .
 d:EX-PC-ASSIGN-MGA pc:roleParty d:EX-PC-MGA .
 d:EX-PC-ASSIGN-MGA pc:roleKind d:EX-PC-ROLE-MGA .
 d:EX-PC-ASSIGN-MGA pc:roleScope d:EX-PC-SUBMISSION .
@@ -247,3 +252,22 @@ d:EX-PC-ASSIGN-GL-UNDERWRITER pc:roleParty d:EX-PC-UW-GRANITE .
 d:EX-PC-ASSIGN-GL-UNDERWRITER pc:roleKind d:EX-PC-ROLE-Underwriter .
 d:EX-PC-ASSIGN-GL-UNDERWRITER pc:roleScope d:EX-PC-TERM-GL .
 d:EX-PC-ASSIGN-GL-UNDERWRITER pc:actsFor d:EX-PC-GRANITE .
+d:EX-PC-BROKER-CONTACT-HQ pc:employedBy d:EX-PC-BROKER .
+d:EX-PC-POLICY-BOP pc:forAccount d:EX-PC-ACCOUNT-WORKSHOP .
+d:EX-PC-POLICY-GL pc:forAccount d:EX-PC-ACCOUNT-CONTRACTOR .
+d:EX-PC-POLICY-AUTO pc:forAccount d:EX-PC-ACCOUNT-WORKSHOP .
+d:EX-PC-POLICY-UMBRELLA pc:forAccount d:EX-PC-ACCOUNT-WORKSHOP .
+d:EX-PC-ASSIGN-BOR-WORKSHOP pc:roleParty d:EX-PC-BROKER .
+d:EX-PC-ASSIGN-BOR-WORKSHOP pc:roleKind d:EX-PC-ROLE-BrokerOfRecord .
+d:EX-PC-ASSIGN-BOR-WORKSHOP pc:roleScope d:EX-PC-ACCOUNT-WORKSHOP .
+d:EX-PC-ASSIGN-BOR-CONTRACTOR pc:roleParty d:EX-PC-BROKER .
+d:EX-PC-ASSIGN-BOR-CONTRACTOR pc:roleKind d:EX-PC-ROLE-BrokerOfRecord .
+d:EX-PC-ASSIGN-BOR-CONTRACTOR pc:roleScope d:EX-PC-ACCOUNT-CONTRACTOR .
+d:EX-PC-ASSIGN-WORKSHOP-BROKER-CONTACT pc:roleParty d:EX-PC-BROKER-CONTACT .
+d:EX-PC-ASSIGN-WORKSHOP-BROKER-CONTACT pc:roleKind d:EX-PC-ROLE-BrokerContact .
+d:EX-PC-ASSIGN-WORKSHOP-BROKER-CONTACT pc:roleScope d:EX-PC-ACCOUNT-WORKSHOP .
+d:EX-PC-ASSIGN-WORKSHOP-BROKER-CONTACT pc:actsFor d:EX-PC-BROKER-RIVERSIDE .
+d:EX-PC-ASSIGN-CONTRACTOR-BROKER-CONTACT pc:roleParty d:EX-PC-BROKER-CONTACT-HQ .
+d:EX-PC-ASSIGN-CONTRACTOR-BROKER-CONTACT pc:roleKind d:EX-PC-ROLE-BrokerContact .
+d:EX-PC-ASSIGN-CONTRACTOR-BROKER-CONTACT pc:roleScope d:EX-PC-ACCOUNT-CONTRACTOR .
+d:EX-PC-ASSIGN-CONTRACTOR-BROKER-CONTACT pc:actsFor d:EX-PC-BROKER .

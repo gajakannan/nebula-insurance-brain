@@ -132,7 +132,8 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 ### Account
 **Type:** Entity
 **Definition:** The customer relationship with exactly one organization seeking or holding insurance coverage; one account per organization in a tenant, with at most one designated parent account. The root of Account (Entity) 360 (70, 86; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
-**Not:** a grouping of several organizations, an owner of policies, or an authorization scope by itself. A policy reaches an account through its organization's named-insured role.
+Each account owns its policies (each policy belongs to exactly one account) and has a broker of record and broker contacts.
+**Not:** a grouping of several organizations, a broker, or an authorization scope by itself. An organization named on a policy another account owns is a named insured there, not an owner.
 
 ### Party
 **Type:** Entity
@@ -144,19 +145,23 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 
 ### Ownership Interest
 **Type:** Term
-**Definition:** One party's percentage interest in an organization, with valid time; an organization can have several owners. Majority ownership is computed (more than 50 percent), never stored. A joint venture's owners need not match its account parent (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+**Definition:** One party's percentage interest in an organization, with valid time; an organization can have several owners. Majority ownership is computed (more than 50 percent), never stored. Any split works (50/50, three or four owners), and the owners need not match the account parent (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
 
 ### Parent Account
 **Type:** Term
-**Definition:** The single account designated as an account's parent for roll-up and Account 360. Designated, not computed from ownership; a 50/50 joint venture still has one (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+**Definition:** The single account, if any, designated as an account's parent for roll-up and Account 360. Designated, not computed from ownership. One parent at most, so a joint venture is never counted twice; one without a majority owner is normally a root account (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
 
 ### Account 360
 **Type:** Term
-**Definition:** One account's organization, its portfolio (every policy term naming that organization), its role assignments and its parent and child accounts. The hierarchy view rolls portfolios up, showing each policy once with all the accounts it names (70; F0023; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+**Definition:** One account's organization, broker of record and contacts, the policies it owns, the policies it is named on, its role assignments, its ownership interests and its parent and child accounts. The hierarchy view rolls owned policies up, so each appears once (70; F0023; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+
+### Program
+**Type:** Term
+**Definition:** A master policy under a parent account, with a local policy under each covered entity's account linked to it. The family view comes from those links; each local policy still belongs to one account (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
 
 ### Insured
 **Type:** Entity
-**Definition:** The named party covered by a policy. A policy can name several insureds, and then appears under each of their accounts (86; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+**Definition:** The named party covered by a policy. A policy can name several: a first named insured, whose account normally owns the policy, and additional named insureds. An additional insured is different: a third party added by endorsement with narrower rights (86; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
 
 ### Policy
 **Type:** Entity
@@ -286,12 +291,14 @@ The [Cedar Bridge walkthrough](../examples/commercial-pc-account/README.md) give
 
 | Term | Example meaning and boundary | Worked/boundary case | Owner |
 |---|---|---|---|
-| Scoped insurance party role | A party acts as named insured, broker, broker contact, risk manager, account contact, carrier, MGA or underwriter in a specific account/submission/policy-term context, acting for a named organization or branch; this is not an access grant. One person can hold roles on several accounts | [EX-PC-001/011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0012/F0013; F0002 owns authorization |
-| Broker | Organization, with its own hierarchy, branches, offices and people, in an account-servicing or policy-placement role; shared broker does not merge accounts or permissions | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012/F0013 |
-| Broker of record | The placement-broker role on one policy term, so it can differ by line and term; a servicing broker is scoped to an account | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012/F0013 |
-| Broker contact | A person employed by a broker organization or branch, assigned to an account; an intermediary who works for neither the insured nor the carrier | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012 role vocabulary; F0023 |
-| Carrier | Organization identified as insurer for a particular policy term; distinguish it from the MGA that handled the submission | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0013 |
-| MGA and underwriter | A submission-handling organization and a person acting in a scoped underwriting role; the fixture establishes no delegated authority or authenticated principal | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--role-and-access-are-separate) | F0012/F0013 |
+| Scoped insurance party role | A party acts as named insured, broker, broker contact, risk manager, account contact, carrier, MGA or underwriter in a specific account/submission/policy-term context, acting for a named organization or branch. One person can hold roles on several accounts. Once confirmed by an authoritative source, it decides an external person's reach and a carrier employee's decision rights | [EX-PC-001/011](../examples/commercial-pc-account/cases.md#ex-pc-011--domain-roles-are-not-grants-by-themselves) | F0012/F0013; F0002-successor amendment for access |
+| Broker | Organization, with its own hierarchy, branches, offices and people, that brings accounts to a carrier; not itself an account. A shared broker does not merge accounts or permissions | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012/F0013 |
+| Broker of record | The broker organization or branch on an account, as a dated role so a change keeps history; a policy term's placement broker can override it for one line | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012/F0013 |
+| Broker contact | A person employed by a broker organization or branch, assigned to one account; works for neither the insured nor the carrier, and reaches only the accounts assigned to them | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012 role vocabulary; F0023 |
+| Additional named insured | An organization named on a policy after the first named insured, with named-insured rights; the policy belongs to the first named insured's account | [EX-PC-016](../examples/commercial-pc-account/cases.md#ex-pc-016--a-policy-belongs-to-exactly-one-account) | F0012/F0013 |
+| Additional insured | A third party, such as a landlord or general contractor, added by endorsement with narrower rights; a separate role kind, not a named insured | Not in the fixture | F0013 |
+| Carrier | Organization identified as insurer for a particular policy term; distinguish it from the MGA that handled the submission | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--domain-roles-are-not-grants-by-themselves) | F0013 |
+| MGA and underwriter | A submission-handling organization and a person acting in a scoped underwriting role; the fixture establishes no delegated authority or authenticated principal | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--domain-roles-are-not-grants-by-themselves) | F0012/F0013 |
 | Insurance product composition | Product/package classification differs from its coverage lines; a BOP may package property and liability while standalone GL reuses common liability concepts | [EX-PC-002](../examples/commercial-pc-account/cases.md#ex-pc-002--package-versus-coverage) | F0012/F0013 contract; additional LOB runtime ownership unassigned |
 | Qualified monetary provision | Limit or deductible with coverage, basis, currency and applicable location/term context; it is not an account-wide total | [EX-PC-004](../examples/commercial-pc-account/cases.md#ex-pc-004--money-needs-context) | F0013, ADR-0039; F0065 for GL comparison |
 | Scheduled underlying term | Explicit reference from an umbrella's supplied schedule to an exact underlying policy term; not a claim attachment or exhaustion result | [EX-PC-007](../examples/commercial-pc-account/cases.md#ex-pc-007--underlying-schedule-is-not-attachment) | F0012 relation contract; umbrella runtime ownership unassigned |

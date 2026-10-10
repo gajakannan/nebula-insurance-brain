@@ -738,26 +738,28 @@ endpoints:
 entities:
   - id: entity:account
     label: Insurance account
-    notes: The customer relationship with exactly one organization seeking or holding coverage, and the
-      root of Account 360 (proposed ADR-0070). One account per organization in a tenant, with at most
-      one designated parent account for roll-up; the parent is designated, not computed from ownership.
-      A policy has no owning account and reaches each account through its organization's named-insured
-      role, so one policy can appear under several accounts. Account parentage and ownership never imply
-      named-insured status or tenant/KB authorization; an account-scoped grant reaches only that account
-      (ADR-0062 scope amendment pending). F0012 owns the representation, F0017 account versus organization
-      identity, F0023 Account 360. No fictional Cedar Bridge instance belongs in the planning KG.
+    notes: The carrier's customer relationship with exactly one insured organization, and the root of
+      Account 360 (proposed ADR-0070). One account per organization in a tenant, with at most one designated
+      parent account for roll-up; the parent is designated, not computed from ownership. Each account
+      has a dated broker of record and broker contacts; brokers are organizations, not accounts. Each
+      policy belongs to exactly one account, normally the first named insured's; other named insureds
+      stay roles on the term, and a master program's local policies link to it. Parentage and ownership
+      never imply named-insured status. External people reach only the accounts they hold an authoritative
+      role on, never the parent or siblings; carrier staff see all and act by role (F0002-successor amendment
+      pending). F0012 owns the representation, F0017 account versus organization identity, F0023 Account
+      360. No fictional Cedar Bridge instance belongs in the planning KG.
     rationale:
       - adr: adr:0070
         section: Proposed Decision
-        summary: One account per organization with a designated parent; policies reach accounts through
-          named-insured roles.
+        summary: One account per organization with a designated parent; each policy belongs to exactly
+          one account.
       - adr: adr:0011
         section: Decision
         summary: Shared account and party concepts compose with line-specific coverage modules.
       - adr: adr:0062
         section: Decision
-        summary: Account is also a trusted resource scope; an account-scoped grant reaches exactly that
-          account.
+        summary: Account is also a trusted resource scope; role-based reach never expands to parent or
+          sibling accounts.
     related_entities:
       - entity:insurance-party
       - entity:insurance-party-role-assignment
@@ -932,17 +934,20 @@ entities:
       - planning-mds/features/F0017-deterministic-entity-resolution/README.md
   - id: entity:insurance-party-role-assignment
     label: Scoped insurance party role
-    notes: A party acting as named insured, servicing or placement broker, broker contact, risk manager,
+    notes: A party acting as named insured, broker of record, placement broker, broker contact, risk manager,
       account contact, carrier, MGA or underwriter in an explicit account, submission or policy-term scope,
-      with the organization or branch a person acts for (proposed ADR-0070). Broker of record is a policy-term
-      scope, so it can differ by line and term. One person can hold roles on several accounts. These domain
-      roles are not authorization roles or grants; they show who does what for Account 360 and routing.
-      Evidence and temporal context remain mandatory. F0012/F0013 settle production representation; the
-      example establishes no delegation authority or runtime schema.
+      with the organization or branch a person acts for (proposed ADR-0070). Broker of record is account-scoped
+      and dated; a placement broker on a term can override it for one line. One person can hold roles
+      on several accounts. Once confirmed by an authoritative source, a role decides an external person's
+      reach (their own accounts only) and a carrier employee's decision rights; a role read from a document
+      grants nothing. The access check is a proposed F0002-successor amendment to ADR-0062. Evidence and
+      temporal context remain mandatory. F0012/F0013 settle production representation; the example establishes
+      no delegation authority or runtime schema.
     rationale:
       - adr: adr:0070
         section: Proposed Decision
-        summary: Role assignments carry party, kind, scope and acted-for organization; they grant no access.
+        summary: Role assignments carry party, kind, scope and acted-for organization; confirmed ones
+          feed reach and decision rights.
       - adr: adr:0045
         section: Identity and release records
         summary: Projection mappings must preserve scoped relationship identity and lineage.
@@ -1075,10 +1080,12 @@ entities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
   - id: entity:ownership-interest
     label: Organization ownership interest
-    notes: One party's percentage interest in an organization, with valid time (proposed ADR-0070). An
-      organization can have several owners; majority ownership is computed, never stored. A joint venture's
-      owners need not match its designated parent account, which is set separately. Ownership never merges
-      identities or implies named-insured status.
+    notes: One party's percentage interest in an organization, with valid time (proposed ADR-0070). Any
+      number of owners (60/40, 50/50, four equal owners); majority ownership is computed, never stored.
+      The designated parent account is set separately and is at most one, so a joint venture is never
+      rolled up twice; without a majority owner it is normally a root account, listed as an ownership
+      interest on each owner's Account 360. Ownership never merges identities or implies named-insured
+      status.
     rationale:
       - adr: adr:0070
         section: Proposed Decision
@@ -1442,11 +1449,11 @@ schemas:
     label: Commercial P&C teaching records
     path: planning-mds/schemas/commercial-pc-example.schema.json
     notes: Schema and reference checks for synthetic contractor-account records under proposed ADR-0070
-      (one account per organization, designated parent accounts, percentage ownership, organization hierarchy),
-      scoped party roles, product composition, exact source lineage, ADR-0064 valid-time kinds with unknown
-      bounds, and a two-time endorsement. Not a production import/API schema or feature acceptance. RDF/OWL/SHACL/query
-      expectations are executed by capability:semantic-example-validation; existing GL fixture evidence
-      does not qualify this bundle.
+      (one account per organization, designated parent accounts, percentage ownership, organization hierarchy,
+      one owning account per policy, broker of record per account), scoped party roles, product composition,
+      exact source lineage, ADR-0064 valid-time kinds with unknown bounds, and a two-time endorsement.
+      Not a production import/API schema or feature acceptance. RDF/OWL/SHACL/query expectations are executed
+      by capability:semantic-example-validation; existing GL fixture evidence does not qualify this bundle.
     related_nodes:
       - adr:0064
       - adr:0070

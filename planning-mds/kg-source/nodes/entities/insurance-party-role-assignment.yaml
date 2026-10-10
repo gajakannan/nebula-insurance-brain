@@ -1,12 +1,14 @@
 id: entity:insurance-party-role-assignment
 label: Scoped insurance party role
 notes: >-
-  A party acting as named insured, servicing or placement broker, broker contact, risk
+  A party acting as named insured, broker of record, placement broker, broker contact, risk
   manager, account contact, carrier, MGA or underwriter in an explicit account, submission or
   policy-term scope, with the organization or branch a person acts for (proposed ADR-0070).
-  Broker of record is a policy-term scope, so it can differ by line and term. One person can
-  hold roles on several accounts. These domain roles are not authorization roles or grants;
-  they show who does what for Account 360 and routing. Evidence and temporal context remain
+  Broker of record is account-scoped and dated; a placement broker on a term can override it
+  for one line. One person can hold roles on several accounts. Once confirmed by an
+  authoritative source, a role decides an external person's reach (their own accounts only)
+  and a carrier employee's decision rights; a role read from a document grants nothing. The
+  access check is a proposed F0002-successor amendment to ADR-0062. Evidence and temporal context remain
   mandatory. F0012/F0013 settle production representation; the example establishes no
   delegation authority or runtime schema.
 source_docs:
@@ -18,7 +20,7 @@ source_docs:
 rationale:
 - adr: adr:0070
   section: Proposed Decision
-  summary: Role assignments carry party, kind, scope and acted-for organization; they grant no access.
+  summary: Role assignments carry party, kind, scope and acted-for organization; confirmed ones feed reach and decision rights.
 - adr: adr:0045
   section: Identity and release records
   summary: Projection mappings must preserve scoped relationship identity and lineage.

@@ -305,8 +305,9 @@ These are proposed contract additions, not claims about the current schema. The 
 | Employment | Person, employing organization or branch | `STATE` | Separate from any role assignment |
 | Account | Account identity, its one organization | organization `ETERNAL` | Exactly one organization per account and one account per organization in a tenant |
 | Parent account | Account, designated parent account | `STATE` | At most one parent; no cycles; not computed from ownership |
-| Ownership interest | Owner party, owned organization, percentage | parties `ETERNAL`, percentage `STATE` | 0 < percentage ≤ 100; several owners allowed; majority is computed |
-| Role assignment | Party, role kind, scope (account, submission or policy term), acted-for organization for a person | party and acted-for `STATE`; kind and scope `ETERNAL` | Grants no access; broker of record is scoped to a policy term |
-| Submission account | Submission, account | `STATE` | Policies have no owning account; they reach accounts through named-insured roles |
+| Ownership interest | Owner party, owned organization, percentage | parties `ETERNAL`, percentage `STATE` | 0 < percentage ≤ 100; any number of owners; majority is computed |
+| Role assignment | Party, role kind, scope (account, submission or policy term), acted-for organization for a person, authoritative source when used for access | party and acted-for `STATE`; kind and scope `ETERNAL` | Broker of record is scoped to an account, a placement broker to a policy term. Only a confirmed assignment decides reach or decision rights |
+| Policy or submission account | Policy or submission, its one account | `STATE` | Exactly one account; a policy's is normally the first named insured's |
+| Program link | Local policy, master program policy | `STATE` | The master belongs to the parent account; each local policy to its entity's account |
 
 Canonical-contract alignment: `Account.primary_party_uid`, `Account.parent_account_uid`, `PartyRelationship`, `AccountPartyRole` and `PolicyPartyRole` in `nebula-insurance-data-contracts`. ADR-0070 lists the gaps to raise there.

@@ -380,10 +380,10 @@ Section 117.1 tracks the decisions for implementation and production acceptance:
 
 **Account identity and account scope (opened 2026-10-09, direction set 2026-10-10).** The Cedar Bridge review asked whether Account is a party or a grouping of organizations, what an account-scoped grant reaches, what roots Entity 360, and how account identity relates to organization identity. The operator answered from commercial P&C practice, recorded in [ADR-0070](architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed):
 
-- each organization has its own account, with one designated parent account; ownership between organizations is a separate, percentage-bearing relationship (F0012);
-- a policy has no single owning account: each named insured's account sees it, and a parent rolls up its descendants (F0012, F0023);
-- brokers are organizations with hierarchy, locations and people, and broker of record can differ by line and term;
-- domain roles never grant access; an account-scoped grant reaches exactly that account, which needs an F0002-successor scope amendment to implement (ADR-0062);
+- each insured organization has its own account, with at most one designated parent account; ownership between organizations is a separate relationship with any number of percentage owners (F0012);
+- a policy belongs to exactly one account, normally the first named insured's; other named insureds stay roles on the term, and a master program's local policies link to it (F0012, F0023);
+- brokers are organizations with hierarchy, locations and people; each account has a dated broker of record and broker contacts, and a policy term can name a different placement broker;
+- external people reach only the accounts they hold an authoritative role on, never the parent's or a sibling's; carrier staff can see the tenant but act only where they hold the role. This needs an F0002-successor scope amendment to ADR-0062;
 - account identity and organization identity resolve separately (F0017).
 
 ADR-0070 lists its proof gates; until it is accepted, F0012/F0013 Phase B plan against it.

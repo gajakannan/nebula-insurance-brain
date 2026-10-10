@@ -35,11 +35,11 @@ Use the [Cedar Bridge contractor account](../../examples/commercial-pc-account/R
 [ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) answers BLUEPRINT section 4.8. Carry these into the foundation module:
 
 - Party (Organization, Person); organization hierarchy with no fixed depth; operating locations; employment.
-- Account: exactly one organization per account and one account per organization in a tenant; at most one designated parent account.
-- Ownership interest: owner, owned organization and percentage, several owners allowed; majority is computed.
-- Role assignment: party, role kind, scope (account, submission or policy term) and acted-for organization. Broker of record is a policy-term scope. Role kinds are open vocabulary aligned to the canonical `PartyRoleTypeCode`.
-- Policies have no owning account; they reach accounts through named-insured roles. Declare `temporal_kind` for every property (ADR-0064); the [data model](../../architecture/data-model.md#proposed-party-account-and-role-records-adr-0070) lists them.
-- Domain roles grant nothing (ADR-0062).
+- Account: exactly one insured organization per account and one account per organization in a tenant; at most one designated parent account. Brokers are organizations, not accounts.
+- Ownership interest: owner, owned organization and percentage, any number of owners; majority is computed. A joint venture without a majority owner is normally a root account.
+- Role assignment: party, role kind, scope (account, submission or policy term) and acted-for organization. Broker of record and broker contacts are account-scoped and dated; a placement broker on a policy term can override for one line. Role kinds are open vocabulary aligned to the canonical `PartyRoleTypeCode`, with additional named insured and additional insured kept distinct.
+- A policy belongs to exactly one account, normally the first named insured's; a local policy links to its master program. Declare `temporal_kind` for every property (ADR-0064); the [data model](../../architecture/data-model.md#proposed-party-account-and-role-records-adr-0070) lists them.
+- Role assignments carry the authoritative source that the proposed access amendment needs (ADR-0070 section 5); the vocabulary itself grants nothing.
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0012.yaml`.
 

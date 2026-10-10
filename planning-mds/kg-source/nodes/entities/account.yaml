@@ -1,13 +1,15 @@
 id: entity:account
 label: Insurance account
 notes: >-
-  The customer relationship with exactly one organization seeking or holding coverage, and
-  the root of Account 360 (proposed ADR-0070). One account per organization in a tenant, with
-  at most one designated parent account for roll-up; the parent is designated, not computed
-  from ownership. A policy has no owning account and reaches each account through its
-  organization's named-insured role, so one policy can appear under several accounts. Account
-  parentage and ownership never imply named-insured status or tenant/KB authorization; an
-  account-scoped grant reaches only that account (ADR-0062 scope amendment pending). F0012
+  The carrier's customer relationship with exactly one insured organization, and the root of
+  Account 360 (proposed ADR-0070). One account per organization in a tenant, with at most one
+  designated parent account for roll-up; the parent is designated, not computed from
+  ownership. Each account has a dated broker of record and broker contacts; brokers are
+  organizations, not accounts. Each policy belongs to exactly one account, normally the first
+  named insured's; other named insureds stay roles on the term, and a master program's local
+  policies link to it. Parentage and ownership never imply named-insured status. External
+  people reach only the accounts they hold an authoritative role on, never the parent or
+  siblings; carrier staff see all and act by role (F0002-successor amendment pending). F0012
   owns the representation, F0017 account versus organization identity, F0023 Account 360. No
   fictional Cedar Bridge instance belongs in the planning KG.
 source_docs:
@@ -21,13 +23,13 @@ source_docs:
 rationale:
 - adr: adr:0070
   section: Proposed Decision
-  summary: One account per organization with a designated parent; policies reach accounts through named-insured roles.
+  summary: One account per organization with a designated parent; each policy belongs to exactly one account.
 - adr: adr:0011
   section: Decision
   summary: Shared account and party concepts compose with line-specific coverage modules.
 - adr: adr:0062
   section: Decision
-  summary: Account is also a trusted resource scope; an account-scoped grant reaches exactly that account.
+  summary: Account is also a trusted resource scope; role-based reach never expands to parent or sibling accounts.
 related_entities:
 - entity:insurance-party
 - entity:ownership-interest

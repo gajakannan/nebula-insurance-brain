@@ -36,8 +36,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 ## Account, party and role amendment (2026-10-10)
 
-[ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Examples: [Cedar Bridge EX-PC-015 to EX-PC-017](../../examples/commercial-pc-account/cases.md).
+[ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Examples: [Cedar Bridge EX-PC-015 to EX-PC-018](../../examples/commercial-pc-account/cases.md).
 
 - Resolve account identity and organization identity separately. Each organization has exactly one account in a tenant; a merge of organizations or accounts states which survives and how the other's parent-account, ownership and role facts move.
 - Broker branches and offices are organizations under a parent organization; resolve them as their own identities, never by matching the parent's name.
 - Ownership and account parentage never merge identities. A joint venture remains its own organization and account.
+- An account merge keeps every policy with exactly one owning account and carries broker-of-record and contact history across.

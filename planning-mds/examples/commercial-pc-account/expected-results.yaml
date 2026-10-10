@@ -16,19 +16,26 @@ semantic_execution:
     2026-10-10 (ADR-0070 account model): the account-program query became a hierarchy roll-up with
     the same six rows; account-360-workshop, ownership and account-team queries and two
     account-structure boundary graphs were added. All matched on first execution.
+    Later the same day (ADR-0070 revision): each policy belongs to one account, each account has a
+    broker of record and its own broker contact. account-program fell to four rows, account-team
+    rose to eight, account-360-workshop became account-360-contracting, and broker-contact-reach
+    and a policy-two-accounts boundary were added.
 scope: document-to-graph teaching fixtures; no Nebula runtime, insurance eligibility or claim determination
 queries:
 - file: queries/account-program.rq
-  rows: 6
-  boundary: the Holdings roll-up reaches policies only through descendant organizations' named-insured roles; parentage creates no named insured
-- file: queries/account-360-workshop.rq
+  rows: 4
+  boundary: the Holdings roll-up lists each policy once under the one account it belongs to; parentage creates no named insured
+- file: queries/account-360-contracting.rq
   rows: 3
-  boundary: the Workshop account sees the auto and umbrella policies it shares with Contracting, not the GL policy (EX-PC-016)
+  boundary: Contracting owns GL and is only a named insured on the Workshop account's auto and umbrella policies (EX-PC-016)
+- file: queries/broker-contact-reach.rq
+  rows: 5
+  boundary: a broker contact reaches only the accounts they hold the role on, never the parent's or a sibling's (EX-PC-018)
 - file: queries/ownership.rq
   rows: 2
   boundary: a 40 percent owner has its own account but is not the designated account parent (EX-PC-015)
 - file: queries/account-team.rq
-  rows: 6
+  rows: 8
   boundary: who does what across the hierarchy; domain roles for Account 360, never access grants (EX-PC-017)
 - file: queries/coverage-money.rq
   rows: 8
@@ -50,6 +57,7 @@ shacl:
 - {shape: property-completeness.ttl, data: boundaries/missing-location.ttl, conforms: false}
 - {shape: shapes.ttl, data: boundaries/two-parent-accounts.ttl, conforms: false}
 - {shape: shapes.ttl, data: boundaries/duplicate-organization-account.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/policy-two-accounts.ttl, conforms: false}
 timeline:
 # result: VALUE (holds), UNKNOWN (ADR-0064 unknown start or end), ABSENT (does not hold or not yet recorded).
 - {case: EX-PC-006-A, slot: EX-PC-SLOT-BPP-ORIGINAL, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-08T00:00:00Z', result: VALUE, fact: EX-PC-F-BPP-ORIGINAL, value: '150000.00'}
