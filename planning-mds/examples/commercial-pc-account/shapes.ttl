@@ -21,7 +21,7 @@ pc:CoverageReferenceShape a sh:NodeShape ;
     sh:property [ sh:path pc:coverageOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:PolicyTerm ] .
 
 # ADR-0070: one organization per account, at most one designated parent, one account per organization,
-# and exactly one account per policy.
+# exactly one account per policy and program, and at most one program per policy.
 pc:AccountShape a sh:NodeShape ; sh:targetClass pc:Account ;
     sh:property [ sh:path pc:accountOrganization ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Organization ] ;
     sh:property [ sh:path pc:parentAccount ; sh:maxCount 1 ; sh:class pc:Account ] .
@@ -37,4 +37,8 @@ pc:OwnershipShape a sh:NodeShape ; sh:targetClass pc:OwnershipInterest ;
         sh:minExclusive 0 ; sh:maxInclusive 100 ] .
 
 pc:PolicyAccountShape a sh:NodeShape ; sh:targetClass pc:Policy ;
+    sh:property [ sh:path pc:forAccount ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Account ] ;
+    sh:property [ sh:path pc:partOfProgram ; sh:maxCount 1 ; sh:class pc:Program ] .
+
+pc:ProgramShape a sh:NodeShape ; sh:targetClass pc:Program ;
     sh:property [ sh:path pc:forAccount ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Account ] .

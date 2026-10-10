@@ -10,25 +10,25 @@ This companion to the [small interchange example](../ontology-interchange/README
 
 Under proposed [ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md), every organization has its own account. **Cedar Bridge Holdings LLC** owns all of **Cedar Bridge Workshop LLC** and 60 percent of **Cedar Bridge Contracting LLC**, a joint venture with **Example Ridge Builders Inc.** (40 percent). The Workshop and Contracting accounts have the Holdings account as their designated parent. Ridge Builders has its own account, which is not a parent.
 
-Workshop has a BOP and Contracting a standalone GL policy. Both are named on the auto and umbrella declarations: Workshop as first named insured, Contracting as an additional named insured. Every policy belongs to exactly one account: BOP, auto and umbrella to the Workshop account, GL to the Contracting account. Named-insured status comes from each policy term's role assignments, never from the account hierarchy or ownership. Each account has Harbor as broker of record and its own broker contact.
+Workshop has a BOP and Contracting a standalone GL policy. Both are named on the auto and umbrella declarations: Workshop as first named insured, Contracting as an additional named insured. Every policy belongs to exactly one account: BOP, auto and umbrella to the Workshop account, GL to the Contracting account. A small property program belongs to the Holdings account, with a master policy for Holdings and a local policy for each subsidiary, each under its own entity's account and linked to the program. Named-insured status comes from each policy term's role assignments, never from the account hierarchy or ownership. Each account has Harbor as broker of record and its own broker contact.
 
 | Participant | Represented as | Boundary |
 |---|---|---|
-| Holdings account | Root of the hierarchy; Holdings owns Workshop and 60% of Contracting | A parent and an owner, but owns no policy and is a named insured on none |
-| Workshop / Contracting accounts | One account per organization, each with the Holdings account as designated parent | Workshop owns BOP, auto and umbrella; Contracting owns GL and is also a named insured on auto and umbrella |
+| Holdings account | Root of the hierarchy; Holdings owns Workshop and 60% of Contracting; owns the property program and its master policy | Parentage never makes it a named insured on its children's policies |
+| Workshop / Contracting accounts | One account per organization, each with the Holdings account as designated parent | Workshop owns BOP, auto, umbrella and a local program policy; Contracting owns GL and a local program policy, and is also a named insured on auto and umbrella |
 | Ridge Builders | 40% owner of Contracting, with its own account | A minority owner is not the account parent |
 | Workshop LLC | Named insured on the BOP, auto and umbrella terms | Named on the GL term only if the GL declarations say so; they don't |
 | Contracting LLC | Named insured on the GL, auto and umbrella terms | Covered by the BOP only if named on it; it isn't |
 | Harbor Example Brokerage and its Riverside branch | Broker of record for the Holdings, Workshop and Contracting accounts and placement broker on three terms; the branch is an organization under it, with its own office | Broker of record is dated, so a change keeps history |
-| Example Fleet Brokers | Placement broker on the auto term only | A per-line override of the account's broker of record |
+| Example Fleet Brokers and Drew Example | Placement broker on the auto term only; Drew is its broker contact on that policy | A per-line override; Drew reaches the auto policy, not the accounts behind it |
 | Jordan Example | Broker contact for the Holdings and Workshop accounts, employed by the Riverside branch | Works for neither the insured nor a carrier; reaches no Contracting record |
-| Sam Example | Broker contact for the Contracting account, employed by Harbor's head office | Reaches no Holdings or Workshop record |
+| Sam Example | Broker contact for the Contracting account and on the umbrella policy, employed by Harbor's head office | Reaches the umbrella because named on it; not auto, which names Contracting but not Sam |
 | Casey Example | Risk manager for the Holdings account and account contact for the Workshop account, employed by Holdings | One person, two roles, two accounts |
 | Example Maple Mutual / Example Granite Casualty | Carrier roles on specific policy terms; underwriters Morgan (BOP) and Avery (GL) | Carrier staff can see the tenant; the underwriter role says who may act |
 | Example Delegated Underwriting MGA and Rowan Example | MGA handling the contracting submission; Rowan underwrites for it | Granite is the GL carrier; the fixture shows no delegated authority |
 | Shop, yard, Riverside office and van | Location and vehicle references | Insured only where a coverage names them |
 
-Party roles are `RoleAssignment` nodes with a party, a role kind, a scope (account, submission or policy term) and, for a person, the organization acted for. Under ADR-0070 they also feed access: an external person reaches only the accounts they hold a role on, and carrier staff may act only where they hold the role. No authorization code runs in this fixture ([EX-PC-018](cases.md#ex-pc-018--external-contacts-reach-their-own-accounts-carrier-staff-see-but-act-by-role)).
+Party roles are `RoleAssignment` nodes with a party, a role kind, a scope (account, submission or policy term) and, for a person, the organization acted for. Under ADR-0070 they also feed access: an external person reaches only what their roles name (an account and its own policies, or a single policy), and carrier staff may act only where they hold the role. No authorization code runs in this fixture ([EX-PC-018](cases.md#ex-pc-018--external-contacts-reach-what-their-roles-name-carrier-staff-see-but-act-by-role)).
 
 ```mermaid
 flowchart TD
@@ -50,6 +50,13 @@ flowchart TD
     GL["Standalone GL"] -->|belongs to| CA
     C -.->|additional named insured| AU
     C -.->|additional named insured| U
+    PG["Property program"] -->|belongs to| H
+    PM["Master policy"] -->|part of| PG
+    PM -->|belongs to| H
+    PW["Local policy W"] -->|part of| PG
+    PC["Local policy C"] -->|part of| PG
+    PW -->|belongs to| WA
+    PC -->|belongs to| CA
     U -->|scheduled underlying| GL
     U -->|scheduled underlying| AU
 ```
@@ -74,10 +81,10 @@ The example encodes this account's declarations only: no eligibility rules, limi
 
 ## 3. Follow the documents into the graph
 
-1. Read the eight excerpts in [source-package.md](source-package.md): account and hierarchy record, BOP, GL, auto, umbrella, broker request, endorsement and loss notice. Each states its document date.
-2. Inspect [records.json](records.json): **89 identity rows, 9 evidence excerpts, 181 assertions, 177 slots, 180 fact versions**, with interpretation runs, reviews and commits. Its [JSON Schema](../../schemas/commercial-pc-example.schema.json) describes these teaching records.
+1. Read the nine excerpts in [source-package.md](source-package.md): account and hierarchy record, BOP, GL, auto, umbrella, property program, broker request, endorsement and loss notice. Each states its document date.
+2. Inspect [records.json](records.json): **110 identity rows, 10 evidence excerpts, 239 assertions, 235 slots, 238 fact versions**, with interpretation runs, reviews and commits. Its [JSON Schema](../../schemas/commercial-pc-example.schema.json) describes these teaching records.
 3. Follow a fact's `assertion_ref` to `run_ref` and `evidence_ref`, and its `commit_ref` to the review that accepted the reading. Accepting a reading records what the source says; it issues no policy and decides no coverage.
-4. Read [snapshot.ttl](snapshot.ttl) or [snapshot.jsonld](snapshot.jsonld): **176 business statements** plus type and label metadata, at `valid_as_of = 2026-07-05` and `known_as_of = 2026-07-11`. Both are generated from `records.json`.
+4. Read [snapshot.ttl](snapshot.ttl) or [snapshot.jsonld](snapshot.jsonld): **234 business statements** plus type and label metadata, at `valid_as_of = 2026-07-05` and `known_as_of = 2026-07-11`. Both are generated from `records.json`.
 5. Use [snapshot-index.json](snapshot-index.json) to recover each statement's fact, assertion, evidence and commit. Type and label rows cite their evidence in `records.entities`.
 
 All rows sit in one synthetic tenant/KB context, which authorizes nothing. The snapshot is a scoped view of accepted facts, not the PostgreSQL kernel's schema. Relationship slots distinguish target identities; money slots keep currency and basis qualifiers.
@@ -91,7 +98,7 @@ Each property declares a `temporal_kind` in [ontology.yaml](ontology.yaml), foll
 | Kind | Properties | Valid time |
 |---|---|---|
 | `ETERNAL` | policy number, product type, term period, coverage-of, monetary basis and currency, role kind and scope, an account's organization, an ownership interest's owner and owned organization | none; identity and structure |
-| `STATE` | limits, deductibles, schedules, location, role party and acted-for organization, a policy's or submission's account, parent account, ownership percentage, parent organization, employment, operating location | an interval with per-bound granularity, `attested_from`, and an `OPEN`, `BOUNDED` or `UNKNOWN` end |
+| `STATE` | limits, deductibles, schedules, location, role party and acted-for organization, a policy's or submission's account, a policy's program, parent account, ownership percentage, parent organization, employment, operating location | an interval with per-bound granularity, `attested_from`, and an `OPEN`, `BOUNDED` or `UNKNOWN` end |
 | `EVENT` | the loss notice, coverage requests | a point at its stated granularity |
 
 Policy-term facts are `BOUNDED` by the declared period at `DAY` granularity. Relationships the sources never date (parent accounts, ownership, employment, operating locations, broker of record, a policy's account, contact and MGA roles) have an unknown start: `from` is null and `attested_from` is the document date. Before that date they read `UNKNOWN`, never "since always".
@@ -121,23 +128,24 @@ A snapshot includes `ETERNAL` facts, `STATE` facts that read as a value, and `EV
 | [program-extensions.ttl](program-extensions.ttl) | Lightweight auto and umbrella concepts |
 | [release.yaml](release.yaml) | Illustrative module versions, dependency locks and artifact digests |
 | [projection-mapping.yaml](projection-mapping.yaml) | Proposed graph mappings, explicit omissions and lineage obligations |
-| [shapes.ttl](shapes.ttl) | Supplied-value, scoped-role-record, account, policy-account and ownership checks |
+| [shapes.ttl](shapes.ttl) | Supplied-value, scoped-role-record, account, policy-account, program and ownership checks |
 | [gl-completeness.ttl](gl-completeness.ttl) | GL each-occurrence input completeness; an aggregate does not substitute |
 | [property-completeness.ttl](property-completeness.ttl) | BPP amount and location completeness for a property summary |
 | [expected-inferences.ttl](expected-inferences.ttl) | Six selected type/inverse consequences |
 | [cases.md](cases.md), [expected-results.yaml](expected-results.yaml) | Worked and boundary cases with authored outcomes |
-| [queries/](queries/) | Account roll-up, Account 360, broker contact reach, ownership, account team, coverage money, umbrella schedule and schedule review |
+| [queries/](queries/) | Account roll-up, Account 360, broker contact reach, program, ownership, account team, coverage money, umbrella schedule and schedule review |
 | [boundaries/](boundaries/) | Independent missing-input, malformed-value and account-structure graphs |
 
 Module version IRIs differ from the composed release IRI, and dependencies resolve through the manifest rather than remote `owl:imports`. The YAML and OWL files are hand-maintained counterparts. Release digests identify bytes; compatibility is a separate judgment. Domain and range declarations infer types only; no axiom creates a coverage from a product label.
 
 Run the queries against the **asserted snapshot**, without the inferred closure:
 
-- [account roll-up](queries/account-program.rq): four policies under the Holdings hierarchy, each once under the account it belongs to, with carrier and placement broker ([EX-PC-001](cases.md#ex-pc-001--account-versus-insured));
-- [Contracting Account 360](queries/account-360-contracting.rq): the GL policy it owns and the two Workshop policies naming it ([EX-PC-016](cases.md#ex-pc-016--a-policy-belongs-to-exactly-one-account));
-- [broker contact reach](queries/broker-contact-reach.rq): five rows; each broker contact reaches only their own accounts' policies ([EX-PC-018](cases.md#ex-pc-018--external-contacts-reach-their-own-accounts-carrier-staff-see-but-act-by-role));
+- [account roll-up](queries/account-program.rq): seven policies under the Holdings hierarchy, each once under the account it belongs to, with carrier and placement broker ([EX-PC-001](cases.md#ex-pc-001--account-versus-insured));
+- [Contracting Account 360](queries/account-360-contracting.rq): the GL and local program policies it owns and the two Workshop policies naming it ([EX-PC-016](cases.md#ex-pc-016--a-policy-belongs-to-exactly-one-account));
+- [broker contact reach](queries/broker-contact-reach.rq): nine rows; each broker contact reaches only what their roles name ([EX-PC-018](cases.md#ex-pc-018--external-contacts-reach-what-their-roles-name-carrier-staff-see-but-act-by-role));
 - [ownership](queries/ownership.rq): two owners of Contracting, only one of them the account parent ([EX-PC-015](cases.md#ex-pc-015--ownership-is-not-the-account-hierarchy));
-- [account team](queries/account-team.rq): eight person/role/scope rows across the hierarchy ([EX-PC-017](cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what));
+- [program](queries/program.rq): the Holdings program's master and two local policies, each under its own account ([EX-PC-019](cases.md#ex-pc-019--a-program-links-its-policies-it-does-not-own-them));
+- [account team](queries/account-team.rq): ten person/role/scope rows across the hierarchy ([EX-PC-017](cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what));
 - [coverage money](queries/coverage-money.rq): eight qualified values, which must never be summed across coverage, basis or layer;
 - [umbrella schedule](queries/umbrella-schedule.rq): the GL and auto terms;
 - [schedule review](queries/umbrella-schedule-review.rq): one row, Workshop's unscheduled BOP liability, a prompt for an underwriter's question ([EX-PC-013](cases.md#ex-pc-013--an-unscheduled-primary-is-a-review-prompt)).

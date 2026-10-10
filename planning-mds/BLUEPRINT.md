@@ -381,9 +381,9 @@ Section 117.1 tracks the decisions for implementation and production acceptance:
 **Account identity and account scope (opened 2026-10-09, direction set 2026-10-10).** The Cedar Bridge review asked whether Account is a party or a grouping of organizations, what an account-scoped grant reaches, what roots Entity 360, and how account identity relates to organization identity. The operator answered from commercial P&C practice, recorded in [ADR-0070](architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed):
 
 - each insured organization has its own account, with at most one designated parent account; ownership between organizations is a separate relationship with any number of percentage owners (F0012);
-- a policy belongs to exactly one account, normally the first named insured's; other named insureds stay roles on the term, and a master program's local policies link to it (F0012, F0023);
+- a policy belongs to exactly one account, normally the first named insured's; other named insureds stay roles on the term, and a program's master and local policies link to the program, which belongs to the parent account (F0012, F0023);
 - brokers are organizations with hierarchy, locations and people; each account has a dated broker of record and broker contacts, and a policy term can name a different placement broker;
-- external people reach only the accounts they hold an authoritative role on, never the parent's or a sibling's; carrier staff can see the tenant but act only where they hold the role. This needs an F0002-successor scope amendment to ADR-0062;
+- external people reach only what their authoritative roles name: an account and its own policies, or a single policy, never the parent's, a sibling's or the account behind a policy; carrier staff can see the tenant but act only where they hold the role. This needs an F0002-successor scope amendment to ADR-0062;
 - account identity and organization identity resolve separately (F0017).
 
 ADR-0070 lists its proof gates; until it is accepted, F0012/F0013 Phase B plan against it.
@@ -465,6 +465,6 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 Current position (2026-10-10): F0001 to F0003 are done and archived. F0005's synthetic Docling-Graph proof is complete, with production qualification deferred (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
 
 1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
-2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B, and raise its cross-repository gaps with the data-contracts and CRM owners.
+2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
 3. For F0012, run the `plan` action as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
 4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.

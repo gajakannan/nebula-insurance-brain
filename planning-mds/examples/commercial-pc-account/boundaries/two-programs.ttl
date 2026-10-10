@@ -1,0 +1,10 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+# Independent hypothetical input: a local policy issued under two programs. A policy is issued
+# under at most one program; the family view must not branch (ADR-0070).
+d:EX-PC-GAP-ORG a pc:Organization .
+d:EX-PC-GAP-ACCOUNT a pc:Account ; pc:accountOrganization d:EX-PC-GAP-ORG .
+d:EX-PC-GAP-PROGRAM-A a pc:Program ; pc:forAccount d:EX-PC-GAP-ACCOUNT .
+d:EX-PC-GAP-PROGRAM-B a pc:Program ; pc:forAccount d:EX-PC-GAP-ACCOUNT .
+d:EX-PC-GAP-LOCAL a pc:Policy ; pc:forAccount d:EX-PC-GAP-ACCOUNT ;
+    pc:partOfProgram d:EX-PC-GAP-PROGRAM-A, d:EX-PC-GAP-PROGRAM-B .

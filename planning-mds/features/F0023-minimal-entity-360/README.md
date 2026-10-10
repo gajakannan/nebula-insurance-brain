@@ -36,9 +36,9 @@ See the [example coverage map](../../examples/README.md) and [F0065](../F0065-gr
 
 ## Account, party and role amendment (2026-10-10)
 
-[ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Examples: [Cedar Bridge EX-PC-015 to EX-PC-018](../../examples/commercial-pc-account/cases.md).
+[ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Examples: [Cedar Bridge EX-PC-015 to EX-PC-019](../../examples/commercial-pc-account/cases.md).
 
 - Root Account 360 on one account: its organization, broker of record and contacts, the policies it owns, the policies it is named on, its role assignments (who does what), and its parent and child accounts.
 - The hierarchy view rolls owned policies up, so each appears once. A master program shows its linked local policies.
 - Show ownership interests with percentages in their own section, outside the roll-up; never present a minority owner as the account parent.
-- An external viewer sees only the accounts they hold a role on, never the parent or siblings; carrier staff see all but act only where they hold the role (ADR-0070 section 5, pending its access amendment).
+- An external viewer sees only what their roles name (an account and its own policies, or a single policy), never the parent, siblings or the account behind a policy; carrier staff see all but act only where they hold the role (ADR-0070 section 5, pending its access amendment).

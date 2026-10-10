@@ -1,11 +1,17 @@
 PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
 PREFIX d: <https://example.invalid/nebula/data/>
-# Expected: five rows. Each broker contact reaches only the accounts they hold the role on and the
-# policies those accounts own: Jordan reaches Holdings (no policies) and Workshop (BOP, auto,
-# umbrella); Sam reaches Contracting (GL). The parent account gives Jordan nothing of Contracting.
+# Expected: nine rows. A broker contact reaches what their role names, nothing more.
+# Account scope: the account's own policies. Jordan: Holdings (the master program) and Workshop
+# (BOP, auto, umbrella, its local program policy). Sam: Contracting (GL, its local policy).
+# Policy-term scope: that policy only. Sam: the umbrella; Drew (Fleet Brokers): the auto policy.
+# Nobody reaches an account through a parent, a master program or a policy-only role.
 # This is the data an access check would read; no authorization code runs here (EX-PC-018).
-SELECT ?person ?account ?policy WHERE {
-  ?assignment pc:roleParty ?person ; pc:roleKind d:EX-PC-ROLE-BrokerContact ; pc:roleScope ?account .
-  ?account a pc:Account .
-  OPTIONAL { ?policy pc:forAccount ?account ; pc:policyNumber ?number . }
-} ORDER BY ?person ?account ?policy
+SELECT ?person ?scope ?policy WHERE {
+  ?assignment pc:roleParty ?person ; pc:roleKind d:EX-PC-ROLE-BrokerContact ; pc:roleScope ?scope .
+  {
+    ?scope a pc:Account .
+    ?policy pc:forAccount ?scope ; pc:policyNumber ?number .
+  } UNION {
+    ?scope pc:termOf ?policy .
+  }
+} ORDER BY ?person ?scope ?policy

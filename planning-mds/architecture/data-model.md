@@ -306,8 +306,8 @@ These are proposed contract additions, not claims about the current schema. The 
 | Account | Account identity, its one organization | organization `ETERNAL` | Exactly one organization per account and one account per organization in a tenant |
 | Parent account | Account, designated parent account | `STATE` | At most one parent; no cycles; not computed from ownership |
 | Ownership interest | Owner party, owned organization, percentage | parties `ETERNAL`, percentage `STATE` | 0 < percentage ≤ 100; any number of owners; majority is computed |
-| Role assignment | Party, role kind, scope (account, submission or policy term), acted-for organization for a person, authoritative source when used for access | party and acted-for `STATE`; kind and scope `ETERNAL` | Broker of record is scoped to an account, a placement broker to a policy term. Only a confirmed assignment decides reach or decision rights |
+| Role assignment | Party, role kind, scope (account, submission or policy term), acted-for organization for a person, authoritative source when used for access | party and acted-for `STATE`; kind and scope `ETERNAL` | Broker of record is scoped to an account, a placement broker to a policy term. Only a confirmed assignment decides reach or decision rights; an account role reaches the account and its own policies, a policy-term role that policy only |
 | Policy or submission account | Policy or submission, its one account | `STATE` | Exactly one account; a policy's is normally the first named insured's |
-| Program link | Local policy, master program policy | `STATE` | The master belongs to the parent account; each local policy to its entity's account |
+| Program and program link | Program with its one account; each master or local policy's program | `STATE` | The program and master policy belong to the parent account, each local policy to its entity's account; at most one program per policy |
 
 Canonical-contract alignment: `Account.primary_party_uid`, `Account.parent_account_uid`, `PartyRelationship`, `AccountPartyRole` and `PolicyPartyRole` in `nebula-insurance-data-contracts`. ADR-0070 lists the gaps to raise there.

@@ -54,7 +54,7 @@ The operator answered them from commercial P&C practice on 2026-10-10, then refi
 ### 3. Policies and accounts
 
 - **One owning account.** A policy belongs to exactly one account, normally the first named insured's. Other named insureds are named-insured role assignments on the term. Their accounts show the policy as one they are named on, not one they own.
-- **Programs.** A master program belongs to the parent account. Each entity's local policy belongs to that entity's account and links to the master. The family view is derived from those links, not from a policy belonging to several accounts.
+- **Programs.** A program (the canonical `MASTER_PROGRAM` Agreement) belongs to the parent account. Its master policy belongs to the parent account too; each entity's local policy belongs to that entity's account. Every policy links to the program (`Policy.agreement_uid`), at most one each. The family view is derived from those links, not from a policy belonging to several accounts.
 - **Roll-up.** An account's portfolio is the policies it owns. A parent's roll-up adds its descendants' portfolios, so each policy is counted once.
 - **Not inferred.** Being under a parent account, or being owned by another organization, never makes an organization a named insured.
 - **Additional insured is a different role.** An additional named insured has named-insured rights. An additional insured, such as a landlord or a general contractor added by endorsement, is a third party with narrower rights and its own role kind.
@@ -80,12 +80,12 @@ Rules:
 
 Role assignments now feed access. This section is a proposed amendment to the F0002 authorization boundary, not a change to delivered behavior.
 
-- **External principals reach only their own accounts.** A broker contact, insured contact or other external person reaches exactly the accounts on which they hold a current role assignment:
-  - the account's organization;
-  - its submissions;
-  - the policies it owns.
+- **External principals reach what their roles name.** A broker contact, insured contact or other external person reaches exactly the scopes of their current role assignments:
+  - an **account** role reaches the account's organization, its submissions and the policies it owns;
+  - a **policy-term** role reaches that policy only, not the account it belongs to;
+  - a **submission** role reaches that submission only.
 
-  Reach never expands to parent, child or sibling accounts. Whether an external principal also sees a policy owned by another account that names its organization is left to the amendment.
+  Nothing cascades. Reach never expands to parent, child or sibling accounts, from a program or master policy to its local policies, or from a policy to its account. Being on an organization's account does not reach a policy owned by another account that names that organization; a role on that policy does.
 - **Carrier staff see everything and act by role.** Internal staff hold tenant- or knowledge-base-wide read grants. A decision or change, such as an underwriting decision on a property term, also needs a current role assignment of the right kind on that term, submission or account.
 - **Only authoritative roles count.** A role extracted from a document is a reading, not a grant. A role counts for access only once carrier operations, a broker-of-record letter or another trusted system has confirmed it. Otherwise a forged submission could grant access to itself.
 - **Revocation is immediate.** Ending a role assignment ends the reach or decision right it supported, including for historical reads (ADR-0062).
@@ -99,20 +99,23 @@ Role assignments now feed access. This section is a proposed amendment to the F0
 
 ## Cross-repository alignment
 
+The operator aligns both repositories separately, following the [cross-repository plan](../account-model-cross-repo-plan.md).
+
 - **nebula-insurance-data-contracts.** This model maps onto the canonical contracts:
   - `Account.parent_account_uid` is the designated parent;
   - `Account.primary_party_uid` is the account's organization;
+  - `Policy.account_uid` is the one owning account;
+  - `Agreement` with type `MASTER_PROGRAM`, linked by `Policy.agreement_uid`, is the program;
   - `AccountPartyRole` and `PolicyPartyRole` are the scoped roles;
   - `PartyRelationship` holds organization hierarchy and ownership.
 
-  Gaps to raise there, not decided here:
+  Gaps, detailed in the plan:
   - an ownership percentage on `PartyRelationship`;
   - a line-of-business or policy-term qualifier for broker roles that override the account's broker of record;
   - an acting-for organization (branch) on role contracts;
   - a uniqueness rule of one account per organization;
-  - a master program and a local policy's link to it;
   - an authoritative-source marker on role assignments used for access.
-- **nebula-insurance-crm.** The CRM's account module says an account "belongs to broker", which matches the broker of record here; keeping its history and allowing per-line placement brokers need reconciling there. Its ADR-026 models the distribution tree as hierarchy nodes rather than organizations. The Brain does not change CRM contracts.
+- **nebula-insurance-crm.** The CRM already has a dated broker of record (`Account.BrokerOfRecordId` with relationship history), a per-policy broker and one account per policy. It lacks parent accounts, ownership, account-to-organization links, broker branches as organizations (ADR-026 uses distribution nodes) and per-account or per-policy contact assignments. Its broker users reach their whole broker tenant (ADR-007), wider than section 5 allows. Its `Program` is an MGA program, not an insured's program. The Brain does not change CRM contracts.
 
 ## Consequences
 
@@ -125,6 +128,8 @@ Role assignments now feed access. This section is a proposed amendment to the F0
   - a broker of record and a broker contact per account;
   - a second placement broker for the auto line;
   - one owning account per policy, with an additional named insured;
+  - a small property program with a master policy and a local policy per subsidiary;
+  - broker contacts scoped to an account and to a single policy;
   - per-line carrier underwriters.
 - **Downstream features:**
   - F0012 adds these classes and properties to the foundation module;
@@ -138,9 +143,9 @@ Role assignments now feed access. This section is a proposed amendment to the F0
 Before acceptance:
 
 1. F0012 Phase B authors these classes and properties with `temporal_kind`, definitions and regression cases (ADR-0063, ADR-0064).
-2. The Cedar Bridge cases EX-PC-001, EX-PC-011 and EX-PC-015 to EX-PC-018 pass the `semantic_examples` and `semantic_rdf` gates.
+2. The Cedar Bridge cases EX-PC-001, EX-PC-011 and EX-PC-015 to EX-PC-019 pass the `semantic_examples` and `semantic_rdf` gates.
 3. F0017 states how account identity and organization identity resolve and merge.
-4. The role-based reach and decision rights in section 5 are accepted in an F0002-successor scope amendment, or replaced there, with security review of the authoritative-source rule.
+4. The role-based reach and decision rights in section 5 (cases EX-PC-018 and EX-PC-019) are accepted in an F0002-successor scope amendment, or replaced there, with security review of the authoritative-source rule.
 
 ## References
 

@@ -8,6 +8,7 @@
 <https://example.invalid/nebula/modules/pc-insurance-core> a owl:Ontology ; owl:versionIRI <https://example.invalid/nebula/modules/pc-insurance-core/1> .
 
 pc:Policy a owl:Class .
+pc:Program a owl:Class .
 pc:PolicyTerm a owl:Class .
 pc:ProductType a owl:Class .
 pc:Submission a owl:Class .
@@ -17,9 +18,10 @@ pc:MonetaryTerm a owl:Class .
 pc:Limit a owl:Class ; rdfs:subClassOf pc:MonetaryTerm .
 pc:Deductible a owl:Class ; rdfs:subClassOf pc:MonetaryTerm .
 pc:LossNotice a owl:Class .
-# A submission or a policy belongs to exactly one account (ADR-0070); no domain, so neither is inferred.
+# A submission, policy or program belongs to exactly one account (ADR-0070); no domain, so none is inferred.
 pc:forAccount a owl:ObjectProperty ; rdfs:range pc:Account .
 pc:productType a owl:ObjectProperty ; rdfs:domain pc:Policy ; rdfs:range pc:ProductType .
+pc:partOfProgram a owl:ObjectProperty ; rdfs:domain pc:Policy ; rdfs:range pc:Program .
 pc:termOf a owl:ObjectProperty ; rdfs:domain pc:PolicyTerm ; rdfs:range pc:Policy ; owl:inverseOf pc:hasTerm .
 pc:hasTerm a owl:ObjectProperty ; rdfs:domain pc:Policy ; rdfs:range pc:PolicyTerm .
 pc:coverageOf a owl:ObjectProperty ; rdfs:domain pc:Coverage ; rdfs:range pc:PolicyTerm ; owl:inverseOf pc:hasCoverage .

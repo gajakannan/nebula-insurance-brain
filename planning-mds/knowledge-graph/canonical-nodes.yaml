@@ -743,11 +743,12 @@ entities:
       parent account for roll-up; the parent is designated, not computed from ownership. Each account
       has a dated broker of record and broker contacts; brokers are organizations, not accounts. Each
       policy belongs to exactly one account, normally the first named insured's; other named insureds
-      stay roles on the term, and a master program's local policies link to it. Parentage and ownership
-      never imply named-insured status. External people reach only the accounts they hold an authoritative
-      role on, never the parent or siblings; carrier staff see all and act by role (F0002-successor amendment
-      pending). F0012 owns the representation, F0017 account versus organization identity, F0023 Account
-      360. No fictional Cedar Bridge instance belongs in the planning KG.
+      stay roles on the term. A program belongs to the parent account, and its master and local policies
+      link to it. Parentage and ownership never imply named-insured status. External people reach only
+      what their authoritative roles name, never the parent or siblings, and a policy-only role never
+      opens the account; carrier staff see all and act by role (F0002-successor amendment pending). F0012
+      owns the representation, F0017 account versus organization identity, F0023 Account 360. No fictional
+      Cedar Bridge instance belongs in the planning KG.
     rationale:
       - adr: adr:0070
         section: Proposed Decision
@@ -772,6 +773,7 @@ entities:
       - glossary_term:insurance-product-composition
       - schema:commercial-pc-example
     source_docs:
+      - planning-mds/architecture/account-model-cross-repo-plan.md
       - planning-mds/architecture/commercial-pc-example-handoff.md
       - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
       - planning-mds/domain/glossary.md
@@ -934,15 +936,16 @@ entities:
       - planning-mds/features/F0017-deterministic-entity-resolution/README.md
   - id: entity:insurance-party-role-assignment
     label: Scoped insurance party role
-    notes: A party acting as named insured, broker of record, placement broker, broker contact, risk manager,
-      account contact, carrier, MGA or underwriter in an explicit account, submission or policy-term scope,
-      with the organization or branch a person acts for (proposed ADR-0070). Broker of record is account-scoped
-      and dated; a placement broker on a term can override it for one line. One person can hold roles
-      on several accounts. Once confirmed by an authoritative source, a role decides an external person's
-      reach (their own accounts only) and a carrier employee's decision rights; a role read from a document
+    notes: 'A party acting as named insured, broker of record, placement broker, broker contact, risk
+      manager, account contact, carrier, MGA or underwriter in an explicit account, submission or policy-term
+      scope, with the organization or branch a person acts for (proposed ADR-0070). Broker of record is
+      account-scoped and dated; a placement broker on a term can override it for one line. One person
+      can hold roles on several accounts. Once confirmed by an authoritative source, a role decides an
+      external person''s reach (an account role: that account and its own policies; a policy role: that
+      policy only; nothing cascades) and a carrier employee''s decision rights; a role read from a document
       grants nothing. The access check is a proposed F0002-successor amendment to ADR-0062. Evidence and
       temporal context remain mandatory. F0012/F0013 settle production representation; the example establishes
-      no delegation authority or runtime schema.
+      no delegation authority or runtime schema.'
     rationale:
       - adr: adr:0070
         section: Proposed Decision

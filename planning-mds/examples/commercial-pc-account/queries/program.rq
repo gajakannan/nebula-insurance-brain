@@ -1,0 +1,9 @@
+PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
+PREFIX d: <https://example.invalid/nebula/data/>
+# Expected: three rows. The Holdings property program belongs to the Holdings account. Its master
+# policy belongs to Holdings and its local policies to Workshop and Contracting. The program link,
+# not shared ownership, gives the family view (EX-PC-019).
+SELECT ?program ?programAccount ?policy ?number ?policyAccount WHERE {
+  ?program pc:forAccount ?programAccount .
+  ?policy pc:partOfProgram ?program ; pc:policyNumber ?number ; pc:forAccount ?policyAccount .
+} ORDER BY ?number

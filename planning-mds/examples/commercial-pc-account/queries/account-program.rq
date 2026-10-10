@@ -1,8 +1,9 @@
 PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
 PREFIX d: <https://example.invalid/nebula/data/>
-# Expected: four rows. The Holdings roll-up lists each policy once, under the one account it belongs
-# to (BOP, auto and umbrella under Workshop; GL under Contracting). Holdings owns no policy.
-# The auto line has its own placement broker.
+# Expected: seven rows. The Holdings roll-up lists each policy once, under the one account it
+# belongs to: the property master program under Holdings; BOP, auto, umbrella and a local program
+# policy under Workshop; GL and a local program policy under Contracting. The auto line has its
+# own placement broker.
 SELECT ?account ?policy ?number ?product ?carrier ?broker WHERE {
   ?account pc:parentAccount* d:EX-PC-ACCOUNT .
   ?policy pc:forAccount ?account ; pc:policyNumber ?number ; pc:productType ?product .

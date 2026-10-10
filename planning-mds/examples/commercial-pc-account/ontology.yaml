@@ -52,6 +52,15 @@ classes:
   - records.json
   regression_cases:
   - cases.md
+- id: pc:Program
+  module: insurance-core
+  parents: []
+  definition: A master program agreement belonging to one account, normally the parent's;
+    its master and local policies link to it, and each policy keeps its own account.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
 - id: pc:Location
   module: foundation
   parents: []
@@ -344,8 +353,18 @@ properties:
   - records.json
   regression_cases:
   - cases.md
-  definition: Links a submission or policy to the one account it belongs to; for a policy
+  definition: Links a submission, policy or program to the one account it belongs to; for a policy
     usually the first named insured's account. Other named insureds stay roles on the term.
+- id: pc:partOfProgram
+  module: insurance-core
+  kind: object
+  temporal_kind: STATE
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Links a master or local policy to the program it is issued under. Each policy
+    keeps its own account; the link gives the family view without shared ownership.
 - id: pc:productType
   module: insurance-core
   kind: object

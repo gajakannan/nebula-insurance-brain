@@ -36,7 +36,7 @@ Policy EX-2042 is a standalone General Liability policy issued by Example Granit
 
 Document date: 2025-12-23.
 
-Policy EX-2042 is a Commercial Auto policy issued by Example Maple Mutual to Cedar Bridge Workshop LLC, the first named insured, and Cedar Bridge Contracting LLC, an additional named insured, for 2026-01-01 through 2027-01-01. The policy belongs to the Workshop account. Example Fleet Brokers, not Harbor Example Brokerage, is the placement broker for this auto policy. The scheduled vehicle is EX-PC-VEHICLE-VAN, an illustrative company van. Liability combined single limit: USD 1,000,000 per accident. No vehicle physical-damage terms are supplied in this excerpt.
+Policy EX-2042 is a Commercial Auto policy issued by Example Maple Mutual to Cedar Bridge Workshop LLC, the first named insured, and Cedar Bridge Contracting LLC, an additional named insured, for 2026-01-01 through 2027-01-01. The policy belongs to the Workshop account. Example Fleet Brokers, not Harbor Example Brokerage, is the placement broker for this auto policy. Drew Example, employed by Example Fleet Brokers, is the broker contact for this policy and acts for Example Fleet Brokers. The scheduled vehicle is EX-PC-VEHICLE-VAN, an illustrative company van. Liability combined single limit: USD 1,000,000 per accident. No vehicle physical-damage terms are supplied in this excerpt.
 
 ## umbrella
 
@@ -44,7 +44,15 @@ Policy EX-2042 is a Commercial Auto policy issued by Example Maple Mutual to Ced
 
 Document date: 2025-12-29.
 
-Policy EX-UMB-100 is issued by Example Granite Casualty to Cedar Bridge Workshop LLC, the first named insured, and Cedar Bridge Contracting LLC, an additional named insured, for 2026-01-01 through 2027-01-01. The policy belongs to the Workshop account. Harbor Example Brokerage is the placement broker. Umbrella liability limit: USD 2,000,000 each occurrence. The schedule identifies Granite GL EX-2042 and Maple Auto EX-2042, each for the 2026 term. BOP EX-BOP-100 is not listed in the supplied schedule. This excerpt supplies no claim-specific attachment or exhaustion determination.
+Policy EX-UMB-100 is issued by Example Granite Casualty to Cedar Bridge Workshop LLC, the first named insured, and Cedar Bridge Contracting LLC, an additional named insured, for 2026-01-01 through 2027-01-01. The policy belongs to the Workshop account. Harbor Example Brokerage is the placement broker. Sam Example is the broker contact for this policy and acts for Harbor Example Brokerage. Umbrella liability limit: USD 2,000,000 each occurrence. The schedule identifies Granite GL EX-2042 and Maple Auto EX-2042, each for the 2026 term. BOP EX-BOP-100 is not listed in the supplied schedule. This excerpt supplies no claim-specific attachment or exhaustion determination.
+
+## program
+
+**EX-PC-DOC-PROGRAM: Property program schedule**
+
+Document date: 2025-12-20.
+
+Example Maple Mutual and Cedar Bridge Holdings LLC set up property program EX-PROG-100, which belongs to the Holdings account. Under the program, master policy EX-PROP-100 is issued to Cedar Bridge Holdings LLC and belongs to the Holdings account; local policy EX-PROP-100-W is issued to Cedar Bridge Workshop LLC and belongs to the Workshop account; and local policy EX-PROP-100-C is issued to Cedar Bridge Contracting LLC and belongs to the Contracting account. All three run from 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker for all three. This excerpt supplies no limits, locations or premium allocation.
 
 ## request
 
