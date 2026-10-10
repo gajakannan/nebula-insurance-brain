@@ -11,11 +11,18 @@ pc:Party a owl:Class .
 pc:Organization a owl:Class ; rdfs:subClassOf pc:Party .
 pc:Person a owl:Class ; rdfs:subClassOf pc:Party .
 pc:Account a owl:Class .
+pc:OwnershipInterest a owl:Class .
 pc:Location a owl:Class .
 pc:Vehicle a owl:Class .
 pc:RoleKind a owl:Class .
 pc:RoleAssignment a owl:Class .
-pc:groupsParty a owl:ObjectProperty ; rdfs:domain pc:Account ; rdfs:range pc:Party .
+pc:accountOrganization a owl:ObjectProperty ; rdfs:domain pc:Account ; rdfs:range pc:Organization .
+pc:parentAccount a owl:ObjectProperty ; rdfs:domain pc:Account ; rdfs:range pc:Account .
+pc:owner a owl:ObjectProperty ; rdfs:domain pc:OwnershipInterest ; rdfs:range pc:Party .
+pc:ownedOrganization a owl:ObjectProperty ; rdfs:domain pc:OwnershipInterest ; rdfs:range pc:Organization .
+pc:ownershipPercent a owl:DatatypeProperty ; rdfs:domain pc:OwnershipInterest ; rdfs:range xsd:decimal .
+pc:parentOrganization a owl:ObjectProperty ; rdfs:domain pc:Organization ; rdfs:range pc:Organization .
+pc:employedBy a owl:ObjectProperty ; rdfs:domain pc:Person ; rdfs:range pc:Organization .
 pc:operatesAt a owl:ObjectProperty ; rdfs:domain pc:Organization ; rdfs:range pc:Location .
 pc:roleParty a owl:ObjectProperty ; rdfs:domain pc:RoleAssignment ; rdfs:range pc:Party .
 pc:roleKind a owl:ObjectProperty ; rdfs:domain pc:RoleAssignment ; rdfs:range pc:RoleKind .

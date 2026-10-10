@@ -33,3 +33,12 @@ See the [example coverage map](../../examples/README.md) and [F0065](../F0065-gr
 
 - List an entity's names with their kind, sources, and validity; answer the legal name as of a valid time (ADR-0066).
 - **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
+
+## Account, party and role amendment (2026-10-10)
+
+[ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Examples: [Cedar Bridge EX-PC-015 to EX-PC-017](../../examples/commercial-pc-account/cases.md).
+
+- Root Account 360 on one account: its organization, every policy term naming that organization, its role assignments (who does what), and its parent and child accounts.
+- The hierarchy view rolls child portfolios up without merging them. A policy naming several organizations appears once, with each account it names.
+- Show ownership with percentages beside the account hierarchy; never present a minority owner as the account parent.
+- Role assignments inform display and routing; visibility comes only from current grants (ADR-0062).

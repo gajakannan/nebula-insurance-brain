@@ -1,0 +1,11 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+# Independent hypothetical input: a 50/50 joint venture whose account names both owners' accounts
+# as parent. Ownership may have several owners; the account parent is designated once (ADR-0070).
+d:EX-PC-GAP-JV a pc:Organization .
+d:EX-PC-GAP-OWNER-A a pc:Organization .
+d:EX-PC-GAP-OWNER-B a pc:Organization .
+d:EX-PC-GAP-ACCOUNT-A a pc:Account ; pc:accountOrganization d:EX-PC-GAP-OWNER-A .
+d:EX-PC-GAP-ACCOUNT-B a pc:Account ; pc:accountOrganization d:EX-PC-GAP-OWNER-B .
+d:EX-PC-GAP-ACCOUNT-JV a pc:Account ; pc:accountOrganization d:EX-PC-GAP-JV ;
+    pc:parentAccount d:EX-PC-GAP-ACCOUNT-A, d:EX-PC-GAP-ACCOUNT-B .

@@ -1,16 +1,16 @@
 # Commercial P&C example — scope and KG handoff
 
-**Status:** Synthetic teaching expansion, 2026-10-08; review fixes 2026-10-09. It proposes representations for F0012/F0013 planning and establishes no feature plan, runtime behavior, production namespace or ADR acceptance. The user selected the contractor-account scenario.
+**Status:** Synthetic teaching expansion, 2026-10-08; review fixes 2026-10-09; account model per proposed ADR-0070, 2026-10-10. It proposes representations for F0012/F0013 planning and establishes no feature plan, runtime behavior, production namespace or ADR acceptance. The user selected the contractor-account scenario.
 
 ## Read in this order
 
-1. [Cedar Bridge walkthrough](../examples/commercial-pc-account/README.md): one account, two organizations, a BOP, standalone GL, auto and umbrella, plus WC and inland-marine requests.
+1. [Cedar Bridge walkthrough](../examples/commercial-pc-account/README.md): a holding company, a wholly owned subsidiary and a 60/40 joint venture, each with its own account; a BOP, standalone GL, auto and umbrella; WC and inland-marine requests.
 2. [Source package](../examples/commercial-pc-account/source-package.md), [structured records](../examples/commercial-pc-account/records.json) and [worked and boundary cases](../examples/commercial-pc-account/cases.md).
-3. [F0012](../features/F0012-foundation-ontology/README.md), [F0013](../features/F0013-insurance-core-gl-ontology/README.md), [F0015](../features/F0015-extraction-profile-compiler/README.md), [ADR-0045](decisions/ADR-0045-ontology-release-compatibility.md) and [ADR-0064](decisions/ADR-0064-time-interpretation-and-valid-time-precision.md).
+3. [F0012](../features/F0012-foundation-ontology/README.md), [F0013](../features/F0013-insurance-core-gl-ontology/README.md), [F0015](../features/F0015-extraction-profile-compiler/README.md), [ADR-0045](decisions/ADR-0045-ontology-release-compatibility.md), [ADR-0064](decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) and [ADR-0070](decisions/ADR-0070-account-party-and-role-model.md).
 
 ## Modeling decisions to carry into planning
 
-- **Account, parties and roles.** Account grouping, legal parties and policy-term named-insured roles are separate. One party can be broker, carrier, MGA or underwriter in different scopes; domain roles grant no application access. Whether Account is a party or a grouping, and what an account-scoped grant reaches, is an [open decision](../BLUEPRINT.md#48-open-decisions).
+- **Account, parties and roles (ADR-0070).** One account per organization, with one designated parent account. Ownership is a separate percentage fact, so a joint venture can have several owners and still one account parent. Policies reach accounts only through named-insured roles; a parent rolls up its descendants. Brokers are organizations with branches, offices and people, and broker of record is per policy term. Role assignments name a party, kind, scope and acted-for organization; they grant no application access.
 - **Product versus coverage.** A BOP packages property and liability; standalone GL reuses liability vocabulary without equating contracts or wording.
 - **Qualified values.** Keep scoped identifiers, qualified money and exact term, location and vehicle references with their evidence. An account-wide sum of limits has no meaning.
 - **Readings versus outcomes.** Requests, reported losses, accepted source readings and coverage or assessment outcomes stay distinct.
@@ -18,11 +18,11 @@
 - **Completeness per consumer.** Named-consumer completeness is separate from malformed supplied values; property-summary gaps are not F0065 GL assessments.
 - **Schedule review.** An umbrella naming an insured whose primary liability term is unscheduled is a review prompt, not a coverage conclusion (EX-PC-013).
 
-The account grouping, scoped role assignment and time encoding are **draft refinements**. Accepted entity and authorization contracts stay in force until F0012/F0013 decide, and the separate namespace leaves EX-INTEROP's terms unchanged.
+The account, ownership and role representation (proposed ADR-0070) and the time encoding are **draft refinements**. Accepted entity and authorization contracts stay in force until F0012/F0013 decide, and the separate namespace leaves EX-INTEROP's terms unchanged.
 
 ## Delivery ownership
 
-F0012 owns shared authoring, identity and release contracts; F0013 insurance core and GL; F0015 TEMPLATE packaging; F0017 scoped identifier resolution; F0008/F0010 temporal storage, with F0016 time mentions; F0018/F0022 governed admission and review; F0065 bounded GL assessment; F0034 the eventual AGE projection.
+F0012 owns shared authoring, identity and release contracts, including the party, account and role vocabulary; F0013 insurance core and GL; F0015 TEMPLATE packaging; F0017 scoped identifier resolution and account versus organization identity; F0008/F0010 temporal storage, with F0016 time mentions; F0018/F0022 governed admission and review; F0065 bounded GL assessment; F0023 Account 360; F0034 the eventual AGE projection.
 
 BOP property, auto, umbrella, WC/employers liability and inland marine are illustrative breadth with no feature or release assigned. Product planning assigns that scope before these examples become requirements; F0013's GL commitment and F0065's evaluator stay as planned.
 
@@ -62,3 +62,4 @@ Edit `records.json`, never the generated snapshots; `--refresh-digests` rewrites
   - KG binding: the shared validator was bound to this example's schema, and a sidecar name match falsely linked it to `vllm_graph_client.py`. It moved to `capability:semantic-example-validation`, and the entry point became `validate_examples`.
   - Account: the account question was logged as an open decision.
   - Added: EX-PC-013 and its schedule-review query; carrier marketing links removed.
+- **2026-10-10, account model.** The operator answered the account decision; [ADR-0070](decisions/ADR-0070-account-party-and-role-model.md) records it as Proposed. The example now has one account per organization, designated parent accounts, percentage ownership with a joint venture, a broker branch and contact, a second broker of record for auto, per-line underwriters, cases EX-PC-015 to EX-PC-017, three queries and two account-structure boundary graphs. `pc:groupsParty` is retired, and policies no longer carry `pc:forAccount`.

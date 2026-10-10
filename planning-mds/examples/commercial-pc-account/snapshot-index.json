@@ -10,17 +10,6 @@
   "identity_metadata": "Types and labels come from records.entities with evidence references; they are authored identity/classification metadata, not additional committed business facts.",
   "statements": [
     {
-      "subject_ref": "EX-PC-ACCOUNT",
-      "predicate": "pc:groupsParty",
-      "object": {
-        "ref": "EX-PC-WORKSHOP"
-      },
-      "fact_ref": "EX-PC-F-001",
-      "assertion_ref": "EX-PC-A-001",
-      "evidence_ref": "EX-PC-EV-ACCOUNT",
-      "commit_ref": "EX-PC-COMMIT-INITIAL"
-    },
-    {
       "subject_ref": "EX-PC-WORKSHOP",
       "predicate": "pc:operatesAt",
       "object": {
@@ -32,21 +21,10 @@
       "commit_ref": "EX-PC-COMMIT-INITIAL"
     },
     {
-      "subject_ref": "EX-PC-ACCOUNT",
-      "predicate": "pc:groupsParty",
-      "object": {
-        "ref": "EX-PC-CONTRACTOR"
-      },
-      "fact_ref": "EX-PC-F-003",
-      "assertion_ref": "EX-PC-A-003",
-      "evidence_ref": "EX-PC-EV-ACCOUNT",
-      "commit_ref": "EX-PC-COMMIT-INITIAL"
-    },
-    {
       "subject_ref": "EX-PC-SUBMISSION",
       "predicate": "pc:forAccount",
       "object": {
-        "ref": "EX-PC-ACCOUNT"
+        "ref": "EX-PC-ACCOUNT-CONTRACTOR"
       },
       "fact_ref": "EX-PC-F-005",
       "assertion_ref": "EX-PC-A-005",
@@ -161,17 +139,6 @@
       "fact_ref": "EX-PC-F-015",
       "assertion_ref": "EX-PC-A-015",
       "evidence_ref": "EX-PC-EV-ACCOUNT",
-      "commit_ref": "EX-PC-COMMIT-INITIAL"
-    },
-    {
-      "subject_ref": "EX-PC-POLICY-BOP",
-      "predicate": "pc:forAccount",
-      "object": {
-        "ref": "EX-PC-ACCOUNT"
-      },
-      "fact_ref": "EX-PC-F-016",
-      "assertion_ref": "EX-PC-A-016",
-      "evidence_ref": "EX-PC-EV-BOP",
       "commit_ref": "EX-PC-COMMIT-INITIAL"
     },
     {
@@ -333,17 +300,6 @@
     },
     {
       "subject_ref": "EX-PC-POLICY-GL",
-      "predicate": "pc:forAccount",
-      "object": {
-        "ref": "EX-PC-ACCOUNT"
-      },
-      "fact_ref": "EX-PC-F-031",
-      "assertion_ref": "EX-PC-A-031",
-      "evidence_ref": "EX-PC-EV-GL",
-      "commit_ref": "EX-PC-COMMIT-INITIAL"
-    },
-    {
-      "subject_ref": "EX-PC-POLICY-GL",
       "predicate": "pc:productType",
       "object": {
         "ref": "EX-PC-PRODUCT-StandaloneGL"
@@ -501,17 +457,6 @@
     },
     {
       "subject_ref": "EX-PC-POLICY-AUTO",
-      "predicate": "pc:forAccount",
-      "object": {
-        "ref": "EX-PC-ACCOUNT"
-      },
-      "fact_ref": "EX-PC-F-046",
-      "assertion_ref": "EX-PC-A-046",
-      "evidence_ref": "EX-PC-EV-AUTO",
-      "commit_ref": "EX-PC-COMMIT-INITIAL"
-    },
-    {
-      "subject_ref": "EX-PC-POLICY-AUTO",
       "predicate": "pc:productType",
       "object": {
         "ref": "EX-PC-PRODUCT-CommercialAuto"
@@ -605,7 +550,7 @@
       "subject_ref": "EX-PC-ASSIGN-AUTO-BROKER",
       "predicate": "pc:roleParty",
       "object": {
-        "ref": "EX-PC-BROKER"
+        "ref": "EX-PC-FLEET-BROKER"
       },
       "fact_ref": "EX-PC-F-055",
       "assertion_ref": "EX-PC-A-055",
@@ -698,17 +643,6 @@
       "fact_ref": "EX-PC-F-063",
       "assertion_ref": "EX-PC-A-063",
       "evidence_ref": "EX-PC-EV-AUTO",
-      "commit_ref": "EX-PC-COMMIT-INITIAL"
-    },
-    {
-      "subject_ref": "EX-PC-POLICY-UMBRELLA",
-      "predicate": "pc:forAccount",
-      "object": {
-        "ref": "EX-PC-ACCOUNT"
-      },
-      "fact_ref": "EX-PC-F-064",
-      "assertion_ref": "EX-PC-A-064",
-      "evidence_ref": "EX-PC-EV-UMBRELLA",
       "commit_ref": "EX-PC-COMMIT-INITIAL"
     },
     {
@@ -1410,6 +1344,438 @@
       "assertion_ref": "EX-PC-A-BPP-ENDORSEMENT",
       "evidence_ref": "EX-PC-EV-ENDORSEMENT",
       "commit_ref": "EX-PC-COMMIT-ENDORSEMENT"
+    },
+    {
+      "subject_ref": "EX-PC-ACCOUNT",
+      "predicate": "pc:accountOrganization",
+      "object": {
+        "ref": "EX-PC-HOLDINGS"
+      },
+      "fact_ref": "EX-PC-F-ACCT-HOLDINGS",
+      "assertion_ref": "EX-PC-A-ACCT-HOLDINGS",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ACCOUNT-WORKSHOP",
+      "predicate": "pc:accountOrganization",
+      "object": {
+        "ref": "EX-PC-WORKSHOP"
+      },
+      "fact_ref": "EX-PC-F-ACCT-WORKSHOP",
+      "assertion_ref": "EX-PC-A-ACCT-WORKSHOP",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ACCOUNT-CONTRACTOR",
+      "predicate": "pc:accountOrganization",
+      "object": {
+        "ref": "EX-PC-CONTRACTOR"
+      },
+      "fact_ref": "EX-PC-F-ACCT-CONTRACTOR",
+      "assertion_ref": "EX-PC-A-ACCT-CONTRACTOR",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ACCOUNT-RIDGE",
+      "predicate": "pc:accountOrganization",
+      "object": {
+        "ref": "EX-PC-RIDGE"
+      },
+      "fact_ref": "EX-PC-F-ACCT-RIDGE",
+      "assertion_ref": "EX-PC-A-ACCT-RIDGE",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ACCOUNT-WORKSHOP",
+      "predicate": "pc:parentAccount",
+      "object": {
+        "ref": "EX-PC-ACCOUNT"
+      },
+      "fact_ref": "EX-PC-F-PARENT-WORKSHOP",
+      "assertion_ref": "EX-PC-A-PARENT-WORKSHOP",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ACCOUNT-CONTRACTOR",
+      "predicate": "pc:parentAccount",
+      "object": {
+        "ref": "EX-PC-ACCOUNT"
+      },
+      "fact_ref": "EX-PC-F-PARENT-CONTRACTOR",
+      "assertion_ref": "EX-PC-A-PARENT-CONTRACTOR",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-WORKSHOP",
+      "predicate": "pc:owner",
+      "object": {
+        "ref": "EX-PC-HOLDINGS"
+      },
+      "fact_ref": "EX-PC-F-OWN-WORKSHOP-OWNER",
+      "assertion_ref": "EX-PC-A-OWN-WORKSHOP-OWNER",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-WORKSHOP",
+      "predicate": "pc:ownedOrganization",
+      "object": {
+        "ref": "EX-PC-WORKSHOP"
+      },
+      "fact_ref": "EX-PC-F-OWN-WORKSHOP-OWNED",
+      "assertion_ref": "EX-PC-A-OWN-WORKSHOP-OWNED",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-WORKSHOP",
+      "predicate": "pc:ownershipPercent",
+      "object": {
+        "value": "100.00",
+        "datatype": "xsd:decimal"
+      },
+      "fact_ref": "EX-PC-F-OWN-WORKSHOP-PERCENT",
+      "assertion_ref": "EX-PC-A-OWN-WORKSHOP-PERCENT",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-CONTRACTOR-HOLDINGS",
+      "predicate": "pc:owner",
+      "object": {
+        "ref": "EX-PC-HOLDINGS"
+      },
+      "fact_ref": "EX-PC-F-OWN-HOLDINGS-OWNER",
+      "assertion_ref": "EX-PC-A-OWN-HOLDINGS-OWNER",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-CONTRACTOR-HOLDINGS",
+      "predicate": "pc:ownedOrganization",
+      "object": {
+        "ref": "EX-PC-CONTRACTOR"
+      },
+      "fact_ref": "EX-PC-F-OWN-HOLDINGS-OWNED",
+      "assertion_ref": "EX-PC-A-OWN-HOLDINGS-OWNED",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-CONTRACTOR-HOLDINGS",
+      "predicate": "pc:ownershipPercent",
+      "object": {
+        "value": "60.00",
+        "datatype": "xsd:decimal"
+      },
+      "fact_ref": "EX-PC-F-OWN-HOLDINGS-PERCENT",
+      "assertion_ref": "EX-PC-A-OWN-HOLDINGS-PERCENT",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-CONTRACTOR-RIDGE",
+      "predicate": "pc:owner",
+      "object": {
+        "ref": "EX-PC-RIDGE"
+      },
+      "fact_ref": "EX-PC-F-OWN-RIDGE-OWNER",
+      "assertion_ref": "EX-PC-A-OWN-RIDGE-OWNER",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-CONTRACTOR-RIDGE",
+      "predicate": "pc:ownedOrganization",
+      "object": {
+        "ref": "EX-PC-CONTRACTOR"
+      },
+      "fact_ref": "EX-PC-F-OWN-RIDGE-OWNED",
+      "assertion_ref": "EX-PC-A-OWN-RIDGE-OWNED",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-OWN-CONTRACTOR-RIDGE",
+      "predicate": "pc:ownershipPercent",
+      "object": {
+        "value": "40.00",
+        "datatype": "xsd:decimal"
+      },
+      "fact_ref": "EX-PC-F-OWN-RIDGE-PERCENT",
+      "assertion_ref": "EX-PC-A-OWN-RIDGE-PERCENT",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-BROKER-RIVERSIDE",
+      "predicate": "pc:parentOrganization",
+      "object": {
+        "ref": "EX-PC-BROKER"
+      },
+      "fact_ref": "EX-PC-F-BRANCH-PARENT",
+      "assertion_ref": "EX-PC-A-BRANCH-PARENT",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-BROKER-RIVERSIDE",
+      "predicate": "pc:operatesAt",
+      "object": {
+        "ref": "EX-PC-LOCATION-RIVERSIDE"
+      },
+      "fact_ref": "EX-PC-F-BRANCH-OFFICE",
+      "assertion_ref": "EX-PC-A-BRANCH-OFFICE",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-BROKER-CONTACT",
+      "predicate": "pc:employedBy",
+      "object": {
+        "ref": "EX-PC-BROKER-RIVERSIDE"
+      },
+      "fact_ref": "EX-PC-F-EMPLOY-BROKER-CONTACT",
+      "assertion_ref": "EX-PC-A-EMPLOY-BROKER-CONTACT",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-RISK-MANAGER",
+      "predicate": "pc:employedBy",
+      "object": {
+        "ref": "EX-PC-HOLDINGS"
+      },
+      "fact_ref": "EX-PC-F-EMPLOY-RISK-MANAGER",
+      "assertion_ref": "EX-PC-A-EMPLOY-RISK-MANAGER",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-BROKER-CONTACT",
+      "predicate": "pc:roleParty",
+      "object": {
+        "ref": "EX-PC-BROKER-CONTACT"
+      },
+      "fact_ref": "EX-PC-F-BROKER-CONTACT-PARTY",
+      "assertion_ref": "EX-PC-A-BROKER-CONTACT-PARTY",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-BROKER-CONTACT",
+      "predicate": "pc:roleKind",
+      "object": {
+        "ref": "EX-PC-ROLE-BrokerContact"
+      },
+      "fact_ref": "EX-PC-F-BROKER-CONTACT-KIND",
+      "assertion_ref": "EX-PC-A-BROKER-CONTACT-KIND",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-BROKER-CONTACT",
+      "predicate": "pc:roleScope",
+      "object": {
+        "ref": "EX-PC-ACCOUNT"
+      },
+      "fact_ref": "EX-PC-F-BROKER-CONTACT-SCOPE",
+      "assertion_ref": "EX-PC-A-BROKER-CONTACT-SCOPE",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-BROKER-CONTACT",
+      "predicate": "pc:actsFor",
+      "object": {
+        "ref": "EX-PC-BROKER-RIVERSIDE"
+      },
+      "fact_ref": "EX-PC-F-BROKER-CONTACT-ACTS-FOR",
+      "assertion_ref": "EX-PC-A-BROKER-CONTACT-ACTS-FOR",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-RISK-MANAGER",
+      "predicate": "pc:roleParty",
+      "object": {
+        "ref": "EX-PC-RISK-MANAGER"
+      },
+      "fact_ref": "EX-PC-F-RISK-MANAGER-PARTY",
+      "assertion_ref": "EX-PC-A-RISK-MANAGER-PARTY",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-RISK-MANAGER",
+      "predicate": "pc:roleKind",
+      "object": {
+        "ref": "EX-PC-ROLE-RiskManager"
+      },
+      "fact_ref": "EX-PC-F-RISK-MANAGER-KIND",
+      "assertion_ref": "EX-PC-A-RISK-MANAGER-KIND",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-RISK-MANAGER",
+      "predicate": "pc:roleScope",
+      "object": {
+        "ref": "EX-PC-ACCOUNT"
+      },
+      "fact_ref": "EX-PC-F-RISK-MANAGER-SCOPE",
+      "assertion_ref": "EX-PC-A-RISK-MANAGER-SCOPE",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-RISK-MANAGER",
+      "predicate": "pc:actsFor",
+      "object": {
+        "ref": "EX-PC-HOLDINGS"
+      },
+      "fact_ref": "EX-PC-F-RISK-MANAGER-ACTS-FOR",
+      "assertion_ref": "EX-PC-A-RISK-MANAGER-ACTS-FOR",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-WORKSHOP-CONTACT",
+      "predicate": "pc:roleParty",
+      "object": {
+        "ref": "EX-PC-RISK-MANAGER"
+      },
+      "fact_ref": "EX-PC-F-WORKSHOP-CONTACT-PARTY",
+      "assertion_ref": "EX-PC-A-WORKSHOP-CONTACT-PARTY",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-WORKSHOP-CONTACT",
+      "predicate": "pc:roleKind",
+      "object": {
+        "ref": "EX-PC-ROLE-AccountContact"
+      },
+      "fact_ref": "EX-PC-F-WORKSHOP-CONTACT-KIND",
+      "assertion_ref": "EX-PC-A-WORKSHOP-CONTACT-KIND",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-WORKSHOP-CONTACT",
+      "predicate": "pc:roleScope",
+      "object": {
+        "ref": "EX-PC-ACCOUNT-WORKSHOP"
+      },
+      "fact_ref": "EX-PC-F-WORKSHOP-CONTACT-SCOPE",
+      "assertion_ref": "EX-PC-A-WORKSHOP-CONTACT-SCOPE",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-WORKSHOP-CONTACT",
+      "predicate": "pc:actsFor",
+      "object": {
+        "ref": "EX-PC-HOLDINGS"
+      },
+      "fact_ref": "EX-PC-F-WORKSHOP-CONTACT-ACTS-FOR",
+      "assertion_ref": "EX-PC-A-WORKSHOP-CONTACT-ACTS-FOR",
+      "evidence_ref": "EX-PC-EV-ACCOUNT",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-BOP-UNDERWRITER",
+      "predicate": "pc:roleParty",
+      "object": {
+        "ref": "EX-PC-UW-MAPLE"
+      },
+      "fact_ref": "EX-PC-F-BOP-UNDERWRITER-PARTY",
+      "assertion_ref": "EX-PC-A-BOP-UNDERWRITER-PARTY",
+      "evidence_ref": "EX-PC-EV-BOP",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-BOP-UNDERWRITER",
+      "predicate": "pc:roleKind",
+      "object": {
+        "ref": "EX-PC-ROLE-Underwriter"
+      },
+      "fact_ref": "EX-PC-F-BOP-UNDERWRITER-KIND",
+      "assertion_ref": "EX-PC-A-BOP-UNDERWRITER-KIND",
+      "evidence_ref": "EX-PC-EV-BOP",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-BOP-UNDERWRITER",
+      "predicate": "pc:roleScope",
+      "object": {
+        "ref": "EX-PC-TERM-BOP"
+      },
+      "fact_ref": "EX-PC-F-BOP-UNDERWRITER-SCOPE",
+      "assertion_ref": "EX-PC-A-BOP-UNDERWRITER-SCOPE",
+      "evidence_ref": "EX-PC-EV-BOP",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-BOP-UNDERWRITER",
+      "predicate": "pc:actsFor",
+      "object": {
+        "ref": "EX-PC-MAPLE"
+      },
+      "fact_ref": "EX-PC-F-BOP-UNDERWRITER-ACTS-FOR",
+      "assertion_ref": "EX-PC-A-BOP-UNDERWRITER-ACTS-FOR",
+      "evidence_ref": "EX-PC-EV-BOP",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-GL-UNDERWRITER",
+      "predicate": "pc:roleParty",
+      "object": {
+        "ref": "EX-PC-UW-GRANITE"
+      },
+      "fact_ref": "EX-PC-F-GL-UNDERWRITER-PARTY",
+      "assertion_ref": "EX-PC-A-GL-UNDERWRITER-PARTY",
+      "evidence_ref": "EX-PC-EV-GL",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-GL-UNDERWRITER",
+      "predicate": "pc:roleKind",
+      "object": {
+        "ref": "EX-PC-ROLE-Underwriter"
+      },
+      "fact_ref": "EX-PC-F-GL-UNDERWRITER-KIND",
+      "assertion_ref": "EX-PC-A-GL-UNDERWRITER-KIND",
+      "evidence_ref": "EX-PC-EV-GL",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-GL-UNDERWRITER",
+      "predicate": "pc:roleScope",
+      "object": {
+        "ref": "EX-PC-TERM-GL"
+      },
+      "fact_ref": "EX-PC-F-GL-UNDERWRITER-SCOPE",
+      "assertion_ref": "EX-PC-A-GL-UNDERWRITER-SCOPE",
+      "evidence_ref": "EX-PC-EV-GL",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
+    },
+    {
+      "subject_ref": "EX-PC-ASSIGN-GL-UNDERWRITER",
+      "predicate": "pc:actsFor",
+      "object": {
+        "ref": "EX-PC-GRANITE"
+      },
+      "fact_ref": "EX-PC-F-GL-UNDERWRITER-ACTS-FOR",
+      "assertion_ref": "EX-PC-A-GL-UNDERWRITER-ACTS-FOR",
+      "evidence_ref": "EX-PC-EV-GL",
+      "commit_ref": "EX-PC-COMMIT-INITIAL"
     }
   ]
 }

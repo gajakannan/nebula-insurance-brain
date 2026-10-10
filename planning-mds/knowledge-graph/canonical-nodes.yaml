@@ -320,6 +320,19 @@ adrs:
       - adr:0041
       - adr:0052
       - entity:audit-event
+  - id: adr:0070
+    label: Account, Party and Role Model for Commercial P&C
+    path: planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+    related_nodes:
+      - adr:0011
+      - adr:0062
+      - adr:0064
+      - adr:0066
+      - entity:account
+      - entity:insurance-party
+      - entity:insurance-party-role-assignment
+      - entity:ownership-interest
+      - entity:resource-scope
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -725,34 +738,45 @@ endpoints:
 entities:
   - id: entity:account
     label: Insurance account
-    notes: Glossary baseline is the business entity seeking or holding coverage and the root of Entity
-      360. The Cedar Bridge example proposes an account that groups several legal organizations, with
-      named-insured status held by policy-term role assignments. Which model applies, and whether an account-scoped
-      grant follows the grouping or the named insureds, is an open decision in BLUEPRINT section 4.8 (F0012
-      representation, ADR-0062 scope, F0017 identity, F0023 Entity 360 root). Account membership never
-      implies named-insured status or tenant/KB authorization. No fictional Cedar Bridge instance belongs
-      in the planning KG.
+    notes: The customer relationship with exactly one organization seeking or holding coverage, and the
+      root of Account 360 (proposed ADR-0070). One account per organization in a tenant, with at most
+      one designated parent account for roll-up; the parent is designated, not computed from ownership.
+      A policy has no owning account and reaches each account through its organization's named-insured
+      role, so one policy can appear under several accounts. Account parentage and ownership never imply
+      named-insured status or tenant/KB authorization; an account-scoped grant reaches only that account
+      (ADR-0062 scope amendment pending). F0012 owns the representation, F0017 account versus organization
+      identity, F0023 Account 360. No fictional Cedar Bridge instance belongs in the planning KG.
     rationale:
+      - adr: adr:0070
+        section: Proposed Decision
+        summary: One account per organization with a designated parent; policies reach accounts through
+          named-insured roles.
       - adr: adr:0011
         section: Decision
         summary: Shared account and party concepts compose with line-specific coverage modules.
       - adr: adr:0062
         section: Decision
-        summary: Account is also a trusted resource scope; the account model decides what an account-scoped
-          grant reaches.
+        summary: Account is also a trusted resource scope; an account-scoped grant reaches exactly that
+          account.
     related_entities:
+      - entity:insurance-party
       - entity:insurance-party-role-assignment
+      - entity:ownership-interest
       - entity:policy-term
       - entity:resource-scope
     related_nodes:
       - adr:0062
+      - adr:0070
       - glossary_term:insurance-product-composition
       - schema:commercial-pc-example
     source_docs:
       - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
       - planning-mds/domain/glossary.md
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0017-deterministic-entity-resolution/README.md
+      - planning-mds/features/F0023-minimal-entity-360/README.md
   - id: entity:assertion
     label: Assertion
     notes: What a source, system, model, or person claims, with evidence bindings and interpretation basis;
@@ -880,26 +904,61 @@ entities:
       - planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: entity:insurance-party
+    label: Insurance party (organization or person)
+    notes: A person or an organization (proposed ADR-0070). Insured, broker, carrier, MGA and underwriter
+      are scoped roles a party plays, not party types. Organizations form an effective-dated hierarchy
+      with no fixed depth (a brokerage's branches and offices, a company's divisions), operate at locations,
+      and employ people; employment is separate from any role. Names are time-bounded claims (ADR-0066).
+      Aligns with the canonical Party and PartyRelationship contracts. Distinct from an authenticated
+      application principal.
+    rationale:
+      - adr: adr:0070
+        section: Proposed Decision
+        summary: Brokers, carriers, MGAs and insureds are organizations; roles are scoped, never party
+          types.
+    related_entities:
+      - entity:account
+      - entity:insurance-party-role-assignment
+      - entity:ownership-interest
+    related_nodes:
+      - adr:0066
+      - adr:0070
+      - schema:commercial-pc-example
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0017-deterministic-entity-resolution/README.md
   - id: entity:insurance-party-role-assignment
     label: Scoped insurance party role
-    notes: Draft shared representation of a party acting as named insured, broker, carrier, MGA or underwriter
-      in an explicit account, submission or policy-term scope. These domain roles are not authorization
-      roles or grants. Evidence and temporal context remain mandatory. F0012/F0013 settle production representation;
-      the example does not establish delegation authority or a runtime schema.
+    notes: A party acting as named insured, servicing or placement broker, broker contact, risk manager,
+      account contact, carrier, MGA or underwriter in an explicit account, submission or policy-term scope,
+      with the organization or branch a person acts for (proposed ADR-0070). Broker of record is a policy-term
+      scope, so it can differ by line and term. One person can hold roles on several accounts. These domain
+      roles are not authorization roles or grants; they show who does what for Account 360 and routing.
+      Evidence and temporal context remain mandatory. F0012/F0013 settle production representation; the
+      example establishes no delegation authority or runtime schema.
     rationale:
+      - adr: adr:0070
+        section: Proposed Decision
+        summary: Role assignments carry party, kind, scope and acted-for organization; they grant no access.
       - adr: adr:0045
         section: Identity and release records
         summary: Projection mappings must preserve scoped relationship identity and lineage.
     related_entities:
       - entity:account
+      - entity:insurance-party
       - entity:policy-term
     related_nodes:
       - adr:0061
       - adr:0062
+      - adr:0070
       - glossary_term:ontology-projection-mapping
       - schema:commercial-pc-example
     source_docs:
       - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
       - planning-mds/domain/glossary.md
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
@@ -1014,6 +1073,27 @@ entities:
     source_docs:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:ownership-interest
+    label: Organization ownership interest
+    notes: One party's percentage interest in an organization, with valid time (proposed ADR-0070). An
+      organization can have several owners; majority ownership is computed, never stored. A joint venture's
+      owners need not match its designated parent account, which is set separately. Ownership never merges
+      identities or implies named-insured status.
+    rationale:
+      - adr: adr:0070
+        section: Proposed Decision
+        summary: Ownership is a percentage-bearing relationship separate from the account hierarchy.
+    related_entities:
+      - entity:account
+      - entity:insurance-party
+    related_nodes:
+      - adr:0070
+      - schema:commercial-pc-example
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0023-minimal-entity-360/README.md
   - id: entity:policy-term
     label: Insurance policy term
     notes: A particular period of an identified policy. Preserve issuer-scoped policy identifiers, scoped
@@ -1361,16 +1441,20 @@ schemas:
   - id: schema:commercial-pc-example
     label: Commercial P&C teaching records
     path: planning-mds/schemas/commercial-pc-example.schema.json
-    notes: Schema and reference checks for synthetic contractor-account records, scoped party roles, product
-      composition, exact source lineage, ADR-0064 valid-time kinds with unknown bounds, and a two-time
-      endorsement. Not a production import/API schema or feature acceptance. RDF/OWL/SHACL/query expectations
-      are executed by capability:semantic-example-validation; existing GL fixture evidence does not qualify
-      this bundle.
+    notes: Schema and reference checks for synthetic contractor-account records under proposed ADR-0070
+      (one account per organization, designated parent accounts, percentage ownership, organization hierarchy),
+      scoped party roles, product composition, exact source lineage, ADR-0064 valid-time kinds with unknown
+      bounds, and a two-time endorsement. Not a production import/API schema or feature acceptance. RDF/OWL/SHACL/query
+      expectations are executed by capability:semantic-example-validation; existing GL fixture evidence
+      does not qualify this bundle.
     related_nodes:
       - adr:0064
+      - adr:0070
       - entity:account
+      - entity:insurance-party
       - entity:insurance-party-role-assignment
       - entity:ontology-release
+      - entity:ownership-interest
       - entity:policy-term
       - glossary_term:insurance-product-composition
     source_docs:

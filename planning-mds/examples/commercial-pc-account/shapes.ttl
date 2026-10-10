@@ -2,7 +2,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-# Supplied values and role-record structure; missing money is not a global rejection.
+# Supplied values, role-record and account structure; missing money is not a global rejection.
 pc:SuppliedMoneyShape a sh:NodeShape ;
     sh:targetClass pc:Limit, pc:Deductible ;
     sh:property [ sh:path pc:amount ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
@@ -19,3 +19,18 @@ pc:RoleRecordShape a sh:NodeShape ; sh:targetClass pc:RoleAssignment ;
 pc:CoverageReferenceShape a sh:NodeShape ;
     sh:targetSubjectsOf pc:coverageOf ;
     sh:property [ sh:path pc:coverageOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:PolicyTerm ] .
+
+# ADR-0070: one organization per account, at most one designated parent, one account per organization.
+pc:AccountShape a sh:NodeShape ; sh:targetClass pc:Account ;
+    sh:property [ sh:path pc:accountOrganization ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Organization ] ;
+    sh:property [ sh:path pc:parentAccount ; sh:maxCount 1 ; sh:class pc:Account ] .
+
+pc:OneAccountPerOrganizationShape a sh:NodeShape ; sh:targetObjectsOf pc:accountOrganization ;
+    sh:property [ sh:path [ sh:inversePath pc:accountOrganization ] ; sh:maxCount 1 ] .
+
+pc:OwnershipShape a sh:NodeShape ; sh:targetClass pc:OwnershipInterest ;
+    sh:property [ sh:path pc:owner ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:or ( [ sh:class pc:Person ] [ sh:class pc:Organization ] ) ] ;
+    sh:property [ sh:path pc:ownedOrganization ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Organization ] ;
+    sh:property [ sh:path pc:ownershipPercent ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
+        sh:minExclusive 0 ; sh:maxInclusive 100 ] .

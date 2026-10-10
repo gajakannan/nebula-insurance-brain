@@ -1,0 +1,26 @@
+id: entity:insurance-party
+label: Insurance party (organization or person)
+notes: >-
+  A person or an organization (proposed ADR-0070). Insured, broker, carrier, MGA and
+  underwriter are scoped roles a party plays, not party types. Organizations form an
+  effective-dated hierarchy with no fixed depth (a brokerage's branches and offices, a
+  company's divisions), operate at locations, and employ people; employment is separate from
+  any role. Names are time-bounded claims (ADR-0066). Aligns with the canonical Party and
+  PartyRelationship contracts. Distinct from an authenticated application principal.
+source_docs:
+- F0012/README.md
+- F0017/README.md
+- planning-mds/domain/glossary.md
+- planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+rationale:
+- adr: adr:0070
+  section: Proposed Decision
+  summary: Brokers, carriers, MGAs and insureds are organizations; roles are scoped, never party types.
+related_entities:
+- entity:account
+- entity:ownership-interest
+- entity:insurance-party-role-assignment
+related_nodes:
+- schema:commercial-pc-example
+- adr:0066
+- adr:0070

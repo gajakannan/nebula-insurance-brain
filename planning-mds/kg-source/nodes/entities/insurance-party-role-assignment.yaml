@@ -1,24 +1,34 @@
 id: entity:insurance-party-role-assignment
 label: Scoped insurance party role
-notes: Draft shared representation of a party acting as named insured, broker, carrier,
-  MGA or underwriter in an explicit account, submission or policy-term scope. These
-  domain roles are not authorization roles or grants. Evidence and temporal context
-  remain mandatory. F0012/F0013 settle production representation; the example does
-  not establish delegation authority or a runtime schema.
+notes: >-
+  A party acting as named insured, servicing or placement broker, broker contact, risk
+  manager, account contact, carrier, MGA or underwriter in an explicit account, submission or
+  policy-term scope, with the organization or branch a person acts for (proposed ADR-0070).
+  Broker of record is a policy-term scope, so it can differ by line and term. One person can
+  hold roles on several accounts. These domain roles are not authorization roles or grants;
+  they show who does what for Account 360 and routing. Evidence and temporal context remain
+  mandatory. F0012/F0013 settle production representation; the example establishes no
+  delegation authority or runtime schema.
 source_docs:
 - F0012/README.md
 - F0013/README.md
 - planning-mds/domain/glossary.md
+- planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
 - planning-mds/architecture/commercial-pc-example-handoff.md
 rationale:
+- adr: adr:0070
+  section: Proposed Decision
+  summary: Role assignments carry party, kind, scope and acted-for organization; they grant no access.
 - adr: adr:0045
   section: Identity and release records
   summary: Projection mappings must preserve scoped relationship identity and lineage.
 related_entities:
 - entity:account
+- entity:insurance-party
 - entity:policy-term
 related_nodes:
 - schema:commercial-pc-example
 - glossary_term:ontology-projection-mapping
 - adr:0061
 - adr:0062
+- adr:0070

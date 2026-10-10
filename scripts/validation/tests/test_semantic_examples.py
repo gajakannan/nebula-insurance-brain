@@ -105,11 +105,11 @@ def test_commercial_snapshot_drift_is_reported(tmp_path, monkeypatch, capsys):
     for name in ("records.json", *snapshot_builder.OUTPUTS):
         (folder / name).write_bytes((PC_FOLDER / name).read_bytes())
     with (folder / "snapshot.ttl").open("a", encoding="utf-8") as handle:
-        handle.write("d:EX-PC-ACCOUNT pc:groupsParty d:EX-PC-MGA .\n")
+        handle.write("d:EX-PC-ACCOUNT-RIDGE pc:parentAccount d:EX-PC-ACCOUNT .\n")
     monkeypatch.setattr("sys.argv", ["build", "--product-root", str(tmp_path), "--check"])
     assert snapshot_builder.main() == 1
     assert "snapshot.ttl" in capsys.readouterr().out
-    assert "groupsParty d:EX-PC-MGA" in (folder / "snapshot.ttl").read_text(encoding="utf-8")  # --check writes nothing
+    assert "EX-PC-ACCOUNT-RIDGE pc:parentAccount" in (folder / "snapshot.ttl").read_text(encoding="utf-8")  # --check writes nothing
 
 
 def test_commercial_rdf_expectations_hold():

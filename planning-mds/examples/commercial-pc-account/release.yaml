@@ -6,13 +6,13 @@ modules:
   version: 1
   version_iri: https://example.invalid/nebula/modules/pc-foundation/1
   file: foundation.ttl
-  sha256: b064c7e16a55b77bcd7c8b8660387d26e3a39568f9b1d473dccbd3ff4c7a95d5
+  sha256: 18b8d867e8101983d3290edcef855f5d9cf85b2517f09a84322f5d5fb5c38a35
   dependencies: []
 - id: pc-insurance-core
   version: 1
   version_iri: https://example.invalid/nebula/modules/pc-insurance-core/1
   file: insurance-core.ttl
-  sha256: d3d928e3368e9fa00c0586663c4b8dc7b81ef1e923f07f4e083fa3ddf9af0b17
+  sha256: fa5848ec686654002afd4421b19860e284e909bfab7044358179fdbd25a31ac0
   dependencies:
   - https://example.invalid/nebula/modules/pc-foundation/1
 - id: pc-general-liability
@@ -38,33 +38,39 @@ modules:
   - https://example.invalid/nebula/modules/pc-insurance-core/1
 artifacts:
 - file: ontology.yaml
-  sha256: db69e382b7a31ac8cc91bfc38ffea552fecfbca35a7c02af0db1a5233b33faf9
+  sha256: 5d95205946da5d235586d8740ba0372b48e14b354521a8fdb30674a18b0940a1
 - file: projection-mapping.yaml
-  sha256: e25e33cf5ca950b81c6ae913a88bb214e8c3875aaa6fe39e79a5cf51963aa3cb
+  sha256: 83ab36326a3313bc147fac026458c0620db4191eca35b5109b80b5b87e7aa357
 - file: shapes.ttl
-  sha256: eff3f1dde1a0fb84115838a60714652fc17aa4fdef3964674c049fdbd6082d21
+  sha256: 8d7165063774243ea644f509a13a55d164887c9dc16bfbdb3cfc36e3dbb280c9
 - file: gl-completeness.ttl
   sha256: 27c854091a5d94816d96f2c3378219215d2c884d07d43f9bddd748e741bfa925
 - file: property-completeness.ttl
   sha256: 1cd9e38d868581d1aa827b9cef6f5959a37bc0d26684ff39571fbb787a554558
 - file: records.json
-  sha256: fd9453504a2831720a322ea68ef1dfc76dc90b1e5bf4adf6c79609161d709beb
+  sha256: 8719494563d5928620fefd19cfdc9e0df74e6e237e75c1feadc4b380d23f9693
 - file: snapshot.ttl
-  sha256: 5d81cda1e8651d18a90734aa3b94eb6298db91c7134cd60ea5580ca6ee3d22c5
+  sha256: 1612952233594d31d6c077e466b9051e566546ee3729171c601c046ff177d27f
 - file: snapshot.jsonld
-  sha256: 6b22c30b5206ca610305c1f16c07544779df112695865053a953062798db1658
+  sha256: f6a3b0088aa902622ffe82800c8a7c11b7b7b3f6fb0afa476aaba426a930e729
 - file: snapshot-index.json
-  sha256: fa6229deffb91954450e04b93e24101f4fd3b90973c2153d7cb1c4fe956cc54a
+  sha256: 85c17815fccaec1fa9f4b200a7a6e0fde4543ea9286bcae520b64ecaaf6b7391
 - file: source-package.md
-  sha256: 0685da6360b0f01f2f9f15077b24bdaf18bb4d98506fd266ab98057e08fbb2ec
+  sha256: f740cdcc55227ccf9b904e85ed1ddaeaeec1fe10fb80d3a525032682b0cdcd79
 - file: expected-inferences.ttl
-  sha256: b8c6a5730f7f76dc707f018b68f2d84c2c6260dd2362d0b8647dc0d7017f58d3
+  sha256: 90dd6057e67640c7e2338d1cea38865b394edd784861e5d8e6879c206d54ec70
 - file: expected-results.yaml
-  sha256: 7ac88d0a47939b9df0e43f19ce9e667ef74dd458a791b62c383cca628a37e56c
+  sha256: 26923b256c18ec4f1f602979ec469a01d54a99338a0962daad5654fd080e005f
 - file: ../../schemas/commercial-pc-example.schema.json
   sha256: fc47ad9a6cb7161de4c3d987b58f891b616bf676a5fc9e16fa2b695728d70ddb
 - file: queries/account-program.rq
-  sha256: 24b8b315d445ca2288b233d80b6eb6e9dfe466928576142ce8cb773fbfcd5bab
+  sha256: 858ec196f6c5a6da2d32e8c892ae97d981ebeb9d1244d251767ffa11814befca
+- file: queries/account-360-workshop.rq
+  sha256: 1ab44515d014b0c5612fc2fe2da7ad8bba56101150651f57ea86882ca1a40959
+- file: queries/ownership.rq
+  sha256: 0d88aff968e56d265eaa0cb14bf05777c0f3c5206d8d0acf5fbd7f0943e46b19
+- file: queries/account-team.rq
+  sha256: c5405ab45af75dfedf947b7fba486cdf3dd4530527c09739c5e7a463da58910e
 - file: queries/coverage-money.rq
   sha256: 92004c2667cad583e45ae79a9ce3e63678e91be715b71eac1aa28d93da4b9182
 - file: queries/umbrella-schedule.rq
@@ -75,6 +81,10 @@ artifacts:
   sha256: ef64c70198c58c5e30650fa6eb788b6623963304c9586ae9ea8e7d0f5e81bdba
 - file: boundaries/missing-location.ttl
   sha256: 3fa8d825d12928b4e2843c6da4499d1a32dd2661e255e8d73d55f3edc0a78997
+- file: boundaries/two-parent-accounts.ttl
+  sha256: 538bb514ea7973848628cd0cca40487b670fc3697891e7f64f4cf56463dd8527
+- file: boundaries/duplicate-organization-account.ttl
+  sha256: 93decb00a39dfa2ff6b43f51d7299f9065e16c78b9d5fdecd2bc04d8c25c73ea
 - file: boundaries/missing-occurrence.ttl
   sha256: 2d4368579be5f614cfeda1d643b54fc70f718a03d6191a3a541db75d9594ae8c
 activation: none; teaching fixtures never install canonical runtime data

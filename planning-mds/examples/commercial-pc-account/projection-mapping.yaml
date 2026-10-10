@@ -13,7 +13,12 @@ per_record_context:
 - temporal_kind_granularity_attestation_and_valid_to_state
 - asserted_or_derived_basis
 relations:
-- {predicate: 'pc:groupsParty', edge: GROUPS_PARTY, direction: subject-to-object}
+- {predicate: 'pc:accountOrganization', edge: ACCOUNT_OF, direction: subject-to-object}
+- {predicate: 'pc:parentAccount', edge: PARENT_ACCOUNT, direction: subject-to-object}
+- {predicate: 'pc:owner', edge: OWNER, direction: subject-to-object}
+- {predicate: 'pc:ownedOrganization', edge: OWNED_ORGANIZATION, direction: subject-to-object}
+- {predicate: 'pc:parentOrganization', edge: PARENT_ORGANIZATION, direction: subject-to-object}
+- {predicate: 'pc:employedBy', edge: EMPLOYED_BY, direction: subject-to-object}
 - {predicate: 'pc:operatesAt', edge: OPERATES_AT, direction: subject-to-object}
 - {predicate: 'pc:roleParty', edge: ROLE_PARTY, direction: subject-to-object}
 - {predicate: 'pc:roleKind', edge: ROLE_KIND, direction: subject-to-object}
@@ -30,6 +35,7 @@ relations:
 - {predicate: 'pc:reportsPolicy', edge: REPORTS_POLICY, direction: subject-to-object}
 scalar_properties:
 - {predicate: 'pc:amount', encoding: decimal-string}
+- {predicate: 'pc:ownershipPercent', encoding: decimal-string}
 - {predicate: 'pc:currency', encoding: string}
 - {predicate: 'pc:basis', encoding: string}
 - {predicate: 'pc:policyNumber', encoding: scoped-identifier-string}

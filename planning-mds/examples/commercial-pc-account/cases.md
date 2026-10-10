@@ -4,7 +4,7 @@ All cases are synthetic. [The source package](source-package.md) supplies the re
 
 ## EX-PC-001 — account versus insured
 
-The account groups two organizations. Named-insured role assignments select Workshop for BOP and Contracting for GL; auto and umbrella name both. Traversing account membership cannot create a missing named-insured relationship. Owner: F0012/F0013, scoped identity F0017.
+Each organization has its own account (ADR-0070): Holdings, Workshop, Contracting and Ridge Builders. Named-insured role assignments select Workshop for BOP and Contracting for GL; auto and umbrella name both. A policy reaches an account only through its organization's named-insured role. [account-program.rq](queries/account-program.rq) rolls the Holdings hierarchy up to six policy/insured rows. Holdings is a parent and an owner but names on no policy, so the roll-up creates no named-insured relationship. Owner: F0012/F0013, scoped identity F0017.
 
 ## EX-PC-002 — package versus coverage
 
@@ -44,7 +44,7 @@ A loss notice reports an event and a GL policy reference. It does not prove insu
 
 ## EX-PC-011 — role and access are separate
 
-The MGA handled a submission while Granite issued the GL policy. Underwriter Rowan acts for the MGA. None of those domain relationships authenticates Rowan, grants access to this KB or authorizes a canonical commit. A second tenant using the same broker must not see this account; current revocation also applies to old snapshots and their evidence. No authorization code is exercised here. Owner: accepted F0002/ADR-0061/ADR-0062 boundaries and F0012's role vocabulary.
+The MGA handled a submission while Granite issued the GL policy. Underwriter Rowan acts for the MGA; Morgan underwrites the BOP for Maple and Avery the GL for Granite. None of those domain relationships authenticates anyone, grants access to this KB or authorizes a canonical commit. Carrier staff see the tenant through their grants; the underwriter roles say who decides what. A second tenant using the same broker must not see this account; current revocation also applies to old snapshots and their evidence. No authorization code is exercised here. Owner: accepted F0002/ADR-0061/ADR-0062 boundaries and F0012's role vocabulary.
 
 ## EX-PC-012 — conflict is not absence
 
@@ -58,3 +58,14 @@ The umbrella names both organizations. Its supplied schedule lists the GL and au
 
 The account record (dated 2025-12-15) says Contracting operates at the yard but not since when. Its fact has `from: null`, `attested_from: 2025-12-15` and an `OPEN` end. Before December 15 the reading is `UNKNOWN`, not "since always" (EX-PC-014-B). The broker's request (dated 2026-05-15, accepted May 18) says Contracting no longer operates there, without a date. That reading has time shape `ENDED_UNDATED`. It closes the open version in recorded time and adds a version whose end is `UNKNOWN` with `attested_to: 2026-05-15`. Known as of July 11, March reads `UNKNOWN` (014-C) and July reads absent (014-D). Known as of April 1, March still reads the open version (014-A). The yard relationship is therefore missing from the July snapshot. Nothing here invents an end date. Owner: F0008 (`valid_to_state`, attestation bounds), F0016 (time mentions), ADR-0064.
 
+## EX-PC-015 — ownership is not the account hierarchy
+
+Holdings owns all of Workshop and 60 percent of Contracting; Ridge Builders owns the other 40 percent. Each owner has its own account. Contracting's account names Holdings' account as its designated parent; Ridge Builders' account is not a parent. [ownership.rq](queries/ownership.rq) returns both owners with their percentages and whether each is the account parent. Majority is computed from the percentage, never stored. A 50/50 joint venture still needs one designated parent: [two-parent-accounts.ttl](boundaries/two-parent-accounts.ttl) names two parents and fails the account shape. [duplicate-organization-account.ttl](boundaries/duplicate-organization-account.ttl) gives one organization two accounts and fails too. Owner: F0012 (ADR-0070), F0017 for account and organization identity.
+
+## EX-PC-016 — a policy belongs to every account it names
+
+The auto and umbrella policies name both Workshop and Contracting, so both accounts see them; BOP names only Workshop and GL only Contracting. [account-360-workshop.rq](queries/account-360-workshop.rq) returns BOP, auto and umbrella for the Workshop account and not GL. The Holdings roll-up shows each policy once with every insured (EX-PC-001). The same shape covers a property policy for a whole corporate family beside GL for a few subsidiaries. Owner: F0012 relation contract, F0023 Account 360.
+
+## EX-PC-017 — brokers are parties, and roles show who does what
+
+Harbor Example Brokerage services the Holdings account. Its Riverside branch is an organization under it and operates from its own office location. Jordan, employed by the branch, is the broker contact: an intermediary who works for neither the insured nor a carrier. Casey, employed by Holdings, is risk manager for the Holdings account and account contact for the Workshop account: one person, two roles, two accounts. The auto policy came through a different broker, Example Fleet Brokers, so broker of record is per policy term. [account-team.rq](queries/account-team.rq) lists six person, role, scope and acted-for rows across the hierarchy. None of these roles grants access (EX-PC-011). Owner: F0012 role vocabulary, F0023 Account 360; access stays with ADR-0062.

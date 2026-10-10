@@ -292,3 +292,21 @@ These are proposed contract additions, not claims about the current schema. The 
 | Automated decision | Target, action, confidence, model sentence, precedents shown, trace, undo data, status; impact-hold reason | F0027/F0043 |
 | Decision basis | `basis_hash` on interpretation runs, bindings, resolution verdicts, derived facts/assessments, impact analyses | F0016/F0027/F0032/F0056/F0065/F0066 |
 | Action attempt | Execution request id (unique `NULLS NOT DISTINCT` with action and scope), definition revision, dispatch token, state, response capture, timestamps, safe request snapshot | F0050/F0059 |
+
+## Proposed party, account and role records (ADR-0070)
+
+[ADR-0070](decisions/ADR-0070-account-party-and-role-model.md) (Proposed) sets the commercial P&C account model. In the Brain these are foundation-ontology classes and properties, stored as tenant-scoped entities with evidence-backed FactSlots and canonical fact versions. They are not new kernel tables. F0012 Phase B settles names, IRIs and constraints; the [Cedar Bridge example](../examples/commercial-pc-account/README.md) shows a proposed shape.
+
+| Concept | Required information | Temporal kind | Constraint |
+|---|---|---|---|
+| Party: Organization, Person | Entity identity, name facts under ADR-0066 | names `STATE` | Broker, carrier, MGA and insured are roles, not party types |
+| Organization hierarchy | Child organization, parent organization | `STATE` | No cycles; no fixed depth |
+| Operating location | Organization, location | `STATE` | Not insured property unless a coverage names it |
+| Employment | Person, employing organization or branch | `STATE` | Separate from any role assignment |
+| Account | Account identity, its one organization | organization `ETERNAL` | Exactly one organization per account and one account per organization in a tenant |
+| Parent account | Account, designated parent account | `STATE` | At most one parent; no cycles; not computed from ownership |
+| Ownership interest | Owner party, owned organization, percentage | parties `ETERNAL`, percentage `STATE` | 0 < percentage ≤ 100; several owners allowed; majority is computed |
+| Role assignment | Party, role kind, scope (account, submission or policy term), acted-for organization for a person | party and acted-for `STATE`; kind and scope `ETERNAL` | Grants no access; broker of record is scoped to a policy term |
+| Submission account | Submission, account | `STATE` | Policies have no owning account; they reach accounts through named-insured roles |
+
+Canonical-contract alignment: `Account.primary_party_uid`, `Account.parent_account_uid`, `PartyRelationship`, `AccountPartyRole` and `PolicyPartyRole` in `nebula-insurance-data-contracts`. ADR-0070 lists the gaps to raise there.

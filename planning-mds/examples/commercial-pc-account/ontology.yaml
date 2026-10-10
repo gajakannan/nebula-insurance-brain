@@ -17,7 +17,8 @@ classes:
   parents:
   - pc:Party
   definition: An identified organization; broker, MGA and insurer describe scoped
-    roles rather than mutually exclusive organization types.
+    roles rather than mutually exclusive organization types. Branches and offices
+    are organizations or locations under a parent organization.
   examples:
   - records.json
   regression_cases:
@@ -35,8 +36,18 @@ classes:
 - id: pc:Account
   module: foundation
   parents: []
-  definition: Illustrative business relationship grouping parties and policies; distinct
-    from a named insured and a structural tenant.
+  definition: The customer relationship with exactly one organization (ADR-0070), with
+    at most one designated parent account; distinct from a named insured and a structural
+    tenant.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:OwnershipInterest
+  module: foundation
+  parents: []
+  definition: One organization's percentage interest in another; several owners are
+    allowed and the account hierarchy is designated separately.
   examples:
   - records.json
   regression_cases:
@@ -71,7 +82,7 @@ classes:
   module: foundation
   parents: []
   definition: A relationship identifying one party, role kind and account, submission
-    or policy-term scope.
+    or policy-term scope, and for a person the organization acted for.
   examples:
   - records.json
   regression_cases:
@@ -209,16 +220,74 @@ classes:
   regression_cases:
   - cases.md
 properties:
-- id: pc:groupsParty
+- id: pc:accountOrganization
   module: foundation
   kind: object
-  temporal_kind: STATE
+  temporal_kind: ETERNAL
+  definition: Identifies the one organization an account represents; one account per
+    organization in a tenant.
   examples:
   - records.json
   regression_cases:
   - cases.md
-  definition: Links an account grouping to a legal party; does not imply named-insured
-    status.
+- id: pc:parentAccount
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  definition: The designated parent account used for roll-up and Account 360; not computed
+    from ownership.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:owner
+  module: foundation
+  kind: object
+  temporal_kind: ETERNAL
+  definition: Identifies the owning party of an ownership interest.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:ownedOrganization
+  module: foundation
+  kind: object
+  temporal_kind: ETERNAL
+  definition: Identifies the organization an ownership interest is held in.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:ownershipPercent
+  module: foundation
+  kind: datatype
+  datatype: xsd:decimal
+  temporal_kind: STATE
+  definition: The held percentage; majority ownership is computed from it, never stored.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:parentOrganization
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  definition: Places an organization, such as a broker branch, under its parent organization;
+    no fixed depth.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+- id: pc:employedBy
+  module: foundation
+  kind: object
+  temporal_kind: STATE
+  definition: Identifies a person's employing organization, separately from any role
+    they play.
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
 - id: pc:operatesAt
   module: foundation
   kind: object
@@ -265,7 +334,7 @@ properties:
   - records.json
   regression_cases:
   - cases.md
-  definition: Identifies the organization represented by an underwriting role; no
+  definition: Identifies the organization or branch a person represents in a role; no
     grant or delegation authority is implied.
 - id: pc:forAccount
   module: insurance-core
@@ -275,7 +344,8 @@ properties:
   - records.json
   regression_cases:
   - cases.md
-  definition: Links a policy or submission to its business account grouping.
+  definition: Links a submission to the account it was submitted for. Policies have no
+    single owning account; they reach accounts through named-insured roles.
 - id: pc:productType
   module: insurance-core
   kind: object

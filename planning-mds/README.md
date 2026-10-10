@@ -22,6 +22,7 @@ All solution-specific planning for Nebula Insurance Brain lives here. Generic ro
 | 126 document pipeline orchestration | ADR-0060; F0004/F0005/F0015/F0016 and dependent feature scope amendments |
 | 106 to 117 pre-build requirements and open decisions | `BLUEPRINT.md` section 4.8; ADR-0038 to ADR-0048 |
 | Statements, time, and governance amendments (2026-09-25) to sections 3, 11, 14, 17, 29, 53, 56, 62, 64, 75, 76, 78, 95, 99 | ADR-0063 to ADR-0069; `BLUEPRINT.md` section 4.11; F0066; feature scope amendments; `examples/statements-time-and-governance.md` |
+| Account, party and role model (2026-10-10) to sections 66, 70, 86, 118, 120 | ADR-0070; `BLUEPRINT.md` section 4.8; F0012/F0017/F0023 amendments; `examples/commercial-pc-account/` |
 
 Everything else in the master blueprint remains authoritative in place until a feature's Phase B extracts it into a contract, schema, or ADR.
 

@@ -9,13 +9,10 @@
     {
       "@id": "d:EX-PC-ACCOUNT",
       "@type": "pc:Account",
-      "rdfs:label": "Cedar Bridge commercial account",
-      "pc:groupsParty": [
+      "rdfs:label": "Cedar Bridge Holdings account",
+      "pc:accountOrganization": [
         {
-          "@id": "d:EX-PC-WORKSHOP"
-        },
-        {
-          "@id": "d:EX-PC-CONTRACTOR"
+          "@id": "d:EX-PC-HOLDINGS"
         }
       ]
     },
@@ -60,6 +57,314 @@
       "rdfs:label": "Rowan Example"
     },
     {
+      "@id": "d:EX-PC-HOLDINGS",
+      "@type": "pc:Organization",
+      "rdfs:label": "Cedar Bridge Holdings LLC"
+    },
+    {
+      "@id": "d:EX-PC-RIDGE",
+      "@type": "pc:Organization",
+      "rdfs:label": "Example Ridge Builders Inc."
+    },
+    {
+      "@id": "d:EX-PC-ACCOUNT-WORKSHOP",
+      "@type": "pc:Account",
+      "rdfs:label": "Cedar Bridge Workshop account",
+      "pc:accountOrganization": [
+        {
+          "@id": "d:EX-PC-WORKSHOP"
+        }
+      ],
+      "pc:parentAccount": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ACCOUNT-CONTRACTOR",
+      "@type": "pc:Account",
+      "rdfs:label": "Cedar Bridge Contracting account",
+      "pc:accountOrganization": [
+        {
+          "@id": "d:EX-PC-CONTRACTOR"
+        }
+      ],
+      "pc:parentAccount": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ACCOUNT-RIDGE",
+      "@type": "pc:Account",
+      "rdfs:label": "Example Ridge Builders account",
+      "pc:accountOrganization": [
+        {
+          "@id": "d:EX-PC-RIDGE"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-OWN-WORKSHOP",
+      "@type": "pc:OwnershipInterest",
+      "rdfs:label": "Holdings interest in Workshop",
+      "pc:owner": [
+        {
+          "@id": "d:EX-PC-HOLDINGS"
+        }
+      ],
+      "pc:ownedOrganization": [
+        {
+          "@id": "d:EX-PC-WORKSHOP"
+        }
+      ],
+      "pc:ownershipPercent": [
+        {
+          "@value": "100.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-OWN-CONTRACTOR-HOLDINGS",
+      "@type": "pc:OwnershipInterest",
+      "rdfs:label": "Holdings interest in Contracting",
+      "pc:owner": [
+        {
+          "@id": "d:EX-PC-HOLDINGS"
+        }
+      ],
+      "pc:ownedOrganization": [
+        {
+          "@id": "d:EX-PC-CONTRACTOR"
+        }
+      ],
+      "pc:ownershipPercent": [
+        {
+          "@value": "60.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-OWN-CONTRACTOR-RIDGE",
+      "@type": "pc:OwnershipInterest",
+      "rdfs:label": "Ridge Builders interest in Contracting",
+      "pc:owner": [
+        {
+          "@id": "d:EX-PC-RIDGE"
+        }
+      ],
+      "pc:ownedOrganization": [
+        {
+          "@id": "d:EX-PC-CONTRACTOR"
+        }
+      ],
+      "pc:ownershipPercent": [
+        {
+          "@value": "40.00",
+          "@type": "xsd:decimal"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-BROKER-RIVERSIDE",
+      "@type": "pc:Organization",
+      "rdfs:label": "Harbor Example Brokerage, Riverside branch",
+      "pc:parentOrganization": [
+        {
+          "@id": "d:EX-PC-BROKER"
+        }
+      ],
+      "pc:operatesAt": [
+        {
+          "@id": "d:EX-PC-LOCATION-RIVERSIDE"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-LOCATION-RIVERSIDE",
+      "@type": "pc:Location",
+      "rdfs:label": "Riverside branch office"
+    },
+    {
+      "@id": "d:EX-PC-BROKER-CONTACT",
+      "@type": "pc:Person",
+      "rdfs:label": "Jordan Example",
+      "pc:employedBy": [
+        {
+          "@id": "d:EX-PC-BROKER-RIVERSIDE"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-RISK-MANAGER",
+      "@type": "pc:Person",
+      "rdfs:label": "Casey Example",
+      "pc:employedBy": [
+        {
+          "@id": "d:EX-PC-HOLDINGS"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ROLE-BrokerContact",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "BrokerContact"
+    },
+    {
+      "@id": "d:EX-PC-ROLE-RiskManager",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "RiskManager"
+    },
+    {
+      "@id": "d:EX-PC-ROLE-AccountContact",
+      "@type": "pc:RoleKind",
+      "rdfs:label": "AccountContact"
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-BROKER-CONTACT",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Broker Contact",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-BROKER-CONTACT"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-BrokerContact"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ],
+      "pc:actsFor": [
+        {
+          "@id": "d:EX-PC-BROKER-RIVERSIDE"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-RISK-MANAGER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Risk Manager",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-RISK-MANAGER"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-RiskManager"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-ACCOUNT"
+        }
+      ],
+      "pc:actsFor": [
+        {
+          "@id": "d:EX-PC-HOLDINGS"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-WORKSHOP-CONTACT",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Workshop Contact",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-RISK-MANAGER"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-AccountContact"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-ACCOUNT-WORKSHOP"
+        }
+      ],
+      "pc:actsFor": [
+        {
+          "@id": "d:EX-PC-HOLDINGS"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-UW-MAPLE",
+      "@type": "pc:Person",
+      "rdfs:label": "Morgan Example"
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-BOP-UNDERWRITER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Bop Underwriter",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-UW-MAPLE"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-Underwriter"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-BOP"
+        }
+      ],
+      "pc:actsFor": [
+        {
+          "@id": "d:EX-PC-MAPLE"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-UW-GRANITE",
+      "@type": "pc:Person",
+      "rdfs:label": "Avery Example"
+    },
+    {
+      "@id": "d:EX-PC-ASSIGN-GL-UNDERWRITER",
+      "@type": "pc:RoleAssignment",
+      "rdfs:label": "Assign Gl Underwriter",
+      "pc:roleParty": [
+        {
+          "@id": "d:EX-PC-UW-GRANITE"
+        }
+      ],
+      "pc:roleKind": [
+        {
+          "@id": "d:EX-PC-ROLE-Underwriter"
+        }
+      ],
+      "pc:roleScope": [
+        {
+          "@id": "d:EX-PC-TERM-GL"
+        }
+      ],
+      "pc:actsFor": [
+        {
+          "@id": "d:EX-PC-GRANITE"
+        }
+      ]
+    },
+    {
+      "@id": "d:EX-PC-FLEET-BROKER",
+      "@type": "pc:Organization",
+      "rdfs:label": "Example Fleet Brokers"
+    },
+    {
       "@id": "d:EX-PC-LOCATION-SHOP",
       "@type": "pc:Location",
       "rdfs:label": "Leased workshop"
@@ -80,7 +385,7 @@
       "rdfs:label": "Contracting submission",
       "pc:forAccount": [
         {
-          "@id": "d:EX-PC-ACCOUNT"
+          "@id": "d:EX-PC-ACCOUNT-CONTRACTOR"
         }
       ]
     },
@@ -219,11 +524,6 @@
       "@id": "d:EX-PC-POLICY-BOP",
       "@type": "pc:Policy",
       "rdfs:label": "BOP policy",
-      "pc:forAccount": [
-        {
-          "@id": "d:EX-PC-ACCOUNT"
-        }
-      ],
       "pc:productType": [
         {
           "@id": "d:EX-PC-PRODUCT-BOP"
@@ -321,11 +621,6 @@
       "@id": "d:EX-PC-POLICY-GL",
       "@type": "pc:Policy",
       "rdfs:label": "GL policy",
-      "pc:forAccount": [
-        {
-          "@id": "d:EX-PC-ACCOUNT"
-        }
-      ],
       "pc:productType": [
         {
           "@id": "d:EX-PC-PRODUCT-StandaloneGL"
@@ -423,11 +718,6 @@
       "@id": "d:EX-PC-POLICY-AUTO",
       "@type": "pc:Policy",
       "rdfs:label": "AUTO policy",
-      "pc:forAccount": [
-        {
-          "@id": "d:EX-PC-ACCOUNT"
-        }
-      ],
       "pc:productType": [
         {
           "@id": "d:EX-PC-PRODUCT-CommercialAuto"
@@ -487,7 +777,7 @@
       "rdfs:label": "Assign Auto Broker",
       "pc:roleParty": [
         {
-          "@id": "d:EX-PC-BROKER"
+          "@id": "d:EX-PC-FLEET-BROKER"
         }
       ],
       "pc:roleKind": [
@@ -545,11 +835,6 @@
       "@id": "d:EX-PC-POLICY-UMBRELLA",
       "@type": "pc:Policy",
       "rdfs:label": "UMBRELLA policy",
-      "pc:forAccount": [
-        {
-          "@id": "d:EX-PC-ACCOUNT"
-        }
-      ],
       "pc:productType": [
         {
           "@id": "d:EX-PC-PRODUCT-Umbrella"
