@@ -39,6 +39,8 @@ d:EX-PC-ASSIGN-RISK-MANAGER a pc:RoleAssignment ; rdfs:label "Assign Risk Manage
 d:EX-PC-ASSIGN-WORKSHOP-CONTACT a pc:RoleAssignment ; rdfs:label "Assign Workshop Contact" .
 d:EX-PC-UW-MAPLE a pc:Person ; rdfs:label "Morgan Example" .
 d:EX-PC-ASSIGN-BOP-UNDERWRITER a pc:RoleAssignment ; rdfs:label "Assign Bop Underwriter" .
+d:EX-PC-UW-MAPLE-PROPERTY a pc:Person ; rdfs:label "Quinn Example" .
+d:EX-PC-ASSIGN-BOP-PROPERTY-UNDERWRITER a pc:RoleAssignment ; rdfs:label "Assign Bop Property Underwriter" .
 d:EX-PC-UW-GRANITE a pc:Person ; rdfs:label "Avery Example" .
 d:EX-PC-ASSIGN-GL-UNDERWRITER a pc:RoleAssignment ; rdfs:label "Assign Gl Underwriter" .
 d:EX-PC-FLEET-BROKER a pc:Organization ; rdfs:label "Example Fleet Brokers" .
@@ -56,19 +58,18 @@ d:EX-PC-ASSIGN-PROGRAM-MASTER-INSURED a pc:RoleAssignment ; rdfs:label "Assign P
 d:EX-PC-POLICY-PROGRAM-WORKSHOP a pc:Policy ; rdfs:label "Workshop local property policy" .
 d:EX-PC-TERM-PROGRAM-WORKSHOP a pc:PolicyTerm ; rdfs:label "EX-PROP-100-W 2026 term" .
 d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-CARRIER a pc:RoleAssignment ; rdfs:label "Assign Program Workshop Carrier" .
-d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-BROKER a pc:RoleAssignment ; rdfs:label "Assign Program Workshop Broker" .
 d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-INSURED a pc:RoleAssignment ; rdfs:label "Assign Program Workshop Insured" .
 d:EX-PC-POLICY-PROGRAM-CONTRACTOR a pc:Policy ; rdfs:label "Contracting local property policy" .
 d:EX-PC-TERM-PROGRAM-CONTRACTOR a pc:PolicyTerm ; rdfs:label "EX-PROP-100-C 2026 term" .
 d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-CARRIER a pc:RoleAssignment ; rdfs:label "Assign Program Contracting Carrier" .
-d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-BROKER a pc:RoleAssignment ; rdfs:label "Assign Program Contracting Broker" .
 d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-INSURED a pc:RoleAssignment ; rdfs:label "Assign Program Contracting Insured" .
 d:EX-PC-LOCATION-SHOP a pc:Location ; rdfs:label "Leased workshop" .
 d:EX-PC-LOCATION-YARD a pc:Location ; rdfs:label "Contracting yard" .
 d:EX-PC-VEHICLE-VAN a pc:Vehicle ; rdfs:label "Illustrative company van" .
 d:EX-PC-SUBMISSION a pc:Submission ; rdfs:label "Contracting submission" .
 d:EX-PC-LOSS-NOTICE a pc:LossNotice ; rdfs:label "Reported trip-and-fall notice" .
-d:EX-PC-ROLE-NamedInsured a pc:RoleKind ; rdfs:label "NamedInsured" .
+d:EX-PC-ROLE-FirstNamedInsured a pc:RoleKind ; rdfs:label "FirstNamedInsured" .
+d:EX-PC-ROLE-AdditionalNamedInsured a pc:RoleKind ; rdfs:label "AdditionalNamedInsured" .
 d:EX-PC-ROLE-PlacementBroker a pc:RoleKind ; rdfs:label "PlacementBroker" .
 d:EX-PC-ROLE-BrokerOfRecord a pc:RoleKind ; rdfs:label "BrokerOfRecord" .
 d:EX-PC-ROLE-Carrier a pc:RoleKind ; rdfs:label "Carrier" .
@@ -140,7 +141,7 @@ d:EX-PC-ASSIGN-BOP-BROKER pc:roleParty d:EX-PC-BROKER .
 d:EX-PC-ASSIGN-BOP-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
 d:EX-PC-ASSIGN-BOP-BROKER pc:roleScope d:EX-PC-TERM-BOP .
 d:EX-PC-ASSIGN-BOP-WORKSHOP pc:roleParty d:EX-PC-WORKSHOP .
-d:EX-PC-ASSIGN-BOP-WORKSHOP pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-BOP-WORKSHOP pc:roleKind d:EX-PC-ROLE-FirstNamedInsured .
 d:EX-PC-ASSIGN-BOP-WORKSHOP pc:roleScope d:EX-PC-TERM-BOP .
 d:EX-PC-POLICY-GL pc:productType d:EX-PC-PRODUCT-StandaloneGL .
 d:EX-PC-POLICY-GL pc:policyNumber "EX-2042" .
@@ -154,7 +155,7 @@ d:EX-PC-ASSIGN-GL-BROKER pc:roleParty d:EX-PC-BROKER .
 d:EX-PC-ASSIGN-GL-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
 d:EX-PC-ASSIGN-GL-BROKER pc:roleScope d:EX-PC-TERM-GL .
 d:EX-PC-ASSIGN-GL-CONTRACTOR pc:roleParty d:EX-PC-CONTRACTOR .
-d:EX-PC-ASSIGN-GL-CONTRACTOR pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-GL-CONTRACTOR pc:roleKind d:EX-PC-ROLE-FirstNamedInsured .
 d:EX-PC-ASSIGN-GL-CONTRACTOR pc:roleScope d:EX-PC-TERM-GL .
 d:EX-PC-POLICY-AUTO pc:productType d:EX-PC-PRODUCT-CommercialAuto .
 d:EX-PC-POLICY-AUTO pc:policyNumber "EX-2042" .
@@ -168,10 +169,10 @@ d:EX-PC-ASSIGN-AUTO-BROKER pc:roleParty d:EX-PC-FLEET-BROKER .
 d:EX-PC-ASSIGN-AUTO-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
 d:EX-PC-ASSIGN-AUTO-BROKER pc:roleScope d:EX-PC-TERM-AUTO .
 d:EX-PC-ASSIGN-AUTO-WORKSHOP pc:roleParty d:EX-PC-WORKSHOP .
-d:EX-PC-ASSIGN-AUTO-WORKSHOP pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-AUTO-WORKSHOP pc:roleKind d:EX-PC-ROLE-FirstNamedInsured .
 d:EX-PC-ASSIGN-AUTO-WORKSHOP pc:roleScope d:EX-PC-TERM-AUTO .
 d:EX-PC-ASSIGN-AUTO-CONTRACTOR pc:roleParty d:EX-PC-CONTRACTOR .
-d:EX-PC-ASSIGN-AUTO-CONTRACTOR pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-AUTO-CONTRACTOR pc:roleKind d:EX-PC-ROLE-AdditionalNamedInsured .
 d:EX-PC-ASSIGN-AUTO-CONTRACTOR pc:roleScope d:EX-PC-TERM-AUTO .
 d:EX-PC-POLICY-UMBRELLA pc:productType d:EX-PC-PRODUCT-Umbrella .
 d:EX-PC-POLICY-UMBRELLA pc:policyNumber "EX-UMB-100" .
@@ -185,10 +186,10 @@ d:EX-PC-ASSIGN-UMBRELLA-BROKER pc:roleParty d:EX-PC-BROKER .
 d:EX-PC-ASSIGN-UMBRELLA-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
 d:EX-PC-ASSIGN-UMBRELLA-BROKER pc:roleScope d:EX-PC-TERM-UMBRELLA .
 d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP pc:roleParty d:EX-PC-WORKSHOP .
-d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP pc:roleKind d:EX-PC-ROLE-FirstNamedInsured .
 d:EX-PC-ASSIGN-UMBRELLA-WORKSHOP pc:roleScope d:EX-PC-TERM-UMBRELLA .
 d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR pc:roleParty d:EX-PC-CONTRACTOR .
-d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR pc:roleKind d:EX-PC-ROLE-AdditionalNamedInsured .
 d:EX-PC-ASSIGN-UMBRELLA-CONTRACTOR pc:roleScope d:EX-PC-TERM-UMBRELLA .
 d:EX-PC-COV-GL pc:coverageOf d:EX-PC-TERM-GL .
 d:EX-PC-COV-BOP-GL pc:coverageOf d:EX-PC-TERM-BOP .
@@ -316,7 +317,7 @@ d:EX-PC-ASSIGN-PROGRAM-MASTER-BROKER pc:roleParty d:EX-PC-BROKER .
 d:EX-PC-ASSIGN-PROGRAM-MASTER-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
 d:EX-PC-ASSIGN-PROGRAM-MASTER-BROKER pc:roleScope d:EX-PC-TERM-PROGRAM-MASTER .
 d:EX-PC-ASSIGN-PROGRAM-MASTER-INSURED pc:roleParty d:EX-PC-HOLDINGS .
-d:EX-PC-ASSIGN-PROGRAM-MASTER-INSURED pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-PROGRAM-MASTER-INSURED pc:roleKind d:EX-PC-ROLE-FirstNamedInsured .
 d:EX-PC-ASSIGN-PROGRAM-MASTER-INSURED pc:roleScope d:EX-PC-TERM-PROGRAM-MASTER .
 d:EX-PC-POLICY-PROGRAM-WORKSHOP pc:productType d:EX-PC-PRODUCT-Property .
 d:EX-PC-POLICY-PROGRAM-WORKSHOP pc:policyNumber "EX-PROP-100-W" .
@@ -328,11 +329,8 @@ d:EX-PC-TERM-PROGRAM-WORKSHOP pc:periodEnd "2027-01-01T00:00:00Z"^^xsd:dateTime 
 d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-CARRIER pc:roleParty d:EX-PC-MAPLE .
 d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-CARRIER pc:roleKind d:EX-PC-ROLE-Carrier .
 d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-CARRIER pc:roleScope d:EX-PC-TERM-PROGRAM-WORKSHOP .
-d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-BROKER pc:roleParty d:EX-PC-BROKER .
-d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
-d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-BROKER pc:roleScope d:EX-PC-TERM-PROGRAM-WORKSHOP .
 d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-INSURED pc:roleParty d:EX-PC-WORKSHOP .
-d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-INSURED pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-INSURED pc:roleKind d:EX-PC-ROLE-FirstNamedInsured .
 d:EX-PC-ASSIGN-PROGRAM-WORKSHOP-INSURED pc:roleScope d:EX-PC-TERM-PROGRAM-WORKSHOP .
 d:EX-PC-POLICY-PROGRAM-CONTRACTOR pc:productType d:EX-PC-PRODUCT-Property .
 d:EX-PC-POLICY-PROGRAM-CONTRACTOR pc:policyNumber "EX-PROP-100-C" .
@@ -344,9 +342,11 @@ d:EX-PC-TERM-PROGRAM-CONTRACTOR pc:periodEnd "2027-01-01T00:00:00Z"^^xsd:dateTim
 d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-CARRIER pc:roleParty d:EX-PC-MAPLE .
 d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-CARRIER pc:roleKind d:EX-PC-ROLE-Carrier .
 d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-CARRIER pc:roleScope d:EX-PC-TERM-PROGRAM-CONTRACTOR .
-d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-BROKER pc:roleParty d:EX-PC-BROKER .
-d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-BROKER pc:roleKind d:EX-PC-ROLE-PlacementBroker .
-d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-BROKER pc:roleScope d:EX-PC-TERM-PROGRAM-CONTRACTOR .
 d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-INSURED pc:roleParty d:EX-PC-CONTRACTOR .
-d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-INSURED pc:roleKind d:EX-PC-ROLE-NamedInsured .
+d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-INSURED pc:roleKind d:EX-PC-ROLE-FirstNamedInsured .
 d:EX-PC-ASSIGN-PROGRAM-CONTRACTOR-INSURED pc:roleScope d:EX-PC-TERM-PROGRAM-CONTRACTOR .
+d:EX-PC-ASSIGN-BOP-PROPERTY-UNDERWRITER pc:roleParty d:EX-PC-UW-MAPLE-PROPERTY .
+d:EX-PC-ASSIGN-BOP-PROPERTY-UNDERWRITER pc:roleKind d:EX-PC-ROLE-Underwriter .
+d:EX-PC-ASSIGN-BOP-PROPERTY-UNDERWRITER pc:roleScope d:EX-PC-TERM-BOP .
+d:EX-PC-ASSIGN-BOP-PROPERTY-UNDERWRITER pc:roleCoverage d:EX-PC-COV-BOP-PROPERTY .
+d:EX-PC-ASSIGN-BOP-PROPERTY-UNDERWRITER pc:actsFor d:EX-PC-MAPLE .

@@ -20,11 +20,14 @@ pc:CoverageReferenceShape a sh:NodeShape ;
     sh:targetSubjectsOf pc:coverageOf ;
     sh:property [ sh:path pc:coverageOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:PolicyTerm ] .
 
-# ADR-0070: one organization per account, at most one designated parent, one account per organization,
+# ADR-0070: one organization per account, at most one designated parent and no parent cycle, one account per organization,
 # exactly one account per policy and program, and at most one program per policy.
 pc:AccountShape a sh:NodeShape ; sh:targetClass pc:Account ;
     sh:property [ sh:path pc:accountOrganization ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Organization ] ;
-    sh:property [ sh:path pc:parentAccount ; sh:maxCount 1 ; sh:class pc:Account ] .
+    sh:property [ sh:path pc:parentAccount ; sh:maxCount 1 ; sh:class pc:Account ] ;
+    sh:sparql [ sh:message "An account cannot be its own parent or ancestor." ;
+        sh:select """SELECT $this WHERE {
+            $this <https://example.invalid/nebula/ont/commercial-example/parentAccount>+ $this }""" ] .
 
 pc:OneAccountPerOrganizationShape a sh:NodeShape ; sh:targetObjectsOf pc:accountOrganization ;
     sh:property [ sh:path [ sh:inversePath pc:accountOrganization ] ; sh:maxCount 1 ] .
@@ -35,6 +38,23 @@ pc:OwnershipShape a sh:NodeShape ; sh:targetClass pc:OwnershipInterest ;
     sh:property [ sh:path pc:ownedOrganization ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Organization ] ;
     sh:property [ sh:path pc:ownershipPercent ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ;
         sh:minExclusive 0 ; sh:maxInclusive 100 ] .
+
+# Shapes run on one snapshot, so one valid and known coordinate. Recorded percentages may total less
+# than 100 when owners are unknown; more than 100 for one organization is an error.
+pc:OwnershipTotalShape a sh:NodeShape ; sh:targetObjectsOf pc:ownedOrganization ;
+    sh:sparql [ sh:message "Current ownership percentages for one organization total more than 100." ;
+        sh:select """SELECT $this WHERE {
+            ?interest <https://example.invalid/nebula/ont/commercial-example/ownedOrganization> $this ;
+                <https://example.invalid/nebula/ont/commercial-example/ownershipPercent> ?percent }
+            GROUP BY $this HAVING (SUM(?percent) > 100)""" ] .
+
+# A coverage qualifier narrows a policy-term role to coverage parts of that same term.
+pc:RoleCoverageShape a sh:NodeShape ; sh:targetSubjectsOf pc:roleCoverage ;
+    sh:sparql [ sh:message "A role's coverage qualifier must name a coverage of the role's own term." ;
+        sh:select """SELECT $this ?value WHERE {
+            $this <https://example.invalid/nebula/ont/commercial-example/roleCoverage> ?value ;
+                <https://example.invalid/nebula/ont/commercial-example/roleScope> ?scope .
+            FILTER NOT EXISTS { ?value <https://example.invalid/nebula/ont/commercial-example/coverageOf> ?scope } }""" ] .
 
 pc:PolicyAccountShape a sh:NodeShape ; sh:targetClass pc:Policy ;
     sh:property [ sh:path pc:forAccount ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Account ] ;

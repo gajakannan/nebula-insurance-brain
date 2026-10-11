@@ -21,6 +21,8 @@ pc:LossNotice a owl:Class .
 # A submission, policy or program belongs to exactly one account (ADR-0070); no domain, so none is inferred.
 pc:forAccount a owl:ObjectProperty ; rdfs:range pc:Account .
 pc:productType a owl:ObjectProperty ; rdfs:domain pc:Policy ; rdfs:range pc:ProductType .
+# A policy-term role covers the whole term unless narrowed to coverage parts of it (ADR-0070).
+pc:roleCoverage a owl:ObjectProperty ; rdfs:domain pc:RoleAssignment ; rdfs:range pc:Coverage .
 pc:partOfProgram a owl:ObjectProperty ; rdfs:domain pc:Policy ; rdfs:range pc:Program .
 pc:termOf a owl:ObjectProperty ; rdfs:domain pc:PolicyTerm ; rdfs:range pc:Policy ; owl:inverseOf pc:hasTerm .
 pc:hasTerm a owl:ObjectProperty ; rdfs:domain pc:Policy ; rdfs:range pc:PolicyTerm .

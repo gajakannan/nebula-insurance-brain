@@ -81,8 +81,8 @@ classes:
 - id: pc:RoleKind
   module: foundation
   parents: []
-  definition: A named domain role such as Carrier or NamedInsured; not an authorization
-    role.
+  definition: A named domain role such as Carrier, FirstNamedInsured or AdditionalNamedInsured;
+    not an authorization role.
   examples:
   - records.json
   regression_cases:
@@ -355,6 +355,16 @@ properties:
   - cases.md
   definition: Links a submission, policy or program to the one account it belongs to; for a policy
     usually the first named insured's account. Other named insureds stay roles on the term.
+- id: pc:roleCoverage
+  module: insurance-core
+  kind: object
+  temporal_kind: ETERNAL
+  examples:
+  - records.json
+  regression_cases:
+  - cases.md
+  definition: Narrows a policy-term role to named coverage parts of that term, such as the property
+    section of a package. Without it, a policy-term role covers the whole term.
 - id: pc:partOfProgram
   module: insurance-core
   kind: object

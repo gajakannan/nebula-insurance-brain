@@ -1,12 +1,12 @@
 version: 0
-generated_at: '2026-10-10T16:06:30+00:00'
+generated_at: '2026-10-11T00:35:42+00:00'
 summary:
-  total_symbols: 531
+  total_symbols: 536
   by_language:
     python:
       files: 70
-      parsed: 0
-      cached: 70
+      parsed: 3
+      cached: 67
     typescript:
       files: 8
       parsed: 0
@@ -5662,6 +5662,7 @@ symbols:
   end_line: 158
   callers:
   - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.main
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-account-counterexamples-are-caught
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-projections-are-generated-from-records
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-typed-string-literals-break-completeness-shapes
   - symbol:capability-semantic-example-validation:validate-semantic-examples.validate-commercial-example
@@ -5835,16 +5836,29 @@ symbols:
   kind: function
   name: _at
   file: scripts/validation/tests/test_semantic_examples.py
-  line: 137
+  line: 182
   signature: 'def _at(day: str)'
   visibility: private
   language: python
-  end_line: 138
+  end_line: 183
   is_test: true
   callers:
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-valid-time-readings-follow-adr-0064
   callees:
   - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.stamp
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.drop-bop-placement-broker
+  node: capability:semantic-example-validation
+  kind: function
+  name: _drop_bop_placement_broker
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 153
+  signature: def _drop_bop_placement_broker(records)
+  visibility: private
+  language: python
+  end_line: 156
+  is_test: true
+  callers: []
+  callees: []
 - id: symbol:capability-semantic-example-validation:test-semantic-examples.load
   node: capability:semantic-example-validation
   kind: function
@@ -5863,11 +5877,11 @@ symbols:
   kind: function
   name: _mutate_records
   file: scripts/validation/tests/test_semantic_examples.py
-  line: 172
+  line: 217
   signature: def _mutate_records(root, change)
   visibility: private
   language: python
-  end_line: 177
+  end_line: 222
   is_test: true
   callers:
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-document-date-must-be-stated-in-the-source
@@ -5880,11 +5894,11 @@ symbols:
   kind: function
   name: pc_root
   file: scripts/validation/tests/test_semantic_examples.py
-  line: 163
+  line: 208
   signature: def pc_root(tmp_path)
   visibility: public
   language: python
-  end_line: 169
+  end_line: 214
   is_test: true
   callers: []
   callees: []
@@ -5901,16 +5915,60 @@ symbols:
   is_test: true
   callers: []
   callees: []
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.set-object
+  node: capability:semantic-example-validation
+  kind: function
+  name: _set_object
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 147
+  signature: def _set_object(assertion_id, value)
+  visibility: private
+  language: python
+  end_line: 150
+  is_test: true
+  callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-account-counterexamples-are-caught
+  callees: []
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.swap-contacts
+  node: capability:semantic-example-validation
+  kind: function
+  name: _swap_contacts
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 138
+  signature: def _swap_contacts(records)
+  visibility: private
+  language: python
+  end_line: 144
+  is_test: true
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-account-counterexamples-are-caught
+  node: capability:semantic-example-validation
+  kind: function
+  name: test_commercial_account_counterexamples_are_caught
+  file: scripts/validation/tests/test_semantic_examples.py
+  line: 168
+  signature: def test_commercial_account_counterexamples_are_caught(tmp_path, mutate,
+    expected)
+  visibility: public
+  language: python
+  end_line: 180
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-semantic-example-validation:build-commercial-pc-snapshot.build
+  - symbol:capability-semantic-example-validation:test-semantic-examples.set-object
+  - symbol:capability-semantic-example-validation:validate-semantic-rdf.check-bundle
 - id: symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-fixture-copy-is-clean
   node: capability:semantic-example-validation
   kind: function
   name: test_commercial_fixture_copy_is_clean
   file: scripts/validation/tests/test_semantic_examples.py
-  line: 180
+  line: 225
   signature: def test_commercial_fixture_copy_is_clean(pc_root)
   visibility: public
   language: python
-  end_line: 181
+  end_line: 226
   is_test: true
   callers: []
   callees:
@@ -5979,11 +6037,11 @@ symbols:
   kind: function
   name: test_document_date_must_be_stated_in_the_source
   file: scripts/validation/tests/test_semantic_examples.py
-  line: 199
+  line: 244
   signature: def test_document_date_must_be_stated_in_the_source(pc_root)
   visibility: public
   language: python
-  end_line: 204
+  end_line: 249
   is_test: true
   callers: []
   callees:
@@ -6021,11 +6079,11 @@ symbols:
   kind: function
   name: test_policy_year_cannot_be_assumed_for_eternal_properties
   file: scripts/validation/tests/test_semantic_examples.py
-  line: 184
+  line: 229
   signature: def test_policy_year_cannot_be_assumed_for_eternal_properties(pc_root)
   visibility: public
   language: python
-  end_line: 190
+  end_line: 235
   is_test: true
   callers: []
   callees:
@@ -6106,11 +6164,11 @@ symbols:
   kind: function
   name: test_unknown_end_requires_an_undated_ending_reading
   file: scripts/validation/tests/test_semantic_examples.py
-  line: 193
+  line: 238
   signature: def test_unknown_end_requires_an_undated_ending_reading(pc_root)
   visibility: public
   language: python
-  end_line: 196
+  end_line: 241
   is_test: true
   callers: []
   callees:
@@ -6120,11 +6178,11 @@ symbols:
   kind: function
   name: test_valid_time_readings_follow_adr_0064
   file: scripts/validation/tests/test_semantic_examples.py
-  line: 158
+  line: 203
   signature: def test_valid_time_readings_follow_adr_0064(valid_time, day, expected)
   visibility: public
   language: python
-  end_line: 159
+  end_line: 204
   is_test: true
   callers: []
   callees:
@@ -6182,11 +6240,11 @@ symbols:
   kind: function
   name: main
   file: scripts/validation/validate_semantic_examples.py
-  line: 274
+  line: 278
   signature: def main()
   visibility: public
   language: python
-  end_line: 288
+  end_line: 292
   callers:
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-drift-is-reported
   callees:
@@ -6200,7 +6258,7 @@ symbols:
   signature: 'def validate_commercial_example(root: Path)'
   visibility: public
   language: python
-  end_line: 271
+  end_line: 275
   callers:
   - symbol:capability-semantic-example-validation:test-semantic-examples.mutate-records
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-fixture-copy-is-clean
@@ -6253,26 +6311,41 @@ symbols:
   signature: 'def check_bundle(folder: Path)'
   visibility: public
   language: python
-  end_line: 61
+  end_line: 72
   callers:
+  - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-account-counterexamples-are-caught
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-rdf-expectations-hold
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-typed-string-literals-break-completeness-shapes
   - symbol:capability-semantic-example-validation:validate-semantic-rdf.main
-  callees: []
+  callees:
+  - symbol:capability-semantic-example-validation:validate-semantic-rdf.render
 - id: symbol:capability-semantic-example-validation:validate-semantic-rdf.main
   node: capability:semantic-example-validation
   kind: function
   name: main
   file: scripts/validation/validate_semantic_rdf.py
-  line: 64
+  line: 83
   signature: def main()
   visibility: public
   language: python
-  end_line: 85
+  end_line: 104
   callers:
   - symbol:capability-semantic-example-validation:test-semantic-examples.test-commercial-snapshot-drift-is-reported
   callees:
   - symbol:capability-semantic-example-validation:validate-semantic-rdf.check-bundle
+- id: symbol:capability-semantic-example-validation:validate-semantic-rdf.render
+  node: capability:semantic-example-validation
+  kind: function
+  name: render
+  file: scripts/validation/validate_semantic_rdf.py
+  line: 75
+  signature: def render(value)
+  visibility: public
+  language: python
+  end_line: 80
+  callers:
+  - symbol:capability-semantic-example-validation:validate-semantic-rdf.check-bundle
+  callees: []
 - id: symbol:capability-semantic-interpretation-run:context-guard.check
   node: capability:semantic-interpretation-run
   kind: method

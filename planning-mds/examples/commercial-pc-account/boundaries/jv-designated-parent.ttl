@@ -1,0 +1,21 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+# Independent hypothetical input that conforms: a 40/30/30 joint venture with no majority owner,
+# designated by the business under the 40 percent owner's account.
+# Owner B also holds 60 percent of a second venture whose other owners are not recorded: a total under
+# 100 is allowed.
+d:EX-PC-GAP-JV a pc:Organization .
+d:EX-PC-GAP-OWNER-A a pc:Organization .
+d:EX-PC-GAP-OWNER-B a pc:Organization .
+d:EX-PC-GAP-OWNER-C a pc:Organization .
+d:EX-PC-GAP-ACCOUNT-A a pc:Account ; pc:accountOrganization d:EX-PC-GAP-OWNER-A .
+d:EX-PC-GAP-ACCOUNT-JV a pc:Account ; pc:accountOrganization d:EX-PC-GAP-JV ; pc:parentAccount d:EX-PC-GAP-ACCOUNT-A .
+d:EX-PC-GAP-INTEREST-A a pc:OwnershipInterest ; pc:owner d:EX-PC-GAP-OWNER-A ;
+    pc:ownedOrganization d:EX-PC-GAP-JV ; pc:ownershipPercent 40.00 .
+d:EX-PC-GAP-INTEREST-B a pc:OwnershipInterest ; pc:owner d:EX-PC-GAP-OWNER-B ;
+    pc:ownedOrganization d:EX-PC-GAP-JV ; pc:ownershipPercent 30.00 .
+d:EX-PC-GAP-INTEREST-C a pc:OwnershipInterest ; pc:owner d:EX-PC-GAP-OWNER-C ;
+    pc:ownedOrganization d:EX-PC-GAP-JV ; pc:ownershipPercent 30.00 .
+d:EX-PC-GAP-OTHER-JV a pc:Organization .
+d:EX-PC-GAP-INTEREST-D a pc:OwnershipInterest ; pc:owner d:EX-PC-GAP-OWNER-B ;
+    pc:ownedOrganization d:EX-PC-GAP-OTHER-JV ; pc:ownershipPercent 60.00 .

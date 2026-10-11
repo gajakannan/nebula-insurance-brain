@@ -20,7 +20,7 @@ Workshop operates at EX-PC-LOCATION-SHOP; Contracting operates at EX-PC-LOCATION
 
 Document date: 2025-12-22.
 
-Policy EX-BOP-100 is a Businessowners package issued by Example Maple Mutual to Cedar Bridge Workshop LLC for 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker. Morgan Example underwrites this policy for Example Maple Mutual. The policy belongs to the Workshop account. Liability: USD 1,000,000 each occurrence and USD 2,000,000 general aggregate. Property: USD 150,000 Business Personal Property at EX-PC-LOCATION-SHOP, with a USD 1,000 per-loss deductible. The premises are leased. These illustrative declarations do not establish a building coverage or business-income amount.
+Policy EX-BOP-100 is a Businessowners package issued by Example Maple Mutual to Cedar Bridge Workshop LLC for 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker. Morgan Example underwrites this policy for Example Maple Mutual. Quinn Example, a Maple property underwriter, underwrites only its property section for Example Maple Mutual. The policy belongs to the Workshop account. Liability: USD 1,000,000 each occurrence and USD 2,000,000 general aggregate. Property: USD 150,000 Business Personal Property at EX-PC-LOCATION-SHOP, with a USD 1,000 per-loss deductible. The premises are leased. These illustrative declarations do not establish a building coverage or business-income amount.
 
 ## gl
 
@@ -52,7 +52,7 @@ Policy EX-UMB-100 is issued by Example Granite Casualty to Cedar Bridge Workshop
 
 Document date: 2025-12-20.
 
-Example Maple Mutual and Cedar Bridge Holdings LLC set up property program EX-PROG-100, which belongs to the Holdings account. Under the program, master policy EX-PROP-100 is issued to Cedar Bridge Holdings LLC and belongs to the Holdings account; local policy EX-PROP-100-W is issued to Cedar Bridge Workshop LLC and belongs to the Workshop account; and local policy EX-PROP-100-C is issued to Cedar Bridge Contracting LLC and belongs to the Contracting account. All three run from 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker for all three. This excerpt supplies no limits, locations or premium allocation.
+Example Maple Mutual and Cedar Bridge Holdings LLC set up property program EX-PROG-100, which belongs to the Holdings account. Under the program, master policy EX-PROP-100 is issued to Cedar Bridge Holdings LLC and belongs to the Holdings account; local policy EX-PROP-100-W is issued to Cedar Bridge Workshop LLC and belongs to the Workshop account; and local policy EX-PROP-100-C is issued to Cedar Bridge Contracting LLC and belongs to the Contracting account. All three run from 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker for the master policy; the local policies name no placement broker. This excerpt supplies no limits, locations or premium allocation.
 
 ## request
 

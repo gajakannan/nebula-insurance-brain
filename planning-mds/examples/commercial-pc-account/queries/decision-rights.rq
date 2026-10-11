@@ -1,0 +1,12 @@
+PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
+PREFIX d: <https://example.invalid/nebula/data/>
+# Expected: four rows of which coverage each underwriter may decide on. A policy-term role covers
+# every coverage of the term unless a coverage qualifier narrows it. Morgan underwrites the whole
+# BOP package (liability and property); Quinn only its property section; Avery the GL policy.
+# Quinn has no BOP liability row. This is the data a decision check would read (EX-PC-018).
+SELECT ?person ?term ?coverage WHERE {
+  ?assignment pc:roleKind d:EX-PC-ROLE-Underwriter ; pc:roleParty ?person ; pc:roleScope ?term .
+  ?coverage pc:coverageOf ?term .
+  FILTER (NOT EXISTS { ?assignment pc:roleCoverage ?any }
+          || EXISTS { ?assignment pc:roleCoverage ?coverage })
+} ORDER BY ?person ?coverage

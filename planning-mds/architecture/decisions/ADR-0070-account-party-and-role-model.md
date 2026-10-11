@@ -42,13 +42,13 @@ The operator answered them from commercial P&C practice on 2026-10-10, then refi
 
 ### 2. Accounts
 
-- **One account per organization.** An account is the carrier's customer relationship with exactly one insured organization (`Account.primary_party_uid` in the canonical contracts). No organization has two accounts in one tenant. Brokers are organizations, not accounts. Account identity and organization identity resolve separately (F0017), and an account merge follows the survivor rules of the owning system.
-- **Broker of record.** Each account has a broker of record (a broker organization or branch) and one or more broker contacts (people acting for it). Both are dated role assignments: a change of broker closes one assignment and opens another, so history is kept. A policy term can name a different placement broker, which overrides the account's broker for that line.
-- **Designated parent account.** Each account has at most one parent account. The parent is designated, not computed. It drives roll-up and the Account 360 hierarchy. A root account has no parent. Further relationships, such as a billing parent, can be added later as typed account relationships; they never replace the single designated parent.
-- **Ownership is separate.** Ownership is a relationship between organizations. It carries the owner, the owned organization, a percentage and valid time. Any number of owners is allowed, so 50/50, 33.33 and 25/25/25/25 joint ventures need no winner.
+- **One account per insured organization.** An account is the carrier's customer relationship with exactly one insured or prospective insured organization (`Account.primary_party_uid` in the canonical contracts). The uniqueness boundary is the tenant: no organization has two current accounts in one tenant, whichever system recorded them. A CRM or policy-system identifier for the same organization is an alias on the one account, not a second account. A closed account keeps its history and does not block a new one; a merge closes the losing account and moves its aliases to the survivor. Brokers, broker branches, carriers and MGAs are organizations without accounts. Account identity and organization identity resolve separately (F0017).
+- **Broker of record.** Each account has a broker of record (a broker organization or branch) and one or more broker contacts (people acting for it). Both are dated role assignments: a change of broker closes one assignment and opens another, so history is kept. A policy term can name a different placement broker, which overrides the account's broker for that line. A term that names no placement broker shows its account's broker of record.
+- **Designated parent account.** Each account has at most one parent account, and an account is never its own parent or ancestor. The parent is designated, not computed. It drives roll-up and the Account 360 hierarchy. A root account has no parent. Further relationships, such as a billing parent, can be added later as typed account relationships; they never replace the single designated parent.
+- **Ownership is separate.** Ownership is a relationship between organizations. It carries the owner, the owned organization, a percentage and valid time. Any number of owners is allowed, so 50/50, 33.33 and 25/25/25/25 joint ventures need no winner. At any one valid and known time, the recorded percentages for one organization total at most 100; less is allowed when some owners are unknown.
   - *Majority owner* is computed (more than 50 percent), not stored.
   - A single parent keeps roll-up honest: a joint venture under two parents would be counted twice.
-  - With a majority owner, the joint venture's parent is normally that owner's account. With none, it is a root account. The business may still designate a parent.
+  - With a majority owner, the joint venture's parent is normally that owner's account. With none, it is a root account unless the business designates a parent, which may be a minority owner's account (for example, a 40/30/30 venture under the 40 percent owner). Parentage is never inferred from ownership; Account 360 shows the designated parent.
   - Every owner's Account 360 lists the joint venture as an ownership interest with its percentage, outside its own roll-up.
 
 ### 3. Policies and accounts
@@ -66,13 +66,15 @@ A role assignment records:
 
 - **the party** in the role;
 - **the role kind** (named insured, broker of record, placement broker, broker contact, risk manager, account contact, underwriter, …);
-- **the scope:** an account, a submission or a policy term. A policy term implies its line of business;
+- **the scope:** an account, a submission or a policy term;
+- **a coverage qualifier,** optional on a policy-term role: the coverage parts of that term the role covers, such as the property section of a package. Without it, the role covers the whole term. A policy term does not imply one line of business: a package such as a BOP has several;
 - **who the party acts for**, when it is a person: the organization or branch they represent in that role;
 - **valid time,** following [ADR-0064](ADR-0064-time-interpretation-and-valid-time-precision.md): the party in a role is a `STATE` fact.
 
 Rules:
 
 - **Broker of record** is scoped to an account. A **placement broker** is scoped to a policy term, so it can differ by line and term.
+- **First and additional named insureds are separate role kinds.** Which party is first named is recorded, never recovered from the policy's account.
 - **Duplicates are expected.** Each organization's account has its own contacts. One person can hold roles on several accounts, and two people can hold the same role kind on different accounts.
 - **Role kinds are open vocabulary,** owned by F0012/F0013. The canonical `PartyRoleTypeCode` codeset is the external reference.
 
@@ -86,7 +88,7 @@ Role assignments now feed access. This section is a proposed amendment to the F0
   - a **submission** role reaches that submission only.
 
   Nothing cascades. Reach never expands to parent, child or sibling accounts, from a program or master policy to its local policies, or from a policy to its account. Being on an organization's account does not reach a policy owned by another account that names that organization; a role on that policy does.
-- **Carrier staff see everything and act by role.** Internal staff hold tenant- or knowledge-base-wide read grants. A decision or change, such as an underwriting decision on a property term, also needs a current role assignment of the right kind on that term, submission or account.
+- **Carrier staff see everything and act by role.** Internal staff hold tenant- or knowledge-base-wide read grants. A decision or change also needs a current role assignment of the right kind on that term, submission or account. On a policy term, the role must cover the coverage decided on: a package underwriter decides every section, and a property underwriter narrowed to the property section decides nothing on its liability section.
 - **Only authoritative roles count.** A role extracted from a document is a reading, not a grant. A role counts for access only once carrier operations, a broker-of-record letter or another trusted system has confirmed it. Otherwise a forged submission could grant access to itself.
 - **Revocation is immediate.** Ending a role assignment ends the reach or decision right it supported, including for historical reads (ADR-0062).
 - **Evaluation.** The role check is a typed restriction added to ADR-0062's evaluator, next to membership and classification checks; Casbin policy rows stay as they are. Every allow and deny is audited as ADR-0062 requires.
@@ -111,9 +113,10 @@ The operator aligns both repositories separately, following the [cross-repositor
 
   Gaps, detailed in the plan:
   - an ownership percentage on `PartyRelationship`;
-  - a line-of-business or policy-term qualifier for broker roles that override the account's broker of record;
+  - a coverage-part qualifier on policy-term roles, so a role can cover one section of a package;
   - an acting-for organization (branch) on role contracts;
-  - a uniqueness rule of one account per organization;
+  - a uniqueness rule of one current account per insured organization per tenant, with source identifiers as aliases;
+  - distinct first and additional named-insured role codes;
   - an authoritative-source marker on role assignments used for access.
 - **nebula-insurance-crm.** The CRM already has a dated broker of record (`Account.BrokerOfRecordId` with relationship history), a per-policy broker and one account per policy. It lacks parent accounts, ownership, account-to-organization links, broker branches as organizations (ADR-026 uses distribution nodes) and per-account or per-policy contact assignments. Its broker users reach their whole broker tenant (ADR-007), wider than section 5 allows. Its `Program` is an MGA program, not an insured's program. The Brain does not change CRM contracts.
 
@@ -130,7 +133,7 @@ The operator aligns both repositories separately, following the [cross-repositor
   - one owning account per policy, with an additional named insured;
   - a small property program with a master policy and a local policy per subsidiary;
   - broker contacts scoped to an account and to a single policy;
-  - per-line carrier underwriters.
+  - per-line carrier underwriters, and a property underwriter narrowed to the BOP's property section.
 - **Downstream features:**
   - F0012 adds these classes and properties to the foundation module;
   - F0017 resolves account and organization identity separately;
@@ -143,9 +146,9 @@ The operator aligns both repositories separately, following the [cross-repositor
 Before acceptance:
 
 1. F0012 Phase B authors these classes and properties with `temporal_kind`, definitions and regression cases (ADR-0063, ADR-0064).
-2. The Cedar Bridge cases EX-PC-001, EX-PC-011 and EX-PC-015 to EX-PC-019 pass the `semantic_examples` and `semantic_rdf` gates.
+2. The Cedar Bridge cases EX-PC-001, EX-PC-011 and EX-PC-015 to EX-PC-019 pass the `semantic_examples` and `semantic_rdf` gates, with exact expected rows and forbidden rows for every query.
 3. F0017 states how account identity and organization identity resolve and merge.
-4. The role-based reach and decision rights in section 5 (cases EX-PC-018 and EX-PC-019) are accepted in an F0002-successor scope amendment, or replaced there, with security review of the authoritative-source rule.
+4. The role-based reach and decision rights in section 5 (cases EX-PC-018 and EX-PC-019) are accepted in an F0002-successor scope amendment, or replaced there, with security review of the authoritative-source rule. That amendment needs a tracked feature identifier and dependencies. Its acceptance criteria bind confirmation to the exact role version and cover expiry, historical reads, renewal terms, and evidence that spans accounts.
 
 ## References
 

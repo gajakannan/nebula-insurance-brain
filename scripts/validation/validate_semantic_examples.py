@@ -239,6 +239,10 @@ def validate_commercial_example(root: Path) -> list[str]:
     for name, text in build_commercial_pc_snapshot.build(data).items():
         if (folder / name).read_text(encoding="utf-8") != text:
             findings.append(f"EX-PC-001: {name} differs from records.json; run scripts/validation/build_commercial_pc_snapshot.py")
+    codes = yaml.safe_load((folder / "projection-mapping.yaml").read_text(encoding="utf-8"))["role_kind_codes"]
+    kinds = {e["label"] for e in data["entities"] if e["type"] == "pc:RoleKind"}
+    if kinds != set(codes) or len(set(codes.values())) != len(codes):
+        findings.append(f"EX-PC-017: role kinds and canonical role codes differ: {sorted(kinds ^ set(codes))}")
     outcomes = yaml.safe_load((folder / "expected-results.yaml").read_text(encoding="utf-8"))
     manifest = yaml.safe_load((folder / "release.yaml").read_text(encoding="utf-8"))
     if manifest["release_iri"] != data["ontology_release"]:

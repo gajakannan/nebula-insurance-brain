@@ -40,5 +40,5 @@ See the [example coverage map](../../examples/README.md) and [F0065](../F0065-gr
 
 - Root Account 360 on one account: its organization, broker of record and contacts, the policies it owns, the policies it is named on, its role assignments (who does what), and its parent and child accounts.
 - The hierarchy view rolls owned policies up, so each appears once. A master program shows its linked local policies.
-- Show ownership interests with percentages in their own section, outside the roll-up; never present a minority owner as the account parent.
+- Show ownership interests with percentages in their own section, outside the roll-up. Show the designated parent account as recorded, which may be a minority owner's account (a 40/30/30 venture under the 40 percent owner); never infer a parent from ownership.
 - An external viewer sees only what their roles name (an account and its own policies, or a single policy), never the parent, siblings or the account behind a policy; carrier staff see all but act only where they hold the role (ADR-0070 section 5, pending its access amendment).

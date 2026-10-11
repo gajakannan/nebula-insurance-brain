@@ -134,6 +134,51 @@ def test_typed_string_literals_break_completeness_shapes(tmp_path, monkeypatch):
     assert any("gl-completeness.ttl on snapshot.ttl" in item for item in findings)
 
 
+
+def _swap_contacts(records):
+    objects = {a["id"]: a["object"] for a in records["assertions"]}
+    for assertion in records["assertions"]:
+        if assertion["id"] == "EX-PC-A-AUTO-BROKER-CONTACT-PARTY":
+            assertion["object"] = objects["EX-PC-A-UMBRELLA-BROKER-CONTACT-PARTY"]
+        elif assertion["id"] == "EX-PC-A-UMBRELLA-BROKER-CONTACT-PARTY":
+            assertion["object"] = objects["EX-PC-A-AUTO-BROKER-CONTACT-PARTY"]
+
+
+def _set_object(assertion_id, value):
+    def mutate(records):
+        next(a for a in records["assertions"] if a["id"] == assertion_id)["object"] = value
+    return mutate
+
+
+def _drop_bop_placement_broker(records):
+    gone = {a["id"] for a in records["assertions"] if a["subject_ref"] == "EX-PC-ASSIGN-BOP-BROKER"}
+    records["assertions"] = [a for a in records["assertions"] if a["id"] not in gone]
+    records["facts"] = [f for f in records["facts"] if f["assertion_ref"] not in gone]
+
+
+# Counterexamples from the PR #19 review: each keeps every query's row count but must still fail.
+@pytest.mark.parametrize("mutate, expected", [
+    (_swap_contacts, "broker-contact-reach.rq: forbidden row"),
+    (_set_object("EX-PC-A-PARENT-CONTRACTOR", {"ref": "EX-PC-ACCOUNT-CONTRACTOR"}),
+     "shapes.ttl on snapshot.ttl"),
+    (_set_object("EX-PC-A-OWN-RIDGE-PERCENT", {"value": "80.00", "datatype": "xsd:decimal"}),
+     "shapes.ttl on snapshot.ttl"),
+    (_drop_bop_placement_broker, "EX-PC-POLICY-BOP, EX-BOP-100, EX-PC-PRODUCT-BOP, EX-PC-MAPLE, EX-PC-BROKER, broker of record"),
+])
+def test_commercial_account_counterexamples_are_caught(tmp_path, mutate, expected):
+    pytest.importorskip("rdflib")
+    pytest.importorskip("pyshacl")
+    pytest.importorskip("owlrl")
+    import shutil
+    folder = tmp_path / "bundle"
+    shutil.copytree(PC_FOLDER, folder)
+    records = json.loads((folder / "records.json").read_text(encoding="utf-8"))
+    mutate(records)
+    for name, text in snapshot_builder.build(records).items():
+        (folder / name).write_text(text, encoding="utf-8")
+    findings = "\n".join(rdf_checker.check_bundle(folder))
+    assert expected in findings.replace("'", "")
+
 def _at(day: str):
     return snapshot_builder.stamp(f"{day}T00:00:00Z")
 
