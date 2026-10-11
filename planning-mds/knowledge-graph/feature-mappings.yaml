@@ -432,10 +432,12 @@ features:
     affects:
       - capability:ontology-release-compatibility
       - entity:account
+      - entity:insurance-party
       - entity:insurance-party-role-assignment
       - entity:ontology-module-version
       - entity:ontology-release
       - entity:ontology-release-module
+      - entity:ownership-interest
       - glossary_term:constraint-execution-context
       - glossary_term:insurance-product-composition
       - glossary_term:ontology-projection-mapping
@@ -449,15 +451,18 @@ features:
       - adr:0045
       - adr:0063
       - adr:0064
+      - adr:0070
     notes:
-      - Account party-versus-grouping and account-scope reach are an open decision in BLUEPRINT section
-        4.8; F0012 owns the representation part and must resolve it before Phase B.
       - Authoring contract precedes vocabulary content. Stable IRIs and meaning-change classes are paired;
         constraint stage/consumer/severity/data basis and missingness are explicit. Release records are
         proposed in data-model.md under ADR-0045.
       - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
         stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
         at formal plan.
+      - Proposed ADR-0070 answers BLUEPRINT section 4.8 with one account per organization with a designated
+        parent, percentage ownership, organization hierarchy, broker of record per account, scoped roles
+        with acted-for organization, and exactly one owning account per policy. F0012 authors this vocabulary
+        in Phase B.
       - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
         verification.
       - Resolve blueprint sections 20/82 parents versus parent before authoring. The synthetic interchange

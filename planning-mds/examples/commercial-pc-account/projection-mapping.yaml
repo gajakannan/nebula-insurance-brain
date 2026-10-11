@@ -13,13 +13,20 @@ per_record_context:
 - temporal_kind_granularity_attestation_and_valid_to_state
 - asserted_or_derived_basis
 relations:
-- {predicate: 'pc:groupsParty', edge: GROUPS_PARTY, direction: subject-to-object}
+- {predicate: 'pc:accountOrganization', edge: ACCOUNT_OF, direction: subject-to-object}
+- {predicate: 'pc:parentAccount', edge: PARENT_ACCOUNT, direction: subject-to-object}
+- {predicate: 'pc:owner', edge: OWNER, direction: subject-to-object}
+- {predicate: 'pc:ownedOrganization', edge: OWNED_ORGANIZATION, direction: subject-to-object}
+- {predicate: 'pc:parentOrganization', edge: PARENT_ORGANIZATION, direction: subject-to-object}
+- {predicate: 'pc:employedBy', edge: EMPLOYED_BY, direction: subject-to-object}
 - {predicate: 'pc:operatesAt', edge: OPERATES_AT, direction: subject-to-object}
 - {predicate: 'pc:roleParty', edge: ROLE_PARTY, direction: subject-to-object}
 - {predicate: 'pc:roleKind', edge: ROLE_KIND, direction: subject-to-object}
 - {predicate: 'pc:roleScope', edge: ROLE_SCOPE, direction: subject-to-object}
 - {predicate: 'pc:actsFor', edge: ACTS_FOR, direction: subject-to-object}
+- {predicate: 'pc:roleCoverage', edge: ROLE_COVERAGE, direction: subject-to-object}
 - {predicate: 'pc:forAccount', edge: FOR_ACCOUNT, direction: subject-to-object}
+- {predicate: 'pc:partOfProgram', edge: PART_OF_PROGRAM, direction: subject-to-object}
 - {predicate: 'pc:productType', edge: PRODUCT_TYPE, direction: subject-to-object}
 - {predicate: 'pc:termOf', edge: HAS_TERM, direction: object-to-subject}
 - {predicate: 'pc:coverageOf', edge: HAS_COVERAGE, direction: object-to-subject}
@@ -28,8 +35,23 @@ relations:
 - {predicate: 'pc:scheduledVehicle', edge: SCHEDULED_VEHICLE, direction: subject-to-object}
 - {predicate: 'pc:scheduledUnderlying', edge: SCHEDULED_UNDERLYING, direction: subject-to-object}
 - {predicate: 'pc:reportsPolicy', edge: REPORTS_POLICY, direction: subject-to-object}
+# Each role kind maps to one proposed canonical PartyRoleTypeCode (account-model-cross-repo-plan.md,
+# data contracts step 7). First and additional named insured stay distinct; ownership of the
+# policy's account is never used to recover which one a party is.
+role_kind_codes:
+  AccountContact: ACCOUNT_CONTACT
+  AdditionalNamedInsured: ADDITIONAL_NAMED_INSURED
+  BrokerContact: BROKER_CONTACT
+  BrokerOfRecord: BROKER_OF_RECORD
+  Carrier: CARRIER
+  FirstNamedInsured: FIRST_NAMED_INSURED
+  MGA: MANAGING_GENERAL_AGENT
+  PlacementBroker: PLACEMENT_BROKER
+  RiskManager: RISK_MANAGER
+  Underwriter: UNDERWRITER
 scalar_properties:
 - {predicate: 'pc:amount', encoding: decimal-string}
+- {predicate: 'pc:ownershipPercent', encoding: decimal-string}
 - {predicate: 'pc:currency', encoding: string}
 - {predicate: 'pc:basis', encoding: string}
 - {predicate: 'pc:policyNumber', encoding: scoped-identifier-string}

@@ -363,7 +363,7 @@ Performance, availability, scalability, and security targets are proposed gates 
 ### 4.7 Architecture Artifacts
 
 - `architecture/master-blueprint.md` — full baseline
-- `architecture/decisions/` — ADR-0001 to ADR-0069 (Accepted architecture and Proposed contracts; ADR-0060 proposes Docling-Graph, with pinned synthetic development proof complete and production acceptance pending; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11)
+- `architecture/decisions/` — ADR-0001 to ADR-0070 (Accepted architecture and Proposed contracts; ADR-0060 proposes Docling-Graph, with pinned synthetic development proof complete and production acceptance pending; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
@@ -378,14 +378,15 @@ Section 117.1 tracks the decisions for implementation and production acceptance:
 
 **Time-interpretation dependency for v0.1 (2026-09-25, validate finding P-1):** F0019 and F0025 take endorsement valid time from the template route's typed effective-date field. F0016 stores time mentions and document time context alongside. Resolution from time mentions (ADR-0064, Proposed) replaces the template field only after ADR-0064 passes its proof gates, which F0026 qualifies. v0.1 acceptance does not depend on a Proposed ADR.
 
-**Account identity and account scope (opened 2026-10-09, from the Cedar Bridge example review).** The [glossary](domain/glossary.md#account) defines Account as the business entity seeking or holding coverage and the root of Entity 360. The [commercial P&C example](architecture/commercial-pc-example-handoff.md) instead models an account as a grouping of separate legal organizations, with named-insured status carried by policy-term role assignments. The master blueprint also treats account as an authorization scope (sections 66, 118, 120). Under the grouping model, an account-scoped grant would reach every grouped organization's policies, evidence and history. Decide before F0012/F0013 Phase B:
+**Account identity and account scope (opened 2026-10-09, direction set 2026-10-10).** The Cedar Bridge review asked whether Account is a party or a grouping of organizations, what an account-scoped grant reaches, what roots Entity 360, and how account identity relates to organization identity. The operator answered from commercial P&C practice, recorded in [ADR-0070](architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed):
 
-- whether Account is a party or a grouping, and its cardinality to legal organizations (F0012);
-- whether account scope in ResourceScope follows the grouping or the named-insured parties (ADR-0062; F0002 is archived, so a change needs its own scope amendment);
-- the Entity 360 root for a multi-organization account (F0023);
-- how account identity resolves separately from organization identity (F0017).
+- each insured organization has its own account, with at most one designated parent account; ownership between organizations is a separate relationship with any number of percentage owners (F0012);
+- a policy belongs to exactly one account, normally the first named insured's; other named insureds stay roles on the term, and a program's master and local policies link to the program, which belongs to the parent account (F0012, F0023);
+- brokers are organizations with hierarchy, locations and people; each account has a dated broker of record and broker contacts, and a policy term can name a different placement broker;
+- external people reach only what their authoritative roles name: an account and its own policies, or a single policy, never the parent's, a sibling's or the account behind a policy; carrier staff can see the tenant but act only where they hold the role. This needs an F0002-successor scope amendment to ADR-0062;
+- account identity and organization identity resolve separately (F0017).
 
-Until then the glossary definition is the baseline and the example's grouping is a proposal.
+ADR-0070 lists its proof gates; until it is accepted, F0012/F0013 Phase B plan against it.
 
 **Local proof decisions from F0001-S0007, updated for ADR-0060 (2026-09-15):**
 
@@ -461,9 +462,9 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Current position (2026-10-09): F0001 to F0003 are done and archived. F0005's synthetic Docling-Graph proof is complete, with production qualification deferred (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
+Current position (2026-10-10): F0001 to F0003 are done and archived. F0005's synthetic Docling-Graph proof is complete, with production qualification deferred (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
 
 1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
-2. Before F0012/F0013 Phase B, settle the account identity and scope decision in section 4.8.
+2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
 3. For F0012, run the `plan` action as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
 4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.

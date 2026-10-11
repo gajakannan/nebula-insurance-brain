@@ -1,0 +1,21 @@
+PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
+PREFIX d: <https://example.invalid/nebula/data/>
+# Expected: eleven rows of who does what across the Holdings hierarchy: Jordan as broker contact
+# (Holdings and Workshop accounts), Sam as broker contact (Contracting account and the umbrella
+# term), Drew as broker contact on the auto term, the risk manager
+# (Holdings) who is also the Workshop account contact, the BOP package and BOP property underwriters and the GL underwriter (policy terms),
+# and the MGA underwriter (submission). Account Team view; access is read separately (EX-PC-018).
+SELECT DISTINCT ?person ?role ?scope ?actsFor WHERE {
+  ?assignment pc:roleParty ?person ; pc:roleKind ?role ; pc:roleScope ?scope ; pc:actsFor ?actsFor .
+  ?person a pc:Person .
+  {
+    ?scope pc:parentAccount* d:EX-PC-ACCOUNT .
+  } UNION {
+    ?scope pc:forAccount ?account .
+    ?account pc:parentAccount* d:EX-PC-ACCOUNT .
+  } UNION {
+    ?scope pc:termOf ?policy .
+    ?policy pc:forAccount ?account .
+    ?account pc:parentAccount* d:EX-PC-ACCOUNT .
+  }
+} ORDER BY ?person ?scope

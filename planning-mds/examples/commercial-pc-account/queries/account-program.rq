@@ -1,9 +1,17 @@
 PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
 PREFIX d: <https://example.invalid/nebula/data/>
-# Expected: six rows (BOP/Workshop, GL/Contractor, Auto/both, Umbrella/both).
-SELECT ?policy ?number ?product ?carrier ?insured WHERE {
-  ?policy pc:forAccount d:EX-PC-ACCOUNT ; pc:policyNumber ?number ; pc:productType ?product .
+# Expected: seven rows. The Holdings roll-up lists each policy once, under the one account it
+# belongs to: the property master program under Holdings; BOP, auto, umbrella and a local program
+# policy under Workshop; GL and a local program policy under Contracting. A term's placement broker
+# overrides the account's broker of record (auto: Fleet Brokers). The local program policies name
+# no placement broker, so they show their account's broker of record.
+SELECT ?account ?policy ?number ?product ?carrier ?broker ?brokerBasis WHERE {
+  ?account pc:parentAccount* d:EX-PC-ACCOUNT .
+  ?policy pc:forAccount ?account ; pc:policyNumber ?number ; pc:productType ?product .
   ?term pc:termOf ?policy .
   ?carrierAssignment pc:roleScope ?term ; pc:roleKind d:EX-PC-ROLE-Carrier ; pc:roleParty ?carrier .
-  ?insuredAssignment pc:roleScope ?term ; pc:roleKind d:EX-PC-ROLE-NamedInsured ; pc:roleParty ?insured .
-} ORDER BY ?policy ?insured
+  OPTIONAL { ?placement pc:roleScope ?term ; pc:roleKind d:EX-PC-ROLE-PlacementBroker ; pc:roleParty ?placementBroker . }
+  OPTIONAL { ?record pc:roleScope ?account ; pc:roleKind d:EX-PC-ROLE-BrokerOfRecord ; pc:roleParty ?recordBroker . }
+  BIND (COALESCE(?placementBroker, ?recordBroker) AS ?broker)
+  BIND (IF(BOUND(?placementBroker), "placement broker", "broker of record") AS ?brokerBasis)
+} ORDER BY ?policy

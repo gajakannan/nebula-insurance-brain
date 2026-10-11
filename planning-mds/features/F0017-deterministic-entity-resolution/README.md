@@ -33,3 +33,12 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 - Resolve on identifiers first. An exact name match without an identifier creates a review pair and never merges. A name held by another compatible entity creates a shared-name pair. Roles such as "the named insured" point at entities and are not names (ADR-0066).
 - **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
+
+## Account, party and role amendment (2026-10-10)
+
+[ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Examples: [Cedar Bridge EX-PC-015 to EX-PC-019](../../examples/commercial-pc-account/cases.md).
+
+- Resolve account identity and organization identity separately. Each insured or prospective insured organization has exactly one current account in a tenant, whichever system recorded it; other systems' identifiers are aliases on that account. Brokers, branches, carriers and MGAs have no accounts. A closed account does not block a new one; a merge of organizations or accounts states which survives and how the other's parent-account, ownership and role facts move.
+- Broker branches and offices are organizations under a parent organization; resolve them as their own identities, never by matching the parent's name.
+- Ownership and account parentage never merge identities. A joint venture remains its own organization and account.
+- An account merge keeps every policy with exactly one owning account and carries broker-of-record and contact history across.

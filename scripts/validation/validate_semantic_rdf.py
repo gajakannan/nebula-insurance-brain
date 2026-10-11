@@ -55,10 +55,29 @@ def check_bundle(folder: Path) -> list[str]:
                             f"got {conforms}\n{report}")
 
     for query in expected["queries"]:
-        rows = len(list(asserted.query((folder / query["file"]).read_text(encoding="utf-8"))))
-        if rows != query["rows"]:
-            findings.append(f"{query['file']}: expected {query['rows']} rows, got {rows}")
+        rows = sorted(
+            [render(value) for value in row]
+            for row in asserted.query((folder / query["file"]).read_text(encoding="utf-8")))
+        wanted = sorted([str(value) for value in row] for row in query["rows"])
+        if rows != wanted:
+            missing = [row for row in wanted if row not in rows]
+            extra = [row for row in rows if row not in wanted]
+            findings.append(f"{query['file']}: expected {len(wanted)} rows, got {len(rows)}; "
+                            f"missing {missing}, unexpected {extra}")
+        for pattern in query.get("forbidden", []):
+            hits = [row for row in rows if len(row) == len(pattern)
+                    and all(want == "*" or want == got for want, got in zip(pattern, row))]
+            if hits:
+                findings.append(f"{query['file']}: forbidden row {pattern} returned {hits}")
     return findings
+
+
+def render(value) -> str:
+    """Compare query rows by IRI local name or literal lexical form; unbound is ''."""
+    from rdflib import URIRef
+    if value is None:
+        return ""
+    return str(value).rsplit("/", 1)[-1] if isinstance(value, URIRef) else str(value)
 
 
 def main() -> int:

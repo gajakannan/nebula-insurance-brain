@@ -2,7 +2,7 @@ status: synthetic-authored-expectations
 example_id: EX-PC-001
 semantic_execution:
   status: observed
-  observed_on: '2026-10-09'
+  observed_on: '2026-10-10'
   executor: scripts/validation/validate_semantic_rdf.py (lifecycle gate semantic_rdf; CI runs it with --require)
   environments: [Python 3.12.13, Python 3.14.4]
   tools: {rdflib: 7.1.4, pyshacl: 0.30.1, owlrl: 7.1.4}
@@ -12,20 +12,117 @@ semantic_execution:
     The generated snapshot typed strings as xsd:string, and rdflib/pySHACL do not match those against
     the shapes' simple-literal sh:hasValue terms. The generator now emits simple literals; the
     authored expectations were right and are unchanged.
+  revisions: >-
+    2026-10-10 (ADR-0070 account model): the account-program query became a hierarchy roll-up with
+    the same six rows; account-360-workshop, ownership and account-team queries and two
+    account-structure boundary graphs were added. All matched on first execution.
+    Later the same day (ADR-0070 revision): each policy belongs to one account, each account has a
+    broker of record and its own broker contact. account-program fell to four rows, account-team
+    rose to eight, account-360-workshop became account-360-contracting, and broker-contact-reach
+    and a policy-two-accounts boundary were added. Then term-scoped broker contacts (Sam on the
+    umbrella, Drew on auto) and a small master property program were added: account-program rose
+    to seven rows, account-360-contracting to four, broker-contact-reach to nine and account-team
+    to ten; program.rq and a two-programs boundary are new.
+    After the PR #19 review: every query lists its exact rows, and the reach and decision-rights
+    queries list forbidden rows; first and additional named insured became separate role kinds;
+    Quinn underwrites only the BOP property section (decision-rights.rq, four rows; account-team
+    eleven); the local program policies name no placement broker and fall back to the broker of
+    record; parent-cycle, self-parent, ownership-over-100 and coverage-outside-scope boundaries
+    fail and jv-designated-parent conforms.
 scope: document-to-graph teaching fixtures; no Nebula runtime, insurance eligibility or claim determination
 queries:
 - file: queries/account-program.rq
-  rows: 6
-  boundary: shared account membership does not make both organizations named insureds on every policy
+  boundary: the Holdings roll-up lists each policy once under the one account it belongs to; a term's placement broker overrides the account broker of record, which is the fallback
+  rows:
+  - [EX-PC-ACCOUNT, EX-PC-POLICY-PROGRAM-MASTER, EX-PROP-100, EX-PC-PRODUCT-PropertyProgram, EX-PC-MAPLE, EX-PC-BROKER, placement broker]
+  - [EX-PC-ACCOUNT-CONTRACTOR, EX-PC-POLICY-GL, EX-2042, EX-PC-PRODUCT-StandaloneGL, EX-PC-GRANITE, EX-PC-BROKER, placement broker]
+  - [EX-PC-ACCOUNT-CONTRACTOR, EX-PC-POLICY-PROGRAM-CONTRACTOR, EX-PROP-100-C, EX-PC-PRODUCT-Property, EX-PC-MAPLE, EX-PC-BROKER, broker of record]
+  - [EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-AUTO, EX-2042, EX-PC-PRODUCT-CommercialAuto, EX-PC-MAPLE, EX-PC-FLEET-BROKER, placement broker]
+  - [EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-BOP, EX-BOP-100, EX-PC-PRODUCT-BOP, EX-PC-MAPLE, EX-PC-BROKER, placement broker]
+  - [EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-PROGRAM-WORKSHOP, EX-PROP-100-W, EX-PC-PRODUCT-Property, EX-PC-MAPLE, EX-PC-BROKER, broker of record]
+  - [EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-UMBRELLA, EX-UMB-100, EX-PC-PRODUCT-Umbrella, EX-PC-GRANITE, EX-PC-BROKER, placement broker]
+- file: queries/account-360-contracting.rq
+  boundary: Contracting owns GL and its local program policy as first named insured, and is only an additional named insured on the Workshop account's auto and umbrella policies (EX-PC-016)
+  rows:
+  - [EX-PC-POLICY-AUTO, EX-2042, named insured, EX-PC-ROLE-AdditionalNamedInsured]
+  - [EX-PC-POLICY-GL, EX-2042, owner, EX-PC-ROLE-FirstNamedInsured]
+  - [EX-PC-POLICY-PROGRAM-CONTRACTOR, EX-PROP-100-C, owner, EX-PC-ROLE-FirstNamedInsured]
+  - [EX-PC-POLICY-UMBRELLA, EX-UMB-100, named insured, EX-PC-ROLE-AdditionalNamedInsured]
+- file: queries/broker-contact-reach.rq
+  boundary: a broker contact reaches only what their role names; an account role gives that account's policies, a policy role only that policy (EX-PC-018)
+  rows:
+  - [EX-PC-BROKER-CONTACT, EX-PC-ACCOUNT, EX-PC-POLICY-PROGRAM-MASTER]
+  - [EX-PC-BROKER-CONTACT, EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-AUTO]
+  - [EX-PC-BROKER-CONTACT, EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-BOP]
+  - [EX-PC-BROKER-CONTACT, EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-PROGRAM-WORKSHOP]
+  - [EX-PC-BROKER-CONTACT, EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-UMBRELLA]
+  - [EX-PC-BROKER-CONTACT-HQ, EX-PC-ACCOUNT-CONTRACTOR, EX-PC-POLICY-GL]
+  - [EX-PC-BROKER-CONTACT-HQ, EX-PC-ACCOUNT-CONTRACTOR, EX-PC-POLICY-PROGRAM-CONTRACTOR]
+  - [EX-PC-BROKER-CONTACT-HQ, EX-PC-TERM-UMBRELLA, EX-PC-POLICY-UMBRELLA]
+  - [EX-PC-FLEET-CONTACT, EX-PC-TERM-AUTO, EX-PC-POLICY-AUTO]
+  forbidden:
+  - [EX-PC-BROKER-CONTACT, '*', EX-PC-POLICY-GL]  # Jordan's Holdings role does not cascade to the child Contracting account
+  - [EX-PC-BROKER-CONTACT, '*', EX-PC-POLICY-PROGRAM-CONTRACTOR]  # the master policy and program give no local policy
+  - [EX-PC-BROKER-CONTACT-HQ, '*', EX-PC-POLICY-AUTO]  # auto names Contracting, not Sam
+  - [EX-PC-BROKER-CONTACT-HQ, '*', EX-PC-POLICY-PROGRAM-MASTER]  # Contracting's role gives nothing of its parent
+  - [EX-PC-FLEET-CONTACT, '*', EX-PC-POLICY-BOP]  # a policy role never opens the account behind it
+  - [EX-PC-FLEET-CONTACT, '*', EX-PC-POLICY-UMBRELLA]  # a policy role never opens the account behind it
+- file: queries/decision-rights.rq
+  boundary: a policy-term role covers the whole term unless a coverage qualifier narrows it; Quinn decides BOP property only (EX-PC-018)
+  rows:
+  - [EX-PC-UW-GRANITE, EX-PC-TERM-GL, EX-PC-COV-GL]
+  - [EX-PC-UW-MAPLE, EX-PC-TERM-BOP, EX-PC-COV-BOP-GL]
+  - [EX-PC-UW-MAPLE, EX-PC-TERM-BOP, EX-PC-COV-BOP-PROPERTY]
+  - [EX-PC-UW-MAPLE-PROPERTY, EX-PC-TERM-BOP, EX-PC-COV-BOP-PROPERTY]
+  forbidden:
+  - [EX-PC-UW-MAPLE-PROPERTY, '*', EX-PC-COV-BOP-GL]  # Quinn's role is narrowed to BOP property
+  - [EX-PC-UW-MAPLE, '*', EX-PC-COV-GL]  # Morgan holds no GL role
+  - [EX-PC-UW-GRANITE, EX-PC-TERM-BOP, '*']  # Avery holds no BOP role
+- file: queries/program.rq
+  boundary: the program belongs to the Holdings account; its master and local policies each keep their own account (EX-PC-019)
+  rows:
+  - [EX-PC-PROGRAM-PROPERTY, EX-PC-ACCOUNT, EX-PC-POLICY-PROGRAM-CONTRACTOR, EX-PROP-100-C, EX-PC-ACCOUNT-CONTRACTOR]
+  - [EX-PC-PROGRAM-PROPERTY, EX-PC-ACCOUNT, EX-PC-POLICY-PROGRAM-MASTER, EX-PROP-100, EX-PC-ACCOUNT]
+  - [EX-PC-PROGRAM-PROPERTY, EX-PC-ACCOUNT, EX-PC-POLICY-PROGRAM-WORKSHOP, EX-PROP-100-W, EX-PC-ACCOUNT-WORKSHOP]
+- file: queries/ownership.rq
+  boundary: a 40 percent owner has its own account but is not the designated account parent (EX-PC-015)
+  rows:
+  - [EX-PC-HOLDINGS, '60.00', EX-PC-ACCOUNT, 'true']
+  - [EX-PC-RIDGE, '40.00', EX-PC-ACCOUNT-RIDGE, 'false']
+- file: queries/account-team.rq
+  boundary: who does what across the hierarchy; domain roles for Account 360, never access grants (EX-PC-017)
+  rows:
+  - [EX-PC-BROKER-CONTACT, EX-PC-ROLE-BrokerContact, EX-PC-ACCOUNT, EX-PC-BROKER-RIVERSIDE]
+  - [EX-PC-BROKER-CONTACT, EX-PC-ROLE-BrokerContact, EX-PC-ACCOUNT-WORKSHOP, EX-PC-BROKER-RIVERSIDE]
+  - [EX-PC-BROKER-CONTACT-HQ, EX-PC-ROLE-BrokerContact, EX-PC-ACCOUNT-CONTRACTOR, EX-PC-BROKER]
+  - [EX-PC-BROKER-CONTACT-HQ, EX-PC-ROLE-BrokerContact, EX-PC-TERM-UMBRELLA, EX-PC-BROKER]
+  - [EX-PC-FLEET-CONTACT, EX-PC-ROLE-BrokerContact, EX-PC-TERM-AUTO, EX-PC-FLEET-BROKER]
+  - [EX-PC-RISK-MANAGER, EX-PC-ROLE-AccountContact, EX-PC-ACCOUNT-WORKSHOP, EX-PC-HOLDINGS]
+  - [EX-PC-RISK-MANAGER, EX-PC-ROLE-RiskManager, EX-PC-ACCOUNT, EX-PC-HOLDINGS]
+  - [EX-PC-UNDERWRITER, EX-PC-ROLE-Underwriter, EX-PC-SUBMISSION, EX-PC-MGA]
+  - [EX-PC-UW-GRANITE, EX-PC-ROLE-Underwriter, EX-PC-TERM-GL, EX-PC-GRANITE]
+  - [EX-PC-UW-MAPLE, EX-PC-ROLE-Underwriter, EX-PC-TERM-BOP, EX-PC-MAPLE]
+  - [EX-PC-UW-MAPLE-PROPERTY, EX-PC-ROLE-Underwriter, EX-PC-TERM-BOP, EX-PC-MAPLE]
 - file: queries/coverage-money.rq
-  rows: 8
   boundary: eight qualified values are not an account-wide total
+  rows:
+  - [EX-PC-TERM-AUTO, EX-PC-COV-AUTO, Limit, CombinedSingleLimitPerAccident, '1000000.00', USD]
+  - [EX-PC-TERM-BOP, EX-PC-COV-BOP-GL, Limit, EachOccurrence, '1000000.00', USD]
+  - [EX-PC-TERM-BOP, EX-PC-COV-BOP-GL, Limit, GeneralAggregate, '2000000.00', USD]
+  - [EX-PC-TERM-BOP, EX-PC-COV-BOP-PROPERTY, Deductible, PerLoss, '1000.00', USD]
+  - [EX-PC-TERM-BOP, EX-PC-COV-BOP-PROPERTY, Limit, BusinessPersonalProperty, '200000.00', USD]
+  - [EX-PC-TERM-GL, EX-PC-COV-GL, Limit, EachOccurrence, '1000000.00', USD]
+  - [EX-PC-TERM-GL, EX-PC-COV-GL, Limit, GeneralAggregate, '2000000.00', USD]
+  - [EX-PC-TERM-UMBRELLA, EX-PC-COV-UMBRELLA, Limit, EachOccurrence, '2000000.00', USD]
 - file: queries/umbrella-schedule.rq
-  rows: 2
   boundary: BOP omitted from the supplied schedule; actual attachment remains undetermined
+  rows:
+  - [EX-PC-TERM-AUTO, EX-PC-POLICY-AUTO, EX-2042]
+  - [EX-PC-TERM-GL, EX-PC-POLICY-GL, EX-2042]
 - file: queries/umbrella-schedule-review.rq
-  rows: 1
   boundary: Workshop's BOP liability is a review prompt (EX-PC-013), not a finding that the umbrella excludes it
+  rows:
+  - [EX-PC-WORKSHOP, EX-PC-TERM-BOP, EX-PC-COV-BOP-GL]
 shacl:
 - {shape: shapes.ttl, data: snapshot.ttl, conforms: true}
 - {shape: gl-completeness.ttl, data: snapshot.ttl, conforms: true}
@@ -35,6 +132,15 @@ shacl:
 - {shape: shapes.ttl, data: boundaries/malformed-amount.ttl, conforms: false}
 - {shape: shapes.ttl, data: boundaries/missing-location.ttl, conforms: true}
 - {shape: property-completeness.ttl, data: boundaries/missing-location.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/two-parent-accounts.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/duplicate-organization-account.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/policy-two-accounts.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/two-programs.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/self-parent.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/parent-cycle.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/ownership-over-100.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/jv-designated-parent.ttl, conforms: true}
+- {shape: shapes.ttl, data: boundaries/coverage-outside-scope.ttl, conforms: false}
 timeline:
 # result: VALUE (holds), UNKNOWN (ADR-0064 unknown start or end), ABSENT (does not hold or not yet recorded).
 - {case: EX-PC-006-A, slot: EX-PC-SLOT-BPP-ORIGINAL, valid_as_of: '2026-07-05T00:00:00Z', known_as_of: '2026-07-08T00:00:00Z', result: VALUE, fact: EX-PC-F-BPP-ORIGINAL, value: '150000.00'}

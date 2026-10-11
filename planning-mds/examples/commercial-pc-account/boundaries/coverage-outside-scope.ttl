@@ -1,0 +1,11 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+# Independent hypothetical input: an underwriter role on one term narrowed to a coverage of another
+# term. A coverage qualifier can only narrow a role within its own term (ADR-0070).
+d:EX-PC-GAP-TERM-A a pc:PolicyTerm .
+d:EX-PC-GAP-TERM-B a pc:PolicyTerm .
+d:EX-PC-GAP-COV-B a pc:PropertyCoverage ; pc:coverageOf d:EX-PC-GAP-TERM-B .
+d:EX-PC-GAP-UW a pc:Person .
+d:EX-PC-GAP-UW-KIND a pc:RoleKind .
+d:EX-PC-GAP-ASSIGN a pc:RoleAssignment ; pc:roleParty d:EX-PC-GAP-UW ; pc:roleKind d:EX-PC-GAP-UW-KIND ;
+    pc:roleScope d:EX-PC-GAP-TERM-A ; pc:roleCoverage d:EX-PC-GAP-COV-B .

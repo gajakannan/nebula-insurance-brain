@@ -1,24 +1,36 @@
 id: entity:insurance-party-role-assignment
 label: Scoped insurance party role
-notes: Draft shared representation of a party acting as named insured, broker, carrier,
-  MGA or underwriter in an explicit account, submission or policy-term scope. These
-  domain roles are not authorization roles or grants. Evidence and temporal context
-  remain mandatory. F0012/F0013 settle production representation; the example does
-  not establish delegation authority or a runtime schema.
+notes: >-
+  A party acting as named insured, broker of record, placement broker, broker contact, risk
+  manager, account contact, carrier, MGA or underwriter in an explicit account, submission or
+  policy-term scope, with the organization or branch a person acts for (proposed ADR-0070).
+  Broker of record is account-scoped and dated; a placement broker on a term can override it
+  for one line. One person can hold roles on several accounts. Once confirmed by an
+  authoritative source, a role decides an external person's reach (an account role: that account and its own policies; a policy role: that policy only; nothing cascades)
+  and a carrier employee's decision rights; a role read from a document grants nothing. The
+  access check is a proposed F0002-successor amendment to ADR-0062. Evidence and temporal context remain
+  mandatory. F0012/F0013 settle production representation; the example establishes no
+  delegation authority or runtime schema.
 source_docs:
 - F0012/README.md
 - F0013/README.md
 - planning-mds/domain/glossary.md
+- planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
 - planning-mds/architecture/commercial-pc-example-handoff.md
 rationale:
+- adr: adr:0070
+  section: Proposed Decision
+  summary: Role assignments carry party, kind, scope and acted-for organization; confirmed ones feed reach and decision rights.
 - adr: adr:0045
   section: Identity and release records
   summary: Projection mappings must preserve scoped relationship identity and lineage.
 related_entities:
 - entity:account
+- entity:insurance-party
 - entity:policy-term
 related_nodes:
 - schema:commercial-pc-example
 - glossary_term:ontology-projection-mapping
 - adr:0061
 - adr:0062
+- adr:0070

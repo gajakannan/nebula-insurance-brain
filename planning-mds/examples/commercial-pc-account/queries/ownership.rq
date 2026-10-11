@@ -1,0 +1,9 @@
+PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
+PREFIX d: <https://example.invalid/nebula/data/>
+# Expected: two rows, Holdings 60.00 (designated account parent) and Ridge Builders 40.00 (not).
+# Ownership is a percentage fact; the account parent is designated separately (ADR-0070).
+SELECT ?owner ?percent ?ownerAccount ?isAccountParent WHERE {
+  ?interest pc:ownedOrganization d:EX-PC-CONTRACTOR ; pc:owner ?owner ; pc:ownershipPercent ?percent .
+  ?ownerAccount pc:accountOrganization ?owner .
+  BIND (EXISTS { d:EX-PC-ACCOUNT-CONTRACTOR pc:parentAccount ?ownerAccount } AS ?isAccountParent)
+} ORDER BY DESC(?percent)

@@ -28,7 +28,18 @@ Worked and boundary cases: [ontology release contracts](../../examples/ontology-
 
 ### Commercial P&C teaching expansion (2026-10-08)
 
-Use the [Cedar Bridge contractor account](../../examples/commercial-pc-account/README.md) to exercise shared Party/Organization/Person, Account, scoped domain roles, policy identity and product composition before freezing the authoring schema. The proposed account grouping and role-assignment representation must be reconciled with the production contracts in this PRD. Broker/carrier/MGA/underwriter roles do not grant application access. The [handoff](../../architecture/commercial-pc-example-handoff.md) distinguishes example data from planning KG nodes and preserves the delivery scope; broader LOB content remains illustrative.
+Use the [Cedar Bridge contractor account](../../examples/commercial-pc-account/README.md) to exercise shared Party/Organization/Person, Account, scoped domain roles, policy identity and product composition before freezing the authoring schema. The account, ownership and role-assignment representation follows proposed [ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (amendment below) and must be reconciled with the production contracts in this PRD. Broker/carrier/MGA/underwriter roles do not grant application access. The [handoff](../../architecture/commercial-pc-example-handoff.md) distinguishes example data from planning KG nodes and preserves the delivery scope; broader LOB content remains illustrative.
+
+### Account, party and role amendment (2026-10-10)
+
+[ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) answers BLUEPRINT section 4.8. Carry these into the foundation module:
+
+- Party (Organization, Person); organization hierarchy with no fixed depth; operating locations; employment.
+- Account: exactly one insured organization per account and one account per organization in a tenant; at most one designated parent account. Brokers are organizations, not accounts.
+- Ownership interest: owner, owned organization and percentage, any number of owners; majority is computed. A joint venture without a majority owner is normally a root account.
+- Role assignment: party, role kind, scope (account, submission or policy term) and acted-for organization. Broker of record and broker contacts are account-scoped and dated; a placement broker on a policy term can override for one line. Role kinds are open vocabulary aligned to the canonical `PartyRoleTypeCode`, with additional named insured and additional insured kept distinct.
+- A policy belongs to exactly one account, normally the first named insured's; a program belongs to the parent account and its master and local policies link to it, mirroring the canonical `MASTER_PROGRAM` Agreement. Declare `temporal_kind` for every property (ADR-0064); the [data model](../../architecture/data-model.md#proposed-party-account-and-role-records-adr-0070) lists them.
+- Role assignments carry the authoritative source that the proposed access amendment needs (ADR-0070 section 5); the vocabulary itself grants nothing.
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0012.yaml`.
 

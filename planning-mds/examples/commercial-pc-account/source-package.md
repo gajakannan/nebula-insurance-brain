@@ -8,7 +8,11 @@
 
 Document date: 2025-12-15.
 
-Cedar Bridge account groups Cedar Bridge Workshop LLC and Cedar Bridge Contracting LLC. They are separate legal organizations. Harbor Example Brokerage services this account. Workshop operates at EX-PC-LOCATION-SHOP; Contracting operates at EX-PC-LOCATION-YARD. Rowan Example is an underwriter acting for Example Delegated Underwriting MGA on the contracting submission, not the policy insurer.
+Cedar Bridge Holdings LLC owns all of Cedar Bridge Workshop LLC and 60 percent of Cedar Bridge Contracting LLC. Contracting is a joint venture: Example Ridge Builders Inc. owns the other 40 percent. All four are separate legal organizations, and each has its own account. The Workshop and Contracting accounts have the Holdings account as their designated parent account; the Ridge Builders account has no parent.
+
+Harbor Example Brokerage is the broker of record for the Holdings, Workshop and Contracting accounts. Its Riverside branch, part of Harbor Example Brokerage, operates at EX-PC-LOCATION-RIVERSIDE. Jordan Example, employed by the Riverside branch, is the broker contact for the Holdings and Workshop accounts and acts for that branch. Sam Example, employed by Harbor Example Brokerage, is the broker contact for the Contracting account and acts for Harbor Example Brokerage. Casey Example, employed by Cedar Bridge Holdings LLC, is the risk manager for the Holdings account and the account contact for the Workshop account, acting for Holdings in both roles.
+
+Workshop operates at EX-PC-LOCATION-SHOP; Contracting operates at EX-PC-LOCATION-YARD. The contracting submission is for the Contracting account. Rowan Example is an underwriter acting for Example Delegated Underwriting MGA on the contracting submission, not the policy insurer.
 
 ## bop
 
@@ -16,7 +20,7 @@ Cedar Bridge account groups Cedar Bridge Workshop LLC and Cedar Bridge Contracti
 
 Document date: 2025-12-22.
 
-Policy EX-BOP-100 is a Businessowners package issued by Example Maple Mutual to Cedar Bridge Workshop LLC for 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker. Liability: USD 1,000,000 each occurrence and USD 2,000,000 general aggregate. Property: USD 150,000 Business Personal Property at EX-PC-LOCATION-SHOP, with a USD 1,000 per-loss deductible. The premises are leased. These illustrative declarations do not establish a building coverage or business-income amount.
+Policy EX-BOP-100 is a Businessowners package issued by Example Maple Mutual to Cedar Bridge Workshop LLC for 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker. Morgan Example underwrites this policy for Example Maple Mutual. Quinn Example, a Maple property underwriter, underwrites only its property section for Example Maple Mutual. The policy belongs to the Workshop account. Liability: USD 1,000,000 each occurrence and USD 2,000,000 general aggregate. Property: USD 150,000 Business Personal Property at EX-PC-LOCATION-SHOP, with a USD 1,000 per-loss deductible. The premises are leased. These illustrative declarations do not establish a building coverage or business-income amount.
 
 ## gl
 
@@ -24,7 +28,7 @@ Policy EX-BOP-100 is a Businessowners package issued by Example Maple Mutual to 
 
 Document date: 2025-12-22.
 
-Policy EX-2042 is a standalone General Liability policy issued by Example Granite Casualty to Cedar Bridge Contracting LLC for 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker. Occurrence coverage: USD 1,000,000 each occurrence and USD 2,000,000 general aggregate. Example Delegated Underwriting MGA handled the submission; Example Granite Casualty is the insurer. Workshop LLC is not listed as a named insured in this excerpt.
+Policy EX-2042 is a standalone General Liability policy issued by Example Granite Casualty to Cedar Bridge Contracting LLC for 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker. Avery Example underwrites this policy for Example Granite Casualty. The policy belongs to the Contracting account. Occurrence coverage: USD 1,000,000 each occurrence and USD 2,000,000 general aggregate. Example Delegated Underwriting MGA handled the submission; Example Granite Casualty is the insurer. Workshop LLC is not listed as a named insured in this excerpt.
 
 ## auto
 
@@ -32,7 +36,7 @@ Policy EX-2042 is a standalone General Liability policy issued by Example Granit
 
 Document date: 2025-12-23.
 
-Policy EX-2042 is a Commercial Auto policy issued by Example Maple Mutual to Cedar Bridge Workshop LLC and Cedar Bridge Contracting LLC for 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker. The scheduled vehicle is EX-PC-VEHICLE-VAN, an illustrative company van. Liability combined single limit: USD 1,000,000 per accident. No vehicle physical-damage terms are supplied in this excerpt.
+Policy EX-2042 is a Commercial Auto policy issued by Example Maple Mutual to Cedar Bridge Workshop LLC, the first named insured, and Cedar Bridge Contracting LLC, an additional named insured, for 2026-01-01 through 2027-01-01. The policy belongs to the Workshop account. Example Fleet Brokers, not Harbor Example Brokerage, is the placement broker for this auto policy. Drew Example, employed by Example Fleet Brokers, is the broker contact for this policy and acts for Example Fleet Brokers. The scheduled vehicle is EX-PC-VEHICLE-VAN, an illustrative company van. Liability combined single limit: USD 1,000,000 per accident. No vehicle physical-damage terms are supplied in this excerpt.
 
 ## umbrella
 
@@ -40,7 +44,15 @@ Policy EX-2042 is a Commercial Auto policy issued by Example Maple Mutual to Ced
 
 Document date: 2025-12-29.
 
-Policy EX-UMB-100 is issued by Example Granite Casualty to Cedar Bridge Workshop LLC and Cedar Bridge Contracting LLC for 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker. Umbrella liability limit: USD 2,000,000 each occurrence. The schedule identifies Granite GL EX-2042 and Maple Auto EX-2042, each for the 2026 term. BOP EX-BOP-100 is not listed in the supplied schedule. This excerpt supplies no claim-specific attachment or exhaustion determination.
+Policy EX-UMB-100 is issued by Example Granite Casualty to Cedar Bridge Workshop LLC, the first named insured, and Cedar Bridge Contracting LLC, an additional named insured, for 2026-01-01 through 2027-01-01. The policy belongs to the Workshop account. Harbor Example Brokerage is the placement broker. Sam Example is the broker contact for this policy and acts for Harbor Example Brokerage. Umbrella liability limit: USD 2,000,000 each occurrence. The schedule identifies Granite GL EX-2042 and Maple Auto EX-2042, each for the 2026 term. BOP EX-BOP-100 is not listed in the supplied schedule. This excerpt supplies no claim-specific attachment or exhaustion determination.
+
+## program
+
+**EX-PC-DOC-PROGRAM: Property program schedule**
+
+Document date: 2025-12-20.
+
+Example Maple Mutual and Cedar Bridge Holdings LLC set up property program EX-PROG-100, which belongs to the Holdings account. Under the program, master policy EX-PROP-100 is issued to Cedar Bridge Holdings LLC and belongs to the Holdings account; local policy EX-PROP-100-W is issued to Cedar Bridge Workshop LLC and belongs to the Workshop account; and local policy EX-PROP-100-C is issued to Cedar Bridge Contracting LLC and belongs to the Contracting account. All three run from 2026-01-01 through 2027-01-01. Harbor Example Brokerage is the placement broker for the master policy; the local policies name no placement broker. This excerpt supplies no limits, locations or premium allocation.
 
 ## request
 

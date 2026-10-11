@@ -1,0 +1,24 @@
+id: entity:ownership-interest
+label: Organization ownership interest
+notes: >-
+  One party's percentage interest in an organization, with valid time (proposed ADR-0070).
+  Any number of owners (60/40, 50/50, four equal owners); majority ownership is computed,
+  never stored. The designated parent account is set separately and is at most one, so a
+  joint venture is never rolled up twice; without a majority owner it is normally a root
+  account, listed as an ownership interest on each owner's Account 360. Ownership never
+  merges identities or implies named-insured status.
+source_docs:
+- F0012/README.md
+- F0023/README.md
+- planning-mds/domain/glossary.md
+- planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+rationale:
+- adr: adr:0070
+  section: Proposed Decision
+  summary: Ownership is a percentage-bearing relationship separate from the account hierarchy.
+related_entities:
+- entity:account
+- entity:insurance-party
+related_nodes:
+- schema:commercial-pc-example
+- adr:0070
