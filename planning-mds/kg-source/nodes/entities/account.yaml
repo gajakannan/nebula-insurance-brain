@@ -2,11 +2,15 @@ id: entity:account
 label: Insurance account
 notes: >-
   The carrier's customer relationship with exactly one insured organization, and the root of
-  Account 360 (proposed ADR-0070). One account per organization in a tenant, with at most one
+  Account 360 (proposed ADR-0070). At most one current account per organization in a tenant;
+  accountOrganization remains eternal while dated accountStatus distinguishes CURRENT and
+  CLOSED in the teaching model. Closed accounts retain history and permit a replacement;
+  unknown status is incomplete. Each account has at most one
   designated parent account for roll-up; the parent is designated, not computed from
   ownership. Each account has a dated broker of record and broker contacts; brokers are
   organizations, not accounts. Each policy belongs to exactly one account, normally the first
-  named insured's; other named insureds stay roles on the term. A program belongs to the
+  named insured's; ownership remains visible without a current insured role, and other named
+  insureds stay roles on the term. A program belongs to the
   parent account, and its master and local policies link to it. Parentage and ownership never imply named-insured status. External
   people reach only what their authoritative roles name, never the parent or
   siblings, and a policy-only role never opens the account; carrier staff see all and act by
@@ -25,7 +29,7 @@ source_docs:
 rationale:
 - adr: adr:0070
   section: Proposed Decision
-  summary: One account per organization with a designated parent; each policy belongs to exactly one account.
+  summary: At most one current account per organization, with retained closed history and a designated parent; policy ownership is independent of insured roles.
 - adr: adr:0011
   section: Decision
   summary: Shared account and party concepts compose with line-specific coverage modules.

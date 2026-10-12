@@ -8,7 +8,7 @@
 
 Document date: 2025-12-15.
 
-Cedar Bridge Holdings LLC owns all of Cedar Bridge Workshop LLC and 60 percent of Cedar Bridge Contracting LLC. Contracting is a joint venture: Example Ridge Builders Inc. owns the other 40 percent. All four are separate legal organizations, and each has its own account. The Workshop and Contracting accounts have the Holdings account as their designated parent account; the Ridge Builders account has no parent.
+Cedar Bridge Holdings LLC owns all of Cedar Bridge Workshop LLC and 60 percent of Cedar Bridge Contracting LLC. Contracting is a joint venture: Example Ridge Builders Inc. owns the other 40 percent. All four are separate legal organizations, and each has its own account. All four accounts are current as of this document date; no closure has been reported. The Workshop and Contracting accounts have the Holdings account as their designated parent account; the Ridge Builders account has no parent.
 
 Harbor Example Brokerage is the broker of record for the Holdings, Workshop and Contracting accounts. Its Riverside branch, part of Harbor Example Brokerage, operates at EX-PC-LOCATION-RIVERSIDE. Jordan Example, employed by the Riverside branch, is the broker contact for the Holdings and Workshop accounts and acts for that branch. Sam Example, employed by Harbor Example Brokerage, is the broker contact for the Contracting account and acts for Harbor Example Brokerage. Casey Example, employed by Cedar Bridge Holdings LLC, is the risk manager for the Holdings account and the account contact for the Workshop account, acting for Holdings in both roles.
 

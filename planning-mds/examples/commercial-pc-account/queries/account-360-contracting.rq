@@ -1,14 +1,25 @@
 PREFIX pc: <https://example.invalid/nebula/ont/commercial-example/>
 PREFIX d: <https://example.invalid/nebula/data/>
-# Expected: four rows. The Contracting account owns the GL policy and its local program policy,
-# where Contracting is the first named insured. It is an additional named insured on the auto and
-# umbrella policies, which belong to the Workshop account, so they appear as "named insured"
-# rather than as Contracting's own policies.
-SELECT ?policy ?number ?relation ?insuredRole WHERE {
-  d:EX-PC-ACCOUNT-CONTRACTOR pc:accountOrganization ?organization .
+# Expected: four rows in the supplied snapshot. Ownership independently includes GL and the
+# local program policy, even without a current insured role. Their role is optional enrichment.
+# Non-owned auto and umbrella appear only through Contracting's current named-insured roles.
+SELECT DISTINCT ?policy ?number ?relation ?insuredRole WHERE {
+  {
+    ?policy pc:forAccount d:EX-PC-ACCOUNT-CONTRACTOR .
+    BIND ("owner" AS ?relation)
+    OPTIONAL {
+      d:EX-PC-ACCOUNT-CONTRACTOR pc:accountOrganization ?organization .
+      ?term pc:termOf ?policy .
+      ?assignment pc:roleParty ?organization ; pc:roleKind ?insuredRole ; pc:roleScope ?term .
+      VALUES ?insuredRole { d:EX-PC-ROLE-FirstNamedInsured d:EX-PC-ROLE-AdditionalNamedInsured }
+    }
+  } UNION {
+    d:EX-PC-ACCOUNT-CONTRACTOR pc:accountOrganization ?organization .
+    ?term pc:termOf ?policy .
+    ?assignment pc:roleParty ?organization ; pc:roleKind ?insuredRole ; pc:roleScope ?term .
+    VALUES ?insuredRole { d:EX-PC-ROLE-FirstNamedInsured d:EX-PC-ROLE-AdditionalNamedInsured }
+    FILTER NOT EXISTS { ?policy pc:forAccount d:EX-PC-ACCOUNT-CONTRACTOR }
+    BIND ("named insured" AS ?relation)
+  }
   ?policy pc:policyNumber ?number .
-  ?term pc:termOf ?policy .
-  ?assignment pc:roleParty ?organization ; pc:roleKind ?insuredRole ; pc:roleScope ?term .
-  VALUES ?insuredRole { d:EX-PC-ROLE-FirstNamedInsured d:EX-PC-ROLE-AdditionalNamedInsured }
-  BIND (IF(EXISTS { ?policy pc:forAccount d:EX-PC-ACCOUNT-CONTRACTOR }, "owner", "named insured") AS ?relation)
 } ORDER BY ?policy

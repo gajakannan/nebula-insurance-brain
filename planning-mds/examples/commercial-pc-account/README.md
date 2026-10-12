@@ -8,7 +8,7 @@ This companion to the [small interchange example](../ontology-interchange/README
 
 ## 1. One account per organization, distinct insureds and roles
 
-Under proposed [ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md), every organization has its own account. **Cedar Bridge Holdings LLC** owns all of **Cedar Bridge Workshop LLC** and 60 percent of **Cedar Bridge Contracting LLC**, a joint venture with **Example Ridge Builders Inc.** (40 percent). The Workshop and Contracting accounts have the Holdings account as their designated parent. Ridge Builders has its own account, which is not a parent.
+Under proposed [ADR-0070](../../architecture/decisions/ADR-0070-account-party-and-role-model.md), each insured organization has at most one current account in the tenant. All four accounts in this snapshot are current; a closed account retains its identity and history and permits a replacement (EX-PC-021). **Cedar Bridge Holdings LLC** owns all of **Cedar Bridge Workshop LLC** and 60 percent of **Cedar Bridge Contracting LLC**, a joint venture with **Example Ridge Builders Inc.** (40 percent). The Workshop and Contracting accounts have the Holdings account as their designated parent. Ridge Builders has its own account, which is not a parent.
 
 Workshop has a BOP and Contracting a standalone GL policy. Both are named on the auto and umbrella declarations: Workshop as first named insured, Contracting as an additional named insured. Every policy belongs to exactly one account: BOP, auto and umbrella to the Workshop account, GL to the Contracting account. A small property program belongs to the Holdings account, with a master policy for Holdings and a local policy for each subsidiary, each under its own entity's account and linked to the program. Named-insured status comes from each policy term's role assignments, never from the account hierarchy or ownership. Each account has Harbor as broker of record and its own broker contact.
 
@@ -82,7 +82,7 @@ The example encodes this account's declarations only: no eligibility rules, limi
 ## 3. Follow the documents into the graph
 
 1. Read the nine excerpts in [source-package.md](source-package.md): account and hierarchy record, BOP, GL, auto, umbrella, property program, broker request, endorsement and loss notice. Each states its document date.
-2. Inspect [records.json](records.json): **111 identity rows, 10 evidence excerpts, 238 assertions, 234 slots, 237 fact versions**, with interpretation runs, reviews and commits. Its [JSON Schema](../../schemas/commercial-pc-example.schema.json) describes these teaching records.
+2. Inspect [records.json](records.json): **111 identity rows, 10 evidence excerpts, 242 assertions, 238 slots, 241 fact versions**, with interpretation runs, reviews and commits. Its [JSON Schema](../../schemas/commercial-pc-example.schema.json) describes these teaching records.
 3. Follow a fact's `assertion_ref` to `run_ref` and `evidence_ref`, and its `commit_ref` to the review that accepted the reading. Accepting a reading records what the source says; it issues no policy and decides no coverage.
 4. Read [snapshot.ttl](snapshot.ttl) or [snapshot.jsonld](snapshot.jsonld): **233 business statements** plus type and label metadata, at `valid_as_of = 2026-07-05` and `known_as_of = 2026-07-11`. Both are generated from `records.json`.
 5. Use [snapshot-index.json](snapshot-index.json) to recover each statement's fact, assertion, evidence and commit. Type and label rows cite their evidence in `records.entities`.

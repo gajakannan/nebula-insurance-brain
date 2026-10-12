@@ -183,6 +183,132 @@ def _at(day: str):
     return snapshot_builder.stamp(f"{day}T00:00:00Z")
 
 
+@pytest.mark.parametrize("policy,relation", [("GL", "owner"), ("AUTO", "named insured")])
+@pytest.mark.parametrize("role_state", ["missing", "expired"])
+def test_account_360_keeps_ownership_independent_of_current_insured_roles(policy, relation, role_state):
+    rdflib = pytest.importorskip("rdflib")
+    records = json.loads((PC_FOLDER / "records.json").read_text(encoding="utf-8"))
+    assignment = f"EX-PC-ASSIGN-{policy}-CONTRACTOR"
+    assertions = {a["id"]: a for a in records["assertions"]}
+    if role_state == "missing":
+        records["entities"] = [e for e in records["entities"] if e["id"] != assignment]
+        records["facts"] = [f for f in records["facts"]
+                            if assertions[f["assertion_ref"]]["subject_ref"] != assignment]
+    else:
+        fact = next(f for f in records["facts"]
+                    if assertions[f["assertion_ref"]]["subject_ref"] == assignment
+                    and assertions[f["assertion_ref"]]["predicate"] == "pc:roleParty")
+        fact["valid_time"].update(to=records["snapshot"]["valid_as_of"], to_state="BOUNDED", to_granularity="DAY")
+    graph = rdflib.Graph().parse(data=snapshot_builder.build(records)["snapshot.ttl"], format="turtle")
+    query = (PC_FOLDER / "queries/account-360-contracting.rq").read_text(encoding="utf-8")
+    rows = sorted([rdf_checker.render(v) for v in row] for row in graph.query(query))
+    expected = [
+        ["EX-PC-POLICY-AUTO", "EX-2042", "named insured", "EX-PC-ROLE-AdditionalNamedInsured"],
+        ["EX-PC-POLICY-GL", "EX-2042", "owner", "EX-PC-ROLE-FirstNamedInsured"],
+        ["EX-PC-POLICY-PROGRAM-CONTRACTOR", "EX-PROP-100-C", "owner", "EX-PC-ROLE-FirstNamedInsured"],
+        ["EX-PC-POLICY-UMBRELLA", "EX-UMB-100", "named insured", "EX-PC-ROLE-AdditionalNamedInsured"],
+    ]
+    if relation == "owner":
+        expected[1][3] = ""  # Ownership supplies no evidence of the insured role.
+    else:
+        expected.pop(0)  # A non-owned policy still needs a current named-insured role.
+    assert rows == expected
+
+
+def test_closed_account_allows_replacement_without_erasing_history():
+    rdflib = pytest.importorskip("rdflib")
+    shacl = pytest.importorskip("pyshacl")
+    graph = rdflib.Graph().parse(PC_FOLDER / "boundaries/account-close-reopen.ttl")
+    shapes = rdflib.Graph().parse(PC_FOLDER / "shapes.ttl")
+    conforms, _, report = shacl.validate(graph, shacl_graph=shapes, inference="none")
+    assert conforms, report
+    pc = rdflib.Namespace(snapshot_builder.PREFIXES["pc"])
+    d = rdflib.Namespace(snapshot_builder.PREFIXES["d"])
+    assert set(graph.subjects(pc.accountOrganization, d["EX-PC-GAP-ORG"])) == {
+        d["EX-PC-GAP-ACCOUNT-OLD"], d["EX-PC-GAP-ACCOUNT-NEW"]}
+    assert (d["EX-PC-GAP-POLICY"], pc.forAccount, d["EX-PC-GAP-ACCOUNT-OLD"]) in graph
+    graph.set((d["EX-PC-GAP-ACCOUNT-OLD"], pc.accountStatus, rdflib.Literal("CURRENT")))
+    conforms, results, _ = shacl.validate(graph, shacl_graph=shapes, inference="none")
+    assert not conforms
+    assert pc.OneAccountPerOrganizationShape in results.objects(predicate=rdflib.SH.sourceShape)
+
+
+@pytest.mark.parametrize("statuses", [[], ["UNKNOWN"], ["CURRENT", "CLOSED"]])
+def test_account_lifecycle_must_be_known_and_single_valued(statuses):
+    rdflib = pytest.importorskip("rdflib")
+    shacl = pytest.importorskip("pyshacl")
+    pc = rdflib.Namespace(snapshot_builder.PREFIXES["pc"])
+    d = rdflib.Namespace(snapshot_builder.PREFIXES["d"])
+    graph = rdflib.Graph().parse(PC_FOLDER / "boundaries/account-close-reopen.ttl")
+    account = d["EX-PC-GAP-ACCOUNT-OLD"]
+    graph.remove((account, pc.accountStatus, None))
+    for status in statuses:
+        graph.add((account, pc.accountStatus, rdflib.Literal(status)))
+    conforms, results, _ = shacl.validate(graph, shacl_graph=rdflib.Graph().parse(PC_FOLDER / "shapes.ttl"))
+    assert not conforms
+    assert pc.accountStatus in results.objects(predicate=rdflib.SH.resultPath)
+
+
+@pytest.mark.parametrize("valid,known,old_status,new_status", [
+    ("2026-06-30", "2026-07-11", "CURRENT", None),
+    ("2026-07-01", "2026-07-09", "CURRENT", None),
+    ("2026-07-01", "2026-07-11", "CLOSED", "CURRENT"),
+    ("2026-07-05", "2026-07-11", "CLOSED", "CURRENT"),
+])
+def test_account_replacement_status_uses_valid_and_known_time(valid, known, old_status, new_status):
+    import copy
+    rdflib = pytest.importorskip("rdflib")
+    shacl = pytest.importorskip("pyshacl")
+    records = json.loads((PC_FOLDER / "records.json").read_text(encoding="utf-8"))
+    old = "EX-PC-ACCOUNT-RIDGE"
+    replacement = "EX-PC-ACCOUNT-RIDGE-REPLACEMENT"
+    effective, recorded = "2026-07-01T00:00:00Z", "2026-07-10T00:00:00Z"
+    original = next(f for f in records["facts"] if f["id"] == "EX-PC-F-STATUS-ACCOUNT-RIDGE")
+    original["recorded_to"] = recorded
+    retained = copy.deepcopy(original)
+    retained.update(id="EX-PC-F-STATUS-RIDGE-RETAINED", recorded_from=recorded, recorded_to=None)
+    retained["valid_time"].update(to=effective, to_state="BOUNDED", to_granularity="DAY")
+    closed_assertion = copy.deepcopy(next(a for a in records["assertions"] if a["id"] == original["assertion_ref"]))
+    closed_assertion.update(id="EX-PC-A-STATUS-RIDGE-CLOSED", object={"value": "CLOSED", "datatype": "xsd:string"})
+    closed = copy.deepcopy(retained)
+    closed.update(id="EX-PC-F-STATUS-RIDGE-CLOSED", assertion_ref=closed_assertion["id"])
+    closed["valid_time"].update({"from": effective, "from_granularity": "DAY", "to": None,
+                               "to_state": "OPEN", "to_granularity": None, "attested_from": recorded})
+    records["assertions"].append(closed_assertion)
+    records["facts"].extend([retained, closed])
+
+    entity = copy.deepcopy(next(e for e in records["entities"] if e["id"] == old))
+    entity.update(id=replacement, label="Ridge replacement account")
+    records["entities"].append(entity)
+    # Synthetic mutation of the teaching records, solely to exercise projection selection.
+    for predicate, value in [("pc:accountOrganization", {"ref": "EX-PC-RIDGE"}),
+                             ("pc:accountStatus", {"value": "CURRENT", "datatype": "xsd:string"})]:
+        field = predicate.removeprefix("pc:")
+        slot_id = f"EX-PC-SLOT-REPLACEMENT-{field}"
+        records["slots"].append({"id": slot_id, "subject_ref": replacement, "predicate": predicate,
+                                 "qualifiers": {"target_ref": value["ref"]} if "ref" in value else {}})
+        assertion = dict(closed_assertion, id=f"EX-PC-A-REPLACEMENT-{field}", subject_ref=replacement,
+                         predicate=predicate, object=value)
+        fact = copy.deepcopy(closed)
+        fact.update(id=f"EX-PC-F-REPLACEMENT-{field}", slot_id=slot_id, assertion_ref=assertion["id"])
+        if predicate == "pc:accountOrganization":
+            fact["valid_time"] = {"kind": "ETERNAL"}
+        records["assertions"].append(assertion)
+        records["facts"].append(fact)
+    records["snapshot"] = {"valid_as_of": f"{valid}T00:00:00Z", "known_as_of": f"{known}T00:00:00Z"}
+    graph = rdflib.Graph().parse(data=snapshot_builder.build(records)["snapshot.ttl"], format="turtle")
+    pc = rdflib.Namespace(snapshot_builder.PREFIXES["pc"])
+    d = rdflib.Namespace(snapshot_builder.PREFIXES["d"])
+    assert set(graph.objects(d[old], pc.accountStatus)) == {rdflib.Literal(old_status)}
+    assert set(graph.objects(d[replacement], pc.accountStatus)) == (
+        {rdflib.Literal(new_status)} if new_status else set())
+    assert (d[old], pc.accountOrganization, d["EX-PC-RIDGE"]) in graph
+    if new_status:
+        assert set(graph.subjects(pc.accountOrganization, d["EX-PC-RIDGE"])) == {d[old], d[replacement]}
+        conforms, _, report = shacl.validate(graph, shacl_graph=rdflib.Graph().parse(PC_FOLDER / "shapes.ttl"))
+        assert conforms, report
+
+
 @pytest.mark.parametrize("valid_time,day,expected", [
     ({"kind": "ETERNAL"}, "1999-01-01", "VALUE"),
     ({"kind": "EVENT", "at": "2026-06-21T00:00:00Z", "granularity": "DAY"}, "2026-06-20", None),

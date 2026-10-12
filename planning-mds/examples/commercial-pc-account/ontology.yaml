@@ -233,11 +233,25 @@ properties:
   module: foundation
   kind: object
   temporal_kind: ETERNAL
-  definition: Identifies the one organization an account represents; one account per
-    organization in a tenant.
+  definition: Identifies the one organization an account represents, including after closure;
+    uniqueness applies only to CURRENT accounts in one tenant at the selected valid/known time.
   examples:
   - records.json
   regression_cases:
+  - cases.md
+- id: pc:accountStatus
+  module: foundation
+  kind: datatype
+  datatype: xsd:string
+  temporal_kind: STATE
+  definition: Lifecycle state at the selected valid/known time, CURRENT (non-closed) or CLOSED
+    in this teaching vocabulary. CLOSED preserves identity and history while allowing a
+    replacement CURRENT account. Missing or unknown state is incomplete, not presumed closed.
+  examples:
+  - records.json
+  regression_cases:
+  - boundaries/account-close-reopen.ttl
+  - boundaries/duplicate-organization-account.ttl
   - cases.md
 - id: pc:parentAccount
   module: foundation

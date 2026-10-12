@@ -2,7 +2,7 @@ status: synthetic-authored-expectations
 example_id: EX-PC-001
 semantic_execution:
   status: observed
-  observed_on: '2026-10-10'
+  observed_on: '2026-10-11'
   executor: scripts/validation/validate_semantic_rdf.py (lifecycle gate semantic_rdf; CI runs it with --require)
   environments: [Python 3.12.13, Python 3.14.4]
   tools: {rdflib: 7.1.4, pyshacl: 0.30.1, owlrl: 7.1.4}
@@ -29,6 +29,10 @@ semantic_execution:
     eleven); the local program policies name no placement broker and fall back to the broker of
     record; parent-cycle, self-parent, ownership-over-100 and coverage-outside-scope boundaries
     fail and jv-designated-parent conforms.
+    2026-10-11: owned-policy selection is independent of insured roles; dated accountStatus
+    permits closed-account replacement while rejecting two current accounts. EX-PC-020/021
+    add 12 passing regression cases; the strict RDF expectations pass on Python 3.12.13
+    with the tool versions above (run 2026-10-11-453de556).
 scope: document-to-graph teaching fixtures; no Nebula runtime, insurance eligibility or claim determination
 queries:
 - file: queries/account-program.rq
@@ -42,7 +46,7 @@ queries:
   - [EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-PROGRAM-WORKSHOP, EX-PROP-100-W, EX-PC-PRODUCT-Property, EX-PC-MAPLE, EX-PC-BROKER, broker of record]
   - [EX-PC-ACCOUNT-WORKSHOP, EX-PC-POLICY-UMBRELLA, EX-UMB-100, EX-PC-PRODUCT-Umbrella, EX-PC-GRANITE, EX-PC-BROKER, placement broker]
 - file: queries/account-360-contracting.rq
-  boundary: Contracting owns GL and its local program policy as first named insured, and is only an additional named insured on the Workshop account's auto and umbrella policies (EX-PC-016)
+  boundary: Contracting owns GL and its local program policy independently of insured roles; named-insured enrichment is optional. Non-owned auto and umbrella require a current role (EX-PC-016/020)
   rows:
   - [EX-PC-POLICY-AUTO, EX-2042, named insured, EX-PC-ROLE-AdditionalNamedInsured]
   - [EX-PC-POLICY-GL, EX-2042, owner, EX-PC-ROLE-FirstNamedInsured]
@@ -134,6 +138,7 @@ shacl:
 - {shape: property-completeness.ttl, data: boundaries/missing-location.ttl, conforms: false}
 - {shape: shapes.ttl, data: boundaries/two-parent-accounts.ttl, conforms: false}
 - {shape: shapes.ttl, data: boundaries/duplicate-organization-account.ttl, conforms: false}
+- {shape: shapes.ttl, data: boundaries/account-close-reopen.ttl, conforms: true}
 - {shape: shapes.ttl, data: boundaries/policy-two-accounts.ttl, conforms: false}
 - {shape: shapes.ttl, data: boundaries/two-programs.ttl, conforms: false}
 - {shape: shapes.ttl, data: boundaries/self-parent.ttl, conforms: false}

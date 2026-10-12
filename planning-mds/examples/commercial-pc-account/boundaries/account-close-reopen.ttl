@@ -1,0 +1,11 @@
+@prefix pc: <https://example.invalid/nebula/ont/commercial-example/> .
+@prefix d: <https://example.invalid/nebula/data/> .
+# Independent synthetic snapshot, one tenant, valid 2026-07-05 and known 2026-07-11.
+# The old relationship closed on July 1; the replacement became current on July 1.
+# Eternal organization identity and the old policy's ownership remain intact.
+d:EX-PC-GAP-ORG a pc:Organization .
+d:EX-PC-GAP-ACCOUNT-OLD a pc:Account ;
+    pc:accountOrganization d:EX-PC-GAP-ORG ; pc:accountStatus "CLOSED" .
+d:EX-PC-GAP-ACCOUNT-NEW a pc:Account ;
+    pc:accountOrganization d:EX-PC-GAP-ORG ; pc:accountStatus "CURRENT" .
+d:EX-PC-GAP-POLICY a pc:Policy ; pc:forAccount d:EX-PC-GAP-ACCOUNT-OLD .
