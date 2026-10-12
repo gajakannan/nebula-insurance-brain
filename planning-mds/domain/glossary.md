@@ -131,7 +131,7 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 
 ### Account
 **Type:** Entity
-**Definition:** The customer relationship with exactly one organization seeking or holding insurance coverage; one account per organization in a tenant, with at most one designated parent account. The root of Account (Entity) 360 (70, 86; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+**Definition:** The customer relationship with exactly one organization seeking or holding insurance coverage; at most one current account per organization in a tenant, with at most one designated parent account. Its organization identity link survives closure. Dated lifecycle state distinguishes current and closed accounts, so retained closed history does not block a replacement ([EX-PC-021](../examples/commercial-pc-account/cases.md#ex-pc-021--closed-accounts-retain-history-and-allow-a-replacement)). The root of Account (Entity) 360 (70, 86; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
 Each account owns its policies (each policy belongs to exactly one account) and has a broker of record and broker contacts.
 **Not:** a grouping of several organizations, a broker, or an authorization scope by itself. An organization named on a policy another account owns is a named insured there, not an owner.
 
@@ -154,6 +154,7 @@ Each account owns its policies (each policy belongs to exactly one account) and 
 ### Account 360
 **Type:** Term
 **Definition:** One account's organization, broker of record and contacts, the policies it owns, the policies it is named on, its role assignments, its ownership interests and its parent and child accounts. The hierarchy view rolls owned policies up, so each appears once (70; F0023; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+Owned policies remain visible without a current named-insured assignment; role details are optional. A non-owned policy needs a current named-insured role to appear in the named-on section ([EX-PC-020](../examples/commercial-pc-account/cases.md#ex-pc-020--owned-policies-survive-missing-or-expired-insured-roles)).
 
 ### Program
 **Type:** Term

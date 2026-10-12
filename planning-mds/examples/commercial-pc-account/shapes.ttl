@@ -20,17 +20,26 @@ pc:CoverageReferenceShape a sh:NodeShape ;
     sh:targetSubjectsOf pc:coverageOf ;
     sh:property [ sh:path pc:coverageOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:PolicyTerm ] .
 
-# ADR-0070: one organization per account, at most one designated parent and no parent cycle, one account per organization,
+# ADR-0070: one organization per account, at most one designated parent and no parent cycle, one current account per organization,
 # exactly one account per policy and program, and at most one program per policy.
+# Input is one tenant at explicit valid/known coordinates. Closed accounts retain identity and history.
 pc:AccountShape a sh:NodeShape ; sh:targetClass pc:Account ;
     sh:property [ sh:path pc:accountOrganization ; sh:minCount 1 ; sh:maxCount 1 ; sh:class pc:Organization ] ;
+    sh:property [ sh:path pc:accountStatus ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ; sh:in ( "CURRENT" "CLOSED" ) ] ;
     sh:property [ sh:path pc:parentAccount ; sh:maxCount 1 ; sh:class pc:Account ] ;
     sh:sparql [ sh:message "An account cannot be its own parent or ancestor." ;
         sh:select """SELECT $this WHERE {
             $this <https://example.invalid/nebula/ont/commercial-example/parentAccount>+ $this }""" ] .
 
 pc:OneAccountPerOrganizationShape a sh:NodeShape ; sh:targetObjectsOf pc:accountOrganization ;
-    sh:property [ sh:path [ sh:inversePath pc:accountOrganization ] ; sh:maxCount 1 ] .
+    sh:sparql [ sh:message "An organization may have at most one current account in this tenant snapshot." ;
+        sh:select """SELECT DISTINCT $this WHERE {
+            ?account <https://example.invalid/nebula/ont/commercial-example/accountOrganization> $this ;
+                <https://example.invalid/nebula/ont/commercial-example/accountStatus> "CURRENT" .
+            ?other <https://example.invalid/nebula/ont/commercial-example/accountOrganization> $this ;
+                <https://example.invalid/nebula/ont/commercial-example/accountStatus> "CURRENT" .
+            FILTER (?account != ?other) }""" ] .
 
 pc:OwnershipShape a sh:NodeShape ; sh:targetClass pc:OwnershipInterest ;
     sh:property [ sh:path pc:owner ; sh:minCount 1 ; sh:maxCount 1 ;
