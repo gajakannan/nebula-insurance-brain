@@ -20,3 +20,13 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Graph Observatory carry-in (2026-10-13)
+
+[ADR-0071](../../architecture/decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Design: [design note section 10](../../architecture/graph-observatory-design.md#10-delivery-approach-carry-the-contract-in-now-land-the-observatory-in-v02b). The scoped Observatory is [F0067](../F0067-graph-observatory/README.md).
+
+- Emit `ANSWER_BASIS_LINKED` built from the ADR-0046 answer object: used nodes, considered-not-used nodes, and each answer span with its basis. Never derive "used" from retrieval rank, proximity or traversal.
+- Record retrieval, graph traversal, temporal selection, evidence resolution and conflict boundaries as trace events, with permission-safe counts only.
+- Record each trace's semantic context: ontology release, projection version, valid-as-of and known-as-of.
+- Recording is non-blocking: a recording failure marks the trace partial and never fails the answer.
+- Acceptance example: [EX-OBS-001/002](../../examples/graph-observatory-2d-options.html) answer trace, where the superseded $2,000,000 limit is traversed and classified as considered, not used.

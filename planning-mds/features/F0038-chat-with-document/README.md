@@ -20,3 +20,18 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Graph Observatory carry-in (2026-10-13)
+
+[ADR-0071](../../architecture/decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md) and [ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) (Proposed) govern this planned work. Carry these requirements into the PRD; the feature status is unchanged. Design: [design note section 10](../../architecture/graph-observatory-design.md#10-delivery-approach-carry-the-contract-in-now-land-the-observatory-in-v02b). The scoped Observatory is [F0067](../F0067-graph-observatory/README.md).
+
+- Return a `trace_id` with each answer when an instrumented execution exists, and show the compact **How the Brain answered** summary: sources, recorded hops, evidence, time checks, gaps and status. The full trace view and replay are F0067.
+
+**Early panel (operator decision, 2026-10-13).** This feature ships the first **How the Brain answered** panel instead of waiting for F0067:
+
+- The static summary plus the basis-path view (option C on the [options page](../../examples/graph-observatory-2d-options.html)): question to answer, with considered-not-used branches and gaps shown as such, and an equivalent accessible list. A lightweight SVG/list rendering is enough; F0045's Cytoscape explorer and F0067 can replace it later.
+- No replay, no 3D, no learning traces. Those stay in F0067.
+- Stand up the read-path trace store (ADR-0071 section 5): retention defaults to 90 days and is configurable per tenant; a trace whose answer is cited by a recorded decision is kept with that decision.
+- Trace access follows answer access (ADR-0072 section 3): whoever may read the answer may read its trace, including colleagues' answers.
+- First golden case: one real GL endorsement answer (the same case F0067 reuses).
+- If there is no trace, show "Detailed trace unavailable". The answer never depends on the trace.

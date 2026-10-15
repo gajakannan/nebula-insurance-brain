@@ -26,3 +26,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
 
 - Build AGE from accepted canonical records and the existing outbox/rebuild path. Do not load upstream graph exports directly; local extraction IDs and deduplication have no canonical authority.
+
+## Graph Observatory carry-in (2026-10-13)
+
+[ADR-0071](../../architecture/decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Design: [design note section 10](../../architecture/graph-observatory-design.md#10-delivery-approach-carry-the-contract-in-now-land-the-observatory-in-v02b). The scoped Observatory is [F0067](../F0067-graph-observatory/README.md).
+
+- Give every projection build a stable version identifier and keep it queryable, so a trace can cite the projection it used and a replay can tell when that version is no longer available (ADR-0071 section 4).
