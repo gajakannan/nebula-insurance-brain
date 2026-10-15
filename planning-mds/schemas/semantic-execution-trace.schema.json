@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/semantic-execution-trace.schema.json",
+  "title": "SemanticExecutionTraceBundle",
+  "description": "Draft contract for a recorded semantic execution trace: the trace summary, the authorized graph projection it refers to, and its ordered events (proposed ADR-0071; read-only boundary in proposed ADR-0072). Planning draft only: it becomes an API contract when F0036/F0038 or F0041 Phase B binds it. Presentation state (camera, cursor, layout, colours, stage grouping) is deliberately absent. Invariants JSON Schema cannot express are listed in ADR-0071 section 6 and are checked by a validator, not by this file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["trace", "projection", "events"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "trace": { "$ref": "#/$defs/trace_summary" },
+    "projection": { "$ref": "#/$defs/graph_projection" },
+    "events": { "type": "array", "items": { "$ref": "#/$defs/trace_event" } }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[A-Za-z0-9_.:@-]+$" },
+    "layer": {
+      "description": "Knowledge layer a node or edge belongs to. Layers are never merged: a traversal does not promote a source statement to a canonical fact (ADR-0063, ADR-0019, ADR-0020).",
+      "type": "string",
+      "enum": ["CONVERSATION", "SOURCE", "OPEN_STATEMENT", "ONTOLOGY", "TYPED_ASSERTION", "CANONICAL", "DERIVED", "LEARNING_CANDIDATE", "GOVERNANCE", "NOT_INSTRUMENTED", "ANSWER"]
+    },
+    "attribution": {
+      "description": "OBSERVED: the operation ran and was recorded. USED_IN_ANSWER: only on ANSWER_BASIS_LINKED, from the grounded answer's own references (ADR-0046). CONSIDERED_NOT_USED is a node classification carried in the basis event, never an event attribution. NOT_INSTRUMENTED: an operation ran but its inside was not recorded.",
+      "type": "string",
+      "enum": ["OBSERVED", "USED_IN_ANSWER", "NOT_INSTRUMENTED"]
+    },
+    "trace_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "trace_id", "execution_id", "operation", "status", "synthetic", "started_at", "completeness", "semantic_context"],
+      "properties": {
+        "schema_version": { "type": "string", "pattern": "^0\\.[0-9]+$" },
+        "trace_id": { "$ref": "#/$defs/identifier", "description": "Opaque; authorized on every access. Never carries tenant or principal identity." },
+        "execution_id": { "$ref": "#/$defs/identifier", "description": "The authoritative execution this trace describes: a conversation turn, interpretation run, or learning run." },
+        "operation": { "type": "string", "enum": ["DOCUMENT_CHAT", "ENTITY_CHAT", "SEMANTIC_QUERY", "LEARNING_RUN"] },
+        "status": { "type": "string", "enum": ["IN_PROGRESS", "COMPLETE", "PARTIAL", "FAILED", "TIMED_OUT"] },
+        "synthetic": { "type": "boolean", "description": "True for fixtures and demos. A synthetic trace must be visibly labelled wherever it is rendered." },
+        "started_at": { "type": "string", "format": "date-time" },
+        "ended_at": { "type": ["string", "null"], "format": "date-time" },
+        "subject": { "type": "string", "maxLength": 500, "description": "Sanitized display text: the question asked or the run described. Never a raw prompt." },
+        "completeness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "recorded_events", "gap_count", "truncated"],
+          "properties": {
+            "status": { "type": "string", "enum": ["COMPLETE", "COMPLETE_WITH_GAPS", "PARTIAL", "TRUNCATED", "UNKNOWN"] },
+            "recorded_events": { "type": "integer", "minimum": 0 },
+            "gap_count": { "type": "integer", "minimum": 0 },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "semantic_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ontology_release_id", "graph_projection_id", "valid_as_of", "known_as_of"],
+          "properties": {
+            "ontology_release_id": { "type": "string" },
+            "graph_projection_id": { "type": "string" },
+            "valid_as_of": { "type": "string", "description": "Valid-time coordinate the execution used (ADR-0064 precision applies)." },
+            "known_as_of": { "type": "string", "format": "date-time", "description": "Recorded-time coordinate the execution used (ADR-0007, ADR-0032)." }
+          }
+        }
+      }
+    },
+    "graph_projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graph_projection_id", "clusters", "nodes"],
+      "properties": {
+        "graph_projection_id": { "type": "string" },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "aggregate_count"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "label": { "type": "string" },
+              "aggregate_count": { "type": "integer", "minimum": 0, "description": "Permission-safe count inside the viewer's authorized scope. Rendered as density, never as entities." }
+            }
+          }
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "kind", "layer", "cluster"],
+            "properties": {
+              "id": { "$ref": "#/$defs/identifier" },
+              "label": { "type": "string", "maxLength": 200 },
+              "kind": { "type": "string", "enum": ["question", "document", "policy", "coverage", "fact", "endorsement", "assertion", "time", "evidence", "gap", "answer", "statement", "signature", "entity", "candidate", "review"] },
+              "layer": { "$ref": "#/$defs/layer" },
+              "cluster": { "$ref": "#/$defs/identifier" },
+              "detail": { "type": "object", "additionalProperties": { "type": ["string", "number", "boolean"] } }
+            }
+          }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_node_id", "predicate_id", "target_node_id"],
+      "properties": {
+        "source_node_id": { "$ref": "#/$defs/identifier" },
+        "predicate_id": { "$ref": "#/$defs/identifier" },
+        "target_node_id": { "$ref": "#/$defs/identifier" },
+        "layer": { "$ref": "#/$defs/layer" }
+      }
+    },
+    "trace_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "trace_id", "event_id", "sequence", "occurred_at", "event_type", "span_id", "parent_span_id", "attribution", "summary", "payload"],
+      "properties": {
+        "schema_version": { "type": "string", "pattern": "^0\\.[0-9]+$" },
+        "trace_id": { "$ref": "#/$defs/identifier" },
+        "event_id": { "$ref": "#/$defs/identifier" },
+        "sequence": { "type": "integer", "minimum": 1, "description": "Ordering within one trace. Timestamps are not an ordering guarantee." },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "REQUEST_ACCEPTED", "CONTEXT_RESOLVED", "RETRIEVAL_EXECUTED", "EDGE_TRAVERSED", "NEIGHBORHOOD_EXPANDED",
+            "ONTOLOGY_TERM_APPLIED", "RULE_EVALUATED", "TEMPORAL_SELECTION", "EVIDENCE_RESOLVED", "EVIDENCE_UNAVAILABLE",
+            "CONFLICT_DETECTED", "CONSTRAINT_FAILED", "INSTRUMENTATION_GAP", "ANSWER_BASIS_LINKED", "ANSWER_EMITTED",
+            "SOURCE_CONTENT_REUSED", "OPEN_STATEMENT_RECORDED", "ASSERTION_ALIGNED", "ENTITY_LINK_RESOLVED",
+            "LEARNING_CANDIDATE_CREATED", "ONTOLOGY_CHANGE_PROPOSED", "GOVERNANCE_ACTION_OBSERVED",
+            "CANONICAL_CHANGE_COMMITTED", "ONTOLOGY_RELEASE_PUBLISHED", "PROJECTION_UPDATED", "TRACE_TERMINATED"
+          ]
+        },
+        "span_id": { "$ref": "#/$defs/identifier" },
+        "parent_span_id": { "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }] },
+        "attribution": { "$ref": "#/$defs/attribution" },
+        "summary": { "type": "string", "maxLength": 300, "description": "Sanitized human-readable line. No prompts, secrets, or evidence excerpts." },
+        "payload": { "$ref": "#/$defs/payload" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "event_type": { "const": "ANSWER_BASIS_LINKED" } } },
+          "then": { "properties": { "attribution": { "const": "USED_IN_ANSWER" }, "payload": { "required": ["used_node_ids", "considered_not_used_node_ids", "answer_spans"] } } }
+        },
+        {
+          "if": { "properties": { "attribution": { "const": "USED_IN_ANSWER" } } },
+          "then": { "properties": { "event_type": { "const": "ANSWER_BASIS_LINKED" } } }
+        },
+        {
+          "if": { "properties": { "event_type": { "const": "INSTRUMENTATION_GAP" } } },
+          "then": { "properties": { "attribution": { "const": "NOT_INSTRUMENTED" }, "payload": { "required": ["reason_code"] } } }
+        },
+        {
+          "if": { "properties": { "event_type": { "enum": ["SOURCE_CONTENT_REUSED", "OPEN_STATEMENT_RECORDED", "ASSERTION_ALIGNED", "ENTITY_LINK_RESOLVED", "LEARNING_CANDIDATE_CREATED", "ONTOLOGY_CHANGE_PROPOSED", "GOVERNANCE_ACTION_OBSERVED", "CANONICAL_CHANGE_COMMITTED", "ONTOLOGY_RELEASE_PUBLISHED", "PROJECTION_UPDATED"] } } },
+          "then": { "properties": { "payload": { "required": ["authoritative_record_ref"] } } }
+        },
+        {
+          "if": { "properties": { "event_type": { "const": "ASSERTION_ALIGNED" } } },
+          "then": { "properties": { "payload": { "required": ["outcome"], "properties": { "outcome": { "enum": ["BOUND", "NONE", "UNDECIDED"] } } } } }
+        }
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "node_ids": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "edges": { "type": "array", "items": { "$ref": "#/$defs/edge" } },
+        "layer": { "$ref": "#/$defs/layer" },
+        "evidence_ref_ids": { "type": "array", "items": { "type": "string" } },
+        "reason_code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+        "reason": { "type": "string", "maxLength": 120 },
+        "outcome": { "type": "string", "enum": ["BOUND", "NONE", "UNDECIDED", "RESOLVED", "UNRESOLVED", "OPEN", "REJECTED", "SUPERSEDED", "COMMITTED"] },
+        "flagged_node_ids": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "used_node_ids": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "considered_not_used_node_ids": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "answer_spans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["span", "basis_node_ids"],
+            "properties": {
+              "span": { "type": "string" },
+              "basis_node_ids": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/identifier" } }
+            }
+          }
+        },
+        "authoritative_record_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "id"],
+          "description": "The durable record this event was projected from (ADR-0072). Learning, governance and commit events never stand on their own.",
+          "properties": {
+            "kind": { "type": "string", "enum": ["interpretation_run", "open_statement", "alignment_decision", "entity_resolution_verdict", "conflict_record", "learning_candidate", "review_item", "canonical_commit", "ontology_release", "projection_version", "audit_event"] },
+            "id": { "$ref": "#/$defs/identifier" }
+          }
+        },
+        "counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } }
+      }
+    }
+  }
+}

@@ -20,3 +20,9 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Graph Observatory carry-in (2026-10-13)
+
+[ADR-0071](../../architecture/decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md) and [ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) (Proposed) govern this planned work. Carry these requirements into the PRD; the feature status is unchanged. Design: [design note section 10](../../architecture/graph-observatory-design.md#10-delivery-approach-carry-the-contract-in-now-land-the-observatory-in-v02b). The scoped Observatory is [F0067](../F0067-graph-observatory/README.md).
+
+- Use the same replay coordinates as trace replay (ontology release, projection version, valid-as-of, known-as-of) and the same permission rule: what the viewer may see now, intersected with what was seen then, never reinstating access (ADR-0053, ADR-0072).

@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Graph Observatory Options</title>
+<meta name="description" content="Self-contained review page: five renderings of one recorded semantic execution trace (synthetic fixture) for the Insurance Brain Graph Observatory: three 2D, one 2.5D depth reference, and one true 3D (WebGL) where height is the knowledge layer.">
+<style>
+:root{
+  --bg:#07080c; --panel:#0c0e14; --panel2:#10131b; --line:#1d2230; --line2:#2a3142;
+  --ink:#e6e9f0; --ink2:#a7afc0; --ink3:#6b7385; --accent:#f2b84b; --flag:#ff4f8b; --ok:#39d3a6; --gap:#ff6b5b;
+  --mono: "JetBrains Mono","SFMono-Regular",ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:12px/1.45 var(--mono)}
+button,select{font:inherit;color:inherit}
+a{color:#7fd8ff}
+.top{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.brand{font-weight:700;letter-spacing:.04em}
+.brand small{display:block;font-weight:400;color:var(--ink3);letter-spacing:0}
+.badge{border:1px solid var(--flag);color:var(--flag);padding:2px 8px;border-radius:2px;font-size:11px;letter-spacing:.06em}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:3px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:5px 10px;cursor:pointer;color:var(--ink2);border-right:1px solid var(--line2)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#111;font-weight:700}
+.seg button:focus-visible,.ctl:focus-visible,.log li:focus-visible,.stagetab:focus-visible{outline:2px solid #7fd8ff;outline-offset:-2px}
+.spacer{flex:1}
+label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--ink2);cursor:pointer}
+.strip{display:flex;gap:2px;padding:6px 16px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin}
+.strip .meta{color:var(--ink3);white-space:nowrap;margin-right:12px;align-self:center}
+.strip .meta b{color:var(--ink)}
+.stagetab{flex:1 0 auto;min-width:70px;background:var(--panel);border:0;border-top:2px solid transparent;color:var(--ink3);padding:4px 8px;cursor:pointer;text-align:center}
+.stagetab.done{color:var(--ink2)}
+.stagetab.cur{border-top-color:var(--accent);color:#111;background:var(--accent);font-weight:700}
+.stagetab.empty{opacity:.45}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:0}
+.stage{position:relative;min-height:520px;height:calc(100vh - 360px);border-right:1px solid var(--line)}
+canvas#gl{position:absolute;inset:0;width:100%;height:100%;display:none}
+body.e3d canvas#gl{display:block}
+canvas#cv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+.overlay{position:absolute;left:16px;top:12px;pointer-events:none;max-width:70%}
+.overlay h2{margin:0;font-size:22px;letter-spacing:.04em;border-left:3px solid var(--accent);padding-left:10px}
+.overlay p{margin:2px 0 0 13px;color:var(--ink2)}
+.legend{position:absolute;right:12px;top:12px;background:rgba(12,14,20,.86);border:1px solid var(--line);padding:8px 10px;max-width:260px;font-size:11px}
+.legend h4{margin:0 0 4px;font-size:10px;color:var(--ink3);letter-spacing:.08em}
+.legend div{display:flex;gap:6px;align-items:center;margin:2px 0;color:var(--ink2)}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid var(--ink2)}
+.legend .sw{width:10px;height:10px;border-radius:50%;border:0}
+.legend details summary{cursor:pointer;color:var(--ink3);font-size:10px;letter-spacing:.08em}
+.hint{position:absolute;left:16px;bottom:10px;color:var(--ink3);font-size:11px;pointer-events:none}
+aside{padding:12px;overflow:auto;height:calc(100vh - 360px);min-height:520px}
+aside h3{font-size:11px;letter-spacing:.1em;color:var(--ink3);margin:14px 0 6px;font-weight:600}
+aside h3:first-child{margin-top:0}
+.insp{background:var(--panel);border:1px solid var(--line);padding:10px}
+.insp .t{font-weight:700;font-size:13px;margin-bottom:4px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:2px 8px;color:var(--ink2)}
+.kv dt{color:var(--ink3)}
+.kv dd{margin:0;word-break:break-word}
+.attr{display:inline-block;padding:0 6px;border-radius:2px;font-size:10px;letter-spacing:.06em;font-weight:700}
+.attr.USED_IN_ANSWER{background:var(--ok);color:#06231a}
+.attr.OBSERVED{background:#2b3a55;color:#cfe0ff}
+.attr.CONSIDERED_NOT_USED{border:1px dashed var(--ink3);color:var(--ink2)}
+.attr.NOT_INSTRUMENTED{border:1px dashed var(--gap);color:var(--gap)}
+pre{white-space:pre-wrap;word-break:break-word;background:#05060a;border:1px solid var(--line);padding:8px;margin:6px 0 0;font-size:10.5px;color:#b9c3d6;max-height:260px;overflow:auto}
+.notes{color:var(--ink2)}
+.notes ul{margin:4px 0 0;padding-left:16px}
+.notes li{margin:2px 0}
+.notes .pro::marker{color:var(--ok)} .notes .con::marker{color:var(--flag)}
+.hud{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1.1fr;border-top:1px solid var(--line)}
+.card{border-right:1px solid var(--line);padding:8px 10px;min-height:150px;max-height:190px;overflow:auto;scrollbar-width:thin;display:flex;flex-direction:column}
+.card:last-child{border-right:0}
+.card h4{margin:0 0 6px;display:flex;justify-content:space-between;font-size:10px;letter-spacing:.1em;color:var(--ink3);font-weight:600}
+.card h4 span{color:var(--ok)}
+.log{list-style:none;margin:0;padding:0;overflow:auto;flex:1;scrollbar-width:thin}
+.log li{display:grid;grid-template-columns:34px 1fr;gap:6px;padding:1px 4px;cursor:pointer;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log li.past{color:var(--ink2)}
+.log li.cur{background:#1b2130;color:var(--ink)}
+.log li .ty{overflow:hidden;text-overflow:ellipsis}
+.log li .ty b{font-weight:600}
+.bars div{display:grid;grid-template-columns:96px 1fr 34px;gap:6px;align-items:center;margin:3px 0;color:var(--ink2)}
+.bars .b{height:5px;background:#1a1f2b;position:relative}
+.bars .b i{position:absolute;left:0;top:0;bottom:0}
+.bars .n{text-align:right;color:var(--ink3)}
+.big{font-size:22px;font-weight:700}
+.ctx{color:var(--ink3);font-size:10.5px;margin-top:4px}
+.ctx b{color:var(--ink2);font-weight:500}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 16px;border-top:1px solid var(--line);background:var(--panel)}
+.ctl{background:var(--panel2);border:1px solid var(--line2);padding:4px 10px;cursor:pointer;border-radius:3px;min-width:34px}
+.ctl.primary{background:var(--accent);color:#111;font-weight:700;border-color:var(--accent)}
+input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
+.compare{display:none;padding:16px;max-width:1200px}
+.compare table{border-collapse:collapse;width:100%;font-size:12px}
+.compare th,.compare td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.compare th{background:var(--panel2);color:var(--ink2);font-weight:600}
+.compare td.g{color:var(--ok)} .compare td.m{color:var(--accent)} .compare td.r{color:var(--flag)}
+.compare h2{font-size:16px;margin:0 0 8px}
+.compare h3{font-size:13px;margin:18px 0 6px;color:var(--accent)}
+.compare p,.compare li{color:var(--ink2);max-width:90ch}
+body.cmp .main,body.cmp .hud,body.cmp .controls,body.cmp .strip{display:none}
+body.cmp .compare{display:block}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:1100px){
+  .main{grid-template-columns:1fr}
+  aside{height:auto;min-height:0;border-top:1px solid var(--line)}
+  .stage{height:62vh;min-height:380px;border-right:0}
+  .hud{grid-template-columns:1fr 1fr}
+  .card{min-height:120px}
+  .legend{display:none}
+}
+@media (max-width:600px){
+  .top,.strip,.controls{padding-left:16px;padding-right:16px}
+  .hud{grid-template-columns:1fr}
+  .overlay h2{font-size:16px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">GRAPH OBSERVATORY · RENDERING OPTIONS<small>Insurance Brain · one recorded trace, five renderers · review page</small></div>
+  <span class="badge" title="Every event on this page is a hand-written fixture. Nothing here came from a running Brain.">SYNTHETIC FIXTURE · NOT LIVE BRAIN DATA</span>
+  <span class="spacer"></span>
+  <div class="seg" role="group" aria-label="Rendering option" id="optSeg">
+    <button data-opt="A" aria-pressed="true">A · Nebula 2D</button>
+    <button data-opt="B" aria-pressed="false">B · Layer lanes</button>
+    <button data-opt="C" aria-pressed="false">C · Basis path</button>
+    <button data-opt="D" aria-pressed="false">D · 2.5D depth</button>
+    <button data-opt="E" aria-pressed="false">E · True 3D</button>
+    <button data-opt="compare" aria-pressed="false">Compare</button>
+  </div>
+  <div class="seg" role="group" aria-label="Trace" id="fxSeg">
+    <button data-fx="answer" aria-pressed="true">Answer trace</button>
+    <button data-fx="learning" aria-pressed="false">Learning run</button>
+  </div>
+  <label class="chk"><input type="checkbox" id="reduced"> Reduced motion</label>
+</header>
+
+<nav class="strip" id="strip" aria-label="Stages"></nav>
+
+<div class="main">
+  <section class="stage" id="stage">
+    <canvas id="gl" aria-hidden="true"></canvas>
+    <canvas id="cv" role="img" aria-label="Graph rendering of the trace. The event list below and the inspector carry the same information as text."></canvas>
+    <div class="overlay"><h2 id="ovTitle"></h2><p id="ovSub"></p></div>
+    <div class="legend" id="legend"></div>
+    <div class="hint" id="hint"></div>
+    <div class="sr" aria-live="polite" id="live"></div>
+  </section>
+  <aside>
+    <h3>INSPECTOR</h3>
+    <div class="insp" id="insp"></div>
+    <h3>CURRENT EVENT (CONTRACT VIEW)</h3>
+    <pre id="raw"></pre>
+    <h3 id="notesTitle">OPTION NOTES</h3>
+    <div class="notes" id="notes"></div>
+  </aside>
+</div>
+
+<section class="hud" aria-label="Trace telemetry">
+  <div class="card"><h4>TRACE LOG <span id="logRate"></span></h4><ol class="log" id="log"></ol></div>
+  <div class="card"><h4>STAGES <span id="stageN"></span></h4><div class="bars" id="stageBars"></div></div>
+  <div class="card"><h4>ATTRIBUTION <span>recorded</span></h4><div class="bars" id="attrBars"></div></div>
+  <div class="card"><h4>LAYERS <span id="layerN"></span></h4><div class="bars" id="layerBars"></div></div>
+  <div class="card"><h4>TRACE <span id="trStatus"></span></h4><div id="trBox"></div></div>
+</section>
+
+<div class="controls" role="group" aria-label="Replay controls">
+  <button class="ctl" id="bSummary" title="Static end-of-trace summary (default)">Summary</button>
+  <button class="ctl" id="bStart" aria-label="Go to start" title="Home">|&lt;</button>
+  <button class="ctl" id="bPrev" aria-label="Step back" title="Left arrow">&lt;</button>
+  <button class="ctl primary" id="bPlay" title="Space">Replay</button>
+  <button class="ctl" id="bNext" aria-label="Step forward" title="Right arrow">&gt;</button>
+  <button class="ctl" id="bEnd" aria-label="Go to end" title="End">&gt;|</button>
+  <input type="range" id="scrub" min="0" max="1" value="1" aria-label="Replay cursor">
+  <span id="cursorLbl" style="min-width:90px;color:var(--ink2)"></span>
+  <label class="chk">Pace
+    <select id="pace" class="ctl">
+      <option value="uniform">uniform</option>
+      <option value="recorded">recorded durations</option>
+    </select>
+  </label>
+  <label class="chk">Speed
+    <select id="speed" class="ctl"><option>0.5</option><option selected>1</option><option>2</option><option>4</option></select>
+  </label>
+  <button class="ctl" id="bRecenter" title="R">Recenter</button>
+</div>
+
+<section class="compare" id="compare">
+  <h2>Comparing the five renderings</h2>
+  <p>All five draw the same recorded events and the same projection. Only presentation differs. Switch the trace between <b>Answer trace</b> and <b>Learning run</b> on each option before deciding. A cell's colour is a judgment: green fits, amber is acceptable with work, red is weak.</p>
+  <table>
+    <thead><tr><th>Criterion</th><th>A · Nebula 2D</th><th>B · Layer lanes</th><th>C · Basis path</th><th>D · 2.5D depth</th><th>E · True 3D</th></tr></thead>
+    <tbody>
+      <tr><td>Closeness to the reference video</td><td class="g">High. The video is largely a 2D field with pan and zoom.</td><td class="r">Low. Reads as a diagram.</td><td class="r">Low.</td><td class="g">High, plus parallax.</td><td class="g">Highest: real perspective, fog, parallax and dense clouds.</td></tr>
+      <tr><td>Reading the answer path</td><td class="m">Good with labels; crowded clusters hurt.</td><td class="g">Very good; order is the x-axis.</td><td class="g">Best; question to answer, left to right.</td><td class="m">Fair; depth hides labels.</td><td class="m">Good while the camera follows the crawler; weaker from oblique angles.</td></tr>
+      <tr><td>Keeping knowledge layers apart (ADR-0063)</td><td class="m">Through line style and legend only.</td><td class="g">Structural: one lane per layer.</td><td class="m">Through box style.</td><td class="m">Line style only.</td><td class="g">Structural: height is the layer.</td></tr>
+      <tr><td>Learning run, "0 canonical changes"</td><td class="m">Shown in the HUD, not the picture.</td><td class="g">The canonical lane visibly reads but never writes.</td><td class="m">Visible but undramatic.</td><td class="m">HUD only.</td><td class="g">The canonical plate is read, never written.</td></tr>
+      <tr><td>Parallel spans and ordering</td><td class="r">Not visible.</td><td class="g">Columns are sequence; spans can be bracketed.</td><td class="m">Partly.</td><td class="r">Not visible.</td><td class="r">Not visible.</td></tr>
+      <tr><td>Scale (bounded projection)</td><td class="g">Thousands of aggregate points on Canvas 2D; WebGL 2D later.</td><td class="m">Tens of nodes per lane before columns crowd.</td><td class="m">Tens of nodes; reuses F0045 Cytoscape.</td><td class="m">Same as A; depth sorting costs more.</td><td class="g">Tens of thousands of points on the GPU.</td></tr>
+      <tr><td>Accessibility and reduced motion</td><td class="g">Motion is optional; text panels carry meaning.</td><td class="g">Static and readable.</td><td class="g">Best; maps directly to a list.</td><td class="m">Depth and orbit need care.</td><td class="m">Needs WebGL, orbit control and a separate 2D path.</td></tr>
+      <tr><td>Honesty risks</td><td class="m">Ambient dots could read as entities; the legend must say they are density.</td><td class="g">Low.</td><td class="g">Low.</td><td class="r">Arbitrary depth invites meaning that isn't there.</td><td class="m">Depth is meaningful (layer); ambient points still need the density label.</td></tr>
+      <tr><td>Build cost and dependencies</td><td class="g">Canvas 2D, no library (this page).</td><td class="g">Canvas 2D or SVG.</td><td class="g">F0045 Cytoscape, already planned.</td><td class="m">Canvas 2D here; a production 3D needs Three.js/R3F.</td><td class="r">Raw WebGL shaders here; production likely Three.js/R3F plus GPU testing.</td></tr>
+    </tbody>
+  </table>
+  <h3>Reviewer's recommendation, for you to overrule</h3>
+  <ul>
+    <li><b>Use A as the Observatory canvas.</b> It keeps the reference look (clusters, crawler focus, tentacles, tags, HUD) without a 3D stack. The reference video is mostly a 2D field with camera pan and zoom.</li>
+    <li><b>Use B for the Learning Observatory.</b> One lane per knowledge layer makes "proposed, not committed" and "zero canonical change" visible.</li>
+    <li><b>Use C as the accessible and inspection view</b>, built on F0045's Cytoscape explorer rather than a new graph library.</li>
+    <li><b>If you keep 3D, use E, not D.</b> E puts height on the knowledge layer, which meets ADR-0072 §5's rule that depth must encode something recorded. D's depth encodes nothing; it stays here only as the contrast.</li>
+    <li><b>With E, the set would be:</b> E as the Observatory canvas where WebGL is available, A as its fallback, B for learning runs, and C as the accessible view. The cost is a GPU rendering stack in the frontend (F0021 dependency policy) and a second accessibility path.</li>
+  </ul>
+  <h3>What the fixture shows on purpose</h3>
+  <ul>
+    <li>Retrieval candidates are only "observed" until the answer-basis event classifies them. Nothing is "used" because it was visited.</li>
+    <li>The superseded $2M limit was traversed but is "considered, not used". The declarations page is used only for the caveat.</li>
+    <li>The answer composer is an explicit instrumentation gap. Its internal steps are not drawn.</li>
+    <li>The learning run ends with zero canonical changes, one unresolved conflict, one ontology proposal and one statement with no fit.</li>
+    <li>Ambient points show permission-safe aggregate density. They are not entities and are never touched by the crawler.</li>
+  </ul>
+</section>
+
+<!-- ===================== FIXTURES (synthetic; contract shape per ADR-0071 draft) ===================== -->
+<script type="application/json" id="fx-answer">
+{
+  "trace": {
+    "schema_version": "0.1",
+    "trace_id": "trace_fixture_gl_001",
+    "execution_id": "exec_fixture_gl_001",
+    "operation": "DOCUMENT_CHAT",
+    "status": "COMPLETE",
+    "synthetic": true,
+    "started_at": "2026-10-13T11:22:01.000Z",
+    "ended_at": "2026-10-13T11:22:03.640Z",
+    "subject": "Does endorsement CG-END-07 change the general aggregate limit effective on the 2026-07-01 renewal?",
+    "completeness": {"status": "COMPLETE_WITH_GAPS", "recorded_events": 14, "gap_count": 1, "truncated": false},
+    "semantic_context": {"ontology_release_id": "insurance-core-gl@fixture", "graph_projection_id": "projection-fixture-17", "valid_as_of": "2026-07-01", "known_as_of": "2026-10-13T11:22:00Z"}
+  },
+  "projection": {
+    "graph_projection_id": "projection-fixture-17",
+    "clusters": [
+      {"id": "conversation", "label": "conversation", "aggregate_count": 6},
+      {"id": "document", "label": "document · evidence", "aggregate_count": 214},
+      {"id": "policy", "label": "policy", "aggregate_count": 38},
+      {"id": "coverage", "label": "coverage · limits", "aggregate_count": 126},
+      {"id": "endorsement", "label": "endorsement", "aggregate_count": 54},
+      {"id": "temporal", "label": "valid time", "aggregate_count": 9}
+    ],
+    "nodes": [
+      {"id": "q", "label": "Question: endorsement CG-END-07 vs general aggregate at renewal", "kind": "question", "layer": "CONVERSATION", "cluster": "conversation"},
+      {"id": "doc", "label": "GL policy package 2026 (PDF)", "kind": "document", "layer": "SOURCE", "cluster": "document", "detail": {"content_artifact": "artifact-fixture-pkg-2026", "pages": 41}},
+      {"id": "pol", "label": "Policy GL-4471", "kind": "policy", "layer": "CANONICAL", "cluster": "policy", "detail": {"ontology_term": "gl:Policy", "term": "2026-07-01 to 2027-07-01"}},
+      {"id": "cov", "label": "Commercial General Liability coverage", "kind": "coverage", "layer": "CANONICAL", "cluster": "coverage", "detail": {"ontology_term": "gl:CGLCoverage"}},
+      {"id": "lim1", "label": "General aggregate $2,000,000 (fact v1)", "kind": "fact", "layer": "CANONICAL", "cluster": "coverage", "detail": {"ontology_term": "gl:GeneralAggregateLimit", "fact_version": "v1", "valid_time": "2025-07-01 to 2026-07-01"}},
+      {"id": "lim2", "label": "General aggregate $3,000,000 (fact v2)", "kind": "fact", "layer": "CANONICAL", "cluster": "coverage", "detail": {"ontology_term": "gl:GeneralAggregateLimit", "fact_version": "v2", "valid_time": "from 2026-07-01", "committed_by": "commit-fixture-882"}},
+      {"id": "end7", "label": "Endorsement CG-END-07", "kind": "endorsement", "layer": "CANONICAL", "cluster": "endorsement", "detail": {"ontology_term": "gl:Endorsement", "effective": "2026-07-01", "issued": "2026-06-20"}},
+      {"id": "ta7", "label": "CG-END-07 sets general aggregate = $3,000,000", "kind": "assertion", "layer": "TYPED_ASSERTION", "cluster": "endorsement", "detail": {"predicate": "gl:setsAggregateLimit", "ontology_release": "insurance-core-gl@fixture", "origin": "TEMPLATE_ROUTE"}},
+      {"id": "t", "label": "Valid time 2026-07-01 (renewal effective)", "kind": "time", "layer": "DERIVED", "cluster": "temporal", "detail": {"rule": "valid-time selection, half-open intervals (ADR-0064)"}},
+      {"id": "ev1", "label": "Endorsement p.3 para 12", "kind": "evidence", "layer": "SOURCE", "cluster": "document", "detail": {"evidence_ref": "evidence-fixture-e1", "locator": "page 3 · block 12"}},
+      {"id": "ev2", "label": "Declarations p.1 row 4", "kind": "evidence", "layer": "SOURCE", "cluster": "document", "detail": {"evidence_ref": "evidence-fixture-e2", "locator": "page 1 · table 1 · row 4", "issued": "2026-06-10"}},
+      {"id": "c1", "label": "Products-completed ops aggregate (block 14)", "kind": "evidence", "layer": "SOURCE", "cluster": "document", "detail": {"locator": "page 1 · block 14"}},
+      {"id": "c2", "label": "Each occurrence limit (block 5)", "kind": "evidence", "layer": "SOURCE", "cluster": "document", "detail": {"locator": "page 1 · block 5"}},
+      {"id": "c3", "label": "CG 20 10 additional insured (block 22)", "kind": "evidence", "layer": "SOURCE", "cluster": "document", "detail": {"locator": "page 9 · block 22"}},
+      {"id": "llm", "label": "Answer composer (structured output only)", "kind": "gap", "layer": "NOT_INSTRUMENTED", "cluster": "conversation", "detail": {"note": "Internal model steps are not recorded and are not drawn."}},
+      {"id": "ans", "label": "Answer: yes, $3,000,000 from 2026-07-01", "kind": "answer", "layer": "ANSWER", "cluster": "conversation"}
+    ]
+  },
+  "events": [
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_001","sequence":1,"occurred_at":"2026-10-13T11:22:01.000Z","event_type":"REQUEST_ACCEPTED","span_id":"span_req","parent_span_id":null,"attribution":"OBSERVED","summary":"Question accepted; scope is this document within the caller's tenant","payload":{"node_ids":["q"],"layer":"CONVERSATION"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_002","sequence":2,"occurred_at":"2026-10-13T11:22:01.080Z","event_type":"CONTEXT_RESOLVED","span_id":"span_ctx","parent_span_id":"span_req","attribution":"OBSERVED","summary":"Document resolved to policy GL-4471","payload":{"node_ids":["q","doc","pol"],"edges":[{"source_node_id":"q","predicate_id":"asksAbout","target_node_id":"doc"},{"source_node_id":"doc","predicate_id":"documentsPolicy","target_node_id":"pol"}],"layer":"CANONICAL"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_003","sequence":3,"occurred_at":"2026-10-13T11:22:01.310Z","event_type":"RETRIEVAL_EXECUTED","span_id":"span_ret","parent_span_id":"span_req","attribution":"OBSERVED","summary":"Hybrid retrieval in authorized scope returned 5 candidate blocks","payload":{"node_ids":["ev1","ev2","c1","c2","c3"],"edges":[{"source_node_id":"doc","predicate_id":"retrieved","target_node_id":"ev1"},{"source_node_id":"doc","predicate_id":"retrieved","target_node_id":"ev2"},{"source_node_id":"doc","predicate_id":"retrieved","target_node_id":"c1"},{"source_node_id":"doc","predicate_id":"retrieved","target_node_id":"c2"},{"source_node_id":"doc","predicate_id":"retrieved","target_node_id":"c3"}],"layer":"SOURCE","counts":{"candidates_returned":5}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_004","sequence":4,"occurred_at":"2026-10-13T11:22:01.420Z","event_type":"EDGE_TRAVERSED","span_id":"span_trv","parent_span_id":"span_req","attribution":"OBSERVED","summary":"policy GL-4471 -hasCoverage-> CGL coverage","payload":{"node_ids":["pol","cov"],"edges":[{"source_node_id":"pol","predicate_id":"hasCoverage","target_node_id":"cov"}],"layer":"CANONICAL"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_005","sequence":5,"occurred_at":"2026-10-13T11:22:01.470Z","event_type":"EDGE_TRAVERSED","span_id":"span_trv_a","parent_span_id":"span_trv","attribution":"OBSERVED","summary":"CGL coverage -hasAggregateLimit-> $2,000,000 (fact v1)","payload":{"node_ids":["cov","lim1"],"edges":[{"source_node_id":"cov","predicate_id":"hasAggregateLimit","target_node_id":"lim1"}],"layer":"CANONICAL"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_006","sequence":6,"occurred_at":"2026-10-13T11:22:01.475Z","event_type":"EDGE_TRAVERSED","span_id":"span_trv_b","parent_span_id":"span_trv","attribution":"OBSERVED","summary":"endorsement CG-END-07 -amendsCoverage-> CGL coverage (parallel with evt_005)","payload":{"node_ids":["end7","cov"],"edges":[{"source_node_id":"end7","predicate_id":"amendsCoverage","target_node_id":"cov"}],"layer":"CANONICAL"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_007","sequence":7,"occurred_at":"2026-10-13T11:22:01.560Z","event_type":"EDGE_TRAVERSED","span_id":"span_trv_b","parent_span_id":"span_trv","attribution":"OBSERVED","summary":"CG-END-07 asserts general aggregate $3,000,000 (typed assertion)","payload":{"node_ids":["end7","ta7","ev1"],"edges":[{"source_node_id":"end7","predicate_id":"assertedBy","target_node_id":"ta7"},{"source_node_id":"ta7","predicate_id":"hasEvidence","target_node_id":"ev1","layer":"SOURCE"}],"layer":"TYPED_ASSERTION","evidence_ref_ids":["evidence-fixture-e1"]}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_008","sequence":8,"occurred_at":"2026-10-13T11:22:01.640Z","event_type":"EDGE_TRAVERSED","span_id":"span_trv_b","parent_span_id":"span_trv","attribution":"OBSERVED","summary":"typed assertion supports fact v2 ($3,000,000) via commit-fixture-882","payload":{"node_ids":["ta7","lim2","cov"],"edges":[{"source_node_id":"ta7","predicate_id":"supportsFactVersion","target_node_id":"lim2"},{"source_node_id":"cov","predicate_id":"hasAggregateLimit","target_node_id":"lim2"}],"layer":"CANONICAL"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_009","sequence":9,"occurred_at":"2026-10-13T11:22:01.720Z","event_type":"TEMPORAL_SELECTION","span_id":"span_time","parent_span_id":"span_req","attribution":"OBSERVED","summary":"Valid time 2026-07-01 selects fact v2; v1 ends 2026-07-01 (exclusive)","payload":{"node_ids":["t","lim1","lim2"],"edges":[{"source_node_id":"t","predicate_id":"selects","target_node_id":"lim2","layer":"DERIVED"},{"source_node_id":"t","predicate_id":"excludes","target_node_id":"lim1","layer":"DERIVED"}],"layer":"DERIVED","reason_code":"VALID_TIME_HALF_OPEN"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_010","sequence":10,"occurred_at":"2026-10-13T11:22:01.800Z","event_type":"EVIDENCE_RESOLVED","span_id":"span_evd","parent_span_id":"span_req","attribution":"OBSERVED","summary":"Evidence resolved: endorsement p.3 para 12; declarations p.1 row 4","payload":{"node_ids":["ev1","ev2"],"layer":"SOURCE","evidence_ref_ids":["evidence-fixture-e1","evidence-fixture-e2"]}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_011","sequence":11,"occurred_at":"2026-10-13T11:22:01.860Z","event_type":"CONFLICT_DETECTED","span_id":"span_evd","parent_span_id":"span_req","attribution":"OBSERVED","summary":"Declarations (issued 2026-06-10) still show $2,000,000; superseded by CG-END-07 (record sup-fixture-118)","payload":{"node_ids":["ev2","lim2"],"edges":[{"source_node_id":"ev2","predicate_id":"conflictsWith","target_node_id":"lim2","layer":"SOURCE"}],"flagged_node_ids":["ev2"],"layer":"SOURCE","reason_code":"RESOLVED_BY_SUPERSESSION","reason":"older declarations superseded"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_012","sequence":12,"occurred_at":"2026-10-13T11:22:03.410Z","event_type":"INSTRUMENTATION_GAP","span_id":"span_cmp","parent_span_id":"span_req","attribution":"NOT_INSTRUMENTED","summary":"Answer composer ran 1.55 s; only its structured output and citations were recorded","payload":{"node_ids":["llm"],"layer":"NOT_INSTRUMENTED","reason_code":"MODEL_INTERNALS_NOT_RECORDED"}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_013","sequence":13,"occurred_at":"2026-10-13T11:22:03.560Z","event_type":"ANSWER_BASIS_LINKED","span_id":"span_basis","parent_span_id":"span_req","attribution":"USED_IN_ANSWER","summary":"Answer spans linked to fact v2, the typed assertion, valid time and two evidence blocks","payload":{"node_ids":["ans","lim2","ta7","t","ev1","ev2"],"edges":[{"source_node_id":"lim2","predicate_id":"supportsAnswer","target_node_id":"ans","layer":"ANSWER"},{"source_node_id":"ev1","predicate_id":"supportsAnswer","target_node_id":"ans","layer":"ANSWER"},{"source_node_id":"ev2","predicate_id":"supportsCaveat","target_node_id":"ans","layer":"ANSWER"}],"layer":"ANSWER","used_node_ids":["lim2","ta7","t","ev1","ev2"],"considered_not_used_node_ids":["lim1","c1","c2","c3"],"answer_spans":[{"span":"Yes. The general aggregate is $3,000,000 from 2026-07-01.","basis_node_ids":["lim2","ta7","t","ev1"]},{"span":"The declarations page still shows the earlier $2,000,000; CG-END-07 supersedes it.","basis_node_ids":["ev2"]}]}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_gl_001","event_id":"evt_014","sequence":14,"occurred_at":"2026-10-13T11:22:03.640Z","event_type":"ANSWER_EMITTED","span_id":"span_req","parent_span_id":null,"attribution":"OBSERVED","summary":"Answer emitted with 2 citations; trace complete with 1 disclosed gap","payload":{"node_ids":["ans"],"layer":"ANSWER","reason_code":"COMPLETE"}}
+  ]
+}
+</script>
+<script type="application/json" id="fx-learning">
+{
+  "trace": {
+    "schema_version": "0.1",
+    "trace_id": "trace_fixture_learn_009",
+    "execution_id": "run_fixture_interp_309",
+    "operation": "LEARNING_RUN",
+    "status": "COMPLETE",
+    "synthetic": true,
+    "started_at": "2026-10-02T14:05:00.000Z",
+    "ended_at": "2026-10-02T14:06:12.000Z",
+    "subject": "Interpretation run over endorsement CG-END-09 (received 2026-10-02)",
+    "completeness": {"status": "COMPLETE", "recorded_events": 13, "gap_count": 0, "truncated": false},
+    "semantic_context": {"ontology_release_id": "insurance-core-gl@fixture", "graph_projection_id": "projection-fixture-18", "valid_as_of": "2026-10-01", "known_as_of": "2026-10-02T14:05:00Z"}
+  },
+  "projection": {
+    "graph_projection_id": "projection-fixture-18",
+    "clusters": [
+      {"id": "source", "label": "source", "aggregate_count": 3},
+      {"id": "open", "label": "open statements", "aggregate_count": 44},
+      {"id": "ontology", "label": "ontology signatures", "aggregate_count": 88},
+      {"id": "canonical", "label": "canonical", "aggregate_count": 418},
+      {"id": "learning", "label": "learning candidates", "aggregate_count": 17},
+      {"id": "governance", "label": "review queues", "aggregate_count": 12}
+    ],
+    "nodes": [
+      {"id": "src", "label": "Endorsement CG-END-09 (PDF)", "kind": "document", "layer": "SOURCE", "cluster": "source", "detail": {"content_artifact": "artifact-fixture-end09", "received": "2026-10-02"}},
+      {"id": "art", "label": "Parsed content (reused, not re-parsed)", "kind": "document", "layer": "SOURCE", "cluster": "source", "detail": {"parse": "one-time Docling parse 2026-10-02T09:12Z (ADR-0060)"}},
+      {"id": "os1", "label": "\"Waiver of subrogation applies to Cedar Bridge Logistics\"", "kind": "statement", "layer": "OPEN_STATEMENT", "cluster": "open", "detail": {"locator": "page 1 · block 6", "mood": "ASSERTED"}},
+      {"id": "os2", "label": "\"Blanket additional insured where required by written contract\"", "kind": "statement", "layer": "OPEN_STATEMENT", "cluster": "open", "detail": {"locator": "page 1 · block 9", "mood": "ASSERTED"}},
+      {"id": "os3", "label": "\"Drone operations are excluded\"", "kind": "statement", "layer": "OPEN_STATEMENT", "cluster": "open", "detail": {"locator": "page 2 · block 3", "mood": "ASSERTED"}},
+      {"id": "sig1", "label": "signature -> gl:waivesSubrogationFor", "kind": "signature", "layer": "ONTOLOGY", "cluster": "ontology", "detail": {"decision": "BOUND", "votes": "2 of 2 agree", "basis_fingerprint": "fp-fixture-a1"}},
+      {"id": "sig2", "label": "signature -> gl:hasAdditionalInsured", "kind": "signature", "layer": "ONTOLOGY", "cluster": "ontology", "detail": {"decision": "BOUND", "votes": "2 of 2 agree", "basis_fingerprint": "fp-fixture-a2"}},
+      {"id": "sig3", "label": "signature -> NONE (no predicate fits)", "kind": "signature", "layer": "ONTOLOGY", "cluster": "ontology", "detail": {"decision": "NONE", "note": "recorded, never skipped (ADR-0063)"}},
+      {"id": "ta1", "label": "typed: waivesSubrogationFor(Cedar Bridge Logistics)", "kind": "assertion", "layer": "TYPED_ASSERTION", "cluster": "ontology"},
+      {"id": "ta2", "label": "typed: hasAdditionalInsured(blanket, written contract)", "kind": "assertion", "layer": "TYPED_ASSERTION", "cluster": "ontology"},
+      {"id": "ent1", "label": "Cedar Bridge Logistics (organization)", "kind": "entity", "layer": "CANONICAL", "cluster": "canonical", "detail": {"resolution": "deterministic, legal name + FEIN (F0017)"}},
+      {"id": "pol", "label": "Policy GL-4471", "kind": "policy", "layer": "CANONICAL", "cluster": "canonical"},
+      {"id": "aiv3", "label": "Existing fact: additional insureds = scheduled only (v3)", "kind": "fact", "layer": "CANONICAL", "cluster": "canonical", "detail": {"fact_version": "v3", "valid_time": "from 2026-07-01"}},
+      {"id": "cand", "label": "Ontology proposal: excludesOperation(Drone)", "kind": "candidate", "layer": "LEARNING_CANDIDATE", "cluster": "learning", "detail": {"status": "PROPOSED", "not": "not a released ontology change"}},
+      {"id": "rq", "label": "Review item rq-fixture-311 (open, no decision)", "kind": "review", "layer": "GOVERNANCE", "cluster": "governance", "detail": {"authoritative_record": "review queue (F0043)", "decision": "none recorded"}}
+    ]
+  },
+  "events": [
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_001","sequence":1,"occurred_at":"2026-10-02T14:05:00.000Z","event_type":"SOURCE_CONTENT_REUSED","span_id":"run","parent_span_id":null,"attribution":"OBSERVED","summary":"Parsed content reused; the source was not parsed again","payload":{"node_ids":["src","art"],"edges":[{"source_node_id":"src","predicate_id":"hasContent","target_node_id":"art"}],"layer":"SOURCE","authoritative_record_ref":{"kind":"interpretation_run","id":"run_fixture_interp_309"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_002","sequence":2,"occurred_at":"2026-10-02T14:05:09.000Z","event_type":"OPEN_STATEMENT_RECORDED","span_id":"run.open","parent_span_id":"run","attribution":"OBSERVED","summary":"Open statement recorded verbatim: waiver of subrogation","payload":{"node_ids":["os1"],"edges":[{"source_node_id":"art","predicate_id":"states","target_node_id":"os1"}],"layer":"OPEN_STATEMENT","authoritative_record_ref":{"kind":"open_statement","id":"os-fixture-1"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_003","sequence":3,"occurred_at":"2026-10-02T14:05:09.000Z","event_type":"OPEN_STATEMENT_RECORDED","span_id":"run.open","parent_span_id":"run","attribution":"OBSERVED","summary":"Open statement recorded verbatim: blanket additional insured","payload":{"node_ids":["os2"],"edges":[{"source_node_id":"art","predicate_id":"states","target_node_id":"os2"}],"layer":"OPEN_STATEMENT","authoritative_record_ref":{"kind":"open_statement","id":"os-fixture-2"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_004","sequence":4,"occurred_at":"2026-10-02T14:05:10.000Z","event_type":"OPEN_STATEMENT_RECORDED","span_id":"run.open","parent_span_id":"run","attribution":"OBSERVED","summary":"Open statement recorded verbatim: drone exclusion","payload":{"node_ids":["os3"],"edges":[{"source_node_id":"art","predicate_id":"states","target_node_id":"os3"}],"layer":"OPEN_STATEMENT","authoritative_record_ref":{"kind":"open_statement","id":"os-fixture-3"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_005","sequence":5,"occurred_at":"2026-10-02T14:05:31.000Z","event_type":"ASSERTION_ALIGNED","span_id":"run.align","parent_span_id":"run","attribution":"OBSERVED","summary":"Signature bound to gl:waivesSubrogationFor; typed assertion materialized","payload":{"node_ids":["os1","sig1","ta1"],"edges":[{"source_node_id":"os1","predicate_id":"alignedBy","target_node_id":"sig1","layer":"ONTOLOGY"},{"source_node_id":"sig1","predicate_id":"materializes","target_node_id":"ta1","layer":"TYPED_ASSERTION"}],"layer":"TYPED_ASSERTION","outcome":"BOUND","authoritative_record_ref":{"kind":"alignment_decision","id":"align-fixture-1"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_006","sequence":6,"occurred_at":"2026-10-02T14:05:33.000Z","event_type":"ASSERTION_ALIGNED","span_id":"run.align","parent_span_id":"run","attribution":"OBSERVED","summary":"Signature bound to gl:hasAdditionalInsured; typed assertion materialized","payload":{"node_ids":["os2","sig2","ta2"],"edges":[{"source_node_id":"os2","predicate_id":"alignedBy","target_node_id":"sig2","layer":"ONTOLOGY"},{"source_node_id":"sig2","predicate_id":"materializes","target_node_id":"ta2","layer":"TYPED_ASSERTION"}],"layer":"TYPED_ASSERTION","outcome":"BOUND","authoritative_record_ref":{"kind":"alignment_decision","id":"align-fixture-2"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_007","sequence":7,"occurred_at":"2026-10-02T14:05:36.000Z","event_type":"ASSERTION_ALIGNED","span_id":"run.align","parent_span_id":"run","attribution":"OBSERVED","summary":"No predicate fits the drone exclusion; NONE recorded and the statement stays open","payload":{"node_ids":["os3","sig3"],"edges":[{"source_node_id":"os3","predicate_id":"alignedBy","target_node_id":"sig3","layer":"ONTOLOGY"}],"flagged_node_ids":["sig3"],"layer":"ONTOLOGY","outcome":"NONE","reason":"no fit","authoritative_record_ref":{"kind":"alignment_decision","id":"align-fixture-3"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_008","sequence":8,"occurred_at":"2026-10-02T14:05:41.000Z","event_type":"ENTITY_LINK_RESOLVED","span_id":"run.er","parent_span_id":"run","attribution":"OBSERVED","summary":"Cedar Bridge Logistics resolved to an existing organization","payload":{"node_ids":["ta1","ent1"],"edges":[{"source_node_id":"ta1","predicate_id":"refersTo","target_node_id":"ent1"}],"layer":"CANONICAL","outcome":"RESOLVED","authoritative_record_ref":{"kind":"entity_resolution_verdict","id":"er-fixture-77"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_009","sequence":9,"occurred_at":"2026-10-02T14:05:42.000Z","event_type":"ENTITY_LINK_RESOLVED","span_id":"run.er","parent_span_id":"run","attribution":"OBSERVED","summary":"Endorsement linked to policy GL-4471","payload":{"node_ids":["ta2","pol"],"edges":[{"source_node_id":"ta2","predicate_id":"refersTo","target_node_id":"pol"}],"layer":"CANONICAL","outcome":"RESOLVED","authoritative_record_ref":{"kind":"entity_resolution_verdict","id":"er-fixture-78"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_010","sequence":10,"occurred_at":"2026-10-02T14:05:50.000Z","event_type":"CONFLICT_DETECTED","span_id":"run.conflict","parent_span_id":"run","attribution":"OBSERVED","summary":"Blanket additional insured conflicts with the scheduled-only fact v3; unresolved","payload":{"node_ids":["ta2","aiv3","pol"],"edges":[{"source_node_id":"ta2","predicate_id":"conflictsWith","target_node_id":"aiv3","layer":"TYPED_ASSERTION"},{"source_node_id":"pol","predicate_id":"hasFact","target_node_id":"aiv3"}],"flagged_node_ids":["ta2"],"layer":"CANONICAL","reason_code":"UNRESOLVED","reason":"unresolved conflict","authoritative_record_ref":{"kind":"conflict_record","id":"conflict-fixture-12"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_011","sequence":11,"occurred_at":"2026-10-02T14:05:58.000Z","event_type":"ONTOLOGY_CHANGE_PROPOSED","span_id":"run.learn","parent_span_id":"run","attribution":"OBSERVED","summary":"Proposal: predicate excludesOperation for the drone exclusion (not released)","payload":{"node_ids":["os3","cand"],"edges":[{"source_node_id":"os3","predicate_id":"motivates","target_node_id":"cand","layer":"LEARNING_CANDIDATE"}],"layer":"LEARNING_CANDIDATE","authoritative_record_ref":{"kind":"learning_candidate","id":"lc-fixture-40"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_012","sequence":12,"occurred_at":"2026-10-02T14:06:05.000Z","event_type":"GOVERNANCE_ACTION_OBSERVED","span_id":"run.gov","parent_span_id":"run","attribution":"OBSERVED","summary":"Review item opened for the conflict and the proposal; no decision recorded","payload":{"node_ids":["rq","cand","ta2"],"edges":[{"source_node_id":"cand","predicate_id":"queuedFor","target_node_id":"rq","layer":"GOVERNANCE"},{"source_node_id":"ta2","predicate_id":"queuedFor","target_node_id":"rq","layer":"GOVERNANCE"}],"layer":"GOVERNANCE","outcome":"OPEN","authoritative_record_ref":{"kind":"review_item","id":"rq-fixture-311"}}},
+    {"schema_version":"0.1","trace_id":"trace_fixture_learn_009","event_id":"lev_013","sequence":13,"occurred_at":"2026-10-02T14:06:12.000Z","event_type":"TRACE_TERMINATED","span_id":"run","parent_span_id":null,"attribution":"OBSERVED","summary":"Run complete: 3 statements, 2 typed assertions, 1 proposal, 1 unresolved conflict, 0 canonical changes","payload":{"layer":"CANONICAL","reason_code":"COMPLETE","counts":{"open_statements":3,"typed_assertions":2,"candidates":1,"unresolved_conflicts":1,"canonical_changes":0},"authoritative_record_ref":{"kind":"interpretation_run","id":"run_fixture_interp_309"}}}
+  ]
+}
+</script>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------
+   Presentation vocabulary. Nothing below adds semantic events: every
+   node, edge, flag and count drawn comes from the fixture's events.
+------------------------------------------------------------------- */
+const $ = s => document.querySelector(s);
+const FX = { answer: JSON.parse($('#fx-answer').textContent), learning: JSON.parse($('#fx-learning').textContent) };
+
+const CLUSTER_COLOR = {
+  conversation:'#ff4f8b', document:'#c9d1e0', policy:'#3fd0e0', coverage:'#39d3a6', endorsement:'#f2b84b', temporal:'#a38bff',
+  source:'#c9d1e0', open:'#ff7aa8', ontology:'#3fd0e0', canonical:'#f2b84b', learning:'#a38bff', governance:'#39d3a6'
+};
+const LAYER = {
+  CONVERSATION:{label:'conversation', dash:[1,3]},
+  SOURCE:{label:'source evidence', dash:[2,3]},
+  OPEN_STATEMENT:{label:'open statement', dash:[1,2]},
+  ONTOLOGY:{label:'ontology alignment', dash:[5,2,1,2]},
+  TYPED_ASSERTION:{label:'typed assertion', dash:[7,3]},
+  CANONICAL:{label:'canonical', dash:[]},
+  DERIVED:{label:'derived / temporal', dash:[6,3,1,3]},
+  LEARNING_CANDIDATE:{label:'learning candidate', dash:[3,3]},
+  GOVERNANCE:{label:'governance record', dash:[2,2]},
+  NOT_INSTRUMENTED:{label:'not instrumented', dash:[2,4]},
+  ANSWER:{label:'answer basis', dash:[]}
+};
+const LANES = {
+  DOCUMENT_CHAT:['CONVERSATION','SOURCE','TYPED_ASSERTION','CANONICAL','DERIVED','NOT_INSTRUMENTED','ANSWER'],
+  LEARNING_RUN:['SOURCE','OPEN_STATEMENT','ONTOLOGY','TYPED_ASSERTION','CANONICAL','LEARNING_CANDIDATE','GOVERNANCE']
+};
+const STAGES = {
+  DOCUMENT_CHAT:[
+    {id:'scope', label:'scope', types:['REQUEST_ACCEPTED','CONTEXT_RESOLVED'], sub:'request and document context'},
+    {id:'retrieve', label:'retrieve', types:['RETRIEVAL_EXECUTED'], sub:'authorized hybrid retrieval'},
+    {id:'traverse', label:'traverse', types:['EDGE_TRAVERSED'], sub:'recorded graph hops'},
+    {id:'time', label:'valid time', types:['TEMPORAL_SELECTION'], sub:'fact version selection'},
+    {id:'evidence', label:'evidence', types:['EVIDENCE_RESOLVED','CONFLICT_DETECTED'], sub:'evidence and conflicts'},
+    {id:'compose', label:'compose', types:['INSTRUMENTATION_GAP'], sub:'answer composer (not instrumented)'},
+    {id:'basis', label:'basis', types:['ANSWER_BASIS_LINKED','ANSWER_EMITTED'], sub:'answer basis and emission'}
+  ],
+  LEARNING_RUN:[
+    {id:'source', label:'source', types:['SOURCE_CONTENT_REUSED'], sub:'content reuse'},
+    {id:'open', label:'open', types:['OPEN_STATEMENT_RECORDED'], sub:'open statements in source words'},
+    {id:'align', label:'align', types:['ASSERTION_ALIGNED'], sub:'signature alignment'},
+    {id:'resolve', label:'resolve', types:['ENTITY_LINK_RESOLVED'], sub:'entity resolution'},
+    {id:'conflict', label:'conflict', types:['CONFLICT_DETECTED'], sub:'conflict and temporal checks'},
+    {id:'candidate', label:'candidate', types:['LEARNING_CANDIDATE_CREATED','ONTOLOGY_CHANGE_PROPOSED'], sub:'proposals (not canonical)'},
+    {id:'govern', label:'govern', types:['GOVERNANCE_ACTION_OBSERVED'], sub:'observed governance records'},
+    {id:'commit', label:'commit', types:['CANONICAL_CHANGE_COMMITTED','ONTOLOGY_RELEASE_PUBLISHED','PROJECTION_UPDATED'], sub:'governed commits'},
+    {id:'end', label:'end', types:['TRACE_TERMINATED'], sub:'run terminal state'}
+  ]
+};
+const GLYPH = {question:'?', document:'D', policy:'P', coverage:'C', fact:'F', endorsement:'E', assertion:'A', time:'T', evidence:'e', gap:'!', answer:'*', statement:'"', signature:'S', entity:'O', candidate:'+', review:'R'};
+
+const NOTES = {
+  A:{title:'A · Nebula 2D', sub:'The reference look on a flat canvas', pro:[
+      'Keeps the video vocabulary: point-cloud clusters, a crawler with tentacles, boxed tags, a focus halo, camera pan and zoom.',
+      'Canvas 2D only, no library; a WebGL 2D layer (e.g. PixiJS or regl) can take over if density grows.',
+      'Labels stay crisp and unoccluded because nothing rotates.'],
+    con:[
+      'Layers are told apart only by line style and the legend.',
+      'Parallel spans are not visible; the timeline carries them.',
+      'Ambient points must be labelled as density, not entities.']},
+  B:{title:'B · Layer lanes', sub:'Knowledge layers as lanes, sequence as columns', pro:[
+      'ADR-0063 layers are structural: source, open, typed and canonical never blur.',
+      'Zero canonical change is visible: the canonical lane is read, never written.',
+      'Order and parallelism read left to right; spans can be bracketed.'],
+    con:[
+      'Least like the video; loses the spatial observatory mood.',
+      'Columns crowd past a few dozen events without paging or zoom.']},
+  C:{title:'C · Basis path', sub:'Question to answer, left to right (Cytoscape-style)', pro:[
+      'Easiest to explain to an underwriter: what the answer stands on.',
+      'Considered-not-used branches sit visibly off the main path.',
+      'Maps directly onto F0045 Cytoscape and an accessible list.'],
+    con:[
+      'No ambient context, so it feels like a diagram, not an observatory.',
+      'A breadth-first layout can reorder when a trace changes shape.']},
+  D:{title:'D · 2.5D depth', sub:'3D reference: same data, perspective and orbit', pro:[
+      'Shows what depth and parallax add before committing to Three.js or R3F.',
+      'Drag rotates; auto orbit stops under reduced motion.'],
+    con:[
+      'Depth here encodes nothing; it is layout noise, against the doc\'s own rule.',
+      'Labels collide and occlude while rotating.',
+      'Production 3D adds a rendering stack, shaders and a separate accessibility path.']},
+  E:{title:'E · True 3D (WebGL)', sub:'Height is the knowledge layer: one plate per layer, the trace climbs from question to answer', pro:[
+      'Depth encodes something recorded: every node sits on its knowledge-layer plate (ADR-0063), so moving up or down means changing layer, not layout noise (ADR-0072 §5).',
+      'Closest to the reference video: real perspective, fog and parallax, and dense GPU point clouds (about 20,000 density points here).',
+      'In the learning run the canonical plate is visibly read but never written.',
+      'Raw WebGL in this page, no library. Labels, crawler and selection stay on a 2D overlay, so they remain crisp.'],
+    con:[
+      'Labels still collide or hide behind each other as the camera orbits.',
+      'Needs WebGL and a separate accessible path; the event list and inspector stay the source of truth.',
+      'Parallel spans are not visible; the timeline carries them.',
+      'Production would mean Three.js/R3F (or maintained raw WebGL), shader code and GPU testing in the frontend.']}
+};
+
+/* ----------------------------- state ----------------------------- */
+const mqReduced = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+const S = { opt:'A', fx:'answer', cursor:0, playing:false, speed:1, pace:'uniform', reduced:mqReduced,
+            sel:null, evStart:0, user:{dx:0,dy:0,zoom:1,yaw:0,pitch:.5,dragging:false}, lastStep:0 };
+$('#reduced').checked = S.reduced;
+function fx(){ return FX[S.fx]; }
+function nodeById(id){ return fx().projection.nodes.find(n=>n.id===id); }
+
+/* deterministic reducer: (fixture, cursor) -> semantic state. Seeking recomputes; nothing is mutable. */
+const _rc = new Map();
+function reduce(f, cursor){
+  const key = f.trace.trace_id+':'+cursor;
+  if(_rc.has(key)) return _rc.get(key);
+  const st = {first:new Map(), touch:new Map(), edges:[], flags:new Map(), gaps:new Set(), used:new Set(), considered:new Set(), current:null, basisSeen:false};
+  for(let i=0;i<cursor;i++){
+    const e=f.events[i], p=e.payload||{};
+    const touch=id=>{ if(!st.first.has(id)) st.first.set(id,e.sequence); if(!st.touch.has(id)) st.touch.set(id,[]); st.touch.get(id).push(e.sequence); };
+    (p.node_ids||[]).forEach(touch);
+    (p.edges||[]).forEach(ed=>{ touch(ed.source_node_id); touch(ed.target_node_id);
+      st.edges.push({s:ed.source_node_id,t:ed.target_node_id,pred:ed.predicate_id,layer:ed.layer||p.layer,seq:e.sequence}); });
+    (p.flagged_node_ids||[]).forEach(id=>st.flags.set(id, p.reason||p.reason_code||e.event_type));
+    if(e.attribution==='NOT_INSTRUMENTED') (p.node_ids||[]).forEach(id=>st.gaps.add(id));
+    if(e.event_type==='ANSWER_BASIS_LINKED'){ st.basisSeen=true; (p.used_node_ids||[]).forEach(id=>st.used.add(id)); (p.considered_not_used_node_ids||[]).forEach(id=>st.considered.add(id)); }
+  }
+  st.current = cursor>0 ? f.events[cursor-1] : null;
+  _rc.set(key, st); return st;
+}
+function attrOf(st,id){
+  if(st.gaps.has(id)) return 'NOT_INSTRUMENTED';
+  if(st.used.has(id)) return 'USED_IN_ANSWER';
+  if(st.considered.has(id)) return 'CONSIDERED_NOT_USED';
+  if(st.first.has(id)) return 'OBSERVED';
+  return null;
+}
+function currentIds(st){
+  const e=st.current; if(!e) return [];
+  const p=e.payload||{}, s=new Set(p.node_ids||[]);
+  (p.edges||[]).forEach(ed=>{s.add(ed.source_node_id); s.add(ed.target_node_id);});
+  return [...s];
+}
+function stageOf(e){ return STAGES[fx().trace.operation].findIndex(s=>s.types.includes(e.event_type)); }
+
+/* --------------------------- utilities --------------------------- */
+function hash(str){ let h=2166136261; for(const c of str){ h^=c.charCodeAt(0); h=Math.imul(h,16777619);} return h>>>0; }
+function rng(seed){ let a=seed||1; return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function gauss(r){ return (r()+r()+r()+r()-2)/2; }
+function hexA(hex,a){ const n=parseInt(hex.slice(1),16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
+function trunc(s,n){ return s.length>n ? s.slice(0,n-1)+'…' : s; }
+function ease(t){ return t<0?0:t>1?1:1-Math.pow(1-t,3); }
+const sprites = {};
+function sprite(color){
+  if(sprites[color]) return sprites[color];
+  const c=document.createElement('canvas'); c.width=c.height=64; const g=c.getContext('2d');
+  const gr=g.createRadialGradient(32,32,0,32,32,32); gr.addColorStop(0,hexA(color,.9)); gr.addColorStop(.25,hexA(color,.35)); gr.addColorStop(1,hexA(color,0));
+  g.fillStyle=gr; g.fillRect(0,0,64,64); sprites[color]=c; return c;
+}
+
+/* ------------------------------ canvas ---------------------------- */
+const cv=$('#cv'), ctx=cv.getContext('2d'), glc=$('#gl');
+let W=0,H=0,DPR=1;
+function resize(){ const r=cv.getBoundingClientRect(); DPR=Math.min(2,window.devicePixelRatio||1); W=r.width; H=r.height; cv.width=glc.width=Math.round(W*DPR); cv.height=glc.height=Math.round(H*DPR); ctx.setTransform(DPR,0,0,DPR,0,0); }
+window.addEventListener('resize', ()=>{ resize(); });
+let hits=[];
+
+let placed=[];
+const MONO=getComputedStyle(document.body).getPropertyValue('--mono');
+function tag(x,y,text,color,opts={}){
+  ctx.font='10px '+MONO;
+  const w=ctx.measureText(text).width+10, h=15;
+  const bx=opts.left? x-w-8 : x+8, by=y-h/2;
+  // optional labels give way to ones already placed, so dense clusters stay legible
+  if(opts.optional && placed.some(r=>bx<r[0]+r[2]&&bx+w>r[0]&&by<r[1]+r[3]&&by+h>r[1])) return false;
+  placed.push([bx,by,w,h]);
+  ctx.fillStyle=opts.fill||'rgba(8,10,15,.86)'; ctx.fillRect(bx,by,w,h);
+  ctx.strokeStyle=color; ctx.lineWidth=1; ctx.setLineDash(opts.dash||[]); ctx.strokeRect(bx+.5,by+.5,w-1,h-1); ctx.setLineDash([]);
+  ctx.fillStyle=opts.ink||color; ctx.textBaseline='middle'; ctx.fillText(text,bx+5,y+.5);
+}
+function curve(x1,y1,x2,y2,bend){ const mx=(x1+x2)/2, my=(y1+y2)/2, dx=x2-x1, dy=y2-y1; return [mx-dy*bend, my+dx*bend]; }
+function qpt(x1,y1,cx,cy,x2,y2,t){ const a=1-t; return [a*a*x1+2*a*t*cx+t*t*x2, a*a*y1+2*a*t*cy+t*t*y2]; }
+function drawEdge(x1,y1,x2,y2,layer,color,alpha,width,progress,bend=.18){
+  const [cx,cy]=curve(x1,y1,x2,y2,bend);
+  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=color; ctx.lineWidth=width; ctx.setLineDash((LAYER[layer]||{}).dash||[]);
+  ctx.beginPath(); ctx.moveTo(x1,y1);
+  if(progress>=1){ ctx.quadraticCurveTo(cx,cy,x2,y2); }
+  else { const n=24; for(let i=1;i<=n*progress;i++){ const [px,py]=qpt(x1,y1,cx,cy,x2,y2,i/n); ctx.lineTo(px,py);} }
+  ctx.stroke(); ctx.restore();
+  if(progress<1 && progress>0){ const [hx,hy]=qpt(x1,y1,cx,cy,x2,y2,progress); ctx.drawImage(sprite(color),hx-12,hy-12,24,24); }
+}
+function drawNodeMark(x,y,r,color,attr,isCur,glyph){
+  ctx.save();
+  if(attr==='USED_IN_ANSWER'||isCur){ ctx.globalCompositeOperation='lighter'; ctx.drawImage(sprite(color),x-r*4,y-r*4,r*8,r*8); ctx.globalCompositeOperation='source-over'; }
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  if(attr==='CONSIDERED_NOT_USED'){ ctx.setLineDash([2,2]); ctx.strokeStyle=hexA(color,.55); ctx.lineWidth=1; ctx.stroke(); }
+  else if(attr==='NOT_INSTRUMENTED'){ ctx.setLineDash([2,3]); ctx.strokeStyle='#ff6b5b'; ctx.lineWidth=1.5; ctx.stroke(); }
+  else { ctx.fillStyle= attr==='USED_IN_ANSWER'? color : hexA(color,.55); ctx.fill(); if(attr==='USED_IN_ANSWER'){ ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.stroke(); } }
+  ctx.setLineDash([]);
+  if(glyph && r>=6){ ctx.fillStyle= attr==='USED_IN_ANSWER' ? '#0a0c10' : '#e6e9f0'; ctx.font='bold 8px '+MONO; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(glyph,x,y+.5); ctx.textAlign='left'; }
+  ctx.restore();
+}
+
+/* ==================== Renderer A / D: nebula (2D or 2.5D) ==================== */
+const ANCHORS = {
+  DOCUMENT_CHAT:{conversation:[170,560,-220], document:[230,240,160], policy:[520,150,-120], coverage:[780,300,220], endorsement:[560,480,-160], temporal:[860,590,120]},
+  LEARNING_RUN:{source:[140,360,180], open:[330,170,-140], ontology:[570,150,200], canonical:[800,360,-180], learning:[330,570,120], governance:[640,590,-60]}
+};
+const neb = { key:null, clusters:[], nodes:{}, cam:{x:500,y:360,z:1} };
+function nebLayout(){
+  const f=fx(), key=f.trace.trace_id; if(neb.key===key) return; neb.key=key;
+  const A=ANCHORS[f.trace.operation];
+  neb.clusters=f.projection.clusters.map(c=>{
+    const [x,y,z]=A[c.id], r=Math.min(150,58+6*Math.sqrt(c.aggregate_count)), R=rng(hash(c.id)), n=Math.max(180,Math.min(1400,c.aggregate_count*6));
+    const pts=[]; const ax=.7+R()*.6, ay=.7+R()*.6, rot=R()*Math.PI;
+    for(let i=0;i<n;i++){ let px=gauss(R)*r*ax, py=gauss(R)*r*ay; const cr=Math.cos(rot), sr=Math.sin(rot);
+      // filaments: pull some points toward a few strands so the cloud looks fibrous like the reference
+      if(i%3===0){ const s=Math.floor(R()*5), ang=rot+s*1.3, d=gauss(R)*r*1.1; px=Math.cos(ang)*d+gauss(R)*8; py=Math.sin(ang)*d+gauss(R)*8; }
+      pts.push([x+px*cr-py*sr, y+px*sr+py*cr, z+gauss(R)*r*.8, .4+R()*1.3, R()*6.28]); }
+    return {id:c.id,label:c.label,count:c.aggregate_count,x,y,z,r,pts,color:CLUSTER_COLOR[c.id]};
+  });
+  neb.nodes={};
+  f.projection.nodes.forEach(n=>{ const c=neb.clusters.find(c=>c.id===n.cluster), R=rng(hash(n.id)); const a=R()*6.283, d=c.r*(.3+.6*R());
+    neb.nodes[n.id]={x:c.x+Math.cos(a)*d, y:c.y+Math.sin(a)*d*.8, z:c.z+(R()-.5)*c.r*.9}; });
+}
+function rot3(p, depth){
+  if(!depth) return [p[0],p[1],0];
+  const yaw=S.user.yaw, cy=Math.cos(yaw), sy=Math.sin(yaw), px=p[0]-500, pz=p[2], py=p[1]-360;
+  const rx=px*cy+pz*sy, rz=-px*sy+pz*cy, pitch=.28, cp=Math.cos(pitch), sp=Math.sin(pitch);
+  return [rx+500, py*cp-rz*sp+360, py*sp+rz*cp];
+}
+function nebProject(p, depth){
+  const cam=neb.cam, z=cam.z*S.user.zoom, r=rot3(p,depth), f=depth? 900/(900+r[2]) : 1;
+  return [(r[0]-cam.x)*z*f+W/2+S.user.dx, (r[1]-cam.y)*z*f+H/2+S.user.dy, f];
+}
+let lastFrame=0;
+function camK(now){ const dt=Math.min(100, now-(lastFrame||now)); lastFrame=now; return S.reduced? 1 : 1-Math.exp(-dt/220); }
+function nebDraw(now, depth){
+  nebLayout();
+  const f=fx(), st=reduce(f,S.cursor), cur=new Set(currentIds(st)), t=now/1000;
+  // camera target: bbox of current event's nodes (replay) or of all touched nodes (summary)
+  const summary = S.cursor===f.events.length && !S.playing;
+  let ids = (cur.size && !summary) ? [...cur] : [...st.first.keys()];
+  if(!ids.length) ids=Object.keys(neb.nodes);
+  const pts=ids.map(id=>{ const n=neb.nodes[id]; return rot3([n.x,n.y,n.z],depth); });
+  let x0=Math.min(...pts.map(p=>p[0])), x1=Math.max(...pts.map(p=>p[0])), y0=Math.min(...pts.map(p=>p[1])), y1=Math.max(...pts.map(p=>p[1]));
+  const pad = (cur.size && !summary) ? 190 : 110, tz=Math.max(.45,Math.min(1.5, Math.min(W/(x1-x0+pad*2), (H-80)/(y1-y0+pad*2))));
+  const k = camK(now);
+  neb.cam.x += ((x0+x1)/2-neb.cam.x)*k; neb.cam.y += ((y0+y1)/2-neb.cam.y)*k; neb.cam.z += (tz-neb.cam.z)*k;
+  if(depth && !S.reduced && !S.user.dragging) S.user.yaw += .0016;
+
+  ctx.fillStyle='#07080c'; ctx.fillRect(0,0,W,H);
+  const focusCluster = st.current && !summary ? (nodeById((st.current.payload.node_ids||[])[0]||'')||{}).cluster : null;
+  // ambient density (aggregate, not entities)
+  ctx.globalCompositeOperation='lighter';
+  const order = depth ? [...neb.clusters].sort((a,b)=>nebProject([b.x,b.y,b.z],1)[2]-nebProject([a.x,a.y,a.z],1)[2]) : neb.clusters;
+  for(const c of order){
+    const dim = focusCluster && S.cursor<f.events.length && c.id!==focusCluster ? .45 : 1;
+    ctx.fillStyle=hexA(c.color, .62*dim);
+    for(const p of c.pts){ const [sx,sy,sf]=nebProject(p,depth); if(sx<-5||sy<-5||sx>W+5||sy>H+5) continue;
+      const tw = S.reduced?1:(.75+.25*Math.sin(t*1.3+p[4])); const s=p[3]*sf*Math.max(.9,neb.cam.z*1.1);
+      ctx.globalAlpha=tw*(depth? Math.min(1,sf*sf):1); ctx.fillRect(sx,sy,s,s); }
+    ctx.globalAlpha=1;
+  }
+  ctx.globalCompositeOperation='source-over';
+  // cluster labels with permission-safe aggregate count and visited count
+  for(const c of neb.clusters){ const [sx,sy]=nebProject([c.x,c.y-c.r*.95,c.z],depth); const visited=f.projection.nodes.filter(n=>n.cluster===c.id && st.first.has(n.id)).length;
+    ctx.fillStyle=c.color; ctx.font='bold 12px monospace'; ctx.fillText(c.label,sx-30,sy);
+    ctx.fillStyle='#6b7385'; ctx.font='10px monospace'; ctx.fillText(`${c.count} in scope · ${visited} touched`,sx-30,sy+13); }
+  // edges
+  hits=[];
+  const P = id=>{ const n=neb.nodes[id]; return nebProject([n.x,n.y,n.z],depth); };
+  const evAge = (now-S.evStart)/(S.reduced?1:650);
+  for(const e of st.edges){ const a=P(e.s), b=P(e.t), isCur=st.current && e.seq===st.current.sequence;
+    const used = st.used.has(e.s)&&(st.used.has(e.t)||e.t==='ans');
+    const col = e.layer==='ANSWER' ? '#39d3a6' : (CLUSTER_COLOR[(nodeById(e.t)||{}).cluster]||'#c9d1e0');
+    drawEdge(a[0],a[1],b[0],b[1],e.layer,col, isCur?.95:(used?.8:(st.considered.has(e.t)?.25:.45)), isCur?1.8:(used?1.5:1), isCur? Math.min(1,ease(evAge)) : 1); }
+  // nodes
+  const all = f.projection.nodes.filter(n=>st.first.has(n.id));
+  for(const n of all){ const [x,y,sf]=P(n.id), attr=attrOf(st,n.id), isCur=cur.has(n.id), col=CLUSTER_COLOR[n.cluster];
+    const r=(isCur?7:5.5)*Math.max(.8,Math.min(1.3,sf)); drawNodeMark(x,y,r,col,attr,isCur,GLYPH[n.kind]); hits.push({id:n.id,x,y,r:Math.max(10,r+4)}); }
+  // crawler: halo + tentacles to recorded nodes of the current event only
+  if(st.current && cur.size && !summary){ const p=st.current.payload, primary=(p.edges&&p.edges.length? p.edges[p.edges.length-1].target_node_id : (p.node_ids||[])[0]);
+    if(primary && neb.nodes[primary]){ const [fx_,fy]=P(primary);
+      ctx.save(); ctx.strokeStyle='#39d3a6'; ctx.globalAlpha=.9; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(fx_,fy,24,0,Math.PI*2); ctx.stroke(); ctx.beginPath(); ctx.arc(fx_,fy,15,0,Math.PI*2); ctx.stroke();
+      const rot = S.reduced?0:t*.6; for(let i=0;i<36;i++){ const a=rot+i/36*6.283, r1=27, r2= i%3? 31:36; ctx.beginPath(); ctx.moveTo(fx_+Math.cos(a)*r1,fy+Math.sin(a)*r1); ctx.lineTo(fx_+Math.cos(a)*r2,fy+Math.sin(a)*r2); ctx.stroke(); }
+      ctx.fillStyle='#ff4f8b'; ctx.fillRect(fx_-4,fy-4,8,8);
+      for(const id of cur){ if(id===primary) continue; const [x,y]=P(id); const [cx,cy]=curve(fx_,fy,x,y,.12); const prog=Math.min(1,ease(evAge*1.2));
+        ctx.globalAlpha=.7; ctx.setLineDash([1,4]); ctx.beginPath(); ctx.moveTo(fx_,fy); const n=20; for(let i=1;i<=n*prog;i++){ const [qx,qy]=qpt(fx_,fy,cx,cy,x,y,i/n); ctx.lineTo(qx,qy);} ctx.stroke(); ctx.setLineDash([]); }
+      ctx.restore(); }
+  }
+  // tags: priority first (selected, current, flagged, used), the rest only where they fit
+  placed=[];
+  const prio=n=> S.sel===n.id?0 : (cur.has(n.id)&&!summary)?1 : st.flags.has(n.id)?2 : attrOf(st,n.id)==='USED_IN_ANSWER'?3 : 4;
+  for(const n of [...all].sort((a,b)=>prio(a)-prio(b))){ const [x,y]=P(n.id), attr=attrOf(st,n.id), isCur=cur.has(n.id)&&!summary, col=CLUSTER_COLOR[n.cluster], pr=prio(n);
+    const left = x > W*.72;
+    if(st.flags.has(n.id)) tag(x,y-16,'⚑ '+st.flags.get(n.id),'#ff4f8b',{fill:'#ff4f8b',ink:'#1a0610',left});
+    tag(x,y,trunc(n.label, isCur||S.sel===n.id?52:30), attr==='CONSIDERED_NOT_USED'?'#6b7385':(attr==='NOT_INSTRUMENTED'?'#ff6b5b':col), {left, optional: pr>=3, dash: attr==='CONSIDERED_NOT_USED'||attr==='NOT_INSTRUMENTED'?[2,2]:[]});
+  }
+  if(S.sel && neb.nodes[S.sel]){ const [x,y]=P(S.sel); ctx.strokeStyle='#fff'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.arc(x,y,14,0,6.283); ctx.stroke(); ctx.setLineDash([]); }
+}
+
+/* ======================= Renderer B: layer lanes ======================= */
+function lanesDraw(now){
+  const f=fx(), st=reduce(f,S.cursor), full=reduce(f,f.events.length), cur=new Set(currentIds(st));
+  const lanes=LANES[f.trace.operation], top=104, bottom=24, left=Math.min(150,W*.26), right=40, lh=(H-top-bottom)/lanes.length;
+  const seqs=[...new Set([...full.first.values()])].sort((a,b)=>a-b), colX=s=>left+ (seqs.length>1? seqs.indexOf(s)/(seqs.length-1):.5)*(W-left-right-120);
+  ctx.fillStyle='#07080c'; ctx.fillRect(0,0,W,H);
+  // lanes
+  lanes.forEach((L,i)=>{ const y=top+i*lh; ctx.fillStyle= i%2? '#0a0c12':'#0c0f16'; ctx.fillRect(0,y,W,lh);
+    ctx.strokeStyle='#161b26'; ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(W,y+.5); ctx.stroke();
+    const nodes=f.projection.nodes.filter(n=>n.layer===L), touched=nodes.filter(n=>st.first.has(n.id)).length;
+    ctx.fillStyle='#e6e9f0'; ctx.font='bold 11px monospace'; ctx.fillText(LAYER[L].label.toUpperCase(),12,y+18);
+    ctx.fillStyle='#6b7385'; ctx.font='10px monospace';
+    let sub = `${touched} touched`;
+    if(L==='CANONICAL' && f.trace.operation==='LEARNING_RUN'){ const commits=f.events.slice(0,S.cursor).filter(e=>e.event_type==='CANONICAL_CHANGE_COMMITTED').length; sub=`${touched} read · ${commits} committed`; }
+    ctx.fillText(sub,12,y+32);
+    ctx.save(); ctx.strokeStyle='#2a3142'; ctx.setLineDash(LAYER[L].dash); ctx.beginPath(); ctx.moveTo(12,y+40); ctx.lineTo(Math.min(left-12,110),y+40); ctx.stroke(); ctx.restore();
+  });
+  // positions (stable: from the full trace)
+  const pos={}, slot={};
+  for(const n of f.projection.nodes){ if(!full.first.has(n.id)) continue; const li=lanes.indexOf(n.layer); const s=full.first.get(n.id); const k=li+':'+s; slot[k]=(slot[k]||0)+1;
+    pos[n.id]=[colX(s), top+li*lh+lh/2 + (slot[k]-1)*15 - 0]; }
+  for(const k in slot){ if(slot[k]>1){ const [li,s]=k.split(':').map(Number); const ids=Object.keys(pos).filter(id=>{const n=nodeById(id); return lanes.indexOf(n.layer)===li && full.first.get(id)===s;}); ids.forEach((id,j)=>{ pos[id][1]=top+li*lh+lh/2+(j-(ids.length-1)/2)*Math.min(15,lh/(ids.length+1)); }); } }
+  // scan beam at current column
+  const beamIds = st.current && !(S.cursor===f.events.length && !S.playing) ? currentIds(st).filter(id=>pos[id]) : [];
+  if(beamIds.length){ const xs=beamIds.map(id=>pos[id][0]); const bx=Math.max(...xs);
+    const g=ctx.createLinearGradient(bx-40,0,bx+6,0); g.addColorStop(0,'rgba(242,184,75,0)'); g.addColorStop(1,'rgba(242,184,75,.16)'); ctx.fillStyle=g; ctx.fillRect(bx-40,top,46,H-top-bottom);
+    ctx.strokeStyle='rgba(242,184,75,.7)'; ctx.beginPath(); ctx.moveTo(bx+6,top); ctx.lineTo(bx+6,H-bottom); ctx.stroke(); }
+  // sequence ticks
+  ctx.fillStyle='#6b7385'; ctx.font='10px monospace'; seqs.forEach(s=>ctx.fillText(String(s).padStart(2,'0'),colX(s)-6,top-8));
+  ctx.fillText('sequence →',left-4,top-24);
+  const evAge=(now-S.evStart)/(S.reduced?1:650);
+  hits=[]; placed=[];
+  for(const e of st.edges){ const a=pos[e.s], b=pos[e.t]; if(!a||!b) continue; const isCur=st.current&&e.seq===st.current.sequence;
+    const col= e.layer==='ANSWER' ? '#39d3a6' : CLUSTER_COLOR[(nodeById(e.t)||{}).cluster];
+    ctx.save(); ctx.globalAlpha= isCur?.95 : (st.considered.has(e.t)?.25:.5); ctx.strokeStyle=col; ctx.lineWidth=isCur?1.8:1; ctx.setLineDash((LAYER[e.layer]||{}).dash||[]);
+    const prog=isCur? Math.min(1,ease(evAge)) : 1, mx=(a[0]+b[0])/2;
+    ctx.beginPath(); ctx.moveTo(a[0],a[1]);
+    if(prog>=1) ctx.bezierCurveTo(mx,a[1],mx,b[1],b[0],b[1]); else { ctx.lineTo(a[0]+(b[0]-a[0])*prog, a[1]+(b[1]-a[1])*prog); }
+    ctx.stroke(); ctx.restore(); }
+  for(const n of f.projection.nodes){ if(!st.first.has(n.id)||!pos[n.id]) continue; const [x,y]=pos[n.id], attr=attrOf(st,n.id), isCur=cur.has(n.id), col=CLUSTER_COLOR[n.cluster];
+    drawNodeMark(x,y,isCur?7:6,col,attr,isCur,GLYPH[n.kind]); hits.push({id:n.id,x,y,r:11});
+    if(st.flags.has(n.id)) tag(x,y-15,'⚑ '+st.flags.get(n.id),'#ff4f8b',{fill:'#ff4f8b',ink:'#1a0610'});
+    const colW=(W-left-right-120)/Math.max(1,seqs.length-1), chars=Math.max(8,Math.floor((colW-22)/6.2));
+    tag(x,y,trunc(n.label, isCur||S.sel===n.id? 46: chars), attr==='CONSIDERED_NOT_USED'?'#6b7385':(attr==='NOT_INSTRUMENTED'?'#ff6b5b':col), {optional: !(isCur||S.sel===n.id), dash: attr==='CONSIDERED_NOT_USED'||attr==='NOT_INSTRUMENTED'?[2,2]:[]}); }
+  if(S.sel&&pos[S.sel]){ const [x,y]=pos[S.sel]; ctx.strokeStyle='#fff'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.arc(x,y,13,0,6.283); ctx.stroke(); ctx.setLineDash([]); }
+}
+
+/* ======================= Renderer C: basis path ======================= */
+const basis={key:null,pos:{},bw:0,bh:0,cam:{x:0,y:0,z:1}};
+function basisLayout(){
+  const f=fx(), k=f.trace.trace_id+':'+Math.round(W); if(basis.key===k) return; basis.key=k;
+  const full=reduce(f,f.events.length), root=f.events[0].payload.node_ids[0], adj={};
+  full.edges.forEach(e=>{ if(e.layer==='ANSWER'||e.layer==='GOVERNANCE') return; (adj[e.s]=adj[e.s]||[]).push(e.t); (adj[e.t]=adj[e.t]||[]).push(e.s); });
+  const depth={[root]:0}, q=[root]; while(q.length){ const u=q.shift(); for(const v of adj[u]||[]) if(!(v in depth)){ depth[v]=depth[u]+1; q.push(v);} }
+  let maxD=Math.max(...Object.values(depth));
+  // nodes reached only via answer/governance edges or not at all go after the main path
+  [...full.first.keys()].forEach(id=>{ if(!(id in depth)){ const n=nodeById(id); depth[id]= (n.layer==='ANSWER'||n.layer==='GOVERNANCE')? maxD+2 : maxD+1; } });
+  maxD=Math.max(...Object.values(depth));
+  const cols={}; Object.entries(depth).forEach(([id,d])=>(cols[d]=cols[d]||[]).push(id));
+  const rank=id=> full.used.has(id)?0 : full.gaps.has(id)?2 : full.considered.has(id)?3 : 1;
+  basis.pos={}; const GX=34, BW=Math.max(112,Math.min(190,(W-40)/(maxD+1)-GX)), BH=40, GY=14;
+  Object.entries(cols).forEach(([d,ids])=>{ ids.sort((a,b)=>rank(a)-rank(b)||full.first.get(a)-full.first.get(b));
+    // centre the strongest node, alternate the rest above and below
+    const ord=[]; ids.forEach((id,i)=>{ i%2? ord.unshift(id) : ord.push(id); });
+    ord.forEach((id,i)=>{ basis.pos[id]=[Number(d)*(BW+GX), (i-(ord.length-1)/2)*(BH+GY)]; }); });
+  basis.bw=(maxD+1)*(BW+GX)-GX; basis.BW=BW; basis.BH=BH;
+  const ys=Object.values(basis.pos).map(p=>p[1]); basis.bh=Math.max(...ys)-Math.min(...ys)+BH; basis.y0=Math.min(...ys);
+}
+function wrap(text,max){ const words=text.split(' '), lines=['']; for(const w of words){ const L=lines[lines.length-1]; if((L+' '+w).trim().length>max) lines.push(w); else lines[lines.length-1]=(L+' '+w).trim(); } return lines.slice(0,2).map((l,i,a)=> i===1 && lines.length>2 ? trunc(l+'…',max) : l); }
+function basisDraw(now){
+  basisLayout();
+  const f=fx(), st=reduce(f,S.cursor), cur=new Set(currentIds(st)), BW=basis.BW, BH=basis.BH;
+  const z=Math.min(1, (H-130)/(basis.bh+20))*S.user.zoom;
+  const ox=(W-basis.bw*z)/2+S.user.dx, oy=(H+70)/2+S.user.dy - (basis.y0+basis.bh/2)*z;
+  const P=id=>{ const p=basis.pos[id]; return [ox+p[0]*z, oy+p[1]*z]; };
+  ctx.fillStyle='#07080c'; ctx.fillRect(0,0,W,H);
+  // faint grid
+  ctx.strokeStyle='#10141d'; ctx.lineWidth=1; for(let x=0;x<W;x+=32){ ctx.beginPath(); ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,H); ctx.stroke(); } for(let y=0;y<H;y+=32){ ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(W,y+.5); ctx.stroke(); }
+  const evAge=(now-S.evStart)/(S.reduced?1:650);
+  for(const e of st.edges){ if(!basis.pos[e.s]||!basis.pos[e.t]) continue; let [ax,ay]=P(e.s), [bx,by]=P(e.t); if(ax>bx){ [ax,ay,bx,by]=[bx,by,ax,ay]; }
+    ax+=BW*z; const isCur=st.current&&e.seq===st.current.sequence, col= e.layer==='ANSWER'?'#39d3a6':CLUSTER_COLOR[(nodeById(e.t)||{}).cluster];
+    const dead = st.considered.has(e.t)||st.considered.has(e.s);
+    ctx.save(); ctx.globalAlpha= isCur?1:(dead?.22:.6); ctx.strokeStyle=col; ctx.lineWidth=isCur?2:1.2; ctx.setLineDash((LAYER[e.layer]||{}).dash||[]);
+    const prog=isCur?Math.min(1,ease(evAge)):1, mx=(ax+bx)/2; ctx.beginPath(); ctx.moveTo(ax,ay);
+    if(Math.abs(bx-ax)<4){ ctx.bezierCurveTo(ax+40,ay,bx+40,by,bx,by); } else if(prog>=1) ctx.bezierCurveTo(mx,ay,mx,by,bx,by); else ctx.lineTo(ax+(bx-ax)*prog,ay+(by-ay)*prog);
+    ctx.stroke(); ctx.restore();
+    if((isCur||S.sel===e.s||S.sel===e.t) && prog>=1){ ctx.fillStyle='#6b7385'; ctx.font='9px monospace'; ctx.fillText(e.pred,(ax+bx)/2-ctx.measureText(e.pred).width/2,(ay+by)/2-4); } }
+  hits=[];
+  for(const n of f.projection.nodes){ if(!st.first.has(n.id)||!basis.pos[n.id]) continue; const [x,y]=P(n.id), w=BW*z, h=BH*z, attr=attrOf(st,n.id), isCur=cur.has(n.id), col=CLUSTER_COLOR[n.cluster];
+    ctx.save();
+    if(isCur||attr==='USED_IN_ANSWER'){ ctx.shadowColor=col; ctx.shadowBlur=isCur?18:8; }
+    ctx.fillStyle= attr==='USED_IN_ANSWER'? hexA(col,.18) : '#0c0f16'; ctx.fillRect(x,y-h/2,w,h); ctx.shadowBlur=0;
+    ctx.strokeStyle= attr==='CONSIDERED_NOT_USED'?'#4a5266': attr==='NOT_INSTRUMENTED'?'#ff6b5b' : col; ctx.lineWidth= isCur?2:1;
+    ctx.setLineDash(attr==='CONSIDERED_NOT_USED'||attr==='NOT_INSTRUMENTED'?[3,3]:[]); ctx.strokeRect(x+.5,y-h/2+.5,w-1,h-1); ctx.setLineDash([]);
+    ctx.fillStyle=col; ctx.fillRect(x,y-h/2,3,h);
+    if(z>.45){ ctx.font=`${Math.round(10*Math.min(1.1,z))}px monospace`; ctx.fillStyle= attr==='CONSIDERED_NOT_USED'?'#6b7385':'#e6e9f0'; ctx.textBaseline='middle';
+      const ls=wrap(n.label,Math.floor((w-14)/(6.1*Math.min(1.1,z)))); ls.forEach((l,i)=>ctx.fillText(l,x+9,y+(i-(ls.length-1)/2)*12*Math.min(1.1,z)));
+      ctx.fillStyle='#6b7385'; ctx.font='8px monospace'; ctx.fillText((attr||'').replace(/_/g,' ').toLowerCase(),x+9,y+h/2-6); }
+    ctx.restore();
+    if(st.flags.has(n.id)) tag(x-6,y-h/2-8,'⚑ '+st.flags.get(n.id),'#ff4f8b',{fill:'#ff4f8b',ink:'#1a0610'});
+    if(S.sel===n.id){ ctx.strokeStyle='#fff'; ctx.setLineDash([3,3]); ctx.strokeRect(x-4,y-h/2-4,w+8,h+8); ctx.setLineDash([]); }
+    hits.push({id:n.id,x:x+w/2,y,r:Math.max(w,h)/2,box:[x,y-h/2,w,h]}); }
+}
+
+/* ============================ panels ============================ */
+function renderStrip(){
+  const f=fx(), st=reduce(f,S.cursor), stages=STAGES[f.trace.operation], curStage=st.current?stageOf(st.current):-1;
+  const counts=stages.map(s=>f.events.filter(e=>s.types.includes(e.event_type)).length);
+  const done=stages.map(s=>f.events.slice(0,S.cursor).filter(e=>s.types.includes(e.event_type)).length);
+  const hops=f.events.slice(0,S.cursor).filter(e=>e.event_type==='EDGE_TRAVERSED').length;
+  const evid=new Set(f.events.slice(0,S.cursor).flatMap(e=>e.payload.evidence_ref_ids||[])).size;
+  $('#strip').innerHTML = `<span class="meta">TRACE <b>${f.trace.trace_id}</b> · EVENTS <b>${S.cursor}/${f.events.length}</b> · HOPS <b>${hops}</b> · EVIDENCE <b>${evid}</b> · GAPS <b>${st.gaps.size}</b> · FLAGS <b>${st.flags.size}</b></span>` +
+    stages.map((s,i)=>`<button class="stagetab ${i===curStage?'cur':''} ${done[i]===counts[i]&&counts[i]>0&&i!==curStage?'done':''} ${counts[i]===0?'empty':''}" data-stage="${i}" title="${s.sub}${counts[i]?'':' · no recorded events'}">${s.label}${counts[i]?'':' · 0'}</button>`).join('');
+  $('#strip').querySelectorAll('.stagetab').forEach(b=>b.onclick=()=>{ const s=stages[+b.dataset.stage]; const i=f.events.findIndex(e=>s.types.includes(e.event_type)); if(i>=0){ stop(); seek(i+1);} });
+  // overlay
+  const n=String(curStage+1).padStart(2,'0');
+  if(st.current){ $('#ovTitle').textContent=`${n} ${stages[curStage].label.toUpperCase()}`; $('#ovSub').textContent=st.current.summary; }
+  else { $('#ovTitle').textContent='00 READY'; $('#ovSub').textContent=f.trace.subject; }
+  if(S.cursor===f.events.length && !S.playing){ $('#ovTitle').textContent='SUMMARY'; $('#ovSub').textContent=f.trace.subject; }
+}
+function renderLog(){
+  const f=fx();
+  const ol=$('#log');
+  if(ol.dataset.key!==f.trace.trace_id){ ol.dataset.key=f.trace.trace_id;
+    ol.innerHTML=f.events.map((e,i)=>`<li tabindex="0" data-i="${i}" title="${e.summary.replace(/"/g,'&quot;')}"><span>${String(e.sequence).padStart(4,'0')}</span><span class="ty"><b>${e.event_type}</b> ${e.summary}</span></li>`).join('');
+    ol.querySelectorAll('li').forEach(li=>{ const go=()=>{ stop(); seek(+li.dataset.i+1); }; li.onclick=go; li.onkeydown=ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); go(); } }; }); }
+  ol.querySelectorAll('li').forEach((li,i)=>{ li.className = i===S.cursor-1?'cur': i<S.cursor?'past':''; });
+  const c=ol.querySelector('li.cur'); if(c){ const top=c.offsetTop-ol.offsetTop; if(top<ol.scrollTop||top>ol.scrollTop+ol.clientHeight-16) ol.scrollTop=top-30; }
+  $('#logRate').textContent = S.playing? 'replaying' : (S.cursor===f.events.length?'summary':'paused');
+}
+function bars(el,rows){ el.innerHTML=rows.map(r=>`<div><span>${r.label}</span><span class="b"><i style="width:${r.max?Math.round(100*r.v/r.max):0}%;background:${r.color}"></i></span><span class="n">${r.text??r.v}</span></div>`).join(''); }
+function renderHud(){
+  const f=fx(), st=reduce(f,S.cursor), stages=STAGES[f.trace.operation];
+  bars($('#stageBars'), stages.map(s=>{ const tot=f.events.filter(e=>s.types.includes(e.event_type)).length, done=f.events.slice(0,S.cursor).filter(e=>s.types.includes(e.event_type)).length; return {label:s.label,v:done,max:tot||1,text:`${done}/${tot}`,color:tot? '#f2b84b':'#2a3142'}; }));
+  $('#stageN').textContent=stages.length;
+  const touched=st.first.size, used=st.used.size, cons=st.considered.size, gaps=st.gaps.size, obs=touched-used-cons-gaps;
+  const op=f.trace.operation;
+  bars($('#attrBars'), [
+    {label:'observed',v:obs,max:touched||1,color:'#5d7bb3'},
+    {label:'used in answer',v:used,max:touched||1,color:'#39d3a6',text: op==='LEARNING_RUN'?'n/a':used},
+    {label:'considered',v:cons,max:touched||1,color:'#6b7385',text: op==='LEARNING_RUN'?'n/a':cons},
+    {label:'not instrumented',v:gaps,max:touched||1,color:'#ff6b5b'},
+    {label:'flagged',v:st.flags.size,max:touched||1,color:'#ff4f8b'}]);
+  const lanes=LANES[op];
+  bars($('#layerBars'), lanes.map(L=>{ const all=f.projection.nodes.filter(n=>n.layer===L).length, t=f.projection.nodes.filter(n=>n.layer===L&&st.first.has(n.id)).length; return {label:LAYER[L].label,v:t,max:all||1,text:`${t}/${all}`,color:'#3fd0e0'}; }));
+  $('#layerN').textContent=`${touched}/${f.projection.nodes.length}`;
+  const tr=f.trace, sc=tr.semantic_context, complete=S.cursor===f.events.length;
+  const ms = st.current ? (new Date(st.current.occurred_at)-new Date(tr.started_at)) : 0;
+  $('#trStatus').textContent = complete? tr.completeness.status.replace(/_/g,' ').toLowerCase() : 'replaying';
+  let extra='';
+  if(op==='LEARNING_RUN'){ const end=f.events.find(e=>e.event_type==='TRACE_TERMINATED'); const c=end.payload.counts; extra = complete? `<div class="ctx">statements <b>${c.open_statements}</b> · typed <b>${c.typed_assertions}</b> · candidates <b>${c.candidates}</b><br>unresolved conflicts <b>${c.unresolved_conflicts}</b> · <b style="color:var(--accent)">canonical changes ${c.canonical_changes}</b></div>`:''; }
+  $('#trBox').innerHTML = `<div class="big">${S.cursor}<span style="font-size:12px;color:var(--ink3)">/${f.events.length} events</span></div>
+    <div class="ctx">t+<b>${ms>=1000?(ms/1000).toFixed(2)+' s':ms+' ms'}</b> · gaps <b>${tr.completeness.gap_count}</b> · truncated <b>${tr.completeness.truncated}</b></div>
+    <div class="ctx">ontology <b>${sc.ontology_release_id}</b><br>projection <b>${sc.graph_projection_id}</b><br>valid as of <b>${sc.valid_as_of}</b> · known as of <b>${sc.known_as_of.replace('T',' ').replace('Z','')}</b></div>${extra}`;
+}
+function renderInspector(){
+  const f=fx(), st=reduce(f,S.cursor);
+  const ev=st.current; $('#raw').textContent = ev? JSON.stringify(ev,null,2) : JSON.stringify(f.trace,null,2);
+  const id=S.sel;
+  if(!id){
+    if(f.trace.operation==='DOCUMENT_CHAT'){ const b=f.events.find(e=>e.event_type==='ANSWER_BASIS_LINKED'); const shown=S.cursor>=b.sequence;
+      $('#insp').innerHTML=`<div class="t">How the Brain answered</div><div style="color:var(--ink2);margin-bottom:6px">${f.trace.subject}</div>`+
+        (shown? b.payload.answer_spans.map(s=>`<div style="margin:6px 0;padding-left:8px;border-left:2px solid var(--ok)">${s.span}<div class="ctx">basis: ${s.basis_node_ids.map(i=>trunc(nodeById(i).label,28)).join(' · ')}</div></div>`).join('')
+         : `<div class="ctx">The answer basis appears at event ${b.sequence}. Until then, nothing is marked as used.</div>`)+
+        `<div class="ctx" style="margin-top:8px">Select any node in the graph for detail.</div>`;
+    } else {
+      $('#insp').innerHTML=`<div class="t">Learning run</div><div style="color:var(--ink2)">${f.trace.subject}</div><div class="ctx" style="margin-top:6px">Each event cites the authoritative record it was projected from (see contract view). The Observatory cannot approve, reject or commit.</div><div class="ctx" style="margin-top:8px">Select any node for detail.</div>`;
+    }
+    return;
+  }
+  const n=nodeById(id), attr=attrOf(st,id), touches=(st.touch.get(id)||[]);
+  const rows=[['kind',n.kind],['layer',LAYER[n.layer].label],['cluster',n.cluster],['first seen', st.first.has(id)? 'event '+st.first.get(id) : 'not yet in replay'],['events',touches.join(', ')||'none yet']];
+  if(st.flags.has(id)) rows.push(['flag',st.flags.get(id)]);
+  Object.entries(n.detail||{}).forEach(([k,v])=>rows.push([k.replace(/_/g,' '),v]));
+  $('#insp').innerHTML=`<div class="t">${n.label}</div>${attr?`<span class="attr ${attr}">${attr.replace(/_/g,' ')}</span>`:''}<dl class="kv" style="margin-top:8px">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+    <div class="ctx" style="margin-top:8px"><a href="#" id="clearSel">clear selection</a></div>`;
+  $('#clearSel').onclick=e=>{ e.preventDefault(); S.sel=null; renderPanels(); };
+}
+function renderNotes(){
+  if(S.opt==='compare') return; const n=NOTES[S.opt];
+  $('#notesTitle').textContent='OPTION NOTES · '+n.title;
+  $('#notes').innerHTML=`<div>${n.sub}</div><ul>${n.pro.map(p=>`<li class="pro">${p}</li>`).join('')}${n.con.map(p=>`<li class="con">${p}</li>`).join('')}</ul>`;
+  $('#hint').textContent = S.opt==='E' ? 'drag to orbit (up/down tilts) · wheel to zoom · click a node to inspect · height = knowledge layer' : S.opt==='D' ? 'drag to rotate · wheel to zoom · click a node to inspect' : S.opt==='B' ? 'click a node to inspect' : 'drag to pan · wheel to zoom · click a node to inspect';
+}
+let legendOpen=false;
+function renderLegend(){
+  const f=fx(), op=f.trace.operation;
+  const cl=f.projection.clusters.map(c=>`<div><i class="sw" style="background:${CLUSTER_COLOR[c.id]}"></i>${c.label}</div>`).join('');
+  const ly=LANES[op].map(L=>`<div><svg width="22" height="6" aria-hidden="true"><line x1="0" y1="3" x2="22" y2="3" stroke="#a7afc0" stroke-width="1.5" stroke-dasharray="${LAYER[L].dash.join(' ')}"/></svg>${LAYER[L].label}</div>`).join('');
+  $('#legend').innerHTML=`<details${legendOpen?' open':''} ontoggle="legendOpen=this.open"><summary>LEGEND</summary>
+    <h4 style="margin-top:6px">CLUSTERS</h4>${cl}
+    <h4 style="margin-top:6px">LAYERS (line style)</h4>${ly}
+    <h4 style="margin-top:6px">ATTRIBUTION</h4>
+    <div><i class="sw" style="background:#39d3a6;box-shadow:0 0 6px #39d3a6"></i>used in answer</div>
+    <div><i class="sw" style="background:#5d7bb3"></i>observed</div>
+    <div><i class="sw" style="border:1px dashed #6b7385"></i>considered, not used</div>
+    <div><i class="sw" style="border:1px dashed #ff6b5b"></i>not instrumented</div>
+    ${S.opt==='E'?'<div style="margin-top:6px;color:var(--ink3)">Height is the knowledge layer: one plate per layer, lit amber when the current event works on it.</div>':''}
+    ${S.opt==='A'||S.opt==='D'||S.opt==='E'?'<div style="margin-top:6px;color:var(--ink3)">Faint points show aggregate density inside your authorized scope. They are not entities, and the crawler never touches them.</div>':''}</details>`;
+}
+function renderPanels(){ renderStrip(); renderLog(); renderHud(); renderInspector(); const f=fx(); $('#scrub').max=f.events.length; $('#scrub').value=S.cursor; $('#cursorLbl').textContent=`${S.cursor}/${f.events.length}`;
+  $('#bPlay').textContent= S.playing? 'Pause' : (S.cursor===f.events.length? 'Replay':'Play'); const ev=reduce(f,S.cursor).current; $('#live').textContent= ev? `Event ${ev.sequence}: ${ev.event_type}. ${ev.summary}` : 'Start of trace'; }
+
+/* ============== Renderer E: true 3D (raw WebGL, no library) ==============
+   Height is the knowledge layer: one plate per layer, ordered as in LANES.
+   The ambient density, plates, edges and nodes are drawn by the GPU; labels,
+   the crawler halo and selection stay on the 2D canvas above it. */
+let gl=null, e3=null;
+const E3 = {plateGap:74, fov:.9, plateX:470, plateZ:320};
+function m4persp(fy,a,n,f){ const t=1/Math.tan(fy/2), nf=1/(n-f); return [t/a,0,0,0, 0,t,0,0, 0,0,(f+n)*nf,-1, 0,0,2*f*n*nf,0]; }
+function m4look(e,c,u){ let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]]; const zl=Math.hypot(...z); z=z.map(v=>v/zl);
+  let x=[u[1]*z[2]-u[2]*z[1], u[2]*z[0]-u[0]*z[2], u[0]*z[1]-u[1]*z[0]]; const xl=Math.hypot(...x); x=x.map(v=>v/xl);
+  const y=[z[1]*x[2]-z[2]*x[1], z[2]*x[0]-z[0]*x[2], z[0]*x[1]-z[1]*x[0]];
+  return [x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0, -(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]), -(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]), -(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]), 1]; }
+function m4mul(a,b){ const o=new Array(16); for(let c=0;c<4;c++) for(let r=0;r<4;r++){ let s=0; for(let k=0;k<4;k++) s+=a[k*4+r]*b[c*4+k]; o[c*4+r]=s; } return o; }
+function e3Project(p){ const m=e3.mvp, x=m[0]*p[0]+m[4]*p[1]+m[8]*p[2]+m[12], y=m[1]*p[0]+m[5]*p[1]+m[9]*p[2]+m[13], w=m[3]*p[0]+m[7]*p[1]+m[11]*p[2]+m[15];
+  return w<=1 ? null : [(x/w*.5+.5)*W, (.5-y/w*.5)*H, w]; }
+function rgb(hex){ const n=parseInt(hex.slice(1),16); return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]; }
+
+function e3Init(){
+  if(e3) return e3.ok;
+  e3={ok:false,key:null};
+  gl = glc.getContext('webgl',{antialias:true,premultipliedAlpha:false,alpha:false});
+  if(!gl) return false;
+  const sh=(type,src)=>{ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const prog=(vs,fs)=>{ const p=gl.createProgram(); gl.attachShader(p,sh(gl.VERTEX_SHADER,vs)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs)); gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; };
+  // points: clouds (style 0, soft), nodes (style 1, core + halo), rings (style 2, dashed: considered / gap)
+  e3.pts=prog(`attribute vec3 a_pos; attribute vec4 a_col; attribute float a_size; attribute float a_style; attribute float a_phase;
+    uniform mat4 u_mvp; uniform float u_px; uniform float u_time; uniform float u_dim; uniform float u_far;
+    varying vec4 v_col; varying float v_style;
+    void main(){ vec4 p=u_mvp*vec4(a_pos,1.); gl_Position=p; gl_PointSize=clamp(a_size*u_px/p.w,1.5,110.);
+      float fog=clamp(1.3-p.w/u_far,.16,1.); float tw=a_style<.5 ? .7+.3*sin(u_time*1.3+a_phase) : 1.;
+      v_col=vec4(a_col.rgb,a_col.a*fog*tw*(a_style<.5?u_dim:1.)); v_style=a_style; }`,
+    `precision mediump float; varying vec4 v_col; varying float v_style;
+    void main(){ vec2 q=gl_PointCoord*2.-1.; float d=length(q); if(d>1.) discard; float a;
+      if(v_style<.5) a=exp(-d*d*5.);
+      else if(v_style<1.5) a=smoothstep(.36,.28,d)+.5*exp(-d*d*3.5);
+      else { float ang=atan(q.y,q.x); a=smoothstep(.1,.03,abs(d-.42))*step(0.,sin(ang*9.)); }
+      gl_FragColor=vec4(v_col.rgb,v_col.a*a); }`);
+  e3.lin=prog(`attribute vec3 a_pos; attribute vec4 a_col; uniform mat4 u_mvp; uniform float u_far; varying vec4 v_col;
+    void main(){ vec4 p=u_mvp*vec4(a_pos,1.); gl_Position=p; v_col=vec4(a_col.rgb,a_col.a*clamp(1.3-p.w/u_far,.16,1.)); }`,
+    `precision mediump float; varying vec4 v_col; void main(){ gl_FragColor=v_col; }`);
+  e3.cloudBuf=gl.createBuffer(); e3.dynPts=gl.createBuffer(); e3.dynLin=gl.createBuffer();
+  e3.ok=true; return true;
+}
+function e3Attrs(p, stride, layout){ let off=0; for(const [name,n] of layout){ const loc=gl.getAttribLocation(p,name); if(loc>=0){ gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,n,gl.FLOAT,false,stride*4,off*4); } off+=n; } }
+const PTS_LAYOUT=[['a_pos',3],['a_col',4],['a_size',1],['a_style',1],['a_phase',1]], LIN_LAYOUT=[['a_pos',3],['a_col',4]];
+
+function e3Layout(){
+  const f=fx(), key=f.trace.trace_id; if(e3.key===key) return; e3.key=key;
+  const lanes=LANES[f.trace.operation], A=ANCHORS[f.trace.operation];
+  e3.lanes=lanes; e3.alt={}; lanes.forEach((L,i)=>e3.alt[L]=(i-(lanes.length-1)/2)*E3.plateGap);
+  const pts=[]; e3.clusters=[]; e3.nodes={};
+  for(const c of f.projection.clusters){
+    const ax=A[c.id][0]-500, az=A[c.id][1]-370, r=Math.min(150,58+6*Math.sqrt(c.aggregate_count)), R=rng(hash('e3'+c.id));
+    const members=f.projection.nodes.filter(n=>n.cluster===c.id), layers=[...new Set(members.map(n=>n.layer))];
+    if(!layers.length) layers.push(lanes[0]);
+    const start=pts.length/10, N=Math.max(900,Math.min(9000,c.aggregate_count*40)), col=rgb(CLUSTER_COLOR[c.id]);
+    const ex=.7+R()*.6, ez=.7+R()*.6, rot=R()*Math.PI, cr=Math.cos(rot), sr=Math.sin(rot);
+    for(let i=0;i<N;i++){ let px=gauss(R)*r*ex, pz=gauss(R)*r*ez;
+      if(i%3===0){ const s=Math.floor(R()*5), ang=rot+s*1.3, d=gauss(R)*r*1.1; px=Math.cos(ang)*d+gauss(R)*8; pz=Math.sin(ang)*d+gauss(R)*8; }
+      const L=layers[i%layers.length];
+      pts.push(ax+px*cr-pz*sr, e3.alt[L]+gauss(R)*6, az+px*sr+pz*cr, col[0],col[1],col[2], .55, 2+R()*3.2, 0, R()*6.283); }
+    e3.clusters.push({id:c.id,label:c.label,count:c.aggregate_count,ax,az,r,layers,start,n:N});
+    members.forEach(n=>{ const Rn=rng(hash(n.id)), a=Rn()*6.283, d=r*(.25+.55*Rn()); e3.nodes[n.id]=[ax+Math.cos(a)*d, e3.alt[n.layer]??0, az+Math.sin(a)*d]; });
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER,e3.cloudBuf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pts),gl.STATIC_DRAW);
+  e3.cloudN=pts.length/10; e3.tgt=[0,0,0]; e3.dist=1100;
+}
+function e3Curve(a,b){ const len=Math.hypot(b[0]-a[0],b[1]-a[1],b[2]-a[2]); return [(a[0]+b[0])/2,(a[1]+b[1])/2+24+len*.14,(a[2]+b[2])/2]; }
+function e3Q(a,c,b,t){ const u=1-t; return [0,1,2].map(i=>u*u*a[i]+2*u*t*c[i]+t*t*b[i]); }
+
+function e3Draw(now){
+  ctx.clearRect(0,0,W,H);
+  if(!e3Init()){ ctx.fillStyle='#a7afc0'; ctx.font='13px '+MONO; ctx.fillText('Option E needs WebGL, which this browser has disabled. Options A to D still work.',24,H/2); hits=[]; return; }
+  e3Layout();
+  const f=fx(), st=reduce(f,S.cursor), cur=new Set(currentIds(st)), t=S.reduced?0:now/1000;
+  const summary=S.cursor===f.events.length && !S.playing;
+  // camera: orbit around the current event's nodes (replay) or everything touched (summary)
+  let ids=(cur.size&&!summary)?[...cur]:[...st.first.keys()]; if(!ids.length) ids=Object.keys(e3.nodes);
+  const P=ids.map(id=>e3.nodes[id]), cen=[0,1,2].map(i=>P.reduce((s,p)=>s+p[i],0)/P.length);
+  const rad=Math.max(60,...P.map(p=>Math.hypot(p[0]-cen[0],p[1]-cen[1],p[2]-cen[2])));
+  const k=camK(now), td=(cur.size&&!summary)? 330+rad*2.1 : 150+rad*1.75;
+  e3.tgt=e3.tgt.map((v,i)=>v+(cen[i]-v)*k); e3.dist+=(td-e3.dist)*k;
+  if(!S.reduced && !S.user.dragging) S.user.yaw+=.0012;
+  const dist=e3.dist/S.user.zoom, yaw=S.user.yaw, pitch=S.user.pitch, tg=e3.tgt;
+  const eye=[tg[0]+dist*Math.cos(pitch)*Math.sin(yaw), tg[1]+dist*Math.sin(pitch), tg[2]+dist*Math.cos(pitch)*Math.cos(yaw)];
+  e3.mvp=m4mul(m4persp(E3.fov,W/H,10,8000), m4look(eye,tg,[0,1,0]));
+  const far=dist+700, px=H*DPR*.5/Math.tan(E3.fov/2);
+
+  gl.viewport(0,0,glc.width,glc.height); gl.clearColor(.027,.031,.047,1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE);
+
+  // --- lines: plates, edges, tentacles
+  const L=[], seg=(a,b,c)=>L.push(a[0],a[1],a[2],c[0],c[1],c[2],c[3], b[0],b[1],b[2],c[0],c[1],c[2],c[3]);
+  const curLayers=new Set(); if(st.current && !summary){ const p=st.current.payload||{}; if(p.layer) curLayers.add(p.layer); cur.forEach(id=>{ const n=nodeById(id); if(n) curLayers.add(n.layer); }); }
+  const PX=E3.plateX, PZ=E3.plateZ;
+  for(const Ly of e3.lanes){ const y=e3.alt[Ly], on=curLayers.has(Ly), c=on? [.95,.72,.29,.55] : [.36,.48,.7,.16], g=on? [.95,.72,.29,.16] : [.36,.48,.7,.05];
+    seg([-PX,y,-PZ],[PX,y,-PZ],c); seg([PX,y,-PZ],[PX,y,PZ],c); seg([PX,y,PZ],[-PX,y,PZ],c); seg([-PX,y,PZ],[-PX,y,-PZ],c);
+    for(let x=-PX+94;x<PX;x+=94) seg([x,y,-PZ],[x,y,PZ],g); for(let z=-PZ+80;z<PZ;z+=80) seg([-PX,y,z],[PX,y,z],g); }
+  const evAge=(now-S.evStart)/(S.reduced?1:650), glow=[];
+  for(const e of st.edges){ const a=e3.nodes[e.s], b=e3.nodes[e.t]; if(!a||!b) continue;
+    const isCur=st.current && e.seq===st.current.sequence, used=st.used.has(e.s)&&(st.used.has(e.t)||e.t==='ans');
+    const col=rgb(e.layer==='ANSWER' ? '#39d3a6' : (CLUSTER_COLOR[(nodeById(e.t)||{}).cluster]||'#c9d1e0'));
+    const alpha=isCur?.95:(used?.85:(st.considered.has(e.t)?.22:.45)), prog=isCur? Math.min(1,ease(evAge)) : 1, c=e3Curve(a,b), n=36, dashed=(LAYER[e.layer]||{}).dash?.length>0;
+    let prev=a; for(let i=1;i<=n*prog;i++){ const q=e3Q(a,c,b,i/n); if(!dashed || i%2) seg(prev,q,[...col,alpha]); prev=q; }
+    if(used||isCur) for(let i=0;i<=n*prog;i+=1){ const q=e3Q(a,c,b,i/n); glow.push(...q, ...col, used?.16:.22, 7, 0, 0); }
+    if(isCur && prog<1){ const q=e3Q(a,c,b,prog); glow.push(...q, ...col, .9, 26, 0, 0); }
+    if(used && st.basisSeen && !S.reduced){ for(let j=0;j<2;j++){ const q=e3Q(a,c,b,((t*.35+j*.5+(hash(e.s+e.t)%100)/100)%1)); glow.push(...q, .22,.83,.65, .9, 13, 0, 0); } }
+  }
+  const primary=e3Primary(st,cur,summary);
+  if(primary) for(const id of cur){ if(id===primary) continue; const a=e3.nodes[primary], b=e3.nodes[id], prog=Math.min(1,ease(evAge*1.2)); let prev=a;
+    for(let i=1;i<=20*prog;i++){ const q=e3Q(a,e3Curve(a,b),b,i/20); if(i%2) seg(prev,q,[.22,.83,.65,.55]); prev=q; } }
+  gl.useProgram(e3.lin); gl.uniformMatrix4fv(gl.getUniformLocation(e3.lin,'u_mvp'),false,e3.mvp); gl.uniform1f(gl.getUniformLocation(e3.lin,'u_far'),far);
+  gl.bindBuffer(gl.ARRAY_BUFFER,e3.dynLin); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(L),gl.DYNAMIC_DRAW); e3Attrs(e3.lin,7,LIN_LAYOUT); gl.drawArrays(gl.LINES,0,L.length/7);
+
+  // --- points: ambient density per cluster (dimmed outside the focus cluster), then glow trails and nodes
+  const P_=e3.pts, u=n=>gl.getUniformLocation(P_,n);
+  gl.useProgram(P_); gl.uniformMatrix4fv(u('u_mvp'),false,e3.mvp); gl.uniform1f(u('u_px'),px); gl.uniform1f(u('u_time'),t); gl.uniform1f(u('u_far'),far);
+  gl.bindBuffer(gl.ARRAY_BUFFER,e3.cloudBuf); e3Attrs(P_,10,PTS_LAYOUT);
+  const focus=st.current && !summary ? (nodeById((st.current.payload.node_ids||[])[0]||'')||{}).cluster : null;
+  for(const c of e3.clusters){ gl.uniform1f(u('u_dim'), focus && c.id!==focus ? .4 : 1); gl.drawArrays(gl.POINTS,c.start,c.n); }
+  const N=[...glow];
+  for(const n of f.projection.nodes){ if(!st.first.has(n.id)) continue; const p=e3.nodes[n.id], attr=attrOf(st,n.id), isCur=cur.has(n.id)&&!summary, col=rgb(CLUSTER_COLOR[n.cluster]);
+    if(attr==='CONSIDERED_NOT_USED') N.push(...p, .55,.6,.68, .9, 30, 2, 0);
+    else if(attr==='NOT_INSTRUMENTED') N.push(...p, 1,.42,.36, 1, 32, 2, 0);
+    else N.push(...p, ...col, attr==='USED_IN_ANSWER'?1:.6, attr==='USED_IN_ANSWER'?40:(isCur?34:24), 1, 0);
+    if(isCur) N.push(...p, ...col, .5, 90, 0, 0); }
+  gl.uniform1f(u('u_dim'),1);
+  gl.bindBuffer(gl.ARRAY_BUFFER,e3.dynPts); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(N),gl.DYNAMIC_DRAW); e3Attrs(P_,10,PTS_LAYOUT); gl.drawArrays(gl.POINTS,0,N.length/10);
+
+  // --- 2D overlay: plate names, cluster counts, crawler halo, tags, selection
+  hits=[]; placed=[];
+  ctx.font='10px '+MONO;
+  for(const Ly of e3.lanes){ const s=e3Project([-PX,e3.alt[Ly],PZ]); if(!s) continue; const on=curLayers.has(Ly);
+    ctx.fillStyle= on?'#f2b84b':'#5d6b85'; ctx.fillText('▸ '+LAYER[Ly].label.toUpperCase(), s[0]+4, s[1]-4); }
+  const all=f.projection.nodes.filter(n=>st.first.has(n.id)), sp={};
+  for(const n of all){ const s=e3Project(e3.nodes[n.id]); if(!s) continue; sp[n.id]=s; hits.push({id:n.id,x:s[0],y:s[1],r:14}); }
+  if(primary && sp[primary]){ const [x,y]=sp[primary]; ctx.save(); ctx.strokeStyle='#39d3a6'; ctx.globalAlpha=.9; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(x,y,24,0,6.283); ctx.stroke(); ctx.beginPath(); ctx.arc(x,y,15,0,6.283); ctx.stroke();
+    for(let i=0;i<36;i++){ const a=t*.6+i/36*6.283, r2=i%3?31:36; ctx.beginPath(); ctx.moveTo(x+Math.cos(a)*27,y+Math.sin(a)*27); ctx.lineTo(x+Math.cos(a)*r2,y+Math.sin(a)*r2); ctx.stroke(); }
+    ctx.fillStyle='#ff4f8b'; ctx.fillRect(x-4,y-4,8,8); ctx.restore(); }
+  const prio=n=> S.sel===n.id?0 : (cur.has(n.id)&&!summary)?1 : st.flags.has(n.id)?2 : attrOf(st,n.id)==='USED_IN_ANSWER'?3 : 4;
+  for(const n of all.filter(n=>sp[n.id]).sort((a,b)=>prio(a)-prio(b) || sp[a.id][2]-sp[b.id][2])){ const s=sp[n.id]; const [x,y]=s, attr=attrOf(st,n.id), isCur=cur.has(n.id)&&!summary, pr=prio(n), left=x>W*.72;
+    if(st.flags.has(n.id)) tag(x,y-16,'⚑ '+st.flags.get(n.id),'#ff4f8b',{fill:'#ff4f8b',ink:'#1a0610',left});
+    tag(x,y,trunc(n.label, isCur||S.sel===n.id?52:30), attr==='CONSIDERED_NOT_USED'?'#6b7385':(attr==='NOT_INSTRUMENTED'?'#ff6b5b':CLUSTER_COLOR[n.cluster]), {left, optional: pr>=3, dash: attr==='CONSIDERED_NOT_USED'||attr==='NOT_INSTRUMENTED'?[2,2]:[]}); }
+  for(const c of e3.clusters){ const top=Math.max(...c.layers.map(l=>e3.alt[l]??0)), s=e3Project([c.ax,top+28,c.az-c.r*.8]); if(!s) continue; ctx.font='bold 12px '+MONO; const bw=Math.max(ctx.measureText(c.label).width,150), bx=s[0]-30, by=s[1]-11;
+    if(placed.some(r=>bx<r[0]+r[2]&&bx+bw>r[0]&&by<r[1]+r[3]&&by+28>r[1])) continue; placed.push([bx,by,bw,28]);
+    const visited=f.projection.nodes.filter(n=>n.cluster===c.id && st.first.has(n.id)).length, fade=Math.max(.35,Math.min(1,1.3-s[2]/far));
+    ctx.globalAlpha=fade; ctx.fillStyle=CLUSTER_COLOR[c.id]; ctx.font='bold 12px '+MONO; ctx.fillText(c.label,s[0]-30,s[1]);
+    ctx.fillStyle='#6b7385'; ctx.font='10px '+MONO; ctx.fillText(`${c.count} in scope · ${visited} touched`,s[0]-30,s[1]+13); ctx.globalAlpha=1; }
+  if(S.sel && sp[S.sel]){ const [x,y]=sp[S.sel]; ctx.strokeStyle='#fff'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.arc(x,y,16,0,6.283); ctx.stroke(); ctx.setLineDash([]); }
+}
+function e3Primary(st,cur,summary){ if(!st.current||!cur.size||summary) return null; const p=st.current.payload; const id=(p.edges&&p.edges.length? p.edges[p.edges.length-1].target_node_id : (p.node_ids||[])[0]); return e3.nodes[id]? id : null; }
+
+/* ============================ replay ============================ */
+function seek(c){ const f=fx(); S.cursor=Math.max(0,Math.min(f.events.length,c)); S.evStart=performance.now(); renderPanels(); }
+function stop(){ S.playing=false; renderPanels(); }
+function play(){ const f=fx(); if(S.cursor>=f.events.length) seek(0); S.playing=true; S.lastStep=performance.now(); renderPanels(); }
+function stepDelay(){ const f=fx(); const base=1300/S.speed; if(S.pace==='uniform'||S.cursor>=f.events.length||S.cursor===0) return base;
+  const a=new Date(f.events[S.cursor-1].occurred_at), b=new Date(f.events[S.cursor].occurred_at); const span=(new Date(f.trace.ended_at)-new Date(f.trace.started_at))||1;
+  return Math.max(350, Math.min(5000, (b-a)/span*f.events.length*1300))/S.speed; }
+function tick(now){
+  if(S.playing && now-S.lastStep>stepDelay()){ S.lastStep=now; if(S.cursor<fx().events.length) seek(S.cursor+1); else stop(); }
+  if(S.opt!=='compare'){ if(!W) resize();
+    if(S.opt==='A') nebDraw(now,false); else if(S.opt==='D') nebDraw(now,true); else if(S.opt==='E') e3Draw(now); else if(S.opt==='B') lanesDraw(now); else basisDraw(now); }
+  requestAnimationFrame(tick);
+}
+
+/* ============================ input ============================ */
+function userReset(){ return {dx:0,dy:0,zoom:1,yaw:S.opt==='D'?.5:S.opt==='E'?.65:0,pitch:.5,dragging:false}; }
+$('#optSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; S.opt=b.dataset.opt; document.querySelectorAll('#optSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b)); document.body.classList.toggle('cmp',S.opt==='compare'); document.body.classList.toggle('e3d',S.opt==='E'); S.user=userReset(); if(S.opt!=='compare'){ resize(); renderNotes(); renderLegend(); } try{localStorage.setItem('obs-opt',S.opt);}catch(_){} };
+$('#fxSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; S.fx=b.dataset.fx; S.sel=null; document.querySelectorAll('#fxSeg button').forEach(x=>x.setAttribute('aria-pressed',x===b)); S.playing=false; seek(fx().events.length); renderLegend(); };
+$('#reduced').onchange=e=>{ S.reduced=e.target.checked; };
+$('#bPlay').onclick=()=> S.playing? stop() : play();
+$('#bPrev').onclick=()=>{ stop(); seek(S.cursor-1); };
+$('#bNext').onclick=()=>{ stop(); seek(S.cursor+1); };
+$('#bStart').onclick=()=>{ stop(); seek(0); };
+$('#bEnd').onclick=()=>{ stop(); seek(fx().events.length); };
+$('#bSummary').onclick=()=>{ stop(); seek(fx().events.length); };
+$('#bRecenter').onclick=()=>{ S.user=userReset(); };
+$('#scrub').oninput=e=>{ stop(); seek(+e.target.value); };
+$('#speed').onchange=e=>{ S.speed=+e.target.value; };
+$('#pace').onchange=e=>{ S.pace=e.target.value; };
+document.addEventListener('keydown',e=>{ if(e.target.matches('input,select,textarea')||S.opt==='compare') return;
+  if(e.key===' '){ e.preventDefault(); S.playing?stop():play(); } else if(e.key==='ArrowRight'){ stop(); seek(S.cursor+1);} else if(e.key==='ArrowLeft'){ stop(); seek(S.cursor-1);} else if(e.key==='Home'){ stop(); seek(0);} else if(e.key==='End'){ stop(); seek(fx().events.length);} else if(e.key==='r'||e.key==='R'){ $('#bRecenter').click(); } });
+let drag=null;
+cv.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY,moved:false}; S.user.dragging=true; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(Math.abs(dx)+Math.abs(dy)>3) drag.moved=true; drag.x=e.clientX; drag.y=e.clientY;
+  if(S.opt==='D') S.user.yaw+=dx*.006; else if(S.opt==='E'){ S.user.yaw-=dx*.006; S.user.pitch=Math.max(.06,Math.min(1.45,S.user.pitch+dy*.004)); } else if(S.opt!=='B'){ S.user.dx+=dx; S.user.dy+=dy; } });
+cv.addEventListener('pointerup',e=>{ S.user.dragging=false; if(drag && !drag.moved){ const r=cv.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+    let best=null, bd=1e9; for(const h of hits){ const inBox=h.box && x>=h.box[0]&&x<=h.box[0]+h.box[2]&&y>=h.box[1]&&y<=h.box[1]+h.box[3]; const d=Math.hypot(h.x-x,h.y-y); if((inBox||d<h.r)&&d<bd){ bd=d; best=h; } }
+    S.sel= best? best.id : null; renderPanels(); } drag=null; });
+cv.addEventListener('wheel',e=>{ if(S.opt==='B') return; e.preventDefault(); S.user.zoom=Math.max(.4,Math.min(4,S.user.zoom*(e.deltaY<0?1.1:1/1.1))); },{passive:false});
+
+/* ============================ boot ============================ */
+try{ const o=localStorage.getItem('obs-opt'); if(o && document.querySelector(`#optSeg button[data-opt="${o}"]`)) document.querySelector(`#optSeg button[data-opt="${o}"]`).click(); }catch(_){}
+resize(); seek(fx().events.length); renderNotes(); renderLegend();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

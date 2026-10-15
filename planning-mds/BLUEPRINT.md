@@ -205,7 +205,7 @@ first user-facing features, F0021 to F0023.
 
 ### 3.3 Epics & Features
 
-The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065 and F0066), sequenced per sections 115.3 and 124. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. F0066 adds open-statement extraction and signature alignment in v0.2B under ADR-0063, accepted as direction on 2026-09-25. Story links are appended by the plan action as each feature is planned.
+The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065 and F0066), sequenced per sections 115.3 and 124. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. F0066 adds open-statement extraction and signature alignment in v0.2B under ADR-0063, accepted as direction on 2026-09-25. F0067 adds the read-only Graph Observatory in v0.2B under proposed ADR-0071 and ADR-0072 (2026-10-13); its trace contract is carried into F0016, F0021, F0034, F0036 to F0038, F0040 to F0042, F0045 and F0058 first. Story links are appended by the plan action as each feature is planned.
 
 **Completed**
 
@@ -293,6 +293,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0041 — Learning Plane](features/F0041-learning-plane/README.md) - Planned
 - [F0042 — Knowledge promotion/governance](features/F0042-knowledge-promotion-and-governance/README.md) - Planned
 - [F0043 — Generalized review queues / governance](features/F0043-generalized-review-queues-and-governance/README.md) - Planned
+- [F0067 — Graph Observatory](features/F0067-graph-observatory/README.md) - Planned (added 2026-10-13, ADR-0071/ADR-0072)
 
 **v0.3 (Later)**
 
@@ -363,12 +364,12 @@ Performance, availability, scalability, and security targets are proposed gates 
 ### 4.7 Architecture Artifacts
 
 - `architecture/master-blueprint.md` — full baseline
-- `architecture/decisions/` — ADR-0001 to ADR-0070 (Accepted architecture and Proposed contracts; ADR-0060 proposes Docling-Graph, with pinned synthetic development proof complete and production acceptance pending; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8)
+- `architecture/decisions/` — ADR-0001 to ADR-0072 (Accepted architecture and Proposed contracts; ADR-0060 proposes Docling-Graph, with pinned synthetic development proof complete and production acceptance pending; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8; ADR-0071 and ADR-0072 propose the semantic execution trace contract and the read-only Graph Observatory boundary, see `architecture/graph-observatory-design.md`)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
 - `api/brain-api.yaml` — OpenAPI 3.1 (F0001 scope: health, protected reads, webhook, commit)
-- `schemas/*.schema.json` — shared JSON Schemas (manifest, interpretation result, review decision, commit request and response, problem details); `semantic-example.schema.json` and `commercial-pc-example.schema.json` are educational fixture contracts, not runtime DTOs
+- `schemas/*.schema.json` — shared JSON Schemas (manifest, interpretation result, review decision, commit request and response, problem details); `semantic-example.schema.json` and `commercial-pc-example.schema.json` are educational fixture contracts, not runtime DTOs; `semantic-execution-trace.schema.json` is a draft contract under proposed ADR-0071, bound at F0036/F0038 Phase B
 - `security/policies/` — Casbin model and policy; `security/` — AuthX contract and pending security artifacts
 - `testing/evaluation-strategy.md` — Golden Corpus, metrics, regression suites, release gates
 
@@ -453,7 +454,7 @@ Sequence per master blueprint sections 115.3 and 124; original identifiers F0001
 2. v0.1A — F0002 to F0017: typed domain contracts, durable ingestion, immutable evidence, assertion extraction
 3. v0.1B — F0018 to F0023 establish authorized commits, temporal reads, evidence review, and minimal 360 views; F0065 adds bounded on-demand GL guideline assessment; F0024/F0025 prove real interpretation-to-assessment and temporal reassessment end to end
 4. v0.1C — F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases
-5. v0.2A — F0033 to F0040 and F0044 to F0047; v0.2B — F0027 to F0032, F0066 (open-statement alignment, ADR-0063), and F0041 to F0043
+5. v0.2A — F0033 to F0040 and F0044 to F0047; v0.2B — F0027 to F0032, F0066 (open-statement alignment, ADR-0063), F0041 to F0043, and F0067 (Graph Observatory, ADR-0071/ADR-0072)
 6. v0.3 and later — F0048 to F0063: full process, generalized reasoning, automatic derivation propagation, decision replay, and advanced semantics; F0065 is already in v0.1B
 
 Baseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations even though the full Execution Gate and Decision Ledger come later (section 89).

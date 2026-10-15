@@ -1,6 +1,6 @@
 # Feature Registry
 
-**Next Available Feature Number:** F0067
+**Next Available Feature Number:** F0068
 
 **Planning Views:**
 - Roadmap sequencing (`Now / Next / Later`): `planning-mds/features/ROADMAP.md`
@@ -93,6 +93,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | F0064 | Repository instructions and planning-check adoption | Planned | Repository Tooling | `F0064-repository-instructions-and-planning-check-adoption/` |
 | F0065 | Grounded GL guideline assessment | Planned | v0.1B | `F0065-grounded-gl-guideline-assessment/` |
 | F0066 | Open-statement extraction + signature alignment | Planned | v0.2B | `F0066-open-statement-extraction-and-signature-alignment/` |
+| F0067 | Graph Observatory | Planned | v0.2B | `F0067-graph-observatory/` |
 <!-- generated:end registry:planned -->
 
 ## Archived Features

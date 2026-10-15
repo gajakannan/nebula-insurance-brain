@@ -39,3 +39,10 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 - Store a `basis_hash` over everything the run considered (ADR-0068).
 - **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
 - **Schema versioning (validate finding A-5):** time mentions, document time context, interpretation drops, run outcome counts, and `basis_hash` need a versioned addition to `schemas/interpretation-result.schema.json` (and to the run metadata contract) with compatible readers.
+
+## Graph Observatory carry-in (2026-10-13)
+
+[ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Design: [design note section 10](../../architecture/graph-observatory-design.md#10-delivery-approach-carry-the-contract-in-now-land-the-observatory-in-v02b). The scoped Observatory is [F0067](../F0067-graph-observatory/README.md).
+
+- Keep each run's outcome records queryable by run, with a terminal status, including outcomes that change nothing: reused content, drops, and `NONE` or `UNDECIDED` alignments. Learning traces are projected from these records (ADR-0072 section 2); this feature emits no Observatory-specific events.
+- **No new v0.1 scope.** This is a property of records the feature already keeps (run outcome counts, drops, `basis_hash`).

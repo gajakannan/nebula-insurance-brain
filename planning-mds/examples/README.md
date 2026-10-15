@@ -1,6 +1,6 @@
 # Semantic examples and contributor reading path
 
-Start with the [GL neurosymbolic walkthrough](neurosymbolic-gl/README.md), then use the [domain glossary](../domain/glossary.md) and [feature registry](../features/REGISTRY.md). The [Review Panel prototype](nebula-review-panel-live-files.html) is the one runnable artifact here. Persona files describe who contributes; these examples explain what the Brain represents and does.
+Start with the [GL neurosymbolic walkthrough](neurosymbolic-gl/README.md), then use the [domain glossary](../domain/glossary.md) and [feature registry](../features/REGISTRY.md). The [Review Panel prototype](nebula-review-panel-live-files.html) and the [Graph Observatory rendering options](graph-observatory-2d-options.html) are the runnable artifacts here. Persona files describe who contributes; these examples explain what the Brain represents and does.
 
 ## Example contract
 
@@ -38,6 +38,7 @@ Documentation/development examples remain outside the frozen evaluation holdout.
 | Resource envelope, delegation and durable decision/authentication events | [EX-AUTHX-012–018](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md), [structured shapes](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/contract-examples.json) | F0002 S0004–S0006; ADR-0062; synthetic planning examples, no runtime proof |
 | Derived-result and evidence authorization | CASE-18/19 | F0002/F0018/F0065 S0005/F0026, v0.1 |
 | Evidence anchoring, selector shapes, declared precision, unresolved evidence | [Review Panel prototype](nebula-review-panel-live-files.html) | F0001 S0004/F0022, v0.1B |
+| Recorded execution traces: observed, used in answer, considered not used, not instrumented; a learning run with zero canonical change | [EX-OBS-001/002](graph-observatory-2d-options.html) (synthetic; fixtures embedded in the page, validated against the draft [trace schema](../schemas/semantic-execution-trace.schema.json)) | F0036/F0038/F0041 carry-ins, F0067, v0.2; proposed ADR-0071/ADR-0072 |
 | Open statements, typed assertions, signature alignment, implication rules | [EX-SEM-001/002](statements-time-and-governance.md#open-statements-and-alignment) | F0006 storage, v0.1A; F0066 alignment, v0.2B; ADR-0063 |
 | Time mentions, document time context, resolution grade, precision, unknown ends, temporal kind | [EX-SEM-003/004](statements-time-and-governance.md#time-interpretation) | F0004/F0008/F0016/F0019/F0025, v0.1; ADR-0064 |
 | Admission checks, drops, text origin, statement mood | [EX-SEM-005–007](statements-time-and-governance.md#admission-origin-and-mood) | F0004/F0006/F0016/F0022, v0.1; F0052 routing, v0.3; ADR-0065 |

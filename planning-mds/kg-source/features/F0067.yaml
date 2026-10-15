@@ -1,0 +1,42 @@
+id: feature:F0067
+name: Graph Observatory
+path: planning-mds/features/F0067-graph-observatory
+status: planned
+registry_section: Planned
+coverage_excluded:
+  reason: Planned feature added by the 2026-10-13 Graph Observatory amendment; no PRD, stories, or implementation to bind
+    yet. The plan action removes this exclusion at Phase B.
+phase: v0.2B
+roadmap_section: Later
+roadmap_order: 30.5
+rationale: 'Proposed ADR-0071 and ADR-0072: make recorded answer traces and learning runs inspectable and replayable
+  on demand, read-only, from the trace contract carried into F0016, F0036 to F0038, F0041 and F0042. Placed after
+  the learning plane, governance and review queues it projects from.'
+validation_gate: Every drawn node and edge maps to a recorded event or an authoritative record; "used in answer" comes
+  only from the ADR-0046 answer basis; a learning trace rebuilt from records matches the cached one; no unauthorized
+  node, edge, label or count after grant revocation; no write path; answer and run unaffected when the Observatory fails.
+depends_on:
+- feature:F0001
+- feature:F0021
+- feature:F0036
+- feature:F0038
+- feature:F0041
+- feature:F0042
+- feature:F0045
+- id: feature:F0043
+  provenance: inferred
+  confidence: 0.7
+- id: feature:F0034
+  provenance: inferred
+  confidence: 0.7
+governed_by:
+- adr:0071
+- adr:0072
+- adr:0046
+- adr:0053
+- adr:0032
+- adr:0036
+notes:
+- The renderer choice (whether and where 3D is used, always with an accessible 2D view) is decided at Phase A from
+  planning-mds/examples/graph-observatory-2d-options.html.
+- 'Decided 2026-10-13: trace access follows answer access; 90-day configurable trace retention; golden cases are one real GL endorsement answer and three real learning runs; extends the early answer panel shipped by F0038.'
