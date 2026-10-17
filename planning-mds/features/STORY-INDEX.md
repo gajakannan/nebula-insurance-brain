@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 27
+**Total Stories:** 31
 
 ---
 
@@ -44,6 +44,17 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0004 — Content artifact model
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0004-S0001](./F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md) | Publish and reuse an immutable content bundle | Critical | MVP — v0.1A | document intelligence engineer |
+| [F0004-S0002](./F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) | Preserve content structure and text origin | Critical | MVP — v0.1A | document intelligence engineer |
+| [F0004-S0003](./F0004-content-artifact-model/F0004-S0003-document-date-provenance.md) | Preserve document-date provenance | Critical | MVP — v0.1A | persistence engineer |
+| [F0004-S0004](./F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md) | Protect artifact consumers and compatibility | Critical | MVP — v0.1A | persistence engineer |
+
+---
+
 ## F0005 — One-time document ingestion
 
 | Story ID | Title | Priority | Phase | Persona |
@@ -74,6 +85,7 @@ Auto-generated index of all user stories across feature folders.
 |-------|-------|
 | Infrastructure | 7 |
 | MVP | 6 |
+| MVP — v0.1A | 4 |
 | v0.1A | 8 |
 | v0.1B | 6 |
 
@@ -83,7 +95,7 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
-| Critical | 11 |
+| Critical | 15 |
 | High | 16 |
 
 ---

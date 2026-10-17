@@ -225,7 +225,11 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 
 **v0.1A (Next)**
 
-- [F0004 — Content artifact model](features/F0004-content-artifact-model/README.md) - Planned
+- [F0004 — Content artifact model](features/F0004-content-artifact-model/README.md) - Planned (four stories; Phases A and B approved 2026-10-16; implementation not started)
+  - [F0004-S0001](features/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md) - Not Started
+  - [F0004-S0002](features/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) - Not Started
+  - [F0004-S0003](features/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md) - Not Started
+  - [F0004-S0004](features/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md) - Not Started
 - [F0005 — One-time document ingestion](features/F0005-one-time-docling-ingestion/README.md) - Planned
   - [F0005-S0001](features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) — In Progress
   - [F0005-S0002](features/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) — In Progress

@@ -3,20 +3,101 @@ name: Content artifact model
 path: planning-mds/features/F0004-content-artifact-model
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
 phase: v0.1A
 roadmap_section: Next
 roadmap_order: 3
-rationale: The content artifact contract (native DoclingDocument plus normalized views, blocks, coordinates, manifest) is what parse-once preserves and what every interpretation reads (sections 5, 80, 81, 108). ADR-0060 separates immutable parse artifacts from Docling-Graph interpretation outputs.
-validation_gate: F0001 accepted; plan action Phase A and Phase B approved for this feature.
+rationale: 'Four-story content contract plan: versioned immutable bundles and normalized origin/structure, append-only
+  document-date provenance, current authorized reads and legacy/restore compatibility. Phases A and B explicitly
+  approved on 2026-10-16. Implementation not started.'
+validation_gate: Approved F0001/F0002/F0003 foundations; plan run 2026-10-15-bbd8df01 approved Phases A and B. Feature-action
+  implementation and proof remain required.
 depends_on:
 - feature:F0001
+- feature:F0002
+- feature:F0003
 governed_by:
-- adr:0060
 - adr:0003
 - adr:0004
+- adr:0037
 - adr:0040
+- adr:0058
+- adr:0059
+- adr:0060
+- adr:0061
+- adr:0062
 - adr:0064
 - adr:0065
+- adr:0073
+affects:
+- capability:parse-once-content-artifact
+- capability:versioned-content-contracts
+- capability:document-date-provenance
+- entity:content-artifact
+- entity:content-block
+- entity:content-table
+- entity:content-table-cell
+- entity:document-date-candidate
+- entity:document-date-selection
+- endpoint:content-artifact-get
+- endpoint:content-artifact-file-get
+uses_api_contract:
+- api:brain-api
+uses_schema:
+- schema:content-artifact-manifest
+- schema:content-artifact-manifest-v2
+- schema:content-artifact-manifest-read
+- schema:content-records-v2
+- schema:document-date-record
+- schema:interpretation-output-manifest
+- schema:problem-details
+story_mappings:
+- id: story:F0004-S0001
+  path: planning-mds/features/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md
+  affects:
+  - capability:parse-once-content-artifact
+  - capability:versioned-content-contracts
+  - entity:content-artifact
+  uses_schema:
+  - schema:content-artifact-manifest
+  - schema:content-artifact-manifest-v2
+  - schema:interpretation-output-manifest
+  governed_by:
+  - adr:0073
+- id: story:F0004-S0002
+  path: planning-mds/features/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md
+  affects:
+  - capability:versioned-content-contracts
+  - entity:content-block
+  - entity:content-table
+  - entity:content-table-cell
+  uses_schema:
+  - schema:content-records-v2
+  - schema:content-artifact-manifest-v2
+  governed_by:
+  - adr:0073
+- id: story:F0004-S0003
+  path: planning-mds/features/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md
+  affects:
+  - capability:document-date-provenance
+  - entity:document-date-candidate
+  - entity:document-date-selection
+  uses_schema:
+  - schema:document-date-record
+  governed_by:
+  - adr:0073
+- id: story:F0004-S0004
+  path: planning-mds/features/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md
+  affects:
+  - capability:versioned-content-contracts
+  - capability:authorization-enforcement
+  - endpoint:content-artifact-get
+  - endpoint:content-artifact-file-get
+  uses_schema:
+  - schema:content-artifact-manifest-read
+  - schema:interpretation-output-manifest
+  - schema:problem-details
+  governed_by:
+  - adr:0073
+  - adr:0062
+  uses_api_contract:
+  - api:brain-api

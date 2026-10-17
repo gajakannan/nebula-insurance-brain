@@ -12,14 +12,29 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 ## Documents
 
-The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0004.yaml`.
+Phase A was approved by the operator (“proceed with Phase B”) in plan run `2026-10-15-bbd8df01`. Phase B architecture was explicitly approved with `approve-phase-b` on 2026-10-16. Both planning phases are approved for the separate feature action. Implementation has not started.
+
+- [Assembly plan](feature-assembly-plan.md) — interfaces, transactions, migration and proof matrix
+- [Getting started](GETTING-STARTED.md) — implementation handoff and planning checks
+- [ADR-0073](../../architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md) — proposed versioning and append-only date decisions
+- [Persistence design](persistence-design.sql) — proposed SQL, not an applied migration
+- [Contract examples](contract-examples.json) and [validator](validate-contract-examples.py) — synthetic schema conformance
+- [PRD](PRD.md) — requirements and scope boundaries
+- [Personas](personas.md) — existing product personas applied to this feature
+- [Acceptance checklist](acceptance-criteria-checklist.md)
+- [Worked examples](worked-examples.md) — synthetic planning expectations
+- [Status](STATUS.md) — planning position and empty implementation signoff history
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
+| [F0004-S0001](F0004-S0001-publish-and-reuse-content-bundle.md) | Publish and reuse an immutable content bundle | Not Started |
+| [F0004-S0002](F0004-S0002-content-structure-and-text-origin.md) | Preserve content structure and text origin | Not Started |
+| [F0004-S0003](F0004-S0003-document-date-provenance.md) | Preserve document-date provenance | Not Started |
+| [F0004-S0004](F0004-S0004-authorized-consumers-and-compatibility.md) | Protect artifact consumers and compatibility | Not Started |
 
-**Total Stories:** 0
+**Total Stories:** 4
 
 ## Docling-Graph scope amendment (2026-09-15)
 
@@ -36,3 +51,57 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 - Store the document's own date with its source (`CONTENT`, `SOURCE_METADATA`, `HUMAN`). Upload, sync, and receipt times are recorded-time facts and never a document date (ADR-0064).
 - Content blocks carry `text_origin` (`STATED`, `OCR`, `TRANSCRIBED`, `DESCRIBED`), the producing engine/model/version, and an origin-specific anchor. A block never mixes origins (ADR-0065).
 - **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
+
+## Proposed entity relationships
+
+All content/date children retain tenant and knowledge-base ownership. A source version may have several explicitly governed artifacts; legacy identities remain stable. Bytes and full text stay in the content store; indexes point to exact immutable JSONL lines. Dates belong to the source version, outside bundle hashes.
+
+```mermaid
+erDiagram
+  SOURCE_DOCUMENT ||--o{ DOCUMENT_VERSION : versions
+  DOCUMENT_VERSION ||--o{ CONTENT_ARTIFACT : governed_artifacts
+  CONTENT_ARTIFACT ||--o{ CONTENT_BLOCK : indexes
+  CONTENT_ARTIFACT ||--o{ CONTENT_TABLE : indexes
+  CONTENT_TABLE ||--o{ CONTENT_TABLE_CELL : contains
+  CONTENT_TABLE_CELL ||--o{ CONTENT_TABLE_CELL_BLOCK : references
+  CONTENT_BLOCK ||--o{ CONTENT_TABLE_CELL_BLOCK : referenced_by
+  DOCUMENT_VERSION ||--o{ DOCUMENT_DATE_CANDIDATE : candidates
+  DOCUMENT_VERSION ||--o{ DOCUMENT_DATE_SELECTION : history
+  DOCUMENT_DATE_CANDIDATE o|--o{ DOCUMENT_DATE_SELECTION : explicit_choice
+```
+
+```text
+source document -> document version -> artifact -> blocks
+                           |               +----> tables -> cells -> block links
+                           +-> date candidates -> explicit selections / clear
+                                                  |
+                                                  +-> pinned run basis (separate outputs)
+```
+
+## Component view within existing containers
+
+```mermaid
+flowchart LR
+  Worker[Existing ingestion worker] --> Projection[Native content projection]
+  Projection --> Verifier[Shared versioned verifier]
+  API[Existing content GET routes] --> Auth[Current AuthX execution]
+  Auth --> Verifier
+  Verifier --> Store[Local content store]
+  Worker --> Ready[Fenced ready registrar]
+  Ready --> DB[(PostgreSQL metadata and indexes)]
+  Dates[Internal document-date service] --> Auth
+  Dates --> DB
+  Human[Trusted human-decision verifier port] --> Dates
+  Store --> Run[Interpretation with pinned artifact and date basis]
+```
+
+```text
+existing worker -> projection -> shared verifier -> local immutable bytes
+       |                               ^
+       +-> fenced ready registrar      +-- current AuthX <-- existing API reads
+                     |                         ^
+                     v                         |
+              PostgreSQL <--- internal date service <--- trusted verifier port
+```
+
+The human verifier has a rejecting default. The diagram is proposed internal composition, not a new public entry point. Existing [C4 context](../../architecture/c4-context.md) and [container](../../architecture/c4-container.md) boundaries remain unchanged.

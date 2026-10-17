@@ -2,12 +2,12 @@ schemas:
 - id: schema:commercial-pc-example
   label: Commercial P&C teaching records
   path: planning-mds/schemas/commercial-pc-example.schema.json
-  notes: Schema and reference checks for synthetic contractor-account records under proposed
-    ADR-0070 (one account per organization, designated parent accounts, percentage ownership,
-    organization hierarchy, one owning account per policy, broker of record per account), scoped party roles, product composition, exact source lineage, ADR-0064 valid-time kinds with unknown bounds, and a
-    two-time endorsement. Not a production import/API
-    schema or feature acceptance. RDF/OWL/SHACL/query expectations are executed by
-    capability:semantic-example-validation; existing GL fixture evidence does not qualify this bundle.
+  notes: Schema and reference checks for synthetic contractor-account records under proposed ADR-0070 (one account
+    per organization, designated parent accounts, percentage ownership, organization hierarchy, one owning account
+    per policy, broker of record per account), scoped party roles, product composition, exact source lineage, ADR-0064
+    valid-time kinds with unknown bounds, and a two-time endorsement. Not a production import/API schema or feature
+    acceptance. RDF/OWL/SHACL/query expectations are executed by capability:semantic-example-validation; existing
+    GL fixture evidence does not qualify this bundle.
   source_docs:
   - F0012/README.md
   - F0013/README.md
@@ -77,10 +77,48 @@ schemas:
 - id: schema:semantic-execution-trace
   label: SemanticExecutionTraceBundle
   path: planning-mds/schemas/semantic-execution-trace.schema.json
-  notes: Draft contract under proposed ADR-0071 for a recorded execution trace (summary, bounded projection,
-    ordered events with attribution). Validates the synthetic EX-OBS-001/002 fixtures embedded in
-    examples/graph-observatory-2d-options.html. Not an API contract until F0036/F0038 or F0041 Phase B binds it.
+  notes: Draft contract under proposed ADR-0071 for a recorded execution trace (summary, bounded projection, ordered
+    events with attribution). Validates the synthetic EX-OBS-001/002 fixtures embedded in examples/graph-observatory-2d-options.html.
+    Not an API contract until F0036/F0038 or F0041 Phase B binds it.
   related_nodes:
   - adr:0071
   - adr:0072
   - adr:0046
+- id: schema:content-artifact-manifest-v2
+  label: Content Artifact Manifest V2
+  path: planning-mds/schemas/content-artifact-manifest-v2.schema.json
+  related_nodes:
+  - capability:versioned-content-contracts
+  - entity:content-artifact
+  - adr:0073
+- id: schema:content-artifact-manifest-read
+  label: Content Artifact Manifest Read
+  path: planning-mds/schemas/content-artifact-manifest-read.schema.json
+  related_nodes:
+  - capability:versioned-content-contracts
+  - endpoint:content-artifact-get
+  - adr:0073
+- id: schema:content-records-v2
+  label: Content Records V2
+  path: planning-mds/schemas/content-records-v2.schema.json
+  related_nodes:
+  - capability:versioned-content-contracts
+  - entity:content-block
+  - entity:content-table
+  - entity:content-table-cell
+  - adr:0073
+- id: schema:document-date-record
+  label: Document Date Record
+  path: planning-mds/schemas/document-date-record.schema.json
+  related_nodes:
+  - capability:document-date-provenance
+  - entity:document-date-candidate
+  - entity:document-date-selection
+  - adr:0073
+- id: schema:interpretation-output-manifest
+  label: Interpretation Output Manifest
+  path: planning-mds/schemas/interpretation-output-manifest.schema.json
+  related_nodes:
+  - capability:versioned-content-contracts
+  - entity:semantic-interpretation-run
+  - adr:0073

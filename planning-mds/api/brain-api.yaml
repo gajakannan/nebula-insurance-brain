@@ -7,8 +7,10 @@ info:
     the Casbin adapter, and audits the decision. Denials are reported as 404 so resource existence is never disclosed
     (master blueprint sections 66, 118.2). F0002 design: all protected operations use current typed scope and restriction
     checks with durable decision audit. Internal AuthX context is never a public request payload; role grants remain
-    unchanged. F0002 runtime implementation is pending.'
-  version: 0.2.0
+    unchanged. F0002 runtime is approved in its archived feature evidence. F0004 proposes dual-version verified
+    content reads and integrity/unavailable responses; those refinements received Phase B design approval on 2026-10-16;
+    implementation proof remains required.'
+  version: 0.3.0
   contact:
     name: Nebula Insurance Brain
 servers:
@@ -51,28 +53,48 @@ paths:
       - $ref: '#/components/parameters/ArtifactId'
       responses:
         '200':
-          description: Manifest of the accepted artifact
+          description: Exact retained manifest bytes, dispatched by declared artifact contract version (legacy v1
+            or proposed v2). No synthesized date or provenance fields.
           content:
             application/json:
               schema:
-                $ref: ../schemas/content-artifact-manifest.schema.json
+                $ref: ../schemas/content-artifact-manifest-read.schema.json
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Malformed input.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
         '401':
-          $ref: '#/components/responses/Unauthenticated'
-        '403':
-          description: Reserved by the shared error catalog. These resource operations return 404 for authorization
-            denial to conceal existence.
+          description: Missing or invalid verified credentials.
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Absent, denied, not-ready or undeclared file; no protected existence or alternate lookup
+            is disclosed.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: 'Authorized read only: ARTIFACT_INTEGRITY or ARTIFACT_VERSION_UNSUPPORTED. No reparse or
+            alternate namespace fallback.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
         '503':
-          $ref: '#/components/responses/AuthorizationUnavailable'
+          description: Authorization/audit unavailable (existing authorization code), or CONTENT_UNAVAILABLE for
+            transient content storage failure. No payload is released.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
       x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
         constraints, bounded delegation and durable audit; no client-supplied trusted context.'
+      x-f0004-status: Phase B design approved 2026-10-16; runtime implementation and proof pending.
   /reviews/{reviewItemId}:
     get:
       summary: Get a review item with its evidence locator and decision
@@ -285,15 +307,41 @@ paths:
                 type: string
                 format: binary
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Malformed input.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
         '401':
-          $ref: '#/components/responses/Unauthenticated'
+          description: Missing or invalid verified credentials.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Absent, denied, not-ready or undeclared file; no protected existence or alternate lookup
+            is disclosed.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: 'Authorized read only: ARTIFACT_INTEGRITY or ARTIFACT_VERSION_UNSUPPORTED. No reparse or
+            alternate namespace fallback.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
         '503':
-          $ref: '#/components/responses/AuthorizationUnavailable'
+          description: Authorization/audit unavailable (existing authorization code), or CONTENT_UNAVAILABLE for
+            transient content storage failure. No payload is released.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
       x-authorization-contract: content_artifact:read plus all F0002 current resource restrictions; commit read-decision
         audit before releasing bytes.
+      x-f0004-status: Phase B design approved 2026-10-16; runtime implementation and proof pending.
 components:
   securitySchemes:
     bearerAuth:
