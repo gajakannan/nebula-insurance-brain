@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://nebula.local/schemas/document-date-record.schema.json",
   "title": "DocumentDateRecord",
-  "description": "Append-only candidates and explicit selections; no automatic precedence. HUMAN provenance needs a trusted verifier, not schema validity alone. A null candidate explicitly clears the selected date; no selection means undated. YEAR/MONTH/DAY preserve supplied precision.",
+  "description": "Append-only candidates and explicit selections; no automatic precedence. HUMAN provenance needs a trusted verifier, not schema validity alone. In v0.1 every selection, including a clear, carries a verified human selection decision; a service principal may record candidates but cannot select. A null candidate explicitly clears the selected date; no selection means undated. YEAR/MONTH/DAY preserve supplied precision.",
   "oneOf": [
     {
       "type": "object",
@@ -267,7 +267,8 @@
         "reason",
         "idempotency_key",
         "sequence",
-        "authorization_audit_event_id"
+        "authorization_audit_event_id",
+        "human_decision"
       ],
       "properties": {
         "contract_version": {
@@ -341,6 +342,40 @@
         "authorization_audit_event_id": {
           "type": "string",
           "format": "uuid"
+        },
+        "human_decision": {
+          "description": "Verified human selection decision (F0022 producer). actor_principal_id here is the deciding human; the record's top-level actor_principal_id is the calling principal. Schema validity is not authority: the trusted verifier binds decision, document version, candidate (or clear) and expected previous selection.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "decision_id",
+            "actor_principal_id",
+            "authorization_decision_id",
+            "decided_at",
+            "receipt_sha256"
+          ],
+          "properties": {
+            "decision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "actor_principal_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "authorization_decision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "decided_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "receipt_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
         }
       }
     }

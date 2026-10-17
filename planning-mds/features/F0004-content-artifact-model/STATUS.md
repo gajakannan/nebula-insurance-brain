@@ -3,11 +3,13 @@
 **Overall Status:** Planned\
 **Delivery Status:** Planned — v0.1A; roadmap Next\
 **Last Updated:** 2026-10-16\
-**Plan Run:** `2026-10-15-bbd8df01`
+**Plan Run:** `2026-10-15-bbd8df01`; rework run `2026-10-16-fce2ff91`
 
 ## Planning Position
 
 Phase A approved by operator “proceed with Phase B”; G1–G3 passed. Phase B design explicitly approved with `approve-phase-b` on 2026-10-16 after G4 and all seven G5 exit checks passed. The plan is ready for the separate feature action. Registry/roadmap retain Planned/Next. Planning does not authorize implementation or change delivery priority.
+
+Plan-review run `2026-10-16-a186bc18` returned CONDITIONALLY READY (2 high, 3 medium, 4 low). Plan run `2026-10-16-fce2ff91` reworks those findings using four operator decisions (2026-10-16): new sources stay on v1 until per-item provenance is proven; legacy v1 artifacts stay readable through the v1 verifier; the date-candidate producer is an open decision; only a verified human decision may select a date in v0.1. The operator re-approved both phases (`approve-phase-a`, `approve-phase-b`) on 2026-10-16. The plan is ready for the feature action, starting with the Step 1a provenance spike. Re-review run `2026-10-16-b98c71c4` returned CONDITIONALLY READY (R-H1 high, R-M1 medium, R-L1 low). Plan run `2026-10-16-06e0131a` reworks those findings using two operator decisions (2026-10-16): a read only fails, and an operator-run integrity sweep quarantines through `AuthorizationExecution.mutate`; after v2 activation, a document with an unattributable item falls back to v1 with a recorded reason. The operator re-approved both phases (`approve-phase-a`, `approve-phase-b`) on 2026-10-16. A full in-session review found six gaps. Plan run `2026-10-17-620b7618` fixes them: the sweep and backfill are synchronous, so they authorize with `decide` over `SyncAuthorityStore`, with the decision and effects in one transaction, rather than `AuthorizationExecution.mutate`; fallback documents keep the ADR-0073 version ID; the insert order and the orphan authorization key are corrected; the restore-drill lifecycle values with no writer are removed. The operator re-approved both phases on 2026-10-17.
 
 ## Story Checklist
 
