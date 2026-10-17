@@ -6,7 +6,7 @@
 **Feature Name:** Content artifact model\
 **Priority:** Critical\
 **Phase:** MVP — v0.1A\
-**Status:** Requirements approved by operator “proceed with Phase B” in plan run `2026-10-15-bbd8df01`. Implementation not started.
+**Status:** Requirements approved by operator “proceed with Phase B” in plan run `2026-10-15-bbd8df01`; targeted reworks in plan runs `2026-10-16-fce2ff91`, `2026-10-16-06e0131a` and `2026-10-17-620b7618`. Implementation not started.
 
 ## Feature Statement
 
@@ -59,7 +59,7 @@ All acceptance criteria in [the checklist](acceptance-criteria-checklist.md) are
 
 **Key workflows:** authorized ingestion handoff → validate/publish → authorized reload; content metadata lookup → original block/table/region; document-date provenance supplied by a trusted caller → retained record → reload; existing artifact → new interpretation → unchanged artifact plus separate run outputs.
 
-System entry points are the existing ingestion publication boundary and authorized artifact/evidence services. Phase B must map each requirement to concrete interfaces and failure responses. F0004 supplies metadata that F0022 can display; it does not deliver those screens or a reviewer action.
+System entry points are the existing ingestion publication boundary and authorized artifact/evidence services. The [assembly plan](feature-assembly-plan.md) maps each requirement to concrete interfaces and failure responses. F0004 supplies metadata that F0022 can display; it does not deliver those screens or a reviewer action.
 
 ## Screen Layouts (ASCII)
 
@@ -77,7 +77,7 @@ Document-date provenance is metadata about the source, not a canonical effective
 
 ## Role-Based Access
 
-Reuse verified F0002 principals, current membership and resource restrictions. An ingestion ServicePrincipal may publish only within its effective scope; no new grant is implied. TenantMember and Reviewer reads require the existing applicable artifact/evidence permissions and parent restrictions. Reviewer status grants neither universal document editing nor canonical acceptance. Every authorization decision retains its audit identity and policy version. Recheck current access on source bytes, artifact metadata, native/normalized files, and referenced run outputs; historical ownership is not a grant.
+Reuse verified F0002 principals, current membership and resource restrictions. An ingestion ServicePrincipal may publish only within its effective scope; no new grant is implied. TenantMember and Reviewer reads require the existing applicable artifact/evidence permissions and parent restrictions. Reviewer status grants neither universal document editing nor canonical acceptance, and the Reviewer role alone grants no content read: reviewers read content through their TenantMember grant. In v0.1, selecting or clearing a document date requires a verified human selection decision; a ServicePrincipal may record date candidates but cannot select one. Every authorization decision retains its audit identity and policy version. Recheck current access on source bytes, artifact metadata, native/normalized files, and referenced run outputs; historical ownership is not a grant.
 
 ## Success Criteria
 
@@ -91,13 +91,13 @@ Reuse verified F0002 principals, current membership and resource restrictions. A
 
 **Source authority:** ADR-0003/0004/0040/0059 are accepted. ADR-0058 is accepted as amended for the bounded PDF/BoxSelector contract. ADR-0060/0064/0065 remain Proposed; their feature README amendments authorize only the bounded carry-ins above. Planning approval does not accept those broader ADRs.
 
-**Compatibility risk:** additional required fields can break strict old readers. Phase B must choose versioned schemas/readers and an explicit legacy path before approval. Missing historical origin/date evidence must remain missing.
+**Compatibility risk:** additional required fields can break strict old readers. ADR-0073 adopts versioned schemas/readers and an explicit v1 legacy path. Existing v1 artifacts stay readable through the v1 verifier, and new sources keep publishing v1 until per-item origin provenance is proven on the pinned converter (operator decision 2026-10-16). After activation, an individual document whose items cannot all be attributed falls back to v1, and the fallback reason is recorded. Missing historical origin/date evidence must remain missing.
 
-**Publication risk:** object bytes and database readiness have separate failure points. Phase B must reconcile manifest-last publication, ownership, integrity checks, idempotency and restoration with the existing stores and F0003 persistence contract.
+**Publication risk:** object bytes and database readiness have separate failure points. The assembly plan reconciles manifest-last publication, ownership, integrity checks, idempotency and restoration with the existing stores and F0003 persistence contract.
 
 **Date/origin risk:** no reliable date or origin may be available for a legacy artifact. Absence is not permission to use receipt time or to label generated text as stated text.
 
-No unresolved business question blocks this draft: the existing blueprint and amendments supply the scope. Physical schema shapes, supported-version matrix, service entry points, missing-anchor representation, and error contracts are Phase B design work, not permission to weaken these requirements.
+No unresolved business question blocks this draft: the existing blueprint and amendments supply the scope. Physical schema shapes, supported-version matrix, service entry points, missing-anchor representation, and error contracts are settled in the assembly plan and ADR-0073; none of them weakens these requirements.
 
 ## Dependencies
 
@@ -109,6 +109,7 @@ No unresolved business question blocks this draft: the existing blueprint and am
 | F0005 | Downstream ingestion consumer and existing opt-in compatibility proof. Production qualification remains pending; F0004 must not depend on its production activation. |
 | F0006/F0009/F0016/F0022 | Downstream origin, provenance, interpretation, and display consumers; their implementation is not a prerequisite to storage contracts. |
 | F0026 | Broader operational/holdout qualification, not a substitute for F0004 integrity and authorization tests. |
+| Unassigned | Runtime producer of CONTENT/SOURCE_METADATA date candidates — open decision in BLUEPRINT §4.8. F0022 supplies the human selection decision. Until both exist, consumers see documents as undated. |
 
 Approved dependency manifest references and pending downstream audits are recorded in this run's [artifact trace](../../operations/evidence/runs/2026-10-15-bbd8df01/artifact-trace.md).
 
@@ -121,4 +122,4 @@ Approved dependency manifest references and pending downstream audits are record
 
 ## Example Library
 
-[Worked examples](worked-examples.md) specialize the continuing EX-GL-001 case and EX-SEM-003/006. They are synthetic, illustrative planning expectations; no F0004 runtime result is claimed. Definitions come from the [glossary](../../domain/glossary.md) and [master blueprint §§5–6, 80–81, 108](../../architecture/master-blueprint.md). The architect must bind these cases to versioned contracts in Phase B; implementation must supply reproduction evidence outside the frozen holdout.
+[Worked examples](worked-examples.md) specialize the continuing EX-GL-001 case and EX-SEM-003/006. They are synthetic, illustrative planning expectations; no F0004 runtime result is claimed. Definitions come from the [glossary](../../domain/glossary.md) and [master blueprint §§5–6, 80–81, 108](../../architecture/master-blueprint.md). Phase B bound these cases to versioned contracts and [synthetic schema cases](contract-examples.json); implementation must supply reproduction evidence outside the frozen holdout.

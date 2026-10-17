@@ -1,0 +1,11 @@
+# Gate Decisions — F0004-content-artifact-model plan run 2026-10-16-06e0131a
+
+## Gate Decisions
+
+| Gate | Decision | Decider | Timestamp | Rationale | Blocking | Follow-up |
+|------|----------|---------|-----------|-----------|----------|-----------|
+| G1 | PASS | Product Manager | 2026-10-16T23:02:38-04:00 | The operator answered both rework decisions (R-H1: read fails, job quarantines; R-M1: per-document v1 fallback), recorded in action-context.md Inputs. R-L1 needs no business decision. | No | - |
+| G2 | PASS | Product Manager | 2026-10-16T23:02:38-04:00 | Targeted Phase A edits: S0004-AC3 (the integrity sweep quarantines; a read only fails), the S0002 provenance gate (per-document v1 fallback after PASS), PRD compatibility risk, checklist mirror, glossary publication-state row, STATUS. AC IDs are stable; validate-stories passes. | No | - |
+| G3 | PASS | Product Manager | 2026-10-16T23:03:02-04:00 | Phase A checkpoint token: **`approve-phase-a`**, typed verbatim by the operator after reviewing the rework summary. | No | - |
+| G4 | PASS | Architect | 2026-10-16T23:05:50-04:00 | Phase B rework. R-H1: the read path only fails (failed read decision, 409). The operator-run integrity sweep quarantines through `AuthorizationExecution.mutate` as the ingestion ServicePrincipal with `content_artifact:ingest`, and also takes over orphan-marker recording (discovered impact). Every state event needs a mutate decision; repair-record ownership wording is aligned. R-M1: per-document v1 fallback with `writer_fallback_reason` (column plus audit), and a Step 1a fallback-rate measurement. R-L1: a BEFORE INSERT stamp trigger plus documented event-first ordering. ADR-0073, OpenAPI 409, GETTING-STARTED and the KG shard are updated. SQL parses with pglast (27 statements, 3 plpgsql bodies). | No | - |
+| G5 | PASS | Architect | 2026-10-16T23:06:38-04:00 | All exit commands exit 0. validate-trackers first failed on the known generate-story-index.py hard-break backslash defect; the committed STORY-INDEX.md was restored (story metadata unchanged) and the stage resumed from validate-trackers. Phase B checkpoint token: **`approve-phase-b`**, typed verbatim by the operator. | No | Framework: generate-story-index backslash defect; manifest placeholder drift |

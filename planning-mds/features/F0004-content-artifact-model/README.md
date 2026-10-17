@@ -12,7 +12,7 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 ## Documents
 
-Phase A was approved by the operator (“proceed with Phase B”) in plan run `2026-10-15-bbd8df01`. Phase B architecture was explicitly approved with `approve-phase-b` on 2026-10-16. Both planning phases are approved for the separate feature action. Implementation has not started.
+Phase A was approved by the operator (“proceed with Phase B”) in plan run `2026-10-15-bbd8df01`. Phase B architecture was explicitly approved with `approve-phase-b` on 2026-10-16. Plan-review run `2026-10-16-a186bc18` returned CONDITIONALLY READY. Plan run `2026-10-16-fce2ff91` reworks its findings: both phases re-approved with `approve-phase-a` and `approve-phase-b` on 2026-10-16. Re-review run `2026-10-16-b98c71c4` returned CONDITIONALLY READY; plan run `2026-10-16-06e0131a` reworks R-H1, R-M1 and R-L1; both phases re-approved with `approve-phase-a` and `approve-phase-b` on 2026-10-16. Plan run `2026-10-17-620b7618` fixes six full-review gaps; both phases re-approved on 2026-10-17. Implementation has not started.
 
 - [Assembly plan](feature-assembly-plan.md) — interfaces, transactions, migration and proof matrix
 - [Getting started](GETTING-STARTED.md) — implementation handoff and planning checks

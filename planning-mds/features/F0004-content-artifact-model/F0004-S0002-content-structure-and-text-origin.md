@@ -26,7 +26,7 @@ The 2026-09-25 F0004 amendment admits text-origin storage and validation. Master
 - [ ] **F0004-S0002-AC5:** Given repeated values, merged cells, repeated headers and continuation-table content, when represented relations are stored/read, then cell/header/continuation identities remain distinguishable; matching a value alone does not establish its location.
 - [ ] **F0004-S0002-AC6:** Given an origin/producer/anchor validation failure or a block mixing origins, when publication is attempted, then the new-contract record is rejected explicitly and no already published bundle is changed. Readable legacy content follows S0004 and is never relabeled without evidence.
 
-- [ ] **F0004-S0002-AC7:** Given an authorized publication, when validated content becomes available, then durable audit history records actor, scope, artifact identity and recorded time; failed publication never records a successful content mutation.
+- [ ] **F0004-S0002-AC7:** Given an authorized publication that carries structure/origin records, when validated content becomes available, then the single publication audit event required by F0004-S0001-AC6 also covers those records; no separate per-story or per-record success event is created, and failed publication records none. Evidence is shared with S0001-AC6.
 
 **Edge Cases & Error Scenarios:** Unknown origin, impossible offsets, invalid dimensions, dangling table references or mixed-origin text → explicit contract failure. Missing parser geometry → truthful reduced precision, not guessed geometry. Described text remains labeled so downstream admission/review can enforce its restrictions.
 
@@ -58,7 +58,7 @@ Artifact-local block/table/cell IDs, actual text and reading order, section/page
 
 ## Dependencies
 
-F0004-S0001 publication contract; accepted ADR-0040 and amended ADR-0058; bounded ADR-0065 amendment. F0005 translates parse output; F0006/F0016/F0022 consume origin/evidence metadata.
+F0004-S0001 publication contract; the Step 1 per-item provenance spike (assembly plan); accepted ADR-0040 and amended ADR-0058; bounded ADR-0065 amendment. F0005 translates parse output; F0006/F0016/F0022 consume origin/evidence metadata.
 
 ## Out of Scope
 
@@ -66,7 +66,7 @@ New transcription/description engines; full W3C/OOXML locators; browser UTF-16 c
 
 ## Questions & Assumptions
 
-No unresolved business question. This story uses the existing blueprint and bounded amendments, not broader acceptance of Proposed ADRs. Physical schema, compatibility matrix and interface/error details must be completed in Phase B before architecture approval.
+No unresolved business question. This story uses the existing blueprint and bounded amendments, not broader acceptance of Proposed ADRs. Physical schema, compatibility matrix and interface/error details are specified in the approved [assembly plan](feature-assembly-plan.md) and [ADR-0073](../../architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md). **Provenance gate (operator decision 2026-10-16):** the v2 origin criteria (AC2–AC4, AC6) are proven on v2 publication. New sources keep publishing v1 bundles until the assembly plan's Step 1 provenance spike proves per-item origin on the pinned converter. After a PASS, a document whose items cannot all be attributed publishes as a v1 bundle with a recorded `ORIGIN_UNAVAILABLE` fallback reason (operator decision 2026-10-16, re-review R-M1); it never receives inferred v2 origins. If the spike fails, this story cannot be signed off and returns to the operator for a scope decision; it is never satisfied by inferring origin from page-level OCR counts.
 
 ## Definition of Done
 

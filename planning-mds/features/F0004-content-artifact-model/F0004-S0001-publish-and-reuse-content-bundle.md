@@ -65,7 +65,7 @@ New parser/model engine, worker scheduling/retry/lease logic, cloud adapters, pr
 
 ## Questions & Assumptions
 
-No unresolved business question. This story uses the existing blueprint and bounded amendments, not broader acceptance of Proposed ADRs. Physical schema, compatibility matrix and interface/error details must be completed in Phase B before architecture approval.
+No unresolved business question. This story uses the existing blueprint and bounded amendments, not broader acceptance of Proposed ADRs. Physical schema, compatibility matrix and interface/error details are specified in the approved [assembly plan](feature-assembly-plan.md) and [ADR-0073](../../architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md).
 
 ## Definition of Done
 
