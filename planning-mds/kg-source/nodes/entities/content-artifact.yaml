@@ -1,12 +1,19 @@
 id: entity:content-artifact
 label: Content artifact
 notes: 'Immutable parse-once bundle for one document version: docling-document.json, normalized.md, blocks.jsonl,
-  tables.jsonl, layout.jsonl, manifest.json with per-file sha256 and execution record.'
+  tables.jsonl, layout.jsonl, manifest.json with per-file sha256 and execution record. Proposed F0004 permits governed
+  artifact versions per retained source version, with preserved legacy identities and separate append-only document-date
+  metadata.'
 source_docs:
 - F0001/F0001-S0003-proof-parse-once-reinterpret-evidence.md
 - planning-mds/architecture/master-blueprint.md
+- F0004/feature-assembly-plan.md
 related_nodes:
 - capability:parse-once-content-artifact
 - schema:content-artifact-manifest
+- capability:versioned-content-contracts
+- capability:document-date-provenance
+- schema:content-artifact-manifest-v2
+- adr:0073
 related_entities:
 - entity:semantic-interpretation-run

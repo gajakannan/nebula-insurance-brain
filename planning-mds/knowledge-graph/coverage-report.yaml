@@ -1,9 +1,9 @@
 version: 0
 summary:
-  canonical_nodes: 175
-  features_mapped: 11
-  stories_mapped: 27
-  features_excluded: 56
+  canonical_nodes: 188
+  features_mapped: 12
+  stories_mapped: 31
+  features_excluded: 55
   features_uncovered: 0
   code_bindings: 19
   symbol_count: 536
@@ -15,6 +15,7 @@ coverage:
   - feature:F0001
   - feature:F0002
   - feature:F0003
+  - feature:F0004
   - feature:F0005
   - feature:F0012
   - feature:F0013
@@ -24,11 +25,6 @@ coverage:
   - feature:F0062
   - feature:F0065
   excluded_features:
-  - id: feature:F0004
-    path: planning-mds/features/F0004-content-artifact-model
-    reason: Planned feature reserved from master blueprint section 95; no PRD, stories,
-      or implementation to bind yet. The plan action removes this exclusion at Phase
-      B.
   - id: feature:F0006
     path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis
     reason: Planned feature reserved from master blueprint section 95; no PRD, stories,
@@ -323,6 +319,10 @@ coverage:
   - story:F0003-S0002
   - story:F0003-S0003
   - story:F0003-S0004
+  - story:F0004-S0001
+  - story:F0004-S0002
+  - story:F0004-S0003
+  - story:F0004-S0004
   - story:F0005-S0001
   - story:F0005-S0002
   - story:F0005-S0003
@@ -346,8 +346,8 @@ freshness:
       - planning-mds/features/F0017-deterministic-entity-resolution/README.md
       - planning-mds/features/F0023-minimal-entity-360/README.md
       source_count: 8
-      last_modified: '2026-10-12'
-      source_hash: 4eac9f9fdecbe154
+      last_modified: '2026-10-16'
+      source_hash: d5cf20aa18a9c340
     entity:assertion:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -384,17 +384,58 @@ freshness:
     entity:content-artifact:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
-      source_count: 2
-      last_modified: '2026-10-08'
-      source_hash: 4f6889e19713b0f7
+      source_count: 3
+      last_modified: '2026-10-17'
+      source_hash: 3721a33bac4a0215
+    entity:content-block:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      source_count: 3
+      last_modified: '2026-10-17'
+      source_hash: 38cbfdf63cd00754
+    entity:content-table:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      source_count: 3
+      last_modified: '2026-10-17'
+      source_hash: 38cbfdf63cd00754
+    entity:content-table-cell:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      source_count: 3
+      last_modified: '2026-10-17'
+      source_hash: 38cbfdf63cd00754
     entity:delegation:
       source_paths:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-10-12'
-      source_hash: c5684c5c583f0647
+      last_modified: '2026-10-16'
+      source_hash: f645e0d296dd0916
+    entity:document-date-candidate:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      source_count: 3
+      last_modified: '2026-10-17'
+      source_hash: 38cbfdf63cd00754
+    entity:document-date-selection:
+      source_paths:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      source_count: 3
+      last_modified: '2026-10-17'
+      source_hash: 38cbfdf63cd00754
     entity:fact-slot:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -417,8 +458,8 @@ freshness:
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0017-deterministic-entity-resolution/README.md
       source_count: 4
-      last_modified: '2026-10-12'
-      source_hash: e35f124478c6e3a5
+      last_modified: '2026-10-16'
+      source_hash: 405f59dc59cfbec9
     entity:insurance-party-role-assignment:
       source_paths:
       - planning-mds/architecture/commercial-pc-example-handoff.md
@@ -427,22 +468,22 @@ freshness:
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       source_count: 5
-      last_modified: '2026-10-12'
-      source_hash: 2302d8419a0a674b
+      last_modified: '2026-10-16'
+      source_hash: aa315eeca64faf80
     entity:knowledge-base:
       source_paths:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-10-12'
-      source_hash: c5684c5c583f0647
+      last_modified: '2026-10-16'
+      source_hash: f645e0d296dd0916
     entity:membership:
       source_paths:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-10-12'
-      source_hash: c5684c5c583f0647
+      last_modified: '2026-10-16'
+      source_hash: f645e0d296dd0916
     entity:ontology-module-version:
       source_paths:
       - planning-mds/architecture/data-model.md
@@ -451,8 +492,8 @@ freshness:
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       source_count: 5
-      last_modified: '2026-10-12'
-      source_hash: 1c67b18c0f9b4a5d
+      last_modified: '2026-10-16'
+      source_hash: 22449a6f14772a5a
     entity:ontology-release:
       source_paths:
       - planning-mds/architecture/data-model.md
@@ -462,8 +503,8 @@ freshness:
       - planning-mds/features/F0015-extraction-profile-compiler/README.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
       source_count: 6
-      last_modified: '2026-10-12'
-      source_hash: 3197733fd3f53bb8
+      last_modified: '2026-10-16'
+      source_hash: d84cc18e3fb3e6da
       hotspot_rank: 16
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
@@ -476,8 +517,8 @@ freshness:
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       source_count: 4
-      last_modified: '2026-10-12'
-      source_hash: 4218fc58928f58f9
+      last_modified: '2026-10-16'
+      source_hash: 7ff1646ed78b2e94
     entity:outbox-event:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -492,16 +533,16 @@ freshness:
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0023-minimal-entity-360/README.md
       source_count: 4
-      last_modified: '2026-10-12'
-      source_hash: b96a39173521bb5f
+      last_modified: '2026-10-16'
+      source_hash: 1ebe4a95180a44eb
     entity:policy-term:
       source_paths:
       - planning-mds/architecture/commercial-pc-example-handoff.md
       - planning-mds/domain/glossary.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       source_count: 3
-      last_modified: '2026-10-12'
-      source_hash: fa79f91b5b48b092
+      last_modified: '2026-10-16'
+      source_hash: 85817b71a1e61147
     entity:principal:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -515,8 +556,8 @@ freshness:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-10-12'
-      source_hash: c5684c5c583f0647
+      last_modified: '2026-10-16'
+      source_hash: f645e0d296dd0916
     entity:review-decision:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -543,22 +584,22 @@ freshness:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-10-12'
-      source_hash: c5684c5c583f0647
+      last_modified: '2026-10-16'
+      source_hash: f645e0d296dd0916
     entity:tenant-entity-identity:
       source_paths:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-10-12'
-      source_hash: c5684c5c583f0647
+      last_modified: '2026-10-16'
+      source_hash: f645e0d296dd0916
     entity:workspace:
       source_paths:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-10-12'
-      source_hash: c5684c5c583f0647
+      last_modified: '2026-10-16'
+      source_hash: f645e0d296dd0916
     glossary_term:constraint-execution-context:
       source_paths:
       - planning-mds/architecture/ontology-planning-handoff.md
@@ -567,8 +608,8 @@ freshness:
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
       source_count: 5
-      last_modified: '2026-10-12'
-      source_hash: acc33afbd84d02ef
+      last_modified: '2026-10-16'
+      source_hash: fd37ee7c081fe638
     glossary_term:insurance-product-composition:
       source_paths:
       - planning-mds/architecture/commercial-pc-example-handoff.md
@@ -576,8 +617,8 @@ freshness:
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       source_count: 4
-      last_modified: '2026-10-12'
-      source_hash: b6293a23bbda343b
+      last_modified: '2026-10-16'
+      source_hash: 7463172f390ea184
     glossary_term:ontology-projection-mapping:
       source_paths:
       - planning-mds/architecture/data-model.md
@@ -587,16 +628,16 @@ freshness:
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0015-extraction-profile-compiler/README.md
       source_count: 6
-      last_modified: '2026-10-12'
-      source_hash: 584ecbd460a438ab
+      last_modified: '2026-10-16'
+      source_hash: 79940c68f169dd4d
     glossary_term:stable-term-iri:
       source_paths:
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/domain/glossary.md
       - planning-mds/features/F0012-foundation-ontology/README.md
       source_count: 3
-      last_modified: '2026-10-12'
-      source_hash: 07e0832d7d498516
+      last_modified: '2026-10-16'
+      source_hash: 845def1562fc4e0a
     workflow:canonical-commit:
       source_paths:
       - planning-mds/architecture/master-blueprint.md
@@ -701,6 +742,13 @@ freshness:
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
+    capability:document-date-provenance:
+      source_paths:
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/F0004-content-artifact-model/worked-examples.md
+      source_count: 2
+      last_modified: '2026-10-17'
+      source_hash: 1aef5336d3ceaf36
     capability:durable-authorization-decisions:
       source_paths:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
@@ -780,11 +828,12 @@ freshness:
     capability:parse-once-content-artifact:
       source_paths:
       - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
-      source_count: 3
-      last_modified: '2026-09-30'
-      source_hash: 214cf891be26faf8
+      source_count: 4
+      last_modified: '2026-10-17'
+      source_hash: 634afdf0578004ac
       hotspot_rank: 3
       hotspot_score: 0.08
       primary_owner: gajapathi.kannan@live.com
@@ -854,49 +903,58 @@ freshness:
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
+    capability:versioned-content-contracts:
+      source_paths:
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/F0004-content-artifact-model/worked-examples.md
+      source_count: 2
+      last_modified: '2026-10-17'
+      source_hash: 1aef5336d3ceaf36
     endpoint:content-artifact-file-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
-      source_count: 2
-      last_modified: '2026-10-01'
-      source_hash: 9937686ae717e71b
+      source_count: 3
+      last_modified: '2026-10-17'
+      source_hash: 328340487cd89b7e
     endpoint:content-artifact-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
-      source_count: 1
-      last_modified: '2026-09-26'
-      source_hash: 06dac75e5e57a1e6
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-10-17'
+      source_hash: 510398fee9c1e52e
     endpoint:fact-commit:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-26'
-      source_hash: 06dac75e5e57a1e6
+      last_modified: '2026-10-16'
+      source_hash: b823d9aca602bcab
     endpoint:fact-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-26'
-      source_hash: 06dac75e5e57a1e6
+      last_modified: '2026-10-16'
+      source_hash: b823d9aca602bcab
     endpoint:health:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-26'
-      source_hash: 06dac75e5e57a1e6
+      last_modified: '2026-10-16'
+      source_hash: b823d9aca602bcab
     endpoint:review-decisions-submit:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-26'
-      source_hash: 06dac75e5e57a1e6
+      last_modified: '2026-10-16'
+      source_hash: b823d9aca602bcab
     endpoint:review-item-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-26'
-      source_hash: 06dac75e5e57a1e6
+      last_modified: '2026-10-16'
+      source_hash: b823d9aca602bcab
     role:reviewer:
       source_paths:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
@@ -1229,8 +1287,8 @@ freshness:
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
       source_count: 3
-      last_modified: '2026-10-12'
-      source_hash: 91b4b2baa22f446d
+      last_modified: '2026-10-16'
+      source_hash: 849e1e4eba92b48c
     adr:0046:
       source_paths:
       - planning-mds/architecture/decisions/ADR-0046-grounded-answer-and-analytic-query-contract.md
@@ -1385,14 +1443,20 @@ freshness:
       source_paths:
       - planning-mds/architecture/decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md
       source_count: 1
-      last_modified: '2026-10-14'
+      last_modified: '2026-10-15'
       source_hash: 7f42ba8c45a8590a
     adr:0072:
       source_paths:
       - planning-mds/architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md
       source_count: 1
-      last_modified: '2026-10-14'
+      last_modified: '2026-10-15'
       source_hash: a9e847b581016ded
+    adr:0073:
+      source_paths:
+      - planning-mds/architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md
+      source_count: 1
+      last_modified: '2026-10-17'
+      source_hash: 306f0726992c25d2
     schema:authx-kernel:
       source_paths:
       - planning-mds/schemas/authx-kernel.schema.json
@@ -1429,8 +1493,38 @@ freshness:
       source_paths:
       - planning-mds/schemas/content-artifact-manifest.schema.json
       source_count: 1
-      last_modified: '2026-09-06'
-      source_hash: d66688c680aeadb8
+      last_modified: '2026-10-16'
+      source_hash: 2df06ee175a50683
+    schema:content-artifact-manifest-read:
+      source_paths:
+      - planning-mds/schemas/content-artifact-manifest-read.schema.json
+      source_count: 1
+      last_modified: '2026-10-16'
+      source_hash: 9950a7792b2e3178
+    schema:content-artifact-manifest-v2:
+      source_paths:
+      - planning-mds/schemas/content-artifact-manifest-v2.schema.json
+      source_count: 1
+      last_modified: '2026-10-16'
+      source_hash: e9a4b85639669230
+    schema:content-records-v2:
+      source_paths:
+      - planning-mds/schemas/content-records-v2.schema.json
+      source_count: 1
+      last_modified: '2026-10-16'
+      source_hash: f70329e8b62fb0c9
+    schema:document-date-record:
+      source_paths:
+      - planning-mds/schemas/document-date-record.schema.json
+      source_count: 1
+      last_modified: '2026-10-16'
+      source_hash: 75d84fb7def3249a
+    schema:interpretation-output-manifest:
+      source_paths:
+      - planning-mds/schemas/interpretation-output-manifest.schema.json
+      source_count: 1
+      last_modified: '2026-10-16'
+      source_hash: 14d8bc3f66aa12a9
     schema:interpretation-result:
       source_paths:
       - planning-mds/schemas/interpretation-result.schema.json
@@ -1459,14 +1553,14 @@ freshness:
       source_paths:
       - planning-mds/schemas/semantic-execution-trace.schema.json
       source_count: 1
-      last_modified: '2026-10-13'
+      last_modified: '2026-10-15'
       source_hash: 6301d3b51722097b
     api:brain-api:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-09-26'
-      source_hash: 06dac75e5e57a1e6
+      last_modified: '2026-10-16'
+      source_hash: b823d9aca602bcab
   mappings:
     feature:F0001:
       source_paths:
@@ -1522,6 +1616,26 @@ freshness:
       source_count: 11
       last_modified: '2026-10-07'
       source_hash: 81132b7e92a0da4f
+    feature:F0004:
+      source_paths:
+      - planning-mds/features/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md
+      - planning-mds/features/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md
+      - planning-mds/features/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md
+      - planning-mds/features/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md
+      - planning-mds/features/F0004-content-artifact-model/GETTING-STARTED.md
+      - planning-mds/features/F0004-content-artifact-model/PRD.md
+      - planning-mds/features/F0004-content-artifact-model/README.md
+      - planning-mds/features/F0004-content-artifact-model/STATUS.md
+      - planning-mds/features/F0004-content-artifact-model/acceptance-criteria-checklist.md
+      - planning-mds/features/F0004-content-artifact-model/contract-examples.json
+      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      - planning-mds/features/F0004-content-artifact-model/personas.md
+      - planning-mds/features/F0004-content-artifact-model/validate-contract-examples.py
+      - planning-mds/features/F0004-content-artifact-model/worked-examples.md
+      source_count: 15
+      last_modified: '2026-10-17'
+      source_hash: f5bb87e17a8700fb
     feature:F0005:
       source_paths:
       - planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
@@ -1694,6 +1808,30 @@ freshness:
       source_count: 1
       last_modified: '2026-10-07'
       source_hash: 94eecd582150e280
+    story:F0004-S0001:
+      source_paths:
+      - planning-mds/features/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md
+      source_count: 1
+      last_modified: '2026-10-17'
+      source_hash: 4e0a7bd238c09a26
+    story:F0004-S0002:
+      source_paths:
+      - planning-mds/features/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md
+      source_count: 1
+      last_modified: '2026-10-17'
+      source_hash: f7dc003dfeafd2bc
+    story:F0004-S0003:
+      source_paths:
+      - planning-mds/features/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md
+      source_count: 1
+      last_modified: '2026-10-17'
+      source_hash: 6fe1e902e0ef5b8c
+    story:F0004-S0004:
+      source_paths:
+      - planning-mds/features/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md
+      source_count: 1
+      last_modified: '2026-10-17'
+      source_hash: f76738903a9b2aa4
     story:F0005-S0001:
       source_paths:
       - planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
@@ -1956,8 +2094,8 @@ freshness:
       source_paths:
       - planning-mds/architecture/data-model.md
       source_count: 1
-      last_modified: '2026-10-12'
-      source_hash: 3275a17d76e78438
+      last_modified: '2026-10-16'
+      source_hash: 9875f007084a9dbc
     schema:commercial-pc-example:
       source_paths:
       - planning-mds/architecture/commercial-pc-example-handoff.md

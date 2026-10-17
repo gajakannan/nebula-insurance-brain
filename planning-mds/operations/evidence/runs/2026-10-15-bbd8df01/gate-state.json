@@ -1,0 +1,96 @@
+{
+  "action": "plan",
+  "contract_version": "2026-07-11",
+  "project_context": {
+    "action": "plan",
+    "manifest_hash": "65eb143fcccbaca98a65e0df1efe17e97c2f5ace9e7c622ea3db959a553e284d",
+    "product_root": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+    "scope": {
+      "plan_scope": "feature",
+      "target": "F0004"
+    }
+  },
+  "run_id": "2026-10-15-bbd8df01",
+  "schema_version": 1,
+  "stages": {
+    "G1": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G2": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G3": {
+      "attestations": [
+        {
+          "acknowledged_preconditions": [],
+          "actor": "operator",
+          "checkpoint_id": "approve-phase-a",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "5a55673a56806eaa82a9fc67ce714ffd6ace14100be5165336b2258833566bdf"
+            }
+          ],
+          "note": "Operator explicitly instructed: proceed with Phase B. Exact wording recorded in gate-decisions.md.",
+          "role": "product-manager",
+          "timestamp": "2026-10-15T21:10:35-04:00"
+        }
+      ],
+      "completed_operations": [
+        "checkpoint:approve-phase-a"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G4": {
+      "attestations": [],
+      "completed_operations": [
+        "kg-compile",
+        "kg-check-drift"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G5": {
+      "attestations": [
+        {
+          "acknowledged_preconditions": [],
+          "actor": "operator",
+          "checkpoint_id": "approve-phase-b",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "8910dfe530e2d40e5edecbe5fae1f1ac758a1bd413212491360a5e1f443846b5"
+            }
+          ],
+          "note": "Exact operator approval: approve-phase-b. Recorded after successful G5 exit validation; approval annotations recompiled and revalidated.",
+          "role": "architect",
+          "timestamp": "2026-10-16T08:16:31-04:00"
+        }
+      ],
+      "completed_operations": [
+        "validate-stories",
+        "generate-story-index",
+        "validate-trackers",
+        "kg-write-coverage",
+        "kg-check-drift-exit",
+        "kg-check-reproducible",
+        "validate-templates",
+        "checkpoint:approve-phase-b"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    }
+  }
+}

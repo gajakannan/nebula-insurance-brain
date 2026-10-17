@@ -363,3 +363,15 @@ These definitions come from the 2026-09-25 architecture amendments, which were i
 | Automation fuse | The per-knowledge-base automatic disabling of an automation type after a configured number of reverts within a window | Default: two reverts in seven days | F0043 |
 | Decision basis | A fingerprint of every input a cached decision considered; the decision is stale when the fingerprint of current inputs differs | EX-SEM-010: a changed ancestor closure reopens a binding | F0016/F0032/F0056/F0066 |
 | Action attempt | A persisted external side-effect attempt with a request identity and the states `PREPARED`, `DISPATCHING`, `NOT_SENT`, `RESPONSE_RECEIVED`, or `OUTCOME_UNKNOWN`; never retried blindly | EX-SEM-011: a worker dies after sending | F0050/F0059 |
+
+## F0004 content contract refinements
+
+These are proposed storage refinements under ADR-0073; they do not activate broader temporal interpretation or assertion admission. Owner: F0004 S0001–S0004. [Worked and boundary examples EX-CONTENT-001–004](../features/F0004-content-artifact-model/worked-examples.md) and [schema examples](../features/F0004-content-artifact-model/contract-examples.json) are synthetic.
+
+| Term | Definition | Worked / boundary case |
+|---|---|---|
+| Versioned content bundle | Immutable parse files plus retained source/assets under an explicit manifest version and recipe identity; interpretation outputs remain separate | EX-CONTENT-001; an unknown version or corrupted marker cannot trigger reparse |
+| Content index | Owned metadata pointing to exact immutable block/table lines and their hashes, without duplicating canonical text into mutable rows | EX-CONTENT-002; one block can have multiple regions but only one observed text origin |
+| Document-date candidate | An append-only proposed date preserving YEAR/MONTH/DAY precision and CONTENT, SOURCE_METADATA or verified HUMAN basis | EX-CONTENT-003; upload/receipt time and forged human provenance are invalid bases |
+| Document-date selection | An explicit append-only choice of one candidate or clear, with predecessor and per-version sequence; consumers can pin the exact historical selection | EX-CONTENT-003; conflicting candidates do not create automatic precedence, and absent selection remains undated |
+| Ready artifact | A verified completion marker whose same identity, indexes and publication audit committed under current authority and generation fence | EX-CONTENT-004; an orphan marker after DB failure is not advertised as ready |
