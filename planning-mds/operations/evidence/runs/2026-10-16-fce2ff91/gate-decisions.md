@@ -1,0 +1,11 @@
+# Gate Decisions — F0004-content-artifact-model plan run 2026-10-16-fce2ff91
+
+## Gate Decisions
+
+| Gate | Decision | Decider | Timestamp | Rationale | Blocking | Follow-up |
+|------|----------|---------|-----------|-----------|----------|-----------|
+| G1 | PASS | Product Manager | 2026-10-16T21:39:26-04:00 | Operator answered the four rework decisions for H-1, H-2, M-1 and M-2 (action-context.md Inputs). No other business question is open. | No | - |
+| G2 | PASS | Product Manager | 2026-10-16T21:39:26-04:00 | Targeted Phase A edits to the PRD, four stories, checklist, worked examples, STATUS and BLUEPRINT §4.8. validate-stories passes. AC IDs are stable. | No | Story index regenerates at G5 |
+| G3 | PASS | Product Manager | 2026-10-16T21:39:26-04:00 | Phase A checkpoint token: **`approve-phase-a`**, typed verbatim by the operator after reviewing the rework summary. | No | - |
+| G4 | PASS | Architect | 2026-10-16T21:46:04-04:00 | Phase B rework covers all plan-review findings. The assembly plan gains Step 1a, the legacy-read/quarantine state machine, repair records and human-only selection. ADR-0073 is amended. persistence-design.sql gains the state-event and repair tables, selection human-decision columns and the content_artifact guard (parsed with pglast). The date schema gains a required human_decision, and contract examples are now 40 (0 failures). OpenAPI 409 wording, GETTING-STARTED and the glossary are updated. kg compile and --check-drift exit 0. | No | - |
+| G5 | PASS | Architect | 2026-10-16T21:46:04-04:00 | All seven exit commands exit 0. validate-trackers first failed on a generator defect: generate-story-index.py copies trailing markdown hard-break backslashes into STORY-INDEX.md. Story metadata was unchanged, so the committed STORY-INDEX.md was restored and the stage resumed from validate-trackers. Later approval-text and KG validation_gate edits were revalidated: compile, coverage report, drift, reproducibility, plan-readiness, stories, trackers and contract examples all exit 0. Four mis-invoked exit-2 lines in commands.log are annotated. Phase B checkpoint token: **`approve-phase-b`**, typed verbatim by the operator. | No | Framework: generate-story-index backslash defect; manifest placeholder drift |

@@ -79,8 +79,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '409':
-          description: 'Authorized read only: ARTIFACT_INTEGRITY or ARTIFACT_VERSION_UNSUPPORTED. No reparse or
-            alternate namespace fallback.'
+          description: 'Authorized read only: ARTIFACT_INTEGRITY (corrupt, inconsistent or quarantined artifact)
+            or ARTIFACT_VERSION_UNSUPPORTED. A definitive integrity failure fails this read, and an operator-run integrity sweep
+            quarantines the artifact; transient storage errors are 503, never 409. No reparse or alternate namespace fallback.'
           content:
             application/problem+json:
               schema:
@@ -326,8 +327,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
         '409':
-          description: 'Authorized read only: ARTIFACT_INTEGRITY or ARTIFACT_VERSION_UNSUPPORTED. No reparse or
-            alternate namespace fallback.'
+          description: 'Authorized read only: ARTIFACT_INTEGRITY (corrupt, inconsistent or quarantined artifact)
+            or ARTIFACT_VERSION_UNSUPPORTED. A definitive integrity failure fails this read, and an operator-run integrity sweep
+            quarantines the artifact; transient storage errors are 503, never 409. No reparse or alternate namespace fallback.'
           content:
             application/problem+json:
               schema:

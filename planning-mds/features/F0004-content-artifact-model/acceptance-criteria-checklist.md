@@ -1,6 +1,6 @@
 # F0004 acceptance criteria checklist
 
-**Status:** Phase A draft. All boxes represent future implementation evidence, not planning approval. The four stories are authoritative for detailed interaction, access and failure contracts.
+**Status:** Approved plan (Phase A/B), reworked in plan runs `2026-10-16-fce2ff91`, `2026-10-16-06e0131a` and `2026-10-17-620b7618`. All boxes represent future implementation evidence, not planning approval. The four stories are authoritative for detailed interaction, access and failure contracts.
 
 ## F0004-S0001 — Publish and reuse an immutable content bundle
 
@@ -30,7 +30,7 @@
 
 - [ ] [F0004-S0002-AC6](F0004-S0002-content-structure-and-text-origin.md) — Given an origin/producer/anchor validation failure or a block mixing origins, when publication is attempted, then the new-contract record is rejected explicitly and no already published bundle is changed. Readable legacy content follows S0004 and is never relabeled without evidence.
 
-- [ ] [F0004-S0002-AC7](F0004-S0002-content-structure-and-text-origin.md) — Given an authorized publication, when validated content becomes available, then durable audit history records actor, scope, artifact identity and recorded time; failed publication never records a successful content mutation.
+- [ ] [F0004-S0002-AC7](F0004-S0002-content-structure-and-text-origin.md) — Given an authorized publication that carries structure/origin records, when validated content becomes available, then the single publication audit event required by F0004-S0001-AC6 also covers those records; no separate per-story or per-record success event is created, and failed publication records none. Evidence is shared with S0001-AC6.
 
 ## F0004-S0003 — Preserve document-date provenance
 
@@ -44,7 +44,7 @@
 
 - [ ] [F0004-S0003-AC5](F0004-S0003-document-date-provenance.md) — Given the June 1 effective / June 10 issued / June 12 received / June 14 accepted example, when F0004 records the content-sourced document date, then it retains June 10 and its source independently; it neither computes a canonical interval nor changes receipt/acceptance times.
 
-- [ ] [F0004-S0003-AC6](F0004-S0003-document-date-provenance.md) — Given conflicting supplied document dates, when their provenance is stored, then the different candidates/bases remain distinguishable and no undocumented precedence rule selects a date. Resolution beyond an explicit authorized selection is outside F0004.
+- [ ] [F0004-S0003-AC6](F0004-S0003-document-date-provenance.md) — Given conflicting supplied document dates, when their provenance is stored, then the different candidates/bases remain distinguishable and no undocumented precedence rule selects a date. In v0.1 only a verified human selection decision can select or clear the document date; a ServicePrincipal can record candidates but a selection it requests without that decision is rejected (operator decision 2026-10-16). Resolution beyond that explicit human selection is outside F0004.
 
 ## F0004-S0004 — Protect artifact consumers and compatibility
 
@@ -52,7 +52,7 @@
 
 - [ ] [F0004-S0004-AC2](F0004-S0004-authorized-consumers-and-compatibility.md) — Given cross-tenant, disallowed-KB, revoked-membership or restricted-source requests, when any covered read/publication path is invoked, then it returns no unauthorized bytes or protected metadata and creates no unauthorized artifact; alternate object-key/preview paths cannot bypass the check.
 
-- [ ] [F0004-S0004-AC3](F0004-S0004-authorized-consumers-and-compatibility.md) — Given supported historical manifests and new-contract manifests, when existing consumers load them, then each follows its declared version; historical bytes/hashes stay unchanged and missing historical date/origin data remains absent. Unsupported versions fail explicitly instead of being guessed or silently upgraded.
+- [ ] [F0004-S0004-AC3](F0004-S0004-authorized-consumers-and-compatibility.md) — Given supported historical manifests and new-contract manifests, when existing consumers load them, then each follows its declared version; historical bytes/hashes stay unchanged and missing historical date/origin data remains absent. Existing v1 artifacts stay readable through the v1 verifier during and after the migration, before and after their readiness backfill; a v1 artifact that fails verification returns an explicit integrity failure on every read, and the operator-run integrity sweep quarantines it with a state event, an audit event and a repair record. Unsupported versions fail explicitly instead of being guessed or silently upgraded.
 
 - [ ] [F0004-S0004-AC4](F0004-S0004-authorized-consumers-and-compatibility.md) — Given a backup of metadata, source and artifact files plus referenced retained run outputs, when the supported local restore procedure is executed, then source/artifact identities, hashes, references and restrictions round-trip. Missing or mismatched bytes prevent a verified ready response.
 

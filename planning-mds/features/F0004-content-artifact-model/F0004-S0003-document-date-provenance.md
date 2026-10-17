@@ -24,7 +24,7 @@ The F0004 amendment and ADR-0064 §3 authorize storage of a document's own date 
 - [ ] **F0004-S0003-AC3:** Given a date correction with attributable authority, when the corrected metadata is persisted, then the previous value and basis remain retrievable, the correction links to its predecessor, and the original and parse bundle hashes are unchanged. Updating source metadata does not rewrite an interpretation run's historical basis.
 - [ ] **F0004-S0003-AC4:** Given invalid source kinds, missing provenance, cross-owner references or an unverified HUMAN attribution, when a mutation is requested, then it is rejected with an explicit reason, no successful mutation audit, and no lost prior value; authorization decisions remain audited.
 - [ ] **F0004-S0003-AC5:** Given the June 1 effective / June 10 issued / June 12 received / June 14 accepted example, when F0004 records the content-sourced document date, then it retains June 10 and its source independently; it neither computes a canonical interval nor changes receipt/acceptance times.
-- [ ] **F0004-S0003-AC6:** Given conflicting supplied document dates, when their provenance is stored, then the different candidates/bases remain distinguishable and no undocumented precedence rule selects a date. Resolution beyond an explicit authorized selection is outside F0004.
+- [ ] **F0004-S0003-AC6:** Given conflicting supplied document dates, when their provenance is stored, then the different candidates/bases remain distinguishable and no undocumented precedence rule selects a date. In v0.1 only a verified human selection decision can select or clear the document date; a ServicePrincipal can record candidates but a selection it requests without that decision is rejected (operator decision 2026-10-16). Resolution beyond that explicit human selection is outside F0004.
 
 **Edge Cases & Error Scenarios:** Only relative wording such as “today” with an upload time → no document date. A forged reviewer identity or stale/unauthorized correction → deny without altering history. A partial/coarse source date must not acquire invented day/time precision; the architect must encode its supported representation explicitly.
 
@@ -47,6 +47,7 @@ Document version/ownership, optional document date and supplied precision, CONTE
 - Existing scoped ServicePrincipal ingestion authority permits the applicable publication handoff only.
 - TenantMember/Reviewer reads require current artifact/evidence permission and parent/source restrictions; neither role gains unrestricted writes.
 - HUMAN date provenance requires an attributable authorized human decision. All content stays internal and scoped; external broker/MGA access is excluded.
+- Selecting or clearing a document date requires a verified human selection decision in v0.1; no automated decider selects (BLUEPRINT §4.11 guard). No new grant is added.
 
 ## Non-Functional Expectations
 
@@ -56,7 +57,7 @@ Document version/ownership, optional document date and supplied precision, CONTE
 
 ## Dependencies
 
-F0004-S0001 identity boundary; F0002 verified principal and current scope; F0003 append/history integrity; ADR-0037 and bounded ADR-0064 amendment. F0016 snapshots the interpretation basis; F0022 owns the interactive human workflow.
+The runtime producer of CONTENT/SOURCE_METADATA candidates is not yet assigned (BLUEPRINT §4.8 open decision); F0004 proves the service with controlled fixtures. F0004-S0001 identity boundary; F0002 verified principal and current scope; F0003 append/history integrity; ADR-0037 and bounded ADR-0064 amendment. F0016 snapshots the interpretation basis; F0022 owns the interactive human workflow.
 
 ## Out of Scope
 
@@ -64,7 +65,7 @@ Date extraction model, automatic precedence across conflicting dates, calendar a
 
 ## Questions & Assumptions
 
-No unresolved business question. This story uses the existing blueprint and bounded amendments, not broader acceptance of Proposed ADRs. Physical schema, compatibility matrix and interface/error details must be completed in Phase B before architecture approval.
+No unresolved business question. This story uses the existing blueprint and bounded amendments, not broader acceptance of Proposed ADRs. Physical schema, compatibility matrix and interface/error details are specified in the approved [assembly plan](feature-assembly-plan.md) and [ADR-0073](../../architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md).
 
 ## Definition of Done
 

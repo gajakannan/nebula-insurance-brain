@@ -383,6 +383,8 @@ Section 117.1 tracks the decisions for implementation and production acceptance:
 
 **Time-interpretation dependency for v0.1 (2026-09-25, validate finding P-1):** F0019 and F0025 take endorsement valid time from the template route's typed effective-date field. F0016 stores time mentions and document time context alongside. Resolution from time mentions (ADR-0064, Proposed) replaces the template field only after ADR-0064 passes its proof gates, which F0026 qualifies. v0.1 acceptance does not depend on a Proposed ADR.
 
+**Document-date candidate producer (opened 2026-10-16, F0004 plan-review M-1).** F0004 delivers the append-only document-date service but no runtime caller. No feature yet owns creating CONTENT or SOURCE_METADATA date candidates. F0022 owns the verified human selection decision, which in v0.1 is the only way to select or clear a date. Until an owner is assigned, consumers see every document as undated, and F0019/F0025 continue to use the template route's typed effective-date field. Assign the producer before planning F0005 production activation or F0016.
+
 **Account identity and account scope (opened 2026-10-09, direction set 2026-10-10).** The Cedar Bridge review asked whether Account is a party or a grouping of organizations, what an account-scoped grant reaches, what roots Entity 360, and how account identity relates to organization identity. The operator answered from commercial P&C practice, recorded in [ADR-0070](architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed):
 
 - each insured organization has its own account, with at most one designated parent account; ownership between organizations is a separate relationship with any number of percentage owners (F0012);

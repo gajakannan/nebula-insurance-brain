@@ -21,7 +21,7 @@ F0002 owns current-scope authorization and F0003 persistence boundaries. ADR-005
 
 - [ ] **F0004-S0004-AC1:** Given current F0002 authority, when source bytes, native/normalized files, metadata, evidence or referenced run outputs are accessed, then the existing service path enforces tenant, KB and applicable parent/source restrictions before returning data, with attributable authorization audit and policy version.
 - [ ] **F0004-S0004-AC2:** Given cross-tenant, disallowed-KB, revoked-membership or restricted-source requests, when any covered read/publication path is invoked, then it returns no unauthorized bytes or protected metadata and creates no unauthorized artifact; alternate object-key/preview paths cannot bypass the check.
-- [ ] **F0004-S0004-AC3:** Given supported historical manifests and new-contract manifests, when existing consumers load them, then each follows its declared version; historical bytes/hashes stay unchanged and missing historical date/origin data remains absent. Unsupported versions fail explicitly instead of being guessed or silently upgraded.
+- [ ] **F0004-S0004-AC3:** Given supported historical manifests and new-contract manifests, when existing consumers load them, then each follows its declared version; historical bytes/hashes stay unchanged and missing historical date/origin data remains absent. Existing v1 artifacts stay readable through the v1 verifier during and after the migration, before and after their readiness backfill; a v1 artifact that fails verification returns an explicit integrity failure on every read, and the operator-run integrity sweep quarantines it with a state event, an audit event and a repair record. Unsupported versions fail explicitly instead of being guessed or silently upgraded.
 - [ ] **F0004-S0004-AC4:** Given a backup of metadata, source and artifact files plus referenced retained run outputs, when the supported local restore procedure is executed, then source/artifact identities, hashes, references and restrictions round-trip. Missing or mismatched bytes prevent a verified ready response.
 - [ ] **F0004-S0004-AC5:** Given the existing F0005 publication and saved-native-JSON proof seam, when contract compatibility is exercised after restart, then its two-profile reuse and honest evidence behavior remain intact without reparse, source mutation, or moving run-owned outputs into the parse bundle.
 - [ ] **F0004-S0004-AC6:** Given the four worked examples, when the feature is implemented, then reproducible commands compare independently expected versus observed persisted outcomes, cover failure and authorization cases, validate versioned structured fixtures, and keep development cases separate from the frozen holdout.
@@ -64,7 +64,7 @@ Cloud adapters, new retention periods or automatic deletion policies, distribute
 
 ## Questions & Assumptions
 
-No unresolved business question. This story uses the existing blueprint and bounded amendments, not broader acceptance of Proposed ADRs. Physical schema, compatibility matrix and interface/error details must be completed in Phase B before architecture approval.
+No unresolved business question. This story uses the existing blueprint and bounded amendments, not broader acceptance of Proposed ADRs. Physical schema, compatibility matrix and interface/error details are specified in the approved [assembly plan](feature-assembly-plan.md) and [ADR-0073](../../architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md).
 
 ## Definition of Done
 
