@@ -366,7 +366,7 @@ These definitions come from the 2026-09-25 architecture amendments, which were i
 
 ## F0004 content contract refinements
 
-These are proposed storage refinements under ADR-0073; they do not activate broader temporal interpretation or assertion admission. Owner: F0004 S0001–S0004. [Worked and boundary examples EX-CONTENT-001–004](../features/F0004-content-artifact-model/worked-examples.md) and [schema examples](../features/F0004-content-artifact-model/contract-examples.json) are synthetic.
+These are proposed storage refinements under ADR-0073; they do not activate broader temporal interpretation or assertion admission. Owner: F0004 S0001–S0004. [Worked and boundary examples EX-CONTENT-001–004](../features/archive/F0004-content-artifact-model/worked-examples.md) and [schema examples](../features/archive/F0004-content-artifact-model/contract-examples.json) are synthetic.
 
 | Term | Definition | Worked / boundary case |
 |---|---|---|

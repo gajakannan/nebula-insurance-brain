@@ -225,11 +225,11 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 
 **v0.1A (Next)**
 
-- [F0004 — Content artifact model](features/F0004-content-artifact-model/README.md) - Planned (four stories; Phases A and B approved 2026-10-16; implementation not started)
-  - [F0004-S0001](features/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md) - Not Started
-  - [F0004-S0002](features/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) - Not Started
-  - [F0004-S0003](features/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md) - Not Started
-  - [F0004-S0004](features/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md) - Not Started
+- [F0004 — Content artifact model](features/archive/F0004-content-artifact-model/README.md) - Done (four stories; feature run 2026-10-17-8a6cc79f; G4 approved 2026-10-21)
+  - [F0004-S0001](features/archive/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md) - Done
+  - [F0004-S0002](features/archive/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) - Done
+  - [F0004-S0003](features/archive/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md) - Done
+  - [F0004-S0004](features/archive/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md) - Done
 - [F0005 — One-time document ingestion](features/F0005-one-time-docling-ingestion/README.md) - Planned
   - [F0005-S0001](features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) — In Progress
   - [F0005-S0002](features/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) — In Progress
@@ -469,7 +469,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Current position (2026-10-10): F0001 to F0003 are done and archived. F0005's synthetic Docling-Graph proof is complete, with production qualification deferred (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
+Current position (2026-10-21): F0001 to F0004 are done and archived. F0005's synthetic Docling-Graph proof is complete, with production qualification deferred (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
 
 1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).

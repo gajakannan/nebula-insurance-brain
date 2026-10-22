@@ -361,6 +361,9 @@ class DocumentJobQueue:
         with self.engine.begin() as conn:
             self._fence(conn, lease)
             result = operation(conn)
+            # Object publication can outlast a lease while its row locks prevent
+            # heartbeat/reclaim. Expiry still fences the database readiness commit.
+            self._fence(conn, lease)
             self._event(conn, str(lease.job_id), lease.generation, "checkpoint_published")
             return result
 

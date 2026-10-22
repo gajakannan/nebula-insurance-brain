@@ -15,7 +15,10 @@ node_bindings:
   - id: capability:backup-and-restore
     paths:
       infra:
+        - docker/content-integrity-runbook.md
         - scripts/ops/**
+      tests:
+        - engine/tests/integration/test_content_restore_v2.py
   - id: capability:bitemporal-canonical-commit
     paths:
       backend:
@@ -43,6 +46,17 @@ node_bindings:
         - engine/packages/brain-persistence/src/brain_persistence/grants.py
       infra:
         - scripts/dev/revoke_membership.py
+  - id: capability:document-date-provenance
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/dates.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/document_dates.py
+      tests:
+        - engine/packages/brain-content/tests/test_document_dates.py
+        - engine/packages/brain-content/tests/test_run_outputs.py
+        - engine/tests/integration/test_content_migration_states.py
+        - engine/tests/integration/test_content_restore_v2.py
   - id: capability:durable-authorization-decisions
     paths:
       backend:
@@ -94,6 +108,10 @@ node_bindings:
         - engine/apps/worker/src/brain_worker/document_delivery.py
         - engine/packages/brain-content/src/**
         - engine/packages/brain-jobs/src/**
+      tests:
+        - neuron/packages/brain-ingestion/tests/**
+        - neuron/tests/integration/test_content_*.py
+        - neuron/tests/integration/test_document_*.py
   - id: capability:postgresql-persistence-contract
     paths:
       backend:
@@ -102,6 +120,7 @@ node_bindings:
     paths:
       backend:
         - engine/apps/api/src/brain_api/app.py
+        - engine/apps/api/src/brain_api/deps.py
         - engine/apps/api/src/brain_api/errors.py
         - engine/apps/api/src/brain_api/health.py
         - engine/pyproject.toml
@@ -117,6 +136,7 @@ node_bindings:
   - id: capability:semantic-interpretation-run
     paths:
       ai:
+        - neuron/benchmarks/docling_graph_comparison.py
         - neuron/packages/brain-extraction/src/**
         - neuron/packages/brain-interpretation/src/**
       backend:
@@ -131,10 +151,89 @@ node_bindings:
         - engine/packages/brain-persistence/src/brain_persistence/tenancy.py
       infra:
         - scripts/dev/reconcile_authx.py
+  - id: capability:versioned-content-contracts
+    paths:
+      ai:
+        - neuron/packages/brain-ingestion/src/brain_ingestion/content_*.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/conversion_recipe.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/integrity_sweep.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/item_provenance.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/submission.py
+      backend:
+        - engine/apps/worker/src/brain_worker/content_*.py
+        - engine/apps/worker/src/brain_worker/publication_intent.py
+        - engine/migrations/versions/0008_f0004_content_contract.*
+        - engine/packages/brain-content/src/brain_content/**
+        - engine/packages/brain-persistence/src/brain_persistence/content_*.py
+      infra:
+        - config/local.yaml
+        - docker/content-integrity-runbook.md
+      tests:
+        - engine/apps/api/tests/test_content.py
+        - engine/packages/brain-content/tests/**
+        - engine/tests/integration/test_content_migration_states.py
+        - neuron/packages/brain-ingestion/tests/spikes/**
+        - neuron/packages/brain-ingestion/tests/test_content_projection_v2.py
+        - neuron/tests/integration/test_content_*.py
+  - id: endpoint:content-artifact-file-get
+    paths:
+      backend:
+        - engine/apps/api/src/brain_api/routes/content.py
+      tests:
+        - engine/apps/api/tests/test_content.py
+  - id: endpoint:content-artifact-get
+    paths:
+      backend:
+        - engine/apps/api/src/brain_api/routes/content.py
+      tests:
+        - engine/apps/api/tests/test_content.py
+  - id: entity:content-artifact
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/manifest.py
+        - engine/packages/brain-content/src/brain_content/validation.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_repository.py
+        - engine/packages/brain-persistence/src/brain_persistence/models.py
+  - id: entity:content-block
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/records.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_repository.py
+  - id: entity:content-table
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/records.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_repository.py
+  - id: entity:content-table-cell
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/records.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_repository.py
+  - id: entity:document-date-candidate
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/dates.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/document_dates.py
+  - id: entity:document-date-selection
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/dates.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/document_dates.py
   - id: entity:ontology-release
     paths:
       architecture:
         - planning-mds/architecture/data-model.md
+  - id: migration:f0004-content-contract
+    paths:
+      backend:
+        - engine/migrations/versions/0008_f0004_content_contract.*
+      tests:
+        - engine/tests/integration/test_content_migration_states.py
   - id: schema:commercial-pc-example
     paths:
       architecture:
@@ -185,3 +284,24 @@ node_bindings:
         - planning-mds/examples/commercial-pc-account/source-package.md
       schemas:
         - planning-mds/schemas/commercial-pc-example.schema.json
+  - id: schema:content-artifact-manifest
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest.schema.json
+  - id: schema:content-artifact-manifest-v2
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest-v2.schema.json
+  - id: schema:content-records-v2
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/schemas/content-records-v2.schema.json
+  - id: schema:document-date-record
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/schemas/document-date-record.schema.json
+  - id: schema:interpretation-output-manifest
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/outputs.py
+        - engine/packages/brain-content/src/brain_content/schemas/interpretation-output-manifest.schema.json

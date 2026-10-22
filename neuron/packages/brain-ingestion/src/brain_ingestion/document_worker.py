@@ -2,18 +2,16 @@
 
 from __future__ import annotations
 
-import hashlib
-import tempfile
 from collections.abc import Callable
 from contextlib import suppress
 from pathlib import Path
 from threading import Event, Thread
+from typing import Literal
 from uuid import UUID, uuid5
 
 from brain_content.checkpoints import CheckpointStore
-from brain_content.manifest import ArtifactManifest
 from brain_content.object_store import ObjectNotFoundError
-from brain_extraction.docling_graph_pipeline import DoclingGraphPipelineAdapter
+from brain_content.validation import VerifiedBundle
 from brain_extraction.graph_interpretation import GraphInterpretationService
 from brain_extraction.profiles import load_profile
 from brain_extraction.vllm_graph_client import VllmGraphClient
@@ -22,10 +20,8 @@ from brain_interpretation.result import InterpretationResult
 from brain_jobs.queue import DocumentJobQueue, JobLease, LeaseLost
 from docling_core.types.doc import DoclingDocument
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy.engine import Connection
 
-from brain_ingestion.bundle_writer import build_bundle
-from brain_ingestion.docling_adapter import DoclingAdapter
+from brain_ingestion.content_workflow import ContentPublisher, load_or_convert_content
 
 
 class DocumentTask(BaseModel):
@@ -39,6 +35,7 @@ class DocumentTask(BaseModel):
     schema_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     actor_id: UUID
     correlation_id: UUID
+    content_contract_version: Literal[1, 2] = 1
 
 
 class DocumentWorker:
@@ -49,14 +46,17 @@ class DocumentWorker:
         store: CheckpointStore,
         authorize_for_job: Callable[[JobLease], Callable[[UUID, UUID, UUID, str], None]],
         client_factory: Callable[[Event], VllmGraphClient],
-        record_artifact: Callable[[Connection, ArtifactManifest], None],
+        publish_content: ContentPublisher,
         converter: Callable[[Path], ParseResult[DoclingDocument]] | None = None,
+        load_accepted: Callable[[JobLease], VerifiedBundle | None] | None = None,
+        v2_writer_enabled: bool = False,
     ) -> None:
         self.queue, self.store = queue, store
         self.authorize_for_job = authorize_for_job
         self.client_factory = client_factory
-        self.record_artifact = record_artifact
+        self.publish_content = publish_content
         self.converter = converter
+        self.load_accepted, self.v2_writer_enabled = load_accepted, v2_writer_enabled
 
     def run_one(self) -> bool:
         lease = self.queue.claim()
@@ -98,60 +98,22 @@ class DocumentWorker:
         authorize = self.authorize_for_job(lease)
         authorize(lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "ingest")
         authorize(lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "interpret")
-        try:
-            manifest, _ = self.store.load(
-                lease.artifact_id, lease.tenant_id, lease.knowledge_base_id
-            )
-        except ObjectNotFoundError:
-            source_key = (
-                f"sources/{lease.tenant_id}/{lease.knowledge_base_id}/{task.source_sha256}.pdf"
-            )
-            source_bytes = self.store.objects.read(source_key)
-            if hashlib.sha256(source_bytes).hexdigest() != task.source_sha256:
-                raise ValueError("source hash mismatch") from None
-            converter = self.converter if self.converter is not None else DoclingAdapter().parse
-
-            def publish(parsed: ParseResult[DoclingDocument]) -> None:
-                manifest, files = build_bundle(
-                    parsed,
-                    tenant_id=lease.tenant_id,
-                    knowledge_base_id=lease.knowledge_base_id,
-                    document_id=task.document_id,
-                    version_id=task.version_id,
-                    artifact_id=lease.artifact_id,
-                    source_sha256=task.source_sha256,
-                    configuration_hash=task.recipe_sha256,
-                    source_bytes=source_bytes,
-                    source_filename="source.pdf",
-                )
-                authorize(lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "ingest")
-                self.queue.publish(lease, lambda: self.store.publish(manifest, files))
-
-            client = self.client_factory(cancelled)
-            try:
-                with tempfile.TemporaryDirectory(prefix="nebula-source-") as directory:
-                    source = Path(directory) / "source.pdf"
-                    source.write_bytes(source_bytes)
-                    DoclingGraphPipelineAdapter(llm_client=client, model_id=client.model).run(
-                        source=source,
-                        template=profile.template,
-                        converter=converter,
-                        publish=publish,
-                        conversion_only=True,
-                    )
-            finally:
-                client.close()
-            manifest, _ = self.store.load(
-                lease.artifact_id, lease.tenant_id, lease.knowledge_base_id
-            )
-        if (
-            manifest.source_sha256,
-            manifest.version_id,
-            manifest.document_id,
-            manifest.execution.configuration_hash,
-        ) != (task.source_sha256, task.version_id, task.document_id, task.recipe_sha256):
-            raise ValueError("checkpoint belongs to a different source or conversion recipe")
-        self.queue.publish_transaction(lease, lambda conn: self.record_artifact(conn, manifest))
+        bundle = load_or_convert_content(
+            lease=lease,
+            task=task,
+            store=self.store,
+            authorize=authorize,
+            publisher=self.publish_content,
+            load_accepted=self.load_accepted,
+            converter=self.converter,
+            client_factory=self.client_factory,
+            cancelled=cancelled,
+            profile=profile,
+            v2_writer_enabled=self.v2_writer_enabled,
+        )
+        key = bundle.key
+        if bundle.manifest.source_sha256 != task.source_sha256:
+            raise ValueError("accepted checkpoint belongs to a different source")
         # Recover a successfully published prior attempt whose DB completion was
         # interrupted. Never pay for another model call to rediscover that result.
         for attempt in range(lease.attempt - 1, 0, -1):
@@ -160,8 +122,9 @@ class DocumentWorker:
                 outputs = self.store.load_run(
                     tenant_id=lease.tenant_id,
                     knowledge_base_id=lease.knowledge_base_id,
-                    artifact_id=lease.artifact_id,
+                    artifact_id=key.artifact_id,
                     run_id=run_id,
+                    artifact_key=key,
                 )
             except ObjectNotFoundError:
                 continue
@@ -174,14 +137,14 @@ class DocumentWorker:
                 result.run_configuration.schema_hash,
             ) != (
                 run_id,
-                lease.artifact_id,
+                key.artifact_id,
                 task.profile_id,
                 task.profile_version,
                 task.schema_sha256,
             ):
                 raise ValueError("published run does not match the queued profile")
             if result.status != "failed":
-                authorize(lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "interpret")
+                authorize(lease.tenant_id, lease.knowledge_base_id, key.artifact_id, "interpret")
                 self.queue.finish(
                     lease,
                     f"runs/{lease.tenant_id}/{lease.knowledge_base_id}/{run_id}/manifest.json",
@@ -193,11 +156,13 @@ class DocumentWorker:
             result = GraphInterpretationService(self.store, authorize).interpret(
                 tenant_id=lease.tenant_id,
                 knowledge_base_id=lease.knowledge_base_id,
-                artifact_id=lease.artifact_id,
+                artifact_id=key.artifact_id,
                 run_id=run_id,
                 profile=profile,
                 client=client,
                 publish=lambda operation: self.queue.publish(lease, operation),
+                artifact_key=key,
+                output_contract_version=2,
             )
         finally:
             client.close()

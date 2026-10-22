@@ -1,0 +1,63 @@
+Warning: truncated output (original token count: 1785)
+Total output lines: 73
+
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+FINFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+FINFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-0…285 tokens truncated…ntent_restore_v2.py:135: in test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage
+    assert backup.returncode == 0, backup.stdout + backup.stderr
+E   AssertionError: {"database_revision": "0008", "verified_artifacts": 1, "verified_runs": 1, "unreferenced_objects": 1, "status": "verified"}
+E     permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['bash', '/app/brain/scripts/ops/backup.sh'], returncode=1, stdout='{"database_revision": "0008"... "verified"}\n', stderr='permission denied while trying to connect to the docker API at unix:///var/run/docker.sock\n').returncode
+=============================== warnings summary ===============================
+tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[1]
+tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[2]
+tests/integration/test_content_restore_v2.py::test_restore_verifier_rejects_missing_bytes_and_index_loss
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                                 Stmts   Miss  Cover
+----------------------------------------------------------------------------------------
+/app/brain/scripts/ops/backup_inventory.py                              58     40    31%
+/app/brain/scripts/ops/verify_citations.py                              55     55     0%
+/app/brain/scripts/ops/verify_content.py                               144     36    75%
+packages/brain-persistence/src/brain_persistence/document_dates.py     163     60    63%
+----------------------------------------------------------------------------------------
+TOTAL                                                                  420    191    55%
+Coverage XML written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/restore.xml
+Coverage JSON written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/restore.json
+=========================== short test summary info ============================
+FAILED tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[1]
+FAILED tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[2]
+2 failed, 2 passed, 3 warnings in 7.78s

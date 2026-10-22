@@ -176,6 +176,10 @@ async def test_mutation_commits_effect_and_decision_together(build, policy) -> N
     )
 
     async def operation(decisions):
+        assert len(store._pending) == 1
+        assert store._pending[0].decision_id == decisions[0].decision_id
+        assert store._pending[0].operation_outcome == OperationOutcome.SUCCEEDED
+        assert store.committed == []
         store.log.append("effect")
         return decisions[0].decision_id
 
@@ -238,6 +242,47 @@ async def test_mutation_commit_failure_is_unavailable_not_success(build, policy)
         )
     with pytest.raises(ValueError):
         await execution.mutate(user, [], Action.COMMIT, trace_id="t", operation=operation)
+
+
+async def test_mutation_audit_staging_failure_prevents_effect(build, policy, monkeypatch) -> None:
+    store, execution, user, resource = _world(
+        build, policy, "ServicePrincipal", ResourceType.FACT_SLOT
+    )
+    effects = []
+
+    async def fail_audit(_decision):
+        raise OSError("synthetic audit failure")
+
+    async def operation(_decisions):
+        effects.append(True)
+
+    monkeypatch.setattr(store, "append_decision", fail_audit)
+    with pytest.raises(AuthorizationUnavailable):
+        await execution.mutate(
+            user, [resource.key], Action.COMMIT, trace_id="t", operation=operation
+        )
+    assert effects == [] and store.committed == [] and store._pending == []
+
+
+async def test_mutation_expiry_while_staging_audit_rolls_back_success(build, policy) -> None:
+    store, _, user, resource = _world(build, policy, "ServicePrincipal", ResourceType.FACT_SLOT)
+    (slice_,) = store.slices[user.id]
+    store.slices[user.id] = (
+        build.grant(slice_.scope, "ServicePrincipal", expires_at=build.now + timedelta(seconds=1)),
+    )
+    times = iter([build.now, build.now, build.now + timedelta(seconds=2)])
+    execution = AuthorizationExecution(store, policy, policy.release, clock=lambda: next(times))
+    effects = []
+
+    async def operation(_decisions):
+        effects.append(True)
+
+    with pytest.raises(AuthorizationDenied):
+        await execution.mutate(
+            user, [resource.key], Action.COMMIT, trace_id="t", operation=operation
+        )
+    assert effects == []
+    assert [d.operation_outcome for d in store.committed] == [OperationOutcome.DENIED]
 
 
 async def test_expiry_between_decision_and_effect_denies(build, policy) -> None:

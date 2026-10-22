@@ -1,0 +1,184 @@
+....................FFF.F................................                [100%]
+=================================== FAILURES ===================================
+________________ test_put_bundle_then_get_manifest_round_trips _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_put_bundle_then_get_manif0')
+
+>   ???
+
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/packages/brain-content/tests/test_store.py:57: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+packages/brain-content/src/brain_content/store.py:52: in put_bundle
+    bundle = await self.publish_verified(key, manifest.model_dump_json().encode(), files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/store.py:60: in publish_verified
+    return await asyncio.to_thread(self._verified.publish, key, manifest_bytes, files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:86: in run
+    result = ctx.run(self.task)
+             ^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:73: in run
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/verified_store.py:59: in publish
+    incoming = verify_bundle(key, manifest_bytes, files)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+key = ArtifactKey(artifact_id=UUID('f3d8241b-c6b9-44b2-8cd7-c4ad909c3231'), tenant_id=UUID('dabead0b-eedd-425e-86c8-99cac346bff0'), knowledge_base_id=UUID('20bdc502-6b5b-4dfa-b522-e8ace60dc4a2'), contract_version=1)
+manifest_bytes = b'{"artifact_contract_version":1,"tenant_id":"dabead0b-eedd-425e-86c8-99cac346bff0","knowledge_base_id":"20bdc502-6b5b...":1,"coordinate_origin":"top_left","offset_encoding":"unicode_code_points","created_at":"2026-10-18T02:07:32.934702Z"}'
+files = {'normalized.md': b'# hello'}
+
+    def verify_bundle(
+        key: ArtifactKey, manifest_bytes: bytes, files: Mapping[str, bytes]
+    ) -> VerifiedBundle:
+        try:
+            manifest = parse_manifest(manifest_bytes)
+        except ArtifactVersionUnsupported:
+            raise
+        except ValueError:
+>           raise ArtifactIntegrityError("invalid manifest") from None
+E           brain_content.validation.ArtifactIntegrityError: invalid manifest
+
+packages/brain-content/src/brain_content/validation.py:279: ArtifactIntegrityError
+_____________________ test_open_file_reads_a_bundled_file ______________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_open_file_reads_a_bundled0')
+
+>   ???
+
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/packages/brain-content/tests/test_store.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+packages/brain-content/src/brain_content/store.py:52: in put_bundle
+    bundle = await self.publish_verified(key, manifest.model_dump_json().encode(), files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/store.py:60: in publish_verified
+    return await asyncio.to_thread(self._verified.publish, key, manifest_bytes, files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:86: in run
+    result = ctx.run(self.task)
+             ^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:73: in run
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/verified_store.py:59: in publish
+    incoming = verify_bundle(key, manifest_bytes, files)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+key = ArtifactKey(artifact_id=UUID('38561968-f8ed-401f-bed1-05d00e22321b'), tenant_id=UUID('39ff8722-b2c4-4ff1-a46b-928575e925e7'), knowledge_base_id=UUID('acc84524-3c87-4ac0-80f7-4a47b09d4614'), contract_version=1)
+manifest_bytes = b'{"artifact_contract_version":1,"tenant_id":"39ff8722-b2c4-4ff1-a46b-928575e925e7","knowledge_base_id":"acc84524-3c87...":1,"coordinate_origin":"top_left","offset_encoding":"unicode_code_points","created_at":"2026-10-18T02:07:32.961661Z"}'
+files = {'normalized.md': b'# hello'}
+
+    def verify_bundle(
+        key: ArtifactKey, manifest_bytes: bytes, files: Mapping[str, bytes]
+    ) -> VerifiedBundle:
+        try:
+            manifest = parse_manifest(manifest_bytes)
+        except ArtifactVersionUnsupported:
+            raise
+        except ValueError:
+>           raise ArtifactIntegrityError("invalid manifest") from None
+E           brain_content.validation.ArtifactIntegrityError: invalid manifest
+
+packages/brain-content/src/brain_content/validation.py:279: ArtifactIntegrityError
+_________________ test_put_bundle_twice_raises_artifact_exists _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_put_bundle_twice_raises_a0')
+
+>   ???
+
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/packages/brain-content/tests/test_store.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+packages/brain-content/src/brain_content/store.py:52: in put_bundle
+    bundle = await self.publish_verified(key, manifest.model_dump_json().encode(), files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/store.py:60: in publish_verified
+    return await asyncio.to_thread(self._verified.publish, key, manifest_bytes, files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:86: in run
+    result = ctx.run(self.task)
+             ^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:73: in run
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/verified_store.py:59: in publish
+    incoming = verify_bundle(key, manifest_bytes, files)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+key = ArtifactKey(artifact_id=UUID('9bded295-df89-4479-ab99-64135c213957'), tenant_id=UUID('2548dba2-47de-49ac-b757-3ba0f7055b28'), knowledge_base_id=UUID('cc535e09-bc0e-4fc2-bacc-82239b9fc338'), contract_version=1)
+manifest_bytes = b'{"artifact_contract_version":1,"tenant_id":"2548dba2-47de-49ac-b757-3ba0f7055b28","knowledge_base_id":"cc535e09-bc0e...":1,"coordinate_origin":"top_left","offset_encoding":"unicode_code_points","created_at":"2026-10-18T02:07:32.974412Z"}'
+files = {'a.txt': b'1'}
+
+    def verify_bundle(
+        key: ArtifactKey, manifest_bytes: bytes, files: Mapping[str, bytes]
+    ) -> VerifiedBundle:
+        try:
+            manifest = parse_manifest(manifest_bytes)
+        except ArtifactVersionUnsupported:
+            raise
+        except ValueError:
+>           raise ArtifactIntegrityError("invalid manifest") from None
+E           brain_content.validation.ArtifactIntegrityError: invalid manifest
+
+packages/brain-content/src/brain_content/validation.py:279: ArtifactIntegrityError
+___________________ test_open_file_missing_raises_not_found ____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_open_file_missing_raises_0')
+
+>   ???
+
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/packages/brain-content/tests/test_store.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+packages/brain-content/src/brain_content/store.py:52: in put_bundle
+    bundle = await self.publish_verified(key, manifest.model_dump_json().encode(), files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/store.py:60: in publish_verified
+    return await asyncio.to_thread(self._verified.publish, key, manifest_bytes, files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:86: in run
+    result = ctx.run(self.task)
+             ^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:73: in run
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/verified_store.py:59: in publish
+    incoming = verify_bundle(key, manifest_bytes, files)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+key = ArtifactKey(artifact_id=UUID('03fe3af1-246a-4683-b58c-c56be2fd9a28'), tenant_id=UUID('1bc37eb2-1fbe-45db-966b-758fa1687ca8'), knowledge_base_id=UUID('2a1cb523-0072-44fb-9e45-32ea06c8d335'), contract_version=1)
+manifest_bytes = b'{"artifact_contract_version":1,"tenant_id":"1bc37eb2-1fbe-45db-966b-758fa1687ca8","knowledge_base_id":"2a1cb523-0072...":1,"coordinate_origin":"top_left","offset_encoding":"unicode_code_points","created_at":"2026-10-18T02:07:32.994618Z"}'
+files = {}
+
+    def verify_bundle(
+        key: ArtifactKey, manifest_bytes: bytes, files: Mapping[str, bytes]
+    ) -> VerifiedBundle:
+        try:
+            manifest = parse_manifest(manifest_bytes)
+        except ArtifactVersionUnsupported:
+            raise
+        except ValueError:
+>           raise ArtifactIntegrityError("invalid manifest") from None
+E           brain_content.validation.ArtifactIntegrityError: invalid manifest
+
+packages/brain-content/src/brain_content/validation.py:279: ArtifactIntegrityError
+=========================== short test summary info ============================
+FAILED packages/brain-content/tests/test_store.py::test_put_bundle_then_get_manifest_round_trips
+FAILED packages/brain-content/tests/test_store.py::test_open_file_reads_a_bundled_file
+FAILED packages/brain-content/tests/test_store.py::test_put_bundle_twice_raises_artifact_exists
+FAILED packages/brain-content/tests/test_store.py::test_open_file_missing_raises_not_found
+4 failed, 53 passed in 1.19s

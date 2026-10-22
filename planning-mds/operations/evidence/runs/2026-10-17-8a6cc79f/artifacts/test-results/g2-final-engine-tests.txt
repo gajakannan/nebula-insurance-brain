@@ -1,0 +1,57 @@
+........................................................................ [ 31%]
+........................................................................ [ 63%]
+........................................................................ [ 95%]
+.........../opt/venv/lib/python3.14/site-packages/coverage/inorout.py:558: CoverageWarning: Module /app/brain/engine/migrations/versions/0008_f0004_content_contract.py was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.16.0/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+                                                              [100%]
+=============================== warnings summary ===============================
+../../../opt/venv/lib/python3.14/site-packages/starlette/testclient.py:53
+  /opt/venv/lib/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+packages/brain-security/tests/test_verification.py::test_symmetric_algorithm_confusion_is_rejected
+  /opt/venv/lib/python3.14/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 19 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/integration/test_content_migration_states.py: 35 warnings
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                                     Stmts   Miss  Cover
+--------------------------------------------------------------------------------------------
+apps/api/src/brain_api/deps.py                                              94     29    69%
+apps/api/src/brain_api/errors.py                                            72      2    97%
+apps/api/src/brain_api/routes/content.py                                    50      2    96%
+apps/worker/src/brain_worker/content_access.py                              67     67     0%
+apps/worker/src/brain_worker/content_publication.py                        113     16    86%
+apps/worker/src/brain_worker/content_submissions.py                         15     15     0%
+apps/worker/src/brain_worker/document_delivery.py                          172    119    31%
+apps/worker/src/brain_worker/outbox_projector.py                            28     28     0%
+apps/worker/src/brain_worker/publication_intent.py                          51      2    96%
+packages/brain-content/src/brain_content/checkpoints.py                     82      7    91%
+packages/brain-content/src/brain_content/config.py                          47      2    96%
+packages/brain-content/src/brain_content/contracts.py                       60     12    80%
+packages/brain-content/src/brain_content/dates.py                          160      2    99%
+packages/brain-content/src/brain_content/identities.py                      32      5    84%
+packages/brain-content/src/brain_content/manifest.py                        96      1    99%
+packages/brain-content/src/brain_content/object_store.py                    80      2    98%
+packages/brain-content/src/brain_content/outputs.py                         52      1    98%
+packages/brain-content/src/brain_content/service.py                         24      1    96%
+packages/brain-content/src/brain_content/validation.py                     234     17    93%
+packages/brain-content/src/brain_content/verified_store.py                  58      5    91%
+packages/brain-jobs/src/brain_jobs/queue.py                                146      8    95%
+packages/brain-persistence/src/brain_persistence/content_operations.py     190     20    89%
+packages/brain-persistence/src/brain_persistence/content_repository.py     167     39    77%
+packages/brain-persistence/src/brain_persistence/document_dates.py         163     16    90%
+packages/brain-security/src/brain_security/execution.py                    165      4    98%
+--------------------------------------------------------------------------------------------
+TOTAL                                                                     2911    422    86%
+
+6 files skipped due to complete coverage.
+Coverage XML written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/engine.xml
+Coverage JSON written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/engine.json
+227 passed, 37 warnings in 37.16s

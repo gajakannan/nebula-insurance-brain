@@ -25,6 +25,7 @@ from brain_content.checkpoints import CheckpointStore
 from brain_content.config import LocalObjectStoreConfig
 from brain_content.manifest import ArtifactManifest
 from brain_content.object_store import LocalFilesystemObjectStore
+from brain_content.validation import ArtifactKey, VerifiedBundle, verify_bundle
 from brain_extraction.graph_interpretation import GraphInterpretationService
 from brain_extraction.openai_compatible_adapter import OpenAICompatibleExtractionAdapter
 from brain_extraction.profiles import load_profile
@@ -85,6 +86,9 @@ class BundleReader:
 
     def __init__(self, manifest: ArtifactManifest, files: dict[str, bytes]) -> None:
         self.manifest, self.files = manifest, files
+
+    async def load_verified(self, key: ArtifactKey) -> VerifiedBundle:
+        return verify_bundle(key, self.manifest.model_dump_json().encode(), self.files)
 
     async def get_manifest(self, artifact_id: UUID) -> ArtifactManifest:
         assert artifact_id == self.manifest.artifact_id
@@ -193,7 +197,11 @@ def run_comparison(root: Path) -> dict[str, Any]:
     profile = load_profile("gl-limits-a")
     for kind in ("unique", "ambiguous", "multi-region"):
         doc, expected = fixture(kind)
-        source = doc.model_dump_json().encode()
+        # Controlled native records test orchestration/evidence only. Retain
+        # the committed synthetic PDF under the supported source contract.
+        source = (
+            Path(__file__).resolve().parents[1] / "fixtures/gl-policy-declarations.pdf"
+        ).read_bytes()
         manifest, files = build_bundle(
             ParseResult(doc, 2, [], 0, "complete", []),
             tenant_id=uuid4(),
@@ -204,7 +212,7 @@ def run_comparison(root: Path) -> dict[str, Any]:
             source_sha256=hashlib.sha256(source).hexdigest(),
             configuration_hash="b" * 64,
             source_bytes=source,
-            source_filename="source.json",
+            source_filename="source.pdf",
         )
         store.publish(manifest, files)
         native_hash = hashlib.sha256(files["docling-document.json"]).hexdigest()

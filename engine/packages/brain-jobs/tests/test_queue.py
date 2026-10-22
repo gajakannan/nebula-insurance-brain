@@ -105,3 +105,20 @@ def test_retry_budget_and_event_history_survive_queue_reconstruction(queue):
     with queue.engine.connect() as conn:
         assert conn.scalar(select(jobs.c.state)) == "failed"
         assert len(conn.execute(select(events)).all()) == 5
+
+
+def test_lease_expiring_during_publication_rolls_back_database_effects(queue):
+    queue, clock = queue
+    job_id, _ = enqueue(queue)
+    lease = queue.claim()
+
+    def publish(connection):
+        # A complete external marker may survive; readiness may not.
+        connection.execute(jobs.update().where(jobs.c.id == str(job_id)).values(result_ref="ready"))
+        clock[0] += 11
+
+    with pytest.raises(LeaseLost):
+        queue.publish_transaction(lease, publish)
+    with queue.engine.connect() as connection:
+        assert connection.scalar(select(jobs.c.result_ref)) is None
+        assert "checkpoint_published" not in connection.scalars(select(events.c.event)).all()

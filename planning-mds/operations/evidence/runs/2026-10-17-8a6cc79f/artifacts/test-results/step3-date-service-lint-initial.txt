@@ -1,0 +1,110 @@
+E501 Line too long (102 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:205:101
+    |
+203 |                         )).mappings().one_or_none()
+204 |                         if row is None:
+205 |                             raise DateBasisInvalid("candidate predecessor belongs to another version")
+    |                                                                                                     ^^
+206 |                         predecessor = row["supersedes_id"]
+207 |                 repository = ContentArtifactRepository(session)
+    |
+
+E501 Line too long (103 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:214:101
+    |
+212 |                 row = session.execute(table.insert().values(
+213 |                     id=uuid4(), document_version_id=metadata.version_id,
+214 |                     tenant_id=metadata.key.tenant_id, knowledge_base_id=metadata.key.knowledge_base_id,
+    |                                                                                                     ^^^
+215 |                     date_value=date.value, date_precision=date.precision,
+216 |                     basis_kind=retained.kind, basis=retained.model_dump(mode="json"),
+    |
+
+E501 Line too long (113 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:217:101
+    |
+215 |                     date_value=date.value, date_precision=date.precision,
+216 |                     basis_kind=retained.kind, basis=retained.model_dump(mode="json"),
+217 |                     content_artifact_id=retained.artifact_id if isinstance(retained, ContentDateBasis) else None,
+    |                                                                                                     ^^^^^^^^^^^^^
+218 |                     content_block_id=retained.block_id if isinstance(retained, ContentDateBasis) else None,
+219 |                     supersedes_id=supersedes_id, idempotency_key=idempotency_key,
+    |
+
+E501 Line too long (107 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:218:101
+    |
+216 |                     basis_kind=retained.kind, basis=retained.model_dump(mode="json"),
+217 |                     content_artifact_id=retained.artifact_id if isinstance(retained, ContentDateBasis) else None,
+218 |                     content_block_id=retained.block_id if isinstance(retained, ContentDateBasis) else None,
+    |                                                                                                     ^^^^^^^
+219 |                     supersedes_id=supersedes_id, idempotency_key=idempotency_key,
+220 |                     request_sha256=request, actor_principal_id=decision.actor_principal_id,
+    |
+
+E501 Line too long (103 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:301:101
+    |
+299 |                 row = session.execute(table.insert().values(
+300 |                     id=uuid4(), document_version_id=metadata.version_id,
+301 |                     tenant_id=metadata.key.tenant_id, knowledge_base_id=metadata.key.knowledge_base_id,
+    |                                                                                                     ^^^
+302 |                     candidate_id=candidate_id, previous_selection_id=expected_selection_id,
+303 |                     human_decision_id=receipt.decision_id,
+    |
+
+E501 Line too long (106 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:311:101
+    |
+309 |                     reason=reason, idempotency_key=idempotency_key, request_sha256=request,
+310 |                     actor_principal_id=decision.actor_principal_id,
+311 |                     authorization_decision_id=decision.decision_id, authorization_audit_event_id=audit.id,
+    |                                                                                                     ^^^^^^
+312 |                 ).returning(table)).mappings().one()
+313 |                 repository.mutation_event(audit, "document_date_selected", {
+    |
+
+E501 Line too long (107 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:316:101
+    |
+314 |                     "selection_id": str(row["id"]), "version_id": str(metadata.version_id),
+315 |                     "candidate_id": str(candidate_id) if candidate_id else None,
+316 |                     "previous_selection_id": str(expected_selection_id) if expected_selection_id else None,
+    |                                                                                                     ^^^^^^^
+317 |                     "authorization_decision_id": str(decision.decision_id),
+318 |                     "human_decision_id": str(human_decision_id),
+    |
+
+E501 Line too long (103 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:336:101
+    |
+335 |             def view(session: Session) -> DocumentDateView:
+336 |                 candidates, selections = tables.document_date_candidate, tables.document_date_selection
+    |                                                                                                     ^^^
+337 |                 rows = session.execute(select(candidates).where(*_owned(candidates, metadata)).order_by(
+338 |                     candidates.c.created_at, candidates.c.id
+    |
+
+E501 Line too long (104 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:337:101
+    |
+335 |             def view(session: Session) -> DocumentDateView:
+336 |                 candidates, selections = tables.document_date_candidate, tables.document_date_selection
+337 |                 rows = session.execute(select(candidates).where(*_owned(candidates, metadata)).order_by(
+    |                                                                                                     ^^^^
+338 |                     candidates.c.created_at, candidates.c.id
+339 |                 )).mappings().all()
+    |
+
+E501 Line too long (114 > 100)
+   --> packages/brain-persistence/src/brain_persistence/document_dates.py:349:101
+    |
+347 |                 records = tuple(candidate_record(row) for row in rows)
+348 |                 selection = selection_record(selected) if selected else None
+349 |                 date = next((row.date for row in records if selection and row.id == selection.candidate_id), None)
+    |                                                                                                     ^^^^^^^^^^^^^^
+350 |                 return DocumentDateView(
+351 |                     document_version_id=metadata.version_id, candidates=records,
+    |
+
+Found 12 errors (2 fixed, 10 remaining).

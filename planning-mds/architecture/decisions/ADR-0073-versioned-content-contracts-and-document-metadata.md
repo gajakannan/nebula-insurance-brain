@@ -102,6 +102,6 @@ All F0004 story criteria plus: v1/new-v2 compatibility; byte-for-byte legacy pre
 
 ## References
 
-- [F0004 PRD](../../features/F0004-content-artifact-model/PRD.md), [assembly plan](../../features/F0004-content-artifact-model/feature-assembly-plan.md)
+- [F0004 PRD](../../features/archive/F0004-content-artifact-model/PRD.md), [assembly plan](../../features/archive/F0004-content-artifact-model/feature-assembly-plan.md)
 - [ADR-0040](ADR-0040-lossless-content-and-evidence-contract.md), [ADR-0058 as amended](ADR-0058-evidence-anchoring-and-selector-contract.md), [ADR-0059](ADR-0059-provider-neutral-content-artifact-storage.md)
 - [F0003 persistence ownership](../../features/archive/F0003-postgresql-persistence/feature-assembly-plan.md), [F0005 candidate plan](../../features/F0005-one-time-docling-ingestion/feature-assembly-plan.md)

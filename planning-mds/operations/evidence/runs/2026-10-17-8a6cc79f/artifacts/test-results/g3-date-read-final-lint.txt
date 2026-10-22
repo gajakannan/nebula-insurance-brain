@@ -1,0 +1,13 @@
+SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+    --> tests/integration/test_content_migration_states.py:1481:5
+     |
+1479 |                   ),
+1480 |               )
+1481 | /     with Session(publisher.queue.engine) as session:
+1482 | |         with pytest.raises(ArtifactIntegrityError, match="links"):
+     | |__________________________________________________________________^
+1483 |               ContentArtifactRepository(session).verify_indexes(bundle)
+     |
+help: Combine `with` statements
+
+Found 1 error.

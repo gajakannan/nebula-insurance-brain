@@ -1,0 +1,38 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_durable_table_cells_headers_and_continuations_round_trip[tables] _____
+tests/integration/test_content_migration_states.py:1331: in test_durable_table_cells_headers_and_continuations_round_trip
+    connection.execute(
+/opt/venv/lib/python3.14/site-packages/psycopg/connection.py:300: in execute
+    raise ex.with_traceback(None)
+E   psycopg.errors.UniqueViolation: duplicate key value violates unique constraint "content_table_cell_block_pkey"
+E   DETAIL:  Key (artifact_id, table_id, cell_id, block_id)=(41a69fd5-3c06-43aa-bad7-8937f45e4bcf, t0, cell-0, #/texts/0) already exists.
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+=============================== warnings summary ===============================
+tests/integration/test_content_migration_states.py::test_durable_table_cells_headers_and_continuations_round_trip[tables]
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                                     Stmts   Miss  Cover
+--------------------------------------------------------------------------------------------
+packages/brain-persistence/src/brain_persistence/content_repository.py     167     29    83%
+--------------------------------------------------------------------------------------------
+TOTAL                                                                      167     29    83%
+Coverage JSON written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/tableindex.json
+=========================== short test summary info ============================
+FAILED tests/integration/test_content_migration_states.py::test_durable_table_cells_headers_and_continuations_round_trip[tables]
+1 failed, 29 deselected, 1 warning in 1.96s

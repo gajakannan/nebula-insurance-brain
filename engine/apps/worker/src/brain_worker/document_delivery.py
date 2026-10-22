@@ -15,7 +15,11 @@ from pathlib import Path
 from uuid import UUID, uuid4, uuid5
 
 from brain_content.checkpoints import ArtifactIntegrityError, CheckpointStore
-from brain_content.manifest import ArtifactManifest
+from brain_content.identities import is_fallback_pair
+from brain_content.manifest import ArtifactManifest, Manifest
+from brain_content.outputs import parse_run_manifest
+from brain_content.store import ArtifactNotFound
+from brain_content.validation import ArtifactKey, VerifiedBundle
 from brain_contracts.result import InterpretationResult
 from brain_domain.authx import (
     AuthorizationDecision,
@@ -25,6 +29,7 @@ from brain_domain.authx import (
 )
 from brain_jobs.queue import JobLease, jobs, leases, outbox
 from brain_persistence.authx import SyncAuthorityStore
+from brain_persistence.content_repository import ContentArtifactRepository
 from brain_persistence.models import (
     Assertion,
     AssertionEvidence,
@@ -123,12 +128,42 @@ class DocumentJobAuthorization:
         delegation_id = UUID(delegation_ref) if delegation_ref else None
         trace_id = str(UUID(lease.payload["correlation_id"]))
 
+        def related(artifact: UUID) -> bool:
+            if artifact == lease.artifact_id:
+                return True
+            source_sha = lease.payload.get("source_sha256")
+            if not source_sha:
+                return False
+            # A registered historical/accepted artifact must have the same
+            # trusted source and owner; its own restrictions are still evaluated.
+            try:
+                with Session(self.engine) as session:
+                    metadata = ContentArtifactRepository(session).get_metadata(artifact)
+                return (
+                    metadata.key.tenant_id,
+                    metadata.key.knowledge_base_id,
+                    metadata.source_sha256,
+                ) == (lease.tenant_id, lease.knowledge_base_id, source_sha)
+            except ArtifactNotFound:
+                pass
+            if lease.payload.get("content_contract_version") != 2:
+                return False
+            try:
+                return is_fallback_pair(
+                    ArtifactKey(lease.artifact_id, lease.tenant_id, lease.knowledge_base_id, 2),
+                    ArtifactKey(artifact, lease.tenant_id, lease.knowledge_base_id, 1),
+                    document_id=UUID(lease.payload["document_id"]),
+                    version_id=UUID(lease.payload["version_id"]),
+                    source_sha256=source_sha,
+                    recipe_sha256=lease.payload["recipe_sha256"],
+                )
+            except (ValueError, KeyError):
+                return False
+
         def authorize(tenant: UUID, kb: UUID, artifact: UUID, action: str) -> None:
-            if (tenant, kb, artifact) != (
-                lease.tenant_id,
-                lease.knowledge_base_id,
-                lease.artifact_id,
-            ) or action not in WORKER_ACTIONS:
+            if (tenant, kb) != (lease.tenant_id, lease.knowledge_base_id) or (
+                action not in WORKER_ACTIONS or not related(artifact)
+            ):
                 raise PermissionError("job authorization scope mismatch")
             decision = self.decide(
                 executor_id=executor_id,
@@ -204,8 +239,10 @@ class DocumentResultImporter:
         engine: Engine,
         store: CheckpointStore,
         authorize_for_job: Callable[[JobLease], Authorizer],
+        read_artifact: Callable[[JobLease, UUID], VerifiedBundle] | None = None,
     ) -> None:
         self.engine, self.store, self.authorize_for_job = engine, store, authorize_for_job
+        self.read_artifact = read_artifact
 
     def run_one(self) -> bool:
         with self.engine.begin() as conn:
@@ -257,17 +294,35 @@ class DocumentResultImporter:
             if not result_ref.startswith(prefix) or not result_ref.endswith("/manifest.json"):
                 raise ArtifactIntegrityError("outbox result namespace mismatch")
             run_id = UUID(result_ref[len(prefix) : -len("/manifest.json")])
-            manifest, _ = self.store.load(
-                lease.artifact_id, lease.tenant_id, lease.knowledge_base_id
-            )
+            manifest: Manifest
+            bundle = None
+            if self.read_artifact is None:
+                manifest, _ = self.store.load(
+                    lease.artifact_id, lease.tenant_id, lease.knowledge_base_id
+                )
+                key = ArtifactKey(lease.artifact_id, lease.tenant_id, lease.knowledge_base_id, 1)
+            else:
+                marker = parse_run_manifest(self.store.objects.read(result_ref))
+                if (marker.tenant_id, marker.knowledge_base_id, marker.run_id) != (
+                    lease.tenant_id,
+                    lease.knowledge_base_id,
+                    run_id,
+                ):
+                    raise ArtifactIntegrityError("run output marker has another owner")
+                bundle = self.read_artifact(lease, marker.artifact_id)
+                manifest, key = bundle.manifest, bundle.key
+                self.authorize_for_job(lease)(
+                    lease.tenant_id, lease.knowledge_base_id, key.artifact_id, "interpret"
+                )
             files = self.store.load_run(
                 tenant_id=lease.tenant_id,
                 knowledge_base_id=lease.knowledge_base_id,
-                artifact_id=lease.artifact_id,
+                artifact_id=key.artifact_id,
                 run_id=run_id,
+                artifact_key=key,
             )
             result = InterpretationResult.model_validate_json(files["result.json"])
-            if (result.run_id, result.artifact_id) != (run_id, lease.artifact_id):
+            if (result.run_id, result.artifact_id) != (run_id, key.artifact_id):
                 raise ArtifactIntegrityError("interpretation identity mismatch")
             if (
                 result.run_configuration.profile_id,
@@ -281,7 +336,7 @@ class DocumentResultImporter:
                 raise ArtifactIntegrityError("interpretation profile mismatch")
             if result.entities or result.relationships or result.status == "failed":
                 raise ValueError("unsupported or failed interpretation output")
-            if (
+            if bundle is None and (
                 str(manifest.document_id),
                 str(manifest.version_id),
                 manifest.source_sha256,
@@ -293,8 +348,16 @@ class DocumentResultImporter:
                 lease.payload["recipe_sha256"],
             ):
                 raise ArtifactIntegrityError("job source identity mismatch")
+            if manifest.source_sha256 != lease.payload["source_sha256"]:
+                raise ArtifactIntegrityError("job source fingerprint mismatch")
             with Session(bind=conn) as session:
-                _register_artifact(session, manifest)
+                if bundle is None:
+                    assert isinstance(manifest, ArtifactManifest)
+                    _register_artifact(session, manifest)
+                else:
+                    repository = ContentArtifactRepository(session)
+                    repository.get_metadata(key.artifact_id).verify_identity(bundle)
+                    repository.verify_indexes(bundle)
                 # The outbox delivered marker and all rows commit together. A pre-existing
                 # run with a pending outbox is not a retry of this transaction.
                 if session.get(SemanticInterpretationRun, run_id) is not None:

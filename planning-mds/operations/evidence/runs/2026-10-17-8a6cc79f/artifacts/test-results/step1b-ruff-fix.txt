@@ -1,0 +1,30 @@
+E501 Line too long (107 > 100)
+  --> engine/packages/brain-content/src/brain_content/validation.py:83:101
+   |
+81 |         for path in sorted(files)
+82 |     ]
+83 |     return sha256(json.dumps(inventory, sort_keys=True, ensure_ascii=True, separators=(",", ":")).encode())
+   |                                                                                                     ^^^^^^^
+
+E501 Line too long (102 > 100)
+   --> engine/packages/brain-content/src/brain_content/validation.py:312:101
+    |
+310 |         _require(bool(files["source.pdf"]) and manifest.page_count > 0, "empty source conversion")
+311 |     if sources:
+312 |         _require(sha256(files[sources[0]]) == manifest.source_sha256, "retained source hash mismatch")
+    |                                                                                                     ^^
+313 |     try:
+314 |         native = decode_json(files[reference.path])
+    |
+
+E501 Line too long (102 > 100)
+   --> engine/packages/brain-content/src/brain_content/validation.py:330:101
+    |
+328 |         raise ArtifactIntegrityError("invalid native content or record") from None
+329 |     return VerifiedBundle(
+330 |         key, manifest, manifest_bytes, sha256(manifest_bytes), MappingProxyType(dict(files)), *records
+    |                                                                                                     ^^
+331 |     )
+    |
+
+Found 7 errors (4 fixed, 3 remaining).

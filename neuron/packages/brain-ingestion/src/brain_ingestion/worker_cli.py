@@ -3,33 +3,28 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
 import os
 import signal
-from datetime import UTC, datetime
-from importlib.metadata import version
 from pathlib import Path
 from threading import BoundedSemaphore, Event
-from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
+from uuid import UUID
 
 from brain_content.checkpoints import CheckpointStore
-from brain_content.config import load_local_object_store_config
-from brain_content.object_store import LocalFilesystemObjectStore, ObjectAlreadyExistsError
-from brain_domain.authx import ResourceKey, ResourceType
-from brain_extraction.profiles import load_profile
+from brain_content.config import load_content_writer_config, load_local_object_store_config
+from brain_content.object_store import LocalFilesystemObjectStore
 from brain_extraction.vllm_graph_client import VllmGraphClient, cached_model_token_counter
-from brain_jobs.queue import DocumentJobQueue, JobLease
-from brain_persistence.tenancy import provision_resource_access
+from brain_jobs.queue import DocumentJobQueue
+from brain_security.casbin_adapter import CasbinAuthorizationAdapter
+from brain_worker.content_access import SourceContentAccess
+from brain_worker.content_publication import AuthorizedContentPublisher
 from brain_worker.document_delivery import (
     DocumentJobAuthorization,
     DocumentResultImporter,
-    register_document_artifact,
 )
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
 
-from brain_ingestion.document_worker import DocumentTask, DocumentWorker
+from brain_ingestion.document_worker import DocumentWorker
+from brain_ingestion.submission import enqueue_document
 
 
 def main() -> int:
@@ -62,7 +57,17 @@ def main() -> int:
         engine, args.policy_dir / "model.conf", args.policy_dir / "policy.csv"
     )
     queue = DocumentJobQueue(engine)
-    importer = DocumentResultImporter(engine, store, authorization.for_job)
+    publication = AuthorizedContentPublisher(
+        queue,
+        store.verified,
+        CasbinAuthorizationAdapter(args.policy_dir / "model.conf", args.policy_dir / "policy.csv"),
+        objects=store.objects,
+    )
+    access = SourceContentAccess(engine, store.verified, publication.policy)
+    writer_config = load_content_writer_config()
+    importer = DocumentResultImporter(
+        engine, store, authorization.for_job, read_artifact=access.read
+    )
     try:
         if args.enqueue:
             if not args.tenant or not args.knowledge_base or args.enqueue.suffix.lower() != ".pdf":
@@ -70,73 +75,21 @@ def main() -> int:
             if not args.classification:
                 parser.error("enqueue requires at least one --classification")
             actor = UUID(os.environ["BRAIN_WORKER_PRINCIPAL_ID"])
-            profile = load_profile(args.profile)
-            # Version the effective physical recipe independently of the extraction profile.
-            recipe = hashlib.sha256(
-                json.dumps(
-                    {"adapter": "docling-default-pdf-v1", "docling": version("docling")},
-                    sort_keys=True,
-                ).encode()
-            ).hexdigest()
-            source = args.enqueue.read_bytes()
-            source_sha = hashlib.sha256(source).hexdigest()
-            document_id = uuid5(
-                NAMESPACE_URL, f"nebula:{args.tenant}:{args.knowledge_base}:{source_sha}"
-            )
-            version_id = uuid5(document_id, recipe)
-            artifact_id = uuid5(version_id, "content")
-            task = DocumentTask(
-                document_id=document_id,
-                version_id=version_id,
-                source_sha256=source_sha,
-                recipe_sha256=recipe,
-                profile_id=profile.profile_id,
-                profile_version=profile.profile_version,
-                schema_sha256=profile.schema_sha256,
-                actor_id=actor,
-                correlation_id=uuid4(),
-            )
-            lease = JobLease(
-                uuid4(),
-                args.tenant,
-                args.knowledge_base,
-                artifact_id,
-                0,
-                0,
-                task.model_dump(mode="json"),
-            )
-            with Session(engine) as session, session.begin():
-                provision_resource_access(
-                    session,
-                    ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact_id),
+            print(
+                enqueue_document(
+                    engine,
+                    queue,
+                    store,
+                    authorization,
+                    access,
+                    source_path=args.enqueue,
                     tenant_id=args.tenant,
                     knowledge_base_id=args.knowledge_base,
+                    actor_id=actor,
+                    profile_id=args.profile,
                     classifications=args.classification,
                     source_acl_ids=args.source_acl,
-                    actor_id=actor,
-                    at=datetime.now(UTC),
-                    allow_before_record=True,
-                )
-            authorization.for_job(lease)(args.tenant, args.knowledge_base, artifact_id, "ingest")
-            authorization.for_job(lease)(args.tenant, args.knowledge_base, artifact_id, "interpret")
-            source_key = f"sources/{args.tenant}/{args.knowledge_base}/{source_sha}.pdf"
-            try:
-                store.objects.create_exclusive(source_key, source)
-            except ObjectAlreadyExistsError:
-                if store.objects.read(source_key) != source:
-                    raise ValueError("retained source conflict") from None
-            # Stable actor/correlation identity permits identical operator retries.
-            request_key = hashlib.sha256(
-                f"{artifact_id}:{actor}:{profile.profile_id}:{profile.profile_version}:{profile.schema_sha256}".encode()
-            ).hexdigest()
-            task.correlation_id = uuid5(artifact_id, request_key)
-            print(
-                queue.enqueue(
-                    tenant_id=args.tenant,
-                    knowledge_base_id=args.knowledge_base,
-                    artifact_id=artifact_id,
-                    request_key=request_key,
-                    payload=task.model_dump(mode="json"),
+                    v2_writer_enabled=writer_config.v2_writer_enabled,
                 )
             )
             return 0
@@ -168,7 +121,9 @@ def main() -> int:
                 store=store,
                 authorize_for_job=authorization.for_job,
                 client_factory=client_factory,
-                record_artifact=register_document_artifact,
+                publish_content=publication.publish_manifest,
+                load_accepted=access.resolve,
+                v2_writer_enabled=writer_config.v2_writer_enabled,
             )
         # One process / one document / one model request at a time. Deployment must
         # cap replicas; this semaphore is intentionally not a distributed GPU quota.

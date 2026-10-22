@@ -1,0 +1,379 @@
+{
+  "query": {
+    "symbol_name": "mutate",
+    "node": "capability:durable-authorization-decisions"
+  },
+  "matched_count": 1,
+  "matches": [
+    {
+      "symbol": {
+        "id": "symbol:capability-durable-authorization-decisions:authorization-execution.mutate",
+        "node": "capability:durable-authorization-decisions",
+        "kind": "method",
+        "name": "mutate",
+        "file": "engine/packages/brain-security/src/brain_security/execution.py",
+        "line": 388,
+        "signature": "async def mutate(self, authenticated: Principal, keys: Sequence[ResourceKey], action: str, *, trace_id: str, operation: Callable[[Sequence[AuthorizationDecision]], Awaitable[T]], requested: RequestedScope=NO_FILTER, delegation_id: UUID | None=None)",
+        "visibility": "public",
+        "language": "python",
+        "container": "AuthorizationExecution",
+        "end_line": 424,
+        "callers": [],
+        "callees": [
+          "symbol:capability-durable-authorization-decisions:authority-store.append-decision",
+          "symbol:capability-durable-authorization-decisions:authority-store.commit",
+          "symbol:capability-durable-authorization-decisions:authorization-execution.deny",
+          "symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide",
+          "symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh",
+          "symbol:capability-durable-authorization-decisions:authorization-execution.recheck-all",
+          "symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback",
+          "symbol:capability-durable-authorization-decisions:execution.authorization-unavailable"
+        ]
+      },
+      "callers": [],
+      "callees": [
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-store.append-decision",
+          "node": "capability:durable-authorization-decisions",
+          "name": "append_decision",
+          "kind": "method",
+          "container": "AuthorityStore",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 112,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-store.commit",
+          "node": "capability:durable-authorization-decisions",
+          "name": "commit",
+          "kind": "method",
+          "container": "AuthorityStore",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 114,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.deny",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_deny",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 340,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_guarded_decide",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 304,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_persist_fresh",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 329,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.recheck-all",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_recheck_all",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 351,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_safe_rollback",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 324,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:execution.authorization-unavailable",
+          "node": "capability:durable-authorization-decisions",
+          "name": "AuthorizationUnavailable",
+          "kind": "class",
+          "container": null,
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 65,
+          "language": "python"
+        }
+      ],
+      "decisions": [],
+      "siblings_in_file": [
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-reader.current-policy-release",
+          "node": "capability:durable-authorization-decisions",
+          "name": "current_policy_release",
+          "kind": "method",
+          "container": "AuthorityReader",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 81,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-reader.hydrate",
+          "node": "capability:durable-authorization-decisions",
+          "name": "hydrate",
+          "kind": "method",
+          "container": "AuthorityReader",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 99,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-reader.lock-authority",
+          "node": "capability:durable-authorization-decisions",
+          "name": "lock_authority",
+          "kind": "method",
+          "container": "AuthorityReader",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 89,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-reader.lock-delegation",
+          "node": "capability:durable-authorization-decisions",
+          "name": "lock_delegation",
+          "kind": "method",
+          "container": "AuthorityReader",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 93,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-reader.peek-delegation",
+          "node": "capability:durable-authorization-decisions",
+          "name": "peek_delegation",
+          "kind": "method",
+          "container": "AuthorityReader",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 85,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-reader.scope-slices",
+          "node": "capability:durable-authorization-decisions",
+          "name": "scope_slices",
+          "kind": "method",
+          "container": "AuthorityReader",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 95,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-store.append-decision",
+          "node": "capability:durable-authorization-decisions",
+          "name": "append_decision",
+          "kind": "method",
+          "container": "AuthorityStore",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 112,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-store.commit",
+          "node": "capability:durable-authorization-decisions",
+          "name": "commit",
+          "kind": "method",
+          "container": "AuthorityStore",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 114,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-store.rollback",
+          "node": "capability:durable-authorization-decisions",
+          "name": "rollback",
+          "kind": "method",
+          "container": "AuthorityStore",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 116,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authority-store.run-sync",
+          "node": "capability:durable-authorization-decisions",
+          "name": "run_sync",
+          "kind": "method",
+          "container": "AuthorityStore",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 108,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-denied.init",
+          "node": "capability:durable-authorization-decisions",
+          "name": "__init__",
+          "kind": "method",
+          "container": "AuthorizationDenied",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 60,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.decide",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_decide",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 279,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.deny",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_deny",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 340,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.guarded-decide",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_guarded_decide",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 304,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.init",
+          "node": "capability:durable-authorization-decisions",
+          "name": "__init__",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 264,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_persist_fresh",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 329,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.read",
+          "node": "capability:durable-authorization-decisions",
+          "name": "read",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 355,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.recheck-all",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_recheck_all",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 351,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback",
+          "node": "capability:durable-authorization-decisions",
+          "name": "_safe_rollback",
+          "kind": "method",
+          "container": "AuthorizationExecution",
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 324,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:execution.assemble-context",
+          "node": "capability:durable-authorization-decisions",
+          "name": "assemble_context",
+          "kind": "function",
+          "container": null,
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 131,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:execution.authority-reader",
+          "node": "capability:durable-authorization-decisions",
+          "name": "AuthorityReader",
+          "kind": "class",
+          "container": null,
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 76,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:execution.authority-store",
+          "node": "capability:durable-authorization-decisions",
+          "name": "AuthorityStore",
+          "kind": "class",
+          "container": null,
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 105,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:execution.authorization-denied",
+          "node": "capability:durable-authorization-decisions",
+          "name": "AuthorizationDenied",
+          "kind": "class",
+          "container": null,
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 56,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:execution.authorization-execution",
+          "node": "capability:durable-authorization-decisions",
+          "name": "AuthorizationExecution",
+          "kind": "class",
+          "container": null,
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 263,
+          "language": "python"
+        },
+        {
+          "id": "symbol:capability-durable-authorization-decisions:execution.authorization-unavailable",
+          "node": "capability:durable-authorization-decisions",
+          "name": "AuthorizationUnavailable",
+          "kind": "class",
+          "container": null,
+          "file": "engine/packages/brain-security/src/brain_security/execution.py",
+          "line": 65,
+          "language": "python"
+        }
+      ],
+      "siblings_truncated": 5
+    }
+  ],
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ]
+}

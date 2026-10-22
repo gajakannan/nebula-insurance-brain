@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import uuid
 
+from brain_content.manifest import ArtifactVersionUnsupported
+from brain_content.validation import ArtifactIntegrityError
 from brain_security.execution import AuthorizationDenied, AuthorizationUnavailable
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -86,6 +88,10 @@ class ServiceUnavailableError(BrainError):
     title = "Service Unavailable"
 
 
+class ContentUnavailableError(ServiceUnavailableError):
+    code = "CONTENT_UNAVAILABLE"
+
+
 def _problem_response(
     *,
     status_code: int,
@@ -112,6 +118,21 @@ def _problem_response(
 
 def install_problem_details_handlers(app: FastAPI) -> None:
     """Map BrainError subclasses and request-validation failures to ProblemDetails."""
+
+    @app.exception_handler(ArtifactIntegrityError)
+    @app.exception_handler(ArtifactVersionUnsupported)
+    async def _handle_content_integrity(request: Request, exc: Exception) -> JSONResponse:
+        return _problem_response(
+            status_code=status.HTTP_409_CONFLICT,
+            title="Content Integrity Conflict",
+            code=(
+                "ARTIFACT_VERSION_UNSUPPORTED"
+                if isinstance(exc, ArtifactVersionUnsupported)
+                else "ARTIFACT_INTEGRITY"
+            ),
+            detail=None,
+            instance=None,
+        )
 
     @app.exception_handler(BrainError)
     async def _handle_brain_error(request: Request, exc: BrainError) -> JSONResponse:
@@ -149,6 +170,14 @@ def install_problem_details_handlers(app: FastAPI) -> None:
     async def _handle_validation_error(
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
+        if request.url.path.startswith("/content/"):
+            return _problem_response(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                title="Invalid Content Request",
+                code="invalid_request",
+                detail=None,
+                instance=None,
+            )
         return _problem_response(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             title="Request Validation Failed",

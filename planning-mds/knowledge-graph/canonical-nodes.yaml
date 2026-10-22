@@ -473,14 +473,16 @@ capabilities:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:document-date-provenance
     label: Append-only document-date provenance
-    notes: 'Proposed F0004: attributable date candidates and explicit versioned selections outside immutable
-      parse bundles. Trusted metadata/human verifiers; no new UI, grants or temporal resolver.'
+    notes: Implemented F0004 attributable candidates and explicit append-only human selection/clear outside
+      parse hashes. Trusted metadata/human ports default deny. FOR SHARE version lock spans read/audit
+      commit against writer FOR UPDATE, preventing a selected candidate from being omitted under READ
+      COMMITTED. No UI, grant or temporal resolver.
     related_nodes:
       - adr:0073
       - entity:content-artifact
     source_docs:
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
-      - planning-mds/features/F0004-content-artifact-model/worked-examples.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/worked-examples.md
   - id: capability:durable-authorization-decisions
     label: Durable authorization decisions
     notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): AuthorizationExecution commits a schema-v1
@@ -607,9 +609,9 @@ capabilities:
       - workflow:ingestion-interpretation
     source_docs:
       - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
   - id: capability:postgresql-persistence-contract
     label: PostgreSQL persistence contract and migration boundary
     notes: Shared PostgreSQL 18 persistence boundary. Preserves existing migration and identifier history,
@@ -709,14 +711,16 @@ capabilities:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:versioned-content-contracts
     label: Versioned verified content contracts
-    notes: 'Proposed F0004: explicit v1/v2 dispatch, shared byte/record verifier, fenced ready registration
-      and legacy preservation. No runtime implementation or production activation claim.'
+    notes: Implemented F0004 shared v1/v2 byte/record verification, manifest-last immutable storage, fenced
+      ready publication and legacy preservation. V2 remains default false pending deployment reconciliation/consumer
+      gates. Integrity failures on reads never quarantine or reparse; explicit authorized operator units
+      own repair.
     related_nodes:
       - adr:0073
       - entity:content-artifact
     source_docs:
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
-      - planning-mds/features/F0004-content-artifact-model/worked-examples.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/worked-examples.md
 endpoints:
   - id: endpoint:content-artifact-file-get
     label: GET /content/{artifactId}/files/{path}
@@ -729,8 +733,8 @@ endpoints:
     route: /content/{artifactId}/files/{path}
     source_docs:
       - planning-mds/api/brain-api.yaml
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
   - id: endpoint:content-artifact-get
     label: GET /content/{artifactId}
     method: GET
@@ -742,7 +746,7 @@ endpoints:
     route: /content/{artifactId}
     source_docs:
       - planning-mds/api/brain-api.yaml
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
   - id: endpoint:fact-commit
     label: POST /facts/{factSlotId}/commits
     method: POST
@@ -911,8 +915,10 @@ entities:
     label: Content artifact
     notes: 'Immutable parse-once bundle for one document version: docling-document.json, normalized.md,
       blocks.jsonl, tables.jsonl, layout.jsonl, manifest.json with per-file sha256 and execution record.
-      Proposed F0004 permits governed artifact versions per retained source version, with preserved legacy
-      identities and separate append-only document-date metadata.'
+      Implemented F0004 permits governed artifact versions per retained source version, with preserved
+      legacy identities and separate append-only document-date metadata. Multiple-artifact global uniqueness
+      reconciliation remains an explicit quiesced operator gate; a fallback retains its source version
+      and original lease fence.'
     related_entities:
       - entity:semantic-interpretation-run
     related_nodes:
@@ -924,12 +930,13 @@ entities:
       - schema:content-artifact-manifest-v2
     source_docs:
       - planning-mds/architecture/master-blueprint.md
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
   - id: entity:content-block
     label: Content block index
-    notes: Proposed F0004. Immutable owned pointer to a v2 blocks.jsonl line, native reference, reading
-      order and one observed text origin; full text stays in the bundle.
+    notes: Implemented F0004 immutable owned pointer to an exact v2 blocks.jsonl line, native reference,
+      reading order and one observed origin; full text stays in retained bytes. Engine/package receipts
+      establish bounded attribution, not model-weight identity.
     related_nodes:
       - adr:0073
       - capability:versioned-content-contracts
@@ -937,12 +944,13 @@ entities:
       - schema:content-records-v2
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
-      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
   - id: entity:content-table
     label: Content table index
-    notes: Proposed F0004. Immutable owned table-line pointer preserving dimensions, header rows and explicit
-      same-artifact continuation.
+    notes: Implemented F0004 immutable owned pointer to an exact tables.jsonl line, dimensions, header
+      and continuation metadata. Dependency-ordered inserts preserve original record ordinals/hashes;
+      full text stays in retained bytes.
     related_nodes:
       - adr:0073
       - capability:versioned-content-contracts
@@ -950,12 +958,12 @@ entities:
       - schema:content-records-v2
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
-      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
   - id: entity:content-table-cell
     label: Content table cell index
-    notes: Proposed F0004. Owned table cell with row/column spans and same-artifact block links; bounds
-      and native associations are verified before publication.
+    notes: Implemented F0004 immutable same-artifact cell geometry, merged spans and block links with
+      ownership constraints; native normalized records remain the byte authority.
     related_nodes:
       - adr:0073
       - capability:versioned-content-contracts
@@ -963,8 +971,8 @@ entities:
       - schema:content-records-v2
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
-      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
   - id: entity:delegation
     label: Delegation
     notes: Proposed F0002 design; implementation pending. Trusted acting/executor binding with finite
@@ -981,8 +989,9 @@ entities:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: entity:document-date-candidate
     label: Document-date candidate
-    notes: Proposed F0004. Append-only YEAR/MONTH/DAY value and attributable CONTENT, SOURCE_METADATA
-      or verified HUMAN basis. Recorded times never become document dates.
+    notes: Implemented F0004 append-only dated candidate with exact CONTENT line/hash/quote or trusted
+      metadata/human receipt and independent current authority. Candidate recording does not select a
+      date or canonical interval.
     related_nodes:
       - adr:0073
       - capability:document-date-provenance
@@ -990,12 +999,13 @@ entities:
       - schema:document-date-record
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
-      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
   - id: entity:document-date-selection
     label: Document-date selection
-    notes: Proposed F0004. Append-only explicit candidate choice or clear, previous selection and sequence;
-      consumers may pin historical selection IDs. No automatic precedence.
+    notes: Implemented F0004 explicit human candidate choice or clear, previous-selection CAS, sequence
+      and immutable history. Consumers may pin a historical selection; processing time and source precedence
+      never select automatically.
     related_nodes:
       - adr:0073
       - capability:document-date-provenance
@@ -1003,8 +1013,8 @@ entities:
       - schema:document-date-record
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0004-content-artifact-model/feature-assembly-plan.md
-      - planning-mds/features/F0004-content-artifact-model/persistence-design.sql
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
   - id: entity:fact-slot
     label: Fact slot
     notes: Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit
@@ -1447,6 +1457,15 @@ glossary_terms:
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/domain/glossary.md
       - planning-mds/features/F0012-foundation-ontology/README.md
+migrations:
+  - id: migration:f0004-content-contract
+    label: F0004 additive content contracts and document dates (revision 0008)
+    path: engine/migrations/versions/0008_f0004_content_contract.py
+    related_nodes:
+      - adr:0073
+      - capability:document-date-provenance
+      - capability:versioned-content-contracts
+      - entity:content-artifact
 policy_rules:
   - id: policy_rule:content-artifact-ingest
     label: content_artifact:ingest

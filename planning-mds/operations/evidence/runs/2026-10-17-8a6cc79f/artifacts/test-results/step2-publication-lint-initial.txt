@@ -1,0 +1,23 @@
+E501 Line too long (101 > 100)
+   --> apps/worker/src/brain_worker/content_publication.py:153:101
+    |
+151 |             if manifest.extraction_quality.status == "failed":
+152 |                 raise ArtifactConflict("failed conversion cannot become ready content")
+153 |             if writer_fallback_reason and (key.contract_version != 1 or unattributed_item_count < 1):
+    |                                                                                                     ^
+154 |                 raise ValueError("invalid writer fallback metadata")
+155 |             if (
+    |
+
+E501 Line too long (105 > 100)
+   --> apps/worker/src/brain_worker/content_publication.py:166:101
+    |
+164 |             )
+165 |             repository = ContentArtifactRepository(session)
+166 |             source = repository.find_source(key.tenant_id, key.knowledge_base_id, manifest.source_sha256)
+    |                                                                                                     ^^^^^
+167 |             if source and (source[0] != manifest.document_id or any(k != key for k in source[1])):
+168 |                 raise ArtifactConflict("accepted source requires governed replacement")
+    |
+
+Found 2 errors.

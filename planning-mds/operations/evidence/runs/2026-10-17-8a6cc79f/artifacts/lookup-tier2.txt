@@ -1,0 +1,230 @@
+{
+  "target": {
+    "status": "planned",
+    "id": "feature:F0004",
+    "path": "planning-mds/features/F0004-content-artifact-model",
+    "affects": [
+      "capability:document-date-provenance",
+      "capability:parse-once-content-artifact",
+      "capability:versioned-content-contracts",
+      "endpoint:content-artifact-file-get",
+      "endpoint:content-artifact-get",
+      "entity:content-artifact",
+      "entity:content-block",
+      "entity:content-table",
+      "entity:content-table-cell",
+      "entity:document-date-candidate",
+      "entity:document-date-selection"
+    ],
+    "depends_on": [
+      "feature:F0001",
+      "feature:F0002",
+      "feature:F0003"
+    ],
+    "governed_by": [
+      "adr:0003",
+      "adr:0004",
+      "adr:0037",
+      "adr:0040",
+      "adr:0058",
+      "adr:0059",
+      "adr:0060",
+      "adr:0061",
+      "adr:0062",
+      "adr:0064",
+      "adr:0065",
+      "adr:0073"
+    ],
+    "uses_api_contract": [
+      "api:brain-api"
+    ],
+    "uses_schema": [
+      "schema:content-artifact-manifest",
+      "schema:content-artifact-manifest-read",
+      "schema:content-artifact-manifest-v2",
+      "schema:content-records-v2",
+      "schema:document-date-record",
+      "schema:interpretation-output-manifest",
+      "schema:problem-details"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:document-date-provenance",
+      "label": "Append-only document-date provenance",
+      "notes": "Proposed F0004: attributable date candidates and explicit versioned selections outside immutable parse bundles. Trusted metadata/human verifiers; no new UI, grants or temporal resolver."
+    },
+    {
+      "id": "capability:parse-once-content-artifact",
+      "label": "Parse-once content artifact",
+      "notes": "Target: Docling-Graph coordinates Docling conversion; Nebula publishes the immutable native bundle before extraction and reuses it on restart. F0005 must prove ADR-0060; F0001 used Docling directly.",
+      "hotspots": {
+        "hotspot_rank": 3,
+        "hotspot_score": 0.08,
+        "primary_owner": "gajapathi.kannan@live.com",
+        "primary_owner_pct": 100,
+        "bus_factor_flag": true
+      }
+    },
+    {
+      "id": "capability:versioned-content-contracts",
+      "label": "Versioned verified content contracts",
+      "notes": "Proposed F0004: explicit v1/v2 dispatch, shared byte/record verifier, fenced ready registration and legacy preservation. No runtime implementation or production activation claim."
+    },
+    {
+      "id": "endpoint:content-artifact-file-get",
+      "label": "GET /content/{artifactId}/files/{path}"
+    },
+    {
+      "id": "endpoint:content-artifact-get",
+      "label": "GET /content/{artifactId}"
+    },
+    {
+      "id": "entity:content-artifact",
+      "label": "Content artifact",
+      "notes": "Immutable parse-once bundle for one document version: docling-document.json, normalized.md, blocks.jsonl, tables.jsonl, layout.jsonl, manifest.json with per-file sha256 and execution record. Proposed F0004 permits governed artifact versions per retained source version, with preserved legacy identities and separate append-only document-date metadata."
+    },
+    {
+      "id": "entity:content-block",
+      "label": "Content block index",
+      "notes": "Proposed F0004. Immutable owned pointer to a v2 blocks.jsonl line, native reference, reading order and one observed text origin; full text stays in the bundle."
+    },
+    {
+      "id": "entity:content-table",
+      "label": "Content table index",
+      "notes": "Proposed F0004. Immutable owned table-line pointer preserving dimensions, header rows and explicit same-artifact continuation."
+    },
+    {
+      "id": "entity:content-table-cell",
+      "label": "Content table cell index",
+      "notes": "Proposed F0004. Owned table cell with row/column spans and same-artifact block links; bounds and native associations are verified before publication."
+    },
+    {
+      "id": "entity:document-date-candidate",
+      "label": "Document-date candidate",
+      "notes": "Proposed F0004. Append-only YEAR/MONTH/DAY value and attributable CONTENT, SOURCE_METADATA or verified HUMAN basis. Recorded times never become document dates."
+    },
+    {
+      "id": "entity:document-date-selection",
+      "label": "Document-date selection",
+      "notes": "Proposed F0004. Append-only explicit candidate choice or clear, previous selection and sequence; consumers may pin historical selection IDs. No automatic precedence."
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0003",
+      "label": "One-Time Content Extraction"
+    },
+    {
+      "id": "adr:0004",
+      "label": "Source, Content Artifact, and Interpretation Are Separately Versioned"
+    },
+    {
+      "id": "adr:0037",
+      "label": "Human Corrections Append; They Do Not Rewrite Evidence"
+    },
+    {
+      "id": "adr:0040",
+      "label": "Lossless Content and Evidence Contract"
+    },
+    {
+      "id": "adr:0058",
+      "label": "Evidence Anchoring and Selector Contract"
+    },
+    {
+      "id": "adr:0059",
+      "label": "Provider-Neutral Content Artifact Storage"
+    },
+    {
+      "id": "adr:0060",
+      "label": "Docling-Graph Document Pipeline Orchestration"
+    },
+    {
+      "id": "adr:0061",
+      "label": "Tenant identity and structural ownership"
+    },
+    {
+      "id": "adr:0062",
+      "label": "Current authorization and durable decisions"
+    },
+    {
+      "id": "adr:0064",
+      "label": "Time Interpretation and Valid-Time Precision"
+    },
+    {
+      "id": "adr:0065",
+      "label": "Assertion Admission, Text Origin, and Statement Mood"
+    },
+    {
+      "id": "adr:0073",
+      "label": "Versioned Content Contracts and Append-Only Document Metadata (Proposed)"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:content-artifact-manifest",
+      "label": "ContentArtifactManifest"
+    },
+    {
+      "id": "schema:content-artifact-manifest-read",
+      "label": "Content Artifact Manifest Read"
+    },
+    {
+      "id": "schema:content-artifact-manifest-v2",
+      "label": "Content Artifact Manifest V2"
+    },
+    {
+      "id": "schema:content-records-v2",
+      "label": "Content Records V2"
+    },
+    {
+      "id": "schema:document-date-record",
+      "label": "Document Date Record"
+    },
+    {
+      "id": "schema:interpretation-output-manifest",
+      "label": "Interpretation Output Manifest"
+    },
+    {
+      "id": "schema:problem-details",
+      "label": "ProblemDetails"
+    }
+  ],
+  "uses_api_contract": [
+    {
+      "id": "api:brain-api",
+      "label": "Nebula Insurance Brain API"
+    }
+  ],
+  "depends_on": [
+    {
+      "id": "feature:F0001",
+      "notes": [
+        "ADR-0057 (2026-09-08) replaced Label Studio with the native Nebula Review Panel: S0004 renamed, the webhook endpoint became the review decision submission endpoint, and ADR-0058 added the anchoring contract S0004 also settles.",
+        "Phase A drafted 2026-09-06 in plan run 2026-09-06-cdb5d8cb: seven stories (toolchain, containers, four section 115.4 proofs, contract settlement). coverage_excluded stays until Phase B binds capabilities.",
+        "Phase B approved 2026-09-06: coverage_excluded removed; ten capabilities, ten entities, three workflows, six endpoints, six schemas, three roles, five policy rules declared; code bindings are authored at feature G7 once source exists."
+      ]
+    },
+    {
+      "id": "feature:F0002",
+      "notes": [
+        "F0005 synchronous worker is an impacted consumer requiring adapter regression; its ADR-0060 production activation is not accepted by F0002.",
+        "Historical review-to-commit wording reconciled in ADR-0062: F0002 owns authorization of existing consumers, F0018 owns full orchestration, F0022 owns review UI.",
+        "Identity is tenant-scoped; KB access is explicit. Existing pilot roles only.",
+        "Implemented in feature run 2026-09-27-bb7c8d1d: capabilities bound to as-built source at G7; ADR-0061/0062 accepted for the bounded F0002 scope; ADR-0042/0052/0053 remain Proposed.",
+        "Phases A and B explicitly approved by user with approve-phase-a and approve-phase-b on 2026-09-25."
+      ]
+    },
+    {
+      "id": "feature:F0003"
+    }
+  ]
+}

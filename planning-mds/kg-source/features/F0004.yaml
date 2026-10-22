@@ -1,17 +1,15 @@
 id: feature:F0004
 name: Content artifact model
-path: planning-mds/features/F0004-content-artifact-model
-status: planned
-registry_section: Planned
+path: planning-mds/features/archive/F0004-content-artifact-model
+status: archived-done
+registry_section: Archived
 phase: v0.1A
-roadmap_section: Next
-roadmap_order: 3
-rationale: 'Four-story content contract plan: versioned immutable bundles and normalized origin/structure, append-only
-  document-date provenance, current authorized reads and legacy/restore compatibility. Phases A and B explicitly
-  approved on 2026-10-16. Implementation not started.'
-validation_gate: Approved F0001/F0002/F0003 foundations; plan run 2026-10-15-bbd8df01 approved Phases A and B; rework run 2026-10-16-fce2ff91 re-approved both after plan-review; rework run 2026-10-16-06e0131a re-approved both after re-review; rework run 2026-10-17-620b7618 fixed full-review gaps and was re-approved. Feature-action implementation starts with the Step 1a provenance spike;
-  feature-action
-  implementation and proof remain required.
+roadmap_section: Completed
+roadmap_order: 4
+rationale: Approved content/date implementation preserves immutable legacy bytes, positive producer attribution
+  and current authority. Production activation and Proposed ADR acceptance remain separate.
+validation_gate: "Feature G0\u2013G7 passed; user G4 approval recorded 2026-10-21; G8 publishes archive and\
+  \ synchronized evidence. No shared corpus migration or production Graph activation."
 depends_on:
 - feature:F0001
 - feature:F0002
@@ -53,7 +51,7 @@ uses_schema:
 - schema:problem-details
 story_mappings:
 - id: story:F0004-S0001
-  path: planning-mds/features/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md
+  path: planning-mds/features/archive/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md
   affects:
   - capability:parse-once-content-artifact
   - capability:versioned-content-contracts
@@ -65,7 +63,7 @@ story_mappings:
   governed_by:
   - adr:0073
 - id: story:F0004-S0002
-  path: planning-mds/features/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md
+  path: planning-mds/features/archive/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md
   affects:
   - capability:versioned-content-contracts
   - entity:content-block
@@ -77,7 +75,7 @@ story_mappings:
   governed_by:
   - adr:0073
 - id: story:F0004-S0003
-  path: planning-mds/features/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md
+  path: planning-mds/features/archive/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md
   affects:
   - capability:document-date-provenance
   - entity:document-date-candidate
@@ -87,7 +85,7 @@ story_mappings:
   governed_by:
   - adr:0073
 - id: story:F0004-S0004
-  path: planning-mds/features/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md
+  path: planning-mds/features/archive/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md
   affects:
   - capability:versioned-content-contracts
   - capability:authorization-enforcement
@@ -102,3 +100,9 @@ story_mappings:
   - adr:0062
   uses_api_contract:
   - api:brain-api
+completed_date: '2026-10-21'
+archived_date: '2026-10-21'
+completion_state: All four stories and 25 ACs verified in feature run 2026-10-17-8a6cc79f; G4 explicitly approved;
+  twenty required story/role signoffs. Engine 229, neuron 93 and restore four pass; four optional inference/tokenizer
+  skips; changed runtime 90.60%. G7 as-built bindings and generated layers pass. V2 remains disabled; security
+  and activation follow-ups retained.

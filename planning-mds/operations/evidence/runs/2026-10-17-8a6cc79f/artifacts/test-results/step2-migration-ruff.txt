@@ -1,0 +1,36 @@
+E501 Line too long (103 > 100)
+   --> engine/tests/integration/test_content_migration_states.py:116:101
+    |
+114 |         assert after[: len(before)] == before
+115 |         assert connection.execute(
+116 |             "SELECT artifact_contract_version,manifest_sha256,publication_state FROM content_artifact "
+    |                                                                                                     ^^^
+117 |             "WHERE id=%s",
+118 |             (artifact,),
+    |
+
+SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+   --> engine/tests/integration/test_content_migration_states.py:120:9
+    |
+118 |               (artifact,),
+119 |           ).fetchone() == (None, None, "legacy_unverified")
+120 | /         with pytest.raises(psycopg.Error, match="same-transaction state event"):
+121 | |             with connection.transaction():
+    | |__________________________________________^
+122 |                   connection.execute(
+123 |                       "UPDATE content_artifact SET publication_state='ready' WHERE id=%s", (artifact,)
+    |
+help: Combine `with` statements
+
+E501 Line too long (101 > 100)
+   --> engine/tests/integration/test_content_migration_states.py:147:101
+    |
+145 |     with psycopg.connect(database, autocommit=True) as connection:
+146 |         connection.execute(
+147 |             "INSERT INTO content_block (artifact_id,block_id,tenant_id,knowledge_base_id,native_ref,"
+    |                                                                                                     ^
+148 |             "reading_order,section_path,text_origin,producer,origin_anchor,record_ordinal,"
+149 |             "record_sha256,created_by) VALUES "
+    |
+
+Found 6 errors (3 fixed, 3 remaining).

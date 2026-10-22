@@ -1,0 +1,143 @@
+...............ssFF....                                                  [100%]
+=================================== FAILURES ===================================
+____ test_bundle_is_published_before_extraction_and_survives_failure[False] ____
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/tests/integration/test_graph_pipeline_contract.py:110: in publish
+    ???
+/usr/local/lib/python3.14/asyncio/runners.py:204: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/asyncio/runners.py:127: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/asyncio/base_events.py:719: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+../engine/packages/brain-content/src/brain_content/store.py:54: in put_bundle
+    bundle = await self.publish_verified(key, manifest.model_dump_json().encode(), files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../engine/packages/brain-content/src/brain_content/store.py:62: in publish_verified
+    return await asyncio.to_thread(self._verified.publish, key, manifest_bytes, files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/tests/integration/test_graph_pipeline_contract.py:79: in inline_io
+    ???
+../engine/packages/brain-content/src/brain_content/verified_store.py:67: in publish
+    incoming = verify_bundle(key, manifest_bytes, files)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../engine/packages/brain-content/src/brain_content/validation.py:314: in verify_bundle
+    raise ArtifactIntegrityError("invalid manifest") from None
+E   brain_content.validation.ArtifactIntegrityError: invalid manifest
+
+The above exception was the direct cause of the following exception:
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/tests/integration/test_graph_pipeline_contract.py:131: in test_bundle_is_published_before_extraction_and_survives_failure
+    ???
+packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py:151: in run
+    context = pipeline.run()
+              ^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling_graph/pipeline/orchestrator.py:275: in run
+    raise PipelineError(
+E   docling_graph.exceptions.PipelineError: Pipeline failed at stage 'Nebula conversion checkpoint': ArtifactIntegrityError
+E   Details: stage=Nebula conversion checkpoint, error=invalid manifest, error_type=ArtifactIntegrityError
+E   Caused by: ArtifactIntegrityError: invalid manifest
+------------------------------ Captured log call -------------------------------
+ERROR    docling_graph.pipeline.orchestrator:orchestrator.py:237 Pipeline failed at stage: Nebula conversion checkpoint
+____ test_bundle_is_published_before_extraction_and_survives_failure[True] _____
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/tests/integration/test_graph_pipeline_contract.py:127: in test_bundle_is_published_before_extraction_and_survives_failure
+    ???
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'injected extraction timeout'
+E     Actual message: "Pipeline failed at stage 'Nebula conversion checkpoint': ArtifactIntegrityError\nDetails: stage=Nebula conversion checkpoint, error=invalid manifest, error_type=ArtifactIntegrityError\nCaused by: ArtifactIntegrityError: invalid manifest"
+------------------------------ Captured log call -------------------------------
+ERROR    docling_graph.pipeline.orchestrator:orchestrator.py:237 Pipeline failed at stage: Nebula conversion checkpoint
+=============================== warnings summary ===============================
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+tests/integration/test_document_delivery.py::test_worker_restart_after_model_failure_reuses_bundle_and_emits_one_completion
+tests/integration/test_graph_pipeline_contract.py::test_saved_json_reinterpretation_uses_real_graph_without_conversion
+tests/integration/test_graph_pipeline_contract.py::test_saved_json_reinterpretation_uses_real_graph_without_conversion
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[False]
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[False]
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[True]
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[True]
+  /opt/venv/lib/python3.14/site-packages/docling_graph/core/utils/alias_reconciler.py:95: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    if id(instance) in seen or not hasattr(instance, "model_fields"):
+
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[False]
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[True]
+  /opt/venv/lib/python3.14/site-packages/pydantic/main.py:542: DeprecationWarning: `force_full_page_ocr` is deprecated; set `mode=OcrMode.FULL_PAGE` instead.
+    return self.__pydantic_serializer__.to_json(
+
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[False]
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[True]
+  /opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:606: DeprecationWarning: This field is deprecated. Use `generate_page_images=True` and call `TableItem.get_image()` to extract table images from page images.
+    or self.pipeline_options.generate_table_images
+
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[False]
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[True]
+  /opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:442: DeprecationWarning: deprecated
+    if self.options.rec_font_path is not None:
+
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[False]
+  /opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/heads/multiheadAttention.py:14: SyntaxWarning: "\d" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\d"? A raw string is also an option.
+    \text{MultiHead}(Q, K, V) = \text{Concat}(head_1,\dots,head_h)W^O
+
+tests/integration/test_graph_pipeline_contract.py::test_native_and_scanned_conversion_then_saved_json_reuse[True]
+  /opt/venv/lib/python3.14/site-packages/torch/nn/modules/conv.py:560: UserWarning: Using padding='same' with even kernel lengths and odd dilation may require a zero-padded copy of the input be created (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/native/Convolution.cpp:1104.)
+    return F.conv2d(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_graph_pipeline_contract.py::test_bundle_is_published_before_extraction_and_survives_failure[False]
+FAILED tests/integration/test_graph_pipeline_contract.py::test_bundle_is_published_before_extraction_and_survives_failure[True]
+2 failed, 19 passed, 2 skipped, 42 warnings in 61.11s (0:01:01)

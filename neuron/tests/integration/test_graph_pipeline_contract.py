@@ -79,8 +79,10 @@ def test_bundle_is_published_before_extraction_and_survives_failure(
         return function(*args, **kwargs)
 
     monkeypatch.setattr(asyncio, "to_thread", inline_io)
-    source = tmp_path / "policy.md"
-    source.write_text("synthetic source")
+    source = tmp_path / "policy.pdf"
+    source.write_bytes(
+        (Path(__file__).resolve().parents[2] / "fixtures/gl-policy-declarations.pdf").read_bytes()
+    )
     artifact_id = uuid4()
     store = LocalContentArtifactStore(
         LocalFilesystemObjectStore(

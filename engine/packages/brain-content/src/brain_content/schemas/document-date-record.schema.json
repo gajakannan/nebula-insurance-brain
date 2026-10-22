@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/document-date-record.schema.json",
+  "title": "DocumentDateRecord",
+  "description": "Append-only candidates and explicit selections; no automatic precedence. HUMAN provenance needs a trusted verifier, not schema validity alone. In v0.1 every selection, including a clear, carries a verified human selection decision; a service principal may record candidates but cannot select. A null candidate explicitly clears the selected date; no selection means undated. YEAR/MONTH/DAY preserve supplied precision.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "id",
+        "tenant_id",
+        "knowledge_base_id",
+        "document_version_id",
+        "created_at",
+        "actor_principal_id",
+        "authorization_decision_id",
+        "record_type",
+        "date",
+        "basis",
+        "supersedes_id",
+        "idempotency_key",
+        "authorization_audit_event_id"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "document_version_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor_principal_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "authorization_decision_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "record_type": {
+          "const": "candidate"
+        },
+        "date": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "precision",
+                "value"
+              ],
+              "properties": {
+                "precision": {
+                  "const": "YEAR"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}$"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "precision",
+                "value"
+              ],
+              "properties": {
+                "precision": {
+                  "const": "MONTH"
+                },
+                "value": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "precision",
+                "value"
+              ],
+              "properties": {
+                "precision": {
+                  "const": "DAY"
+                },
+                "value": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          ]
+        },
+        "basis": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "artifact_id",
+                "block_id",
+                "quote",
+                "record_ordinal",
+                "record_sha256"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "CONTENT"
+                },
+                "artifact_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "block_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "record_ordinal": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "record_sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "system",
+                "record_id",
+                "field",
+                "source_value",
+                "snapshot_sha256"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "SOURCE_METADATA"
+                },
+                "system": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "record_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "field": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_value": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "snapshot_sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "decision_id",
+                "actor_principal_id",
+                "authorization_decision_id",
+                "decided_at",
+                "receipt_sha256"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "HUMAN"
+                },
+                "decision_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "actor_principal_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "authorization_decision_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "decided_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "receipt_sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          ]
+        },
+        "supersedes_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorization_audit_event_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "id",
+        "tenant_id",
+        "knowledge_base_id",
+        "document_version_id",
+        "created_at",
+        "actor_principal_id",
+        "authorization_decision_id",
+        "record_type",
+        "candidate_id",
+        "previous_selection_id",
+        "reason",
+        "idempotency_key",
+        "sequence",
+        "authorization_audit_event_id",
+        "human_decision"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": 1
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "document_version_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor_principal_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "authorization_decision_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "record_type": {
+          "const": "selection"
+        },
+        "candidate_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_selection_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "authorization_audit_event_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "human_decision": {
+          "description": "Verified human selection decision (F0022 producer). actor_principal_id here is the deciding human; the record's top-level actor_principal_id is the calling principal. Schema validity is not authority: the trusted verifier binds decision, document version, candidate (or clear) and expected previous selection.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "decision_id",
+            "actor_principal_id",
+            "authorization_decision_id",
+            "decided_at",
+            "receipt_sha256"
+          ],
+          "properties": {
+            "decision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "actor_principal_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "authorization_decision_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "decided_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "receipt_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

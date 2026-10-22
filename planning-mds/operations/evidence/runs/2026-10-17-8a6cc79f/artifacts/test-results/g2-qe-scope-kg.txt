@@ -1,0 +1,202 @@
+{
+  "target": {
+    "status": "planned",
+    "id": "feature:F0004",
+    "path": "planning-mds/features/F0004-content-artifact-model",
+    "affects": [
+      "capability:document-date-provenance",
+      "capability:parse-once-content-artifact",
+      "capability:versioned-content-contracts",
+      "endpoint:content-artifact-file-get",
+      "endpoint:content-artifact-get",
+      "entity:content-artifact",
+      "entity:content-block",
+      "entity:content-table",
+      "entity:content-table-cell",
+      "entity:document-date-candidate",
+      "entity:document-date-selection"
+    ],
+    "depends_on": [
+      "feature:F0001",
+      "feature:F0002",
+      "feature:F0003"
+    ],
+    "governed_by": [
+      "adr:0003",
+      "adr:0004",
+      "adr:0037",
+      "adr:0040",
+      "adr:0058",
+      "adr:0059",
+      "adr:0060",
+      "adr:0061",
+      "adr:0062",
+      "adr:0064",
+      "adr:0065",
+      "adr:0073"
+    ],
+    "uses_api_contract": [
+      "api:brain-api"
+    ],
+    "uses_schema": [
+      "schema:content-artifact-manifest",
+      "schema:content-artifact-manifest-read",
+      "schema:content-artifact-manifest-v2",
+      "schema:content-records-v2",
+      "schema:document-date-record",
+      "schema:interpretation-output-manifest",
+      "schema:problem-details"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:document-date-provenance",
+      "label": "Append-only document-date provenance"
+    },
+    {
+      "id": "capability:parse-once-content-artifact",
+      "label": "Parse-once content artifact"
+    },
+    {
+      "id": "capability:versioned-content-contracts",
+      "label": "Versioned verified content contracts"
+    },
+    {
+      "id": "endpoint:content-artifact-file-get",
+      "label": "GET /content/{artifactId}/files/{path}"
+    },
+    {
+      "id": "endpoint:content-artifact-get",
+      "label": "GET /content/{artifactId}"
+    },
+    {
+      "id": "entity:content-artifact",
+      "label": "Content artifact"
+    },
+    {
+      "id": "entity:content-block",
+      "label": "Content block index"
+    },
+    {
+      "id": "entity:content-table",
+      "label": "Content table index"
+    },
+    {
+      "id": "entity:content-table-cell",
+      "label": "Content table cell index"
+    },
+    {
+      "id": "entity:document-date-candidate",
+      "label": "Document-date candidate"
+    },
+    {
+      "id": "entity:document-date-selection",
+      "label": "Document-date selection"
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0003",
+      "label": "One-Time Content Extraction"
+    },
+    {
+      "id": "adr:0004",
+      "label": "Source, Content Artifact, and Interpretation Are Separately Versioned"
+    },
+    {
+      "id": "adr:0037",
+      "label": "Human Corrections Append; They Do Not Rewrite Evidence"
+    },
+    {
+      "id": "adr:0040",
+      "label": "Lossless Content and Evidence Contract"
+    },
+    {
+      "id": "adr:0058",
+      "label": "Evidence Anchoring and Selector Contract"
+    },
+    {
+      "id": "adr:0059",
+      "label": "Provider-Neutral Content Artifact Storage"
+    },
+    {
+      "id": "adr:0060",
+      "label": "Docling-Graph Document Pipeline Orchestration"
+    },
+    {
+      "id": "adr:0061",
+      "label": "Tenant identity and structural ownership"
+    },
+    {
+      "id": "adr:0062",
+      "label": "Current authorization and durable decisions"
+    },
+    {
+      "id": "adr:0064",
+      "label": "Time Interpretation and Valid-Time Precision"
+    },
+    {
+      "id": "adr:0065",
+      "label": "Assertion Admission, Text Origin, and Statement Mood"
+    },
+    {
+      "id": "adr:0073",
+      "label": "Versioned Content Contracts and Append-Only Document Metadata (Proposed)"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:content-artifact-manifest",
+      "label": "ContentArtifactManifest"
+    },
+    {
+      "id": "schema:content-artifact-manifest-read",
+      "label": "Content Artifact Manifest Read"
+    },
+    {
+      "id": "schema:content-artifact-manifest-v2",
+      "label": "Content Artifact Manifest V2"
+    },
+    {
+      "id": "schema:content-records-v2",
+      "label": "Content Records V2"
+    },
+    {
+      "id": "schema:document-date-record",
+      "label": "Document Date Record"
+    },
+    {
+      "id": "schema:interpretation-output-manifest",
+      "label": "Interpretation Output Manifest"
+    },
+    {
+      "id": "schema:problem-details",
+      "label": "ProblemDetails"
+    }
+  ],
+  "uses_api_contract": [
+    {
+      "id": "api:brain-api",
+      "label": "Nebula Insurance Brain API"
+    }
+  ],
+  "depends_on": [
+    {
+      "id": "feature:F0001"
+    },
+    {
+      "id": "feature:F0002"
+    },
+    {
+      "id": "feature:F0003"
+    }
+  ]
+}

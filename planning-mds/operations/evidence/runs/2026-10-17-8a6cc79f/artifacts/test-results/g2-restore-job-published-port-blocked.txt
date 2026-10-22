@@ -1,0 +1,280 @@
+Warning: truncated output (original token count: 6134)
+Total output lines: 341
+
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+FINFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+FINFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+..
+=================================== FAILURES ===================================
+__ test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[1] ___
+tests/integration/test_content_restore_v2.py:144: in test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage
+    assert restored.returncode == 0, restored.stdout + restored.stderr
+E   AssertionError: Backup verify: verified
+E     Backup extract: verified
+E     Traceback (most recent call last):
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 144, in __init__
+E         self._dbapi_connection = engine.raw_connection()
+E                                  ~~~~~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 3319, in raw_connection
+E         return self.pool.connect()
+E                ~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 448, in connect
+E         return _ConnectionFairy._checkout(self)
+E                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 1272, in _checkout
+E         fairy = _ConnectionRecord.checkout(pool)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 712, in checkout
+E         rec = pool._do_get()
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/impl.py", line 178, in _do_get
+E         with util.safe_reraise():
+E              ~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+E         raise exc_value.with_traceback(exc_tb)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/impl.py", line 176, in _do_get
+E         return self._create_connection()
+E                ~~~~~~~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 389, in _create_connection
+E         return _ConnectionRecord(self)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 674, in __init__
+E         self.__connect()
+E         ~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 900, in __connect
+E         with util.safe_reraise():
+E              ~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+E         raise exc_value.with_traceback(exc_tb)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 896, in __connect
+E         self.dbapi_connection = connection = pool._invoke_creator(self)
+E                                              ~~~~~~~~~~~~~~~~~~~~^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/create.py", line 667, in connect
+E         return dialect.connect(*cargs_tup, **cparams)
+E                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 630, in connect
+E         return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+E                ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/psycopg/connection.py", line 122, in connect
+E         raise last_ex.with_traceback(None)
+E     psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 58891 failed: Connection refused
+E     	Is the server running on that host and accepting TCP/IP connections?
+E     
+E     The above exception was the direct cause of the following exception:
+E     
+E     Traceback (most recent call last):
+E       File "/app/brain/scripts/ops/verify_content.py", line 282, in <module>
+E         raise SystemExit(main())
+E                          ~~~~^^
+E       File "/app/brain/scripts/ops/verify_content.py", line 258, in main
+E         result = snapshot(args.database_url, args.content_root)
+E       File "/app/brain/scripts/ops/verify_content.py", line 64, in snapshot
+E         row.id: row for row in session.scalars(select(ContentArtifact))
+E                                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2481, in scalars
+E         return self._execute_internal(
+E                ~~~~~~~~~~~~~~~~~~~~~~^
+E             statement,
+E             ^^^^^^^^^^
+E         ...<4 lines>...
+E             **kw,
+E             ^^^^^
+E         ).scalars()
+E         ^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2261, in _execute_internal
+E         conn = self._connection_for_bind(bind)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2113, in _connection_for_bind
+E         return trans._connection_for_bind(engine, execution_options)
+E                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "<string>", line 2, in _connection_for_bind
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+E         ret_value = fn(self, *arg, **kw)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 1191, in _connection_for_bind
+E         conn = bind.connect()
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 3295, in connect
+E         return self._connection_cls(self)
+E                ~~~~~~~~~~~~~~~~~~~~^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 146, in __init__
+E         Connection._handle_dbapi_exception_noconnection(
+E         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+E             err, dialect, engine
+E             ^^^^^^^^^^^^^^^^^^^^
+E         )
+E         ^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 2450, in _handle_dbapi_exception_noconnection
+E         raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 144, in __init__
+E         self._dbapi_connection = engine.raw_connection()
+E                                  ~~~~~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 3319, in raw_connection
+E         return self.pool.connect()
+E                ~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 448, in connect
+E         return _ConnectionFairy._checkout(self)
+E                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 1272, in _checkout
+E         fairy = _ConnectionRecord.checkout(pool)
+E       File "/opt/venv/lib/pytho…1134 tokens truncated…File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 389, in _create_connection
+E         return _ConnectionRecord(self)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 674, in __init__
+E         self.__connect()
+E         ~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 900, in __connect
+E         with util.safe_reraise():
+E              ~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+E         raise exc_value.with_traceback(exc_tb)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 896, in __connect
+E         self.dbapi_connection = connection = pool._invoke_creator(self)
+E                                              ~~~~~~~~~~~~~~~~~~~~^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/create.py", line 667, in connect
+E         return dialect.connect(*cargs_tup, **cparams)
+E                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 630, in connect
+E         return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+E                ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/psycopg/connection.py", line 122, in connect
+E         raise last_ex.with_traceback(None)
+E     psycopg.OperationalError: connection failed: connection to server at "127.0.0.1", port 64890 failed: Connection refused
+E     	Is the server running on that host and accepting TCP/IP connections?
+E     
+E     The above exception was the direct cause of the following exception:
+E     
+E     Traceback (most recent call last):
+E       File "/app/brain/scripts/ops/verify_content.py", line 282, in <module>
+E         raise SystemExit(main())
+E                          ~~~~^^
+E       File "/app/brain/scripts/ops/verify_content.py", line 258, in main
+E         result = snapshot(args.database_url, args.content_root)
+E       File "/app/brain/scripts/ops/verify_content.py", line 64, in snapshot
+E         row.id: row for row in session.scalars(select(ContentArtifact))
+E                                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2481, in scalars
+E         return self._execute_internal(
+E                ~~~~~~~~~~~~~~~~~~~~~~^
+E             statement,
+E             ^^^^^^^^^^
+E         ...<4 lines>...
+E             **kw,
+E             ^^^^^
+E         ).scalars()
+E         ^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2261, in _execute_internal
+E         conn = self._connection_for_bind(bind)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2113, in _connection_for_bind
+E         return trans._connection_for_bind(engine, execution_options)
+E                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       File "<string>", line 2, in _connection_for_bind
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+E         ret_value = fn(self, *arg, **kw)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 1191, in _connection_for_bind
+E         conn = bind.connect()
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 3295, in connect
+E         return self._connection_cls(self)
+E                ~~~~~~~~~~~~~~~~~~~~^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 146, in __init__
+E         Connection._handle_dbapi_exception_noconnection(
+E         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+E             err, dialect, engine
+E             ^^^^^^^^^^^^^^^^^^^^
+E         )
+E         ^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 2450, in _handle_dbapi_exception_noconnection
+E         raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 144, in __init__
+E         self._dbapi_connection = engine.raw_connection()
+E                                  ~~~~~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 3319, in raw_connection
+E         return self.pool.connect()
+E                ~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 448, in connect
+E         return _ConnectionFairy._checkout(self)
+E                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 1272, in _checkout
+E         fairy = _ConnectionRecord.checkout(pool)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 712, in checkout
+E         rec = pool._do_get()
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/impl.py", line 178, in _do_get
+E         with util.safe_reraise():
+E              ~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+E         raise exc_value.with_traceback(exc_tb)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/impl.py", line 176, in _do_get
+E         return self._create_connection()
+E                ~~~~~~~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 389, in _create_connection
+E         return _ConnectionRecord(self)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 674, in __init__
+E         self.__connect()
+E         ~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 900, in __connect
+E         with util.safe_reraise():
+E              ~~~~~~~~~~~~~~~~~^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+E         raise exc_value.with_traceback(exc_tb)
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/pool/base.py", line 896, in __connect
+E         self.dbapi_connection = connection = pool._invoke_creator(self)
+E                                              ~~~~~~~~~~~~~~~~~~~~^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/create.py", line 667, in connect
+E         return dialect.connect(*cargs_tup, **cparams)
+E                ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 630, in connect
+E         return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+E                ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+E       File "/opt/venv/lib/python3.14/site-packages/psycopg/connection.py", line 122, in connect
+E         raise last_ex.with_traceback(None)
+E     sqlalchemy.exc.OperationalError: (psycopg.OperationalError) connection failed: connection to server at "127.0.0.1", port 64890 failed: Connection refused
+E     	Is the server running on that host and accepting TCP/IP connections?
+E     (Background on this error at: https://sqlalche.me/e/20/e3q8)
+E     
+E   assert 1 == 0
+E    +  where 1 = CompletedProcess(args=['bash', '/app/brain/scripts/ops/restore.sh', '/tmp/pytest-of-unknown/pytest-0/test_dump_and_iso...unning on that host and accepting TCP/IP connections?\n(Background on this error at: https://sqlalche.me/e/20/e3q8)\n').returncode
+=============================== warnings summary ===============================
+tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[1]
+tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[2]
+tests/integration/test_content_restore_v2.py::test_restore_verifier_rejects_missing_bytes_and_index_loss
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                                 Stmts   Miss  Cover
+----------------------------------------------------------------------------------------
+/app/brain/scripts/ops/backup_inventory.py                              58     40    31%
+/app/brain/scripts/ops/verify_citations.py                              55     55     0%
+/app/brain/scripts/ops/verify_content.py                               144     36    75%
+packages/brain-persistence/src/brain_persistence/document_dates.py     163     60    63%
+----------------------------------------------------------------------------------------
+TOTAL                                                                  420    191    55%
+Coverage XML written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/restore.xml
+Coverage JSON written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/restore.json
+=========================== short test summary info ============================
+FAILED tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[1]
+FAILED tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[2]
+2 failed, 2 passed, 3 warnings in 26.16s

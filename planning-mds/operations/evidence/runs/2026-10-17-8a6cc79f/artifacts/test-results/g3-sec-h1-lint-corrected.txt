@@ -1,0 +1,29 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> packages/brain-ingestion/tests/test_docling_adapter.py:1:1
+   |
+ 1 | / from __future__ import annotations
+ 2 | |
+ 3 | | import gzip
+ 4 | | import io
+ 5 | | import tarfile
+ 6 | | import zipfile
+ 7 | | from pathlib import Path
+ 8 | | from unittest.mock import patch
+ 9 | |
+10 | | import pytest
+11 | | from pypdf import PdfReader, PdfWriter
+12 | |
+13 | | from brain_ingestion.docling_adapter import DoclingAdapter
+   | |__________________________________________________________^
+help: Organize imports
+   |
+10 | import pytest
+   - from pypdf import PdfReader, PdfWriter
+   -
+11 | from brain_ingestion.docling_adapter import DoclingAdapter
+12 + from pypdf import PdfReader, PdfWriter
+13 |
+   |
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

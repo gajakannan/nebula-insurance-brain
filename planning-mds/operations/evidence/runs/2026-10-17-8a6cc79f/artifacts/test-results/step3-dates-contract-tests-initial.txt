@@ -1,0 +1,48 @@
+..............FFFFFF                                                     [100%]
+=================================== FAILURES ===================================
+_______ test_processing_timestamp_is_never_a_document_date[uploaded_at] ________
+packages/brain-content/tests/test_document_dates.py:86: in test_processing_timestamp_is_never_a_document_date
+    SourceMetadataDateBasis(
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for SourceMetadataDateBasis
+E     Value error, processing time is not the document date [type=value_error, input_value={'kind': 'SOURCE_METADATA...a60259e6b4865953d9c5c5'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/value_error
+_______ test_processing_timestamp_is_never_a_document_date[receiptTime] ________
+packages/brain-content/tests/test_document_dates.py:86: in test_processing_timestamp_is_never_a_document_date
+    SourceMetadataDateBasis(
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for SourceMetadataDateBasis
+E     Value error, processing time is not the document date [type=value_error, input_value={'kind': 'SOURCE_METADATA...c155761a3b0bd39e74429a'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/value_error
+_____ test_processing_timestamp_is_never_a_document_date[extraction_date] ______
+packages/brain-content/tests/test_document_dates.py:86: in test_processing_timestamp_is_never_a_document_date
+    SourceMetadataDateBasis(
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for SourceMetadataDateBasis
+E     Value error, processing time is not the document date [type=value_error, input_value={'kind': 'SOURCE_METADATA...c39d80ac04b2f86045f792'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/value_error
+_______ test_processing_timestamp_is_never_a_document_date[received_at] ________
+packages/brain-content/tests/test_document_dates.py:86: in test_processing_timestamp_is_never_a_document_date
+    SourceMetadataDateBasis(
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for SourceMetadataDateBasis
+E     Value error, processing time is not the document date [type=value_error, input_value={'kind': 'SOURCE_METADATA...0ba78e175fcd1134140f02'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/value_error
+__________ test_source_snapshot_digest_is_exact_and_detects_tampering __________
+packages/brain-content/tests/test_document_dates.py:106: in test_source_snapshot_digest_is_exact_and_detects_tampering
+    SourceMetadataDateBasis.model_validate({**basis.model_dump(), "source_value": "2025-02"})
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for SourceMetadataDateBasis
+E     Value error, source metadata snapshot mismatch [type=value_error, input_value={'kind': 'SOURCE_METADATA...e8c205a3b74b6df81d1536'}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.13/v/value_error
+______ test_content_basis_binds_unicode_quote_exact_line_ordinal_and_hash ______
+packages/brain-content/tests/test_document_dates.py:148: in test_content_basis_binds_unicode_quote_exact_line_ordinal_and_hash
+    assert DocumentDateCandidate.model_validate_json(candidate.model_dump_json()) == candidate
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for DocumentDateCandidate
+E   created_at
+E     Input should be a valid datetime [type=datetime_type, input_value='2026-10-19T02:07:17.169501Z', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.13/v/datetime_type
+=========================== short test summary info ============================
+FAILED packages/brain-content/tests/test_document_dates.py::test_processing_timestamp_is_never_a_document_date[uploaded_at]
+FAILED packages/brain-content/tests/test_document_dates.py::test_processing_timestamp_is_never_a_document_date[receiptTime]
+FAILED packages/brain-content/tests/test_document_dates.py::test_processing_timestamp_is_never_a_document_date[extraction_date]
+FAILED packages/brain-content/tests/test_document_dates.py::test_processing_timestamp_is_never_a_document_date[received_at]
+FAILED packages/brain-content/tests/test_document_dates.py::test_source_snapshot_digest_is_exact_and_detects_tampering
+FAILED packages/brain-content/tests/test_document_dates.py::test_content_basis_binds_unicode_quote_exact_line_ordinal_and_hash
+6 failed, 14 passed in 0.29s

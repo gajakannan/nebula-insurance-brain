@@ -1,0 +1,50 @@
+E501 Line too long (105 > 100)
+  --> neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:87:101
+   |
+85 |             prior_metadata = json.loads(prior["metadata.json"])
+86 |             if isinstance(retained.manifest, RunManifestV2):
+87 |                 prior_pipeline = PipelineIdentity.model_validate(prior_metadata.get("pipeline_identity"))
+   |                                                                                                     ^^^^^
+88 |                 if (
+89 |                     retained.manifest.pipeline != prior_pipeline
+   |
+
+E501 Line too long (106 > 100)
+  --> neuron/packages/brain-ingestion/src/brain_ingestion/integrity_sweep.py:33:101
+   |
+31 |     parser.add_argument("--tenant", type=UUID, required=True)
+32 |     parser.add_argument("--knowledge-base", type=UUID, required=True)
+33 |     parser.add_argument("--action", choices=("sweep", "backfill", "repair", "reconcile"), default="sweep")
+   |                                                                                                     ^^^^^^
+34 |     parser.add_argument("--writers-quiesced", action="store_true")
+35 |     parser.add_argument("--all-scopes", action="store_true")
+   |
+
+EXE001 Shebang is present but file is not executable
+ --> scripts/ops/backup_inventory.py:1:1
+  |
+1 | #!/usr/bin/env python3
+  | ^^^^^^^^^^^^^^^^^^^^^^
+2 | """Seal/check local backup files and safely extract the content snapshot."""
+  |
+
+BLE001 Do not catch blind exception: `Exception`
+  --> scripts/ops/verify_citations.py:79:16
+   |
+77 |         try:
+78 |             bundle = store.load_verified(ArtifactKey(artifact_id, tenant, kb, version))
+79 |         except Exception as exc:
+   |                ^^^^^^^^^
+80 |             failures.append(f"evidence {row_id}: bundle verification failed ({type(exc).__name__})")
+81 |             continue
+   |
+
+EXE001 Shebang is present but file is not executable
+ --> scripts/ops/verify_content.py:1:1
+  |
+1 | #!/usr/bin/env python3
+  | ^^^^^^^^^^^^^^^^^^^^^^
+2 | """Read-only, parser-free inventory for quiesced local backup/isolated restore."""
+  |
+
+Found 6 errors (1 fixed, 5 remaining).

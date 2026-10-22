@@ -48,10 +48,10 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0004-S0001](./F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md) | Publish and reuse an immutable content bundle | Critical | MVP — v0.1A | document intelligence engineer |
-| [F0004-S0002](./F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) | Preserve content structure and text origin | Critical | MVP — v0.1A | document intelligence engineer |
-| [F0004-S0003](./F0004-content-artifact-model/F0004-S0003-document-date-provenance.md) | Preserve document-date provenance | Critical | MVP — v0.1A | persistence engineer |
-| [F0004-S0004](./F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md) | Protect artifact consumers and compatibility | Critical | MVP — v0.1A | persistence engineer |
+| [F0004-S0001](./archive/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md) | Publish and reuse an immutable content bundle | Critical | MVP — v0.1A | document intelligence engineer |
+| [F0004-S0002](./archive/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) | Preserve content structure and text origin | Critical | MVP — v0.1A | document intelligence engineer |
+| [F0004-S0003](./archive/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md) | Preserve document-date provenance | Critical | MVP — v0.1A | persistence engineer |
+| [F0004-S0004](./archive/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md) | Protect artifact consumers and compatibility | Critical | MVP — v0.1A | persistence engineer |
 
 ---
 
