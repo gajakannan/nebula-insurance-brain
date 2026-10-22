@@ -1,13 +1,27 @@
 version: 0
-generated_at: '2026-10-05T03:11:02+00:00'
+generated_at: '2026-10-21T04:18:00+00:00'
 summary:
-  total_decisions: 0
+  total_decisions: 2
   by_kind:
     DECISION: 0
     SUPERSEDES: 0
     TRADEOFF: 0
-    WHY: 0
-  resolved_node_count: 0
-  resolved_symbol_count: 0
+    WHY: 2
+  resolved_node_count: 2
+  resolved_symbol_count: 2
   ambiguous_count: 0
-decisions: []
+decisions:
+- id: decision:engine-packages-brain-persistence-src-brain-persistence-document-dates-l496-why
+  file: engine/packages/brain-persistence/src/brain_persistence/document_dates.py
+  line: 496
+  kind: WHY
+  text: READ COMMITTED candidate/selection queries need one stable
+  resolved_node: capability:document-date-provenance
+  resolved_symbol: symbol:capability-document-date-provenance:document-date-service.read
+- id: decision:neuron-packages-brain-ingestion-src-brain-ingestion-docling-adapter-l36-why
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
+  line: 36
+  kind: WHY
+  text: Docling detects archives before applying allowed_formats, and
+  resolved_node: capability:parse-once-content-artifact
+  resolved_symbol: symbol:capability-parse-once-content-artifact:docling-adapter.parse

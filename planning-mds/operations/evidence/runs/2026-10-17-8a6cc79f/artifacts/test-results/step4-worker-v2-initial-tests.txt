@@ -1,0 +1,124 @@
+...F.                                                                    [100%]
+=================================== FAILURES ===================================
+_______ test_missing_producer_is_hard_failure_without_ready_or_fallback ________
+/opt/venv/lib/python3.14/site-packages/docling_graph/pipeline/orchestrator.py:126: in run
+    context = stage.execute(context)
+              ^^^^^^^^^^^^^^^^^^^^^^
+packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py:68: in execute
+    self._publish(result)
+packages/brain-ingestion/src/brain_ingestion/content_workflow.py:108: in publish
+    manifest, files = build_bundle_v2(
+packages/brain-ingestion/src/brain_ingestion/content_projection.py:162: in build_bundle_v2
+    walk(f"#/{root}", [])
+packages/brain-ingestion/src/brain_ingestion/content_projection.py:156: in walk
+    walk(child["$ref"], child_path)
+packages/brain-ingestion/src/brain_ingestion/content_projection.py:114: in walk
+    add_blocks(ref, item, path)
+packages/brain-ingestion/src/brain_ingestion/content_projection.py:99: in add_blocks
+    "producer": asdict(origin.producer),
+                ^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/dataclasses.py:1495: in asdict
+    raise TypeError("asdict() should be called on dataclass instances")
+E   TypeError: asdict() should be called on dataclass instances
+
+The above exception was the direct cause of the following exception:
+tests/integration/test_content_worker_v2.py:259: in test_missing_producer_is_hard_failure_without_ready_or_fallback
+    worker._execute(lease, Event())
+packages/brain-ingestion/src/brain_ingestion/document_worker.py:101: in _execute
+    bundle = load_or_convert_content(
+packages/brain-ingestion/src/brain_ingestion/content_workflow.py:167: in load_or_convert_content
+    DoclingGraphPipelineAdapter(llm_client=client, model_id=client.model).run(
+packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py:151: in run
+    context = pipeline.run()
+              ^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling_graph/pipeline/orchestrator.py:275: in run
+    raise PipelineError(
+E   docling_graph.exceptions.PipelineError: Pipeline failed at stage 'Nebula conversion checkpoint': TypeError
+E   Details: stage=Nebula conversion checkpoint, error=asdict() should be called on dataclass instances, error_type=TypeError
+E   Caused by: TypeError: asdict() should be called on dataclass instances
+------------------------------ Captured log call -------------------------------
+ERROR    docling_graph.pipeline.orchestrator:orchestrator.py:237 Pipeline failed at stage: Nebula conversion checkpoint
+=============================== warnings summary ===============================
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+../../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /opt/venv/lib/python3.14/site-packages/pydantic/main.py:542: DeprecationWarning: `force_full_page_ocr` is deprecated; set `mode=OcrMode.FULL_PAGE` instead.
+    return self.__pydantic_serializer__.to_json(
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:606: DeprecationWarning: This field is deprecated. Use `generate_page_images=True` and call `TableItem.get_image()` to extract table images from page images.
+    or self.pipeline_options.generate_table_images
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:442: DeprecationWarning: deprecated
+    if self.options.rec_font_path is not None:
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/heads/multiheadAttention.py:14: SyntaxWarning: "\d" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\d"? A raw string is also an option.
+    \text{MultiHead}(Q, K, V) = \text{Concat}(head_1,\dots,head_h)W^O
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[True]
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[True]
+tests/integration/test_content_worker_v2.py::test_corrupt_accepted_marker_never_becomes_conversion_miss
+  /opt/venv/lib/python3.14/site-packages/docling_graph/core/utils/alias_reconciler.py:95: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    if id(instance) in seen or not hasattr(instance, "model_fields"):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_content_worker_v2.py::test_missing_producer_is_hard_failure_without_ready_or_fallback
+1 failed, 4 passed, 37 warnings in 21.07s

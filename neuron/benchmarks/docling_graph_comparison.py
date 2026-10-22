@@ -193,7 +193,11 @@ def run_comparison(root: Path) -> dict[str, Any]:
     profile = load_profile("gl-limits-a")
     for kind in ("unique", "ambiguous", "multi-region"):
         doc, expected = fixture(kind)
-        source = doc.model_dump_json().encode()
+        # Controlled native records test orchestration/evidence only. Retain
+        # the committed synthetic PDF under the supported source contract.
+        source = (
+            Path(__file__).resolve().parents[1] / "fixtures/gl-policy-declarations.pdf"
+        ).read_bytes()
         manifest, files = build_bundle(
             ParseResult(doc, 2, [], 0, "complete", []),
             tenant_id=uuid4(),
@@ -204,7 +208,7 @@ def run_comparison(root: Path) -> dict[str, Any]:
             source_sha256=hashlib.sha256(source).hexdigest(),
             configuration_hash="b" * 64,
             source_bytes=source,
-            source_filename="source.json",
+            source_filename="source.pdf",
         )
         store.publish(manifest, files)
         native_hash = hashlib.sha256(files["docling-document.json"]).hexdigest()

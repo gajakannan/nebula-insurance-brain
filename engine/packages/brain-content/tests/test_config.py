@@ -3,7 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from brain_content.config import ConfigError, load_local_object_store_config
+from brain_content.config import (
+    ConfigError,
+    load_content_writer_config,
+    load_local_object_store_config,
+)
 
 
 def test_loads_committed_repo_config_from_env_override(
@@ -70,3 +74,22 @@ def test_no_config_found_by_walking_up_raises_config_error(
 
     with pytest.raises(ConfigError):
         load_local_object_store_config()
+
+
+@pytest.mark.parametrize(
+    "entry,expected", [("", False), ("content:\n  v2_writer_enabled: true\n", True)]
+)
+def test_v2_writer_is_disabled_unless_explicitly_enabled(tmp_path, monkeypatch, entry, expected):
+    path = tmp_path / "local.yaml"
+    path.write_text(entry)
+    monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(path))
+    assert load_content_writer_config().v2_writer_enabled is expected
+
+
+@pytest.mark.parametrize("value", ['"true"', '"false"', "1"])
+def test_non_boolean_writer_activation_fails_closed(tmp_path, monkeypatch, value):
+    path = tmp_path / "local.yaml"
+    path.write_text(f"content:\n  v2_writer_enabled: {value}\n")
+    monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(path))
+    with pytest.raises(ConfigError):
+        load_content_writer_config()

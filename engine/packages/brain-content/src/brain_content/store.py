@@ -5,12 +5,12 @@ from collections.abc import Mapping
 from typing import Protocol
 from uuid import UUID
 
-from brain_content.manifest import ArtifactManifest
-from brain_content.object_store import LocalFilesystemObjectStore, ObjectAlreadyExistsError
+from brain_content.manifest import ArtifactManifest, Manifest, parse_manifest
+from brain_content.object_store import LocalFilesystemObjectStore, ObjectNotFoundError
+from brain_content.validation import ArtifactConflict, ArtifactKey, VerifiedBundle
+from brain_content.verified_store import VerifiedBundleStore
 
-
-class ArtifactExists(Exception):
-    """Raised by `put_bundle` when the artifact was already accepted (immutability, ADR-0059)."""
+ArtifactExists = ArtifactConflict
 
 
 class ArtifactNotFound(Exception):
@@ -18,6 +18,8 @@ class ArtifactNotFound(Exception):
 
 
 class ContentArtifactStore(Protocol):
+    async def load_verified(self, key: ArtifactKey) -> VerifiedBundle: ...
+
     async def put_bundle(
         self, manifest: ArtifactManifest, files: Mapping[str, bytes]
     ) -> ArtifactManifest: ...
@@ -37,50 +39,50 @@ class LocalContentArtifactStore:
 
     def __init__(self, object_store: LocalFilesystemObjectStore) -> None:
         self._object_store = object_store
+        self._verified = VerifiedBundleStore(object_store)
 
     def _bundle_prefix(self, artifact_id: UUID) -> str:
         return f"bundles/{artifact_id}"
 
-    async def put_bundle(
-        self, manifest: ArtifactManifest, files: Mapping[str, bytes]
-    ) -> ArtifactManifest:
-        prefix = self._bundle_prefix(manifest.artifact_id)
-        manifest_key = f"{prefix}/manifest.json"
+    async def put_bundle[M: Manifest](self, manifest: M, files: Mapping[str, bytes]) -> M:
+        key = ArtifactKey(
+            manifest.artifact_id,
+            manifest.tenant_id,
+            manifest.knowledge_base_id,
+            manifest.artifact_contract_version,
+        )
+        bundle = await self.publish_verified(key, manifest.model_dump_json().encode(), files)
+        # The verified version discriminator guarantees the concrete model type.
+        assert isinstance(bundle.manifest, type(manifest))
+        return bundle.manifest
 
-        def _write() -> None:
-            if self._object_store.exists(manifest_key):
-                raise ArtifactExists(str(manifest.artifact_id))
-            for relative_path, data in files.items():
-                self._object_store.create_exclusive(f"{prefix}/{relative_path}", data)
-            try:
-                self._object_store.create_exclusive(
-                    manifest_key, manifest.model_dump_json(indent=2).encode("utf-8")
-                )
-            except ObjectAlreadyExistsError as exc:
-                raise ArtifactExists(str(manifest.artifact_id)) from exc
+    async def publish_verified(
+        self, key: ArtifactKey, manifest_bytes: bytes, files: Mapping[str, bytes]
+    ) -> VerifiedBundle:
+        return await asyncio.to_thread(self._verified.publish, key, manifest_bytes, files)
 
-        await asyncio.to_thread(_write)
-        return manifest
+    async def load_verified(self, key: ArtifactKey) -> VerifiedBundle:
+        return await asyncio.to_thread(self._verified.load_verified, key)
 
     async def get_manifest(self, artifact_id: UUID) -> ArtifactManifest:
-        manifest_key = f"{self._bundle_prefix(artifact_id)}/manifest.json"
-
         def _read() -> ArtifactManifest:
             try:
-                raw = self._object_store.read(manifest_key)
-            except Exception as exc:  # noqa: BLE001 — translated to the store's own error type
+                raw = self._object_store.read(f"{self._bundle_prefix(artifact_id)}/manifest.json")
+            except ObjectNotFoundError as exc:
                 raise ArtifactNotFound(str(artifact_id)) from exc
-            return ArtifactManifest.model_validate_json(raw)
+            manifest = parse_manifest(raw)
+            key = ArtifactKey(artifact_id, manifest.tenant_id, manifest.knowledge_base_id, 1)
+            bundle = self._verified.load_verified(key)
+            assert isinstance(bundle.manifest, ArtifactManifest)
+            return bundle.manifest
 
         return await asyncio.to_thread(_read)
 
     async def open_file(self, artifact_id: UUID, path: str) -> bytes:
-        key = f"{self._bundle_prefix(artifact_id)}/{path}"
-
-        def _read() -> bytes:
-            try:
-                return self._object_store.read(key)
-            except Exception as exc:  # noqa: BLE001
-                raise ArtifactNotFound(f"{artifact_id}/{path}") from exc
-
-        return await asyncio.to_thread(_read)
+        manifest = await self.get_manifest(artifact_id)
+        key = ArtifactKey(artifact_id, manifest.tenant_id, manifest.knowledge_base_id, 1)
+        bundle = await self.load_verified(key)
+        try:
+            return bundle.files[path]
+        except KeyError:
+            raise ArtifactNotFound(str(artifact_id)) from None

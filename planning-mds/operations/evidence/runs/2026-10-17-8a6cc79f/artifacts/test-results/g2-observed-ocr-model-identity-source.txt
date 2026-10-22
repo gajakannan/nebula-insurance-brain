@@ -1,0 +1,126 @@
+# Docling's default language names -> rapidocr language codes.
+_DOCLING_LANG_NORMALIZE: dict[str, str] = {"chinese": "ch", "english": "en"}
+
+# Inference backends docling supports. Must stay in sync with the `backend` Literal of
+# RapidOcrOptions in docling/datamodel/pipeline_options.py and with the mapping built in
+# _backend_to_engine_type().
+_RAPIDOCR_BACKENDS: tuple[str, ...] = ("onnxruntime", "openvino", "paddle", "torch")
+
+# Recognition languages served by the PP-OCRv4 backbone
+_PPOCRV4_LANGS = frozenset(
+    {"arabic", "cyrillic", "devanagari", "ka", "korean", "latin", "ta", "te"}
+)
+# Recognition languages served by the PP-OCRv5 backbone
+_PPOCRV5_LANGS = frozenset(
+    {
+        "arabic",
+        "ch",
+        "cyrillic",
+        "devanagari",
+        "el",
+        "en",
+        "eslav",
+        "korean",
+        "latin",
+        "ta",
+        "te",
+        "th",
+    }
+)
+
+
+@dataclass(frozen=True)
+class _RapidOcrArtifact:
+    """One resolved checkpoint: where it lives locally and where it comes from"""
+
+    # What gets handed to RapidOCR: the checkpoint file, or its directory for paddle.
+    model_path: Path
+
+    # Every local file the checkpoint needs, mapped to the URL it is downloaded from.
+    files: dict[Path, str]
+
+    # Recognition-keys file, for the entries that ship one (v6/v5 onnx embed the charset).
+    dict_path: Path | None
+
+
+@dataclass(frozen=True)
+class _RapidOcrModelSpec:
+    """One RapidOCR checkpoint set, as requested or as resolved"""
+
+    # Docling inference backend name, one of _RAPIDOCR_BACKENDS.
+    backend: str
+
+    # Language exactly as the user wrote it
+    user_lang: str | None = None
+
+    # Language code the rapidocr registry expects, after normalization and aliasing.
+    rapidocr_lang_token: str | None = None
+
+    # PP-OCR backbone that the (backend, language) pair resolves to.
+    ppocr_version: "OCRVersion | None" = None
+
+
+def _parse_rapidocr_model_spec(value: str) -> _RapidOcrModelSpec:
+    """Parse a `<backend>:<lang>` prefetch spec into its requested form.
+
+    The pair is routed through _resolve_rapidocr so the prefetcher can never accept a
+    combination the runtime would reject, but only the user's own values are kept.
+    """
+    backend, separator, lang = value.partition(":")
+    if not separator or not backend or not lang or ":" in lang:
+        raise ValueError(
+            f"Invalid RapidOCR model spec {value!r}. "
+            "Expected '<backend>:<lang>', e.g. 'onnxruntime:th'."
+        )
+    if backend not in _RAPIDOCR_BACKENDS:
+        raise ValueError(
+            f"Unknown RapidOCR backend {backend!r} in {value!r}. "
+            f"Supported: {list(_RAPIDOCR_BACKENDS)}."
+        )
+    try:
+        _resolve_rapidocr(lang, backend)
+    except ValueError as err:
+        raise ValueError(f"Invalid RapidOCR model spec {value!r}: {err}") from err
+    return _RapidOcrModelSpec(backend=backend, user_lang=lang)
+
+
+def _backend_to_engine_type(backend: str) -> "EngineType":
+    """Map a docling backend name onto the rapidocr EngineType it stands for."""
+    from rapidocr.utils.typings import EngineType
+
+    engine_types = {
+        "onnxruntime": EngineType.ONNXRUNTIME,
+        "openvino": EngineType.OPENVINO,
+        "paddle": EngineType.PADDLE,
+        "torch": EngineType.TORCH,
+    }
+    if backend not in engine_types:
+        raise ValueError(
+            f"Unknown RapidOCR backend {backend!r}. Supported: {list(_RAPIDOCR_BACKENDS)}."
+        )
+    return engine_types[backend]
+
+
+def _resolve_rapidocr(lang: str, backend: str) -> _RapidOcrModelSpec:
+    """Map one requested language + backend onto a fully populated _RapidOcrModelSpec.
+
+    - Prefer PP-OCRv6 (whose recognizer is multilingual and covers ~52 codes)
+    - Otherwise fall back to PP-OCRv4 for the torch backend or PP-OCRv5 for the others.
+    - Raises when the language cannot be served by the resolved backbone.
+
+    Callers pass a single language; reducing a multi-language request is up to them.
+    """
+    from rapidocr.utils.model_resolver import COMMON_LANG_ALIASES, PP_OCRV6_LANGS
+    from rapidocr.utils.typings import OCRVersion
+
+    code = lang.strip().lower()
+    code = _DOCLING_LANG_NORMALIZE.get(code, code)
+    aliased = COMMON_LANG_ALIASES.get(code, code)
+
+    if aliased in PP_OCRV6_LANGS:
+        version = OCRVersion.PPOCRV6
+    elif backend == "torch":
+        if aliased not in _PPOCRV4_LANGS:
+            raise ValueError(
+                f"RapidOCR torch backend does not support language {lang!r}. "
+                f"Supported: {sorted(PP_OCRV6_LANGS | _PPOCRV4_LANGS)}."

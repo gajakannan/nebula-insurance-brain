@@ -1,0 +1,33 @@
+E501 Line too long (103 > 100)
+  --> packages/brain-content/tests/test_document_dates.py:66:101
+   |
+64 |         SourceMetadataDateBasis(
+65 |             kind="SOURCE_METADATA", system="trusted", record_id="1", field=field,
+66 |             source_value="2024", snapshot_sha256=metadata_snapshot_hash("trusted", "1", field, "2024"),
+   |                                                                                                     ^^^
+67 |         )
+   |
+
+E501 Line too long (115 > 100)
+  --> packages/brain-content/tests/test_document_dates.py:73:101
+   |
+71 |     basis = SourceMetadataDateBasis(
+72 |         kind="SOURCE_METADATA", system="trusted", record_id="1", field="document_date",
+73 |         source_value="2024-02", snapshot_sha256=metadata_snapshot_hash("trusted", "1", "document_date", "2024-02"),
+   |                                                                                                     ^^^^^^^^^^^^^^^
+74 |     )
+75 |     with pytest.raises(DateBasisInvalid):
+   |
+
+E501 Line too long (113 > 100)
+  --> packages/brain-content/tests/test_document_dates.py:92:101
+   |
+90 |     ):
+91 |         with pytest.raises(DateBasisInvalid):
+92 |             verify_content_date_basis(bundle, ContentDateBasis.model_validate({**basis.model_dump(), **changed}))
+   |                                                                                                     ^^^^^^^^^^^^^
+93 |     candidate = DocumentDateCandidate(
+94 |         contract_version=1, record_type="candidate", id=uuid4(), tenant_id=key.tenant_id,
+   |
+
+Found 5 errors (2 fixed, 3 remaining).

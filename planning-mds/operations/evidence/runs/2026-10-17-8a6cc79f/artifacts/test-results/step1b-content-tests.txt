@@ -1,0 +1,63 @@
+......................F..................................                [100%]
+=================================== FAILURES ===================================
+________________ test_conflicting_retry_raises_artifact_exists _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_conflicting_retry_raises_0')
+
+    @pytest.mark.asyncio
+    async def test_conflicting_retry_raises_artifact_exists(tmp_path: Path) -> None:
+        store = _make_store(tmp_path)
+        files = _files()
+        manifest = _make_manifest(files)
+        await store.put_bundle(manifest, files)
+        changed = {**files, "normalized.md": b"changed"}
+        changed_manifest = _make_manifest(changed, manifest.artifact_id)
+    
+        with pytest.raises(ArtifactExists):
+>           await store.put_bundle(changed_manifest, changed)
+
+packages/brain-content/tests/test_store.py:101: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+packages/brain-content/src/brain_content/store.py:52: in put_bundle
+    bundle = await self.publish_verified(key, manifest.model_dump_json().encode(), files)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/store.py:60: in publish_verified
+    return await asyncio.to_thread(self._verified.publish, key, manifest_bytes, files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/asyncio/threads.py:25: in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:86: in run
+    result = ctx.run(self.task)
+             ^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.14/concurrent/futures/thread.py:73: in run
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+packages/brain-content/src/brain_content/verified_store.py:62: in publish
+    prior = self.load_verified(key)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <brain_content.verified_store.VerifiedBundleStore object at 0x7a640c9bb050>
+key = ArtifactKey(artifact_id=UUID('6f7efb75-29ad-4253-9749-eadf5b3a39da'), tenant_id=UUID('fe02e36d-9a18-4ba9-91eb-0987be4031be'), knowledge_base_id=UUID('2aff7d45-1f26-4766-aa44-7daf9eea6320'), contract_version=1)
+
+    def load_verified(self, key: ArtifactKey) -> VerifiedBundle:
+        marker = f"{key.prefix}/manifest.json"
+        raw = self.objects.read(marker)
+        try:
+            manifest = parse_manifest(raw)
+        except ArtifactVersionUnsupported:
+            raise
+        except ValueError:
+            raise ArtifactIntegrityError("invalid manifest") from None
+        if (manifest.tenant_id, manifest.knowledge_base_id) != (
+            key.tenant_id,
+            key.knowledge_base_id,
+        ):
+>           raise PermissionError("artifact scope mismatch")
+E           PermissionError: artifact scope mismatch
+
+packages/brain-content/src/brain_content/verified_store.py:36: PermissionError
+=========================== short test summary info ============================
+FAILED packages/brain-content/tests/test_store.py::test_conflicting_retry_raises_artifact_exists
+1 failed, 56 passed in 1.47s

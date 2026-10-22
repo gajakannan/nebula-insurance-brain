@@ -1,0 +1,85 @@
+[32m[INFO] 2026-10-18 01:55:44,283 [RapidOCR] base.py:23: Using engine_name: torch[0m
+[32m[INFO] 2026-10-18 01:55:44,287 [RapidOCR] device_config.py:57: Using CPU device[0m
+[32m[INFO] 2026-10-18 01:55:44,288 [RapidOCR] download_file.py:68: Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv6/det/PP-OCRv6_det_small.pth[0m
+[32m[INFO] 2026-10-18 01:55:46,437 [RapidOCR] download_file.py:82: Download size: 9.77MB[0m
+Traceback (most recent call last):
+  File "/app/brain/neuron/packages/brain-ingestion/tests/spikes/test_item_provenance.py", line 271, in <module>
+    result = run_spike(args.output)
+  File "/app/brain/neuron/packages/brain-ingestion/tests/spikes/test_item_provenance.py", line 212, in run_spike
+    converter.initialize_pipeline(InputFormat.PDF)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.14/site-packages/docling/document_converter.py", line 504, in initialize_pipeline
+    pipeline = self._get_pipeline(doc_format=format)
+  File "/opt/venv/lib/python3.14/site-packages/docling/document_converter.py", line 794, in _get_pipeline
+    self.initialized_pipelines[cache_key] = pipeline_class(
+                                            ~~~~~~~~~~~~~~^
+        pipeline_options=pipeline_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py", line 595, in __init__
+    self._init_models()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py", line 616, in _init_models
+    self.ocr_model = self._make_ocr_model(art_path)
+                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py", line 692, in _make_ocr_model
+    return factory.create_instance(
+           ~~~~~~~~~~~~~~~~~~~~~~~^
+        options=self.pipeline_options.ocr_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        accelerator_options=self.pipeline_options.accelerator_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/venv/lib/python3.14/site-packages/docling/models/factories/base_factory.py", line 60, in create_instance
+    return _cls(options=options, **kwargs)
+  File "/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/auto_ocr_model.py", line 125, in __init__
+    self._engine = RapidOcrModel(
+                   ~~~~~~~~~~~~~^
+        enabled=self.enabled,
+        ^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        accelerator_options=accelerator_options,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py", line 455, in __init__
+    self.reader = RapidOCR(
+                  ~~~~~~~~^
+        params=params,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/venv/lib/python3.14/site-packages/rapidocr/main.py", line 46, in __init__
+    self._initialize(cfg)
+    ~~~~~~~~~~~~~~~~^^^^^
+  File "/opt/venv/lib/python3.14/site-packages/rapidocr/main.py", line 71, in _initialize
+    self.text_det = TextDetector(cfg.Det)
+                    ~~~~~~~~~~~~^^^^^^^^^
+  File "/opt/venv/lib/python3.14/site-packages/rapidocr/ch_ppocr_det/main.py", line 47, in __init__
+    self.session = get_engine(cfg.engine_type)(cfg)
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/main.py", line 22, in __init__
+    self.predictor = ModelLoader(cfg, self.device).predictor
+                     ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py", line 20, in __init__
+    model_path = self._init_model_path(cfg)
+  File "/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py", line 41, in _init_model_path
+    DownloadFile.run(
+    ~~~~~~~~~~~~~~~~^
+        DownloadFileInput(
+        ^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py", line 41, in run
+    cls._save_response_with_progress(response, save_path, logger)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py", line 90, in _save_response_with_progress
+    with open(save_path, "wb") as output_file:
+         ~~~~^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'

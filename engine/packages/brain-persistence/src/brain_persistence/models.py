@@ -11,7 +11,9 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     PrimaryKeyConstraint,
+    SmallInteger,
     String,
+    Text,
     UniqueConstraint,
     Uuid,
 )
@@ -67,7 +69,7 @@ class DocumentVersion(Base):
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     source_document: Mapped[SourceDocument] = relationship(back_populates="versions")
-    artifact: Mapped[ContentArtifact | None] = relationship(back_populates="document_version")
+    artifacts: Mapped[list[ContentArtifact]] = relationship(back_populates="document_version")
 
 
 class ContentArtifact(Base):
@@ -75,10 +77,20 @@ class ContentArtifact(Base):
     (`brain_content`); the bundle bytes themselves live in the object store, not here."""
 
     __tablename__ = "content_artifact"
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "knowledge_base_id", name="uq_content_artifact_owner"),
+        UniqueConstraint(
+            "id",
+            "document_version_id",
+            "tenant_id",
+            "knowledge_base_id",
+            name="uq_f0004_artifact_version_owner",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True)  # == artifact_id
     document_version_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("document_version.id"), unique=True, nullable=False
+        ForeignKey("document_version.id"), nullable=False
     )
     artifact_sha256: Mapped[str] = mapped_column(nullable=False)
     page_count: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -90,7 +102,16 @@ class ContentArtifact(Base):
     knowledge_base_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    document_version: Mapped[DocumentVersion] = relationship(back_populates="artifact")
+    artifact_contract_version: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    recipe_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    manifest_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    supersedes_artifact_id: Mapped[uuid.UUID | None] = mapped_column(_UUIDVariant, nullable=True)
+    publication_state: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default="legacy_unverified"
+    )
+    writer_fallback_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    document_version: Mapped[DocumentVersion] = relationship(back_populates="artifacts")
     runs: Mapped[list[SemanticInterpretationRun]] = relationship(back_populates="artifact")
 
 
@@ -607,3 +628,7 @@ class CanonicalCommitRow(Base):
     knowledge_base_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
     authorization_decision_id: Mapped[uuid.UUID | None] = mapped_column(_UUIDVariant, nullable=True)
     created_at: Mapped[datetime] = mapped_column(_TS, nullable=False)
+
+
+# Register the additive F0004 Core tables after their parent models exist.
+from brain_persistence import content_models as _content_models  # noqa: E402, F401

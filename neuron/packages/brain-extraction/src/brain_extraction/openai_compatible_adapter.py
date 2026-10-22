@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 import httpx
 import tiktoken
 from brain_content.store import ContentArtifactStore
+from brain_content.validation import ArtifactKey
 from brain_interpretation.counters import CounterAccumulator
 from brain_interpretation.result import (
     BoundingBox,
@@ -88,12 +89,23 @@ class OpenAICompatibleExtractionAdapter:
         self._client.close()
 
     async def interpret(
-        self, *, store: ContentArtifactStore, artifact_id: UUID, profile: ExtractionProfile
+        self,
+        *,
+        store: ContentArtifactStore,
+        artifact_id: UUID,
+        profile: ExtractionProfile,
+        artifact_key: ArtifactKey | None = None,
     ) -> InterpretationResult:
         counters = CounterAccumulator()
         run_id = uuid4()
 
-        docling_document_bytes = await store.open_file(artifact_id, "docling-document.json")
+        if artifact_key is None:
+            docling_document_bytes = await store.open_file(artifact_id, "docling-document.json")
+        else:
+            if artifact_key.artifact_id != artifact_id:
+                raise PermissionError("interpretation key belongs to another artifact")
+            bundle = await store.load_verified(artifact_key)
+            docling_document_bytes = bundle.files[bundle.manifest.docling_document.path]
         doc = DoclingDocument.model_validate_json(docling_document_bytes)
         page_heights = {page_no: item.size.height for page_no, item in doc.pages.items()}
 

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, StrictInt, model_validator
+
+from brain_content.contracts import decode_json, validate_contract, wire_value
 
 
 class ArtifactFile(BaseModel):
@@ -61,3 +63,78 @@ class ArtifactManifest(BaseModel):
     coordinate_origin: Literal["top_left"] = "top_left"
     offset_encoding: Literal["unicode_code_points"] = "unicode_code_points"
     created_at: datetime
+
+
+# Keep the original import and model intact for legacy producers/consumers.
+ArtifactManifestV1 = ArtifactManifest
+
+
+class ParserExecutionV2(ExecutionRecord):
+    parser_name: Literal["docling"]
+    projection_version: str
+
+
+class ArtifactManifestV2(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    artifact_contract_version: Literal[2]
+    tenant_id: UUID
+    knowledge_base_id: UUID
+    document_id: UUID
+    version_id: UUID
+    artifact_id: UUID
+    source_sha256: str
+    artifact_sha256: str
+    docling_document: DoclingDocumentRef
+    files: list[ArtifactFile]
+    execution: ParserExecutionV2
+    extraction_quality: ExtractionQuality
+    page_count: StrictInt
+    coordinate_origin: Literal["top_left"]
+    offset_encoding: Literal["unicode_code_points"]
+    created_at: datetime
+    source_file: Literal["source.pdf"]
+    recipe_sha256: str
+    bundle_hash_algorithm: Literal["sha256-file-inventory-v2"]
+    record_contract_version: Literal[2]
+    page_number_base: Literal[1]
+    coordinate_units: Literal["pdf_points"]
+    text_normalization_version: Literal["identity-unicode-v1"]
+
+    @model_validator(mode="before")
+    @classmethod
+    def input_contract(cls, value: Any) -> Any:
+        validate_contract("content-artifact-manifest-v2.schema.json", wire_value(value))
+        return value
+
+    @model_validator(mode="after")
+    def contract(self) -> Self:
+        validate_contract("content-artifact-manifest-v2.schema.json", self.model_dump(mode="json"))
+        return self
+
+
+Manifest = ArtifactManifestV1 | ArtifactManifestV2
+
+
+class ArtifactVersionUnsupported(ValueError):
+    pass
+
+
+def parse_manifest(raw: bytes) -> Manifest:
+    value = decode_json(raw)
+    if not isinstance(value, dict):
+        raise ValueError("CONTENT_CONTRACT_INVALID")
+    version = value.get("artifact_contract_version")
+    if type(version) is not int or version not in (1, 2):
+        raise ArtifactVersionUnsupported("ARTIFACT_VERSION_UNSUPPORTED")
+    name = (
+        "content-artifact-manifest.schema.json"
+        if version == 1
+        else "content-artifact-manifest-v2.schema.json"
+    )
+    validate_contract(name, value)
+    return (
+        ArtifactManifestV1.model_validate(value)
+        if version == 1
+        else ArtifactManifestV2.model_validate(value)
+    )

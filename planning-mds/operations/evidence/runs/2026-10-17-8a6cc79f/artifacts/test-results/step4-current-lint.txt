@@ -1,0 +1,13 @@
+SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+   --> tests/integration/test_content_worker_v2.py:288:5
+    |
+286 |       marker = tmp_path / "objects" / key.prefix / "manifest.json"
+287 |       marker.unlink()
+288 | /     with patch.object(DoclingAdapter, "parse", side_effect=AssertionError("parser forbidden")):
+289 | |         with pytest.raises(ArtifactIntegrityError, match="marker is missing"):
+    | |______________________________________________________________________________^
+290 |               enqueue(path, profile="gl-limits-b")
+    |
+help: Combine `with` statements
+
+Found 1 error.

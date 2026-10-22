@@ -9,7 +9,7 @@ leaves the process:
 |--------------------------|------------------------------------------------------------------|
 | allowed read             | evaluate/lock -> load payload -> append decision -> commit -> return |
 | denied / missing read    | append minimal denial -> commit -> `AuthorizationDenied` (404)   |
-| allowed mutation         | operation in the same UoW -> append decision -> commit together  |
+| allowed mutation         | stage decision -> operation in same UoW -> commit together       |
 | failed mutation          | rollback -> append `failed` decision in a fresh transaction      |
 | denied mutation          | rollback -> append denial in a fresh transaction                 |
 | storage/audit failure    | abort -> `AuthorizationUnavailable` (503); no payload, no success |
@@ -410,13 +410,22 @@ class AuthorizationExecution:
             raise await self._deny(evaluated)
         decisions = [e.decision for e in evaluated]
         try:
+            # Mutation rows may reference this audit through an immediate FK.
+            # Staging success is transactional: rollback removes it with effects.
+            for decision in decisions:
+                await self._store.append_decision(decision.with_outcome(OperationOutcome.SUCCEEDED))
+        except Exception as exc:  # noqa: BLE001 - no effect without its audit
+            await self._safe_rollback()
+            raise AuthorizationUnavailable("mutation audit could not be staged") from exc
+        evaluated = self._recheck_all(evaluated)
+        if not all(e.decision.allowed for e in evaluated):
+            raise await self._deny(evaluated)
+        try:
             result = await operation(decisions)
         except Exception:
             await self._persist_fresh([d.with_outcome(OperationOutcome.FAILED) for d in decisions])
             raise
         try:
-            for decision in decisions:
-                await self._store.append_decision(decision.with_outcome(OperationOutcome.SUCCEEDED))
             await self._store.commit()
         except Exception as exc:  # noqa: BLE001 - no unaudited successful mutation
             await self._safe_rollback()

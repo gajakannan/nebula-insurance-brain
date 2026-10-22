@@ -18,6 +18,24 @@ class LocalObjectStoreConfig:
     immutable: bool
 
 
+@dataclass(frozen=True)
+class ContentWriterConfig:
+    v2_writer_enabled: bool = False
+
+
+def load_content_writer_config() -> ContentWriterConfig:
+    override = os.environ.get("BRAIN_LOCAL_CONFIG_PATH")
+    path = Path(override) if override else _find_config_file(Path.cwd())
+    if not path.is_file():
+        raise ConfigError("content writer configuration is missing")
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    section = data.get("content", {})
+    enabled = section.get("v2_writer_enabled", False)
+    if type(enabled) is not bool:
+        raise ConfigError("content.v2_writer_enabled must be a boolean")
+    return ContentWriterConfig(v2_writer_enabled=enabled)
+
+
 def _find_config_file(start: Path) -> Path:
     """Walk upward from `start` looking for `config/local.yaml` (a fresh checkout may
     run the app from the repo root or from within `engine/`)."""

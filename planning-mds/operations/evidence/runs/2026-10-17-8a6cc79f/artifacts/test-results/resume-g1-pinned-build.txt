@@ -1,0 +1,100 @@
+ Image brain-f0004-engine:2026-10-17-8a6cc79f Building 
+ Image brain-f0004-neuron:2026-10-17-8a6cc79f Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.44kB done
+#1 DONE 0.0s
+
+#2 [engine-validation internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.45kB 0.0s done
+#2 DONE 0.0s
+
+#3 [neuron-validation internal] load metadata for ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437
+#3 DONE 0.1s
+
+#4 [engine-validation internal] load metadata for docker.io/library/python:3.14.4-slim-bookworm@sha256:fc74d22ffd0d5ac395a4b7bdda75a4539758862c49ebf3005647084631e63789
+#4 DONE 0.1s
+
+#5 [engine-validation uv 1/1] FROM ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437
+#5 resolve ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437 0.1s done
+#5 DONE 0.1s
+
+#6 [engine-validation dependencies 1/7] FROM docker.io/library/python:3.14.4-slim-bookworm@sha256:fc74d22ffd0d5ac395a4b7bdda75a4539758862c49ebf3005647084631e63789
+#6 resolve docker.io/library/python:3.14.4-slim-bookworm@sha256:fc74d22ffd0d5ac395a4b7bdda75a4539758862c49ebf3005647084631e63789 0.1s done
+#6 DONE 0.1s
+
+#7 [engine-validation internal] load build context
+#7 transferring context: 26.56kB 0.0s done
+#7 transferring context: 26.56kB 0.0s done
+#7 DONE 0.0s
+
+#8 [neuron-validation runtime 3/5] COPY --from=dependencies /opt/venv /opt/venv
+#8 CACHED
+
+#9 [neuron-validation dependencies 7/7] RUN uv sync --locked --directory /app/brain/neuron
+#9 CACHED
+
+#10 [neuron-validation runtime 4/5] COPY --from=uv /uv /usr/local/bin/uv
+#10 CACHED
+
+#11 [neuron-validation runtime 5/5] WORKDIR /app/brain
+#11 CACHED
+
+#12 [neuron-validation dependencies 3/7] RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1 && rm -rf /var/lib/apt/lists/*
+#12 CACHED
+
+#13 [neuron-validation dependencies 6/7] COPY neuron/ neuron/
+#13 CACHED
+
+#14 [engine-validation dependencies 7/7] RUN uv sync --locked --directory /app/brain/engine
+#14 CACHED
+
+#15 [engine-validation runtime 3/5] COPY --from=dependencies /opt/venv /opt/venv
+#15 CACHED
+
+#16 [neuron-validation dependencies 2/7] COPY --from=uv /uv /usr/local/bin/uv
+#16 CACHED
+
+#17 [engine-validation runtime 4/5] COPY --from=uv /uv /usr/local/bin/uv
+#17 CACHED
+
+#18 [neuron-validation dependencies 5/7] COPY engine/ engine/
+#18 CACHED
+
+#19 [neuron-validation runtime 2/5] RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1 && rm -rf /var/lib/apt/lists/*
+#19 CACHED
+
+#20 [neuron-validation dependencies 4/7] WORKDIR /app/brain
+#20 CACHED
+
+#21 [engine-validation runtime 5/5] WORKDIR /app/brain
+#21 CACHED
+
+#22 [neuron-validation] exporting to image
+#22 exporting layers done
+#22 exporting manifest sha256:129a8b4133e8689480868303b02f02c7da5c60c827a7e1f842404330bab55282 done
+#22 exporting config sha256:91104f341c2f35f52c0d055a08386852e98a036c6bc8f2cc171c501b826a31df done
+#22 exporting attestation manifest sha256:8839e2994bb50a41680b4588765fa9137de038051d013762724ac0433c517225
+#22 exporting attestation manifest sha256:8839e2994bb50a41680b4588765fa9137de038051d013762724ac0433c517225 0.1s done
+#22 exporting manifest list sha256:4d8604d2d5d8458f9d31cc49502e37cffc6cfeae6671fffd208a337e0f9bbe8c
+#22 exporting manifest list sha256:4d8604d2d5d8458f9d31cc49502e37cffc6cfeae6671fffd208a337e0f9bbe8c 0.1s done
+#22 naming to docker.io/library/brain-f0004-neuron:2026-10-17-8a6cc79f 0.0s done
+#22 unpacking to docker.io/library/brain-f0004-neuron:2026-10-17-8a6cc79f 0.0s done
+#22 DONE 0.3s
+
+#23 [engine-validation] exporting to image
+#23 exporting layers done
+#23 exporting manifest sha256:48cde18eea94e606a6fd66e446f68b133b2bc855fb8202cab3d73cdf1bbe7e89 done
+#23 exporting config sha256:c957bfb4f58737e846d3e696bff1c889626c14c5cd54f6495906dc14634bb6d9 done
+#23 exporting attestation manifest sha256:fc86b8637dbd3c4b6902c94416ed03a12bd0cd8126ded7ccf72d7ac68fd5dd2e 0.1s done
+#23 exporting manifest list sha256:9d4c58b3f4d4e771c97b90ecb1cf8d2d2999c9f936161799cead6057cc7ce1ae 0.1s done
+#23 naming to docker.io/library/brain-f0004-engine:2026-10-17-8a6cc79f done
+#23 unpacking to docker.io/library/brain-f0004-engine:2026-10-17-8a6cc79f 0.0s done
+#23 DONE 0.3s
+
+#24 [neuron-validation] resolving provenance for metadata file
+#24 DONE 0.0s
+
+#25 [engine-validation] resolving provenance for metadata file
+#25 DONE 0.0s
+ Image brain-f0004-engine:2026-10-17-8a6cc79f Built 
+ Image brain-f0004-neuron:2026-10-17-8a6cc79f Built

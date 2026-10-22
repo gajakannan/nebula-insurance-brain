@@ -1,0 +1,169 @@
+F811 Redefinition of unused `database` from line 35
+  --> tests/integration/test_content_worker_v2.py:50:16
+   |
+50 | def components(database, tmp_path):
+   |                ^^^^^^^^ `database` redefined here
+51 |     engine, _ = database
+52 |     tenant, kb, actor = _seed(engine)
+   |
+  ::: tests/integration/test_content_worker_v2.py:35:58
+   |
+33 | from sqlalchemy import func, select
+34 | from sqlalchemy.orm import Session
+35 | from test_worker_cli_enqueue import POLICY, ROOT, _seed, database  # noqa: F401
+   |                                                          -------- previous definition of `database` here
+help: Remove definition: `database`
+
+F811 Redefinition of unused `database` from line 35
+   --> tests/integration/test_content_worker_v2.py:100:54
+    |
+ 99 | @pytest.mark.parametrize("fallback", [False, True])
+100 | def test_publication_import_and_second_profile_reuse(database, tmp_path, native, fallback):
+    |                                                      ^^^^^^^^ `database` redefined here
+101 |     engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
+102 |     path, parsed = native
+    |
+   ::: tests/integration/test_content_worker_v2.py:35:58
+    |
+ 33 | from sqlalchemy import func, select
+ 34 | from sqlalchemy.orm import Session
+ 35 | from test_worker_cli_enqueue import POLICY, ROOT, _seed, database  # noqa: F401
+    |                                                          -------- previous definition of `database` here
+help: Remove definition: `database`
+
+E501 Line too long (104 > 100)
+   --> tests/integration/test_content_worker_v2.py:127:101
+    |
+125 |         assert row.writer_fallback_reason == ("ORIGIN_UNAVAILABLE" if fallback else None)
+126 |         assert row.unattributed_item_count == (2 if fallback else 0)
+127 |         assert session.scalar(select(func.count()).select_from(content_block)) == (0 if fallback else 2)
+    |                                                                                                     ^^^^
+128 |         key = ArtifactKey(row.id, row.tenant_id, row.knowledge_base_id, row.artifact_contract_version)
+129 |         if fallback:
+    |
+
+E501 Line too long (102 > 100)
+   --> tests/integration/test_content_worker_v2.py:128:101
+    |
+126 |         assert row.unattributed_item_count == (2 if fallback else 0)
+127 |         assert session.scalar(select(func.count()).select_from(content_block)) == (0 if fallback else 2)
+128 |         key = ArtifactKey(row.id, row.tenant_id, row.knowledge_base_id, row.artifact_contract_version)
+    |                                                                                                     ^^
+129 |         if fallback:
+130 |             assert key == fallback_key(row.document_version_id, row.tenant_id, row.knowledge_base_id)
+    |
+
+E501 Line too long (101 > 100)
+   --> tests/integration/test_content_worker_v2.py:130:101
+    |
+128 |         key = ArtifactKey(row.id, row.tenant_id, row.knowledge_base_id, row.artifact_contract_version)
+129 |         if fallback:
+130 |             assert key == fallback_key(row.document_version_id, row.tenant_id, row.knowledge_base_id)
+    |                                                                                                     ^
+131 |         assert session.scalar(select(jobs.c.state).where(jobs.c.id == str(job))) == "complete"
+132 |     importer = DocumentResultImporter(engine, store, authorization.for_job, read_artifact=access.read)
+    |
+
+E501 Line too long (102 > 100)
+   --> tests/integration/test_content_worker_v2.py:132:101
+    |
+130 |             assert key == fallback_key(row.document_version_id, row.tenant_id, row.knowledge_base_id)
+131 |         assert session.scalar(select(jobs.c.state).where(jobs.c.id == str(job))) == "complete"
+132 |     importer = DocumentResultImporter(engine, store, authorization.for_job, read_artifact=access.read)
+    |                                                                                                     ^^
+133 |     assert importer.run_one()
+134 |     first = store.load_verified(key)
+    |
+
+E501 Line too long (102 > 100)
+   --> tests/integration/test_content_worker_v2.py:137:101
+    |
+135 |     # A changed writer flag/installed recipe cannot replace an accepted source.
+136 |     with (
+137 |         patch("brain_ingestion.submission.physical_recipe", side_effect=AssertionError("new recipe")),
+    |                                                                                                     ^^
+138 |         patch.object(DoclingAdapter, "parse", side_effect=AssertionError("parser forbidden")),
+139 |         patch.object(DocumentConverter, "convert", side_effect=AssertionError("convert forbidden")),
+    |
+
+E501 Line too long (108 > 100)
+   --> tests/integration/test_content_worker_v2.py:140:101
+    |
+138 |         patch.object(DoclingAdapter, "parse", side_effect=AssertionError("parser forbidden")),
+139 |         patch.object(DocumentConverter, "convert", side_effect=AssertionError("convert forbidden")),
+140 |         patch.object(DocumentConverter, "convert_all", side_effect=AssertionError("convert_all forbidden")),
+    |                                                                                                     ^^^^^^^^
+141 |         patch.object(RapidOCR, "__call__", side_effect=AssertionError("OCR forbidden")),
+142 |     ):
+    |
+
+F811 Redefinition of unused `database` from line 35
+   --> tests/integration/test_content_worker_v2.py:160:79
+    |
+160 | def test_concurrent_profiles_share_pending_identity_and_preserve_restrictions(database, tmp_path, native):
+    |                                                                               ^^^^^^^^ `database` redefined here
+161 |     engine, _, _, _, _, _, enqueue = components(database, tmp_path)
+162 |     path, _ = native
+    |
+   ::: tests/integration/test_content_worker_v2.py:35:58
+    |
+ 33 | from sqlalchemy import func, select
+ 34 | from sqlalchemy.orm import Session
+ 35 | from test_worker_cli_enqueue import POLICY, ROOT, _seed, database  # noqa: F401
+    |                                                          -------- previous definition of `database` here
+help: Remove definition: `database`
+
+E501 Line too long (106 > 100)
+   --> tests/integration/test_content_worker_v2.py:160:101
+    |
+160 | def test_concurrent_profiles_share_pending_identity_and_preserve_restrictions(database, tmp_path, native):
+    |                                                                                                     ^^^^^^
+161 |     engine, _, _, _, _, _, enqueue = components(database, tmp_path)
+162 |     path, _ = native
+    |
+
+F811 Redefinition of unused `database` from line 35
+   --> tests/integration/test_content_worker_v2.py:184:69
+    |
+184 | def test_missing_producer_is_hard_failure_without_ready_or_fallback(database, tmp_path, native):
+    |                                                                     ^^^^^^^^ `database` redefined here
+185 |     engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
+186 |     path, parsed = native
+    |
+   ::: tests/integration/test_content_worker_v2.py:35:58
+    |
+ 33 | from sqlalchemy import func, select
+ 34 | from sqlalchemy.orm import Session
+ 35 | from test_worker_cli_enqueue import POLICY, ROOT, _seed, database  # noqa: F401
+    |                                                          -------- previous definition of `database` here
+help: Remove definition: `database`
+
+F811 Redefinition of unused `database` from line 35
+   --> tests/integration/test_content_worker_v2.py:205:64
+    |
+205 | def test_corrupt_accepted_marker_never_becomes_conversion_miss(database, tmp_path, native):
+    |                                                                ^^^^^^^^ `database` redefined here
+206 |     engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
+207 |     path, parsed = native
+    |
+   ::: tests/integration/test_content_worker_v2.py:35:58
+    |
+ 33 | from sqlalchemy import func, select
+ 34 | from sqlalchemy.orm import Session
+ 35 | from test_worker_cli_enqueue import POLICY, ROOT, _seed, database  # noqa: F401
+    |                                                          -------- previous definition of `database` here
+help: Remove definition: `database`
+
+SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+   --> tests/integration/test_content_worker_v2.py:221:5
+    |
+219 |       marker = tmp_path / "objects" / key.prefix / "manifest.json"
+220 |       marker.unlink()
+221 | /     with patch.object(DoclingAdapter, "parse", side_effect=AssertionError("parser forbidden")):
+222 | |         with pytest.raises(ArtifactIntegrityError, match="marker is missing"):
+    | |______________________________________________________________________________^
+223 |               enqueue(path, profile="gl-limits-b")
+    |
+help: Combine `with` statements
+
+Found 15 errors (2 fixed, 13 remaining).

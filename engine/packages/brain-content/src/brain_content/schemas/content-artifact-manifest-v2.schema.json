@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/content-artifact-manifest-v2.schema.json",
+  "title": "ContentArtifactManifestV2",
+  "description": "F0004 proposed v2 parse bundle. Date metadata and interpretation outputs are external, append-only records. Cross-file hashes, identity, duplicate paths and native asset closure require service validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_contract_version",
+    "tenant_id",
+    "knowledge_base_id",
+    "document_id",
+    "version_id",
+    "artifact_id",
+    "source_sha256",
+    "artifact_sha256",
+    "docling_document",
+    "files",
+    "execution",
+    "extraction_quality",
+    "page_count",
+    "coordinate_origin",
+    "offset_encoding",
+    "created_at",
+    "source_file",
+    "recipe_sha256",
+    "bundle_hash_algorithm",
+    "record_contract_version",
+    "page_number_base",
+    "coordinate_units",
+    "text_normalization_version"
+  ],
+  "properties": {
+    "artifact_contract_version": {
+      "const": 2
+    },
+    "tenant_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "knowledge_base_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "document_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "version_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "artifact_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "artifact_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "docling_document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "schema_version",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "const": "docling-document.json"
+        },
+        "schema_version": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "size_bytes"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^(docling-document\\.json|normalized\\.md|blocks\\.jsonl|tables\\.jsonl|layout\\.jsonl|source\\.pdf|assets/[A-Za-z0-9_-]+\\.[A-Za-z0-9]+)$"
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "docling-document.json"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "normalized.md"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "blocks.jsonl"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "tables.jsonl"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "layout.jsonl"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "source.pdf"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parser_package_version",
+        "model_artifact_digests",
+        "configuration_hash",
+        "environment_digest",
+        "parser_name",
+        "projection_version"
+      ],
+      "properties": {
+        "parser_package_version": {
+          "type": "string"
+        },
+        "model_artifact_digests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "configuration_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "environment_digest": {
+          "type": "string"
+        },
+        "parser_name": {
+          "const": "docling"
+        },
+        "projection_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "extraction_quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "failed_pages",
+        "warnings"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial"
+          ]
+        },
+        "failed_pages": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "page_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "coordinate_origin": {
+      "const": "top_left"
+    },
+    "offset_encoding": {
+      "const": "unicode_code_points"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_file": {
+      "const": "source.pdf"
+    },
+    "recipe_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "bundle_hash_algorithm": {
+      "const": "sha256-file-inventory-v2"
+    },
+    "record_contract_version": {
+      "const": 2
+    },
+    "page_number_base": {
+      "const": 1
+    },
+    "coordinate_units": {
+      "const": "pdf_points"
+    },
+    "text_normalization_version": {
+      "const": "identity-unicode-v1"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

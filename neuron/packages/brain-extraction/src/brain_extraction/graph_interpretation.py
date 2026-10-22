@@ -13,6 +13,8 @@ from typing import Any, Literal
 from uuid import UUID, uuid5
 
 from brain_content.checkpoints import CheckpointStore
+from brain_content.outputs import PipelineIdentity, RunManifestV2
+from brain_content.validation import ArtifactIntegrityError, ArtifactKey
 from brain_interpretation.result import (
     CandidateAssertion,
     Counters,
@@ -51,24 +53,46 @@ class GraphInterpretationService:
         chunk_max_tokens: int = 512,
         selected_refs: tuple[str, ...] = (),
         publish: Callable[[Callable[[], str]], str] | None = None,
+        artifact_key: ArtifactKey | None = None,
+        output_contract_version: Literal[1, 2] = 1,
     ) -> InterpretationResult:
         # Targeted interpretation cannot quietly become a whole-document request.
         # The pinned upstream pipeline does not expose a tested ref-preserving slice.
         if selected_refs:
             raise NotImplementedError("targeted native-item interpretation is not qualified")
         self.authorize(tenant_id, knowledge_base_id, artifact_id, "interpret")
-        manifest, files = self.store.load(artifact_id, tenant_id, knowledge_base_id)
+        key = artifact_key or ArtifactKey(artifact_id, tenant_id, knowledge_base_id, 1)
+        if (key.artifact_id, key.tenant_id, key.knowledge_base_id) != (
+            artifact_id,
+            tenant_id,
+            knowledge_base_id,
+        ):
+            raise PermissionError("interpretation key belongs to another artifact")
+        bundle = self.store.load_verified(key)
+        manifest, files = bundle.manifest, bundle.files
         document = DoclingDocument.model_validate_json(files[manifest.docling_document.path])
         result_ref = f"runs/{tenant_id}/{knowledge_base_id}/{run_id}/manifest.json"
         if self.store.objects.exists(result_ref):
-            prior = self.store.load_run(
+            retained = self.store.load_run_bundle(
                 tenant_id=tenant_id,
                 knowledge_base_id=knowledge_base_id,
                 artifact_id=artifact_id,
                 run_id=run_id,
+                artifact_key=key,
             )
+            prior = retained.files
             previous = InterpretationResult.model_validate_json(prior["result.json"])
             prior_metadata = json.loads(prior["metadata.json"])
+            if isinstance(retained.manifest, RunManifestV2):
+                prior_pipeline = PipelineIdentity.model_validate(
+                    prior_metadata.get("pipeline_identity")
+                )
+                if (
+                    retained.manifest.pipeline != prior_pipeline
+                    or retained.manifest.document_date_selection_id
+                    != prior_metadata.get("document_date_selection_id")
+                ):
+                    raise ArtifactIntegrityError("run marker differs from retained configuration")
             if prior_metadata.get("requested_configuration") != {
                 "extraction_contract": extraction_contract,
                 "chunk_max_tokens": chunk_max_tokens,
@@ -190,6 +214,27 @@ class GraphInterpretationService:
                 name: version(name) for name in ("docling", "docling-core", "docling-graph")
             },
         }
+        pipeline: PipelineIdentity | None = None
+        if output_contract_version == 2:
+            pipeline = PipelineIdentity(
+                name="docling-graph",
+                package_version=version("docling-graph"),
+                configuration_sha256=hashlib.sha256(
+                    _json(
+                        {
+                            "requested_configuration": metadata["requested_configuration"],
+                            "effective_configuration": metadata["pipeline_config"],
+                            "profile_id": profile.profile_id,
+                            "profile_version": profile.profile_version,
+                            "schema_sha256": result.run_configuration.schema_hash,
+                        }
+                    )
+                ).hexdigest(),
+            )
+            metadata["pipeline_identity"] = pipeline.model_dump(mode="json")
+            # F0016/F0022 owns a future verified selection producer. This worker
+            # records the exact absence of a selected basis until that exists.
+            metadata["document_date_selection_id"] = None
         outputs = {
             "result.json": result.model_dump_json().encode(),
             "provenance.json": _json(output.provenance if output else None),
@@ -205,6 +250,10 @@ class GraphInterpretationService:
                 artifact_id=artifact_id,
                 run_id=run_id,
                 files=outputs,
+                artifact_key=key,
+                output_contract_version=output_contract_version,
+                pipeline=pipeline,
+                document_date_selection_id=None,
             )
 
         if publish is None:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import os
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Protocol
 
 from brain_content.config import LocalObjectStoreConfig
@@ -35,6 +35,8 @@ class ObjectStore(Protocol):
 
     def exists(self, key: str) -> bool: ...
 
+    def list_keys(self, prefix: str) -> tuple[str, ...]: ...
+
     def delete(self, key: str) -> None:
         """Controlled deletion. Raises ObjectNotFoundError if `key` does not exist."""
         ...
@@ -57,8 +59,19 @@ class LocalFilesystemObjectStore:
         self._root.mkdir(parents=True, exist_ok=True)
 
     def _path_for(self, key: str) -> Path:
-        if not key or key.startswith("/") or ".." in Path(key).parts:
+        if (
+            not key
+            or key.startswith("/")
+            or "\\" in key
+            or ".." in PurePosixPath(key).parts
+            or PurePosixPath(key).as_posix() != key
+        ):
             raise ValueError(f"invalid object key: {key!r}")
+        component = self._root
+        for part in PurePosixPath(key).parts:
+            component = component / part
+            if component.is_symlink():
+                raise ValueError("object key contains a symlink")
         path = (self._root / key).resolve()
         if self._root not in path.parents and path != self._root:
             raise ValueError(f"object key escapes the configured root: {key!r}")
@@ -104,6 +117,18 @@ class LocalFilesystemObjectStore:
 
     def exists(self, key: str) -> bool:
         return self._path_for(key).is_file()
+
+    def list_keys(self, prefix: str) -> tuple[str, ...]:
+        folder = self._path_for(prefix)
+        if not folder.exists():
+            return ()
+        result = []
+        for path in folder.rglob("*"):
+            if path.is_symlink():
+                raise ValueError("object namespace contains a symlink")
+            if path.is_file() and not path.name.startswith(".pending-"):
+                result.append(path.relative_to(self._root).as_posix())
+        return tuple(sorted(result))
 
     def delete(self, key: str) -> None:
         path = self._path_for(key)

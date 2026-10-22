@@ -1,0 +1,28 @@
+E501 Line too long (105 > 100)
+  --> apps/worker/src/brain_worker/publication_intent.py:38:101
+   |
+36 |     """
+37 |     key, manifest = bundle.key, bundle.manifest
+38 |     path = f"publication-intents/{key.tenant_id}/{key.knowledge_base_id}/{key.artifact_id}/fallback.json"
+   |                                                                                                     ^^^^^
+39 |     identity = dict(
+40 |         contract_version=1,
+   |
+
+SIM105 Use `contextlib.suppress(ObjectAlreadyExistsError)` instead of `try`-`except`-`pass`
+  --> apps/worker/src/brain_worker/publication_intent.py:57:9
+   |
+55 |       )
+56 |       if incoming is not None:
+57 | /         try:
+58 | |             objects.create_exclusive(path, incoming.model_dump_json().encode())
+59 | |         except ObjectAlreadyExistsError:
+60 | |             pass
+   | |________________^
+61 |       try:
+62 |           value = decode_json(objects.read(path))
+   |
+help: Replace `try`-`except`-`pass` with `with contextlib.suppress(ObjectAlreadyExistsError): ...`
+
+Found 3 errors (1 fixed, 2 remaining).
+No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).

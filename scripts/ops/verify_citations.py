@@ -1,19 +1,5 @@
 #!/usr/bin/env python3
-"""Verify every S0003 evidence binding resolves to a real block/page in the
-restored content root (F0001-S0006 restore-drill acceptance criterion:
-"every citation from S0003 resolves").
-
-A citation is one `assertion_evidence` row. It resolves if:
-  - its artifact's bundle manifest exists at
-    `<content_root>/bundles/<artifact_id>/manifest.json`, and
-  - when `block_id` is set, a line in that bundle's `blocks.jsonl` has a
-    matching `block_id`;
-  - when `block_id` is null (page/document-level precision), `page` (if set)
-    is one of the pages listed in that bundle's `layout.jsonl`.
-
-Usage:
-    python3 scripts/ops/verify_citations.py --database-url <url> --content-root <path>
-"""
+"""Resolve restored citations through trusted v1/v2 keys and common verification."""
 
 from __future__ import annotations
 
@@ -23,16 +9,11 @@ import sys
 from pathlib import Path
 
 import psycopg
-
-
-def _bundle_dir(content_root: Path, artifact_id: str) -> Path:
-    return content_root / "bundles" / artifact_id
-
-
-def _load_jsonl(path: Path) -> list[dict]:
-    if not path.is_file():
-        return []
-    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+from brain_content.checkpoints import CheckpointStore
+from brain_content.config import LocalObjectStoreConfig
+from brain_content.manifest import ArtifactVersionUnsupported
+from brain_content.object_store import LocalFilesystemObjectStore, ObjectNotFoundError
+from brain_content.validation import ArtifactIntegrityError, ArtifactKey
 
 
 def verify(*, database_url: str, content_root: Path) -> tuple[int, int, list[str]]:
@@ -43,36 +24,63 @@ def verify(*, database_url: str, content_root: Path) -> tuple[int, int, list[str
 
     with psycopg.connect(database_url) as connection, connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id, assertion_id, artifact_id, block_id, page, precision "
-            "FROM assertion_evidence"
+            "SELECT e.id,e.assertion_id,e.artifact_id,e.block_id,e.page,e.precision,"
+            "a.tenant_id,a.knowledge_base_id,COALESCE(a.artifact_contract_version,1),"
+            "e.tenant_id,e.knowledge_base_id "
+            "FROM assertion_evidence e JOIN content_artifact a ON a.id=e.artifact_id"
         )
         rows = cursor.fetchall()
 
-    for row_id, assertion_id, artifact_id, block_id, page, _precision in rows:
+    store = CheckpointStore(
+        LocalFilesystemObjectStore(LocalObjectStoreConfig("filesystem", content_root, True))
+    )
+    for (
+        row_id,
+        assertion_id,
+        artifact_id,
+        block_id,
+        page,
+        _precision,
+        tenant,
+        kb,
+        version,
+        evidence_tenant,
+        evidence_kb,
+    ) in rows:
         total += 1
-        bundle_dir = _bundle_dir(content_root, str(artifact_id))
-        manifest_path = bundle_dir / "manifest.json"
-        if not manifest_path.is_file():
-            failures.append(
-                f"evidence {row_id} (assertion {assertion_id}): bundle manifest missing "
-                f"at {manifest_path}"
-            )
+        if (tenant, kb) != (evidence_tenant, evidence_kb):
+            failures.append(f"evidence {row_id}: artifact owner mismatch")
             continue
-
+        try:
+            bundle = store.load_verified(ArtifactKey(artifact_id, tenant, kb, version))
+        except (
+            ArtifactIntegrityError,
+            ArtifactVersionUnsupported,
+            ObjectNotFoundError,
+            PermissionError,
+            OSError,
+            ValueError,
+        ) as exc:
+            failures.append(f"evidence {row_id}: bundle verification failed ({type(exc).__name__})")
+            continue
         if block_id is not None:
-            blocks = _load_jsonl(bundle_dir / "blocks.jsonl")
+            blocks = [
+                json.loads(line) for line in bundle.files["blocks.jsonl"].splitlines() if line
+            ]
             if not any(b.get("block_id") == block_id for b in blocks):
                 failures.append(
                     f"evidence {row_id} (assertion {assertion_id}): block_id={block_id!r} "
-                    f"not found in {bundle_dir / 'blocks.jsonl'}"
+                    "not found in verified blocks"
                 )
                 continue
         elif page is not None:
-            layout = _load_jsonl(bundle_dir / "layout.jsonl")
+            layout = [
+                json.loads(line) for line in bundle.files["layout.jsonl"].splitlines() if line
+            ]
             if not any(entry.get("page") == page for entry in layout):
                 failures.append(
                     f"evidence {row_id} (assertion {assertion_id}): page={page} "
-                    f"not found in {bundle_dir / 'layout.jsonl'}"
+                    "not found in verified layout"
                 )
                 continue
         # precision == "unresolved" or document-level: manifest presence alone is

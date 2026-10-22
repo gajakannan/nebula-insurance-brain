@@ -1,0 +1,922 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/content-records-v2.schema.json",
+  "title": "ContentRecordsV2",
+  "description": "One JSONL record. Relational uniqueness, bounds, native references and geometry consistency are service checks. Positions refer to exact block.text in Unicode code points; identity normalization never rewrites source text.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/block"
+    },
+    {
+      "$ref": "#/$defs/table"
+    },
+    {
+      "$ref": "#/$defs/layout"
+    }
+  ],
+  "$defs": {
+    "native_text": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "native_ref",
+        "regions"
+      ],
+      "properties": {
+        "kind": {
+          "const": "native_text"
+        },
+        "native_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "page",
+              "bbox",
+              "char_start",
+              "char_end"
+            ],
+            "properties": {
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "bbox": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "x0",
+                      "y0",
+                      "x1",
+                      "y1"
+                    ],
+                    "properties": {
+                      "x0": {
+                        "type": "number"
+                      },
+                      "y0": {
+                        "type": "number"
+                      },
+                      "x1": {
+                        "type": "number"
+                      },
+                      "y1": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "char_start": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "char_end": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "char_start": {
+                      "type": "null"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "char_end": {
+                      "type": "null"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "char_end": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "page_region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "regions"
+      ],
+      "properties": {
+        "kind": {
+          "const": "page_region"
+        },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "page",
+              "bbox",
+              "char_start",
+              "char_end"
+            ],
+            "properties": {
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "bbox": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "x0",
+                      "y0",
+                      "x1",
+                      "y1"
+                    ],
+                    "properties": {
+                      "x0": {
+                        "type": "number"
+                      },
+                      "y0": {
+                        "type": "number"
+                      },
+                      "x1": {
+                        "type": "number"
+                      },
+                      "y1": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "char_start": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "char_end": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "char_start": {
+                      "type": "null"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "char_end": {
+                      "type": "null"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "char_end": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "time_span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "start_ms",
+        "end_ms",
+        "speaker"
+      ],
+      "properties": {
+        "kind": {
+          "const": "time_span"
+        },
+        "start_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "speaker": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "figure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "figure_ref",
+        "regions"
+      ],
+      "properties": {
+        "kind": {
+          "const": "figure"
+        },
+        "figure_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "page",
+              "bbox",
+              "char_start",
+              "char_end"
+            ],
+            "properties": {
+              "page": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "bbox": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "x0",
+                      "y0",
+                      "x1",
+                      "y1"
+                    ],
+                    "properties": {
+                      "x0": {
+                        "type": "number"
+                      },
+                      "y0": {
+                        "type": "number"
+                      },
+                      "x1": {
+                        "type": "number"
+                      },
+                      "y1": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "char_start": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "char_end": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "char_start": {
+                      "type": "null"
+                    }
+                  }
+                },
+                "then": {
+                  "properties": {
+                    "char_end": {
+                      "type": "null"
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "char_end": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "unresolved": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "reason"
+      ],
+      "properties": {
+        "kind": {
+          "const": "unresolved"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_type",
+        "contract_version",
+        "block_id",
+        "native_ref",
+        "reading_order",
+        "section_path",
+        "text",
+        "text_origin",
+        "producer",
+        "origin_anchor",
+        "confidence"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "block"
+        },
+        "contract_version": {
+          "const": 2
+        },
+        "block_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "native_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reading_order": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "section_path": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "text": {
+          "type": "string"
+        },
+        "text_origin": {
+          "enum": [
+            "STATED",
+            "OCR",
+            "TRANSCRIBED",
+            "DESCRIBED"
+          ]
+        },
+        "producer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "engine",
+            "engine_version",
+            "model",
+            "model_version"
+          ],
+          "properties": {
+            "engine": {
+              "type": "string",
+              "minLength": 1
+            },
+            "engine_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "model_version": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "model": {
+                    "type": "null"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "model_version": {
+                    "type": "null"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "model_version": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "origin_anchor": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/native_text"
+            },
+            {
+              "$ref": "#/$defs/page_region"
+            },
+            {
+              "$ref": "#/$defs/time_span"
+            },
+            {
+              "$ref": "#/$defs/figure"
+            },
+            {
+              "$ref": "#/$defs/unresolved"
+            }
+          ]
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "text_origin": {
+                "const": "STATED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "origin_anchor": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/native_text"
+                  },
+                  {
+                    "$ref": "#/$defs/unresolved"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "text_origin": {
+                "const": "OCR"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "origin_anchor": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/page_region"
+                  },
+                  {
+                    "$ref": "#/$defs/unresolved"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "text_origin": {
+                "const": "TRANSCRIBED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "origin_anchor": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/time_span"
+                  },
+                  {
+                    "$ref": "#/$defs/unresolved"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "text_origin": {
+                "const": "DESCRIBED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "origin_anchor": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/figure"
+                  },
+                  {
+                    "$ref": "#/$defs/unresolved"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_type",
+        "contract_version",
+        "table_id",
+        "native_ref",
+        "num_rows",
+        "num_cols",
+        "header_rows",
+        "continuation_of",
+        "cells"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "table"
+        },
+        "contract_version": {
+          "const": 2
+        },
+        "table_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "native_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "num_rows": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "num_cols": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "header_rows": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "continuation_of": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cell_id",
+              "row_start",
+              "col_start",
+              "row_span",
+              "col_span",
+              "text",
+              "block_ids"
+            ],
+            "properties": {
+              "cell_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "row_start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "col_start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "row_span": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "col_span": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "text": {
+                "type": "string"
+              },
+              "block_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_type",
+        "contract_version",
+        "page",
+        "geometry_state",
+        "width",
+        "height",
+        "rotation_degrees",
+        "native_to_canonical",
+        "unavailable_reason"
+      ],
+      "properties": {
+        "record_type": {
+          "const": "layout"
+        },
+        "contract_version": {
+          "const": 2
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "geometry_state": {
+          "enum": [
+            "available",
+            "unavailable"
+          ]
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rotation_degrees": {
+          "anyOf": [
+            {
+              "enum": [
+                0,
+                90,
+                180,
+                270
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "native_to_canonical": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 6,
+              "maxItems": 6
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unavailable_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "geometry_state": {
+                "const": "available"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "width": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "height": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "rotation_degrees": {
+                "enum": [
+                  0,
+                  90,
+                  180,
+                  270
+                ]
+              },
+              "native_to_canonical": {
+                "type": "array"
+              },
+              "unavailable_reason": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "width": {
+                "type": "null"
+              },
+              "height": {
+                "type": "null"
+              },
+              "rotation_degrees": {
+                "type": "null"
+              },
+              "native_to_canonical": {
+                "type": "null"
+              },
+              "unavailable_reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

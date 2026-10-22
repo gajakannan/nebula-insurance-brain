@@ -1,0 +1,146 @@
+F.F........................../opt/venv/lib/python3.14/site-packages/coverage/inorout.py:558: CoverageWarning: Module brain_api.routes.content was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.16.0/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+/opt/venv/lib/python3.14/site-packages/coverage/inorout.py:558: CoverageWarning: Module brain_api.deps was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.16.0/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+/opt/venv/lib/python3.14/site-packages/coverage/inorout.py:558: CoverageWarning: Module brain_api.errors was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.16.0/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+                                            [100%]
+=================================== FAILURES ===================================
+___ test_expand_and_safe_empty_downgrade_preserve_existing_owner_constraints ___
+tests/integration/test_content_migration_states.py:142: in test_expand_and_safe_empty_downgrade_preserve_existing_owner_constraints
+    command.downgrade(config, "0007")
+/opt/venv/lib/python3.14/site-packages/alembic/command.py:534: in downgrade
+    script.run_env()
+/opt/venv/lib/python3.14/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/opt/venv/lib/python3.14/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:759: in exec_module
+    ???
+<frozen importlib._bootstrap>:491: in _call_with_frames_removed
+    ???
+migrations/env.py:67: in <module>
+    run_migrations_online()
+migrations/env.py:61: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/opt/venv/lib/python3.14/site-packages/alembic/runtime/environment.py:967: in run_migrations
+    self.get_context().run_migrations(**kw)
+/opt/venv/lib/python3.14/site-packages/alembic/runtime/migration.py:621: in run_migrations
+    step.migration_fn(**kw)
+migrations/versions/0008_f0004_content_contract.py:48: in downgrade
+    history = table(table_name, schema="public")
+              ^^^^^
+E   UnboundLocalError: cannot access local variable 'table' where it is not associated with a value
+----------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running downgrade 0008 -> 0007, F0004 additive content contracts, indexes and append-only date history.
+______ test_index_history_is_append_only_and_blocks_destructive_downgrade ______
+tests/integration/test_content_migration_states.py:205: in test_index_history_is_append_only_and_blocks_destructive_downgrade
+    command.downgrade(config, "0007")
+/opt/venv/lib/python3.14/site-packages/alembic/command.py:534: in downgrade
+    script.run_env()
+/opt/venv/lib/python3.14/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/opt/venv/lib/python3.14/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:759: in exec_module
+    ???
+<frozen importlib._bootstrap>:491: in _call_with_frames_removed
+    ???
+migrations/env.py:67: in <module>
+    run_migrations_online()
+migrations/env.py:61: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/opt/venv/lib/python3.14/site-packages/alembic/runtime/environment.py:967: in run_migrations
+    self.get_context().run_migrations(**kw)
+/opt/venv/lib/python3.14/site-packages/alembic/runtime/migration.py:621: in run_migrations
+    step.migration_fn(**kw)
+migrations/versions/0008_f0004_content_contract.py:48: in downgrade
+    history = table(table_name, schema="public")
+              ^^^^^
+E   UnboundLocalError: cannot access local variable 'table' where it is not associated with a value
+----------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running downgrade 0008 -> 0007, F0004 additive content contracts, indexes and append-only date history.
+=============================== warnings summary ===============================
+tests/integration/test_content_migration_states.py: 34 warnings
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                                     Stmts   Miss  Cover
+--------------------------------------------------------------------------------------------
+apps/worker/src/brain_worker/content_access.py                              67     67     0%
+apps/worker/src/brain_worker/content_publication.py                        113     16    86%
+apps/worker/src/brain_worker/content_submissions.py                         15     15     0%
+apps/worker/src/brain_worker/document_delivery.py                          172    119    31%
+apps/worker/src/brain_worker/outbox_projector.py                            28     28     0%
+apps/worker/src/brain_worker/publication_intent.py                          51      2    96%
+packages/brain-content/src/brain_content/checkpoints.py                     82     56    32%
+packages/brain-content/src/brain_content/config.py                          47     30    36%
+packages/brain-content/src/brain_content/contracts.py                       60     14    77%
+packages/brain-content/src/brain_content/dates.py                          160     10    94%
+packages/brain-content/src/brain_content/identities.py                      32      5    84%
+packages/brain-content/src/brain_content/manifest.py                        96      2    98%
+packages/brain-content/src/brain_content/object_store.py                    80     12    85%
+packages/brain-content/src/brain_content/outputs.py                         52     15    71%
+packages/brain-content/src/brain_content/service.py                         24      2    92%
+packages/brain-content/src/brain_content/store.py                           48     24    50%
+packages/brain-content/src/brain_content/validation.py                     234     53    77%
+packages/brain-content/src/brain_content/verified_store.py                  58     18    69%
+packages/brain-jobs/src/brain_jobs/queue.py                                146     49    66%
+packages/brain-persistence/src/brain_persistence/content_operations.py     190     20    89%
+packages/brain-persistence/src/brain_persistence/content_repository.py     167     39    77%
+packages/brain-persistence/src/brain_persistence/document_dates.py         163     16    90%
+packages/brain-security/src/brain_security/execution.py                    165     39    76%
+--------------------------------------------------------------------------------------------
+TOTAL                                                                     2695    651    76%
+
+5 files skipped due to complete coverage.
+Coverage XML written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/enginefix.xml
+Coverage JSON written to file /app/brain/planning-mds/operations/evidence/runs/2026-10-17-8a6cc79f/artifacts/coverage/enginefix.json
+=========================== short test summary info ============================
+FAILED tests/integration/test_content_migration_states.py::test_expand_and_safe_empty_downgrade_preserve_existing_owner_constraints
+FAILED tests/integration/test_content_migration_states.py::test_index_history_is_append_only_and_blocks_destructive_downgrade
+2 failed, 27 passed, 34 warnings in 18.21s

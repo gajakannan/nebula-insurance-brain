@@ -1,0 +1,97 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> engine/packages/brain-content/src/brain_content/records.py:3:1
+   |
+ 1 |   """Typed v2 records; JSON Schema remains the authority for their wire shape."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | from typing import Annotated, Any, ClassVar, Literal, Self
+ 6 | |
+ 7 | | from brain_content.contracts import validate_contract, wire_value
+ 8 | | from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
+   | |_____________________________________________________________________________^
+ 9 |
+10 |   Origin = Literal["STATED", "OCR", "TRANSCRIBED", "DESCRIBED"]
+   |
+help: Organize imports
+   |
+6  |
+   - from brain_content.contracts import validate_contract, wire_value
+7  | from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
+8  |
+9  + from brain_content.contracts import validate_contract, wire_value
+10 +
+11 | Origin = Literal["STATED", "OCR", "TRANSCRIBED", "DESCRIBED"]
+   |
+
+E501 Line too long (107 > 100)
+  --> engine/packages/brain-content/src/brain_content/validation.py:79:101
+   |
+77 |         for path in sorted(files)
+78 |     ]
+79 |     return sha256(json.dumps(inventory, sort_keys=True, ensure_ascii=True, separators=(",", ":")).encode())
+   |                                                                                                     ^^^^^^^
+
+UP047 Generic function `_jsonl` should use type parameters
+   --> engine/packages/brain-content/src/brain_content/validation.py:142:5
+    |
+142 | def _jsonl(raw: bytes, model: type[R]) -> tuple[R, ...]:
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+143 |     records = []
+144 |     try:
+    |
+help: Use type parameters
+
+B905 `zip()` without an explicit `strict=` parameter
+   --> engine/packages/brain-content/src/brain_content/validation.py:231:55
+    |
+229 |     timed.sort()
+230 |     _require(
+231 |         all(a[1] <= b[1] and a[2] <= b[2] for a, b in zip(timed, timed[1:])),
+    |                                                       ^^^^^^^^^^^^^^^^^^^^^
+232 |         "non-monotonic transcript time",
+233 |     )
+    |
+help: Add explicit value for parameter `strict=`
+
+SIM300 [*] Yoda condition detected
+   --> engine/packages/brain-content/src/brain_content/validation.py:288:14
+    |
+286 |     _require(len(expected) == len(manifest.files), "duplicate bundle path")
+287 |     _require(set(expected) == set(files), "bundle file inventory mismatch")
+288 |     _require(PAYLOAD_FILES <= set(files), "native bundle is incomplete")
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+289 |     for path, entry in expected.items():
+290 |         _require(valid_path(path, key.contract_version), "invalid bundle filename")
+    |
+help: Rewrite as `set(files) >= PAYLOAD_FILES`
+    |
+287 |     _require(set(expected) == set(files), "bundle file inventory mismatch")
+    -     _require(PAYLOAD_FILES <= set(files), "native bundle is incomplete")
+288 +     _require(set(files) >= PAYLOAD_FILES, "native bundle is incomplete")
+289 |     for path, entry in expected.items():
+    |
+
+E501 Line too long (102 > 100)
+   --> engine/packages/brain-content/src/brain_content/validation.py:310:101
+    |
+308 |         _require(sources == ["source.pdf"], "retained source is missing")
+309 |     if sources:
+310 |         _require(sha256(files[sources[0]]) == manifest.source_sha256, "retained source hash mismatch")
+    |                                                                                                     ^^
+311 |     try:
+312 |         native = decode_json(files[reference.path])
+    |
+
+E501 Line too long (102 > 100)
+   --> engine/packages/brain-content/src/brain_content/validation.py:328:101
+    |
+326 |         raise ArtifactIntegrityError("invalid native content or record") from None
+327 |     return VerifiedBundle(
+328 |         key, manifest, manifest_bytes, sha256(manifest_bytes), MappingProxyType(dict(files)), *records
+    |                                                                                                     ^^
+329 |     )
+    |
+
+Found 7 errors.
+[*] 2 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).

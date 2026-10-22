@@ -33,3 +33,7 @@ A targeted `plan` rework (PHASE=A+B, FEATURE_MODE=existing) of six gaps found by
 
 - Framework: the generate-story-index.py backslash defect; manifest `{PRODUCT_ROOT}` placeholder drift on framework main.
 - Independence: the same session wrote and reviewed this work. A fresh-session plan-review is recommended before build.
+
+## Planning approval reconciliation
+
+The three earlier planning revisions were marked superseded with operator authorization; this run remains the approved planning baseline. See [planning-approval-reconciliation.md](planning-approval-reconciliation.md).

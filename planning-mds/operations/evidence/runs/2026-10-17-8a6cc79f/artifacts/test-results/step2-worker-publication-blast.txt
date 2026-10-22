@@ -1,0 +1,108 @@
+{
+  "query": {
+    "file": "neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py"
+  },
+  "direct_nodes": [
+    "capability:parse-once-content-artifact"
+  ],
+  "neighbor_nodes": [],
+  "impacted_by_type": {
+    "capability": [
+      "capability:parse-once-content-artifact"
+    ]
+  },
+  "features": [
+    {
+      "id": "feature:F0001",
+      "path": "planning-mds/features/archive/F0001-repository-and-engineering-foundation",
+      "status": "archived-done"
+    },
+    {
+      "id": "feature:F0004",
+      "path": "planning-mds/features/F0004-content-artifact-model",
+      "status": "planned"
+    },
+    {
+      "id": "feature:F0005",
+      "path": "planning-mds/features/F0005-one-time-docling-ingestion",
+      "status": "planned"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story:F0001-S0003",
+      "path": "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md"
+    },
+    {
+      "id": "story:F0004-S0001",
+      "path": "planning-mds/features/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md"
+    },
+    {
+      "id": "story:F0005-S0001",
+      "path": "planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md"
+    },
+    {
+      "id": "story:F0005-S0002",
+      "path": "planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md"
+    },
+    {
+      "id": "story:F0005-S0003",
+      "path": "planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md"
+    },
+    {
+      "id": "story:F0005-S0004",
+      "path": "planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md"
+    }
+  ],
+  "indirect_features": [],
+  "indirect_stories": [],
+  "policy_rules": [
+    "policy_rule:content-artifact-ingest",
+    "policy_rule:content-artifact-interpret",
+    "policy_rule:content-artifact-read",
+    "policy_rule:fact-slot-commit",
+    "policy_rule:fact-slot-read",
+    "policy_rule:review-task-annotate",
+    "policy_rule:review-task-read"
+  ],
+  "code_bindings": {
+    "capability:parse-once-content-artifact": {
+      "ai": [
+        "neuron/packages/brain-ingestion/src/**"
+      ],
+      "backend": [
+        "engine/apps/worker/src/brain_worker/document_delivery.py",
+        "engine/packages/brain-content/src/**",
+        "engine/packages/brain-jobs/src/**"
+      ]
+    }
+  },
+  "resolved_files": [
+    "engine/apps/worker/src/brain_worker/document_delivery.py",
+    "engine/packages/brain-content/src/brain_content/__init__.py",
+    "engine/packages/brain-content/src/brain_content/checkpoints.py",
+    "engine/packages/brain-content/src/brain_content/config.py",
+    "engine/packages/brain-content/src/brain_content/manifest.py",
+    "engine/packages/brain-content/src/brain_content/object_store.py",
+    "engine/packages/brain-content/src/brain_content/py.typed",
+    "engine/packages/brain-content/src/brain_content/store.py",
+    "engine/packages/brain-jobs/src/brain_jobs/__init__.py",
+    "engine/packages/brain-jobs/src/brain_jobs/py.typed",
+    "engine/packages/brain-jobs/src/brain_jobs/queue.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/__init__.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py"
+  ],
+  "summary": {
+    "direct_node_count": 1,
+    "neighbor_node_count": 0,
+    "feature_count": 3,
+    "indirect_feature_count": 0,
+    "story_count": 6,
+    "indirect_story_count": 0,
+    "policy_rule_count": 7,
+    "resolved_file_count": 16
+  }
+}

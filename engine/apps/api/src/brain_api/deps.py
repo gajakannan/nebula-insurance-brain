@@ -184,4 +184,10 @@ async def get_authorization_execution(
 
 
 def get_content_store() -> ContentArtifactStore:
+    """The async adapter shares the strict verifier with synchronous publishers.
+
+    Protected consumers resolve ArtifactKey from metadata in their authorized
+    unit of work before calling load_verified; UUID-only legacy helpers are not
+    the public read composition.
+    """
     return _content_store

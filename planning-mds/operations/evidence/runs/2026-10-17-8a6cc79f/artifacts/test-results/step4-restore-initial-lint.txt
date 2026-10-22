@@ -1,0 +1,56 @@
+E501 Line too long (101 > 100)
+  --> /app/brain/scripts/ops/verify_citations.py:72:101
+   |
+70 |             continue
+71 |         if block_id is not None:
+72 |             blocks = [json.loads(line) for line in bundle.files["blocks.jsonl"].splitlines() if line]
+   |                                                                                                     ^
+73 |             if not any(b.get("block_id") == block_id for b in blocks):
+74 |                 failures.append(
+   |
+
+E501 Line too long (101 > 100)
+  --> /app/brain/scripts/ops/verify_citations.py:80:101
+   |
+78 |                 continue
+79 |         elif page is not None:
+80 |             layout = [json.loads(line) for line in bundle.files["layout.jsonl"].splitlines() if line]
+   |                                                                                                     ^
+81 |             if not any(entry.get("page") == page for entry in layout):
+82 |                 failures.append(
+   |
+
+E501 Line too long (108 > 100)
+   --> /app/brain/scripts/ops/verify_content.py:128:101
+    |
+126 |                 if selection.previous_selection_id:
+127 |                     previous = selections[selection.previous_selection_id]
+128 |                     if not same_version(selection, previous) or previous.sequence + 1 != selection.sequence:
+    |                                                                                                     ^^^^^^^^
+129 |                         raise ValueError("invalid selection lineage")
+130 |                 elif selection.sequence != 1:
+    |
+
+E501 Line too long (110 > 100)
+   --> /app/brain/scripts/ops/verify_content.py:137:101
+    |
+135 |                 marker = parse_run_manifest(objects.read(relative))
+136 |                 bundle = bundles[marker.artifact_id]
+137 |                 expected = f"runs/{marker.tenant_id}/{marker.knowledge_base_id}/{marker.run_id}/manifest.json"
+    |                                                                                                     ^^^^^^^^^^
+138 |                 if relative != expected:
+139 |                     raise ValueError("run marker path/owner mismatch")
+    |
+
+E501 Line too long (108 > 100)
+   --> /app/brain/scripts/ops/verify_content.py:168:101
+    |
+166 |             for table in Base.metadata.sorted_tables:
+167 |                 if table.name in existing:
+168 |                     rows = sorted(canonical(dict(row)) for row in session.execute(select(table)).mappings())
+    |                                                                                                     ^^^^^^^^
+169 |                     database[table.name] = {"rows": len(rows), "sha256": digest(b"\n".join(rows))}
+170 |             revision = session.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+    |
+
+Found 8 errors (3 fixed, 5 remaining).

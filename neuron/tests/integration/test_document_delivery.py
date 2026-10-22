@@ -66,6 +66,21 @@ def bundle(tmp_path: Path) -> tuple[CheckpointStore, ArtifactManifest, dict[str,
     return CheckpointStore(objects), manifest, files
 
 
+def publication_callback(queue, store, *, register=True):
+    """Controlled lifecycle fixture; current-policy publication has separate PG proofs."""
+
+    def publish(lease, manifest, files, **_diagnostics):
+        def operation(connection):
+            retained = store.publish(manifest, files)
+            if register:
+                register_document_artifact(connection, retained)
+            return retained
+
+        return queue.publish_transaction(lease, operation)
+
+    return publish
+
+
 def test_bundle_retry_completes_partial_publication_and_verifies_hashes(tmp_path: Path) -> None:
     store, manifest, files = bundle(tmp_path)
     store.objects.create_exclusive(
@@ -194,7 +209,7 @@ def test_worker_restart_after_model_failure_reuses_bundle_and_emits_one_completi
         store=store,
         authorize_for_job=lambda lease: lambda *args: None,
         client_factory=client_factory,
-        record_artifact=register_document_artifact,
+        publish_content=publication_callback(queue, store),
         converter=convert,
     )
     assert worker.run_one()
@@ -211,7 +226,7 @@ def test_worker_restart_after_model_failure_reuses_bundle_and_emits_one_completi
         store=CheckpointStore(store.objects),
         authorize_for_job=lambda lease: lambda *args: None,
         client_factory=client_factory,
-        record_artifact=register_document_artifact,
+        publish_content=publication_callback(queue, store),
         converter=lambda path: pytest.fail("reparse"),
     )
     assert restarted.run_one()
@@ -649,7 +664,9 @@ os._exit(27)  # no finally, no completion acknowledgement, no clean worker shutd
         store=CheckpointStore(store.objects),
         authorize_for_job=lambda lease: lambda *args: None,
         client_factory=lambda _: pytest.fail("model call after published run"),
-        record_artifact=lambda _conn, _manifest: None,
+        publish_content=publication_callback(
+            DocumentJobQueue(engine, clock=lambda: 111.0), store, register=False
+        ),
         converter=lambda _: pytest.fail("conversion after published artifact"),
     )
     assert restarted.run_one()

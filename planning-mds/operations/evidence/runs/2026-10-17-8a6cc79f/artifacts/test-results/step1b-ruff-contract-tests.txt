@@ -1,0 +1,14 @@
+E731 Do not assign a `lambda` expression, use a `def`
+   --> engine/packages/brain-content/tests/test_versioned_content.py:334:13
+    |
+332 |         payload = case["payload"]
+333 |         if case["schema"] == "content-artifact-manifest-read.schema.json":
+334 |             validate = lambda p: parse_manifest(json.dumps(p).encode())
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+335 |         elif case["schema"] == "content-records-v2.schema.json":
+336 |             model = {"block": ContentBlockV2, "table": ContentTableV2, "layout": ContentLayoutV2}[
+    |
+help: Rewrite `validate` as a `def`
+
+Found 2 errors (1 fixed, 1 remaining).
+No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).

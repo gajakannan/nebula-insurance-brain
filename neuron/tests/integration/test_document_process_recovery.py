@@ -24,6 +24,7 @@ from brain_content.checkpoints import CheckpointStore
 from brain_content.config import LocalObjectStoreConfig
 from brain_content.manifest import ArtifactManifest
 from brain_content.object_store import LocalFilesystemObjectStore
+from brain_content.verified_store import VerifiedBundleStore
 from brain_domain.authx import ResourceKey, ResourceType
 from brain_domain.principal import PrincipalKind
 from brain_extraction.profiles import load_profile
@@ -40,11 +41,12 @@ from brain_persistence.models import (
     ReviewItemRow,
     SemanticInterpretationRun,
 )
+from brain_security.casbin_adapter import CasbinAuthorizationAdapter
 from brain_testing import fixtures
+from brain_worker.content_publication import AuthorizedContentPublisher
 from brain_worker.document_delivery import (
     DocumentJobAuthorization,
     DocumentResultImporter,
-    register_document_artifact,
 )
 from docling_core.types.doc import DocItemLabel, DoclingDocument
 from docling_core.types.doc.base import BoundingBox, CoordOrigin, Size
@@ -131,6 +133,14 @@ def components(
     store = CrashingStore(
         LocalFilesystemObjectStore(LocalObjectStoreConfig("filesystem", root / "objects", True))
     )
+
+    class CrashingVerifiedStore(VerifiedBundleStore):
+        def publish(self, key, manifest_bytes, files):
+            result = super().publish(key, manifest_bytes, files)
+            crash("bundle")
+            return result
+
+    store.verified = CrashingVerifiedStore(store.objects)
     queue = CrashingQueue(engine, lease_seconds=2)
     policy = ROOT / "planning-mds/security/policies"
     authorization = DocumentJobAuthorization(engine, policy / "model.conf", policy / "policy.csv")
@@ -203,7 +213,11 @@ def components(
         authorize_for_job=authorization.for_job,
         client_factory=client,
         converter=convert,
-        record_artifact=register_document_artifact,
+        publish_content=AuthorizedContentPublisher(
+            queue,
+            store.verified,
+            CasbinAuthorizationAdapter(policy / "model.conf", policy / "policy.csv"),
+        ).publish_manifest,
     )
     importer = DocumentResultImporter(engine, store, authorization.for_job)
     return worker, importer, store

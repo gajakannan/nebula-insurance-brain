@@ -1,0 +1,96 @@
+.....FFFFF                                                               [100%]
+=================================== FAILURES ===================================
+_ test_orphan_marker_is_adopted_with_exact_bytes_after_database_failure[registration] _
+tests/integration/test_content_migration_states.py:353: in test_orphan_marker_is_adopted_with_exact_bytes_after_database_failure
+    assert len(audits) == 1
+E   assert 2 == 1
+E    +  where 2 = len([<brain_persistence.models.AuditEventRow object at 0x7142ec47fd90>, <brain_persistence.models.AuditEventRow object at 0x7142ec47f230>])
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+_ test_orphan_marker_is_adopted_with_exact_bytes_after_database_failure[commit] _
+tests/integration/test_content_migration_states.py:353: in test_orphan_marker_is_adopted_with_exact_bytes_after_database_failure
+    assert len(audits) == 1
+E   assert 2 == 1
+E    +  where 2 = len([<brain_persistence.models.AuditEventRow object at 0x7142ec07a350>, <brain_persistence.models.AuditEventRow object at 0x7142ec07add0>])
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+__ test_expiry_after_marker_rolls_back_readiness_and_success_audit[authority] __
+tests/integration/test_content_migration_states.py:395: in test_expiry_after_marker_rolls_back_readiness_and_success_audit
+    assert len(audits) == 1
+E   assert 2 == 1
+E    +  where 2 = len([<brain_persistence.models.AuditEventRow object at 0x7142ebc61550>, <brain_persistence.models.AuditEventRow object at 0x7142ebc61a90>])
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+____ test_expiry_after_marker_rolls_back_readiness_and_success_audit[lease] ____
+tests/integration/test_content_migration_states.py:395: in test_expiry_after_marker_rolls_back_readiness_and_success_audit
+    assert len(audits) == 1
+E   assert 2 == 1
+E    +  where 2 = len([<brain_persistence.models.AuditEventRow object at 0x7142eb7b1fd0>, <brain_persistence.models.AuditEventRow object at 0x7142eb7b0c90>])
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+________________ test_current_denial_prevents_all_object_writes ________________
+tests/integration/test_content_migration_states.py:406: in test_current_denial_prevents_all_object_writes
+    assert publisher.store.objects.list_keys(bundle.key.prefix) == []
+E   assert () == []
+E     
+E     Use -v to get more diff
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+=============================== warnings summary ===============================
+tests/integration/test_content_migration_states.py: 16 warnings
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_content_migration_states.py::test_orphan_marker_is_adopted_with_exact_bytes_after_database_failure[registration]
+FAILED tests/integration/test_content_migration_states.py::test_orphan_marker_is_adopted_with_exact_bytes_after_database_failure[commit]
+FAILED tests/integration/test_content_migration_states.py::test_expiry_after_marker_rolls_back_readiness_and_success_audit[authority]
+FAILED tests/integration/test_content_migration_states.py::test_expiry_after_marker_rolls_back_readiness_and_success_audit[lease]
+FAILED tests/integration/test_content_migration_states.py::test_current_denial_prevents_all_object_writes
+5 failed, 5 passed, 16 warnings in 5.44s
