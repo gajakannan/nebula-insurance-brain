@@ -363,7 +363,8 @@ def test_every_record_and_manifest_example_matches_its_runtime_model():
     product = next(p for p in Path(__file__).parents if (p / "planning-mds").is_dir())
     examples = json.loads(
         (
-            product / "planning-mds/features/F0004-content-artifact-model/contract-examples.json"
+            product
+            / "planning-mds/features/archive/F0004-content-artifact-model/contract-examples.json"
         ).read_text()
     )
     for case in examples["cases"]:

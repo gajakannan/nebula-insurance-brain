@@ -24,6 +24,8 @@ ADR-0073 Proposed. No deployment or commit/merge occurred.
 [G4 approval request](g4-approval-request.md); [signoffs](signoff-ledger.md);
 [graph reconciliation](kg-reconciliation.md); [PM closeout](pm-closeout.md).
 Raw logs and coverage live under artifacts/test-results and artifacts/coverage.
+The [PR #27 CI follow-up](ci-followup.md) records the archived fixture correction
+and PostgreSQL persistence/restore coverage lane verification.
 
 ## Validation Summary
 

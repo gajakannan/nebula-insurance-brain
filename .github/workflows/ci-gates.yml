@@ -76,11 +76,6 @@ jobs:
       - name: engine/ — pytest brain_content coverage gate (>=80%)
         working-directory: engine
         run: uv run pytest packages/brain-content/tests --cov=brain_content --cov-fail-under=80
-      - name: engine/ — pytest brain_persistence coverage gate (>=80%)
-        working-directory: engine
-        run: >
-          uv run pytest packages/brain-persistence/tests --cov=brain_persistence
-          --cov-fail-under=80
       - name: engine/ — pytest brain_domain coverage gate (>=80%)
         working-directory: engine
         run: uv run pytest packages/brain-domain/tests --cov=brain_domain --cov-fail-under=80
@@ -169,6 +164,20 @@ jobs:
         env:
           BRAIN_TEST_POSTGRES_URL: postgresql+psycopg://brain:brain@localhost:5432/brain
         run: engine/.venv/bin/python -m pytest engine/packages/brain-jobs/tests/test_postgres.py -q
+      # The persistence gate includes real F0004 migrations/date concurrency and
+      # isolated DB+bytes restore, so it belongs with PostgreSQL and Docker.
+      - name: Prove F0004 persistence and restore (>=80% persistence coverage)
+        timeout-minutes: 5
+        working-directory: engine
+        env:
+          BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@localhost:5432/brain
+        run: >
+          .venv/bin/python -m pytest
+          packages/brain-persistence/tests
+          tests/integration/test_content_migration_states.py
+          tests/integration/test_content_restore_v2.py
+          --cov=brain_persistence --cov-fail-under=80
+          --cov-report=term-missing --cov-report=xml:coverage/persistence.xml -q
       - name: Install the locked neuron dependencies for delivery recovery
         run: uv sync --locked --project neuron
       - name: Prove worker and importer recovery against PostgreSQL

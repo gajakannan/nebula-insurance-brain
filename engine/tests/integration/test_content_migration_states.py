@@ -75,7 +75,9 @@ def _clean_fact_tables():
 
 @pytest.fixture
 def database(monkeypatch):
-    admin_url = os.environ["BRAIN_MIGRATION_ADMIN_URL"]
+    admin_url = os.environ.get("BRAIN_MIGRATION_ADMIN_URL")
+    if not admin_url:
+        pytest.skip("Set BRAIN_MIGRATION_ADMIN_URL for owned PostgreSQL migration/restore tests")
     name = f"f0004_8a6cc79f_migration_{uuid4().hex[:12]}"
     with psycopg.connect(admin_url, autocommit=True) as connection:
         connection.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
