@@ -1,12 +1,12 @@
 version: 0
-generated_at: '2026-10-22T02:19:54+00:00'
+generated_at: '2026-10-22T02:27:19+00:00'
 summary:
-  total_symbols: 985
+  total_symbols: 986
   by_language:
     python:
       files: 119
-      parsed: 2
-      cached: 117
+      parsed: 5
+      cached: 114
     typescript:
       files: 8
       parsed: 0
@@ -8330,12 +8330,12 @@ symbols:
   kind: function
   name: test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr
   file: neuron/tests/integration/test_content_consumer_versions.py
-  line: 32
-  signature: def test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr(tmp_path,
-    content_version)
+  line: 34
+  signature: 'def test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr(tmp_path:
+    Path, content_version: Literal[1, 2])'
   visibility: public
   language: python
-  end_line: 190
+  end_line: 197
   is_test: true
   callers: []
   callees:
@@ -8357,11 +8357,11 @@ symbols:
   kind: function
   name: client_factory
   file: neuron/tests/integration/test_content_worker_v2.py
-  line: 87
-  signature: def client_factory(calls)
+  line: 107
+  signature: 'def client_factory(calls: list[httpx.Request])'
   visibility: public
   language: python
-  end_line: 131
+  end_line: 151
   is_test: true
   callers:
   - symbol:capability-parse-once-content-artifact:content-workflow.load-or-convert-content
@@ -8375,11 +8375,11 @@ symbols:
   kind: function
   name: components
   file: neuron/tests/integration/test_content_worker_v2.py
-  line: 55
-  signature: def components(database, tmp_path)
+  line: 60
+  signature: 'def components(database: tuple[Engine, str], tmp_path: Path)'
   visibility: public
   language: python
-  end_line: 84
+  end_line: 104
   is_test: true
   callers:
   - symbol:capability-parse-once-content-artifact:test-content-worker-v2.test-concurrent-profiles-share-pending-identity-and-preserve-restrictions
@@ -8399,11 +8399,11 @@ symbols:
   kind: function
   name: native
   file: neuron/tests/integration/test_content_worker_v2.py
-  line: 44
-  signature: def native(tmp_path_factory)
+  line: 49
+  signature: 'def native(tmp_path_factory: pytest.TempPathFactory)'
   visibility: public
   language: python
-  end_line: 52
+  end_line: 57
   is_test: true
   callers: []
   callees:
@@ -8414,12 +8414,12 @@ symbols:
   kind: function
   name: test_concurrent_profiles_share_pending_identity_and_preserve_restrictions
   file: neuron/tests/integration/test_content_worker_v2.py
-  line: 214
-  signature: def test_concurrent_profiles_share_pending_identity_and_preserve_restrictions(database,
-    tmp_path, native)
+  line: 240
+  signature: 'def test_concurrent_profiles_share_pending_identity_and_preserve_restrictions(database:
+    tuple[Engine, str], tmp_path: Path, native: tuple[Path, ParseResult[DoclingDocument]])'
   visibility: public
   language: python
-  end_line: 237
+  end_line: 265
   is_test: true
   callers: []
   callees:
@@ -8431,12 +8431,12 @@ symbols:
   kind: function
   name: test_corrupt_accepted_marker_never_becomes_conversion_miss
   file: neuron/tests/integration/test_content_worker_v2.py
-  line: 268
-  signature: def test_corrupt_accepted_marker_never_becomes_conversion_miss(database,
-    tmp_path, native)
+  line: 299
+  signature: 'def test_corrupt_accepted_marker_never_becomes_conversion_miss(database:
+    tuple[Engine, str], tmp_path: Path, native: tuple[Path, ParseResult[DoclingDocument]])'
   visibility: public
   language: python
-  end_line: 292
+  end_line: 325
   is_test: true
   callers: []
   callees:
@@ -8452,12 +8452,12 @@ symbols:
   kind: function
   name: test_missing_producer_is_hard_failure_without_ready_or_fallback
   file: neuron/tests/integration/test_content_worker_v2.py
-  line: 240
-  signature: def test_missing_producer_is_hard_failure_without_ready_or_fallback(database,
-    tmp_path, native)
+  line: 268
+  signature: 'def test_missing_producer_is_hard_failure_without_ready_or_fallback(database:
+    tuple[Engine, str], tmp_path: Path, native: tuple[Path, ParseResult[DoclingDocument]])'
   visibility: public
   language: python
-  end_line: 265
+  end_line: 296
   is_test: true
   callers: []
   callees:
@@ -8473,12 +8473,13 @@ symbols:
   kind: function
   name: test_publication_import_and_second_profile_reuse
   file: neuron/tests/integration/test_content_worker_v2.py
-  line: 135
-  signature: def test_publication_import_and_second_profile_reuse(database, tmp_path,
-    native, fallback)
+  line: 155
+  signature: 'def test_publication_import_and_second_profile_reuse(database: tuple[Engine,
+    str], tmp_path: Path, native: tuple[Path, ParseResult[DoclingDocument]], fallback:
+    bool)'
   visibility: public
   language: python
-  end_line: 211
+  end_line: 237
   is_test: true
   callers: []
   callees:
@@ -8568,11 +8569,11 @@ symbols:
   kind: function
   name: bundle
   file: neuron/tests/integration/test_document_delivery.py
-  line: 49
+  line: 51
   signature: 'def bundle(tmp_path: Path)'
   visibility: public
   language: python
-  end_line: 66
+  end_line: 68
   is_test: true
   callers:
   - symbol:capability-parse-once-content-artifact:test-document-delivery.test-bundle-retry-completes-partial-publication-and-verifies-hashes
@@ -8591,11 +8592,11 @@ symbols:
   kind: function
   name: document
   file: neuron/tests/integration/test_document_delivery.py
-  line: 30
+  line: 32
   signature: def document()
   visibility: public
   language: python
-  end_line: 46
+  end_line: 48
   is_test: true
   callers:
   - symbol:capability-parse-once-content-artifact:test-document-delivery.bundle
@@ -8611,11 +8612,11 @@ symbols:
   kind: function
   name: _engine_schema
   file: neuron/tests/integration/test_document_delivery.py
-  line: 321
+  line: 327
   signature: 'def _engine_schema(engine: Engine)'
   visibility: private
   language: python
-  end_line: 329
+  end_line: 335
   is_test: true
   callers:
   - symbol:capability-parse-once-content-artifact:test-document-delivery.test-job-authorization-reloads-revocations-and-audits-denials
@@ -8627,11 +8628,12 @@ symbols:
   kind: function
   name: publication_callback
   file: neuron/tests/integration/test_document_delivery.py
-  line: 69
-  signature: def publication_callback(queue, store, *, register=True)
+  line: 71
+  signature: 'def publication_callback(queue: DocumentJobQueue, store: CheckpointStore,
+    *, register: bool=True)'
   visibility: public
   language: python
-  end_line: 81
+  end_line: 87
   is_test: true
   callers:
   - symbol:capability-parse-once-content-artifact:test-document-delivery.test-process-exit-after-publication-recovers-without-conversion-or-model
@@ -8648,12 +8650,12 @@ symbols:
   kind: function
   name: test_bundle_retry_completes_partial_publication_and_verifies_hashes
   file: neuron/tests/integration/test_document_delivery.py
-  line: 84
+  line: 90
   signature: 'def test_bundle_retry_completes_partial_publication_and_verifies_hashes(tmp_path:
     Path)'
   visibility: public
   language: python
-  end_line: 99
+  end_line: 105
   is_test: true
   callers: []
   callees:
@@ -8670,11 +8672,11 @@ symbols:
   kind: function
   name: test_each_property_gets_its_own_native_selector
   file: neuron/tests/integration/test_document_delivery.py
-  line: 103
+  line: 109
   signature: 'def test_each_property_gets_its_own_native_selector(value: str)'
   visibility: public
   language: python
-  end_line: 109
+  end_line: 115
   is_test: true
   callers: []
   callees:
@@ -8684,12 +8686,12 @@ symbols:
   kind: function
   name: test_job_authorization_reloads_revocations_and_audits_denials
   file: neuron/tests/integration/test_document_delivery.py
-  line: 332
+  line: 338
   signature: 'def test_job_authorization_reloads_revocations_and_audits_denials(tmp_path:
     Path)'
   visibility: public
   language: python
-  end_line: 397
+  end_line: 403
   is_test: true
   callers: []
   callees:
@@ -8702,11 +8704,11 @@ symbols:
   kind: function
   name: test_node_anchor_does_not_ground_missing_or_ambiguous_properties
   file: neuron/tests/integration/test_document_delivery.py
-  line: 112
+  line: 118
   signature: def test_node_anchor_does_not_ground_missing_or_ambiguous_properties()
   visibility: public
   language: python
-  end_line: 122
+  end_line: 128
   is_test: true
   callers: []
   callees:
@@ -8716,12 +8718,12 @@ symbols:
   kind: function
   name: test_outbox_import_is_atomic_idempotent_and_never_commits_facts
   file: neuron/tests/integration/test_document_delivery.py
-  line: 401
+  line: 407
   signature: 'def test_outbox_import_is_atomic_idempotent_and_never_commits_facts(tmp_path:
     Path, multiple_regions: bool)'
   visibility: public
   language: python
-  end_line: 559
+  end_line: 565
   is_test: true
   callers: []
   callees:
@@ -8744,12 +8746,12 @@ symbols:
   kind: function
   name: test_process_exit_after_publication_recovers_without_conversion_or_model
   file: neuron/tests/integration/test_document_delivery.py
-  line: 562
+  line: 568
   signature: 'def test_process_exit_after_publication_recovers_without_conversion_or_model(tmp_path:
     Path)'
   visibility: public
   language: python
-  end_line: 676
+  end_line: 682
   is_test: true
   callers: []
   callees:
@@ -8767,11 +8769,11 @@ symbols:
   kind: function
   name: test_relationship_object_is_not_grounded_by_a_node_anchor
   file: neuron/tests/integration/test_document_delivery.py
-  line: 707
+  line: 713
   signature: def test_relationship_object_is_not_grounded_by_a_node_anchor()
   visibility: public
   language: python
-  end_line: 715
+  end_line: 721
   is_test: true
   callers: []
   callees:
@@ -8781,11 +8783,11 @@ symbols:
   kind: function
   name: test_run_missing_file_is_corruption_not_a_cache_miss
   file: neuron/tests/integration/test_document_delivery.py
-  line: 244
+  line: 250
   signature: 'def test_run_missing_file_is_corruption_not_a_cache_miss(tmp_path: Path)'
   visibility: public
   language: python
-  end_line: 267
+  end_line: 273
   is_test: true
   callers: []
   callees:
@@ -8803,11 +8805,11 @@ symbols:
   kind: function
   name: test_table_geometry_and_ambiguous_unlocated_cells
   file: neuron/tests/integration/test_document_delivery.py
-  line: 270
+  line: 276
   signature: def test_table_geometry_and_ambiguous_unlocated_cells()
   visibility: public
   language: python
-  end_line: 318
+  end_line: 324
   is_test: true
   callers: []
   callees:
@@ -8817,11 +8819,11 @@ symbols:
   kind: function
   name: test_value_crossing_regions_keeps_separate_complete_selectors
   file: neuron/tests/integration/test_document_delivery.py
-  line: 679
+  line: 685
   signature: def test_value_crossing_regions_keeps_separate_complete_selectors()
   visibility: public
   language: python
-  end_line: 704
+  end_line: 710
   is_test: true
   callers: []
   callees:
@@ -8831,12 +8833,12 @@ symbols:
   kind: function
   name: test_worker_restart_after_model_failure_reuses_bundle_and_emits_one_completion
   file: neuron/tests/integration/test_document_delivery.py
-  line: 125
+  line: 131
   signature: 'def test_worker_restart_after_model_failure_reuses_bundle_and_emits_one_completion(tmp_path:
     Path)'
   visibility: public
   language: python
-  end_line: 241
+  end_line: 247
   is_test: true
   callers: []
   callees:
@@ -8859,11 +8861,11 @@ symbols:
   kind: function
   name: child_main
   file: neuron/tests/integration/test_document_process_recovery.py
-  line: 315
+  line: 316
   signature: def child_main()
   visibility: public
   language: python
-  end_line: 337
+  end_line: 338
   is_test: true
   callers: []
   callees:
@@ -8877,11 +8879,11 @@ symbols:
   kind: function
   name: components
   file: neuron/tests/integration/test_document_process_recovery.py
-  line: 104
+  line: 105
   signature: 'def components(engine: Engine, root: Path, crash_at: str | None=None)'
   visibility: public
   language: python
-  end_line: 223
+  end_line: 224
   is_test: true
   callers:
   - symbol:capability-parse-once-content-artifact:test-content-worker-v2.test-concurrent-profiles-share-pending-identity-and-preserve-restrictions
@@ -8909,11 +8911,11 @@ symbols:
   kind: function
   name: database
   file: neuron/tests/integration/test_document_process_recovery.py
-  line: 62
+  line: 63
   signature: 'def database(url: str, schema: str | None)'
   visibility: public
   language: python
-  end_line: 66
+  end_line: 67
   is_test: true
   callers:
   - symbol:capability-parse-once-content-artifact:test-document-process-recovery.child-main
@@ -8924,11 +8926,11 @@ symbols:
   kind: function
   name: recovery_database
   file: neuron/tests/integration/test_document_process_recovery.py
-  line: 70
+  line: 71
   signature: 'def recovery_database(request: pytest.FixtureRequest, tmp_path: Path)'
   visibility: public
   language: python
-  end_line: 101
+  end_line: 102
   is_test: true
   callers: []
   callees:
@@ -8938,12 +8940,12 @@ symbols:
   kind: function
   name: test_process_recovery_delivers_one_reviewed_assertion
   file: neuron/tests/integration/test_document_process_recovery.py
-  line: 227
+  line: 228
   signature: 'def test_process_recovery_delivers_one_reviewed_assertion(recovery_database:
     tuple[Engine, str, str | None], tmp_path: Path, crash_at: str)'
   visibility: public
   language: python
-  end_line: 312
+  end_line: 313
   is_test: true
   callers: []
   callees:
@@ -10469,12 +10471,12 @@ symbols:
   kind: method
   name: get_manifest
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 89
+  line: 93
   signature: 'async def get_manifest(self, artifact_id: UUID)'
   visibility: public
   language: python
   container: BundleReader
-  end_line: 91
+  end_line: 95
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:bundle-reader.init
@@ -10482,27 +10484,41 @@ symbols:
   kind: method
   name: __init__
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 86
+  line: 87
   signature: 'def __init__(self, manifest: ArtifactManifest, files: dict[str, bytes])'
   visibility: private
   language: python
   container: BundleReader
-  end_line: 87
+  end_line: 88
   callers:
   - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
   - symbol:capability-semantic-interpretation-run:inference-rejected.init
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:bundle-reader.load-verified
+  node: capability:semantic-interpretation-run
+  kind: method
+  name: load_verified
+  file: neuron/benchmarks/docling_graph_comparison.py
+  line: 90
+  signature: 'async def load_verified(self, key: ArtifactKey)'
+  visibility: public
+  language: python
+  container: BundleReader
+  end_line: 91
+  callers:
+  - symbol:capability-semantic-interpretation-run:graph-interpretation-service.interpret
   callees: []
 - id: symbol:capability-semantic-interpretation-run:bundle-reader.open-file
   node: capability:semantic-interpretation-run
   kind: method
   name: open_file
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 93
+  line: 97
   signature: 'async def open_file(self, artifact_id: UUID, path: str)'
   visibility: public
   language: python
   container: BundleReader
-  end_line: 95
+  end_line: 99
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:bundle-reader.put-bundle
@@ -10510,12 +10526,12 @@ symbols:
   kind: method
   name: put_bundle
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 97
+  line: 101
   signature: 'async def put_bundle(self, manifest: ArtifactManifest, files: Any)'
   visibility: public
   language: python
   container: BundleReader
-  end_line: 98
+  end_line: 102
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:context-guard.check
@@ -10710,11 +10726,11 @@ symbols:
   kind: class
   name: BundleReader
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 83
+  line: 84
   signature: class BundleReader
   visibility: public
   language: python
-  end_line: 98
+  end_line: 102
   callers:
   - symbol:capability-semantic-interpretation-run:docling-graph-comparison.run-comparison
   callees: []
@@ -10723,11 +10739,11 @@ symbols:
   kind: function
   name: fixture
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 43
+  line: 44
   signature: 'def fixture(kind: str)'
   visibility: public
   language: python
-  end_line: 80
+  end_line: 81
   callers:
   - symbol:capability-semantic-interpretation-run:docling-graph-comparison.run-comparison
   callees:
@@ -10737,11 +10753,11 @@ symbols:
   kind: function
   name: main
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 344
+  line: 348
   signature: def main()
   visibility: public
   language: python
-  end_line: 358
+  end_line: 362
   callers: []
   callees:
   - symbol:capability-semantic-interpretation-run:docling-graph-comparison.run-comparison
@@ -10750,11 +10766,11 @@ symbols:
   kind: class
   name: RecordedTransport
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 101
+  line: 105
   signature: class RecordedTransport
   visibility: public
   language: python
-  end_line: 151
+  end_line: 155
   callers:
   - symbol:capability-semantic-interpretation-run:docling-graph-comparison.run-comparison
   callees: []
@@ -10763,11 +10779,11 @@ symbols:
   kind: function
   name: run_comparison
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 184
+  line: 188
   signature: 'def run_comparison(root: Path)'
   visibility: public
   language: python
-  end_line: 341
+  end_line: 345
   callers:
   - symbol:capability-semantic-interpretation-run:docling-graph-comparison.main
   callees:
@@ -10789,12 +10805,12 @@ symbols:
   kind: function
   name: score
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 154
+  line: 158
   signature: 'def score(result: InterpretationResult, expected: list[tuple[int, int,
     int]])'
   visibility: public
   language: python
-  end_line: 181
+  end_line: 185
   callers:
   - symbol:capability-semantic-interpretation-run:docling-graph-comparison.run-comparison
   callees: []
@@ -10947,6 +10963,7 @@ symbols:
   callers:
   - symbol:capability-semantic-interpretation-run:docling-graph-comparison.run-comparison
   callees:
+  - symbol:capability-semantic-interpretation-run:bundle-reader.load-verified
   - symbol:capability-semantic-interpretation-run:docling-graph-pipeline-adapter.run
   - symbol:capability-semantic-interpretation-run:docling-graph-pipeline.docling-graph-pipeline-adapter
   - symbol:capability-semantic-interpretation-run:graph-evidence.ground-value
@@ -11150,12 +11167,12 @@ symbols:
   kind: method
   name: http_client
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 150
+  line: 154
   signature: def http_client(self)
   visibility: public
   language: python
   container: RecordedTransport
-  end_line: 151
+  end_line: 155
   callers:
   - symbol:capability-semantic-interpretation-run:docling-graph-comparison.run-comparison
   callees: []
@@ -11164,12 +11181,12 @@ symbols:
   kind: method
   name: __init__
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 102
+  line: 106
   signature: def __init__(self)
   visibility: private
   language: python
   container: RecordedTransport
-  end_line: 104
+  end_line: 108
   callers:
   - symbol:capability-semantic-interpretation-run:context-limit-exceeded.init
   - symbol:capability-semantic-interpretation-run:inference-rejected.init
@@ -11179,12 +11196,12 @@ symbols:
   kind: method
   name: respond
   file: neuron/benchmarks/docling_graph_comparison.py
-  line: 106
+  line: 110
   signature: 'def respond(self, request: httpx.Request)'
   visibility: public
   language: python
   container: RecordedTransport
-  end_line: 148
+  end_line: 152
   callers: []
   callees: []
 - id: symbol:capability-semantic-interpretation-run:result.bounding-box

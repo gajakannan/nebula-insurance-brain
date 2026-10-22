@@ -25,6 +25,7 @@ from brain_content.checkpoints import CheckpointStore
 from brain_content.config import LocalObjectStoreConfig
 from brain_content.manifest import ArtifactManifest
 from brain_content.object_store import LocalFilesystemObjectStore
+from brain_content.validation import ArtifactKey, VerifiedBundle, verify_bundle
 from brain_extraction.graph_interpretation import GraphInterpretationService
 from brain_extraction.openai_compatible_adapter import OpenAICompatibleExtractionAdapter
 from brain_extraction.profiles import load_profile
@@ -85,6 +86,9 @@ class BundleReader:
 
     def __init__(self, manifest: ArtifactManifest, files: dict[str, bytes]) -> None:
         self.manifest, self.files = manifest, files
+
+    async def load_verified(self, key: ArtifactKey) -> VerifiedBundle:
+        return verify_bundle(key, self.manifest.model_dump_json().encode(), self.files)
 
     async def get_manifest(self, artifact_id: UUID) -> ArtifactManifest:
         assert artifact_id == self.manifest.artifact_id

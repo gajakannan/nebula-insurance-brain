@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import json
 import runpy
+from functools import partial
 from pathlib import Path
 from threading import BoundedSemaphore, Event
+from typing import Literal
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -29,7 +31,9 @@ from rapidocr import RapidOCR
 
 
 @pytest.mark.parametrize("content_version", [1, 2])
-def test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr(tmp_path, content_version):
+def test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr(
+    tmp_path: Path, content_version: Literal[1, 2]
+) -> None:
     helpers = runpy.run_path(str(Path(__file__).parent / "test_document_delivery.py"))
     store, manifest, files = helpers["bundle"](tmp_path)
     if content_version == 2:
@@ -102,7 +106,9 @@ def test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr(tmp_pat
     ):
         for profile_id, values in cases:
 
-            def response(request, values=values):
+            def response(
+                request: httpx.Request, values: dict[str, str | None] = values
+            ) -> httpx.Response:
                 calls.append(request)
                 return httpx.Response(
                     200,
@@ -139,7 +145,8 @@ def test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr(tmp_pat
             try:
                 reopened = CheckpointStore(store.objects)
                 service = GraphInterpretationService(reopened, lambda *_: None)
-                args = dict(
+                interpret = partial(
+                    service.interpret,
                     tenant_id=key.tenant_id,
                     knowledge_base_id=key.knowledge_base_id,
                     artifact_id=key.artifact_id,
@@ -149,7 +156,7 @@ def test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr(tmp_pat
                     client=client,
                     output_contract_version=2,
                 )
-                result = service.interpret(**args)
+                result = interpret()
                 # The actual pinned direct-mode ledger omits native refs. This
                 # existing Graph limitation stays explicit in both versions.
                 assert result.status == "partial" and result.assertions
@@ -170,7 +177,7 @@ def test_two_profiles_and_restart_use_saved_native_without_parser_or_ocr(tmp_pat
                 assert locator.precision == "exact-span"
                 assert locator.selector[0]["type"] == "nebula:BoxSelector"
                 before = len(calls)
-                assert service.interpret(**args) == result
+                assert interpret() == result
                 assert len(calls) == before
                 outputs = reopened.load_run_bundle(
                     tenant_id=key.tenant_id,

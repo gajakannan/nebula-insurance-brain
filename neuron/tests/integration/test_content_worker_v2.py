@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import json
 import runpy
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
 from threading import Barrier, BoundedSemaphore, Event
 from unittest.mock import patch
+from uuid import UUID
 
 import httpx
 import pytest
@@ -22,6 +24,7 @@ from brain_extraction.vllm_graph_client import VllmGraphClient
 from brain_ingestion.docling_adapter import DoclingAdapter
 from brain_ingestion.document_worker import DocumentWorker
 from brain_ingestion.submission import enqueue_document
+from brain_interpretation.parsed_content import ParseResult
 from brain_jobs.queue import DocumentJobQueue, jobs
 from brain_persistence.content_models import content_block
 from brain_persistence.models import AuditEventRow, ContentArtifact, SemanticInterpretationRun
@@ -30,9 +33,11 @@ from brain_worker.content_access import SourceContentAccess
 from brain_worker.content_publication import AuthorizedContentPublisher
 from brain_worker.document_delivery import DocumentJobAuthorization, DocumentResultImporter
 from docling.document_converter import DocumentConverter
+from docling_core.types.doc import DoclingDocument
 from docling_graph.exceptions import PipelineError
 from rapidocr import RapidOCR
 from sqlalchemy import func, select
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 _enqueue_helpers = runpy.run_path(str(Path(__file__).with_name("test_worker_cli_enqueue.py")))
@@ -41,7 +46,7 @@ database, _seed = _enqueue_helpers["database"], _enqueue_helpers["_seed"]
 
 
 @pytest.fixture(scope="module")
-def native(tmp_path_factory):
+def native(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, ParseResult[DoclingDocument]]:
     folder = tmp_path_factory.mktemp("native-receipts")
     helpers = runpy.run_path(
         str(ROOT / "neuron/packages/brain-ingestion/tests/spikes/test_item_provenance.py")
@@ -52,7 +57,17 @@ def native(tmp_path_factory):
     return path, parsed
 
 
-def components(database, tmp_path):
+def components(
+    database: tuple[Engine, str], tmp_path: Path
+) -> tuple[
+    Engine,
+    DocumentJobQueue,
+    CheckpointStore,
+    DocumentJobAuthorization,
+    SourceContentAccess,
+    AuthorizedContentPublisher,
+    Callable[..., UUID],
+]:
     engine, _ = database
     tenant, kb, actor = _seed(engine)
     queue = DocumentJobQueue(engine, lease_seconds=30)
@@ -61,10 +76,15 @@ def components(database, tmp_path):
     )
     policy = CasbinAuthorizationAdapter(POLICY / "model.conf", POLICY / "policy.csv")
     authorization = DocumentJobAuthorization(engine, POLICY / "model.conf", POLICY / "policy.csv")
-    access = SourceContentAccess(engine, store, policy)
+    access = SourceContentAccess(engine, store.verified, policy)
     publisher = AuthorizedContentPublisher(queue, store.verified, policy, objects=store.objects)
 
-    def enqueue(path, profile="gl-limits-a", enabled=True, classifications=None):
+    def enqueue(
+        path: Path,
+        profile: str = "gl-limits-a",
+        enabled: bool = True,
+        classifications: list[str] | None = None,
+    ) -> UUID:
         return enqueue_document(
             engine,
             queue,
@@ -84,9 +104,9 @@ def components(database, tmp_path):
     return engine, queue, store, authorization, access, publisher, enqueue
 
 
-def client_factory(calls):
-    def factory(cancelled):
-        def response(request):
+def client_factory(calls: list[httpx.Request]) -> Callable[[Event], VllmGraphClient]:
+    def factory(cancelled: Event) -> VllmGraphClient:
+        def response(request: httpx.Request) -> httpx.Response:
             calls.append(request)
             return httpx.Response(
                 200,
@@ -132,7 +152,12 @@ def client_factory(calls):
 
 
 @pytest.mark.parametrize("fallback", [False, True])
-def test_publication_import_and_second_profile_reuse(database, tmp_path, native, fallback):
+def test_publication_import_and_second_profile_reuse(
+    database: tuple[Engine, str],
+    tmp_path: Path,
+    native: tuple[Path, ParseResult[DoclingDocument]],
+    fallback: bool,
+) -> None:
     engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
     path, parsed = native
     if fallback:
@@ -140,9 +165,10 @@ def test_publication_import_and_second_profile_reuse(database, tmp_path, native,
     job = enqueue(path)
     lease = queue.claim()
     assert lease is not None and lease.job_id == job
-    calls, conversions = [], []
+    calls: list[httpx.Request] = []
+    conversions: list[Path] = []
 
-    def convert(_path):
+    def convert(_path: Path) -> ParseResult[DoclingDocument]:
         conversions.append(_path)
         return parsed
 
@@ -165,13 +191,12 @@ def test_publication_import_and_second_profile_reuse(database, tmp_path, native,
         published = session.scalars(
             select(AuditEventRow).where(AuditEventRow.event_type == "content_artifact_published")
         ).one()
+        assert published.payload is not None
         assert published.payload["unattributed_item_count"] == (2 if fallback else 0)
         assert session.scalar(select(func.count()).select_from(content_block)) == (
             0 if fallback else 2
         )
-        key = ArtifactKey(
-            row.id, row.tenant_id, row.knowledge_base_id, row.artifact_contract_version
-        )
+        key = ArtifactKey(row.id, row.tenant_id, row.knowledge_base_id, 1 if fallback else 2)
         if fallback:
             assert key == fallback_key(
                 row.document_version_id, row.tenant_id, row.knowledge_base_id
@@ -203,6 +228,7 @@ def test_publication_import_and_second_profile_reuse(database, tmp_path, native,
         assert session.scalar(select(func.count()).select_from(ContentArtifact)) == 1
         assert session.scalar(select(func.count()).select_from(SemanticInterpretationRun)) == 2
         result_ref = session.scalar(select(jobs.c.result_ref).where(jobs.c.id == str(second_job)))
+        assert result_ref is not None
         marker = store.objects.read(result_ref)
         assert json.loads(marker)["artifact_id"] == str(key.artifact_id)
         assert isinstance(RunManifestV2.model_validate_json(marker), RunManifestV2)
@@ -212,13 +238,15 @@ def test_publication_import_and_second_profile_reuse(database, tmp_path, native,
 
 
 def test_concurrent_profiles_share_pending_identity_and_preserve_restrictions(
-    database, tmp_path, native
-):
+    database: tuple[Engine, str],
+    tmp_path: Path,
+    native: tuple[Path, ParseResult[DoclingDocument]],
+) -> None:
     engine, _, _, _, _, _, enqueue = components(database, tmp_path)
     path, _ = native
     barrier = Barrier(2)
 
-    def submit(profile):
+    def submit(profile: str) -> UUID:
         barrier.wait(timeout=10)
         return enqueue(path, profile=profile)
 
@@ -237,11 +265,14 @@ def test_concurrent_profiles_share_pending_identity_and_preserve_restrictions(
         assert session.scalar(select(func.count()).select_from(jobs)) == 2
 
 
-def test_missing_producer_is_hard_failure_without_ready_or_fallback(database, tmp_path, native):
+def test_missing_producer_is_hard_failure_without_ready_or_fallback(
+    database: tuple[Engine, str], tmp_path: Path, native: tuple[Path, ParseResult[DoclingDocument]]
+) -> None:
     engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
     path, parsed = native
     bad = {
-        ref: tuple(replace(origin, producer=None) for origin in origins)
+        # Deliberately violate the producer contract to exercise rejection.
+        ref: tuple(replace(origin, producer=None) for origin in origins)  # type: ignore[arg-type]
         for ref, origins in parsed.provenance.items()
     }
     enqueue(path)
@@ -265,7 +296,9 @@ def test_missing_producer_is_hard_failure_without_ready_or_fallback(database, tm
     assert not list((tmp_path / "objects").glob("**/manifest.json"))
 
 
-def test_corrupt_accepted_marker_never_becomes_conversion_miss(database, tmp_path, native):
+def test_corrupt_accepted_marker_never_becomes_conversion_miss(
+    database: tuple[Engine, str], tmp_path: Path, native: tuple[Path, ParseResult[DoclingDocument]]
+) -> None:
     engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
     path, parsed = native
     enqueue(path)

@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from threading import BoundedSemaphore, Event
+from typing import Any
 from uuid import uuid4
 
 import httpx
@@ -18,13 +20,13 @@ from brain_extraction.vllm_graph_client import VllmGraphClient
 from brain_ingestion.bundle_writer import build_bundle
 from brain_ingestion.document_worker import DocumentTask, DocumentWorker
 from brain_interpretation.parsed_content import ParseResult
-from brain_jobs.queue import DocumentJobQueue, jobs, metadata, outbox
+from brain_jobs.queue import DocumentJobQueue, JobLease, jobs, metadata, outbox
 from brain_worker.document_delivery import register_document_artifact
 from docling_core.types.doc import DocItemLabel, DoclingDocument
 from docling_core.types.doc.base import BoundingBox, CoordOrigin, Size
 from docling_core.types.doc.document import ProvenanceItem
 from sqlalchemy import create_engine, select
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Connection, Engine
 
 
 def document() -> DoclingDocument:
@@ -66,11 +68,15 @@ def bundle(tmp_path: Path) -> tuple[CheckpointStore, ArtifactManifest, dict[str,
     return CheckpointStore(objects), manifest, files
 
 
-def publication_callback(queue, store, *, register=True):
+def publication_callback(
+    queue: DocumentJobQueue, store: CheckpointStore, *, register: bool = True
+) -> Callable[..., ArtifactManifest]:
     """Controlled lifecycle fixture; current-policy publication has separate PG proofs."""
 
-    def publish(lease, manifest, files, **_diagnostics):
-        def operation(connection):
+    def publish(
+        lease: JobLease, manifest: ArtifactManifest, files: Mapping[str, bytes], **_diagnostics: Any
+    ) -> ArtifactManifest:
+        def operation(connection: Connection) -> ArtifactManifest:
             retained = store.publish(manifest, files)
             if register:
                 register_document_artifact(connection, retained)

@@ -14,3 +14,24 @@ Validation ran in the existing run-scoped application containers:
 - Ruff lint and format checks passed for the two changed test files; workflow YAML parsed successfully.
 
 These checks supplement the approved implementation evidence. Runtime implementation and activation settings are unchanged.
+
+## Neuron type-check follow-up
+
+[Run 39710872526](https://github.com/gajakannan/nebula-insurance-brain/actions/runs/39710872526)
+passed product, framework, experience, graph reproducibility and runtime-stack,
+including the relocated F0004 persistence/restore gate. The generic runtime job
+then reached neuron mypy and exposed 21 errors in test and benchmark helpers.
+
+The benchmark reader now implements the verified-read protocol using the actual
+bundle verifier. Crash injection preserves the generic manifest signature, and
+integration fixtures/callbacks declare their input and return types. The v2
+worker fixture supplies the verified store interface to SourceContentAccess.
+The deliberately malformed producer case retains a scoped type suppression
+because it must pass an invalid value to prove runtime rejection.
+
+- [Complete neuron checks](artifacts/test-results/ci-followup-neuron.txt):
+  Ruff lint/format passed; mypy passed all 37 source files; regression suite
+  89 passed with 15 environment-dependent skips.
+- [Configured PostgreSQL worker checks](artifacts/test-results/ci-followup-neuron-postgres.txt):
+  all five v2/fallback publication, reuse, concurrency and rejection tests passed
+  in owned schemas, with no skips.

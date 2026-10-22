@@ -22,8 +22,9 @@ import httpx
 import pytest
 from brain_content.checkpoints import CheckpointStore
 from brain_content.config import LocalObjectStoreConfig
-from brain_content.manifest import ArtifactManifest
+from brain_content.manifest import Manifest
 from brain_content.object_store import LocalFilesystemObjectStore
+from brain_content.validation import ArtifactKey, VerifiedBundle
 from brain_content.verified_store import VerifiedBundleStore
 from brain_domain.authx import ResourceKey, ResourceType
 from brain_domain.principal import PrincipalKind
@@ -113,9 +114,7 @@ def components(
             os._exit(EXIT_CODE)
 
     class CrashingStore(CheckpointStore):
-        def publish(
-            self, manifest: ArtifactManifest, files: Mapping[str, bytes]
-        ) -> ArtifactManifest:
+        def publish[M: Manifest](self, manifest: M, files: Mapping[str, bytes]) -> M:
             result = super().publish(manifest, files)
             crash("bundle")
             return result
@@ -135,7 +134,9 @@ def components(
     )
 
     class CrashingVerifiedStore(VerifiedBundleStore):
-        def publish(self, key, manifest_bytes, files):
+        def publish(
+            self, key: ArtifactKey, manifest_bytes: bytes, files: Mapping[str, bytes]
+        ) -> VerifiedBundle:
             result = super().publish(key, manifest_bytes, files)
             crash("bundle")
             return result
