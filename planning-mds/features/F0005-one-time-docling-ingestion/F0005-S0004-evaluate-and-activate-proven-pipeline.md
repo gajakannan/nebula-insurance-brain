@@ -1,67 +1,84 @@
 ## Story Header
 
 **Story ID:** F0005-S0004
+
 **Feature:** F0005 — One-time document ingestion
+
 **Title:** Evaluate and activate the proven pipeline
+
 **Priority:** High
-**Phase:** v0.1A
+
+**Phase:** MVP — v0.1A
+
 **Status:** In Progress
 
 ## User Story
 
 **As a** platform owner
-**I want** measured migration results and reproducible runtime wiring
-**So that** we adopt Graph only after it satisfies our artifact, evidence, and operational contracts.
+
+**I want** a measured direct-versus-Graph comparison against agreed thresholds, followed by activation or rejection
+
+**So that** Graph replaces the direct client only on evidence, and either outcome is recorded and reversible.
 
 ## Context & Background
 
-Implements the [PRD](PRD.md) and [assembly plan](feature-assembly-plan.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). F0001 measured Docling plus a direct full-document vLLM request; it did not prove the Graph pipeline.
+Implements the [PRD](PRD.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Delivered 2026-09-22: a recorded-response [synthetic comparison](synthetic-comparison.json), which is orchestration proof, not model quality. This plan adds the live corpus comparison, reviewer verdicts and the activation decision.
 
 ## Acceptance Criteria
 
-Edge cases covered below include benchmark failure, missing reviewer evidence, leaked secrets, exceeded concurrency, and rollback after activation.
+- [ ] **F0005-S0004-AC1:** Given the qualification corpus (at least 12 synthetic documents: 6 native, 4 scanned, 2 mixed-page), when it is committed, then every expected value and evidence location was authored from the document source by a role that does not run or review the extraction, and the corpus and expectation hashes are recorded before the first measured run.
+- [ ] **F0005-S0004-AC2:** Given the direct baseline and Graph dense under recorded configurations (pins, model and tokenizer revision, chunking, budgets), when both profiles run over the full corpus, then the report records per-case and aggregate schema validity, field accuracy, abstention, fabricated evidence, evidence resolution, calls, serving-tokenizer tokens, p95 latency and review items per document.
+- [ ] **F0005-S0004-AC3:** Given the report, when it is compared with the PRD thresholds, then each threshold is marked met or missed with its measured value; a missed threshold blocks activation and is never re-run with relaxed budgets to pass.
+- [ ] **F0005-S0004-AC4:** Given S0001–S0003 and S0005 evidence plus the report, when QA, Architect and Security review them, then each records a verdict with evidence references in STATUS, and the operator records acceptance or rejection.
+- [ ] **F0005-S0004-AC5:** Given all thresholds met, every verdict passing and operator acceptance, when activation runs, then ADR-0060 becomes Accepted, the worker default extraction contract becomes Graph dense through committed non-secret configuration, the v2 writer is enabled per S0005, and the dependency matrix, build/run metadata and C4 runtime description are updated together.
+- [ ] **F0005-S0004-AC6:** Given an activated configuration, when the rollback setting selects the direct baseline, then new runs use the direct client with its own identity, existing artifacts and runs stay readable and unchanged, and no run mixes engines.
+- [ ] **F0005-S0004-AC7:** Given any threshold miss, failing verdict or operator rejection, when the feature closes, then the direct client stays default, the v2 writer stays disabled, ADR-0060 records the failed gates (Proposed or Rejected per operator), and no partial activation remains.
+- [ ] **F0005-S0004-AC8:** Given a job, artifact, run or activation state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
 
-- **Given** an agreed licensed corpus slice with independently authored expectations, **when** Graph and the current direct adapter run under recorded configurations, **then** compare schema validity, field accuracy, abstention, evidence precision, model calls/tokens, latency, and review workload; explicitly measure the change from one full-document request per profile to chunked extraction.
-- **Given** local vLLM credentials and bounded resources, **when** all extraction paths including retries execute, **then** verify compatible settings, secret redaction, no identity credentials in model context, per-call context limits, configured aggregate concurrency, and authorized retention of source-bearing exports.
-- **Given** S0001–S0003 and timeout/partial-conversion/invalid-output/retry/restart cases, **when** acceptance is reviewed, **then** record commands, exact pins, fixtures, outputs, agreed thresholds, failures, and actual reviewer verdicts in the evidence package; leave the ADR Proposed while any mandatory gate is unmet.
-- **Given** all ADR-0060 proof gates pass and reviewers accept the evidence, **when** the runtime migration is enabled, **then** update owning pyproject declarations, neuron/uv.lock, build/run version metadata, composition wiring, dependency matrix, and runtime diagrams together; rename the old direct client and update imports/tests so its name identifies what it does.
-- **Given** the candidate fails or later needs rollback, **when** activation is considered or reversed, **then** retain the explicitly identified F0001 baseline and existing artifacts; never silently switch engines within a run or present baseline results as Graph proof.
+**Edge Cases & Error Scenarios:** Live model unavailable during measurement → the run is void and repeated in full, never partially merged. Baseline worse than Graph on every metric → still reported; the baseline remains the rollback path. Reviewer finds an expectation error → the corrected expectation is re-hashed and both engines are re-measured.
 
-- **Given** a job, artifact, run, or activation state changes, **when** the operation succeeds or fails, **then** append an audit event with actor/job identity, correlation and attempt IDs, relevant artifact/run references, outcome, and timestamp; omit secrets and source text.
+## Interaction Contract
+
+No UI. Entry points: the comparison harness, the committed configuration file and the ADR/STATUS records.
+
+| Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+|---|---|---|---|---|---|
+| Comparison harness → report | Run both engines over the corpus | Report immutable once recorded; a re-run creates a new report | Hashed report with per-case rows | Re-run reproduction command; compare corpus and configuration hashes | QA owns corpus; AI engineer runs; reviewers do not author expectations |
+| Committed configuration | Activate or roll back | Default extraction contract and `content.v2_writer_enabled` | Next job uses the selected engine and writer | Restart worker; submit a document; inspect run and manifest identity | Activation only after AC4 acceptance |
+
+**Validation and audit:** activation and rollback are recorded in STATUS and the feature evidence package with the operator's decision.
 
 ## Data Requirements
 
-Source/version and tenant/KB identity; native document/schema and file hashes; parser/conversion recipe separate from pipeline/template/model/run metadata; parse quality; declared evidence precision; attempts and outcomes. Preserve accepted six-file bundles and strict schema versioning.
+Corpus manifest and hashes, expectation files, run configurations, per-case results, aggregate metrics, verdicts, activation decision and configuration diff.
 
 ## Role-Based Visibility
 
-Only authorized principals/jobs can read source or run outputs. Model calls receive authorized content, never user credentials or authorization authority. Review and canonical acceptance remain engine responsibilities.
+Corpus and reports are synthetic and repository-committed; measured runs execute under the ServicePrincipal's current authorization like any job, and activation needs no new permission; reports exclude secrets and serving credentials.
 
 ## Non-Functional Expectations
 
-Enforce explicit concurrency/context budgets and durable job recovery. Keep source text and secrets out of routine logs; retain evidence outputs under tenant access and retention controls. Report costs and failures without claiming unmeasured quality.
+Thresholds as listed in the PRD. Measurement uses one worker replica and the model semaphore at 1.
 
 ## Dependencies
 
-S0001–S0003; named quality/architecture/security reviewers and agreed corpus/thresholds; production F0026 reuses these regression cases.
+S0001–S0003, S0005; agent-role QA, Architect and Security reviewers; operator acceptance; F0026 reuses the cases.
 
 ## Out of Scope
 
-Full profile workbench, enterprise entity resolution, canonical commits, AGE projection, and Temporal business workflows retain their owning features. This story cannot bypass those services.
+Production host activation, licensed or frozen-holdout corpora, retiring the direct client code (it stays as the rollback path).
 
 ## Questions & Assumptions
 
-The current authorized scope is early development using synthetic fixtures. The recorded-response comparison is implemented and reproducible; its [report](synthetic-comparison.json) is orchestration/evidence proof, not model-quality acceptance. Live comparison, business thresholds, reviewer signoff, and activation remain later release work.
-
-The candidate pin, lockfiles, implementation, and contract results are recorded in [compatibility evidence](compatibility-evidence.md). Comparative live benchmarks, activation, and reviewer verdicts remain open. Record limitations before approval; do not invent quality thresholds.
+Thresholds are the operator-approved PRD defaults. Graph direct is reported for completeness but is not an activation candidate.
 
 ## Definition of Done
 
-- [ ] Acceptance and failure cases have observed evidence against the pinned package.
-- [ ] Applicable runtime tests, authorization checks, and contract validation pass.
-- [ ] STATUS, metadata, documentation, and trackers describe the actual implementation.
-- [ ] Required reviewer verdicts are recorded; planning checks are not runtime proof.
+- [ ] Every acceptance criterion has observed evidence.
+- [ ] Applicable runtime tests, authorization checks and contract validation pass.
+- [ ] STATUS, ADR-0060, dependency matrix and trackers describe the actual outcome.
+- [ ] Required reviewer verdicts and the operator decision are recorded; planning checks are not runtime proof.
 
 ## Review Provenance
 
-Pending in [STATUS.md](STATUS.md). No implementation or lifecycle approval is claimed.
+Implementation signoff belongs in [STATUS.md](STATUS.md). This planning update is not runtime completion or reviewer approval.

@@ -446,11 +446,14 @@ features:
     affects:
       - capability:parse-once-content-artifact
       - capability:semantic-interpretation-run
+      - capability:versioned-content-contracts
       - entity:content-artifact
       - entity:semantic-interpretation-run
       - workflow:ingestion-interpretation
     depends_on:
       - feature:F0001
+      - feature:F0002
+      - feature:F0003
       - feature:F0004
     governed_by:
       - adr:0003
@@ -460,13 +463,18 @@ features:
       - adr:0058
       - adr:0059
       - adr:0060
+      - adr:0065
+      - adr:0073
     notes:
       - Candidate contract evidence is recorded in the feature folder. No production activation or lifecycle
         approvals claimed; F0001 remains the live-model baseline.
       - Fixed proof templates avoid a dependency on the F0015 production compiler; F0002/F0003 contracts
         are required for production job wiring.
+      - Operator decisions 2026-10-23 - synthetic corpus with agent-role reviewers; F0005 enables the
+        v2 writer at activation; F0016 owns document-date candidates; production host stays F0026.
     uses_schema:
       - schema:content-artifact-manifest
+      - schema:content-artifact-manifest-v2
       - schema:interpretation-result
   - status: planned
     id: feature:F0012
@@ -1019,6 +1027,16 @@ stories:
       - capability:semantic-interpretation-run
     governed_by:
       - adr:0060
+  - id: story:F0005-S0005
+    feature: feature:F0005
+    path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md
+    affects:
+      - capability:parse-once-content-artifact
+      - capability:versioned-content-contracts
+    governed_by:
+      - adr:0060
+      - adr:0065
+      - adr:0073
   - id: story:F0065-S0001
     feature: feature:F0065
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md

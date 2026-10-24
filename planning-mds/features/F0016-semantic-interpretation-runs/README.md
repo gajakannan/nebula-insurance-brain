@@ -46,3 +46,7 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 - Keep each run's outcome records queryable by run, with a terminal status, including outcomes that change nothing: reused content, drops, and `NONE` or `UNDECIDED` alignments. Learning traces are projected from these records (ADR-0072 section 2); this feature emits no Observatory-specific events.
 - **No new v0.1 scope.** This is a property of records the feature already keeps (run outcome counts, drops, `basis_hash`).
+
+## Document-date candidate producer (2026-10-23)
+
+Operator decision at the F0005 plan G1 (run `2026-10-23-9a04b327`), closing the BLUEPRINT §4.8 open decision: F0016 owns producing CONTENT and SOURCE_METADATA document-date candidates through the F0004 append-only date service. F0005 produces none. Carry this into the PRD and stories when the feature is planned; selection stays a verified human decision (F0022).

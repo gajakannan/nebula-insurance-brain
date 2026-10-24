@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 31
+**Total Stories:** 32
 
 ---
 
@@ -59,10 +59,11 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0005-S0001](./F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) | Pin and process source documents | High | v0.1A | document intelligence engineer |
-| [F0005-S0002](./F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) | Persist artifacts and recover jobs | High | v0.1A | platform engineer |
-| [F0005-S0003](./F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) | Reinterpret saved JSON and map evidence | High | v0.1A | document intelligence engineer |
-| [F0005-S0004](./F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | High | v0.1A | platform owner |
+| [F0005-S0001](./F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) | Pin and process source documents | High | MVP — v0.1A | document intelligence engineer |
+| [F0005-S0002](./F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) | Persist artifacts and recover jobs | High | MVP — v0.1A | platform engineer |
+| [F0005-S0003](./F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) | Reinterpret saved JSON and map evidence | High | MVP — v0.1A | document intelligence engineer |
+| [F0005-S0004](./F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | High | MVP — v0.1A | platform owner |
+| [F0005-S0005](./F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) | Qualify text origin and enable v2 publication | High | MVP — v0.1A | document intelligence engineer |
 
 ---
 
@@ -85,8 +86,8 @@ Auto-generated index of all user stories across feature folders.
 |-------|-------|
 | Infrastructure | 7 |
 | MVP | 6 |
-| MVP — v0.1A | 4 |
-| v0.1A | 8 |
+| MVP — v0.1A | 9 |
+| v0.1A | 4 |
 | v0.1B | 6 |
 
 ---
@@ -96,7 +97,7 @@ Auto-generated index of all user stories across feature folders.
 | Priority | Count |
 |----------|-------|
 | Critical | 15 |
-| High | 16 |
+| High | 17 |
 
 ---
 

@@ -1,65 +1,82 @@
 ## Story Header
 
 **Story ID:** F0005-S0001
+
 **Feature:** F0005 — One-time document ingestion
+
 **Title:** Pin and process source documents
+
 **Priority:** High
-**Phase:** v0.1A
+
+**Phase:** MVP — v0.1A
+
 **Status:** In Progress
 
 ## User Story
 
 **As a** document intelligence engineer
-**I want** a reproducible Docling-Graph pipeline candidate for native and scanned sources
-**So that** I can establish compatibility before changing the running extraction path.
+
+**I want** the pinned Docling-Graph pipeline to convert real native, scanned and mixed-page sources and publish them before any model call
+
+**So that** conversion is proven on the actual parser and OCR stack, not only on synthetic native content.
 
 ## Context & Background
 
-Implements the [PRD](PRD.md) and [assembly plan](feature-assembly-plan.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). F0001 measured Docling plus a direct full-document vLLM request; it did not prove the Graph pipeline.
+Implements the [PRD](PRD.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Delivered 2026-09-20: the 1.9.1 pin, wheel digest, lock, checkpoint stage and synthetic conversion tests ([compatibility evidence](compatibility-evidence.md)). This plan adds live conversion of the qualification corpus. F0004's v1/v2 publication boundary is the checkpoint target.
 
 ## Acceptance Criteria
 
-Edge cases covered below include partial conversion, unsupported checkpoint API, and model timeout or invalid extraction before final export.
+- [ ] **F0005-S0001-AC1:** Given a clean checkout, when both workspaces sync from their locks, then the resolved Docling-Graph, Docling and docling-core versions and the Graph wheel digest equal the recorded pin, and any difference fails the qualification run before conversion.
+- [ ] **F0005-S0001-AC2:** Given each native, scanned and mixed-page corpus document, when it enters the real pipeline with physical conversion and OCR enabled, then the published bundle records parser name/version/configuration, OCR engine name/version, page count, failed pages, OCR page count, warnings and source hash; mocks or recorded native JSON cannot satisfy this criterion.
+- [ ] **F0005-S0001-AC3:** Given conversion completes and the model endpoint then fails or returns invalid output, when the checkpoint stage runs, then the bundle is verified and registered before the first model request, and the job records the model failure without discarding or reconverting the bundle.
+- [ ] **F0005-S0001-AC4:** Given the corpus's partial-conversion document, when conversion returns, then supported content is published with its failed pages and partial status, and no later stage labels the document complete.
+- [ ] **F0005-S0001-AC5:** Given the checkpoint callback fails or the installed stage layout differs from the pinned guard, when processing is attempted, then extraction does not start, the job fails with an explicit integration reason, and no artifact is registered ready.
+- [ ] **F0005-S0001-AC6:** Given a job, artifact or run state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
 
-- **Given** the proposed upstream candidate, **when** a clean environment resolves it, **then** record the immutable release/commit, package digest, Docling/docling-core versions, and dependency lock; explain the difference from the F0001 tested build using observed results.
-- **Given** the native and scanned GL fixtures, **when** each enters the actual Graph pipeline, **then** Docling performs the initial conversion and the adapter exposes the native document, schema/version, parse status, failed pages, OCR counts, warnings, and source hash; mocks cannot satisfy this criterion.
-- **Given** conversion completes before a model timeout or invalid extraction, **when** the pipeline crosses the proposed checkpoint seam, **then** the native document and quality details are available to Nebula before the model failure; document and test a supported pinned integration seam rather than relying on final exports.
-- **Given** the callback fails or the selected build cannot expose the checkpoint, **when** processing is attempted, **then** stop before continuing extraction, record the integration limitation, and leave ADR-0060 Proposed.
-- **Given** a partial conversion, **when** the result is returned, **then** preserve supported content and failed-page diagnostics; never label the document complete or discard its quality status.
+**Edge Cases & Error Scenarios:** Encrypted or corrupt PDF → explicit conversion failure with no bundle. OCR model assets missing offline → conversion fails before publication; no fallback to an unrecorded engine. A page that converts empty is a failed page, not silent success.
 
-- **Given** a job, artifact, run, or activation state changes, **when** the operation succeeds or fails, **then** append an audit event with actor/job identity, correlation and attempt IDs, relevant artifact/run references, outcome, and timestamp; omit secrets and source text.
+## Interaction Contract
+
+No UI. Entry point: the worker CLI `submit` command and the worker loop under a provisioned ServicePrincipal.
+
+| Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+|---|---|---|---|---|---|
+| Worker CLI submission → conversion → checkpoint publication | Submit a corpus PDF | New job only; published bundle immutable | Verified bundle registered ready, or explicit conversion/integration failure | Restart, reload the artifact through the authorized reader, compare hashes and identities | ServicePrincipal with current `ingest` grant in the target tenant/KB |
+
+**Validation and audit:** a failed conversion or checkpoint never registers a ready artifact; every authorization decision and state change is audited with policy version.
 
 ## Data Requirements
 
-Source/version and tenant/KB identity; native document/schema and file hashes; parser/conversion recipe separate from pipeline/template/model/run metadata; parse quality; declared evidence precision; attempts and outcomes. Preserve accepted six-file bundles and strict schema versioning.
+Source/version, tenant/KB, native document and file hashes, parser and OCR identities, parse quality, attempts and outcomes; F0004 manifest contract version. Exact OCR model-asset identity is qualified in S0005.
 
 ## Role-Based Visibility
 
-Only authorized principals/jobs can read source or run outputs. Model calls receive authorized content, never user credentials or authorization authority. Review and canonical acceptance remain engine responsibilities.
+Only principals and jobs with current `ingest` authorization read source or bundle bytes; each decision is audited with its policy version. Model calls receive authorized content only, never credentials or authorization data.
 
 ## Non-Functional Expectations
 
-Enforce explicit concurrency/context budgets and durable job recovery. Keep source text and secrets out of routine logs; retain evidence outputs under tenant access and retention controls. Report costs and failures without claiming unmeasured quality.
+- Conversion of each corpus document completes within 300 s on the development host, or fails explicitly at that bound.
+- Source text and secrets stay out of routine logs.
 
 ## Dependencies
 
-F0004 artifact/manifest contract; F0001 fixtures and recorded direct-client baseline; ADR-0060. This prototype uses fixed templates and does not depend on the future F0015 compiler.
+F0004 publication boundary and verifier; F0001 fixtures and inference runbook; ADR-0060.
 
 ## Out of Scope
 
-Full profile workbench, enterprise entity resolution, canonical commits, AGE projection, and Temporal business workflows retain their owning features. This story cannot bypass those services.
+New parser or OCR engines, non-PDF formats, production host deployment.
 
 ## Questions & Assumptions
 
-Prototype the proposed brain-extraction pipeline adapter and neutral parse-result handoff described in the assembly plan. Production activation waits for S0004.
+The installed pin is not upgraded by this plan. If live conversion forces an upgrade, the checkpoint seam and every S0001–S0003 criterion are re-proven on the new pin.
 
 ## Definition of Done
 
-- [ ] Acceptance and failure cases have observed evidence against the pinned package.
-- [ ] Applicable runtime tests, authorization checks, and contract validation pass.
-- [ ] STATUS, metadata, documentation, and trackers describe the actual implementation.
-- [ ] Required reviewer verdicts are recorded; planning checks are not runtime proof.
+- [ ] Every acceptance criterion has observed live evidence on the pinned package.
+- [ ] Applicable runtime tests, authorization checks and contract validation pass.
+- [ ] STATUS, compatibility evidence and trackers describe the actual implementation.
+- [ ] Required reviewer verdicts are recorded in STATUS; planning checks are not runtime proof.
 
 ## Review Provenance
 
-Pending in [STATUS.md](STATUS.md). No implementation or lifecycle approval is claimed.
+Implementation signoff belongs in [STATUS.md](STATUS.md). This planning update is not runtime completion or reviewer approval.

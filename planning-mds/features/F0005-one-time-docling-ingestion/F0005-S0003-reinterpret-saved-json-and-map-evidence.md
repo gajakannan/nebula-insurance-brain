@@ -1,65 +1,83 @@
 ## Story Header
 
 **Story ID:** F0005-S0003
+
 **Feature:** F0005 — One-time document ingestion
+
 **Title:** Reinterpret saved JSON and map evidence
+
 **Priority:** High
-**Phase:** v0.1A
+
+**Phase:** MVP — v0.1A
+
 **Status:** In Progress
 
 ## User Story
 
 **As a** document intelligence engineer
-**I want** new interpretations over saved native content with usable evidence
+
+**I want** live interpretations over saved native content with evidence grounded in actual source regions
+
 **So that** a profile change enriches knowledge without reparsing or inventing locations.
 
 ## Context & Background
 
-Implements the [PRD](PRD.md) and [assembly plan](feature-assembly-plan.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). F0001 measured Docling plus a direct full-document vLLM request; it did not prove the Graph pipeline.
+Implements the [PRD](PRD.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) and accepted ADR-0058. Delivered 2026-09-22: evidence mapper v2, multi-region grounding and recorded-response dense extraction. This plan proves the same behavior with live model output on the qualification corpus.
 
 ## Acceptance Criteria
 
-Edge cases covered below include unresolved or multi-region evidence, synthesized/merged nodes, oversized prompts, and unsupported selected-block scope.
+- [ ] **F0005-S0003-AC1:** Given each published corpus bundle after a worker restart, when `gl-limits-a` and `gl-limits-b` run through the live dense contract, then saved DoclingDocument JSON is the only input, converter/OCR entry points are instrumented and called zero times, bundle hashes are unchanged, and each run records distinct template, schema, chunking, model and tokenizer identities.
+- [ ] **F0005-S0003-AC2:** Given live output for limits, dates and the named insured, when evidence is resolved, then every resolved selector's source text supports its value (Unicode offsets and table cells checked against the bundle), repeated or ambiguous values stay unresolved, and multi-region values need complete character coverage.
+- [ ] **F0005-S0003-AC3:** Given Graph chunks, nodes and properties, when the adapter builds InterpretationResult, then the provenance ledger and native item references are retained as run outputs; graph IDs and local merges never become enterprise identity or canonical facts.
+- [ ] **F0005-S0003-AC4:** Given output containing relationships or entity types without a downstream mapping, when it is imported, then the import fails closed with an explicit unsupported-output reason and no partial assertions.
+- [ ] **F0005-S0003-AC5:** Given any model call (skeleton, fill, repair or reconciliation), when it is scheduled, then input + schema + output reservations measured with the serving tokenizer fit the 4,096-token context; an oversized request fails before sending.
+- [ ] **F0005-S0003-AC6:** Given a selected-block or targeted request, when interpretation begins, then it fails explicitly as unsupported rather than broadening to the full document; F0032 owns targeted evolution.
+- [ ] **F0005-S0003-AC7:** Given a job, artifact or run state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
 
-- **Given** each native/scanned bundle after worker restart, **when** two fixed profiles execute through the real Graph package, **then** pass saved DoclingDocument JSON, assert no physical conversion/OCR entry point is called, and preserve all content hashes while recording distinct run/configuration identities.
-- **Given** Graph chunks, nodes, properties, and relationships, **when** the adapter creates InterpretationResult, **then** retain the full provenance ledger and stable original item/block mappings; graph IDs and local merges cannot become enterprise identity or canonical facts.
-- **Given** limit amount, currency, basis, effective date, table headers, repeated values, or multi-region support, **when** evidence is resolved, **then** check every value against its actual source regions and declared precision, including Unicode offsets and geometry conventions; a node-identifier match cannot ground all its properties.
-- **Given** source text does not support an exact binding, **when** an assertion candidate is produced, **then** keep coarse or unresolved evidence explicit and preserve ADR-0058 review behavior; synthesized or merged nodes do not gain stronger support.
-- **Given** a selected block scope or an oversized request, **when** interpretation begins, **then** exclude unselected content, reject unsupported targeting, and enforce prompt/schema/input/output budgets before every call, including fill, repair, and reconciliation; F0032 later proves evolution scheduling.
+**Edge Cases & Error Scenarios:** Value printed differently from the expectation (e.g. `$1M`) → reported as an accuracy miss, not normalized into a match. Model returns a value absent from the document → unresolved evidence and an accuracy miss, never a fabricated span. A chunk boundary splitting a value → multi-region resolution or unresolved, never truncation.
 
-- **Given** a job, artifact, run, or activation state changes, **when** the operation succeeds or fails, **then** append an audit event with actor/job identity, correlation and attempt IDs, relevant artifact/run references, outcome, and timestamp; omit secrets and source text.
+## Interaction Contract
+
+No UI. Entry points: worker interpretation stage and the importer; review items appear in the existing Review Panel unchanged.
+
+| Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+|---|---|---|---|---|---|
+| Interpretation over a published bundle → importer | Run a profile against an artifact | New run only; bundle and prior runs immutable | Run outputs plus assertions, evidence and review items in one transaction, or explicit failure | Reload run, assertions and evidence selectors; recheck selectors against bundle text | ServicePrincipal `interpret` grant; canonical acceptance excluded |
+
+**Validation and audit:** unresolved evidence enters provenance review per ADR-0058; nothing is committed canonically.
 
 ## Data Requirements
 
-Source/version and tenant/KB identity; native document/schema and file hashes; parser/conversion recipe separate from pipeline/template/model/run metadata; parse quality; declared evidence precision; attempts and outcomes. Preserve accepted six-file bundles and strict schema versioning.
+Run identity and configuration hashes, chunk inventory, provenance ledger, per-call token reservations and usage, evidence precision per value.
 
 ## Role-Based Visibility
 
-Only authorized principals/jobs can read source or run outputs. Model calls receive authorized content, never user credentials or authorization authority. Review and canonical acceptance remain engine responsibilities.
+Run outputs require current `interpret` authorization in the source's tenant/KB, rechecked after restart. Model context contains chunk text only.
 
 ## Non-Functional Expectations
 
-Enforce explicit concurrency/context budgets and durable job recovery. Keep source text and secrets out of routine logs; retain evidence outputs under tenant access and retention controls. Report costs and failures without claiming unmeasured quality.
+- Every call's reservation is checked before sending; budgets cover repairs.
+- Per-document-profile latency is reported for S0004's threshold.
 
 ## Dependencies
 
-S0001/S0002; fixed proof profiles in this feature, with the production compiler and run services delivered by F0015/F0016; ADR-0040/ADR-0058.
+S0001/S0002; fixed proof profiles; ADR-0040/ADR-0058; F0015/F0016 for production profiles and run lifecycle.
 
 ## Out of Scope
 
-Full profile workbench, enterprise entity resolution, canonical commits, AGE projection, and Temporal business workflows retain their owning features. This story cannot bypass those services.
+Relationship semantics, new profiles, targeted evolution, canonical commits.
 
 ## Questions & Assumptions
 
-This story proves the adapter result contract and scoped capability. F0016 persists the full production run model; F0032 owns targeted evolution jobs. Evidence remains tied to the immutable original artifact.
+Two fixed profiles remain sufficient for qualification; F0015 compiles production templates against the qualified adapter.
 
 ## Definition of Done
 
-- [ ] Acceptance and failure cases have observed evidence against the pinned package.
-- [ ] Applicable runtime tests, authorization checks, and contract validation pass.
-- [ ] STATUS, metadata, documentation, and trackers describe the actual implementation.
-- [ ] Required reviewer verdicts are recorded; planning checks are not runtime proof.
+- [ ] Every acceptance criterion has observed live-model evidence.
+- [ ] Applicable runtime tests, authorization checks and contract validation pass.
+- [ ] STATUS, compatibility evidence and trackers describe the actual implementation.
+- [ ] Required reviewer verdicts are recorded in STATUS; planning checks are not runtime proof.
 
 ## Review Provenance
 
-Pending in [STATUS.md](STATUS.md). No implementation or lifecycle approval is claimed.
+Implementation signoff belongs in [STATUS.md](STATUS.md). This planning update is not runtime completion or reviewer approval.
