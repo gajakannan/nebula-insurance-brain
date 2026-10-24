@@ -234,7 +234,8 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0005-S0001](features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) — In Progress
   - [F0005-S0002](features/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) — In Progress
   - [F0005-S0003](features/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) — In Progress
-  - [F0005-S0004](features/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) — In Progress — synthetic comparison complete; production qualification deferred
+  - [F0005-S0004](features/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) — In Progress — synthetic comparison complete; live comparison planned
+  - [F0005-S0005](features/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) — Not Started
 - [F0006 — Assertion plane + origin + interpretation basis](features/F0006-assertion-plane-origin-and-interpretation-basis/README.md) - Planned
 - [F0007 — FactSlot model](features/F0007-factslot-model/README.md) - Planned
 - [F0008 — Bitemporal canonical facts](features/F0008-bitemporal-canonical-facts/README.md) - Planned
@@ -383,7 +384,7 @@ Section 117.1 tracks the decisions for implementation and production acceptance:
 
 **Time-interpretation dependency for v0.1 (2026-09-25, validate finding P-1):** F0019 and F0025 take endorsement valid time from the template route's typed effective-date field. F0016 stores time mentions and document time context alongside. Resolution from time mentions (ADR-0064, Proposed) replaces the template field only after ADR-0064 passes its proof gates, which F0026 qualifies. v0.1 acceptance does not depend on a Proposed ADR.
 
-**Document-date candidate producer (opened 2026-10-16, F0004 plan-review M-1).** F0004 delivers the append-only document-date service but no runtime caller. No feature yet owns creating CONTENT or SOURCE_METADATA date candidates. F0022 owns the verified human selection decision, which in v0.1 is the only way to select or clear a date. Until an owner is assigned, consumers see every document as undated, and F0019/F0025 continue to use the template route's typed effective-date field. Assign the producer before planning F0005 production activation or F0016.
+**Document-date candidate producer (opened 2026-10-16, F0004 plan-review M-1).** F0004 delivers the append-only document-date service but no runtime caller. No feature yet owns creating CONTENT or SOURCE_METADATA date candidates. F0022 owns the verified human selection decision, which in v0.1 is the only way to select or clear a date. Operator decision (2026-10-23, F0005 plan G1): F0016 owns producing both CONTENT and SOURCE_METADATA candidates; F0005 produces none. Until F0016 delivers, consumers see every document as undated, and F0019/F0025 continue to use the template route's typed effective-date field.
 
 **Account identity and account scope (opened 2026-10-09, direction set 2026-10-10).** The Cedar Bridge review asked whether Account is a party or a grouping of organizations, what an account-scoped grant reaches, what roots Entity 360, and how account identity relates to organization identity. The operator answered from commercial P&C practice, recorded in [ADR-0070](architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed):
 
@@ -398,7 +399,7 @@ ADR-0070 lists its proof gates; until it is accepted, F0012/F0013 Phase B plan a
 **Local proof decisions from F0001-S0007, updated for ADR-0060 (2026-09-15):**
 
 - **Item 3 (target host, PostgreSQL/extension build, model/provider data policy) — answered for the local proof scope.** The exact PostgreSQL/pgvector/AGE build is pinned and twice-verified live (S0002, re-verified at S0006 with no drift beyond an upstream base-image patch bump — `docker/DEPENDENCY-MATRIX.md`). The model/provider data policy is proven: self-hosted vLLM, chunk-text-only requests, no prompt persistence (F0001-S0003/S0006 live runs). The **production host** (as opposed to local Docker Compose) remains explicitly open, owned by F0026 per this feature's own G1 clarification and the F0001-S0006 story's stated assumption ("the production host decision waits for F0026").
-- **Item 4 (exact Docling-Graph implementation and release/commit) — answered for the synthetic development scope.** `docling-project/docling-graph` 1.9.1 and Docling 2.126.0 are locked, with the Graph wheel digest recorded. Native/scanned conversion, saved-JSON reuse, publication before extraction, PostgreSQL recovery, and a recorded-response direct/dense comparison have bounded proof; see [F0005 compatibility evidence](features/F0005-one-time-docling-ingestion/compatibility-evidence.md). F0001's unsuccessful reuse attempt and direct-vLLM results remain historical evidence; its blanket no-reuse conclusion was too broad. Live-model and deployment qualification and reviewer acceptance remain pending under ADR-0060.
+- **Item 4 (exact Docling-Graph implementation and release/commit) — answered for the synthetic development scope.** `docling-project/docling-graph` 1.9.1 and Docling 2.126.0 are locked, with the Graph wheel digest recorded. Native/scanned conversion, saved-JSON reuse, publication before extraction, PostgreSQL recovery, and a recorded-response direct/dense comparison have bounded proof; see [F0005 compatibility evidence](features/F0005-one-time-docling-ingestion/compatibility-evidence.md). F0001's unsuccessful reuse attempt and direct-vLLM results remain historical evidence; its blanket no-reuse conclusion was too broad. Live-model and deployment qualification and reviewer acceptance remain pending under ADR-0060; F0005 plan run `2026-10-23-9a04b327` (approved 2026-10-23) specifies the local qualification and gated activation.
 
 ### 4.9 F0001 Phase B (2026-09-06)
 
@@ -469,7 +470,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Current position (2026-10-21): F0001 to F0004 are done and archived. F0005's synthetic Docling-Graph proof is complete, with production qualification deferred (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
+Current position (2026-10-23): F0001 to F0004 are done and archived. F0005's synthetic Docling-Graph proof is complete; its local qualification and gated activation plan is approved (plan run `2026-10-23-9a04b327`) and ready for the feature action (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
 
 1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).

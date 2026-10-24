@@ -2,6 +2,8 @@
 
 The candidate adapter is implemented; the production integration is incomplete. Read [compatibility evidence](compatibility-evidence.md) for the exact pin, tested boundary, and remaining gates. ADR-0060 is Proposed.
 
+The remaining work, local live qualification and gated activation, is specified in the [assembly plan](feature-assembly-plan.md) (plan run `2026-10-23-9a04b327`). Its corpus, harness, fault proxy, `extraction.pipeline` setting and migration 0009 do not exist yet; the commands below cover only what is implemented.
+
 From the repository root:
 
 ```bash

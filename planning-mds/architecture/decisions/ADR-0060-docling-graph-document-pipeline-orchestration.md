@@ -9,7 +9,7 @@
 
 **Date:** 2026-09-15
 **Direction authorized by:** Operator; formal ADR acceptance awaits the proof gates below.
-**Implementation:** Synthetic development proof complete for the current scope. Docling-Graph 1.9.1 is locked; conversion/reuse, PostgreSQL recovery, dense extraction with recorded responses, and multi-region review mapping have bounded proof. Production acceptance and activation remain future work; see [compatibility evidence](../../features/F0005-one-time-docling-ingestion/compatibility-evidence.md).
+**Implementation:** Synthetic development proof complete for the current scope. Docling-Graph 1.9.1 is locked; conversion/reuse, PostgreSQL recovery, dense extraction with recorded responses, and multi-region review mapping have bounded proof. Production acceptance and activation remain future work; see [compatibility evidence](../../features/F0005-one-time-docling-ingestion/compatibility-evidence.md). Plan run `2026-10-23-9a04b327` (2026-10-23) defines the acceptance procedure: local live qualification on a synthetic corpus against operator-approved thresholds, independent QA/Architect/Security verdicts and operator acceptance, then activation through committed configuration with a direct-baseline rollback. See the F0005 [PRD](../../features/F0005-one-time-docling-ingestion/PRD.md) and [assembly plan](../../features/F0005-one-time-docling-ingestion/feature-assembly-plan.md).
 **Would refine:** ADR-0003, ADR-0004, ADR-0028, ADR-0040, ADR-0055, ADR-0058, ADR-0059. Reconsiders the exclusion recorded after F0001; the current runtime decision, accepted content/evidence contracts, and F0001 measurements remain in force pending proof.
 
 ## Context
@@ -85,6 +85,8 @@ These are production-acceptance requirements. The current early-development scop
 - Ground limit amount, currency, basis, effective date, table headers, and values supported by multiple regions; preserve the provenance ledger and unresolved precision.
 - Compare the current single-request baseline with Graph chunking on an agreed corpus: schema validity, accuracy, abstention, tokens/calls, latency, and review workload. Cover timeouts, partial conversion, invalid extraction, retries, and worker restart.
 - Verify local vLLM configuration, secret redaction, bounded worker/model concurrency (including upstream internal fan-out), and tenant access/retention for source-bearing outputs.
+
+**Acceptance scope (2026-10-23).** Under the operator's F0005 scope decision, acceptance on F0005's local qualification governs the local Docker Compose runtime only. Production host qualification and frozen-corpus acceptance remain F0026 obligations, and they may reopen this decision. A rejection keeps the direct client as the runtime default and records the failed gates here.
 
 Evidence and reviewer verdicts belong in [F0005 STATUS](../../features/F0005-one-time-docling-ingestion/STATUS.md). The pin, native/scanned conversion, publication ordering, native-JSON reuse, scalar/table evidence, and durable recovery have bounded test evidence, including PostgreSQL queue and worker/importer process-exit recovery with recorded model responses. The synthetic comparison also proves dense extraction orchestration and multi-region grounding through import and review. Production gates remain open: live comparative extraction and property/multi-region evidence qualification, unsupported relationship semantics, full deployment recovery, operational qualification, and reviewer acceptance. Structural planning checks cannot change this ADR to Accepted.
 

@@ -1,9 +1,14 @@
 # F0005 — One-time document ingestion — Status
 
-**Overall Status:** Synthetic development scope complete. The opt-in candidate and its development proof are implemented; production qualification and activation are future work. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).
-**Last Updated:** 2026-09-25 (activation prerequisite from validate finding A-4; no status change)
+**Overall Status:** Synthetic development scope complete; local qualification and gated activation re-planned. The opt-in candidate and its development proof are implemented. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).\
+**Last Updated:** 2026-10-23\
+**Plan Run:** `2026-10-23-9a04b327` (first F0005 plan run)
 
-## Current scope: early development
+## Planning Position
+
+Plan run `2026-10-23-9a04b327` re-plans the remaining work against shipped F0002–F0004. Operator decisions at G1 (2026-10-23): local live qualification on the development host with gated activation; a synthetic qualification corpus with independent expectations and independent agent-role reviewers; F0005 enables the F0004 v2 writer as an activation step (new story S0005); F0016 owns document-date candidates. The PRD fixes the qualification thresholds. Phase A was approved with `approve-phase-a` and Phase B with `approve-phase-b` on 2026-10-23. The plan is ready for the feature action, starting with Step 0 preflight and the Step 1 corpus. Planning does not authorize implementation or change delivery priority.
+
+## Synthetic development scope (2026-09-20 to 2026-09-22)
 
 The authorized scope uses synthetic development fixtures. Architecture/article reconciliation, the pinned Graph integration, durable recovery, bounded transport, evidence mapping, and a reproducible recorded-response comparison are delivered. This is the completion boundary for the current development work. The production proof gates below remain release requirements, not prerequisites for completing this scope.
 
@@ -40,7 +45,8 @@ The candidate has been merged to main from `feature/docling-graph-delivery`, bas
 | [F0005-S0001](F0005-S0001-pin-and-process-source-documents.md) | Pin and process source documents | In Progress |
 | [F0005-S0002](F0005-S0002-persist-artifacts-and-recover-jobs.md) | Persist artifacts and recover jobs | In Progress |
 | [F0005-S0003](F0005-S0003-reinterpret-saved-json-and-map-evidence.md) | Reinterpret saved JSON and map evidence | In Progress |
-| [F0005-S0004](F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | In Progress — synthetic comparison complete; production qualification deferred |
+| [F0005-S0004](F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | In Progress — synthetic comparison complete; live comparison planned |
+| [F0005-S0005](F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) | Qualify text origin and enable v2 publication | Not Started |
 
 ## Recommendation Audit
 
@@ -65,7 +71,7 @@ The candidate has been merged to main from `feature/docling-graph-delivery`, bas
 - [ ] Insurer-critical property/relationship evidence, table and multi-region cases.
 - [ ] Corpus comparison and timeout/partial/invalid-output/retry/restart cases.
 - [ ] Local vLLM, secrets, concurrency, tenant access, and retention.
-- [ ] Activation prerequisite added 2026-09-25 (validate finding A-4). Before S0004 activates the candidate pipeline, published blocks carry `text_origin` (`STATED`, `OCR`, `TRANSCRIBED`, `DESCRIBED`) and the producing engine, and the evidence mapping locates quotes on the server under the ADR-0065 admission contract. The alternative is a recorded deferral of both to F0004/F0016 with rationale. Resolve in F0005's next `feature` run. See [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md) and [validate run 2026-09-25-463eecdd](../../operations/evidence/runs/2026-09-25-463eecdd/architect-validation-report.md).
+- [ ] Activation prerequisite added 2026-09-25 (validate finding A-4). Before S0004 activates the candidate pipeline, published blocks carry `text_origin` (`STATED`, `OCR`, `TRANSCRIBED`, `DESCRIBED`) and the producing engine, and the evidence mapping locates quotes on the server under the ADR-0065 admission contract. The alternative is a recorded deferral of both to F0004/F0016 with rationale. F0004 delivered the text-origin storage and fallback; plan run `2026-10-23-9a04b327` assigns the live qualification and switch to S0005. See [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md) and [validate run 2026-09-25-463eecdd](../../operations/evidence/runs/2026-09-25-463eecdd/architect-validation-report.md).
 
 ## Required Signoff Roles
 
