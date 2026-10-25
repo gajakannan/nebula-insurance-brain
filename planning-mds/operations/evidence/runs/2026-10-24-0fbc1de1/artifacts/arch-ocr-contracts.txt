@@ -1,0 +1,270 @@
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-192-        }
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-193-      ]
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-194-    },
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-195-    "execution": {
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-196-      "type": "object",
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-197-      "additionalProperties": false,
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-198-      "required": [
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-199-        "parser_package_version",
+planning-mds/schemas/content-artifact-manifest-v2.schema.json:200:        "model_artifact_digests",
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-201-        "configuration_hash",
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-202-        "environment_digest",
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-203-        "parser_name",
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-204-        "projection_version"
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-205-      ],
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-206-      "properties": {
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-207-        "parser_package_version": {
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-208-          "type": "string"
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-209-        },
+planning-mds/schemas/content-artifact-manifest-v2.schema.json:210:        "model_artifact_digests": {
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-211-          "type": "array",
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-212-          "items": {
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-213-            "type": "string"
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-214-          }
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-215-        },
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-216-        "configuration_hash": {
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-217-          "$ref": "#/$defs/sha256"
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-218-        },
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-219-        "environment_digest": {
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-220-          "type": "string"
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-221-        },
+planning-mds/schemas/content-artifact-manifest-v2.schema.json-222-        "parser_name": {
+--
+planning-mds/schemas/content-records-v2.schema.json-467-        },
+planning-mds/schemas/content-records-v2.schema.json-468-        "producer": {
+planning-mds/schemas/content-records-v2.schema.json-469-          "type": "object",
+planning-mds/schemas/content-records-v2.schema.json-470-          "additionalProperties": false,
+planning-mds/schemas/content-records-v2.schema.json-471-          "required": [
+planning-mds/schemas/content-records-v2.schema.json-472-            "engine",
+planning-mds/schemas/content-records-v2.schema.json-473-            "engine_version",
+planning-mds/schemas/content-records-v2.schema.json-474-            "model",
+planning-mds/schemas/content-records-v2.schema.json:475:            "model_version"
+planning-mds/schemas/content-records-v2.schema.json-476-          ],
+planning-mds/schemas/content-records-v2.schema.json-477-          "properties": {
+planning-mds/schemas/content-records-v2.schema.json-478-            "engine": {
+planning-mds/schemas/content-records-v2.schema.json-479-              "type": "string",
+planning-mds/schemas/content-records-v2.schema.json-480-              "minLength": 1
+planning-mds/schemas/content-records-v2.schema.json-481-            },
+planning-mds/schemas/content-records-v2.schema.json-482-            "engine_version": {
+planning-mds/schemas/content-records-v2.schema.json-483-              "type": "string",
+planning-mds/schemas/content-records-v2.schema.json-484-              "minLength": 1
+planning-mds/schemas/content-records-v2.schema.json-485-            },
+planning-mds/schemas/content-records-v2.schema.json-486-            "model": {
+planning-mds/schemas/content-records-v2.schema.json-487-              "anyOf": [
+--
+planning-mds/schemas/content-records-v2.schema.json-489-                  "type": "string",
+planning-mds/schemas/content-records-v2.schema.json-490-                  "minLength": 1
+planning-mds/schemas/content-records-v2.schema.json-491-                },
+planning-mds/schemas/content-records-v2.schema.json-492-                {
+planning-mds/schemas/content-records-v2.schema.json-493-                  "type": "null"
+planning-mds/schemas/content-records-v2.schema.json-494-                }
+planning-mds/schemas/content-records-v2.schema.json-495-              ]
+planning-mds/schemas/content-records-v2.schema.json-496-            },
+planning-mds/schemas/content-records-v2.schema.json:497:            "model_version": {
+planning-mds/schemas/content-records-v2.schema.json-498-              "anyOf": [
+planning-mds/schemas/content-records-v2.schema.json-499-                {
+planning-mds/schemas/content-records-v2.schema.json-500-                  "type": "string",
+planning-mds/schemas/content-records-v2.schema.json-501-                  "minLength": 1
+planning-mds/schemas/content-records-v2.schema.json-502-                },
+planning-mds/schemas/content-records-v2.schema.json-503-                {
+planning-mds/schemas/content-records-v2.schema.json-504-                  "type": "null"
+planning-mds/schemas/content-records-v2.schema.json-505-                }
+planning-mds/schemas/content-records-v2.schema.json-506-              ]
+planning-mds/schemas/content-records-v2.schema.json-507-            }
+planning-mds/schemas/content-records-v2.schema.json-508-          },
+planning-mds/schemas/content-records-v2.schema.json-509-          "allOf": [
+--
+planning-mds/schemas/content-records-v2.schema.json-512-                "properties": {
+planning-mds/schemas/content-records-v2.schema.json-513-                  "model": {
+planning-mds/schemas/content-records-v2.schema.json-514-                    "type": "null"
+planning-mds/schemas/content-records-v2.schema.json-515-                  }
+planning-mds/schemas/content-records-v2.schema.json-516-                }
+planning-mds/schemas/content-records-v2.schema.json-517-              },
+planning-mds/schemas/content-records-v2.schema.json-518-              "then": {
+planning-mds/schemas/content-records-v2.schema.json-519-                "properties": {
+planning-mds/schemas/content-records-v2.schema.json:520:                  "model_version": {
+planning-mds/schemas/content-records-v2.schema.json-521-                    "type": "null"
+planning-mds/schemas/content-records-v2.schema.json-522-                  }
+planning-mds/schemas/content-records-v2.schema.json-523-                }
+planning-mds/schemas/content-records-v2.schema.json-524-              },
+planning-mds/schemas/content-records-v2.schema.json-525-              "else": {
+planning-mds/schemas/content-records-v2.schema.json-526-                "properties": {
+planning-mds/schemas/content-records-v2.schema.json:527:                  "model_version": {
+planning-mds/schemas/content-records-v2.schema.json-528-                    "type": "string",
+planning-mds/schemas/content-records-v2.schema.json-529-                    "minLength": 1
+planning-mds/schemas/content-records-v2.schema.json-530-                  }
+planning-mds/schemas/content-records-v2.schema.json-531-                }
+planning-mds/schemas/content-records-v2.schema.json-532-              }
+planning-mds/schemas/content-records-v2.schema.json-533-            }
+planning-mds/schemas/content-records-v2.schema.json-534-          ]
+planning-mds/schemas/content-records-v2.schema.json-535-        },
+planning-mds/schemas/content-records-v2.schema.json-536-        "origin_anchor": {
+planning-mds/schemas/content-records-v2.schema.json-537-          "oneOf": [
+planning-mds/schemas/content-records-v2.schema.json-538-            {
+planning-mds/schemas/content-records-v2.schema.json-539-              "$ref": "#/$defs/native_text"
+--
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-29-| Existing path | Audited behavior | Planned change |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-30-|---|---|---|
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-31-| `engine/packages/brain-content/src/brain_content/manifest.py` | Strict Pydantic v1 models; `ArtifactManifest` has 17 fields | Keep explicit v1 model; add v2 and a discriminated reader using planning schemas. Preserve import compatibility until all callers adopt the union. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-32-| `engine/packages/brain-content/src/brain_content/store.py` | Async API store writes marker last, but neither publication nor file reads verify all declared hashes | Delegate to the same verifier as the worker. Route reads return exact retained manifest bytes/files after full validation. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-33-| `engine/packages/brain-content/src/brain_content/checkpoints.py` | Sync manifest-last publication, identical retry, hash/scope checks, separate four-file run outputs | Reuse those guarantees; version hash/namespace dispatch, enforce record/native asset closure, and preserve corruption-as-failure. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-34-| `neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py` | Native JSON and five parse payload files; source retained as `source.<ext>`; duplicate block ID per provenance region; table dimensions only | V2 one block per attributable native item/origin with multiple regions, table/cell relations, explicit geometry and truthful producer metadata. Preserve a v1 reader; no synthetic backfill. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-35-| `neuron/packages/brain-interpretation/src/brain_interpretation/parsed_content.py` | `ParseResult` has six fields: document, page count, failed pages, OCR page count, status, warnings | Add a versioned projection handoff carrying per-item origin/producer and asset closure. Keep the existing conversion result readable; page OCR counts alone cannot populate block origins. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-36-| `neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py` | Conversion callback builds/publishes through queue fencing; reuse loads saved JSON | Inject the v2 builder/verifier and common ready registrar; do not copy scheduler/retry logic. Fail closed on corrupt accepted artifacts or insufficient origin metadata. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:37:| `neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py` | `version_id=uuid5(document_id, recipe)`, `artifact_id=uuid5(version_id,'content')`; scoped source retention | Resolve existing source/artifact first; retain historical IDs. New sources use ADR-0073 identities; changed recipe cannot implicitly reparse a previously accepted source. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-38-| `engine/apps/worker/src/brain_worker/document_delivery.py` | `register_document_artifact()` persists source/version/artifact before extraction; importer checks identities | Extend this existing registration transaction with contract/manifest hashes, normalized indexes and mutation audit. Importer adopts verified existing metadata without a second publication event. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-39-| `engine/packages/brain-jobs/src/brain_jobs/queue.py` | `publish_transaction(lease, operation)` holds the generation fence | Reuse this API for marker/ready registration. Scheduling and lease policy remain F0005. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-40-| `engine/packages/brain-persistence/src/brain_persistence/models.py` | Source/version/artifact from 0001; one-artifact-per-version unique constraint; F0002 scoped keys | Add nullable expansion columns, normalized index/date models; remove only the single-artifact cardinality constraint after reconciliation. Preserve all parent ownership constraints. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-41-| `engine/apps/api/src/brain_api/routes/content.py` | Two authorized GET routes; files must appear in manifest | Use versioned verified reads with hydrated scope; preserve 404 non-disclosure and audit-before-payload. No date data is appended to an immutable manifest response. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-42-| `scripts/ops/backup.sh`, `restore.sh`, `verify_citations.py` | Local DB/content backup and citation restore drill | Add verified artifact/run-output inventory and metadata/date/index checks; use an isolated restore target and a quiesced local writer window. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-43-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-44-The published v1 schema now admits observed `source.pdf`; it otherwise retains its legacy fields. No previously stored byte stream or archive requirement is rewritten. F0005's existing checkpoint/registration machinery is reused; this feature does not claim it was missing or that Graph is production-qualified.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-45-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-46-## Contract inventory and serialization
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-47-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-48-| Contract | Purpose |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-49-|---|---|
+--
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-63-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-64-## Step 1 — Versioned records and provenance (S0001/S0002)
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-65-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-66-### Step 1a — Per-item provenance spike (gates the v2 writer)
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-67-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-68-The current conversion handoff carries only page-level `ocr_page_count` (`docling_adapter.py`, `ParseResult`), and a page count cannot populate a block origin. Before any v2 writer code, the AI engineer proves or disproves a per-item provenance hook on the pinned converter (Docling 2.126.0 under the F0005 lock):
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-69-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-70-- **Fixtures:** one native PDF, one fully scanned PDF, and one mixed page (native text layer plus an OCR'd image region), all synthetic and outside the frozen holdout.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:71:- **Pass criteria (all required):** every native text item maps to `STATED` with an observed producer identity; every OCR'd item maps to `OCR` with engine name/version; on the mixed page, each item has exactly one observed origin, or the adapter returns `ORIGIN_UNAVAILABLE` for exactly the items it cannot attribute. No origin is derived from page OCR counts or from "not OCR".
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:72:- **Evidence:** a reproduction command, converter/package versions and per-item expected-versus-observed tables and, for each mixed fixture, the count of items returning `ORIGIN_UNAVAILABLE` (the expected per-document v1 fallback rate after activation), kept in the feature evidence package.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-73-- **Exit decision:** the Architect records PASS or FAIL in the feature run's gate decisions before Step 1 item 1 starts.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-74-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:75:**On PASS:** implement items 1–8 below and enable the v2 writer for new sources only after Step 4's consumer compatibility passes. The switch is the non-secret composition-root setting `content.v2_writer_enabled` in `config/local.yaml`, default `false`. After activation, a document with any `ORIGIN_UNAVAILABLE` item publishes through the per-document v1 fallback (Step 2 item 10).
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-76-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-77-**On FAIL (operator decision 2026-10-16):** new sources keep the existing v1 writer, v1 namespace and v1 identity derivation (`worker_cli.py`). The v2 readers, shared verifier, indexes for v2 records, date storage and legacy-read work still proceed. S0002's v2 origin criteria (AC2–AC4, AC6) cannot be signed off, and the feature returns to the operator for a scope decision. A v2 writer is never enabled with inferred origins.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-78-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-79-### Step 1b — Versioned records
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-80-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-81-**New implementation files:** `engine/packages/brain-content/src/brain_content/records.py`, `validation.py`; `neuron/packages/brain-ingestion/src/brain_ingestion/content_projection.py`. Modify manifest.py, parsed_content.py, bundle_writer.py and the pinned extraction adapter's parse-result handoff.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-82-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-83-All DTO fields/types are defined in the linked strict JSON Schemas; runtime Pydantic models must reject extras and match those schemas, including nullability. Do not maintain a permissive parallel payload shape. These are the planned Python interfaces:
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-84-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-85-```python
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-86-@dataclass(frozen=True)
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-87-class ArtifactKey:
+--
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-111-                    execution: ParserExecutionV2,
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-112-                    provenance: Mapping[str, tuple[BlockOriginInput, ...]],
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-113-                    retained_assets: Mapping[str, bytes]) -> tuple[ArtifactManifestV2, dict[str, bytes]]: ...
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-114-```
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-115-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-116-`ParserExecutionV2` exactly matches manifest `execution`. `ContentBlockV2`, `ContentTableV2`, `ContentLayoutV2` match the record schema definitions. `BlockOriginInput` has native_ref:str, text:str, text_origin:the four-value enum, producer:the record-schema Producer, origin_anchor:the schema union, confidence:float|None. The provenance map is keyed by native item reference, not by page-level OCR status.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-117-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-118-1. Serialize native JSON with all needed assets retained, without lossy reconstruction from Markdown.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:119:2. For each native text item, use its observed producer provenance. Preserve one origin per block; mixed-origin native items become separate attributable blocks only when actual subspans identify the split, otherwise return `ORIGIN_UNAVAILABLE`.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-120-3. For a single origin, retain the stable native reference as the local block ID; if a proven split is necessary, append `:<origin>:<zero-based-segment>`. One block has a list of all genuine regions. Never duplicate block IDs per region.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:121:4. Preserve actual reading order and section paths from the native document hierarchy, not a text-array assumption. If the pinned export returns `ORIGIN_UNAVAILABLE` for any item, abandon the v2 projection for that document and use the per-document v1 fallback (Step 2 item 10). Any other missing required provenance (for example, no observed producer identity) stops publication and retains the failed attempt diagnostics. Never infer STATED from “not OCR”.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-122-5. Tables preserve cells, zero-based row/column and spans, header rows and explicit continuation links when present. Absent continuation information is null, not inferred from similar text. Each cell's block references point to stored blocks; merged-cell coverage is validated and repeated headers remain distinct.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-123-6. Retain original block text; derive code-point regions from the native model with explicit bounds checks. Missing exact geometry/offsets is represented by nullable region fields or unresolved anchor, never a guessed location.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-124-7. Validate schemas plus semantics: unique record IDs/paths, `0 <= start <= end <= len(text)`, monotonic transcript time, finite ordered bbox within actual canonical page dimensions, page count consistency, cell bounds/nonoverlap, header bounds, no continuation cycles, same-artifact references and native asset closure. Empty valid JSONL is allowed for absent blocks/tables; missing files are not.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-125-8. Build v2 file/hash inventory, then call the common verifier before publication. Empty or failed source conversion cannot become a complete parse; partial has explicit diagnostics.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-126-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-127-Items 1–4 and 8 (the v2 writer path) depend on a Step 1a PASS. The v2 record contracts, their validators (item 7) and the v2 reader are built either way.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-128-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-129-**Checkpoint:** native and scanned fixtures have truthful origins; a multi-region item is one block; repeated amounts, merged cells, astral Unicode, rotated/missing geometry and mixed-origin rejection have persisted expected outcomes. TRANSCRIBED/DESCRIBED examples prove only shape/storage, not new engine execution or canonical authority.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-130-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-131-## Step 2 — Persistence and fenced publication (S0001/S0002)
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-132-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-133-**New implementation files:** `engine/packages/brain-content/src/brain_content/service.py`, `engine/packages/brain-persistence/src/brain_persistence/content_models.py`, `content_repository.py`, and the next available Alembic revision after `0007` (currently proposed `0008_f0004_content_contract.py`), and `neuron/packages/brain-ingestion/src/brain_ingestion/integrity_sweep.py` with its operator CLI entry point. Update models imports, async/sync stores, worker registration and API composition.
+--
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-166-8. **A read fails; it never writes state (operator decision 2026-10-16, re-review R-H1).** A definitive verification failure (hash mismatch, a declared file missing under a complete marker, an invalid manifest) raises `ArtifactIntegrityError` from the `load` callback. `AuthorizationExecution.read` already persists that read decision with outcome `failed`, and the route maps the error to 409 `ARTIFACT_INTEGRITY`. The read path writes nothing else: no state event, audit event or repair record. Every later read re-verifies and fails the same way, so blocking a corrupt artifact never depends on its quarantine. Transient storage errors (`CONTENT_UNAVAILABLE`, 503) are not definitive.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-167-9. **Integrity sweep.** `brain-content-integrity-sweep` is a new operator CLI (`neuron/packages/brain-ingestion/src/brain_ingestion/integrity_sweep.py`, DevOps runbook). It runs as the ingestion ServicePrincipal on demand: after failed `content_artifact:read` decisions appear in audit, after a restore drill, and before writer activation. It is synchronous, so it authorizes the way Step 2 item 2 does, never through the async `AuthorizationExecution` and never through the worker's separate pre-step gate (`document_delivery.py`, which commits its decision before the job step). Each unit opens one session and transaction, calls `brain_security.execution.decide` over `SyncAuthorityStore` for the `CONTENT_ARTIFACT` key with current `content_artifact:ingest`. If allowed, it runs the effects below in that transaction, appends the decision once with outcome `succeeded` (as `mutate` does) and commits once. If denied, it appends and commits only the denial. Any failure rolls back, then appends a `failed` decision in a fresh transaction. This is the "in-transaction authorization" the backfill and repair also use. For each in-scope `legacy_unverified` or `ready` row, the unit:
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-168-   - locks the row and re-verifies the full bytes with the shared verifier;
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-169-   - on a definitive failure, inserts in foreign-key order: one `content_repair_record` (`INTEGRITY_FAILURE`), one `content_artifact_quarantined` audit event, one `content_artifact_state_event` (trigger `INTEGRITY_SWEEP`, actor = the ingestion ServicePrincipal, `authorization_decision_id` = this unit's decision, referencing both), then updates `publication_state`;
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-170-   - leaves a row that verifies unchanged;
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-171-   - reports transient errors without changing anything.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-172-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-173-   Everything commits with the decision, or nothing does. The sweep also inventories complete markers that have no row. For each one, it appends an `ORPHAN_MARKER` repair record under in-transaction authorization on the marker's `CONTENT_ARTIFACT` key with `require_record=False`, using the provisioned pre-record scope (as the existing worker gate does). Leaving quarantine requires `AUTHORIZED_REPAIR` under the same in-transaction authorization: current `content_artifact:ingest`, full byte re-verification and audit.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:174:10. **Per-document v1 fallback (operator decision 2026-10-16, re-review R-M1).** With `content.v2_writer_enabled=true`, if the Step 1b projection returns `ORIGIN_UNAVAILABLE` for any item, the publisher discards the v2 projection. It publishes that document as a v1 bundle, using the same fenced, authorized transaction as item 5. The source and document version keep the ADR-0073 §3 identity already resolved before conversion (`version_id = uuid5(document_id, 'source-v1:' + source_sha256)`); only the bundle falls back, to the v1 contract, the v1 namespace `bundles/{artifact_id}/` and `artifact_id = uuid5(version_id, 'content')`:
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:175:   - the row is inserted `ready` with `artifact_contract_version=1` and `writer_fallback_reason='ORIGIN_UNAVAILABLE'`;
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-176-   - `content_artifact_published` carries the reason and `unattributed_item_count`;
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-177-   - no v2 records or origins are written.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-178-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-179-   Later runs reuse that accepted v1 artifact. Moving it to v2 needs a governed replacement, which adds a v2 artifact under the same document version. Every other v2 contract or validation failure still fails the publication.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-180-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-181-| Failure point | Observable result / recovery |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-182-|---|---|
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-183-| Before marker | No ready row; valid current publisher may resume identical files; conflicting partial bytes fail |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-184-| After marker, before ready commit | Verified orphan marker; authorized fenced retry adopts it without parse |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-185-| Stale generation/revoked permission | No ready/audit mutation commit; existing complete bundle stays unchanged |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-186-| After ready commit, before worker acknowledgement | Idempotent lookup returns same artifact; no duplicate content event/indexes |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-187-| Missing/corrupt bytes after readiness | Authorized read fails explicitly; repair/restore is governed, not a cache-miss retry |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-188-| Partial parse, intact bundle | Ready content with quality `partial`; failed-page evidence cannot imply a negative fact |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-189-| Definitive verification failure on read | The read decision is persisted `failed` and the read returns 409. The row is unchanged until the integrity sweep quarantines it (state event, audit, `INTEGRITY_FAILURE` repair record). There is no reparse. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:190:| Unattributable item with v2 enabled | The document publishes as v1 with `writer_fallback_reason=ORIGIN_UNAVAILABLE`, recorded in its audit; no v2 origins |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-191-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-192-**Migration sequence:** deploy dual-version readers first; expand nullable metadata columns and new empty tables; inventory and verify legacy rows/bytes; backfill only observed manifest version/hash/recipe metadata, leaving unavailable origin/date data absent; reconcile the existing single-artifact uniqueness and replace it with v2 source-version/recipe uniqueness; enable v2 writers only after all consumers pass. The backfill runs as an operator-run migration job under the existing ingestion ServicePrincipal, using in-transaction authorization (item 9) with current `content_artifact:ingest`. Each row's decision, repair record, audit and state event commit in one transaction, in foreign-key order. Each verified legacy row moves `legacy_unverified → ready` with a `LEGACY_BACKFILL` state event. A row that fails verification moves to `quarantined`. Missing/ambiguous legacy metadata leaves the row `legacy_unverified` (still readable through the v1 verifier) and appends a `content_repair_record` (`LEGACY_BACKFILL_BLOCKED`, with the missing fields in `detail`). DevOps owns triage of repair records. Only operator-run jobs (the backfill and the integrity sweep) and authorized repair append them, always under in-transaction authorization. The restore drill runs against an isolated target and reports in its own evidence; production effects come from the integrity sweep run after the drill. No API route and no tenant or human grant reads or writes them. No source hash is used to infer a new owner. Do not edit migrations 0001–0007.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-193-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-194-Downgrade is allowed only before any v2/date/index data exists. Otherwise refuse destructive downgrade and use forward repair. Original bundle/source/archive history must survive every migration test.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-195-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-196-## Step 3 — Date candidates and explicit selection (S0003)
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-197-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-198-**New implementation files:** `engine/packages/brain-content/src/brain_content/dates.py`, `engine/packages/brain-persistence/src/brain_persistence/document_dates.py`; DTOs follow the date-record schema. No date route or UI is added.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-199-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-200-```python
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-201-@dataclass(frozen=True)
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-202-class VerifiedHumanDateBasis:
+--
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-268-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-269-| Existing endpoint | 200 | Errors after applicable authentication/authorization | Enforcement |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-270-|---|---|---|---|
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-271-| `GET /content/{artifactId}` | Exact persisted v1/v2 manifest JSON, including `legacy_unverified` v1 rows that pass the v1 verifier | 400 malformed input; 401 unverified credentials; 404 absent/denied/not-ready (no row); 409 unsupported version, corrupt/inconsistent or quarantined artifact; 503 authorization/storage unavailable | `AuthorizationExecution.read`, `content_artifact:read`; trusted ArtifactKey then verified load; decision audit committed before response |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-272-| `GET /content/{artifactId}/files/{path}` | Exact declared, verified bytes with declared/derived safe media type | Same; traversal/undeclared file is 404 without alternate lookup; malformed input 400 | Same current restrictions, plus declared-path check; no direct/signed object URL |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-273-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-274-ProblemDetails uses `application/problem+json`, stable `code`, `traceId`, no protected path or existence detail. An authorized corruption response uses `ARTIFACT_INTEGRITY`; unsupported version uses `ARTIFACT_VERSION_UNSUPPORTED`; transient storage uses `CONTENT_UNAVAILABLE`. Authentication/denial behavior retains the existing F0002 contract. New response contracts remain proposed until the feature implementation lands.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-275-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:276:Internal mutations return typed errors rather than inventing HTTP endpoints. Schema/basis errors: `CONTENT_CONTRACT_INVALID`, `ORIGIN_UNAVAILABLE`, `DATE_BASIS_INVALID`, `HUMAN_BASIS_UNAVAILABLE`; conflicts: `ARTIFACT_CONFLICT`, `PARSER_MIGRATION_REQUIRED`, `IDEMPOTENCY_CONFLICT`, `DATE_SELECTION_STALE`; stale lease uses existing `LeaseLost`. A future UI/API owner must map these explicitly when it adds a route.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-277-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-278-### Compatibility matrix
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-279-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-280-| Input/consumer | Required behavior |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-281-|---|---|
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-282-| v1 bundle with or without original source | Readable in `legacy_unverified` and `ready` through the v1 verifier during and after migration; quarantined on definitive verification failure. Preserve bytes/IDs/hash algorithm. Return missing-origin/date explicitly in internal views; do not rewrite manifest or invent record-v2 data. Source-dependent operations fail if source is absent. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-283-| v2 bundle | Both async/sync stores validate the same strict schema, assets, records and hashes; existing PDF evidence translation keeps accepted BoxSelector precision. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-284-| v1 run output marker | Verify existing four files/hash map under current scope; no fabricated pipeline/date fields. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-285-| v2 run output marker | Also validate pipeline identity and exact nullable date-selection reference; result/provenance/graph/configuration stay outside parse inventory. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-286-| Unknown version | Explicit unsupported-version failure; no lenient fallback. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-287-| Existing source with a new profile or writer version | Reuse accepted supported artifact; no schema-upgrade conversion. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:288:| New source | v1 writer, namespace and identities while `content.v2_writer_enabled=false` (the default, and permanently so after a Step 1a FAIL). V2 only after a Step 1a PASS and Step 4 consumer compatibility. With v2 enabled, a document with an `ORIGIN_UNAVAILABLE` item publishes a v1 bundle under its ADR-0073 version identity with a recorded `writer_fallback_reason` (Step 2 item 10), never silently. Any other origin or contract failure fails that publication. |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-289-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-290-`LocalContentArtifactStore` becomes an async adapter over the verified core, using `asyncio.to_thread` for filesystem work. Worker APIs stay synchronous. Common validation/serialization has no dependency on Docling, FastAPI or SQLAlchemy; the neuron adapter alone maps the pinned native model. No verification cache is introduced. The existing non-secret `config/local.yaml` remains the composition root.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-291-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-292-### Restore boundary
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-293-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-294-Quiesce local ingestion/date writes for the backup window; record the selected database revision and content/run inventory, then capture database plus the complete configured content root and dependency/contract versions. Do not claim a consistent distributed snapshot. Restoration uses an isolated DB/content directory, verifies the backup inventory before use, and runs common verification for every referenced ready bundle and retained run marker, all normalized index hashes, date lineage and cross-owner constraints. Missing required bytes fail the drill. Unreferenced partial/orphan objects are reported separately and never promoted by restore. No automatic deletion or new retention period is introduced.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-295-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-296-## Mutation and read traceability
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-297-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-298-| Entry / action | Service / carrier | Authority | Concurrency | Audit / proof |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-299-|---|---|---|---|---|
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-300-| Existing ingestion callback → publish | `publish_ready`; manifest + source/artifact/index rows | Current `content_artifact:ingest`, inherited parent/source restrictions | Authority + job fence + artifact advisory lock; exclusive immutable writes | One publication event with decision ref; crash-point readback; no render-only closure |
+--
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-309-Planning checks: strict schemas and [contract examples](contract-examples.json) via [validate-contract-examples.py](validate-contract-examples.py); OpenAPI validator; local feature readiness; KG compile/drift/reproducibility and the ordered G5 validators. These validate the proposed package only.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-310-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-311-Planned runtime tests (create during the feature action):
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-312-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-313-| Story / criteria | Existing suites to extend; new suites | Required observations |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-314-|---|---|---|
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-315-| S0001 AC1–AC6 | brain-content `test_store.py`, `test_checkpoints.py`; new `engine/tests/integration/test_content_publication_v2.py` | Missing/corrupt/source/native-asset checks, same/different concurrent publish, fence loss, four crash points, restart reuse, one mutation audit |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-316-| Step 1a spike | new `neuron/packages/brain-ingestion/tests/spikes/test_item_provenance.py` (kept as a regression test on PASS) | Per-item origin on native, scanned and mixed fixtures under the pinned converter; recorded exit decision |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md:317:| S0002 AC1–AC7 | brain-ingestion `test_bundle_writer.py`, `test_docling_adapter.py`; new `test_content_projection_v2.py` | Actual native/scanned origins (requires Step 1a PASS); mixed-origin rejection; with v2 enabled, an `ORIGIN_UNAVAILABLE` item publishes a v1 bundle with `writer_fallback_reason` and audit under the ADR-0073 version ID, while a missing producer identity fails; multi-region IDs; cell/header/merge/continuation bounds; Unicode/rotation/unavailable geometry; durable indexes |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-318-| S0003 AC1–AC6 | new brain-content `tests/test_document_dates.py`; new `engine/tests/integration/test_document_date_history.py` | Calendar/source/basis validation, all provenance kinds with controlled verifier, undated/conflict/clear/correction, concurrency/idempotency, denied receipt, select/clear without a verified human selection decision rejected (default verifier and forged receipt), persisted history/audit |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-319-| S0004 AC1–AC6 | API `tests/test_content.py`; existing F0005 compatibility/recovery tests; new `engine/tests/integration/test_content_restore_v2.py`, `test_content_migration_states.py` | Cross-tenant/KB/source/revocation denial across routes and run output reads; Reviewer-only principal (no TenantMember grant) denied `content_artifact:read`; v1 reads before, during and after expand/backfill; a corrupt read returns 409 with a `failed` read decision and no state, audit or repair write; the integrity sweep (`neuron/packages/brain-ingestion/tests/test_content_integrity_sweep.py`) quarantines with its decision, repair record, audit and state event committed in one transaction (and none of them on a mid-unit failure), records orphan markers, and is denied without `content_artifact:ingest`; transient storage error not quarantined; backfill-blocked row stays readable with a repair record; `content_artifact_guard` rejects identity changes and state changes without an event; old/new version matrix; real DB+bytes restore; no fabricated legacy origin; no Graph activation claim |
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-320-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-321-Use PostgreSQL 18 for owner constraints, locking and migration proofs; SQLite cannot establish these guarantees. The four worked examples map to the corresponding rows. Structured planning examples remain synthetic and outside the frozen holdout. Actual converter/OCR entry points must be forbidden during both reuse calls; self-reported counters alone are insufficient. Run expected-vs-observed evidence with exact commands and environment versions.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-322-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-323-Required feature-action reviewers for **all four stories**: Quality Engineer, Code Reviewer, Security Reviewer, DevOps and Architect. Backend/AI engineers own their fast tests; QA owns independent expectations and integration evidence; Security judges resource/access and provenance authority; DevOps owns migration/restart/restore proof; Architect reviews contract/ADR reconciliation. Changed runtime scope requires at least 80% coverage. Performance budgets stay with F0005/F0026; no unmeasured latency target is asserted.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-324-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-325-## Risks, activation and exclusions
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-326-
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-327-1. Per-item producer/origin may be absent in the pinned converter result. Step 1a decides this before writer work. On FAIL, new sources stay on v1 and S0002's v2 origin criteria return to the operator; failing closed is the specified behavior, not permission to guess or activate a new model.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-328-2. Manifest-last publication is not an atomic database/object-store transaction. The explicit orphan-marker recovery and current-authority fence are mandatory tests.
+planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md-329-3. Date HUMAN handoff and human selection have no production producer in this scope. Both default verifiers deny, so production documents stay undated until F0022 lands and the candidate producer is assigned (BLUEPRINT §4.8). This is the approved storage/hook boundary, not a newly implemented reviewer workflow.

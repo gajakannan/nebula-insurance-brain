@@ -1,0 +1,78 @@
+
+### PR2
+Command: python3 agents/scripts/check-plan-approvals.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --plan-scope feature --target F0005
+Stage: PR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### PR2
+Command: python3 agents/product-manager/scripts/validate-stories.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/F0005-one-time-docling-ingestion
+Stage: PR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### PR2
+Command: python3 agents/product-manager/scripts/validate-trackers.py
+Stage: PR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### PR2
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py
+Stage: PR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### PR2
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: PR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### PR2
+Command: python3 agents/scripts/validate_templates.py
+Stage: PR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### PR2
+Command: /usr/bin/python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/validation/validate_plan_readiness.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --plan-scope feature --target F0005
+Stage: PR2
+Exit Code: 0
+Result: PASS
+Output References: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-10-24-0fbc1de1/artifacts/project-checks/PR2-plan-readiness-87c1e90feb114123bb960086fdb82c66.stdout.json, /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-10-24-0fbc1de1/artifacts/project-checks/PR2-plan-readiness-87c1e90feb114123bb960086fdb82c66.stderr.txt, /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-10-24-0fbc1de1/artifacts/project-checks/PR2-plan-readiness-87c1e90feb114123bb960086fdb82c66.result.json
+Skipped Gates: -
+
+## PR2 validation evidence supplement
+
+Core runner records were preserved above. The following per-command result artifacts index the original command records and completed operation IDs; validators were not rerun.
+
+| Operation | Exit code | Summary | Artifact |
+|---|---|---|---|
+| pr2-check-plan-approvals | 0 | Current F0005 planning approval history check passed. | artifacts/validation/pr2-check-plan-approvals.result.json |
+| pr2-validate-stories | 0 | F0005 story validation passed. | artifacts/validation/pr2-validate-stories.result.json |
+| pr2-validate-trackers | 0 | Required tracker validation passed. | artifacts/validation/pr2-validate-trackers.result.json |
+| pr2-kg-validate | 0 | Required KG validation passed. | artifacts/validation/pr2-kg-validate.result.json |
+| pr2-kg-check-drift | 0 | Required KG drift validation passed. | artifacts/validation/pr2-kg-check-drift.result.json |
+| pr2-validate-templates | 0 | Framework template validation passed. | artifacts/validation/pr2-validate-templates.result.json |
+| plan-readiness (required product check) | 0 | PASS; findings=[] | artifacts/project-checks/PR2-plan-readiness-87c1e90feb114123bb960086fdb82c66.stdout.json; artifacts/project-checks/PR2-plan-readiness-87c1e90feb114123bb960086fdb82c66.result.json |
+
+## Final review gates
+
+PR3: PASS. Three role-owned self-reviews confirm exact citations and justified exclusions; see plan-review-report.md and artifacts/{product-readiness,architecture-readiness,buildability-challenge}.md.
+
+PR4: CONDITIONALLY READY. gate_policy.py exited 0; critical=0, high=3, no missing build-critical owner. Evidence: artifacts/severity-policy.txt; gate-state.json confirms procedural completion.
+
+Package audit: PASS; required base files/report sections, seven PR2 check results, PR0–PR4 state, verbatim role ownership, local report links, JSONL shape and absence of feature manifest verified. Evidence: artifacts/package-audit.json.

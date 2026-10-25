@@ -1,0 +1,158 @@
+
+### G4
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G4
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-stories.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/F0005-one-time-docling-ingestion
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/generate-story-index.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --skip-feature-evidence
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --write-coverage-report
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-reproducible
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/scripts/validate_templates.py
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+## Planning rework validation evidence
+
+The core runner exit records above are preserved. Per-command artifacts below index the original exits/journal; core stdout was not retained, and no validator was rerun to reconstruct it.
+
+| Stage / operation | Exit | Summary | Artifact |
+|---|---|---|---|
+| G4 / kg-compile | 0 | KG source compiled into projections/trackers. | artifacts/validation/G4-kg-compile.result.json |
+| G4 / kg-check-drift | 0 | KG drift check passed. | artifacts/validation/G4-kg-check-drift.result.json |
+| G5 / validate-stories | 0 | Story validation passed. | artifacts/validation/G5-validate-stories.result.json |
+| G5 / generate-story-index | 0 | Story index regenerated. | artifacts/validation/G5-generate-story-index.result.json |
+| G5 / validate-trackers | 0 | Tracker-only validation passed. | artifacts/validation/G5-validate-trackers.result.json |
+| G5 / kg-write-coverage | 0 | Coverage projection refreshed. | artifacts/validation/G5-kg-write-coverage.result.json |
+| G5 / kg-check-drift-exit | 0 | Exit KG drift check passed. | artifacts/validation/G5-kg-check-drift-exit.result.json |
+| G5 / kg-check-reproducible | 0 | Compiled output reproducibility passed. | artifacts/validation/G5-kg-check-reproducible.result.json |
+| G5 / validate-templates | 0 | Framework templates validated. | artifacts/validation/G5-validate-templates.result.json |
+| Supplementary product plan-readiness | 0 | PASS, findings=[] | artifacts/product-readiness.txt |
+| Whitespace | 0 | git diff --check clean | artifacts/final-diff-check.txt |
+
+G5 approve-phase-b: PENDING. The runner paused normally (exit 0). No attestation, post-approval operation or approval publication has occurred.
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --write-coverage-report
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-reproducible
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --skip-feature-evidence
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/scripts/approve-plan.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0005 --run-id 2026-10-25-50fcf658 --stage G5
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+## G5 approval publication and final checks
+
+Operator response: approve. Checkpoint approve-phase-b attested against unchanged gate-decisions.md. All required post-approval operations completed through run-gate.py:
+
+| Operation | Exit | Result | Artifact |
+|---|---|---|---|
+| kg-compile-post-approval | 0 | PASS | artifacts/validation/G5-kg-compile-post-approval.result.json |
+| kg-write-coverage-post-approval | 0 | PASS | artifacts/validation/G5-kg-write-coverage-post-approval.result.json |
+| kg-check-reproducible-post-approval | 0 | PASS | artifacts/validation/G5-kg-check-reproducible-post-approval.result.json |
+| kg-validate-post-approval | 0 | PASS | artifacts/validation/G5-kg-validate-post-approval.result.json |
+| validate-trackers-post-approval | 0 | PASS | artifacts/validation/G5-validate-trackers-post-approval.result.json |
+| approve-plan | 0 | PASS | artifacts/validation/G5-approve-plan.result.json |
+| Published approval-history check | 0 | PASS; current F0005 plan is this run, no errors | artifacts/published-approval-history.txt |
+| Product plan-readiness | 0 | PASS; findings=[] | artifacts/approved-product-readiness.txt |
+| Whitespace check | 0 | PASS | artifacts/approved-diff-check.txt |
+
+G5: COMPLETE. Approved plan publication and explicit supersession chain verified. Requirements/checklist and historical review preserved. No product planning edits were made after the post-approval refresh.

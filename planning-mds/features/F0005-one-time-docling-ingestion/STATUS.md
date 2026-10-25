@@ -1,12 +1,14 @@
 # F0005 — One-time document ingestion — Status
 
-**Overall Status:** Synthetic development scope complete; local qualification and gated activation re-planned. The opt-in candidate and its development proof are implemented. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).\
-**Last Updated:** 2026-10-23\
-**Plan Run:** `2026-10-23-9a04b327` (first F0005 plan run)
+**Overall Status:** Synthetic development scope complete; local qualification and gated activation have approved Phase B rework. The opt-in candidate and its development proof are implemented; the new deadline, singleton and default-selection controls are planned only. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).\
+**Last Updated:** 2026-10-25\
+**Plan Run:** `2026-10-25-50fcf658` (Phase B, existing feature, approved 2026-10-25; follows `2026-10-23-9a04b327`)
 
 ## Planning Position
 
-Plan run `2026-10-23-9a04b327` re-plans the remaining work against shipped F0002–F0004. Operator decisions at G1 (2026-10-23): local live qualification on the development host with gated activation; a synthetic qualification corpus with independent expectations and independent agent-role reviewers; F0005 enables the F0004 v2 writer as an activation step (new story S0005); F0016 owns document-date candidates. The PRD fixes the qualification thresholds. Phase A was approved with `approve-phase-a` and Phase B with `approve-phase-b` on 2026-10-23. The plan is ready for the feature action, starting with Step 0 preflight and the Step 1 corpus. Planning does not authorize implementation or change delivery priority.
+Plan run `2026-10-23-9a04b327` re-planned the remaining work against shipped F0002–F0004. Operator decisions at G1 (2026-10-23): local live qualification on the development host with gated activation; a synthetic qualification corpus with independent expectations and independent agent-role reviewers; F0005 enables the F0004 v2 writer as an activation step (new story S0005); F0016 owns document-date candidates. The PRD fixes the qualification thresholds. Phase A was approved with `approve-phase-a` and the preceding Phase B with `approve-phase-b` on 2026-10-23.
+
+[Plan review `2026-10-24-0fbc1de1`](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md) found three high gaps. The operator requested plan-action repairs; run `2026-10-25-50fcf658` is Phase B for this existing feature. Its [assembly plan](feature-assembly-plan.md) addresses PM-1 with initial/rejection direct-baseline settings and isolated candidate configs, ARCH-1 with supervised conversion and a parent-owned 300-second outcome/publication fence, and BLD-1 with an enforced host singleton plus confirmed provider quiescence after uncertain requests. The new negative proof inventory covers restart/rejection, hung/late conversion, process-group cleanup, two-process refusal and in-flight SIGKILL/timeout recovery. Requirements, stories and thresholds are unchanged. The operator explicitly approved this revised Phase B design on 2026-10-25 with the response `approve`; gate and publication results are recorded in the current run. The approved design is ready for the feature action, starting with preflight. Historical plan/review evidence is preserved. Planning does not authorize implementation or change delivery priority.
 
 ## Synthetic development scope (2026-09-20 to 2026-09-22)
 
@@ -75,7 +77,7 @@ The candidate has been merged to main from `feature/docling-graph-delivery`, bas
 
 ## Required Signoff Roles
 
-Architecture reviews the checkpoint and invariants; QA reviews independent results; security reviews boundaries and resource/retention controls; code review covers runtime integration. Named reviewers and their actual verdicts remain pending.
+Every story requires Quality Engineer, Code Reviewer, Security, DevOps and Architect signoff, matching the assembly plan. Architecture reviews the checkpoint/deadline and invariants; QA reviews independent results; Security reviews boundaries and resource/retention controls; Code Reviewer covers runtime integration; DevOps reviews shared host locks, provider recovery, subprocess cleanup and migration/restore/serving proof. Named reviewers and their actual runtime verdicts remain pending. The separate QA/Architect/Security qualification verdicts and operator acceptance gate activation and do not replace the full story signoff set.
 
 ## Story Signoff Provenance
 

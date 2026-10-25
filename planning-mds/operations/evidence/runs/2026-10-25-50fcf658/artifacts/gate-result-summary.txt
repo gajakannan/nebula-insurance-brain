@@ -1,0 +1,105 @@
+{
+  "G4": {
+    "status": "completed",
+    "completed_operations": [
+      "kg-compile",
+      "kg-check-drift"
+    ],
+    "pending_checkpoint": null
+  },
+  "G5": {
+    "status": "pending-checkpoint",
+    "completed_operations": [
+      "validate-stories",
+      "generate-story-index",
+      "validate-trackers",
+      "kg-write-coverage",
+      "kg-check-drift-exit",
+      "kg-check-reproducible",
+      "validate-templates"
+    ],
+    "pending_checkpoint": {
+      "description": "User reviews architecture; the Architect records the explicit approval token in gate-decisions.md after exit validation is green. Make any approval-status edits to planning artifacts (STATUS/README/PRD/assembly plan/ADR/kg-source shard), attest, then re-run G5 so the post-approval operations refresh the KG.",
+      "id": "approve-phase-b",
+      "produces": [
+        "phase-b-approved"
+      ],
+      "requires": [
+        "gate-decisions.md"
+      ]
+    }
+  }
+}
+
+### G4
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G4
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-stories.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/F0005-one-time-docling-ingestion
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/generate-story-index.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --skip-feature-evidence
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --write-coverage-report
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-reproducible
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/scripts/validate_templates.py
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+

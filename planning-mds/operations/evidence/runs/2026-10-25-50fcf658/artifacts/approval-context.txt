@@ -1,0 +1,34 @@
+# F0005 targeted plan rework
+
+## Run identity and inputs
+
+- Action: plan; contract scope: base-run-only; policy 2026-07-11.
+- NEBULA_PRODUCT_ROOT: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain (explicit operator selection retained from this conversation, resolved again on 2026-10-25).
+- Framework: /home/gajap/uSandbox/repos/nebula/nebula-agents.
+- FEATURE_ID: F0005; FEATURE_SLUG: one-time-docling-ingestion; FEATURE_MODE: existing.
+- FEATURE_PATH: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/F0005-one-time-docling-ingestion.
+- PHASE: B. PM verified the existing approved requirements already specify each required outcome; no Phase A scope, threshold, story or acceptance change is needed.
+- PLAN_RUN_ID: 2026-10-25-50fcf658, minted once by init-run.py using its contract run-ID generator.
+- PLAN_RUN_FOLDER: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-10-25-50fcf658.
+- rerun_of: 2026-10-23-9a04b327 (approved Phase A+B plan).
+- Repair input: plan-review run 2026-10-24-0fbc1de1, PM-1 / ARCH-1 / BLD-1.
+
+## Authorization and boundaries
+
+Operator: “use the nebula-agents/agents/actions/plan and appropriate agent roles to fix these gaps”. This authorizes concrete planning repairs and checks. It is not an explicit approval of as-yet-unwritten architecture and does not authorize runtime implementation or activation.
+
+PM owns requirement interpretation and preservation. Architect owns Phase B design, dependent planning metadata and authored KG shards. Code Reviewer challenges the repaired handoff without editing planning artifacts. The coordinator owns this run's evidence and procedural gates. No standalone feature role reports, feature index, feature evidence package or current-run.json are created.
+
+Preserve Phase A approval and the historical review; do not rewrite earlier findings as if they never existed. Record architecture reconciliation explicitly. G1–G3 are not rerun in PHASE=B; G4 ontology sync and G5 exit checks/architecture approval apply. Stop at approve-phase-b until explicit operator approval of the concrete revision; approval publication and supersession run only through approve-plan.py after that checkpoint.
+
+## PM requirement disposition
+
+- PM-1: PRD Business Objective and S0004 AC7 already require direct-baseline behavior on rejection. Correct the architecture's Graph-direct initial selector and unchanged-settings rejection branch; do not weaken the story.
+- ARCH-1: S0001 Non-Functional Expectations already requires completion or explicit failure within 300 seconds. Specify supervised conversion, parent publication fencing and a hung-converter test; keep the bound.
+- BLD-1: S0002 AC4 requires limit 1 under competing-worker attempts, while PRD and S0004 measurement use one worker replica. Specify an enforced singleton and retain a two-process negative proof; no distributed multi-host quota enters scope.
+
+No business clarification is needed: fixes implement already approved rules. No user risk acceptance, new requirements approval or runtime proof is invented.
+
+## Current lifecycle position
+
+G4 completed. All seven G5 pre-approval operations and supplementary product/whitespace checks passed. G5 is pending-checkpoint approve-phase-b; no attestation exists and manifest status is draft. On resume reuse this root and run ID, read resume-brief.py first, and continue at this checkpoint rather than creating another run.

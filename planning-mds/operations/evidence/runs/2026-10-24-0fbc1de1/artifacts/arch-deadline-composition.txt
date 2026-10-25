@@ -1,0 +1,163 @@
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-100-        if not args.import_only:
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-101-            model = os.environ["BRAIN_INFERENCE_MODEL"]
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-102-            revision = os.environ["BRAIN_INFERENCE_MODEL_REVISION"]
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-103-            key = os.environ["BRAIN_INFERENCE_API_KEY"]
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-104-            endpoint = os.environ["BRAIN_INFERENCE_BASE_URL"]
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-105-            counter = cached_model_token_counter(model, revision)
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-106-            slots = BoundedSemaphore(1)
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-107-
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:108:            def client_factory(cancelled: Event) -> VllmGraphClient:
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-109-                return VllmGraphClient(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-110-                    base_url=endpoint,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-111-                    api_key=key,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-112-                    model_id=model,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-113-                    model_revision=revision,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-114-                    token_counter=counter,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-115-                    slots=slots,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-116-                    cancelled=cancelled,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-117-                )
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-118-
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-119-            worker = DocumentWorker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-120-                queue=queue,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-121-                store=store,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-122-                authorize_for_job=authorization.for_job,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:123:                client_factory=client_factory,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-124-                publish_content=publication.publish_manifest,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-125-                load_accepted=access.resolve,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-126-                v2_writer_enabled=writer_config.v2_writer_enabled,
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-127-            )
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-128-        # One process / one document / one model request at a time. Deployment must
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-129-        # cap replicas; this semaphore is intentionally not a distributed GPU quota.
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-130-        while not stop.is_set():
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-131-            worked = worker.run_one() if worker is not None else False
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-132-            imported = importer.run_one()
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-133-            if args.once:
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-134-                break
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-135-            if not worked and not imported:
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-136-                stop.wait(1)
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-137-        return 0
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-138-    finally:
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-139-        engine.dispose()
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-140-
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-141-
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-142-if __name__ == "__main__":
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-143-    try:
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-144-        raise SystemExit(main())
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-145-    except Exception as exc:
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-146-        # SDK/DB exceptions may contain credentials or source text.
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py-147-        raise SystemExit(f"document_worker_failed:{type(exc).__name__}") from None
+--
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-51-def load_or_convert_content(
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-52-    *,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-53-    lease: JobLease,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-54-    task: DocumentTask,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-55-    store: CheckpointStore,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-56-    authorize: Callable[[UUID, UUID, UUID, str], None],
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-57-    publisher: ContentPublisher,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-58-    load_accepted: Callable[[JobLease], VerifiedBundle | None] | None,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py:59:    converter: Callable[[Path], ParseResult[DoclingDocument]] | None,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py:60:    client_factory: Callable[[Event], VllmGraphClient],
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-61-    cancelled: Event,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-62-    profile: ExtractionProfile,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-63-    v2_writer_enabled: bool,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-64-) -> VerifiedBundle:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-65-    accepted = load_accepted(lease) if load_accepted else None
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-66-    if accepted is not None:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-67-        authorize(lease.tenant_id, lease.knowledge_base_id, accepted.key.artifact_id, "ingest")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-68-        authorize(lease.tenant_id, lease.knowledge_base_id, accepted.key.artifact_id, "interpret")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-69-        return accepted
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-70-    preferred = ArtifactKey(
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-71-        lease.artifact_id, lease.tenant_id, lease.knowledge_base_id, task.content_contract_version
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-72-    )
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-73-    candidates = [preferred]
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-74-    if task.content_contract_version == 2:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-75-        candidates.append(fallback_key(task.version_id, lease.tenant_id, lease.knowledge_base_id))
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-76-    for key in candidates:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-77-        authorize(lease.tenant_id, lease.knowledge_base_id, key.artifact_id, "ingest")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-78-        authorize(lease.tenant_id, lease.knowledge_base_id, key.artifact_id, "interpret")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-79-        try:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-80-            retained = store.load_verified(key)
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-81-        except ObjectNotFoundError:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-82-            # Only an absent completion marker is a recoverable miss. Corrupt
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-83-            # accepted bytes never cause another key lookup or conversion.
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-84-            continue
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-85-        publisher(lease, retained.manifest, retained.files)
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-86-        return store.load_verified(key)
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-87-    if task.content_contract_version == 2 and not v2_writer_enabled:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-88-        raise ParserMigrationRequired("v2 publication is disabled for new sources")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py:89:    if converter is None and physical_recipe(task.content_contract_version) != task.recipe_sha256:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-90-        raise ParserMigrationRequired("queued physical recipe differs from the installed parser")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-91-    source_key = f"sources/{lease.tenant_id}/{lease.knowledge_base_id}/{task.source_sha256}.pdf"
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-92-    source_bytes = store.objects.read(source_key)
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-93-    if hashlib.sha256(source_bytes).hexdigest() != task.source_sha256:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-94-        raise ValueError("source hash mismatch")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-95-    convert = (
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py:96:        converter or DoclingAdapter(capture_provenance=task.content_contract_version == 2).parse
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-97-    )
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-98-    published: VerifiedBundle | None = None
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-99-
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-100-    def publish(parsed: ParseResult[DoclingDocument]) -> None:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-101-        nonlocal published
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-102-        if (
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-103-            parsed.status == "failed"
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-104-            or parsed.page_count < 1
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-105-            or not (parsed.document.texts or parsed.document.tables)
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-106-        ):
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-107-            raise ValueError("CONTENT_CONTRACT_INVALID")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-108-        reason: Literal["ORIGIN_UNAVAILABLE"] | None = None
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-109-        count = 0
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-110-        target = preferred
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-111-        manifest: Manifest
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-112-        if task.content_contract_version == 2:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-113-            try:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-114-                manifest, files = build_bundle_v2(
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-115-                    parsed,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-116-                    tenant_id=lease.tenant_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-117-                    knowledge_base_id=lease.knowledge_base_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-118-                    document_id=task.document_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-119-                    version_id=task.version_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-120-                    artifact_id=preferred.artifact_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-121-                    source_bytes=source_bytes,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-122-                    recipe_sha256=task.recipe_sha256,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-123-                    execution=ParserExecutionV2(
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-124-                        parser_name="docling",
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-125-                        parser_package_version=f"docling=={version('docling')}",
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-126-                        projection_version=PROJECTION_VERSION,
+--
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-160-                source_filename="source.pdf",
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-161-            )
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-162-        authorize(lease.tenant_id, lease.knowledge_base_id, target.artifact_id, "ingest")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-163-        publisher(
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-164-            lease, manifest, files, writer_fallback_reason=reason, unattributed_item_count=count
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-165-        )
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-166-        published = store.load_verified(target)
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-167-
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py:168:    client = client_factory(cancelled)
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-169-    try:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py:170:        with tempfile.TemporaryDirectory(prefix="nebula-source-") as directory:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-171-            path = Path(directory) / "source.pdf"
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-172-            path.write_bytes(source_bytes)
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-173-            DoclingGraphPipelineAdapter(llm_client=client, model_id=client.model).run(
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-174-                source=path,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-175-                template=profile.template,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py:176:                converter=convert,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-177-                publish=publish,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-178-                conversion_only=True,
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-179-            )
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-180-    finally:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-181-        client.close()
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-182-    if published is None:
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-183-        raise RuntimeError("conversion did not publish a verified checkpoint")
+neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py-184-    return published
+--
+engine/packages/brain-jobs/src/brain_jobs/queue.py-423-                .mappings()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-424-                .one_or_none()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-425-            )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-426-            if row is None:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-427-                raise PermissionError("job is not in scope")
+engine/packages/brain-jobs/src/brain_jobs/queue.py-428-            if row["state"] in ("complete", "cancelled", "failed"):
+engine/packages/brain-jobs/src/brain_jobs/queue.py-429-                return
+engine/packages/brain-jobs/src/brain_jobs/queue.py-430-            conn.execute(update(jobs).where(jobs.c.id == str(job_id)).values(state="cancelled"))
+engine/packages/brain-jobs/src/brain_jobs/queue.py:431:            # Keep the artifact lease until timeout: an in-flight converter must not
+engine/packages/brain-jobs/src/brain_jobs/queue.py-432-            # overlap a new one just because its consumer requested cancellation.
+engine/packages/brain-jobs/src/brain_jobs/queue.py-433-            self._event(conn, str(job_id), row["generation"], "cancelled")

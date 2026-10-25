@@ -1,0 +1,488 @@
+# SOLUTION-PATTERNS.md — Nebula Insurance Brain
+
+Project-level implementation conventions every role follows. Seeded by the Architect at F0001 Phase B from the master blueprint and the accepted ADRs; changes go through an ADR first.
+
+## Metadata
+
+- Project: Nebula Insurance Brain
+- Version: 0.1
+- Last Updated: 2026-09-28 (F0002: authorization enforcement point, ADR-0062)
+- Owners: Architect (patterns), Security (pattern 1 co-sign)
+- Scope: `engine/`, `neuron/`, `experience/` (from F0021), runtime assets, contracts under `planning-mds/`
+
+## Pattern Categories
+
+- `MUST` - mandatory convention for this solution
+- `SHOULD` - recommended convention unless a documented exception exists
+- `MAY` - optional convention based on feature needs
+
+## Pattern Scope Labels
+
+- `Universal` - technology-agnostic rule expected in any stack
+- `Stack-Specific` - tied to a concrete framework/tool choice
+- `Hybrid` - universal policy with stack-specific implementation details
+
+---
+
+## 1. Authorization Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: authentik OIDC, native Casbin adapter in `brain_security`, PostgreSQL-backed principals and memberships
+
+### Decision
+- Policy model: verified `(issuer, subject)` → stable internal principal; structural tenancy (tenant, knowledge base) resolved from current grants; Casbin evaluates `(role, resource type, action, condition)` over server-hydrated typed attributes; authorization is the conjunction of membership, action, resource or parent scope, classification, and delegation limits.
+- Enforcement point: every API route authenticates through `brain_api.deps.current_principal` and runs its protected operation through `brain_security.execution.AuthorizationExecution` (`read` / `mutate`), which locks current authority, evaluates with the pure `brain_security.evaluation.evaluate`, and commits the decision audit before any payload or together with the mutation. Background workers use the same `execution.decide` orchestration over a sync store. No consumer assembles its own resource snapshot. Commit services run inside the facade's unit of work. Search, vector, and graph paths filter before rows, counts, facets, and snippets; MCP uses the same path.
+
+### Rationale
+- Master blueprint sections 66, 118 to 120; ADR-0030; proposed ADR-0049, ADR-0050, ADR-0053. The CRM gaps in section 119 are not copied.
+
+### Applied In
+- Backend: `brain_security` (verifier, identity profile, resolver, Casbin adapter, evaluator, execution facade, delegation rules, audit); trusted state in `brain_persistence` (`authx`, `tenancy`, `identity`, `grants`); routes in `brain_api.routes.*`
+- Frontend: renders what the API returns; never derives permissions client-side (F0021)
+- AI layer: `neuron/` calls the engine as the acting principal; the model server receives no identity data
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```text
+p, TenantMember, content_artifact, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, Reviewer, review_task, annotate, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, ServicePrincipal, fact_slot, commit, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+```
+
+Denials are reported as 404; reason codes live only in `audit_event`.
+
+---
+
+## 2. Audit and Timeline Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: PostgreSQL append-only tables written inside the same transaction as the change
+
+### Decision
+- What gets logged: every authorization decision (policy hash, grant revision, actor and delegate, resource, action, decision, reason code, trace id); every canonical commit (commit id, fact versions, change reason, evidence); every review decision; every interpretation run.
+- Event immutability policy: `audit_event`, `outbox_event`, `canonical_fact_change`, `review_event`, and `review_decision` are append-only; corrections create new rows linked to the originals (ADR-0037).
+
+### Rationale
+- Sections 17, 66, 109.3; ADR-0009, ADR-0010, ADR-0037; proposed ADR-0041.
+
+### Applied In
+- Data model: `audit_event`, `outbox_event`, `canonical_fact_change`, `review_event`
+- Workflow engine: none in v0.1; Temporal (F0050) proposes state changes only through commit services (ADR-0028)
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```json
+{"actor_principal_id": "…", "resource_type": "fact_slot", "action": "commit", "decision": "allow", "policy_hash": "sha256:…", "grant_revision": 7, "trace_id": "…"}
+```
+
+---
+
+## 3. API Design Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: FastAPI, OpenAPI 3.1 contract in `planning-mds/api/brain-api.yaml`, JSON Schema 2020-12 in `planning-mds/schemas/`
+
+### Decision
+- API style: REST over root resource paths (`/content/{id}`, `/facts/{id}`, `/reviews/{id}`); no `/api` prefix; nouns only; versioning by OpenAPI `info.version` until a breaking change forces a path version.
+- Error format: RFC 9457 `ProblemDetails` with a stable `code` and a `traceId` extension member (the one camelCase field, required by the framework API contract validator), media type `application/problem+json`.
+- Pagination approach: cursor-based (`cursor`, `limit` up to 100) for list endpoints (none in F0001).
+- Time coordinates: `validAsOf` and `knownAsOf` query parameters on canonical reads, defaulting to now.
+
+### Rationale
+- Section 68; ADR-0013; the framework API validator rejects `/api` prefixes and requires ProblemDetails on error responses.
+
+### Applied In
+- API contracts: `planning-mds/api/brain-api.yaml`
+- Service endpoints: `brain_api.routes.*`
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```http
+GET /facts/8b2c…?validAsOf=2026-07-01T00:00:00Z&knownAsOf=2026-06-05T00:00:00Z
+```
+
+---
+
+## 4. Clean Architecture Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: Python packages under `engine/packages/` and `neuron/packages/`
+
+### Decision
+- Layer boundaries: `brain_domain` (frozen dataclasses, enums, invariants, no I/O) → application packages (`brain_security`, `brain_temporal`, `brain_review`, `brain_content` ports) → infrastructure adapters (`brain_persistence`, local filesystem content adapter) → `brain_api` and `brain_worker`.
+- Dependency direction: inward only; adapters implement `Protocol` ports declared in application packages; `brain_api` wires them in `create_app()`.
+- `neuron/` mirrors the split: `brain_interpretation` (models, ports) → `brain_ingestion` (bundle writer and durable publication callback) and `brain_extraction` (the upstream Graph pipeline adapter, compiled templates, and result/evidence translation). This is the ADR-0060 target; F0001 currently uses Docling plus a direct-vLLM adapter. Keep upstream graph IDs and output directories outside domain contracts.
+
+### Rationale
+- Master blueprint section 114.3 (package list as code boundaries); BLUEPRINT 2.3 boundary rules.
+
+### Applied In
+- `engine/`: as above
+- `neuron/`: as above; writes to canonical truth only through engine commit services (section 64)
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```text
+brain_domain -> brain_temporal (port: CanonicalFactRepository) -> brain_persistence (SQLAlchemy) -> brain_api
+```
+
+---
+
+## 5. Frontend Pattern
+
+### Scope
+- Label: `Stack-Specific`
+- Stack context: React, TypeScript, Vite, TanStack Query, React Hook Form, AJV (BLUEPRINT 2.1)
+
+### Decision
+- Form strategy: React Hook Form with AJV validation against the shared JSON Schemas.
+- Data-fetching strategy: TanStack Query over the OpenAPI contract; no client-side permission derivation.
+- Validation strategy: the same JSON Schema files the backend validates against (ADR-0013).
+
+### Rationale
+- ADR-0013, ADR-0036; the semantic-first UX in section 72.
+
+### Applied In
+- `experience/`: from F0021; feature-slice folders `src/features/<feature>/`
+
+### Enforcement Level
+- `SHOULD` until F0021 lands, then `MUST`
+
+### Example
+
+```text
+React Hook Form + AJV (draft 2020-12) + TanStack Query, semantic theme tokens only
+```
+
+---
+
+## 6. Data Modeling Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: PostgreSQL 18, SQLAlchemy 2, Alembic, range types with btree_gist
+
+### Decision
+- Entity identity strategy: UUID primary keys; external identifiers scoped by namespace and version (section 107.3); every authoritative row carries `tenant_id` and `knowledge_base_id` (ADR-0030).
+- Soft delete policy: canonical facts are never deleted or soft-deleted; they end with a change reason (ADR-0009); governed retention and deletion arrive with F0026 (proposed ADR-0043).
+- Temporal/audit fields: canonical fact and relationship versions carry `valid tstzrange` and `recorded tstzrange` with a two-range GiST exclusion; `source_received_at`, `artifact_created_at`, `assertion_created_at`, `canonical_accepted_at` are stored separately; all rows carry `created_at`.
+
+### Rationale
+- Sections 13 to 16, 78, 109.1, 109.2; ADR-0006 to ADR-0009.
+
+### Applied In
+- Entity model docs: `planning-mds/architecture/data-model.md`
+- Migrations: `engine/migrations/versions/`
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```sql
+canonical_fact_version(id, slot_id, tenant_id, knowledge_base_id, value jsonb, valid tstzrange, recorded tstzrange, change_reason, commit_id,
+  EXCLUDE USING gist (slot_id WITH =, valid WITH &&, recorded WITH &&))
+```
+
+---
+
+## 7. Testing Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: pytest with coverage for `engine/` and `neuron/`; Playwright for `experience/` (from F0021)
+
+### Decision
+- Unit/integration/e2e split: unit tests own domain invariants and pure logic; integration tests run against the Compose stack (database, object store, authentik); evaluation tests run against the Golden Corpus fixtures; contract tests validate JSON Schemas and the OpenAPI document.
+- Coverage targets: 80% line coverage per workspace (framework evidence contract); severe-error rate and precision/recall reported with sample sizes (section 115.2).
+- Test data policy: synthetic or licensed fixtures only; no production documents; fixture text never enters telemetry.
+
+### Rationale
+- Sections 96 to 98, 115; framework feature evidence contract.
+
+### Applied In
+- Test plans: per feature under the run's `test-plan.md`
+- CI checks: `.github/workflows/ci-gates.yml` product-gates job
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```text
+Unit: brain_domain, range splitting, context guard
+Integration: verifier, commit, review round trip, stack health
+Evaluation: parse once and reinterpret on the GL fixture
+```
+
+---
+
+## 8. Workflow Pattern
+
+### Scope
+- Label: `Universal`
+
+### Decision
+- State model: three separate state families, never conflated: canonical (accepted truth), observed (what a system reports), execution (Temporal from F0050); every state transition of canonical state is a canonical commit.
+- Transition constraints: proposals pass authorization, validation, and evidence requirements before commit; review decisions and commits are append-only.
+- Compensation/retry rules: PostgreSQL-backed jobs with idempotency keys, attempts, lease and heartbeat, and a transactional outbox; retries never create duplicate accepted effects (section 114.1).
+
+### Rationale
+- Sections 59 to 62, 109, 114.1; ADR-0028.
+
+### Applied In
+- Workflow specs: `planning-mds/kg-source/nodes/workflows/`
+- Orchestration services: `brain_temporal.commit`, `brain_worker`
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```text
+Interpretation: received -> parsed -> (interpreted | partial | failed)
+Review: open -> task_created -> (decided | stale)
+Commit: proposed -> authorized -> committed -> projected
+```
+
+---
+
+## 9. Cross-Cutting Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: structlog-style JSON logs, OpenTelemetry-compatible trace ids, pydantic settings
+
+### Decision
+- Observability defaults: structured logs with `trace_id`, principal id, resource ids, model id, token counts, latency, and status; never full prompts, full model responses, fixture text, or PII (section 114.2).
+- Error handling standard: typed `BrainError(code)` hierarchy mapped to ProblemDetails; no stack traces in responses.
+- Configuration strategy: committed, non-secret local defaults live in `config/local.yaml`; the composition root loads that file without requiring storage environment variables. Deployment-specific overrides and secrets remain outside the repository and are introduced only where a future integration requires them.
+
+### Rationale
+- Sections 110.4, 114.2; ADR-0055 client conventions.
+
+### Applied In
+- All services and runtimes
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```text
+{"trace_id": "…", "principal_id": "…", "model_id": "microsoft/Phi-4-mini-instruct", "prompt_tokens": 2810, "latency_ms": 412, "status": "complete"}
+```
+
+---
+
+## 10. DevOps Pattern
+
+### Scope
+- Label: `Stack-Specific`
+- Stack context: Docker Compose, custom PostgreSQL image, host-GPU vLLM, GitHub Actions
+
+### Decision
+- Container strategy: Compose for the local stack with pinned tags or digests; the PostgreSQL image is built from `docker/postgres/Dockerfile`; the inference service runs on the host per the runbook (ADR-0054, ADR-0055).
+- Environment promotion model: local Compose now; the production host is an open decision settled by F0026 (section 117.1).
+- Secrets handling: never in the repository; committed local configuration contains no credentials. Future deployment integrations use platform secret management.
+
+### Rationale
+- Sections 114.3, 117.1; ADR-0054.
+
+### Applied In
+- Dockerfiles: `docker/postgres/Dockerfile`
+- Compose: `docker-compose.yml`; runbook `docker/local-inference-runbook.md`
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```text
+docker compose up -d; scripts/dev/check_pins.py; backup and restore drill per scripts/ops/
+```
+
+---
+
+## Pattern Update Process
+
+1. Propose changes via ADR or architecture note.
+2. Review impact across backend, AI runtime, frontend, test, and devops.
+3. Update this file with rationale and enforcement level.
+4. Communicate changes before implementation begins.
+
+## Change Log
+
+- 2026-09-06: Initial project-specific pattern set created at F0001 Phase B.
+
+
+## F0005 candidate composition — 2026-09-20
+
+The opt-in `brain_ingestion.worker_cli` composes engine-owned jobs/authorization and result import with neuron-owned conversion/extraction activities. `brain-contracts` holds the shared result DTO; engine code does not import the AI runtime. Publication is manifest-last and fenced by the current artifact lease. Missing files under an accepted manifest are corruption, never a cache miss. A completion outbox imports the result and acknowledges delivery in one database transaction; retries do not promote or duplicate canonical facts.
+
+The fixed-template candidate uses Graph direct extraction. Scalar values receive independent native selectors or remain unresolved. Unhandled entity/relationship output fails closed. Production compilation and targeted evolution remain in F0015/F0032. Activation and PostgreSQL/live-model qualification are still gated by ADR-0060; see [F0005 status](../features/F0005-one-time-docling-ingestion/STATUS.md).
+# Authorization Review — Nebula Insurance Brain
+
+**Status:** Draft
+**Date:** 2026-09-05
+**Owner:** Security role (completes during Phase B of F0002 and F0018)
+
+## Scope
+
+This review seeds the Brain's authorization model from the master blueprint (sections 65, 66, 110, and 118 to 122). It is a draft until the permission catalog, Casbin model and policy files, and the carryover tests in section 121.2 exist in this repository.
+
+## Identity and principals
+
+- Identity provider: authentik OIDC. Verified `(issuer, subject)` maps to a stable internal principal through a governed registry contract (proposed ADR-0049).
+- Principal kinds: UserPrincipal, ServicePrincipal, AgentPrincipal; Membership, Role, Permission, ResourceScope are first-class (section 66).
+- Reviewer identity: the reviewer is the authenticated session principal in the native Review Panel, so there is no callback to trust and no second directory to map (ADR-0057); annotation permission remains separate from adjudication and canonical approval authority (sections 75, 111.2, 125; proposed ADR-0044 and ADR-0052).
+
+## Policy evaluation
+
+- Native Casbin adapter behind an AuthorizationService; typed, server-hydrated resource attributes; cross-runtime behavior fixtures to prove parity with the CRM reference (proposed ADR-0050).
+- Decision = current tenant and knowledge-base membership AND permitted action AND actual resource or parent scope AND classification and source restrictions AND delegation limits (section 66).
+- Structural tenancy (`tenant_id`, `knowledge_base_id`) is resolved from verified identity and trusted grants, separately from broker, distribution, account, policy, and evidence scope; request filters may only narrow (section 65, ADR-0030).
+
+## Enforcement points
+
+API, commit services, search, vector retrieval, AGE traversal, evidence access, ontology access, conversation context assembly, MCP, and the execution gate. Security filters participate during retrieval, never after (section 66). Historical business query dates cannot reinstate revoked permissions (proposed ADR-0053).
+
+## CRM gaps that must not be copied (section 119)
+
+1. Unverified identity selecting Neuron-owned records (high).
+2. Document parent attributes not enforced by the Casbin adapter (high).
+3. Token storage and logout not forming one contract (high design inconsistency); the Brain proposes a same-origin BFF with server-held tokens (proposed ADR-0051).
+4. Policy parity drift between catalog, matrix, and runtime (medium); the Brain tests all three together.
+
+## Audit
+
+Every authorization decision records policy version or hash, grant revision, actor and delegate, resource and action, decision and reason codes, and trace ID. Baseline enforcement and audit are v0.1 obligations (sections 66, 89).
+
+## Required evidence before acceptance
+
+- Carryover test matrix from section 121.2 implemented and passing for the affected boundaries.
+- Isolation, revocation, graph, vector, export, and chat leakage suite passing (section 115.2 Authorization gate).
+- Permission catalog and review boundaries documented per section 120.2, with policy files under `policies/`.
+# ADR-0073: Versioned Content Contracts and Append-Only Document Metadata
+
+## Status
+
+- [x] Proposed
+- [ ] Accepted
+- [ ] Superseded
+- [ ] Rejected
+
+**Date:** 2026-10-15\
+**Owner:** Architect\
+**Scope:** F0004, v0.1A\
+**Requirements approval:** operator “proceed with Phase B”, plan run `2026-10-15-bbd8df01`. Phase B design approved by operator `approve-phase-b` on 2026-10-16. Amended in plan run `2026-10-16-fce2ff91` for plan-review `2026-10-16-a186bc18` findings, from four operator decisions (2026-10-16); re-approved with `approve-phase-b`. Amended again in plan run `2026-10-16-06e0131a` for re-review `2026-10-16-b98c71c4` (two operator decisions, 2026-10-16); re-approved with `approve-phase-b`. Corrected in plan run `2026-10-17-620b7618` for full-review gaps; re-approved with `approve-phase-b`. This ADR remains Proposed until its runtime proofs pass.
+
+## Context
+
+Accepted ADR-0003/0004/0040/0059 separate source, content and interpretation, retain the native six-file parse set, and require immutable verified publication. The F0004 amendments add text-origin and document-date storage. ADR-0060/0064/0065 remain Proposed; their broader behavior is not accepted by this record.
+
+The implementation audit found:
+
+- `brain_content.manifest.ArtifactManifest` is strict v1; new mandatory metadata cannot be silently inserted into v1.
+- `build_bundle()` emits `source.pdf`, but the published v1 JSON Schema omits that observed filename. The v1 filename enum receives a compatible clarification; no historical bytes or origin/date values are rewritten.
+- Async `LocalContentArtifactStore` and synchronous `CheckpointStore` enforce different integrity guarantees. Both must use one verifier.
+- The worker derives `version_id` from the parser recipe, while `content_artifact.document_version_id` is unique. That historical representation cannot model a governed replacement artifact of the same source version. Existing identifiers remain stable; new sources and future governed replacements use the explicit identities below.
+- Current normalized blocks can repeat one block ID across provenance regions, and tables omit cell/header/continuation detail. V2 records one block with multiple regions and preserves supported table structure.
+
+## Proposed Decision
+
+### 1. Explicit version dispatch; no implicit upgrade
+
+Keep v1 readable with its current hashing algorithm and native evidence vocabulary. Add v2 manifest and block/table/layout contracts; dispatch solely on the declared contract version. Unknown versions fail. V1 remains a legacy read/reuse path; missing historical origins or document dates remain unknown. New v2 writers require actual provenance, never a whole-document OCR guess. **Writer activation:** new sources keep the v1 writer, namespace and identities until a provenance spike on the pinned converter proves per-item origin, and consumers pass v2 compatibility. If the spike fails, v1 remains the writer for new sources and S0002's v2 origin criteria return to the operator. A v2 writer is never enabled with inferred origins. **Per-document fallback:** after activation, a document with any item whose origin the adapter cannot attribute (`ORIGIN_UNAVAILABLE`) publishes a v1 bundle (v1 contract, namespace and `artifact_id = uuid5(version_id, 'content')`) under its §3 source/version identity, with `writer_fallback_reason` recorded on the row and in the publication audit. Other v2 failures still fail the publication.
+
+The v1 schema clarification admits `source.pdf` in addition to the already declared `original.pdf`. V1 bundles without retained source remain readable as historical parsed content; source-dependent operations fail explicitly when the original cannot be resolved. They are never represented as meeting v2 source-retention requirements.
+
+V2 preserves the native JSON and five-file payload inventory (plus manifest as the sixth parse file), requires retained `source.pdf`, and declares any native assets. It records normalized record version, page/coordinate/offset conventions, parser and projection recipe identities, quality and hashes. Failed parsing is a job failure, not a ready v2 bundle; complete/partial quality remains distinct from byte-integrity readiness.
+
+### 2. One verifier for every publisher and reader
+
+`brain_content.validation` is the planned common verifier behind async and sync store adapters. It checks typed shape, exact inventory, unique paths, byte lengths, hashes, required/native assets, source digest, record references and coordinate/offset bounds. Reading a ready row alone does not prove bytes are intact.
+
+**Artifact lifecycle.** `content_artifact.publication_state` is `legacy_unverified`, `ready` or `quarantined`. Pre-F0004 v1 rows start `legacy_unverified` and stay readable through the v1 verifier (bundle hash against `artifact_sha256`, recomputed on every read). A verified backfill moves them to `ready`. A read that hits a definitive verification failure returns 409 `ARTIFACT_INTEGRITY`, and its only write is the failed read decision `AuthorizationExecution.read` already persists (ADR-0062). The operator-run integrity sweep, as the ingestion ServicePrincipal under in-transaction authorization (synchronous `decide` over `SyncAuthorityStore`, with the decision and effects committed together) with `content_artifact:ingest`, re-verifies the bytes and moves the row to `quarantined`. A quarantined row always reads as 409 `ARTIFACT_INTEGRITY`; transient storage errors never quarantine. Every transition is written in one authorized transaction: an append-only state event, the audit event and any repair record, together, with the event's time stamped by the database. A database guard enforces this. Leaving quarantine requires an authorized repair with current ingest authority and full byte re-verification. Anything that needs repair (blocked backfill, integrity failure, orphan marker) gets an append-only repair record owned by DevOps. No API route and no tenant or human grant reads or writes repair records. API, worker and restore paths use the same verifier; corruption is never interpreted as a cache miss and cannot trigger an automatic reparse.
+
+V1 bundle hash remains SHA-256 of concatenated per-file digest strings in sorted path order. V2 bundle hash is SHA-256 of the ASCII JSON serialization of the sorted file-descriptor list, using sorted object keys and separators `(',', ':')`; descriptors contain exactly `path`, `sha256`, `size_bytes`. The manifest is excluded from that inventory to avoid self-reference; PostgreSQL records the SHA-256 of the exact stored manifest bytes separately.
+
+The manifest is published last, then a fenced, currently authorized transaction records ready metadata, normalized indexes and mutation audit. A crash between marker and transaction produces an unadvertised orphan marker; retry verifies and adopts those same bytes without conversion. A database row never makes a partial marker readable. See the assembly plan for recovery states and stale-publisher handling.
+
+### 3. Stable source identity and governed artifact versions
+
+Preserve all existing IDs, foreign keys and v1 namespaces. Existing document versions remain references to their retained source bytes even though their historical IDs included the recipe. Do not merge or rename them during this feature.
+
+For a genuinely new source written by the v2 writer (after activation), the trusted ingestion service resolves `(tenant, KB, source_sha256)` first, assigns `version_id = uuid5(document_id, 'source-v1:' + source_sha256)`, and derives `artifact_id = uuid5(version_id, 'artifact-v2:' + recipe_sha256)`. These are domain IDs, not plan run IDs. A per-document v1 fallback keeps this `version_id`. The v2 recipe covers parser name/package/configuration, projection version, record contract and normalization version. A new extraction profile never changes this recipe.
+
+If any accepted artifact already represents the source, reuse its supported contract. A changed recipe/package does not automatically authorize conversion: require an explicit governed replacement basis or return `PARSER_MIGRATION_REQUIRED`. The model permits several artifact versions per source version; published consumers pin artifact ID. F0004 records replacement lineage and rejects implicit replacement but does not supply a corpus migration executor or approval workflow.
+
+New v2 keys use `bundles/{tenant_id}/{knowledge_base_id}/{artifact_id}/`; v1 keys keep `bundles/{artifact_id}/`. The trusted database contract version and ownership select the namespace. Never search alternate namespaces on a failed authorization or corrupt read. No object-store path is an application permission grant.
+
+### 4. Document dates live outside immutable bundles
+
+Append-only `document_date_candidate` rows preserve date, precision, source basis and correction predecessor. Append-only `document_date_selection` rows record an explicit candidate selection or clearing, its previous selection and actor. The document version is the concurrency lock; an expected-selection token prevents lost updates. There is no date-source priority algorithm. Zero selections, or an explicit clear, means undated. Conflicting candidates remain visible to authorized internal consumers.
+
+Support YEAR, MONTH and DAY precision, with calendar validation and no padding to a finer precision. Original source values remain in the basis. Unsupported subday inputs fail explicitly; this date-only boundary does not implement the broader time-context/resolution contract of F0016.
+
+CONTENT resolves to an actual same-version artifact/block/quote plus immutable JSONL line ordinal and hash, so repeated legacy IDs remain unambiguous without inventing v2 indexes; SOURCE_METADATA preserves the immutable attributable system-field snapshot; HUMAN requires a trusted verification port that binds decision, human actor, document version, exact proposed value and authorization receipt. The default human verifier rejects all receipts. **Selection is human-only in v0.1:** every select or clear carries a verified human selection decision bound to document version, candidate (or clear) and expected previous selection. A service principal may append candidates and may carry that decision, but ingest authority alone never selects (BLUEPRINT §4.11 no-automated-decider guard). F0022 supplies the real human-decision producer; F0004 proves the storage handoff with controlled verifier fixtures and rejects forged/absent authority. No public date-write endpoint or new Casbin grant is added.
+
+An interpretation records the exact selected date record/selection in its run basis when that consumer adopts the contract; later metadata corrections never mutate a prior run. Full F0016 scheduling and re-resolution remain outside F0004.
+
+### 5. Separate run outputs and honest origin
+
+Run manifests remain under their tenant/KB/run namespace, outside parse files. Existing output manifest v1 remains readable; v2 adds pipeline identity and an explicit optional date-selection reference. Configuration/provenance/graph files are run-owned, use current source restrictions and belong in the restore inventory.
+
+Each v2 block has one `STATED`, `OCR`, `TRANSCRIBED` or `DESCRIBED` origin, its producer and an origin-specific anchor or explicit unresolved reason. Missing mixed-page provenance blocks v2 publication; a page OCR count is not a block's origin. Synthetic transcript/description records test storage shapes only. The accepted PDF/BoxSelector review contract is unchanged.
+
+```mermaid
+flowchart LR
+  Parser[Parser handoff] --> Verify[Shared versioned verifier]
+  Verify --> Bytes[Immutable bundle and manifest]
+  Bytes --> Ready[Authorized ready transaction]
+  Ready --> Index[Metadata and content indexes]
+  Dates[Append-only date candidates and selections] --> Basis[Pinned interpretation basis]
+  Bytes --> Basis
+  Basis --> Outputs[Separate run output manifest]
+```
+
+```text
+parse -> verify -> immutable bytes + manifest -> authorized DB ready + indexes + audit
+                                     |
+date candidates -> explicit selection +-> pinned run -> separate run outputs
+```
+
+## Alternatives and Consequences
+
+- Adding mandatory fields to v1 would break strict readers and imply historical provenance that was never captured. Separate versions permit staged deployment.
+- Editing manifest dates would invalidate immutable evidence hashes. Separate append-only metadata permits corrections and historical replay.
+- Retaining two verifiers would preserve inconsistent integrity checks. One verifier needs both worker and API integration tests.
+- Replacing historical source/version IDs would risk broken evidence links. Preserve them and use explicit version semantics only for new records.
+- Choosing the first/highest-priority date would invent a business rule. Explicit selection adds a concurrency token and preserves conflicts.
+- Full-bundle verification adds read I/O. The initial correctness boundary uses no verification cache; later caching requires an immutable object-version proof and separate review. Authorization is never cached across requests.
+
+## Proof Gates Before Acceptance
+
+All F0004 story criteria plus: v1/new-v2 compatibility; byte-for-byte legacy preservation; failure before/after marker and before/after ready commit; stale-worker fencing; cross-owner references; duplicate/racing publication; mixed-origin and multi-region round-trip; partial geometry and Unicode offsets; date append/correction/CAS and forged human receipt rejection; select/clear without a verified human selection decision rejected; the per-item provenance spike exit decision; v1 reads through expand/backfill, a failing read that writes no state, the integrity sweep with its decision and effects in one transaction (quarantine, orphan markers, denial without ingest), per-document v1 fallback with a recorded reason, the lifecycle guard and repair records; current access/revocation; database-plus-byte restore; two-profile restart reuse with converter/OCR entry points forbidden. Changed runtime coverage must meet 80%. A planning schema pass does not satisfy these runtime gates.
+
+## References
+
+- [F0004 PRD](../../features/archive/F0004-content-artifact-model/PRD.md), [assembly plan](../../features/archive/F0004-content-artifact-model/feature-assembly-plan.md)
+- [ADR-0040](ADR-0040-lossless-content-and-evidence-contract.md), [ADR-0058 as amended](ADR-0058-evidence-anchoring-and-selector-contract.md), [ADR-0059](ADR-0059-provider-neutral-content-artifact-storage.md)
+- [F0003 persistence ownership](../../features/archive/F0003-postgresql-persistence/feature-assembly-plan.md), [F0005 candidate plan](../../features/F0005-one-time-docling-ingestion/feature-assembly-plan.md)

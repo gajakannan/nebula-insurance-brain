@@ -1,0 +1,147 @@
+     1	"""Explicitly enabled candidate worker; credentials are read only from the environment."""
+     2	
+     3	from __future__ import annotations
+     4	
+     5	import argparse
+     6	import os
+     7	import signal
+     8	from pathlib import Path
+     9	from threading import BoundedSemaphore, Event
+    10	from uuid import UUID
+    11	
+    12	from brain_content.checkpoints import CheckpointStore
+    13	from brain_content.config import load_content_writer_config, load_local_object_store_config
+    14	from brain_content.object_store import LocalFilesystemObjectStore
+    15	from brain_extraction.vllm_graph_client import VllmGraphClient, cached_model_token_counter
+    16	from brain_jobs.queue import DocumentJobQueue
+    17	from brain_security.casbin_adapter import CasbinAuthorizationAdapter
+    18	from brain_worker.content_access import SourceContentAccess
+    19	from brain_worker.content_publication import AuthorizedContentPublisher
+    20	from brain_worker.document_delivery import (
+    21	    DocumentJobAuthorization,
+    22	    DocumentResultImporter,
+    23	)
+    24	from sqlalchemy import create_engine
+    25	
+    26	from brain_ingestion.document_worker import DocumentWorker
+    27	from brain_ingestion.submission import enqueue_document
+    28	
+    29	
+    30	def main() -> int:
+    31	    parser = argparse.ArgumentParser(description=__doc__)
+    32	    parser.add_argument("--policy-dir", type=Path, required=True)
+    33	    parser.add_argument("--once", action="store_true")
+    34	    parser.add_argument("--import-only", action="store_true")
+    35	    parser.add_argument("--enqueue", type=Path, help="Trusted operator submission of one PDF")
+    36	    parser.add_argument("--tenant", type=UUID)
+    37	    parser.add_argument("--knowledge-base", type=UUID)
+    38	    parser.add_argument("--profile", default="gl-limits-a")
+    39	    # F0002-S0004: the trusted submitter declares the artifact's restrictions; there
+    40	    # is no default label, and missing metadata denies every later job step.
+    41	    parser.add_argument("--classification", action="append", default=[])
+    42	    parser.add_argument("--source-acl", action="append", default=[])
+    43	    args = parser.parse_args()
+    44	    if os.environ.get("BRAIN_ENABLE_GRAPH_CANDIDATE") != "1":
+    45	        parser.error(
+    46	            "candidate activation requires BRAIN_ENABLE_GRAPH_CANDIDATE=1; ADR-0060 is Proposed"
+    47	        )
+    48	    database = os.environ["BRAIN_WORKER_DATABASE_URL"]
+    49	    if not database.startswith("postgresql+psycopg://"):
+    50	        parser.error("worker requires a postgresql+psycopg database URL")
+    51	    engine = create_engine(database, pool_pre_ping=True)
+    52	    config = load_local_object_store_config()
+    53	    if not config.immutable:
+    54	        parser.error("candidate ingestion requires immutable object storage")
+    55	    store = CheckpointStore(LocalFilesystemObjectStore(config))
+    56	    authorization = DocumentJobAuthorization(
+    57	        engine, args.policy_dir / "model.conf", args.policy_dir / "policy.csv"
+    58	    )
+    59	    queue = DocumentJobQueue(engine)
+    60	    publication = AuthorizedContentPublisher(
+    61	        queue,
+    62	        store.verified,
+    63	        CasbinAuthorizationAdapter(args.policy_dir / "model.conf", args.policy_dir / "policy.csv"),
+    64	        objects=store.objects,
+    65	    )
+    66	    access = SourceContentAccess(engine, store.verified, publication.policy)
+    67	    writer_config = load_content_writer_config()
+    68	    importer = DocumentResultImporter(
+    69	        engine, store, authorization.for_job, read_artifact=access.read
+    70	    )
+    71	    try:
+    72	        if args.enqueue:
+    73	            if not args.tenant or not args.knowledge_base or args.enqueue.suffix.lower() != ".pdf":
+    74	                parser.error("enqueue requires a PDF, --tenant, and --knowledge-base")
+    75	            if not args.classification:
+    76	                parser.error("enqueue requires at least one --classification")
+    77	            actor = UUID(os.environ["BRAIN_WORKER_PRINCIPAL_ID"])
+    78	            print(
+    79	                enqueue_document(
+    80	                    engine,
+    81	                    queue,
+    82	                    store,
+    83	                    authorization,
+    84	                    access,
+    85	                    source_path=args.enqueue,
+    86	                    tenant_id=args.tenant,
+    87	                    knowledge_base_id=args.knowledge_base,
+    88	                    actor_id=actor,
+    89	                    profile_id=args.profile,
+    90	                    classifications=args.classification,
+    91	                    source_acl_ids=args.source_acl,
+    92	                    v2_writer_enabled=writer_config.v2_writer_enabled,
+    93	                )
+    94	            )
+    95	            return 0
+    96	        stop = Event()
+    97	        for sig in (signal.SIGINT, signal.SIGTERM):
+    98	            signal.signal(sig, lambda *_: stop.set())
+    99	        worker = None
+   100	        if not args.import_only:
+   101	            model = os.environ["BRAIN_INFERENCE_MODEL"]
+   102	            revision = os.environ["BRAIN_INFERENCE_MODEL_REVISION"]
+   103	            key = os.environ["BRAIN_INFERENCE_API_KEY"]
+   104	            endpoint = os.environ["BRAIN_INFERENCE_BASE_URL"]
+   105	            counter = cached_model_token_counter(model, revision)
+   106	            slots = BoundedSemaphore(1)
+   107	
+   108	            def client_factory(cancelled: Event) -> VllmGraphClient:
+   109	                return VllmGraphClient(
+   110	                    base_url=endpoint,
+   111	                    api_key=key,
+   112	                    model_id=model,
+   113	                    model_revision=revision,
+   114	                    token_counter=counter,
+   115	                    slots=slots,
+   116	                    cancelled=cancelled,
+   117	                )
+   118	
+   119	            worker = DocumentWorker(
+   120	                queue=queue,
+   121	                store=store,
+   122	                authorize_for_job=authorization.for_job,
+   123	                client_factory=client_factory,
+   124	                publish_content=publication.publish_manifest,
+   125	                load_accepted=access.resolve,
+   126	                v2_writer_enabled=writer_config.v2_writer_enabled,
+   127	            )
+   128	        # One process / one document / one model request at a time. Deployment must
+   129	        # cap replicas; this semaphore is intentionally not a distributed GPU quota.
+   130	        while not stop.is_set():
+   131	            worked = worker.run_one() if worker is not None else False
+   132	            imported = importer.run_one()
+   133	            if args.once:
+   134	                break
+   135	            if not worked and not imported:
+   136	                stop.wait(1)
+   137	        return 0
+   138	    finally:
+   139	        engine.dispose()
+   140	
+   141	
+   142	if __name__ == "__main__":
+   143	    try:
+   144	        raise SystemExit(main())
+   145	    except Exception as exc:
+   146	        # SDK/DB exceptions may contain credentials or source text.
+   147	        raise SystemExit(f"document_worker_failed:{type(exc).__name__}") from None

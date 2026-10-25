@@ -1,0 +1,280 @@
+planning-mds/schemas/interpretation-output-manifest.schema.json-1-{
+planning-mds/schemas/interpretation-output-manifest.schema.json-2-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+planning-mds/schemas/interpretation-output-manifest.schema.json-3-  "$id": "https://nebula.local/schemas/interpretation-output-manifest.schema.json",
+planning-mds/schemas/interpretation-output-manifest.schema.json-4-  "title": "InterpretationOutputManifest",
+planning-mds/schemas/interpretation-output-manifest.schema.json:5:  "description": "Run-owned outputs stay outside the parse bundle. V1 reflects the existing checkpoint marker; proposed v2 adds pipeline identity and exact date-basis selection. The selected output schema is independent of content artifact version.",
+planning-mds/schemas/interpretation-output-manifest.schema.json-6-  "oneOf": [
+planning-mds/schemas/interpretation-output-manifest.schema.json-7-    {
+planning-mds/schemas/interpretation-output-manifest.schema.json-8-      "type": "object",
+planning-mds/schemas/interpretation-output-manifest.schema.json-9-      "additionalProperties": false,
+planning-mds/schemas/interpretation-output-manifest.schema.json-10-      "required": [
+planning-mds/schemas/interpretation-output-manifest.schema.json:11:        "contract_version",
+planning-mds/schemas/interpretation-output-manifest.schema.json-12-        "tenant_id",
+planning-mds/schemas/interpretation-output-manifest.schema.json-13-        "knowledge_base_id",
+planning-mds/schemas/interpretation-output-manifest.schema.json-14-        "artifact_id",
+planning-mds/schemas/interpretation-output-manifest.schema.json-15-        "run_id",
+planning-mds/schemas/interpretation-output-manifest.schema.json-16-        "files"
+planning-mds/schemas/interpretation-output-manifest.schema.json-17-      ],
+planning-mds/schemas/interpretation-output-manifest.schema.json-18-      "properties": {
+planning-mds/schemas/interpretation-output-manifest.schema.json:19:        "contract_version": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-20-          "const": 1
+planning-mds/schemas/interpretation-output-manifest.schema.json-21-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-22-        "tenant_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-23-          "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-24-          "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-25-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-26-        "knowledge_base_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-27-          "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-28-          "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-29-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-30-        "artifact_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-31-          "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-32-          "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-33-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-34-        "run_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-35-          "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-36-          "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-37-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-38-        "files": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-39-          "type": "object",
+planning-mds/schemas/interpretation-output-manifest.schema.json-40-          "additionalProperties": false,
+planning-mds/schemas/interpretation-output-manifest.schema.json-41-          "required": [
+planning-mds/schemas/interpretation-output-manifest.schema.json-42-            "result.json",
+planning-mds/schemas/interpretation-output-manifest.schema.json-43-            "provenance.json",
+planning-mds/schemas/interpretation-output-manifest.schema.json-44-            "graph.json",
+planning-mds/schemas/interpretation-output-manifest.schema.json-45-            "metadata.json"
+planning-mds/schemas/interpretation-output-manifest.schema.json-46-          ],
+planning-mds/schemas/interpretation-output-manifest.schema.json-47-          "properties": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-48-            "result.json": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-49-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-50-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-51-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-52-            "provenance.json": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-53-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-54-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-55-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-56-            "graph.json": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-57-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-58-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-59-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-60-            "metadata.json": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-61-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-62-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-63-            }
+planning-mds/schemas/interpretation-output-manifest.schema.json-64-          }
+--
+planning-mds/schemas/interpretation-output-manifest.schema.json-66-      }
+planning-mds/schemas/interpretation-output-manifest.schema.json-67-    },
+planning-mds/schemas/interpretation-output-manifest.schema.json-68-    {
+planning-mds/schemas/interpretation-output-manifest.schema.json-69-      "type": "object",
+planning-mds/schemas/interpretation-output-manifest.schema.json-70-      "additionalProperties": false,
+planning-mds/schemas/interpretation-output-manifest.schema.json-71-      "required": [
+planning-mds/schemas/interpretation-output-manifest.schema.json:72:        "contract_version",
+planning-mds/schemas/interpretation-output-manifest.schema.json-73-        "tenant_id",
+planning-mds/schemas/interpretation-output-manifest.schema.json-74-        "knowledge_base_id",
+planning-mds/schemas/interpretation-output-manifest.schema.json-75-        "artifact_id",
+planning-mds/schemas/interpretation-output-manifest.schema.json-76-        "run_id",
+planning-mds/schemas/interpretation-output-manifest.schema.json-77-        "files",
+planning-mds/schemas/interpretation-output-manifest.schema.json:78:        "pipeline",
+planning-mds/schemas/interpretation-output-manifest.schema.json-79-        "document_date_selection_id"
+planning-mds/schemas/interpretation-output-manifest.schema.json-80-      ],
+planning-mds/schemas/interpretation-output-manifest.schema.json-81-      "properties": {
+planning-mds/schemas/interpretation-output-manifest.schema.json:82:        "contract_version": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-83-          "const": 2
+planning-mds/schemas/interpretation-output-manifest.schema.json-84-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-85-        "tenant_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-86-          "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-87-          "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-88-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-89-        "knowledge_base_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-90-          "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-91-          "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-92-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-93-        "artifact_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-94-          "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-95-          "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-96-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-97-        "run_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-98-          "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-99-          "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-100-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-101-        "files": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-102-          "type": "object",
+planning-mds/schemas/interpretation-output-manifest.schema.json-103-          "additionalProperties": false,
+planning-mds/schemas/interpretation-output-manifest.schema.json-104-          "required": [
+planning-mds/schemas/interpretation-output-manifest.schema.json-105-            "result.json",
+planning-mds/schemas/interpretation-output-manifest.schema.json-106-            "provenance.json",
+planning-mds/schemas/interpretation-output-manifest.schema.json-107-            "graph.json",
+planning-mds/schemas/interpretation-output-manifest.schema.json-108-            "metadata.json"
+planning-mds/schemas/interpretation-output-manifest.schema.json-109-          ],
+planning-mds/schemas/interpretation-output-manifest.schema.json-110-          "properties": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-111-            "result.json": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-112-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-113-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-114-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-115-            "provenance.json": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-116-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-117-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-118-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-119-            "graph.json": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-120-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-121-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-122-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-123-            "metadata.json": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-124-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-125-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-126-            }
+planning-mds/schemas/interpretation-output-manifest.schema.json-127-          }
+planning-mds/schemas/interpretation-output-manifest.schema.json-128-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json:129:        "pipeline": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-130-          "type": "object",
+planning-mds/schemas/interpretation-output-manifest.schema.json-131-          "additionalProperties": false,
+planning-mds/schemas/interpretation-output-manifest.schema.json-132-          "required": [
+planning-mds/schemas/interpretation-output-manifest.schema.json-133-            "name",
+planning-mds/schemas/interpretation-output-manifest.schema.json-134-            "package_version",
+planning-mds/schemas/interpretation-output-manifest.schema.json-135-            "configuration_sha256"
+planning-mds/schemas/interpretation-output-manifest.schema.json-136-          ],
+planning-mds/schemas/interpretation-output-manifest.schema.json-137-          "properties": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-138-            "name": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-139-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-140-              "minLength": 1
+planning-mds/schemas/interpretation-output-manifest.schema.json-141-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-142-            "package_version": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-143-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-144-              "minLength": 1
+planning-mds/schemas/interpretation-output-manifest.schema.json-145-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-146-            "configuration_sha256": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-147-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-148-              "pattern": "^[a-f0-9]{64}$"
+planning-mds/schemas/interpretation-output-manifest.schema.json-149-            }
+planning-mds/schemas/interpretation-output-manifest.schema.json-150-          }
+planning-mds/schemas/interpretation-output-manifest.schema.json-151-        },
+planning-mds/schemas/interpretation-output-manifest.schema.json-152-        "document_date_selection_id": {
+planning-mds/schemas/interpretation-output-manifest.schema.json-153-          "anyOf": [
+planning-mds/schemas/interpretation-output-manifest.schema.json-154-            {
+planning-mds/schemas/interpretation-output-manifest.schema.json-155-              "type": "string",
+planning-mds/schemas/interpretation-output-manifest.schema.json-156-              "format": "uuid"
+planning-mds/schemas/interpretation-output-manifest.schema.json-157-            },
+planning-mds/schemas/interpretation-output-manifest.schema.json-158-            {
+planning-mds/schemas/interpretation-output-manifest.schema.json-159-              "type": "null"
+planning-mds/schemas/interpretation-output-manifest.schema.json-160-            }
+planning-mds/schemas/interpretation-output-manifest.schema.json-161-          ]
+planning-mds/schemas/interpretation-output-manifest.schema.json-162-        }
+planning-mds/schemas/interpretation-output-manifest.schema.json-163-      }
+planning-mds/schemas/interpretation-output-manifest.schema.json-164-    }
+planning-mds/schemas/interpretation-output-manifest.schema.json-165-  ]
+planning-mds/schemas/interpretation-output-manifest.schema.json-166-}
+--
+planning-mds/schemas/interpretation-result.schema.json-2-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+planning-mds/schemas/interpretation-result.schema.json-3-  "$id": "https://nebula.local/schemas/interpretation-result.schema.json",
+planning-mds/schemas/interpretation-result.schema.json-4-  "title": "InterpretationResult",
+planning-mds/schemas/interpretation-result.schema.json-5-  "description": "Provider-neutral output of one semantic interpretation run over a persisted content artifact (master blueprint section 108.3; F0001-S0003).",
+planning-mds/schemas/interpretation-result.schema.json-6-  "type": "object",
+planning-mds/schemas/interpretation-result.schema.json-7-  "additionalProperties": false,
+planning-mds/schemas/interpretation-result.schema.json:8:  "required": ["run_id", "artifact_id", "status", "entities", "assertions", "relationships", "quality_signals", "warnings", "failed_chunks", "run_configuration", "counters", "created_at"],
+planning-mds/schemas/interpretation-result.schema.json-9-  "properties": {
+planning-mds/schemas/interpretation-result.schema.json-10-    "run_id": { "type": "string", "format": "uuid" },
+planning-mds/schemas/interpretation-result.schema.json-11-    "artifact_id": { "type": "string", "format": "uuid" },
+planning-mds/schemas/interpretation-result.schema.json-12-    "status": { "type": "string", "enum": ["complete", "partial", "failed"] },
+planning-mds/schemas/interpretation-result.schema.json-13-    "entities": { "type": "array", "items": { "$ref": "#/$defs/candidate_entity" } },
+planning-mds/schemas/interpretation-result.schema.json-14-    "assertions": { "type": "array", "items": { "$ref": "#/$defs/candidate_assertion" } },
+planning-mds/schemas/interpretation-result.schema.json-15-    "relationships": { "type": "array", "items": { "$ref": "#/$defs/candidate_relationship" } },
+planning-mds/schemas/interpretation-result.schema.json-16-    "quality_signals": { "type": "object", "additionalProperties": { "type": "number" } },
+planning-mds/schemas/interpretation-result.schema.json-17-    "warnings": { "type": "array", "items": { "type": "string" } },
+planning-mds/schemas/interpretation-result.schema.json-18-    "failed_chunks": { "type": "array", "items": { "type": "string" } },
+planning-mds/schemas/interpretation-result.schema.json:19:    "run_configuration": {
+planning-mds/schemas/interpretation-result.schema.json-20-      "type": "object",
+planning-mds/schemas/interpretation-result.schema.json-21-      "additionalProperties": false,
+planning-mds/schemas/interpretation-result.schema.json:22:      "required": ["backend", "model_id", "endpoint_hash", "prompt_hash", "schema_hash", "context_limit", "profile_id", "profile_version"],
+planning-mds/schemas/interpretation-result.schema.json-23-      "properties": {
+planning-mds/schemas/interpretation-result.schema.json-24-        "backend": { "const": "openai_compatible" },
+planning-mds/schemas/interpretation-result.schema.json:25:        "model_id": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json:26:        "model_revision": { "type": ["string", "null"] },
+planning-mds/schemas/interpretation-result.schema.json-27-        "endpoint_hash": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-28-        "prompt_hash": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-29-        "schema_hash": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-30-        "context_limit": { "type": "integer", "minimum": 1 },
+planning-mds/schemas/interpretation-result.schema.json-31-        "profile_id": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-32-        "profile_version": { "type": "string" }
+planning-mds/schemas/interpretation-result.schema.json-33-      }
+planning-mds/schemas/interpretation-result.schema.json-34-    },
+planning-mds/schemas/interpretation-result.schema.json-35-    "counters": {
+planning-mds/schemas/interpretation-result.schema.json-36-      "type": "object",
+planning-mds/schemas/interpretation-result.schema.json-37-      "additionalProperties": false,
+planning-mds/schemas/interpretation-result.schema.json:38:      "required": ["conversion_calls", "ocr_calls", "model_calls", "prompt_tokens", "completion_tokens"],
+planning-mds/schemas/interpretation-result.schema.json-39-      "properties": {
+planning-mds/schemas/interpretation-result.schema.json-40-        "conversion_calls": { "type": "integer", "minimum": 0 },
+planning-mds/schemas/interpretation-result.schema.json-41-        "ocr_calls": { "type": "integer", "minimum": 0 },
+planning-mds/schemas/interpretation-result.schema.json:42:        "model_calls": { "type": "integer", "minimum": 0 },
+planning-mds/schemas/interpretation-result.schema.json-43-        "prompt_tokens": { "type": "integer", "minimum": 0 },
+planning-mds/schemas/interpretation-result.schema.json-44-        "completion_tokens": { "type": "integer", "minimum": 0 }
+planning-mds/schemas/interpretation-result.schema.json-45-      }
+planning-mds/schemas/interpretation-result.schema.json-46-    },
+planning-mds/schemas/interpretation-result.schema.json-47-    "provenance_ledger_ref": { "type": ["string", "null"] },
+planning-mds/schemas/interpretation-result.schema.json-48-    "created_at": { "type": "string", "format": "date-time" }
+planning-mds/schemas/interpretation-result.schema.json-49-  },
+planning-mds/schemas/interpretation-result.schema.json-50-  "$defs": {
+planning-mds/schemas/interpretation-result.schema.json-51-    "precision": { "type": "string", "enum": ["span", "table_cell", "block", "page", "document", "unresolved"] },
+planning-mds/schemas/interpretation-result.schema.json-52-    "interpretation_basis": { "type": "string", "enum": ["EXPLICIT", "INFERRED", "AMBIGUOUS"] },
+planning-mds/schemas/interpretation-result.schema.json-53-    "bounding_box": {
+planning-mds/schemas/interpretation-result.schema.json-54-      "type": "object",
+planning-mds/schemas/interpretation-result.schema.json-55-      "additionalProperties": false,
+planning-mds/schemas/interpretation-result.schema.json-56-      "required": ["page", "x0", "y0", "x1", "y1"],
+planning-mds/schemas/interpretation-result.schema.json-57-      "properties": {
+planning-mds/schemas/interpretation-result.schema.json-58-        "page": { "type": "integer", "minimum": 1 },
+planning-mds/schemas/interpretation-result.schema.json-59-        "x0": { "type": "number" }, "y0": { "type": "number" }, "x1": { "type": "number" }, "y1": { "type": "number" }
+planning-mds/schemas/interpretation-result.schema.json-60-      }
+planning-mds/schemas/interpretation-result.schema.json-61-    },
+planning-mds/schemas/interpretation-result.schema.json-62-    "evidence_binding": {
+planning-mds/schemas/interpretation-result.schema.json-63-      "type": "object",
+planning-mds/schemas/interpretation-result.schema.json-64-      "additionalProperties": false,
+planning-mds/schemas/interpretation-result.schema.json-65-      "required": ["artifact_id", "precision"],
+planning-mds/schemas/interpretation-result.schema.json-66-      "properties": {
+planning-mds/schemas/interpretation-result.schema.json-67-        "artifact_id": { "type": "string", "format": "uuid" },
+planning-mds/schemas/interpretation-result.schema.json-68-        "block_id": { "type": ["string", "null"] },
+planning-mds/schemas/interpretation-result.schema.json-69-        "page": { "type": ["integer", "null"], "minimum": 1 },
+planning-mds/schemas/interpretation-result.schema.json-70-        "bbox": { "oneOf": [{ "$ref": "#/$defs/bounding_box" }, { "type": "null" }] },
+planning-mds/schemas/interpretation-result.schema.json-71-        "char_start": { "type": ["integer", "null"], "minimum": 0 },
+planning-mds/schemas/interpretation-result.schema.json-72-        "char_end": { "type": ["integer", "null"], "minimum": 0 },
+planning-mds/schemas/interpretation-result.schema.json-73-        "precision": { "$ref": "#/$defs/precision" }
+planning-mds/schemas/interpretation-result.schema.json-74-      }
+planning-mds/schemas/interpretation-result.schema.json-75-    },
+planning-mds/schemas/interpretation-result.schema.json-76-    "candidate_entity": {
+planning-mds/schemas/interpretation-result.schema.json-77-      "type": "object",
+planning-mds/schemas/interpretation-result.schema.json-78-      "additionalProperties": false,
+planning-mds/schemas/interpretation-result.schema.json-79-      "required": ["id", "entity_type", "label", "evidence"],
+planning-mds/schemas/interpretation-result.schema.json-80-      "properties": {
+planning-mds/schemas/interpretation-result.schema.json-81-        "id": { "type": "string", "format": "uuid" },
+planning-mds/schemas/interpretation-result.schema.json-82-        "entity_type": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-83-        "label": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-84-        "external_id": { "type": ["string", "null"] },
+planning-mds/schemas/interpretation-result.schema.json-85-        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence_binding" } }
+planning-mds/schemas/interpretation-result.schema.json-86-      }
+planning-mds/schemas/interpretation-result.schema.json-87-    },
+--
+planning-mds/schemas/interpretation-result.schema.json-93-        "id": { "type": "string", "format": "uuid" },
+planning-mds/schemas/interpretation-result.schema.json-94-        "subject_ref": { "type": ["string", "null"] },
+planning-mds/schemas/interpretation-result.schema.json-95-        "subject_type": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-96-        "slot_type": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-97-        "value": { "type": "object" },
+planning-mds/schemas/interpretation-result.schema.json-98-        "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidence_binding" } },
+planning-mds/schemas/interpretation-result.schema.json:99:        "model_confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+planning-mds/schemas/interpretation-result.schema.json-100-        "interpretation_basis": { "$ref": "#/$defs/interpretation_basis" }
+planning-mds/schemas/interpretation-result.schema.json-101-      }
+planning-mds/schemas/interpretation-result.schema.json-102-    },
+planning-mds/schemas/interpretation-result.schema.json-103-    "candidate_relationship": {
+planning-mds/schemas/interpretation-result.schema.json-104-      "type": "object",
+planning-mds/schemas/interpretation-result.schema.json-105-      "additionalProperties": false,
+planning-mds/schemas/interpretation-result.schema.json-106-      "required": ["id", "relation_type", "source_entity_id", "target_entity_id", "evidence", "interpretation_basis"],
+planning-mds/schemas/interpretation-result.schema.json-107-      "properties": {
+planning-mds/schemas/interpretation-result.schema.json-108-        "id": { "type": "string", "format": "uuid" },
+planning-mds/schemas/interpretation-result.schema.json-109-        "relation_type": { "type": "string" },
+planning-mds/schemas/interpretation-result.schema.json-110-        "source_entity_id": { "type": "string", "format": "uuid" },
+planning-mds/schemas/interpretation-result.schema.json-111-        "target_entity_id": { "type": "string", "format": "uuid" },
+planning-mds/schemas/interpretation-result.schema.json-112-        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence_binding" } },
+planning-mds/schemas/interpretation-result.schema.json:113:        "model_confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+planning-mds/schemas/interpretation-result.schema.json-114-        "interpretation_basis": { "$ref": "#/$defs/interpretation_basis" }
+planning-mds/schemas/interpretation-result.schema.json-115-      }
+planning-mds/schemas/interpretation-result.schema.json-116-    }
+planning-mds/schemas/interpretation-result.schema.json-117-  }
+planning-mds/schemas/interpretation-result.schema.json-118-}

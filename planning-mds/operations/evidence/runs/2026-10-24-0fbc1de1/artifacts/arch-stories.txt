@@ -1,0 +1,423 @@
+
+FILE planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
+1: ## Story Header
+2: 
+3: **Story ID:** F0005-S0001
+4: 
+5: **Feature:** F0005 — One-time document ingestion
+6: 
+7: **Title:** Pin and process source documents
+8: 
+9: **Priority:** High
+10: 
+11: **Phase:** MVP — v0.1A
+12: 
+13: **Status:** In Progress
+14: 
+15: ## User Story
+16: 
+17: **As a** document intelligence engineer
+18: 
+19: **I want** the pinned Docling-Graph pipeline to convert real native, scanned and mixed-page sources and publish them before any model call
+20: 
+21: **So that** conversion is proven on the actual parser and OCR stack, not only on synthetic native content.
+22: 
+23: ## Context & Background
+24: 
+25: Implements the [PRD](PRD.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Delivered 2026-09-20: the 1.9.1 pin, wheel digest, lock, checkpoint stage and synthetic conversion tests ([compatibility evidence](compatibility-evidence.md)). This plan adds live conversion of the qualification corpus. F0004's v1/v2 publication boundary is the checkpoint target.
+26: 
+27: ## Acceptance Criteria
+28: 
+29: - [ ] **F0005-S0001-AC1:** Given a clean checkout, when both workspaces sync from their locks, then the resolved Docling-Graph, Docling and docling-core versions and the Graph wheel digest equal the recorded pin, and any difference fails the qualification run before conversion.
+30: - [ ] **F0005-S0001-AC2:** Given each native, scanned and mixed-page corpus document, when it enters the real pipeline with physical conversion and OCR enabled, then the published bundle records parser name/version/configuration, OCR engine name/version, page count, failed pages, OCR page count, warnings and source hash; mocks or recorded native JSON cannot satisfy this criterion.
+31: - [ ] **F0005-S0001-AC3:** Given conversion completes and the model endpoint then fails or returns invalid output, when the checkpoint stage runs, then the bundle is verified and registered before the first model request, and the job records the model failure without discarding or reconverting the bundle.
+32: - [ ] **F0005-S0001-AC4:** Given the corpus's partial-conversion document, when conversion returns, then supported content is published with its failed pages and partial status, and no later stage labels the document complete.
+33: - [ ] **F0005-S0001-AC5:** Given the checkpoint callback fails or the installed stage layout differs from the pinned guard, when processing is attempted, then extraction does not start, the job fails with an explicit integration reason, and no artifact is registered ready.
+34: - [ ] **F0005-S0001-AC6:** Given a job, artifact or run state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
+35: 
+36: **Edge Cases & Error Scenarios:** Encrypted or corrupt PDF → explicit conversion failure with no bundle. OCR model assets missing offline → conversion fails before publication; no fallback to an unrecorded engine. A page that converts empty is a failed page, not silent success.
+37: 
+38: ## Interaction Contract
+39: 
+40: No UI. Entry point: the worker CLI `submit` command and the worker loop under a provisioned ServicePrincipal.
+41: 
+42: | Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+43: |---|---|---|---|---|---|
+44: | Worker CLI submission → conversion → checkpoint publication | Submit a corpus PDF | New job only; published bundle immutable | Verified bundle registered ready, or explicit conversion/integration failure | Restart, reload the artifact through the authorized reader, compare hashes and identities | ServicePrincipal with current `ingest` grant in the target tenant/KB |
+45: 
+46: **Validation and audit:** a failed conversion or checkpoint never registers a ready artifact; every authorization decision and state change is audited with policy version.
+47: 
+48: ## Data Requirements
+49: 
+50: Source/version, tenant/KB, native document and file hashes, parser and OCR identities, parse quality, attempts and outcomes; F0004 manifest contract version. Exact OCR model-asset identity is qualified in S0005.
+51: 
+52: ## Role-Based Visibility
+53: 
+54: Only principals and jobs with current `ingest` authorization read source or bundle bytes; each decision is audited with its policy version. Model calls receive authorized content only, never credentials or authorization data.
+55: 
+56: ## Non-Functional Expectations
+57: 
+58: - Conversion of each corpus document completes within 300 s on the development host, or fails explicitly at that bound.
+59: - Source text and secrets stay out of routine logs.
+60: 
+61: ## Dependencies
+62: 
+63: F0004 publication boundary and verifier; F0001 fixtures and inference runbook; ADR-0060.
+64: 
+65: ## Out of Scope
+66: 
+67: New parser or OCR engines, non-PDF formats, production host deployment.
+68: 
+69: ## Questions & Assumptions
+70: 
+71: The installed pin is not upgraded by this plan. If live conversion forces an upgrade, the checkpoint seam and every S0001–S0003 criterion are re-proven on the new pin.
+72: 
+73: ## Definition of Done
+74: 
+75: - [ ] Every acceptance criterion has observed live evidence on the pinned package.
+76: - [ ] Applicable runtime tests, authorization checks and contract validation pass.
+77: - [ ] STATUS, compatibility evidence and trackers describe the actual implementation.
+78: - [ ] Required reviewer verdicts are recorded in STATUS; planning checks are not runtime proof.
+79: 
+80: ## Review Provenance
+81: 
+82: Implementation signoff belongs in [STATUS.md](STATUS.md). This planning update is not runtime completion or reviewer approval.
+
+FILE planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md
+1: ## Story Header
+2: 
+3: **Story ID:** F0005-S0002
+4: 
+5: **Feature:** F0005 — One-time document ingestion
+6: 
+7: **Title:** Persist artifacts and recover jobs
+8: 
+9: **Priority:** High
+10: 
+11: **Phase:** MVP — v0.1A
+12: 
+13: **Status:** In Progress
+14: 
+15: ## User Story
+16: 
+17: **As a** platform engineer
+18: 
+19: **I want** document jobs to recover from live provider, storage and process failures without reconverting or duplicating effects
+20: 
+21: **So that** retries preserve published evidence and never produce two accepted results.
+22: 
+23: ## Context & Background
+24: 
+25: Implements the [PRD](PRD.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Delivered 2026-09-21: the PostgreSQL queue (migration 0004) and nine database recovery cases with recorded model responses. Not yet proven: live-provider failures, storage write failures, and recovery through the F0004 publication boundary.
+26: 
+27: ## Acceptance Criteria
+28: 
+29: - [ ] **F0005-S0002-AC1:** Given a published bundle, when the live vLLM endpoint is stopped, times out, returns HTTP 5xx, returns malformed JSON or returns schema-invalid output, then the attempt fails with a distinct recorded reason, finite retries resume from the saved native JSON, and converter/OCR call counters stay at zero after publication.
+30: - [ ] **F0005-S0002-AC2:** Given a worker process killed after bundle publication, after result publication, mid-import and after import commit, when a new worker claims the job, then it completes with exactly one accepted artifact, one run per profile, one assertion/evidence/review set and one acknowledged completion.
+31: - [ ] **F0005-S0002-AC3:** Given a storage write failure or crash before the manifest completion marker, when recovery runs, then the incomplete publication is never exposed as ready, is cleaned or resumed under the F0004 store contract, and the job reconverts at most once.
+32: - [ ] **F0005-S0002-AC4:** Given duplicate submissions, competing workers, expired leases or cancellation during model calls, when jobs execute, then stale attempts are fenced, cancellation stops further model scheduling within one in-flight call, and the configured model concurrency limit (default 1 for the host GPU) is never exceeded, including Graph-internal fan-out.
+33: - [ ] **F0005-S0002-AC5:** Given a different tenant, a revoked grant or an inactive principal, when a job or reader accesses source, bundle, run output or temporary export, then access is denied and audited; the job does not continue under stale authority.
+34: - [ ] **F0005-S0002-AC6:** Given run outputs, chunks, provenance ledgers and temporary exports holding source text, when a run completes, fails or is cancelled, then temporary files are removed and retained outputs sit under the owning tenant/KB scope with the same retention as the source.
+35: - [ ] **F0005-S0002-AC7:** Given a job, artifact or run state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
+36: 
+37: **Edge Cases & Error Scenarios:** Retry budget exhausted → job ends `failed` with the bundle retained and readable. Provider recovers mid-retry → no duplicate assertion set. Disk full during result publication → result not registered; bundle untouched.
+38: 
+39: ## Interaction Contract
+40: 
+41: No UI. Entry points: worker loop, importer and the CLI `cancel` command; failures are injected by the qualification harness.
+42: 
+43: | Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+44: |---|---|---|---|---|---|
+45: | Worker/importer under injected failure | Submit, kill, cancel or resubmit a job | Job state transitions only; accepted artifacts and results immutable | One accepted outcome per scoped version, recipe and profile, or an explicit terminal failure | Database row counts, counters and audit history after restart | ServicePrincipal `ingest`/`interpret` grants; revocation takes effect at the next boundary |
+46: 
+47: **Validation and audit:** every terminal failure carries a reason code; no failure path records a successful mutation.
+48: 
+49: ## Data Requirements
+50: 
+51: Job, attempt, lease generation, idempotency key, failure reason, counters (conversion, OCR, model calls), artifact and run references, retention scope.
+52: 
+53: ## Role-Based Visibility
+54: 
+55: Run outputs and temporary exports require the same current authorization as the source, rechecked after every restart; operators read failure reasons, not source text, from logs.
+56: 
+57: ## Non-Functional Expectations
+58: 
+59: - Recovery after a worker kill completes within one lease period plus one attempt.
+60: - Queue depth beyond the configured bound rejects new submissions explicitly rather than growing without limit.
+61: 
+62: ## Dependencies
+63: 
+64: S0001 checkpoint; F0004 store contract and v1 fallback; F0002/F0003 authorization and persistence; ADR-0059.
+65: 
+66: ## Out of Scope
+67: 
+68: Multi-host deployment, distributed GPU quotas, Temporal workflows (F0050), retention-period policy changes.
+69: 
+70: ## Questions & Assumptions
+71: 
+72: PostgreSQL durable jobs and outbox stay the v0.1 mechanism. Failure before publication may reconvert once; failure after publication may not.
+73: 
+74: ## Definition of Done
+75: 
+76: - [ ] Every acceptance criterion has observed evidence with the live provider and real storage.
+77: - [ ] Applicable runtime tests, authorization checks and contract validation pass.
+78: - [ ] STATUS, compatibility evidence and trackers describe the actual implementation.
+79: - [ ] Required reviewer verdicts are recorded in STATUS; planning checks are not runtime proof.
+80: 
+81: ## Review Provenance
+82: 
+83: Implementation signoff belongs in [STATUS.md](STATUS.md). This planning update is not runtime completion or reviewer approval.
+
+FILE planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md
+1: ## Story Header
+2: 
+3: **Story ID:** F0005-S0003
+4: 
+5: **Feature:** F0005 — One-time document ingestion
+6: 
+7: **Title:** Reinterpret saved JSON and map evidence
+8: 
+9: **Priority:** High
+10: 
+11: **Phase:** MVP — v0.1A
+12: 
+13: **Status:** In Progress
+14: 
+15: ## User Story
+16: 
+17: **As a** document intelligence engineer
+18: 
+19: **I want** live interpretations over saved native content with evidence grounded in actual source regions
+20: 
+21: **So that** a profile change enriches knowledge without reparsing or inventing locations.
+22: 
+23: ## Context & Background
+24: 
+25: Implements the [PRD](PRD.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) and accepted ADR-0058. Delivered 2026-09-22: evidence mapper v2, multi-region grounding and recorded-response dense extraction. This plan proves the same behavior with live model output on the qualification corpus.
+26: 
+27: ## Acceptance Criteria
+28: 
+29: - [ ] **F0005-S0003-AC1:** Given each published corpus bundle after a worker restart, when `gl-limits-a` and `gl-limits-b` run through the live dense contract, then saved DoclingDocument JSON is the only input, converter/OCR entry points are instrumented and called zero times, bundle hashes are unchanged, and each run records distinct template, schema, chunking, model and tokenizer identities.
+30: - [ ] **F0005-S0003-AC2:** Given live output for limits, dates and the named insured, when evidence is resolved, then every resolved selector's source text supports its value (Unicode offsets and table cells checked against the bundle), repeated or ambiguous values stay unresolved, and multi-region values need complete character coverage.
+31: - [ ] **F0005-S0003-AC3:** Given Graph chunks, nodes and properties, when the adapter builds InterpretationResult, then the provenance ledger and native item references are retained as run outputs; graph IDs and local merges never become enterprise identity or canonical facts.
+32: - [ ] **F0005-S0003-AC4:** Given output containing relationships or entity types without a downstream mapping, when it is imported, then the import fails closed with an explicit unsupported-output reason and no partial assertions.
+33: - [ ] **F0005-S0003-AC5:** Given any model call (skeleton, fill, repair or reconciliation), when it is scheduled, then input + schema + output reservations measured with the serving tokenizer fit the 4,096-token context; an oversized request fails before sending.
+34: - [ ] **F0005-S0003-AC6:** Given a selected-block or targeted request, when interpretation begins, then it fails explicitly as unsupported rather than broadening to the full document; F0032 owns targeted evolution.
+35: - [ ] **F0005-S0003-AC7:** Given a job, artifact or run state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
+36: 
+37: **Edge Cases & Error Scenarios:** Value printed differently from the expectation (e.g. `$1M`) → reported as an accuracy miss, not normalized into a match. Model returns a value absent from the document → unresolved evidence and an accuracy miss, never a fabricated span. A chunk boundary splitting a value → multi-region resolution or unresolved, never truncation.
+38: 
+39: ## Interaction Contract
+40: 
+41: No UI. Entry points: worker interpretation stage and the importer; review items appear in the existing Review Panel unchanged.
+42: 
+43: | Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+44: |---|---|---|---|---|---|
+45: | Interpretation over a published bundle → importer | Run a profile against an artifact | New run only; bundle and prior runs immutable | Run outputs plus assertions, evidence and review items in one transaction, or explicit failure | Reload run, assertions and evidence selectors; recheck selectors against bundle text | ServicePrincipal `interpret` grant; canonical acceptance excluded |
+46: 
+47: **Validation and audit:** unresolved evidence enters provenance review per ADR-0058; nothing is committed canonically.
+48: 
+49: ## Data Requirements
+50: 
+51: Run identity and configuration hashes, chunk inventory, provenance ledger, per-call token reservations and usage, evidence precision per value.
+52: 
+53: ## Role-Based Visibility
+54: 
+55: Run outputs require current `interpret` authorization in the source's tenant/KB, rechecked after restart. Model context contains chunk text only.
+56: 
+57: ## Non-Functional Expectations
+58: 
+59: - Every call's reservation is checked before sending; budgets cover repairs.
+60: - Per-document-profile latency is reported for S0004's threshold.
+61: 
+62: ## Dependencies
+63: 
+64: S0001/S0002; fixed proof profiles; ADR-0040/ADR-0058; F0015/F0016 for production profiles and run lifecycle.
+65: 
+66: ## Out of Scope
+67: 
+68: Relationship semantics, new profiles, targeted evolution, canonical commits.
+69: 
+70: ## Questions & Assumptions
+71: 
+72: Two fixed profiles remain sufficient for qualification; F0015 compiles production templates against the qualified adapter.
+73: 
+74: ## Definition of Done
+75: 
+76: - [ ] Every acceptance criterion has observed live-model evidence.
+77: - [ ] Applicable runtime tests, authorization checks and contract validation pass.
+78: - [ ] STATUS, compatibility evidence and trackers describe the actual implementation.
+79: - [ ] Required reviewer verdicts are recorded in STATUS; planning checks are not runtime proof.
+80: 
+81: ## Review Provenance
+82: 
+83: Implementation signoff belongs in [STATUS.md](STATUS.md). This planning update is not runtime completion or reviewer approval.
+
+FILE planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md
+1: ## Story Header
+2: 
+3: **Story ID:** F0005-S0004
+4: 
+5: **Feature:** F0005 — One-time document ingestion
+6: 
+7: **Title:** Evaluate and activate the proven pipeline
+8: 
+9: **Priority:** High
+10: 
+11: **Phase:** MVP — v0.1A
+12: 
+13: **Status:** In Progress
+14: 
+15: ## User Story
+16: 
+17: **As a** platform owner
+18: 
+19: **I want** a measured direct-versus-Graph comparison against agreed thresholds, followed by activation or rejection
+20: 
+21: **So that** Graph replaces the direct client only on evidence, and either outcome is recorded and reversible.
+22: 
+23: ## Context & Background
+24: 
+25: Implements the [PRD](PRD.md) under proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Delivered 2026-09-22: a recorded-response [synthetic comparison](synthetic-comparison.json), which is orchestration proof, not model quality. This plan adds the live corpus comparison, reviewer verdicts and the activation decision.
+26: 
+27: ## Acceptance Criteria
+28: 
+29: - [ ] **F0005-S0004-AC1:** Given the qualification corpus (at least 12 synthetic documents: 6 native, 4 scanned, 2 mixed-page), when it is committed, then every expected value and evidence location was authored from the document source by a role that does not run or review the extraction, and the corpus and expectation hashes are recorded before the first measured run.
+30: - [ ] **F0005-S0004-AC2:** Given the direct baseline and Graph dense under recorded configurations (pins, model and tokenizer revision, chunking, budgets), when both profiles run over the full corpus, then the report records per-case and aggregate schema validity, field accuracy, abstention, fabricated evidence, evidence resolution, calls, serving-tokenizer tokens, p95 latency and review items per document.
+31: - [ ] **F0005-S0004-AC3:** Given the report, when it is compared with the PRD thresholds, then each threshold is marked met or missed with its measured value; a missed threshold blocks activation and is never re-run with relaxed budgets to pass.
+32: - [ ] **F0005-S0004-AC4:** Given S0001–S0003 and S0005 evidence plus the report, when QA, Architect and Security review them, then each records a verdict with evidence references in STATUS, and the operator records acceptance or rejection.
+33: - [ ] **F0005-S0004-AC5:** Given all thresholds met, every verdict passing and operator acceptance, when activation runs, then ADR-0060 becomes Accepted, the worker default extraction contract becomes Graph dense through committed non-secret configuration, the v2 writer is enabled per S0005, and the dependency matrix, build/run metadata and C4 runtime description are updated together.
+34: - [ ] **F0005-S0004-AC6:** Given an activated configuration, when the rollback setting selects the direct baseline, then new runs use the direct client with its own identity, existing artifacts and runs stay readable and unchanged, and no run mixes engines.
+35: - [ ] **F0005-S0004-AC7:** Given any threshold miss, failing verdict or operator rejection, when the feature closes, then the direct client stays default, the v2 writer stays disabled, ADR-0060 records the failed gates (Proposed or Rejected per operator), and no partial activation remains.
+36: - [ ] **F0005-S0004-AC8:** Given a job, artifact, run or activation state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
+37: 
+38: **Edge Cases & Error Scenarios:** Live model unavailable during measurement → the run is void and repeated in full, never partially merged. Baseline worse than Graph on every metric → still reported; the baseline remains the rollback path. Reviewer finds an expectation error → the corrected expectation is re-hashed and both engines are re-measured.
+39: 
+40: ## Interaction Contract
+41: 
+42: No UI. Entry points: the comparison harness, the committed configuration file and the ADR/STATUS records.
+43: 
+44: | Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+45: |---|---|---|---|---|---|
+46: | Comparison harness → report | Run both engines over the corpus | Report immutable once recorded; a re-run creates a new report | Hashed report with per-case rows | Re-run reproduction command; compare corpus and configuration hashes | QA owns corpus; AI engineer runs; reviewers do not author expectations |
+47: | Committed configuration | Activate or roll back | Default extraction contract and `content.v2_writer_enabled` | Next job uses the selected engine and writer | Restart worker; submit a document; inspect run and manifest identity | Activation only after AC4 acceptance |
+48: 
+49: **Validation and audit:** activation and rollback are recorded in STATUS and the feature evidence package with the operator's decision.
+50: 
+51: ## Data Requirements
+52: 
+53: Corpus manifest and hashes, expectation files, run configurations, per-case results, aggregate metrics, verdicts, activation decision and configuration diff.
+54: 
+55: ## Role-Based Visibility
+56: 
+57: Corpus and reports are synthetic and repository-committed; measured runs execute under the ServicePrincipal's current authorization like any job, and activation needs no new permission; reports exclude secrets and serving credentials.
+58: 
+59: ## Non-Functional Expectations
+60: 
+61: Thresholds as listed in the PRD. Measurement uses one worker replica and the model semaphore at 1.
+62: 
+63: ## Dependencies
+64: 
+65: S0001–S0003, S0005; agent-role QA, Architect and Security reviewers; operator acceptance; F0026 reuses the cases.
+66: 
+67: ## Out of Scope
+68: 
+69: Production host activation, licensed or frozen-holdout corpora, retiring the direct client code (it stays as the rollback path).
+70: 
+71: ## Questions & Assumptions
+72: 
+73: Thresholds are the operator-approved PRD defaults. Graph direct is reported for completeness but is not an activation candidate.
+74: 
+75: ## Definition of Done
+76: 
+77: - [ ] Every acceptance criterion has observed evidence.
+78: - [ ] Applicable runtime tests, authorization checks and contract validation pass.
+79: - [ ] STATUS, ADR-0060, dependency matrix and trackers describe the actual outcome.
+80: - [ ] Required reviewer verdicts and the operator decision are recorded; planning checks are not runtime proof.
+81: 
+82: ## Review Provenance
+83: 
+84: Implementation signoff belongs in [STATUS.md](STATUS.md). This planning update is not runtime completion or reviewer approval.
+
+FILE planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md
+1: ## Story Header
+2: 
+3: **Story ID:** F0005-S0005
+4: 
+5: **Feature:** F0005 — One-time document ingestion
+6: 
+7: **Title:** Qualify text origin and enable v2 publication
+8: 
+9: **Priority:** High
+10: 
+11: **Phase:** MVP — v0.1A
+12: 
+13: **Status:** Not Started
+14: 
+15: ## User Story
+16: 
+17: **As a** document intelligence engineer
+18: 
+19: **I want** every published block to carry an observed text origin and exact OCR provenance before the v2 writer is switched on
+20: 
+21: **So that** downstream admission and review never rely on inferred origins or unidentified OCR models.
+22: 
+23: ## Context & Background
+24: 
+25: F0004 delivered v2 content contracts, per-item origin projection, the `content.v2_writer_enabled` switch (default `false`) and the per-document v1 fallback, and its Step 1a spike passed on three synthetic fixtures. F0004 closeout assigned F0005 two obligations before broader activation: fixed Docling/hook qualification and exact OCR model-asset provenance. This story also satisfies the 2026-09-25 A-4 activation prerequisite under ADR-0065. See the [PRD](PRD.md).
+26: 
+27: ## Acceptance Criteria
+28: 
+29: - [ ] **F0005-S0005-AC1:** Given every qualification-corpus document converted live, when per-item origin is projected, then each native text item is `STATED` with its observed producer, each OCR item is `OCR` with engine name/version, and items that cannot be attributed return `ORIGIN_UNAVAILABLE`; no origin is derived from page OCR counts.
+30: - [ ] **F0005-S0005-AC2:** Given OCR ran, when the bundle is published, then the OCR model assets used are identified by name, revision and file SHA-256 read from the installed asset files; an unidentifiable asset blocks v2 publication for that document instead of recording a guessed identity.
+31: - [ ] **F0005-S0005-AC3:** Given a document with any `ORIGIN_UNAVAILABLE` item and the v2 writer enabled, when it is published, then it falls back to a v1 bundle with `writer_fallback_reason=ORIGIN_UNAVAILABLE` audited, and the per-corpus fallback rate is reported.
+32: - [ ] **F0005-S0005-AC4:** Given v2 bundles from the corpus, when every existing consumer reads them (authorized content reader, evidence resolver, Graph adapter saved-JSON path, importer, restore drill), then they pass with unchanged behavior; v1 bundles stay readable.
+33: - [ ] **F0005-S0005-AC5:** Given AC1–AC4 pass and S0004 activation is accepted, when `content.v2_writer_enabled` is set to `true` in committed configuration, then new sources publish v2 bundles and existing artifacts are not rewritten.
+34: - [ ] **F0005-S0005-AC6:** Given a job, artifact or run state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
+35: 
+36: **Edge Cases & Error Scenarios:** OCR assets present but altered after install → digest mismatch blocks v2 publication. Mixed page with an image region OCR skipped → that region's items `ORIGIN_UNAVAILABLE`, document falls back to v1. Docling upgrade → origin hook re-qualified before the switch stays on.
+37: 
+38: ## Interaction Contract
+39: 
+40: No UI. Entry points: the publication boundary and the committed `config/local.yaml` switch.
+41: 
+42: | Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+43: |---|---|---|---|---|---|
+44: | Publication boundary with v2 writer | Publish a converted document | New bundle only | v2 bundle with per-item origins and OCR asset identity, or audited v1 fallback | Reload through the v2 verifier; check manifest version, origins and asset digests | ServicePrincipal `ingest`; switch flipped only after S0004 acceptance |
+45: 
+46: **Validation and audit:** the switch change is recorded with the activation decision; fallbacks are audited per document.
+47: 
+48: ## Data Requirements
+49: 
+50: Per-item origin and producer, OCR engine name/version, OCR asset name/revision/SHA-256, fallback reason and rate, manifest contract version.
+51: 
+52: ## Role-Based Visibility
+53: 
+54: Unchanged from F0004: origin metadata follows artifact access.
+55: 
+56: ## Non-Functional Expectations
+57: 
+58: Origin projection adds no model call and no second conversion.
+59: 
+60: ## Dependencies
+61: 
+62: F0004 v2 contracts, projection and fallback; S0001 live conversion; S0004 activation decision; ADR-0065 (Proposed; only its storage carry-in applies).
+63: 
+64: ## Out of Scope
+65: 
+66: `TRANSCRIBED` and `DESCRIBED` producers, new OCR engines, rewriting legacy bundles, assertion admission behavior (F0006).
+67: 
+68: ## Questions & Assumptions
+69: 
+70: The v2 switch flips only together with S0004 activation; on rejection it stays `false`.
+71: 
+72: ## Definition of Done
+73: 
+74: - [ ] Every acceptance criterion has observed evidence on live conversions.
+75: - [ ] Applicable runtime tests, authorization checks and contract validation pass.
+76: - [ ] STATUS, compatibility evidence and trackers describe the actual implementation.
+77: - [ ] Required reviewer verdicts are recorded in STATUS; planning checks are not runtime proof.
+78: 
+79: ## Review Provenance
+80: 
+81: Implementation signoff belongs in [STATUS.md](STATUS.md). This planning update is not runtime completion or reviewer approval.

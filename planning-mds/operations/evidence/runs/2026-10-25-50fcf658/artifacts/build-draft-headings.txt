@@ -1,0 +1,24 @@
+5:## Reconciliation with the 2026-09-15 plan and shipped F0002–F0004
+14:| Job leases, fencing, outbox, recovery | Delivered: `DocumentJobQueue`, migration 0004, nine PostgreSQL cases with recorded responses; job events carry no failure reason | Add live-provider and storage failure injection (Step 4) and a reason column (migration 0009) |
+22:## Ownership and package boundary
+29:| AI Engineer | Live conversion, origin/OCR provenance, evidence proof, comparison harness and runs, direct-baseline worker path |
+38:## Build order
+48:| 6 | S0004-AC6 support | `extraction.pipeline` selection with job pinning; direct-baseline worker path passes the S0002/S0003 recovery and evidence suites. |
+53:## Step 0 — Preflight (DevOps)
+57:## Step 1 — Qualification corpus (QE corpus author)
+72:## Step 2 — Live conversion (S0001)
+80:## Step 3 — Text origin and OCR asset provenance (S0005)
+92:## Step 4 — Failure injection (S0002)
+100:- **Concurrency (AC4):** submit 5 jobs with two worker processes on one host; assert via proxy request timestamps that in-flight model requests never exceed the configured limit (default 1), and that cancellation leaves at most one in-flight request and schedules none after it.
+104:## Step 5 — Live interpretation and evidence (S0003)
+113:## Step 6 — Pipeline selection and rollback path
+119:  # graph-direct (current opt-in behavior) | graph-dense | direct-baseline
+128:## Step 7 — Comparison, review and decision (S0004, S0005-AC5)
+130:**Harness:** `neuron/benchmarks/f0005_qualification.py --corpus neuron/fixtures/qualification --pipelines direct-baseline graph-dense graph-direct --output <run>/artifacts/qualification/report.json`. It reuses the scoring of `docling_graph_comparison.py`, runs through the worker composition against live vLLM, and records configuration hashes, pins, corpus and expectation hashes, and per-case rows. Graph direct is reported but is not a candidate.
+141:**Void runs:** if the provider fails mid-measurement, the whole report is void and rerun. Reports are immutable; reruns get a new file.
+148:4. **On acceptance:** in one change, set `extraction.pipeline: graph-dense` and `content.v2_writer_enabled: true`; mark ADR-0060 Accepted with the evidence links; update `docker/DEPENDENCY-MATRIX.md`, build/run metadata, the C4 container description and BLUEPRINT §2.1/§4.8. Then submit one new corpus document and verify the pipeline, run identity and v2 manifest after a restart. Rollback is verified by switching `extraction.pipeline: direct-baseline`, submitting again, and confirming earlier artifacts and runs are unchanged.
+149:5. **On rejection:** both settings stay as they are. ADR-0060 records the failed gates and stays Proposed, or becomes Rejected if the operator says so. The direct-baseline worker path remains available as built.
+151:## Contracts, data and authorization
+164:## Test inventory and coverage
+176:## Non-functional limits
+184:## Rollout

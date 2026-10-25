@@ -1,0 +1,75 @@
+# Agent retrieval guard. Gitignore-style patterns for AI agents.
+# This is not .gitignore; it does not change source control behavior.
+
+# Treat operations evidence as cold archive by default.
+/planning-mds/operations/**
+
+# Re-allow only small index entry points.
+!/planning-mds/operations/
+!/planning-mds/operations/evidence/
+!/planning-mds/operations/evidence/README.md
+!/planning-mds/operations/evidence/features/
+!/planning-mds/operations/evidence/features/**/
+!/planning-mds/operations/evidence/features/**/latest-run.json
+!/planning-mds/operations/evidence/frontend-quality/
+!/planning-mds/operations/evidence/frontend-quality/README.md
+!/planning-mds/operations/evidence/frontend-quality/latest-run.json
+!/planning-mds/operations/evidence/frontend-ux/
+!/planning-mds/operations/evidence/frontend-ux/README.md
+# Working in Nebula Insurance Brain
+
+Read `planning-mds/BLUEPRINT.md` for process, scope, technology, and phase status. Architectural intent comes from `planning-mds/architecture/master-blueprint.md` and its governing ADRs. Feature-specific accepted requirements live in their feature folders. Report conflicts between these sources; do not invent product rules.
+
+## Repository boundaries
+
+- Keep product requirements, insurance terminology, review criteria, and validation scripts here. Generic framework mechanisms belong in the sibling `nebula-agents` repository.
+- Framework sessions start in that sibling repository. Always pass this repository's absolute path as `--product-root`, or set `NEBULA_PRODUCT_ROOT` explicitly. Do not rely on a default product or the shell's current directory.
+- `BOUNDARY-POLICY.md` in the framework describes the separation of framework and product content. It is not an insurance regulatory policy.
+- Runtime directories and proof harnesses named in a plan may not exist yet. Distinguish a proposed implementation path from a required existing planning artifact.
+
+## Planning and knowledge graph
+
+- Keep the blueprint, feature status, and trackers aligned under `planning-mds/features/TRACKER-GOVERNANCE.md`.
+- Edit `planning-mds/kg-source/**` as the authored graph source. Generate projections and tracker tables with `scripts/kg/compile.py`; do not hand-edit generated regions.
+- Use KG lookup for routing. Inspect the source planning artifacts before making readiness judgments.
+- KG coverage means a feature has retrieval mappings, including planning-only stubs. It does not imply a PRD, completed Phase B, approval, or implementation; read status and mapping notes before making readiness claims.
+- Honor `.agentignore` for broad searches. Read exact evidence references when a review requires them.
+- Proposed ADRs stay proposed until their stated proof and acceptance conditions are met. Structural readiness checks do not settle them.
+
+## Local validation
+
+From this repository, run:
+
+```bash
+python3 scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0001
+python3 scripts/validation/validate_plan_readiness.py --plan-scope project --target project
+python3 scripts/run-lifecycle-gates.py
+```
+
+The readiness validator emits JSON and exits 0 for a structurally valid plan, 1 for failed checks, and 2 for invalid invocation. Architectural adequacy remains a reviewer decision. During `plan-review`, also read `docs/plan-review-checklist.md` and cite actual planning evidence for findings.
+
+## Semantic examples
+
+For each introduced or changed concept, maintain its glossary definition, worked example, boundary case, and owning feature/story/contract links in `planning-mds/examples/README.md`. Reuse the continuing EX-GL-001 case where it fits. Label synthetic/illustrative outputs and future delivery phases explicitly. Validate structured examples; runtime delivery must add actual reproduction evidence and keep development examples outside the frozen holdout.
+# Brain plan review checklist
+
+These are product review criteria for `plan-review`. The script validates the structure and source references in this checklist and the target planning package. Reviewers judge whether the referenced plan addresses the criteria adequately; a script pass does not mean approval or regulatory compliance.
+
+For each target, record each applicable rule's outcome and a feature-specific planning evidence reference in the review report. If a rule does not apply, record the reason explicitly. The governing references below orient the reviewer; they do not assert that every target already satisfies each rule.
+
+| Rule ID | Owner | Criterion | Governing source | Planning evidence to inspect |
+|---|---|---|---|---|
+| BRAIN-SCOPE | product-manager | Requirements, exclusions, and acceptance criteria are explicit. | planning-mds/BLUEPRINT.md | Target PRD.md and story acceptance criteria |
+| BRAIN-AUTHORITY | architect | Accepted requirements and proposed decisions remain distinguishable. | planning-mds/architecture/master-blueprint.md | Target dependencies, design decisions, and referenced ADR status |
+| BRAIN-EVIDENCE | architect | Assertion and canonical fact authority are tied to evidence or derivation lineage. | planning-mds/architecture/decisions/ADR-0010-provenance-is-mandatory.md | Target data requirements and proof/evidence plan; or an explicit scope exclusion |
+| BRAIN-PARSE-ONCE | architect | Reinterpretation preserves the accepted content artifact. | planning-mds/architecture/decisions/ADR-0003-one-time-content-extraction.md | Target ingestion/interpretation requirements; or an explicit scope exclusion |
+| BRAIN-TEMPORAL | architect | Changes preserve the valid-time and recorded-time contract. | planning-mds/architecture/decisions/ADR-0007-full-bitemporality.md | Target persistence requirements and planned tests; or an explicit scope exclusion |
+| BRAIN-AUTHORIZATION | security | Protected reads and writes establish identity and enforce resource scope. | planning-mds/security/authorization-review.md | Target permission requirements and negative test plan; or an explicit scope exclusion |
+| BRAIN-BUILDABILITY | code-reviewer | Ownership, prerequisites, interfaces, and planned validation let implementation begin without invented rules. | planning-mds/features/TRACKER-GOVERNANCE.md | Target stories, dependencies, planning artifacts, and required signoff roles |
+| BRAIN-EXAMPLES | architect | Each introduced/changed semantic concept has a definition, worked example, boundary example, and owning feature/story/contract links; structured examples validate, phases/provenance are labeled, and runtime reproduction/holdout separation are planned. | planning-mds/examples/README.md | Target example coverage, schema/reference checks, story acceptance, and actual reproduction evidence when implemented; or an explicit no-semantic-change rationale |
+
+## Evidence boundary
+
+Required planning artifacts must exist and contain substantive sections. Runtime paths explicitly described as future deliverables are allowed to be absent. Do not require completed runtime proof results merely to review the plan for conducting those proofs.
+
+Record review findings in the action's base evidence package. Preserve its normal PR0–PR4 ownership and readiness rules. A failing required local check blocks completion; a passing check supplies validation evidence for reviewer judgment.

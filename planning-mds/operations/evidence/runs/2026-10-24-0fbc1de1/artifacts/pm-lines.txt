@@ -1,0 +1,203 @@
+
+PRD.md
+1: # F0005 — One-time document ingestion — PRD
+2: 
+3: ## Feature Header
+4: 
+5: **Feature ID:** F0005\
+6: **Feature Name:** One-time document ingestion\
+7: **Priority:** High\
+8: **Phase:** MVP — v0.1A\
+9: **Status:** Requirements re-planned in plan run `2026-10-23-9a04b327` (Phase A approved by the operator with `approve-phase-a` on 2026-10-23, including the qualification thresholds; Phase B approved with `approve-phase-b` the same day). The synthetic development scope delivered 2026-09-20 to 2026-09-22 remains complete; this plan defines the remaining local qualification and gated activation. See [STATUS](STATUS.md).
+10: 
+11: ## Feature Statement
+12: 
+13: **As a** document intelligence engineer
+14: **I want** durable one-time ingestion and repeatable interpretation of saved native content, qualified against a live local model
+15: **So that** model failures and profile changes never repeat published parsing or lose source evidence, and the Docling-Graph pipeline replaces the direct client only on measured evidence.
+16: 
+17: ## Business Objective
+18: 
+19: Decide ADR-0060 on observed local evidence. The candidate pipeline (Docling-Graph 1.9.1 over Docling 2.126.0) is implemented and opt-in, with synthetic, recorded-response proof only. F0005 finishes when the pipeline is either qualified and activated as the local default, or rejected with the F0001 direct client retained. Both outcomes are complete if recorded with evidence.
+20: 
+21: ## Problem Statement
+22: 
+23: The current proof never ran a live model through Graph, never measured quality or cost against the direct baseline, and never injected live-provider or storage failures. Since it was written, F0002–F0004 shipped verified principals, persistence discipline, versioned content contracts, text-origin records and a disabled v2 writer. F0004 handed F0005 two obligations: exact OCR model-asset provenance and fixed Docling/hook qualification before broader v2 activation. Without this plan, the candidate stays opt-in indefinitely and downstream features (F0014–F0016, F0024) plan against an unqualified extraction path.
+24: 
+25: ## Scope & Boundaries
+26: 
+27: **Operator scope decisions (G1, 2026-10-23):**
+28: 
+29: 1. Local qualification plus gated activation: live `microsoft/Phi-4-mini-instruct` on vLLM on the development host GPU, real failure injection, a direct-versus-Graph comparison with thresholds fixed in this PRD. If every gate passes, ADR-0060 is accepted and Graph becomes the default extraction path in local Docker Compose. The production host remains F0026.
+30: 2. Synthetic qualification corpus with independent expectations and independent agent-role reviewers; the operator accepts the result. No licensed real documents are used or claimed.
+31: 3. F0005 qualifies text origin and exact OCR asset provenance, then enables `content.v2_writer_enabled` for new sources as an activation step, keeping F0004's per-document v1 fallback.
+32: 4. F0016 owns producing CONTENT and SOURCE_METADATA document-date candidates. F0005 produces none.
+33: 
+34: **In scope:**
+35: 
+36: - Live native, scanned and mixed-page conversion on the pinned package with exact parser, OCR engine and OCR model-asset identity.
+37: - Live two-profile interpretation over saved native JSON with zero conversion/OCR, through the dense (chunked) Graph contract and the direct baseline.
+38: - Live failure injection: provider unavailable, timeout, malformed and schema-invalid output, worker kill after publication, storage write failure, cancellation and duplicate submission.
+39: - Evidence qualification for amounts, dates, names, table cells, repeated values and multi-region values; unsupported relationship output fails closed.
+40: - A synthetic qualification corpus, a recorded comparison against the thresholds below, and independent QA, Architect and Security verdicts.
+41: - Activation: Graph dense as the worker default, v2 writer enabled for new sources, metadata/dependency-matrix/C4 updates, and a tested rollback switch to the direct baseline.
+42: 
+43: **Out of scope:** production host or multi-replica deployment (F0026); licensed or frozen-holdout corpora (F0026); F0015 profile compiler and profiles beyond `gl-limits-a`/`gl-limits-b`; F0016 production run lifecycle and date-candidate production; F0032 targeted evolution; F0017 entity resolution; canonical acceptance (F0018); AGE loading; review UI changes (F0022); Temporal (F0050); new OCR engines or input formats beyond PDF. Archived F0001 records remain unchanged.
+44: 
+45: ## Acceptance Criteria Overview
+46: 
+47: - [ ] S0001: live native, scanned and mixed-page conversion on the pinned package publishes a bundle before any model call, records exact parser/OCR identities and preserves partial-conversion diagnostics.
+48: - [ ] S0002: live provider and storage failures, worker kills, cancellation and duplicates recover with zero reconversion after publication and no duplicate accepted effects; run outputs follow tenant access and retention.
+49: - [ ] S0003: live two-profile reinterpretation over saved JSON grounds every resolved value in its actual source regions, keeps the rest unresolved, keeps every call within budget and fails closed on relationship output.
+50: - [ ] S0004: the corpus comparison meets every threshold below with recorded reviewer verdicts; only then are ADR-0060 accepted and Graph activated, with a tested rollback.
+51: - [ ] S0005: per-item text origin and exact OCR asset provenance pass on the live corpus, and consumers read v2 bundles before the v2 writer is enabled.
+52: 
+73: **Key workflows:** authorized submission → conversion → bundle publication (checkpoint) → per-profile interpretation over saved JSON → transactional import → review items; failure → retry from checkpoint; operator activation and rollback through committed configuration.
+74: 
+75: Existing job status and evidence consumers must keep distinguishing pending, partial, failed and completed work, and must not treat a failed extraction as missing source evidence. Native review stays F0022; its Review Panel consumes imported evidence unchanged.
+76: 
+77: ## Screen Layouts (ASCII)
+78: 
+79: No UI. F0005 changes worker, ingestion and configuration behavior only; no screen is introduced or materially modified, so desktop and narrow layouts are not applicable.
+80: 
+81: ## Data Requirements
+82: 
+83: Keep separate source, content-artifact and interpretation identities (ADR-0004). Conversion identity: parser name/version/configuration, OCR engine name/version and exact OCR model-asset identity (name, revision, file digest). Interpretation identity: Graph revision, extraction contract (direct or dense), template/schema hash, chunking settings, serving model id and revision, tokenizer revision. Graph chunks, extraction graph and provenance ledger are run-owned outputs, never bundle content.
+84: 
+85: **Qualification corpus:** at least 12 synthetic GL declarations documents outside the frozen holdout — at least 6 native, 4 scanned and 2 mixed-page — covering unique values, repeated values, table-borne limits, values split across regions, absent fields and one partial conversion. Expected values and evidence locations for all five profile fields are authored from the document source, before and independently of any extraction output, and committed with their hashes.
+86: 
+87: **Validation rules:** missing values stay missing; unknown origin stays `ORIGIN_UNAVAILABLE` and triggers v1 fallback; a node-identifier match cannot ground all of its properties; unsupported targeting or relationship output is an explicit failure.
+88: 
+89: ## Role-Based Access
+90: 
+91: Reuse F0002 principals and the existing `ServicePrincipal` `ingest`/`interpret` grants; no new role, permission or endpoint. Authorization is rechecked at each sensitive boundary, including after restart. Model requests carry authorized chunk text only, never principal, tenant or credential data (ADR-0055 data policy). Run outputs, temporary exports and qualification artifacts holding source text are readable only under the owning tenant/KB scope. The CLI remains a trusted-operator interface.
+118: | F0004 (archived) | Versioned bundle contracts, verifier, text-origin records, v2 writer switch, per-document v1 fallback; hands F0005 OCR asset provenance and hook qualification. |
+119: | F0014/F0015/F0016 | Downstream: production profiles, compiler and run lifecycle consume the qualified adapter. F0016 owns date candidates. |
+120: | F0022 | Downstream review display of imported evidence; no change required. |
+121: | F0026 | Production host, frozen corpus and release qualification reuse these cases. |
+122: 
+123: ## Related Stories
+124: 
+125: - [S0001 — Pin and process source documents](F0005-S0001-pin-and-process-source-documents.md)
+126: - [S0002 — Persist artifacts and recover jobs](F0005-S0002-persist-artifacts-and-recover-jobs.md)
+127: - [S0003 — Reinterpret saved JSON and map evidence](F0005-S0003-reinterpret-saved-json-and-map-evidence.md)
+128: - [S0004 — Evaluate and activate the proven pipeline](F0005-S0004-evaluate-and-activate-proven-pipeline.md)
+129: - [S0005 — Qualify text origin and enable v2 publication](F0005-S0005-qualify-text-origin-and-enable-v2-publication.md)
+130: 
+131: ## Example Library
+132: 
+133: No new semantic concept is introduced. The qualification corpus specializes the continuing EX-GL-001 case and reuses F0004's EX-CONTENT examples for bundle, origin and fallback behavior. Its documents are synthetic development data, outside the frozen holdout.
+
+F0005-S0004-evaluate-and-activate-proven-pipeline.md
+26: 
+27: ## Acceptance Criteria
+28: 
+29: - [ ] **F0005-S0004-AC1:** Given the qualification corpus (at least 12 synthetic documents: 6 native, 4 scanned, 2 mixed-page), when it is committed, then every expected value and evidence location was authored from the document source by a role that does not run or review the extraction, and the corpus and expectation hashes are recorded before the first measured run.
+30: - [ ] **F0005-S0004-AC2:** Given the direct baseline and Graph dense under recorded configurations (pins, model and tokenizer revision, chunking, budgets), when both profiles run over the full corpus, then the report records per-case and aggregate schema validity, field accuracy, abstention, fabricated evidence, evidence resolution, calls, serving-tokenizer tokens, p95 latency and review items per document.
+31: - [ ] **F0005-S0004-AC3:** Given the report, when it is compared with the PRD thresholds, then each threshold is marked met or missed with its measured value; a missed threshold blocks activation and is never re-run with relaxed budgets to pass.
+32: - [ ] **F0005-S0004-AC4:** Given S0001–S0003 and S0005 evidence plus the report, when QA, Architect and Security review them, then each records a verdict with evidence references in STATUS, and the operator records acceptance or rejection.
+33: - [ ] **F0005-S0004-AC5:** Given all thresholds met, every verdict passing and operator acceptance, when activation runs, then ADR-0060 becomes Accepted, the worker default extraction contract becomes Graph dense through committed non-secret configuration, the v2 writer is enabled per S0005, and the dependency matrix, build/run metadata and C4 runtime description are updated together.
+34: - [ ] **F0005-S0004-AC6:** Given an activated configuration, when the rollback setting selects the direct baseline, then new runs use the direct client with its own identity, existing artifacts and runs stay readable and unchanged, and no run mixes engines.
+35: - [ ] **F0005-S0004-AC7:** Given any threshold miss, failing verdict or operator rejection, when the feature closes, then the direct client stays default, the v2 writer stays disabled, ADR-0060 records the failed gates (Proposed or Rejected per operator), and no partial activation remains.
+36: - [ ] **F0005-S0004-AC8:** Given a job, artifact, run or activation state change, when the operation succeeds or fails, then an audit event records actor and job identity, correlation and attempt IDs, artifact/run references, outcome and timestamp, without secrets or source text.
+37: 
+38: **Edge Cases & Error Scenarios:** Live model unavailable during measurement → the run is void and repeated in full, never partially merged. Baseline worse than Graph on every metric → still reported; the baseline remains the rollback path. Reviewer finds an expectation error → the corrected expectation is re-hashed and both engines are re-measured.
+39: 
+40: ## Interaction Contract
+41: 
+42: No UI. Entry points: the comparison harness, the committed configuration file and the ADR/STATUS records.
+43: 
+44: | Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+45: |---|---|---|---|---|---|
+46: | Comparison harness → report | Run both engines over the corpus | Report immutable once recorded; a re-run creates a new report | Hashed report with per-case rows | Re-run reproduction command; compare corpus and configuration hashes | QA owns corpus; AI engineer runs; reviewers do not author expectations |
+47: | Committed configuration | Activate or roll back | Default extraction contract and `content.v2_writer_enabled` | Next job uses the selected engine and writer | Restart worker; submit a document; inspect run and manifest identity | Activation only after AC4 acceptance |
+48: 
+
+feature-assembly-plan.md
+28: | Quality Engineer (corpus author session) | Corpus generator, documents, expectations, hashes. Never runs or reviews extraction. |
+29: | AI Engineer | Live conversion, origin/OCR provenance, evidence proof, comparison harness and runs, direct-baseline worker path |
+30: | Backend Developer | Pipeline selection config and job pinning, failure-injection composition, cleanup/retention of temporary exports |
+31: | DevOps | Preflight: vLLM serving, GPU, model and OCR asset cache, database; dependency matrix; C4 runtime update at activation |
+32: | Quality Engineer (independent review session) | QA verdict over all stories and the report |
+33: | Architect (independent review session) | Architecture verdict; ADR-0060 status change |
+34: | Security (independent review session) | Security verdict: data egress, credentials, logs, tenant access, retention |
+35: 
+36: Review sessions start from fresh context and do not author code, corpus or expectations they judge.
+37: 
+38: ## Build order
+39: 
+40: | Step | Story | Exit condition |
+41: |---|---|---|
+42: | 0 | all | Preflight green: vLLM serves `microsoft/Phi-4-mini-instruct` at revision `cfbefacb99257ffa30c83adab238a50856ac3083` on the host GPU; serving tokenizer cached; Docling and RapidOCR assets cached offline; PostgreSQL at migration head; lock check passes. |
+43: | 1 | S0004-AC1 | Corpus committed with corpus and expectation hashes recorded in the feature evidence package before any measured run. |
+116: 
+117: ```yaml
+118: extraction:
+119:   # graph-direct (current opt-in behavior) | graph-dense | direct-baseline
+120:   pipeline: graph-direct
+121: ```
+122: 
+123: - **Job pinning:** the selected pipeline is written into the job `payload` at submission, as the profile and schema hash already are, and is covered by the idempotency check. Retries and recovery use the pinned value. A configuration change affects new submissions only, so no run mixes engines (S0004-AC6). No migration is needed: `payload` is JSON.
+124: - **Run identity:** the interpretation run records the pipeline value, Graph revision and contract, or the direct adapter's identity.
+125: - **Direct baseline in the worker:** wrap `OpenAICompatibleExtractionAdapter` behind the same interpretation interface as `GraphInterpretationService`, with the same `VllmGraphClient` budget and semaphore policy, evidence mapper and importer. It must pass the Step 4 recovery suite and the Step 5 evidence checks before it can serve as a rollback.
+126: - An unknown value fails worker startup with a configuration error; there is no environment-variable override.
+127: 
+128: ## Step 7 — Comparison, review and decision (S0004, S0005-AC5)
+129: 
+130: **Harness:** `neuron/benchmarks/f0005_qualification.py --corpus neuron/fixtures/qualification --pipelines direct-baseline graph-dense graph-direct --output <run>/artifacts/qualification/report.json`. It reuses the scoring of `docling_graph_comparison.py`, runs through the worker composition against live vLLM, and records configuration hashes, pins, corpus and expectation hashes, and per-case rows. Graph direct is reported but is not a candidate.
+131: 
+132: **Metrics,** exactly as the PRD defines them:
+133: 
+134: - Accuracy: normalized exact match. Normalization is limited to whitespace collapse and Unicode NFC; no currency or date reformatting.
+135: - Abstention: computed over expected-null fields.
+136: - Fabricated evidence: resolved selectors whose re-read text fails the value comparison.
+137: - Evidence resolution: exact span or cell over correct values.
+138: - Latency: wall time from interpretation start to result publication per document-profile; p95 by nearest rank.
+139: - Review workload: review items created per document.
+140: 
+141: **Void runs:** if the provider fails mid-measurement, the whole report is void and rerun. Reports are immutable; reruns get a new file.
+142: 
+143: **Decision sequence:**
+144: 
+145: 1. Mark each threshold met or missed in `report-summary.md`.
+146: 2. The three independent review sessions write verdicts with evidence references into STATUS's append-only provenance table.
+147: 3. The operator records acceptance or rejection.
+148: 4. **On acceptance:** in one change, set `extraction.pipeline: graph-dense` and `content.v2_writer_enabled: true`; mark ADR-0060 Accepted with the evidence links; update `docker/DEPENDENCY-MATRIX.md`, build/run metadata, the C4 container description and BLUEPRINT §2.1/§4.8. Then submit one new corpus document and verify the pipeline, run identity and v2 manifest after a restart. Rollback is verified by switching `extraction.pipeline: direct-baseline`, submitting again, and confirming earlier artifacts and runs are unchanged.
+149: 5. **On rejection:** both settings stay as they are. ADR-0060 records the failed gates and stays Proposed, or becomes Rejected if the operator says so. The direct-baseline worker path remains available as built.
+150: 
+151: ## Contracts, data and authorization
+152: 
+153: - No new endpoint, schema file, role or permission. Existing `ServicePrincipal` `ingest`/`interpret` grants cover all qualification jobs; Casbin policy is unchanged.
+154: - S0005 fills existing, currently empty fields of `schema:content-artifact-manifest-v2`; no shape change.
+155: - **Failure reasons (migration 0009, expand-only).** `document_job_event` records only `event` (state); `DocumentJobQueue.retry()` has no reason. Add a nullable `reason VARCHAR(64)` column with a CHECK constraint over this enumeration:
+
+STATUS.md
+1: # F0005 — One-time document ingestion — Status
+2: 
+3: **Overall Status:** Synthetic development scope complete; local qualification and gated activation re-planned. The opt-in candidate and its development proof are implemented. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).\
+4: **Last Updated:** 2026-10-23\
+5: **Plan Run:** `2026-10-23-9a04b327` (first F0005 plan run)
+6: 
+7: ## Planning Position
+8: 
+9: Plan run `2026-10-23-9a04b327` re-plans the remaining work against shipped F0002–F0004. Operator decisions at G1 (2026-10-23): local live qualification on the development host with gated activation; a synthetic qualification corpus with independent expectations and independent agent-role reviewers; F0005 enables the F0004 v2 writer as an activation step (new story S0005); F0016 owns document-date candidates. The PRD fixes the qualification thresholds. Phase A was approved with `approve-phase-a` and Phase B with `approve-phase-b` on 2026-10-23. The plan is ready for the feature action, starting with Step 0 preflight and the Step 1 corpus. Planning does not authorize implementation or change delivery priority.
+10: 
+11: ## Synthetic development scope (2026-09-20 to 2026-09-22)
+12: 
+13: The authorized scope uses synthetic development fixtures. Architecture/article reconciliation, the pinned Graph integration, durable recovery, bounded transport, evidence mapping, and a reproducible recorded-response comparison are delivered. This is the completion boundary for the current development work. The production proof gates below remain release requirements, not prerequisites for completing this scope.
+14: 
+15: The comparison runs the direct baseline, Graph direct, and Graph dense over three synthetic cases. All nine retain the saved native JSON without conversion. Dense performs skeleton/fill requests across multiple chunks and passes the unique, ambiguous, and multi-region evidence expectations. The historical baseline chooses a first match for repeated values; Graph direct lacks usable item refs on these longer fixtures and remains unresolved. These are observed development limitations, not measured model quality. The worker's current direct default remains opt-in.
+72: - [ ] Corpus comparison and timeout/partial/invalid-output/retry/restart cases.
+73: - [ ] Local vLLM, secrets, concurrency, tenant access, and retention.
+74: - [ ] Activation prerequisite added 2026-09-25 (validate finding A-4). Before S0004 activates the candidate pipeline, published blocks carry `text_origin` (`STATED`, `OCR`, `TRANSCRIBED`, `DESCRIBED`) and the producing engine, and the evidence mapping locates quotes on the server under the ADR-0065 admission contract. The alternative is a recorded deferral of both to F0004/F0016 with rationale. F0004 delivered the text-origin storage and fallback; plan run `2026-10-23-9a04b327` assigns the live qualification and switch to S0005. See [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md) and [validate run 2026-09-25-463eecdd](../../operations/evidence/runs/2026-09-25-463eecdd/architect-validation-report.md).
+75: 
+76: ## Required Signoff Roles
+77: 
+78: Architecture reviews the checkpoint and invariants; QA reviews independent results; security reviews boundaries and resource/retention controls; code review covers runtime integration. Named reviewers and their actual verdicts remain pending.
+79: 
+80: ## Story Signoff Provenance
+81: 
+82: | Story | Role | Reviewer | Verdict | Evidence | Date | Notes |
+83: |---|---|---|---|---|---|---|
+84: 
+85: No verdicts recorded. Planning checks do not satisfy any proof gate.

@@ -1,0 +1,358 @@
+engine/packages/brain-jobs/src/brain_jobs/queue.py-56-jobs = Table(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-57-    "document_job",
+engine/packages/brain-jobs/src/brain_jobs/queue.py-58-    metadata,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-59-    Column("id", UUIDText(), primary_key=True),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-60-    Column("tenant_id", UUIDText(), nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-61-    Column("knowledge_base_id", UUIDText(), nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-62-    Column("artifact_id", UUIDText(), nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-63-    Column("request_key", String(128), nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py:64:    Column("payload", JSON, nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-65-    Column("state", String(20), nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-66-    Column("attempt", Integer, nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-67-    Column("max_attempts", Integer, nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-68-    Column("generation", Integer, nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-69-    Column("available_at", Float, nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-70-    Column("leased_until", Float, nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-71-    Column("result_ref", String, nullable=True),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-72-    UniqueConstraint(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-73-        "tenant_id", "knowledge_base_id", "request_key", name="uq_document_job_request"
+engine/packages/brain-jobs/src/brain_jobs/queue.py-74-    ),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-75-)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-76-leases = Table(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-77-    "document_artifact_lease",
+engine/packages/brain-jobs/src/brain_jobs/queue.py-78-    metadata,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-79-    Column("artifact_id", UUIDText(), primary_key=True),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-80-    Column("tenant_id", UUIDText(), nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-81-    Column("knowledge_base_id", UUIDText(), nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-82-    Column("job_id", UUIDText(), nullable=True),
+--
+engine/packages/brain-jobs/src/brain_jobs/queue.py-112-@dataclass(frozen=True)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-113-class JobLease:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-114-    job_id: UUID
+engine/packages/brain-jobs/src/brain_jobs/queue.py-115-    tenant_id: UUID
+engine/packages/brain-jobs/src/brain_jobs/queue.py-116-    knowledge_base_id: UUID
+engine/packages/brain-jobs/src/brain_jobs/queue.py-117-    artifact_id: UUID
+engine/packages/brain-jobs/src/brain_jobs/queue.py-118-    generation: int
+engine/packages/brain-jobs/src/brain_jobs/queue.py-119-    attempt: int
+engine/packages/brain-jobs/src/brain_jobs/queue.py:120:    payload: dict[str, Any]
+engine/packages/brain-jobs/src/brain_jobs/queue.py-121-
+engine/packages/brain-jobs/src/brain_jobs/queue.py-122-
+engine/packages/brain-jobs/src/brain_jobs/queue.py-123-class DocumentJobQueue:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-124-    """PostgreSQL queue; SQLite is supported for deterministic contract tests.
+engine/packages/brain-jobs/src/brain_jobs/queue.py-125-
+engine/packages/brain-jobs/src/brain_jobs/queue.py:126:    A separate artifact lease serializes conversion even across different profile
+engine/packages/brain-jobs/src/brain_jobs/queue.py-127-    jobs. Fencing and publication use the same transaction and row lock. Failed
+engine/packages/brain-jobs/src/brain_jobs/queue.py-128-    attempts remain audited; accepted completion emits one outbox row.
+engine/packages/brain-jobs/src/brain_jobs/queue.py-129-    """
+engine/packages/brain-jobs/src/brain_jobs/queue.py-130-
+engine/packages/brain-jobs/src/brain_jobs/queue.py-131-    def __init__(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-132-        self,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-133-        engine: Engine,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-134-        *,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-135-        lease_seconds: float = 120,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-136-        clock: Callable[[], float] | None = None,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-137-    ) -> None:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-138-        if lease_seconds <= 0:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-139-            raise ValueError("lease duration must be positive")
+engine/packages/brain-jobs/src/brain_jobs/queue.py-140-        self.engine = engine
+engine/packages/brain-jobs/src/brain_jobs/queue.py-141-        self.lease_seconds = lease_seconds
+engine/packages/brain-jobs/src/brain_jobs/queue.py-142-        self.clock = clock
+engine/packages/brain-jobs/src/brain_jobs/queue.py-143-
+engine/packages/brain-jobs/src/brain_jobs/queue.py-144-    def _now(self, connection: Connection) -> float:
+--
+engine/packages/brain-jobs/src/brain_jobs/queue.py-168-
+engine/packages/brain-jobs/src/brain_jobs/queue.py-169-    def enqueue(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-170-        self,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-171-        *,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-172-        tenant_id: UUID,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-173-        knowledge_base_id: UUID,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-174-        artifact_id: UUID,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-175-        request_key: str,
+engine/packages/brain-jobs/src/brain_jobs/queue.py:176:        payload: dict[str, Any],
+engine/packages/brain-jobs/src/brain_jobs/queue.py-177-        max_attempts: int = 3,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-178-    ) -> UUID:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-179-        if not request_key or len(request_key) > 128 or max_attempts <= 0:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-180-            raise ValueError("invalid job identity or retry limit")
+engine/packages/brain-jobs/src/brain_jobs/queue.py-181-        scope = dict(tenant_id=str(tenant_id), knowledge_base_id=str(knowledge_base_id))
+engine/packages/brain-jobs/src/brain_jobs/queue.py-182-        with self.engine.begin() as conn:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-183-            try:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-184-                with conn.begin_nested():
+engine/packages/brain-jobs/src/brain_jobs/queue.py-185-                    conn.execute(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-186-                        insert(leases).values(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-187-                            artifact_id=str(artifact_id),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-188-                            **scope,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-189-                            job_id=None,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-190-                            generation=0,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-191-                            leased_until=0,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-192-                        )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-193-                    )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-194-            except IntegrityError:
+--
+engine/packages/brain-jobs/src/brain_jobs/queue.py-204-            try:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-205-                with conn.begin_nested():
+engine/packages/brain-jobs/src/brain_jobs/queue.py-206-                    conn.execute(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-207-                        insert(jobs).values(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-208-                            id=str(job_id),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-209-                            **scope,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-210-                            artifact_id=str(artifact_id),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-211-                            request_key=request_key,
+engine/packages/brain-jobs/src/brain_jobs/queue.py:212:                            payload=payload,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-213-                            state="queued",
+engine/packages/brain-jobs/src/brain_jobs/queue.py-214-                            attempt=0,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-215-                            max_attempts=max_attempts,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-216-                            generation=0,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-217-                            available_at=self._now(conn),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-218-                            leased_until=0,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-219-                        )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-220-                    )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-221-                self._event(conn, str(job_id), 0, "queued")
+engine/packages/brain-jobs/src/brain_jobs/queue.py-222-                return job_id
+engine/packages/brain-jobs/src/brain_jobs/queue.py-223-            except IntegrityError:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-224-                row = (
+engine/packages/brain-jobs/src/brain_jobs/queue.py-225-                    conn.execute(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-226-                        select(jobs).where(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-227-                            jobs.c.tenant_id == str(tenant_id),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-228-                            jobs.c.knowledge_base_id == str(knowledge_base_id),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-229-                            jobs.c.request_key == request_key,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-230-                        )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-231-                    )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-232-                    .mappings()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-233-                    .one()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-234-                )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-235-                if (
+engine/packages/brain-jobs/src/brain_jobs/queue.py-236-                    row["artifact_id"] != str(artifact_id)
+engine/packages/brain-jobs/src/brain_jobs/queue.py:237:                    or row["payload"] != payload
+engine/packages/brain-jobs/src/brain_jobs/queue.py-238-                    or row["max_attempts"] != max_attempts
+engine/packages/brain-jobs/src/brain_jobs/queue.py-239-                ):
+engine/packages/brain-jobs/src/brain_jobs/queue.py:240:                    raise ValueError("idempotency key reused for a different request") from None
+engine/packages/brain-jobs/src/brain_jobs/queue.py-241-                return UUID(row["id"])
+engine/packages/brain-jobs/src/brain_jobs/queue.py-242-
+engine/packages/brain-jobs/src/brain_jobs/queue.py-243-    def claim(self) -> JobLease | None:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-244-        with self.engine.begin() as conn:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-245-            now = self._now(conn)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-246-            eligible = or_(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-247-                and_(jobs.c.state.in_(["queued", "retry"]), jobs.c.available_at <= now),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-248-                and_(jobs.c.state == "running", jobs.c.leased_until <= now),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-249-            )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-250-            rows = (
+engine/packages/brain-jobs/src/brain_jobs/queue.py-251-                conn.execute(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-252-                    select(jobs)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-253-                    .where(eligible)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-254-                    .order_by(jobs.c.available_at)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-255-                    .limit(32)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-256-                    .with_for_update(skip_locked=True)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-257-                )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-258-                .mappings()
+--
+engine/packages/brain-jobs/src/brain_jobs/queue.py-292-                self._event(conn, row["id"], generation, "claimed")
+engine/packages/brain-jobs/src/brain_jobs/queue.py-293-                return JobLease(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-294-                    UUID(row["id"]),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-295-                    UUID(row["tenant_id"]),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-296-                    UUID(row["knowledge_base_id"]),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-297-                    UUID(row["artifact_id"]),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-298-                    generation,
+engine/packages/brain-jobs/src/brain_jobs/queue.py-299-                    row["attempt"] + 1,
+engine/packages/brain-jobs/src/brain_jobs/queue.py:300:                    row["payload"],
+engine/packages/brain-jobs/src/brain_jobs/queue.py-301-                )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-302-        return None
+engine/packages/brain-jobs/src/brain_jobs/queue.py-303-
+engine/packages/brain-jobs/src/brain_jobs/queue.py-304-    def _fence(self, conn: Connection, lease: JobLease) -> None:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-305-        row = (
+engine/packages/brain-jobs/src/brain_jobs/queue.py-306-            conn.execute(select(jobs).where(jobs.c.id == str(lease.job_id)).with_for_update())
+engine/packages/brain-jobs/src/brain_jobs/queue.py-307-            .mappings()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-308-            .one()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-309-        )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-310-        artifact = (
+engine/packages/brain-jobs/src/brain_jobs/queue.py-311-            conn.execute(
+engine/packages/brain-jobs/src/brain_jobs/queue.py-312-                select(leases)
+engine/packages/brain-jobs/src/brain_jobs/queue.py-313-                .where(leases.c.artifact_id == str(lease.artifact_id))
+engine/packages/brain-jobs/src/brain_jobs/queue.py-314-                .with_for_update()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-315-            )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-316-            .mappings()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-317-            .one()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-318-        )
+--
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-6-from datetime import UTC, datetime
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-7-from pathlib import Path
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-8-from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-9-
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-10-from brain_content.checkpoints import CheckpointStore
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-11-from brain_content.identities import ParserMigrationRequired, fallback_key, new_source_identity
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-12-from brain_content.object_store import ObjectAlreadyExistsError
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-13-from brain_domain.authx import ResourceKey, ResourceType
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:14:from brain_extraction.profiles import load_profile
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-15-from brain_jobs.queue import DocumentJobQueue, JobLease, jobs
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-16-from brain_persistence.content_repository import ContentArtifactRepository
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-17-from brain_persistence.models import ResourceAccessRow
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-18-from brain_persistence.tenancy import provision_resource_access
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-19-from brain_worker.content_access import SourceContentAccess
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-20-from brain_worker.content_submissions import source_submission
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-21-from brain_worker.document_delivery import DocumentJobAuthorization
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-22-from sqlalchemy import select
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-23-from sqlalchemy.engine import Engine
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-24-from sqlalchemy.orm import Session
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-25-
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:26:from brain_ingestion.conversion_recipe import physical_recipe
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:27:from brain_ingestion.document_worker import DocumentTask
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-28-
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-29-
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-30-def enqueue_document(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-31-    engine: Engine,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-32-    queue: DocumentJobQueue,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-33-    store: CheckpointStore,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-34-    authorization: DocumentJobAuthorization,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-35-    access: SourceContentAccess,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-36-    *,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-37-    source_path: Path,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-38-    tenant_id: UUID,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-39-    knowledge_base_id: UUID,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-40-    actor_id: UUID,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:41:    profile_id: str,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-42-    classifications: list[str],
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-43-    source_acl_ids: list[str],
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-44-    v2_writer_enabled: bool,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-45-) -> UUID:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-46-    source_bytes = source_path.read_bytes()
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-47-    source_sha = hashlib.sha256(source_bytes).hexdigest()
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:48:    profile = load_profile(profile_id)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-49-    with source_submission(engine, tenant_id, knowledge_base_id, source_sha):
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-50-        with Session(engine) as session:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-51-            repository = ContentArtifactRepository(session)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-52-            source = repository.find_source(tenant_id, knowledge_base_id, source_sha)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-53-            pending = (
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-54-                session.execute(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-55-                    select(jobs)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-56-                    .where(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-57-                        jobs.c.tenant_id == str(tenant_id),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-58-                        jobs.c.knowledge_base_id == str(knowledge_base_id),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:59:                        jobs.c.payload["source_sha256"].as_string() == source_sha,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-60-                    )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-61-                    .order_by(jobs.c.available_at, jobs.c.id)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-62-                )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-63-                .mappings()
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-64-                .all()
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-65-            )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-66-        existing = False
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-67-        if source is not None and source[1]:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-68-            if len(source[1]) != 1:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-69-                raise ParserMigrationRequired("source has ambiguous accepted artifacts")
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-70-            key = source[1][0]
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-71-            probe = JobLease(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-72-                uuid4(),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-73-                tenant_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-74-                knowledge_base_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-75-                key.artifact_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-76-                0,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-77-                0,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-78-                {
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-79-                    "actor_id": str(actor_id),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-80-                    "correlation_id": str(uuid4()),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-81-                    "source_sha256": source_sha,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-82-                },
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-83-            )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-84-            retained = access.read(probe, key.artifact_id)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-85-            document_id, version_id = retained.manifest.document_id, retained.manifest.version_id
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:86:            recipe = getattr(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:87:                retained.manifest, "recipe_sha256", retained.manifest.execution.configuration_hash
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-88-            )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-89-            contract = key.contract_version
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-90-            existing = True
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-91-        elif pending:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:92:            tasks = [DocumentTask.model_validate(row["payload"]) for row in pending]
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-93-            identities = {
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-94-                (
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-95-                    task.document_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-96-                    task.version_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:97:                    task.recipe_sha256,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-98-                    task.content_contract_version,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-99-                    UUID(row["artifact_id"]),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-100-                )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-101-                for task, row in zip(tasks, pending, strict=True)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-102-            }
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-103-            if len(identities) != 1:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-104-                raise ParserMigrationRequired("pending source has conflicting physical identities")
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:105:            document_id, version_id, recipe, contract, artifact_id = identities.pop()
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-106-            from brain_content.validation import ArtifactKey
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-107-
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-108-            key = ArtifactKey(artifact_id, tenant_id, knowledge_base_id, contract)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-109-            existing = True
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-110-        else:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-111-            document_id = (
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-112-                source[0]
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-113-                if source
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-114-                else uuid5(NAMESPACE_URL, f"nebula:{tenant_id}:{knowledge_base_id}:{source_sha}")
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-115-            )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-116-            contract = 2 if v2_writer_enabled else 1
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:117:            recipe = physical_recipe(contract)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-118-            identity = new_source_identity(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-119-                tenant_id=tenant_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-120-                knowledge_base_id=knowledge_base_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-121-                document_id=document_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-122-                source_sha256=source_sha,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:123:                recipe_sha256=recipe,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-124-                contract_version=contract,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-125-            )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-126-            version_id, key = identity.version_id, identity.key
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:127:        task = DocumentTask(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-128-            document_id=document_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-129-            version_id=version_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-130-            source_sha256=source_sha,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:131:            recipe_sha256=recipe,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-132-            content_contract_version=contract,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:133:            profile_id=profile.profile_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:134:            profile_version=profile.profile_version,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:135:            schema_sha256=profile.schema_sha256,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-136-            actor_id=actor_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-137-            correlation_id=uuid4(),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-138-        )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-139-        request_key = hashlib.sha256(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:140:            f"{key.artifact_id}:{actor_id}:{profile.profile_id}:{profile.profile_version}:{profile.schema_sha256}".encode()
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-141-        ).hexdigest()
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-142-        task.correlation_id = uuid5(key.artifact_id, request_key)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:143:        payload = task.model_dump(mode="json", exclude_defaults=True)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:144:        lease = JobLease(uuid4(), tenant_id, knowledge_base_id, key.artifact_id, 0, 0, payload)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-145-        resources = [key]
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-146-        # Accepted v2 content needs no fallback provisioning or conversion. An
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-147-        # unaccepted v2 submission reserves both deterministic resource scopes.
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-148-        if contract == 2 and not (source and source[1]):
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-149-            resources.append(fallback_key(version_id, tenant_id, knowledge_base_id))
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-150-        with Session(engine) as session, session.begin():
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-151-            for resource in resources:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-152-                prior = session.get(ResourceAccessRow, ("content_artifact", resource.artifact_id))
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-153-                if existing:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-154-                    if prior is None or (prior.tenant_id, prior.knowledge_base_id) != (
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-155-                        tenant_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-156-                        knowledge_base_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-157-                    ):
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-158-                        raise PermissionError("retained source security metadata is unavailable")
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-159-                    if set(prior.classifications) != set(classifications) or set(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-160-                        prior.source_acl_ids
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-161-                    ) != set(source_acl_ids):
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-162-                        raise PermissionError(
+--
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-180-            authorize(tenant_id, knowledge_base_id, resource.artifact_id, "interpret")
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-181-        source_key = f"sources/{tenant_id}/{knowledge_base_id}/{source_sha}.pdf"
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-182-        try:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-183-            store.objects.create_exclusive(source_key, source_bytes)
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-184-        except ObjectAlreadyExistsError:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-185-            if store.objects.read(source_key) != source_bytes:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-186-                raise ValueError("retained source conflict") from None
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-187-        # Preserve the byte shape of an existing legacy task when its normalized
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:188:        # command is identical; the generic queue keeps strict payload comparison.
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-189-        with Session(engine) as session:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-190-            prior = session.execute(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:191:                select(jobs.c.payload).where(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-192-                    jobs.c.tenant_id == str(tenant_id),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-193-                    jobs.c.knowledge_base_id == str(knowledge_base_id),
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-194-                    jobs.c.request_key == request_key,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-195-                )
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-196-            ).scalar_one_or_none()
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:197:        if prior is not None and DocumentTask.model_validate(prior) == task:
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:198:            payload = prior
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-199-        return queue.enqueue(
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-200-            tenant_id=tenant_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-201-            knowledge_base_id=knowledge_base_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-202-            artifact_id=key.artifact_id,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-203-            request_key=request_key,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py:204:            payload=payload,
+neuron/packages/brain-ingestion/src/brain_ingestion/submission.py-205-        )

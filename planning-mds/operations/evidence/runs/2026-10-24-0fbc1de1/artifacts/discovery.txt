@@ -1,0 +1,56 @@
+# Agent retrieval guard. Gitignore-style patterns for AI agents.
+# This is not .gitignore; it does not change source control behavior.
+
+# Treat operations evidence as cold archive by default.
+/planning-mds/operations/**
+
+# Re-allow only small index entry points.
+!/planning-mds/operations/
+!/planning-mds/operations/evidence/
+!/planning-mds/operations/evidence/README.md
+!/planning-mds/operations/evidence/features/
+!/planning-mds/operations/evidence/features/**/
+!/planning-mds/operations/evidence/features/**/latest-run.json
+!/planning-mds/operations/evidence/frontend-quality/
+!/planning-mds/operations/evidence/frontend-quality/README.md
+!/planning-mds/operations/evidence/frontend-quality/latest-run.json
+!/planning-mds/operations/evidence/frontend-ux/
+!/planning-mds/operations/evidence/frontend-ux/README.md
+
+version: 1
+instructions:
+  - path: docs/agent-instructions.md
+  - path: docs/plan-review-checklist.md
+    actions: [plan-review]
+checks:
+  - id: plan-readiness
+    action: plan-review
+    stage: PR2
+    event: before_stage_complete
+    argv:
+      - python3
+      - "{NEBULA_PRODUCT_ROOT}/scripts/validation/validate_plan_readiness.py"
+      - --product-root
+      - "{NEBULA_PRODUCT_ROOT}"
+      - --plan-scope
+      - "{PLAN_SCOPE}"
+      - --target
+      - "{TARGET}"
+    cwd: product
+    timeout_seconds: 60
+    inputs:
+      - planning-mds/BLUEPRINT.md
+      - planning-mds/architecture/*.md
+      - planning-mds/architecture/decisions/*.md
+      - planning-mds/security/*.md
+      - planning-mds/api/**/*
+      - planning-mds/schemas/**/*
+      - planning-mds/features/**/*.md
+      - planning-mds/examples/**/*
+      - planning-mds/domain/glossary.md
+      - docs/agent-instructions.md
+      - docs/plan-review-checklist.md
+      - scripts/validation/**/*.py
+
+F0005 REGISTRY:
+| F0005 | One-time document ingestion | Planned | v0.1A | `F0005-one-time-docling-ingestion/` |

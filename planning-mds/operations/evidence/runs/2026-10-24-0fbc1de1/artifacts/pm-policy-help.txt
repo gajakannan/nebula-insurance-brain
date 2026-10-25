@@ -1,0 +1,26 @@
+usage: gate_policy.py [-h] [--profile {standard,review-family,none}]
+                      [--variant {plan,feature}]
+                      [--code-critical CODE_CRITICAL] [--code-high CODE_HIGH]
+                      [--security-critical SECURITY_CRITICAL]
+                      [--security-high SECURITY_HIGH] [--domain DOMAIN]
+
+Central severity state machine (F0007-S0005). One implementation of the gate-
+severity arithmetic that was duplicated across build / feature / review /
+validate / test / plan-review / feature-review. Agents classify findings; this
+module only computes the allowed outcome from the per-domain critical/high
+counts. It never classifies. Profiles: - standard: BLOCKED (any critical) /
+WARNING (any high) / ACCEPTABLE. - review-family: NOT READY / CONDITIONALLY
+READY / READY (plan variant); NOT DONE / CONDITIONALLY DONE / TRULY DONE
+(feature variant). - none: always PASS (no severity gate). python3 -m
+gate_policy --profile standard --code-critical 0 --code-high 1 --security-
+critical 0 --security-high 0
+
+options:
+  -h, --help            show this help message and exit
+  --profile {standard,review-family,none}
+  --variant {plan,feature}
+  --code-critical CODE_CRITICAL
+  --code-high CODE_HIGH
+  --security-critical SECURITY_CRITICAL
+  --security-high SECURITY_HIGH
+  --domain DOMAIN       Extra domain as name:critical:high. Repeatable.

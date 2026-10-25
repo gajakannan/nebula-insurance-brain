@@ -1,0 +1,71 @@
+267:{"schema_version":1,"timestamp":"2026-05-19T14:20:00-04:00","cwd":"{NEBULA_PRODUCT_ROOT}","command":"pnpm test","exit_code":0,"artifacts":["…/artifacts/test-results/pnpm-test.log"],"redactions":[]}
+268-```
+269-
+270-| Field | Notes |
+271-|-------|-------|
+272:| `schema_version` | supported integer |
+273-| `timestamp` | ISO 8601 with timezone or `Z` |
+274-| `cwd` | repo-relative or `{NEBULA_PRODUCT_ROOT}` preferred; absolute paths warn unless justified in `artifact-trace.md` → `Run Environment` |
+275-| `command` | non-empty, sanitized |
+276-| `exit_code` | integer |
+277-| `artifacts` | paths produced; resolve where committed |
+278-| `redactions` | names of redacted fields/token classes |
+279-
+280-**Secret scanning is mandatory and self-contained.** The validator scans a
+281-per-record surface (`command` + `artifacts` strings) against named patterns
+282-in `agents/product-manager/scripts/secret_patterns.json` — bearer tokens,
+283-cookies, private keys, raw connection strings, access keys (single-line
+284-regex), and `env_dump` / `env_file_contents` (multi-line scanners). The
+285-pattern file is the maintained source of truth and is loaded at startup;
+286-products may extend it (name conflicts error). Public scanners like
+287-`detect-secrets`/`trufflehog` may inform the pattern set but are **not**
+288-invoked at runtime, so validation stays deterministic. Each class has a
+289-must-detect and must-not-detect (redaction-marker) acceptance set proven by
+290-fixtures.
+291-
+292-## Verdicts & Recommendations
+293-
+294-Canonical **passing** verdicts: `PASS`, `PASS WITH RECOMMENDATIONS`,
+295-`APPROVED`, `APPROVED WITH RECOMMENDATIONS`. Canonical **blocking**
+296-verdicts: `FAIL`, `REQUEST CHANGES`, `REJECTED`. `NOT_REQUIRED` is valid
+297-only for non-required roles/gates.
+298-
+299-Recommendations under a `WITH RECOMMENDATIONS` verdict must each be a
+300-discrete, parseable item in the role report:
+301-
+302-```
+303-- [severity] <text> — owner: <name-or-role>; follow-up: <ticket | deferred-to-story | explicit-deferred-no-followup>
+304-```
+305-
+306-Severity is exactly one of `low` / `medium` / `high` / `critical`. `low`
+307-and `medium` need disposition (owner + follow-up). `high` and `critical`
+308-are **blocking** — they cannot be closeout-passing unless `pm-closeout.md`
+309-explicitly mitigates them via the **PM Acceptance Line**:
+310-
+311-```
+312-- Accepted: <identifier> — <type-specific details>
+313-```
+314-
+315-The PM Acceptance Line is the one canonical form for *every* PM acceptance
+316-(coverage waiver → identifier `coverage`; validator-defect waiver →
+317-the rule ID; unknown waiver key → the key; high/critical recommendation →
+318-recommendation ID/text with a `mitigation:` prefix). The validator accepts
+319-`—` or `-` as the separator and is case-insensitive on `Accepted:` and
+320-`mitigation:`.
+321-
+322-## Validation & Stages
+323-
+324-The validator is stage-aware so gaps surface during the run:
+325-
+326-```bash
+327-# in-progress / candidate (latest-run.json does not exist yet)
+328-python3 agents/product-manager/scripts/validate-feature-evidence.py \
+329-  --product-root {NEBULA_PRODUCT_ROOT} --feature F#### --run-id YYYY-MM-DD-xxxxxxxx --stage G2
+330-
+331-# final closeout (requires latest-run.json)
+332-python3 agents/product-manager/scripts/validate-feature-evidence.py \
+333-  --product-root {NEBULA_PRODUCT_ROOT} --feature F#### --stage closeout
+334-```
+335-
+336-| Stage | Newly required at this stage |
+337-|-------|------------------------------|

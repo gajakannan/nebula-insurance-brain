@@ -1,0 +1,182 @@
+# Operations Evidence
+
+This directory stores evidence packages produced by `nebula-agents` action runs against this product repo.
+
+Effective `2026-05-19` (the framework default for the Feature Evidence Contract; see the framework `CONSUMER-CONTRACT.md`). Runs initialized on or after 2026-09-05 are stamped with the active policy version `2026-07-11` in `evidence-manifest.json`.
+
+## Base Run Profile (§8)
+
+Non-feature, manual, init, plan, and validate-action runs produce the base package only:
+
+```text
+planning-mds/operations/evidence/runs/{run-id}/
+  README.md
+  action-context.md
+  artifact-trace.md
+  gate-decisions.md
+  commands.log
+  lifecycle-gates.log
+```
+
+Base runs do not require an `evidence-manifest.json`. The validate action additionally writes `pm-validation-report.md`, `architect-validation-report.md`, and `implementation-validation-report.md` alongside the base files.
+
+## Feature Evidence Profile (§9, §10)
+
+`feature` and `build` closeouts write the full artifact matrix:
+
+```text
+planning-mds/operations/evidence/features/F####-{slug}/
+  latest-run.json                       # only after PM closeout + supersession patch
+
+planning-mds/operations/evidence/runs/{run-id}/
+  <§8 base files>
+  evidence-manifest.json                # §11 schema
+  feature-action-execution.md
+  g0-assembly-plan-validation.md
+  g1-runtime-preflight.md               # when runtime_bearing = true
+  g2-self-review.md
+  test-plan.md
+  test-execution-report.md
+  coverage-report.md
+  deployability-check.md
+  code-review-report.md
+  security-review-report.md             # when security_sensitive_scope or required
+  signoff-ledger.md
+  pm-closeout.md
+  kg-reconciliation.md                  # G7
+  artifacts/{coverage,diffs,test-results,security,screenshots}/
+```
+
+Run ID format: `YYYY-MM-DD-XXXXXXXX` (`secrets.token_hex(4)` suffix, never uuid4). Templates for each artifact live under `nebula-agents/agents/templates/`.
+
+## Effective-Date Boundary (§6)
+
+- This product has no pre-contract features: every feature that reaches `Done`, `Completed`, or `Archived` requires the canonical feature evidence package.
+- Retired features (`Terminal Status = Abandoned` or `Superseded`) are registry-only and never satisfy completion-evidence requirements.
+
+## Path Class Extensions (§7)
+
+The framework default path classes (in `nebula-agents/agents/product-manager/scripts/validate-feature-evidence.py` `DEFAULT_PATH_CLASSES`) cover `engine/**` and `experience/**`, plus `**/migrations/**`, container and CI files, and capitalized `Auth*`, `Identity*`, `Permissions`, `Security`, and `Secrets` directories. This product extends them additively as declared in `planning-mds/BLUEPRINT.md` section 2.4:
+
+| Path class (glob) | Forces |
+|-------------------|--------|
+| `neuron/**` | `runtime_bearing = true` |
+| `neuron/**/migrations/**` | `runtime_bearing = true` and `deployment_config_changed = true` |
+| `ontology/**` | `runtime_bearing = true` |
+| `profiles/**` | `runtime_bearing = true` |
+| `schemas/**` | `runtime_bearing = true` |
+| `knowledge-packs/**` | `runtime_bearing = true` |
+| `golden-corpus/**` | `runtime_bearing = true` |
+| `**/brain_security/**` | `security_sensitive_scope = true` |
+| `**/brain-security/**` | `security_sensitive_scope = true` |
+| `**/auth/**` | `security_sensitive_scope = true` |
+| `**/authz/**` | `security_sensitive_scope = true` |
+| `**/identity/**` | `security_sensitive_scope = true` |
+| `**/principals/**` | `security_sensitive_scope = true` |
+
+Rationale: `neuron/` hosts the AI and semantic runtime (Docling ingestion, extraction, interpretation, conversation, learning, MCP tools) and is runtime-bearing; the authored semantic assets (`ontology/`, `profiles/`, `schemas/`, `knowledge-packs/`) drive interpretation at runtime; the Golden Corpus is executable test input; Python security and identity packages use lowercase directory names that the capitalized framework defaults do not match. The extension is additive; framework defaults are not overridden (`path_class_extension_conflict_fails`).
+
+## Global Lanes (§20)
+
+- `planning-mds/operations/evidence/frontend-quality/` is the global frontend quality lane once `experience/` exists; the lifecycle gate consumes its `latest-run.json`.
+- `planning-mds/operations/evidence/frontend-ux/` is the rolling UX audit lane (`ux-audit-YYYY-MM-DD.md`).
+
+Both lanes may be referenced from a feature evidence package via `manifest.global_evidence_refs`. They do not substitute for feature-level role reports. Neither lane exists yet.
+
+## Validators
+
+Run from the framework repo (`nebula-agents`) with `NEBULA_PRODUCT_ROOT` exported:
+
+```text
+python3 agents/product-manager/scripts/validate-trackers.py --product-root /path/to/nebula-insurance-brain
+python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /path/to/nebula-insurance-brain --json
+```
+
+Closeout (`--stage closeout`) is run by the closeout action after tracker results are appended to `lifecycle-gates.log`.
+
+## Runs
+
+| Run | Action | Scope | Outcome |
+|-----|--------|-------|---------|
+| `runs/2026-09-05-6823e66e/` | init | bootstrap | PASS (I0 to I6; five I6 validators exit 0) |
+# Feature Evidence README — F####-{slug} run {run-id}
+
+> Template for `{NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/runs/{run-id}/README.md`
+> per §8 of the Feature Evidence Package Standardization contract.
+
+## Run Summary
+
+One paragraph describing what changed, who ran the action, and the lifecycle action (`feature` / `build` / `validate`).
+
+## Status
+
+Final state for this run: `draft` / `in-progress` / `approved` / `superseded` — must agree with `evidence-manifest.json` `status`.
+
+## Evidence Index
+
+- `evidence-manifest.json` — schema v1 (§11)
+- `action-context.md` — Run Identity, Inputs, Assumptions, Scope Boundaries, Lifecycle Stage
+- `artifact-trace.md` — read/written artifacts + Run Environment when needed
+- `gate-decisions.md` — pass/fail/skip per gate row (§17 stage matrix)
+- `commands.log` — JSON Lines per §13
+- `lifecycle-gates.log` — lifecycle gate run summary
+- Role and gate reports — list `g0-…`, `g1-…`, `g2-…`, `test-plan.md`, etc.
+
+## Validation Summary
+
+Each validator invocation (tracker, story-index, KG, template, feature-evidence) with exit code and rule IDs encountered. Mirror the `lifecycle-gates.log` contents and the manifest `gate_results`.
+
+## Open Follow-ups
+
+Deferred recommendations, validator defects, and operational follow-ups. Each item should reference an external ticket or `Recommendation Acceptances` line in `pm-closeout.md`.
+# Gate Decisions — F0005 — plan run 2026-10-23-9a04b327
+
+## Gate Decisions
+
+| Gate | Decision | Decider | Timestamp | Rationale | Blocking | Follow-up |
+|---|---|---|---|---|---|---|
+| G1 | PASS | Operator; recorded by Product Manager | 2026-10-23T23:44:40Z | Four open requirement decisions answered by the operator (scope, corpus/reviewers, v2 writer, date-candidate owner). PRD and five stories updated; strict story validation passes with no warnings. Thresholds are proposed defaults for G3 approval. | No | G2 |
+| G2 | PASS | Product Manager | 2026-10-23T23:44:40Z | Story index regenerated (32 stories, S0005 added); validate-trackers --skip-feature-evidence 0 errors/0 warnings; BLUEPRINT §3.3 links resolve. Dependency evidence audit recorded in artifact-trace.md. | No | Present Phase A at G3 |
+| G3 | PASS | Operator; recorded by Product Manager | 2026-10-23T23:50:13Z | Explicit operator approval token `approve-phase-a` after review of PRD, five stories, checklist and the nine proposed thresholds (thresholds approved as written). | No | Attest and complete G3; begin Phase B |
+| G4 | PASS | Architect | 2026-10-23T23:54:17Z | F0005 feature shard updated (S0005 mapping, F0002/F0003 dependencies, ADR-0065/0073, versioned-content-contracts, manifest v2 schema); compile and drift check exited 0 on the first attempt. No new canonical node; no repair cycle. | No | G5 exit validation |
+| G5 validation | PASS | Architect | 2026-10-23T23:54:17Z | All seven exit operations exited 0 in order (validate-stories, generate-story-index, validate-trackers, coverage report, drift, reproducibility, validate_templates). Product plan-readiness check for F0005 passed with no findings; git diff --check clean. | No | Operator architecture review |
+| G5 approval | PASS | Operator; recorded by Architect | 2026-10-24T00:14:24Z | Explicit operator token `approve-phase-b` after all seven exit operations passed. Approval-status edits only; design and requirements unchanged. | No | Attest, re-run G5 post-approval operations, publish plan approval |
+
+Template example rows were removed; they were not evidence for this run.
+
+## Requirements Clarification Basis
+
+F0005 had planning artifacts from 2026-09-15 to 2026-09-25 and a delivered synthetic development scope, but no plan run. Those artifacts predate F0002–F0004 delivery. FEATURE_MODE=existing: artifacts are updated in place; STATUS story provenance remains append-only (no rows existed).
+
+Operator decisions (2026-10-23, AskUserQuestion at G1):
+
+1. **Scope:** local qualification plus gated activation — live Phi-4-mini on vLLM on the development host GPU (RTX 5070, 12 GB), live failure injection, direct-versus-Graph comparison with thresholds; on full pass, accept ADR-0060 and make Graph the local default. Production host stays F0026.
+2. **Corpus and reviewers:** synthetic GL documents with expectations authored independently of extraction output, outside the frozen holdout; QA/Architect/Security verdicts by independent agent roles; operator acceptance. No licensed real documents.
+3. **v2 writer:** F0005 qualifies text origin and exact OCR asset provenance, then enables `content.v2_writer_enabled` as an activation step (new story S0005). Satisfies the 2026-09-25 A-4 activation prerequisite and F0004's closeout handoff.
+4. **Date candidates:** F0016 owns CONTENT and SOURCE_METADATA candidates; F0005 produces none. Recorded in BLUEPRINT §4.8 and the F0016 README.
+
+Proposed by the Product Manager for operator approval at G3 (not invented as business rules; labelled as defaults in the PRD): corpus minimum (12 documents: 6 native, 4 scanned, 2 mixed) and the nine qualification thresholds.
+
+## Ownership and Reconciliation
+
+The product manager did not edit kg-source shards or generated KG projections in Phase A. The F0005 shard needs S0005's story mapping and refreshed rationale/notes; the architect adds them at G4. ADR-0060 status is unchanged. The existing assembly plan is reconciled (not silently overwritten) in Phase B, with the reconciliation recorded here.
+
+## Phase B Reconciliation and Judgment
+
+- **Existing assembly plan reconciled, not overwritten.** The 2026-09-15 draft's first three steps are delivered as synthetic scope. Its open-decisions table is closed: the pin and seam by S0001, DTOs and publication by F0004, corpus/reviewers/thresholds by the operator. The new plan carries an item-by-item reconciliation table.
+- **As-built facts the plan corrects for:**
+  - The worker already runs Graph with the `direct` contract; the old "direct client" is only a test/benchmark baseline. Activation therefore means a pinned `extraction.pipeline` setting (`graph-direct` | `graph-dense` | `direct-baseline`) written into the job JSON payload, with a direct-baseline worker path built as the rollback.
+  - `document_job_event` has no failure reason, so an expand-only migration 0009 adds a constrained nullable `reason`.
+  - The v2 manifest already has `execution.model_artifact_digests` and the per-item `ProducerIdentity.model/model_version`, both written empty today. S0005 fills them, with no schema change.
+- **No new endpoint, schema, role, permission or Casbin rule.** Existing ServicePrincipal `ingest`/`interpret` grants cover all qualification jobs.
+- **ADR-0060 stays Proposed.** It now records the acceptance procedure and the acceptance scope (local Compose runtime only; F0026 retains production host and frozen-corpus acceptance). ADR-0073 stays Proposed. No new ADR: pipeline selection and reason codes are feature-local design inside ADR-0060's and F0003's existing decisions.
+- **Reviewer independence:** a corpus-author QE session is separate from the independent QA, Architect and Security review sessions; expectations come from generator input data, not extraction output.
+- **PRD/architecture conflict check:** none. The design satisfies all 33 ACs without changing the approved PRD.
+- **Dependency audit:** approved F0001–F0004 manifests and pending downstream audits are in artifact-trace.md.
+
+## Approval Tokens
+
+Phase A checkpoint token: `approve-phase-a`, selected verbatim by the operator in response to the Phase A approval question; recorded by Product Manager at 2026-10-23T23:50:13Z. The approval covers the qualification thresholds and corpus minimum as written in the PRD.
+
+Phase B checkpoint token: `approve-phase-b`, selected verbatim by the operator in response to the Phase B approval question after G5 exit validation was green; recorded by Architect at 2026-10-24T00:14:24Z. Approval-status edits made afterward: PRD, STATUS, README, assembly plan status lines, F0005 shard rationale, BLUEPRINT §4.8 item 4 and §6. Phase B approval authorizes the design for the feature action; it is not runtime delivery, ADR acceptance or activation.
+cat: planning-mds/operations/evidence/runs/2026-10-23-9a04b327/plan-manifest.json: No such file or directory

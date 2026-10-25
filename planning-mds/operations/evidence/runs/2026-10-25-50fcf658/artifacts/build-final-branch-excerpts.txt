@@ -1,0 +1,52 @@
+## Step 6 — Pipeline selection and rollback path
+
+Add a committed, non-secret section to `config/local.yaml`, loaded beside `ContentWriterConfig`. This changes the planned initial worker selection to the direct baseline; Graph's current opt-in `direct` path is neither the accepted baseline nor the rejection outcome:
+
+```yaml
+extraction:
+  # direct-baseline | graph-dense | graph-direct (qualification only)
+  pipeline: direct-baseline
+```
+
+- **Job pinning and identity:** new submissions derive their idempotency key from the existing scoped source/version/recipe/actor/profile identity **plus the selected pipeline**, and write that pipeline in `payload`. Same pipeline + same identity stays idempotent; a different pipeline is a different job/run over the same immutable artifact, not a conflicting payload for the old key. Retries and recovery use the pinned value. A configuration change affects new submissions only, so no run mixes engines (S0004-AC6). Existing pinned jobs/results are immutable. Historical jobs lacking the new field retain their existing keys and known pre-change `graph-direct` meaning on recovery, never acquire the current default; record that effective legacy identity without rewriting their payload/history. Drain or cancel historical candidate jobs before decision smoke tests. New submissions always contain an explicit pipeline. No migration is needed: `payload` and idempotency keys are existing carriers.
+- **Run identity:** the interpretation run records the pipeline value, Graph revision and contract, or the direct adapter's identity.
+- **Direct baseline in the worker:** wrap `OpenAICompatibleExtractionAdapter` behind the same interpretation interface as `GraphInterpretationService`, with the same `VllmGraphClient` budget and semaphore policy, evidence mapper and importer. It must pass the Step 4 recovery suite and the Step 5 evidence checks before it can serve as a rollback.
+- An unknown value fails worker startup with a configuration error; there is no environment-variable override.
+- **Qualification isolation:** each measured engine uses a separate temporary config, queue namespace/database schema and content root, recording its hash; those worker compositions still share Step 0a's fixed host guard directory for the same provider. Only one runs at a time. `BRAIN_LOCAL_CONFIG_PATH` selects this existing isolated-config facility. Graph direct/dense are explicitly selected there; running the harness never edits the committed baseline setting or leaves candidate jobs in the ordinary queue. The guard directory cannot be changed by an isolated config; reject an attempted override.
+- **Required branch tests:** `test_pipeline_selection.py` restarts from committed `direct-baseline`/v2 false, submits a fresh source and proves direct adapter identity/v1. Exercise acceptance, rejection after each threshold/reviewer failure, operator rejection and rollback using the settings table below; restart and submit a new source after each branch. Assert the expected engine/writer, hashes/config identity, unchanged historical runs/bundles/pinned jobs, no live temporary override, and no Graph call on new rejection/default jobs. A rollback test also checks v2 artifacts remain readable. A legacy queued candidate remains identifiable without changing its pinned interpretation.
+
+## Step 7 — Comparison, review and decision (S0004, S0005-AC5)
+
+**Harness:** `neuron/benchmarks/f0005_qualification.py --corpus neuron/fixtures/qualification --pipelines direct-baseline graph-dense graph-direct --output <run>/artifacts/qualification/report.json`. It reuses the scoring of `docling_graph_comparison.py`, runs through the worker composition against live vLLM, and records configuration hashes, pins, corpus and expectation hashes, and per-case rows. Graph direct is reported but is not a candidate.
+
+**Metrics,** exactly as the PRD defines them:
+
+- Accuracy: normalized exact match. Normalization is limited to whitespace collapse and Unicode NFC; no currency or date reformatting.
+- Abstention: computed over expected-null fields.
+- Fabricated evidence: resolved selectors whose re-read text fails the value comparison.
+- Evidence resolution: exact span or cell over correct values.
+- Latency: wall time from interpretation start to result publication per document-profile; p95 by nearest rank.
+- Review workload: review items created per document.
+
+**Void runs:** if the provider fails mid-measurement, the whole report is void and rerun. Reports are immutable; reruns get a new file.
+
+**Decision sequence:**
+
+1. Mark each threshold met or missed in `report-summary.md`.
+2. The three independent review sessions write verdicts with evidence references into STATUS's append-only provenance table.
+3. The operator records acceptance or rejection.
+4. **On acceptance:** in one change, set `extraction.pipeline: graph-dense` and `content.v2_writer_enabled: true`; mark ADR-0060 Accepted with the evidence links; update `docker/DEPENDENCY-MATRIX.md`, build/run metadata, the C4 container description and BLUEPRINT §2.1/§4.8. Restart, submit a new corpus document and verify engine/run/v2 identity. These remain future runtime/operator decisions, not this plan's approval.
+5. **On rejection:** verify or restore `extraction.pipeline: direct-baseline` and `content.v2_writer_enabled: false`, remove isolated qualification overrides and drain/cancel their queue namespaces. Restart the ordinary worker and submit a new source; it must use the direct client and v1. ADR-0060 records failed gates and remains Proposed, or becomes Rejected if the operator says so. Do not infer either setting from the phrase "stay as they are".
+
+| State / decision | Ordinary `extraction.pipeline` | `content.v2_writer_enabled` | Evidence required after restart |
+|---|---|---|---|
+| Initial implementation / before qualification | `direct-baseline` | `false` | New ordinary source uses direct adapter/v1 |
+| Isolated measured qualification | Ordinary default stays `direct-baseline`; isolated engine config explicitly selects each of the three pipelines | Ordinary stays `false`; isolated v2 compatibility config may use `true` | Hashed temporary config, isolated queues/content, shared host guard, no ordinary-default mutation |
+| All thresholds/verdicts pass and operator accepts | `graph-dense` | `true` | New ordinary source uses dense/v2, with the retained per-document origin fallback |
+| Any threshold miss, failed verdict or operator rejection | `direct-baseline` | `false` | New ordinary source uses direct/v1; no candidate override or partial activation remains |
+| Rollback after an accepted activation | `direct-baseline` | `true` | Only extraction selection changes; new run uses direct, and accepted v2 publication/read compatibility remains qualified |
+
+The approved rollback criterion switches extraction engines; it does not revoke an already qualified content writer. If writer integrity itself fails, stop new ingestion for targeted repair rather than silently rewriting accepted bundles or treating it as the extraction rollback. Rejection before acceptance always leaves the writer disabled. Every branch preserves existing accepted bytes and prior run identities.
+
+## Contracts, data and authorization
+

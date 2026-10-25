@@ -1,0 +1,42 @@
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:17:from threading import BoundedSemaphore, Event, Lock
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:31:    """Stable reason code, deliberately excluding SDK errors and source text."""
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:130:        slots: BoundedSemaphore,
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:132:        cancelled: Event | None = None,
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:153:        self._cancelled = cancelled if cancelled is not None else Event()
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:155:        self._deadline = time.monotonic() + limits.run_timeout_seconds
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:158:        self._fatal_reason: str | None = None
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:173:        if self._fatal_reason is not None:
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:174:            raise InferenceRejected(self._fatal_reason)
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:175:        if self._cancelled.is_set():
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:176:            raise InferenceRejected("cancelled")
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:177:        remaining = self._deadline - time.monotonic()
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:179:            raise InferenceRejected("run_deadline_exceeded")
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:234:        # Poll while queued so cancellation does not wait for a busy model slot.
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:287:                            self._fatal_reason = "usage_exceeds_reservation"
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:289:                if len(response.choices) != 1 or response.choices[0].finish_reason != "stop":
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:65:        cancelled, stop = Event(), Event()
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:72:                    cancelled.set()
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:78:            self._execute(lease, cancelled)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:80:            cancelled.set()
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:90:    def _execute(self, lease: JobLease, cancelled: Event) -> None:
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:91:        task = DocumentTask.model_validate(lease.payload)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:110:            cancelled=cancelled,
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:153:        client = self.client_factory(cancelled)
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:9:from threading import BoundedSemaphore, Event
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:106:            slots = BoundedSemaphore(1)
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:108:            def client_factory(cancelled: Event) -> VllmGraphClient:
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116:                    cancelled=cancelled,
+engine/packages/brain-jobs/src/brain_jobs/queue.py:64:    Column("payload", JSON, nullable=False),
+engine/packages/brain-jobs/src/brain_jobs/queue.py:120:    payload: dict[str, Any]
+engine/packages/brain-jobs/src/brain_jobs/queue.py:126:    A separate artifact lease serializes conversion even across different profile
+engine/packages/brain-jobs/src/brain_jobs/queue.py:176:        payload: dict[str, Any],
+engine/packages/brain-jobs/src/brain_jobs/queue.py:212:                            payload=payload,
+engine/packages/brain-jobs/src/brain_jobs/queue.py:237:                    or row["payload"] != payload
+engine/packages/brain-jobs/src/brain_jobs/queue.py:300:                    row["payload"],
+engine/packages/brain-jobs/src/brain_jobs/queue.py:328:            raise LeaseLost("job cancelled, expired, or superseded")
+engine/packages/brain-jobs/src/brain_jobs/queue.py:394:    def retry(self, lease: JobLease, *, delay_seconds: float = 5) -> None:
+engine/packages/brain-jobs/src/brain_jobs/queue.py:411:    def cancel(self, job_id: UUID, tenant_id: UUID, knowledge_base_id: UUID) -> None:
+engine/packages/brain-jobs/src/brain_jobs/queue.py:428:            if row["state"] in ("complete", "cancelled", "failed"):
+engine/packages/brain-jobs/src/brain_jobs/queue.py:430:            conn.execute(update(jobs).where(jobs.c.id == str(job_id)).values(state="cancelled"))
+engine/packages/brain-jobs/src/brain_jobs/queue.py:432:            # overlap a new one just because its consumer requested cancellation.
+engine/packages/brain-jobs/src/brain_jobs/queue.py:433:            self._event(conn, str(job_id), row["generation"], "cancelled")

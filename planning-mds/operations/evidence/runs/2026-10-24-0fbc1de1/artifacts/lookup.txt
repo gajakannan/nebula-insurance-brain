@@ -1,0 +1,655 @@
+{
+  "target": {
+    "status": "planned",
+    "id": "feature:F0005",
+    "path": "planning-mds/features/F0005-one-time-docling-ingestion",
+    "affects": [
+      "capability:parse-once-content-artifact",
+      "capability:semantic-interpretation-run",
+      "capability:versioned-content-contracts",
+      "entity:content-artifact",
+      "entity:semantic-interpretation-run",
+      "workflow:ingestion-interpretation"
+    ],
+    "depends_on": [
+      "feature:F0001",
+      "feature:F0002",
+      "feature:F0003",
+      "feature:F0004"
+    ],
+    "governed_by": [
+      "adr:0003",
+      "adr:0004",
+      "adr:0040",
+      "adr:0055",
+      "adr:0058",
+      "adr:0059",
+      "adr:0060",
+      "adr:0065",
+      "adr:0073"
+    ],
+    "notes": [
+      "Candidate contract evidence is recorded in the feature folder. No production activation or lifecycle approvals claimed; F0001 remains the live-model baseline.",
+      "Fixed proof templates avoid a dependency on the F0015 production compiler; F0002/F0003 contracts are required for production job wiring.",
+      "Operator decisions 2026-10-23 - synthetic corpus with agent-role reviewers; F0005 enables the v2 writer at activation; F0016 owns document-date candidates; production host stays F0026."
+    ],
+    "uses_schema": [
+      "schema:content-artifact-manifest",
+      "schema:content-artifact-manifest-v2",
+      "schema:interpretation-result"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:parse-once-content-artifact",
+      "label": "Parse-once content artifact",
+      "notes": "Target: Docling-Graph coordinates Docling conversion; Nebula publishes the immutable native bundle before extraction and reuses it on restart. F0005 must prove ADR-0060; F0001 used Docling directly.",
+      "related_nodes": [
+        "adr:0003",
+        "adr:0004",
+        "adr:0060",
+        "capability:versioned-content-contracts",
+        "entity:content-artifact",
+        "schema:content-artifact-manifest",
+        "workflow:ingestion-interpretation"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md",
+        "planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "ai": [
+          "neuron/packages/brain-ingestion/src/**"
+        ],
+        "backend": [
+          "engine/apps/worker/src/brain_worker/document_delivery.py",
+          "engine/packages/brain-content/src/**",
+          "engine/packages/brain-jobs/src/**"
+        ],
+        "tests": [
+          "neuron/packages/brain-ingestion/tests/**",
+          "neuron/tests/integration/test_content_*.py",
+          "neuron/tests/integration/test_document_*.py"
+        ]
+      }
+    },
+    {
+      "id": "capability:semantic-interpretation-run",
+      "label": "Semantic interpretation run",
+      "notes": "Target: Docling-Graph extracts from saved native content, producing run-owned graph/provenance and a provider-neutral InterpretationResult with honest evidence precision. F0001 used direct vLLM; the ADR-0060 integration is planned.",
+      "related_nodes": [
+        "adr:0016",
+        "adr:0035",
+        "adr:0060",
+        "entity:assertion",
+        "entity:semantic-interpretation-run",
+        "schema:interpretation-result",
+        "workflow:ingestion-interpretation"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "ai": [
+          "neuron/benchmarks/docling_graph_comparison.py",
+          "neuron/packages/brain-extraction/src/**",
+          "neuron/packages/brain-interpretation/src/**"
+        ],
+        "backend": [
+          "engine/packages/brain-contracts/src/**"
+        ]
+      }
+    },
+    {
+      "id": "capability:versioned-content-contracts",
+      "label": "Versioned verified content contracts",
+      "notes": "Implemented F0004 shared v1/v2 byte/record verification, manifest-last immutable storage, fenced ready publication and legacy preservation. V2 remains default false pending deployment reconciliation/consumer gates. Integrity failures on reads never quarantine or reparse; explicit authorized operator units own repair.",
+      "related_nodes": [
+        "adr:0073",
+        "entity:content-artifact"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md",
+        "planning-mds/features/archive/F0004-content-artifact-model/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "ai": [
+          "neuron/packages/brain-ingestion/src/brain_ingestion/content_*.py",
+          "neuron/packages/brain-ingestion/src/brain_ingestion/conversion_recipe.py",
+          "neuron/packages/brain-ingestion/src/brain_ingestion/integrity_sweep.py",
+          "neuron/packages/brain-ingestion/src/brain_ingestion/item_provenance.py",
+          "neuron/packages/brain-ingestion/src/brain_ingestion/submission.py"
+        ],
+        "backend": [
+          "engine/apps/worker/src/brain_worker/content_*.py",
+          "engine/apps/worker/src/brain_worker/publication_intent.py",
+          "engine/migrations/versions/0008_f0004_content_contract.*",
+          "engine/packages/brain-content/src/brain_content/**",
+          "engine/packages/brain-persistence/src/brain_persistence/content_*.py"
+        ],
+        "infra": [
+          "config/local.yaml",
+          "docker/content-integrity-runbook.md"
+        ],
+        "tests": [
+          "engine/apps/api/tests/test_content.py",
+          "engine/packages/brain-content/tests/**",
+          "engine/tests/integration/test_content_migration_states.py",
+          "neuron/packages/brain-ingestion/tests/spikes/**",
+          "neuron/packages/brain-ingestion/tests/test_content_projection_v2.py",
+          "neuron/tests/integration/test_content_*.py"
+        ]
+      }
+    },
+    {
+      "id": "entity:content-artifact",
+      "label": "Content artifact",
+      "notes": "Immutable parse-once bundle for one document version: docling-document.json, normalized.md, blocks.jsonl, tables.jsonl, layout.jsonl, manifest.json with per-file sha256 and execution record. Implemented F0004 permits governed artifact versions per retained source version, with preserved legacy identities and separate append-only document-date metadata. Multiple-artifact global uniqueness reconciliation remains an explicit quiesced operator gate; a fallback retains its source version and original lease fence.",
+      "related_entities": [
+        "entity:semantic-interpretation-run"
+      ],
+      "related_nodes": [
+        "adr:0073",
+        "capability:document-date-provenance",
+        "capability:parse-once-content-artifact",
+        "capability:versioned-content-contracts",
+        "schema:content-artifact-manifest",
+        "schema:content-artifact-manifest-v2"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/master-blueprint.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md",
+        "planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md"
+      ],
+      "_kind": "entity",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-content/src/brain_content/manifest.py",
+          "engine/packages/brain-content/src/brain_content/validation.py",
+          "engine/packages/brain-persistence/src/brain_persistence/content_repository.py",
+          "engine/packages/brain-persistence/src/brain_persistence/models.py"
+        ]
+      }
+    },
+    {
+      "id": "entity:semantic-interpretation-run",
+      "label": "Semantic interpretation run",
+      "notes": "Versioned execution of an extraction profile over a content artifact; records run configuration, counters, status (complete, partial, failed), and the external provenance ledger.",
+      "related_entities": [
+        "entity:assertion",
+        "entity:content-artifact",
+        "entity:ontology-release"
+      ],
+      "related_nodes": [
+        "capability:semantic-interpretation-run",
+        "schema:interpretation-result"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/master-blueprint.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md"
+      ],
+      "_kind": "entity"
+    },
+    {
+      "id": "workflow:ingestion-interpretation",
+      "label": "Ingestion and interpretation lifecycle",
+      "rationale": [
+        {
+          "adr": "adr:0003",
+          "section": "Decision",
+          "summary": "Each document version is parsed once; interpretation runs read the persisted artifact and a failed page yields a partial run, never a negative assertion (sections 5, 86, 108.3)."
+        }
+      ],
+      "related_nodes": [
+        "capability:parse-once-content-artifact",
+        "capability:semantic-interpretation-run",
+        "entity:content-artifact",
+        "entity:semantic-interpretation-run"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/master-blueprint.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md"
+      ],
+      "states": [
+        {
+          "id": "state:ingestion-interpretation:received",
+          "label": "Received",
+          "transitions_to": [
+            "state:ingestion-interpretation:parsed",
+            "state:ingestion-interpretation:failed"
+          ]
+        },
+        {
+          "id": "state:ingestion-interpretation:parsed",
+          "label": "Parsed once",
+          "transitions_to": [
+            "state:ingestion-interpretation:interpreted",
+            "state:ingestion-interpretation:partial"
+          ]
+        },
+        {
+          "id": "state:ingestion-interpretation:partial",
+          "label": "Partially interpreted",
+          "transitions_to": [
+            "state:ingestion-interpretation:interpreted"
+          ]
+        },
+        {
+          "id": "state:ingestion-interpretation:interpreted",
+          "label": "Interpreted",
+          "transitions_to": []
+        },
+        {
+          "id": "state:ingestion-interpretation:failed",
+          "label": "Failed",
+          "transitions_to": []
+        }
+      ],
+      "_kind": "workflow"
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0003",
+      "label": "One-Time Content Extraction",
+      "path": "planning-mds/architecture/decisions/ADR-0003-one-time-content-extraction.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0004",
+      "label": "Source, Content Artifact, and Interpretation Are Separately Versioned",
+      "path": "planning-mds/architecture/decisions/ADR-0004-source-content-artifact-and-interpretation-are-separately-versioned.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0040",
+      "label": "Lossless Content and Evidence Contract",
+      "path": "planning-mds/architecture/decisions/ADR-0040-lossless-content-and-evidence-contract.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0055",
+      "label": "Local Inference Profile \u2014 Phi-4-mini-instruct on vLLM",
+      "path": "planning-mds/architecture/decisions/ADR-0055-local-inference-profile-phi-4-mini-on-vllm.md",
+      "related_nodes": [
+        "capability:local-inference-service",
+        "capability:semantic-interpretation-run"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0058",
+      "label": "Evidence Anchoring and Selector Contract",
+      "path": "planning-mds/architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md",
+      "related_nodes": [
+        "adr:0040",
+        "adr:0057",
+        "capability:evidence-review-round-trip",
+        "entity:review-decision"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0059",
+      "label": "Provider-Neutral Content Artifact Storage",
+      "path": "planning-mds/architecture/decisions/ADR-0059-provider-neutral-content-artifact-storage.md",
+      "related_nodes": [
+        "adr:0002",
+        "adr:0003",
+        "adr:0004",
+        "adr:0040",
+        "adr:0054",
+        "capability:backup-and-restore",
+        "capability:local-dependency-stack",
+        "capability:parse-once-content-artifact"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0060",
+      "label": "Docling-Graph Document Pipeline Orchestration",
+      "path": "planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md",
+      "related_nodes": [
+        "adr:0003",
+        "adr:0004",
+        "adr:0015",
+        "adr:0028",
+        "adr:0040",
+        "adr:0055",
+        "adr:0058",
+        "adr:0059",
+        "capability:parse-once-content-artifact",
+        "capability:semantic-interpretation-run",
+        "entity:content-artifact",
+        "entity:semantic-interpretation-run"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0065",
+      "label": "Assertion Admission, Text Origin, and Statement Mood",
+      "path": "planning-mds/architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md",
+      "related_nodes": [
+        "adr:0010",
+        "adr:0027",
+        "adr:0040",
+        "adr:0058",
+        "entity:assertion",
+        "entity:content-artifact"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0073",
+      "label": "Versioned Content Contracts and Append-Only Document Metadata (Proposed)",
+      "path": "planning-mds/architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md",
+      "related_nodes": [
+        "capability:document-date-provenance",
+        "capability:versioned-content-contracts",
+        "entity:content-artifact"
+      ],
+      "_kind": "adr"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:content-artifact-manifest",
+      "label": "ContentArtifactManifest",
+      "path": "planning-mds/schemas/content-artifact-manifest.schema.json",
+      "related_nodes": [
+        "capability:parse-once-content-artifact",
+        "entity:content-artifact"
+      ],
+      "_kind": "schema",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "schema:content-artifact-manifest-v2",
+      "label": "Content Artifact Manifest V2",
+      "path": "planning-mds/schemas/content-artifact-manifest-v2.schema.json",
+      "related_nodes": [
+        "adr:0073",
+        "capability:versioned-content-contracts",
+        "entity:content-artifact"
+      ],
+      "_kind": "schema",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest-v2.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "schema:interpretation-result",
+      "label": "InterpretationResult",
+      "path": "planning-mds/schemas/interpretation-result.schema.json",
+      "related_nodes": [
+        "capability:semantic-interpretation-run",
+        "entity:semantic-interpretation-run"
+      ],
+      "_kind": "schema"
+    }
+  ],
+  "depends_on": [
+    {
+      "status": "archived-done",
+      "id": "feature:F0001",
+      "path": "planning-mds/features/archive/F0001-repository-and-engineering-foundation",
+      "affects": [
+        "capability:authorization-enforcement",
+        "capability:backup-and-restore",
+        "capability:bitemporal-canonical-commit",
+        "capability:credential-verification-and-principal-resolution",
+        "capability:evidence-review-round-trip",
+        "capability:local-dependency-stack",
+        "capability:local-inference-service",
+        "capability:parse-once-content-artifact",
+        "capability:runtime-roots-and-toolchain",
+        "capability:semantic-interpretation-run",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:health",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get",
+        "entity:assertion",
+        "entity:audit-event",
+        "entity:canonical-fact-version",
+        "entity:content-artifact",
+        "entity:fact-slot",
+        "entity:outbox-event",
+        "entity:principal",
+        "entity:review-decision",
+        "entity:review-item",
+        "entity:semantic-interpretation-run",
+        "workflow:canonical-commit",
+        "workflow:human-review",
+        "workflow:ingestion-interpretation"
+      ],
+      "enforced_by_policy": [
+        "policy_rule:content-artifact-read",
+        "policy_rule:fact-slot-commit",
+        "policy_rule:fact-slot-read",
+        "policy_rule:review-task-annotate",
+        "policy_rule:review-task-read"
+      ],
+      "governed_by": [
+        "adr:0001",
+        "adr:0003",
+        "adr:0004",
+        "adr:0007",
+        "adr:0008",
+        "adr:0009",
+        "adr:0010",
+        "adr:0016",
+        "adr:0035",
+        "adr:0037",
+        "adr:0040",
+        "adr:0041",
+        "adr:0044",
+        "adr:0049",
+        "adr:0050",
+        "adr:0054",
+        "adr:0055",
+        "adr:0057",
+        "adr:0058",
+        "adr:0059"
+      ],
+      "notes": [
+        "ADR-0057 (2026-09-08) replaced Label Studio with the native Nebula Review Panel: S0004 renamed, the webhook endpoint became the review decision submission endpoint, and ADR-0058 added the anchoring contract S0004 also settles.",
+        "Phase A drafted 2026-09-06 in plan run 2026-09-06-cdb5d8cb: seven stories (toolchain, containers, four section 115.4 proofs, contract settlement). coverage_excluded stays until Phase B binds capabilities.",
+        "Phase B approved 2026-09-06: coverage_excluded removed; ten capabilities, ten entities, three workflows, six endpoints, six schemas, three roles, five policy rules declared; code bindings are authored at feature G7 once source exists."
+      ],
+      "restricted_to_role": [
+        "role:reviewer",
+        "role:service-principal",
+        "role:tenant-member"
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "schema:content-artifact-manifest",
+        "schema:interpretation-result",
+        "schema:problem-details",
+        "schema:review-decision"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0002",
+      "path": "planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts",
+      "affects": [
+        "capability:authorization-enforcement",
+        "capability:bounded-delegation",
+        "capability:credential-verification-and-principal-resolution",
+        "capability:current-resource-scope",
+        "capability:durable-authorization-decisions",
+        "capability:structural-tenancy-and-entity-identity",
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get",
+        "entity:audit-event",
+        "entity:delegation",
+        "entity:knowledge-base",
+        "entity:membership",
+        "entity:principal",
+        "entity:resource-scope",
+        "entity:tenant",
+        "entity:tenant-entity-identity",
+        "entity:workspace"
+      ],
+      "depends_on": [
+        "feature:F0001"
+      ],
+      "governed_by": [
+        "adr:0030",
+        "adr:0042",
+        "adr:0049",
+        "adr:0050",
+        "adr:0052",
+        "adr:0053",
+        "adr:0061",
+        "adr:0062"
+      ],
+      "notes": [
+        "F0005 synchronous worker is an impacted consumer requiring adapter regression; its ADR-0060 production activation is not accepted by F0002.",
+        "Historical review-to-commit wording reconciled in ADR-0062: F0002 owns authorization of existing consumers, F0018 owns full orchestration, F0022 owns review UI.",
+        "Identity is tenant-scoped; KB access is explicit. Existing pilot roles only.",
+        "Implemented in feature run 2026-09-27-bb7c8d1d: capabilities bound to as-built source at G7; ADR-0061/0062 accepted for the bounded F0002 scope; ADR-0042/0052/0053 remain Proposed.",
+        "Phases A and B explicitly approved by user with approve-phase-a and approve-phase-b on 2026-09-25."
+      ],
+      "restricted_to_role": [
+        "role:reviewer",
+        "role:service-principal",
+        "role:tenant-member"
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:authx-kernel",
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "schema:problem-details",
+        "schema:review-decision"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0003",
+      "path": "planning-mds/features/archive/F0003-postgresql-persistence",
+      "affects": [
+        "capability:bitemporal-canonical-commit",
+        "capability:postgresql-persistence-contract",
+        "capability:structural-tenancy-and-entity-identity",
+        "entity:assertion",
+        "entity:audit-event",
+        "entity:canonical-fact-version",
+        "entity:content-artifact",
+        "entity:fact-slot",
+        "entity:knowledge-base",
+        "entity:membership",
+        "entity:outbox-event",
+        "entity:principal",
+        "entity:review-decision",
+        "entity:review-item",
+        "entity:semantic-interpretation-run",
+        "entity:tenant",
+        "entity:workspace",
+        "workflow:canonical-commit"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002"
+      ],
+      "governed_by": [
+        "adr:0002",
+        "adr:0003",
+        "adr:0007",
+        "adr:0008",
+        "adr:0009",
+        "adr:0010",
+        "adr:0030",
+        "adr:0059"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0004",
+      "path": "planning-mds/features/archive/F0004-content-artifact-model",
+      "affects": [
+        "capability:document-date-provenance",
+        "capability:parse-once-content-artifact",
+        "capability:versioned-content-contracts",
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "entity:content-artifact",
+        "entity:content-block",
+        "entity:content-table",
+        "entity:content-table-cell",
+        "entity:document-date-candidate",
+        "entity:document-date-selection"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002",
+        "feature:F0003"
+      ],
+      "governed_by": [
+        "adr:0003",
+        "adr:0004",
+        "adr:0037",
+        "adr:0040",
+        "adr:0058",
+        "adr:0059",
+        "adr:0060",
+        "adr:0061",
+        "adr:0062",
+        "adr:0064",
+        "adr:0065",
+        "adr:0073"
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:content-artifact-manifest",
+        "schema:content-artifact-manifest-read",
+        "schema:content-artifact-manifest-v2",
+        "schema:content-records-v2",
+        "schema:document-date-record",
+        "schema:interpretation-output-manifest",
+        "schema:problem-details"
+      ],
+      "_kind": "feature"
+    }
+  ]
+}

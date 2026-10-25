@@ -1,0 +1,145 @@
+diff --git a/planning-mds/BLUEPRINT.md b/planning-mds/BLUEPRINT.md
+index 2b3603c..2eb48fe 100644
+--- a/planning-mds/BLUEPRINT.md
++++ b/planning-mds/BLUEPRINT.md
+@@ -399,7 +399,7 @@ ADR-0070 lists its proof gates; until it is accepted, F0012/F0013 Phase B plan a
+ **Local proof decisions from F0001-S0007, updated for ADR-0060 (2026-09-15):**
+ 
+ - **Item 3 (target host, PostgreSQL/extension build, model/provider data policy) — answered for the local proof scope.** The exact PostgreSQL/pgvector/AGE build is pinned and twice-verified live (S0002, re-verified at S0006 with no drift beyond an upstream base-image patch bump — `docker/DEPENDENCY-MATRIX.md`). The model/provider data policy is proven: self-hosted vLLM, chunk-text-only requests, no prompt persistence (F0001-S0003/S0006 live runs). The **production host** (as opposed to local Docker Compose) remains explicitly open, owned by F0026 per this feature's own G1 clarification and the F0001-S0006 story's stated assumption ("the production host decision waits for F0026").
+-- **Item 4 (exact Docling-Graph implementation and release/commit) — answered for the synthetic development scope.** `docling-project/docling-graph` 1.9.1 and Docling 2.126.0 are locked, with the Graph wheel digest recorded. Native/scanned conversion, saved-JSON reuse, publication before extraction, PostgreSQL recovery, and a recorded-response direct/dense comparison have bounded proof; see [F0005 compatibility evidence](features/F0005-one-time-docling-ingestion/compatibility-evidence.md). F0001's unsuccessful reuse attempt and direct-vLLM results remain historical evidence; its blanket no-reuse conclusion was too broad. Live-model and deployment qualification and reviewer acceptance remain pending under ADR-0060; F0005 plan run `2026-10-23-9a04b327` (approved 2026-10-23) specifies the local qualification and gated activation.
++- **Item 4 (exact Docling-Graph implementation and release/commit) — answered for the synthetic development scope.** `docling-project/docling-graph` 1.9.1 and Docling 2.126.0 are locked, with the Graph wheel digest recorded. Native/scanned conversion, saved-JSON reuse, publication before extraction, PostgreSQL recovery, and a recorded-response direct/dense comparison have bounded proof; see [F0005 compatibility evidence](features/F0005-one-time-docling-ingestion/compatibility-evidence.md). F0001's unsuccessful reuse attempt and direct-vLLM results remain historical evidence; its blanket no-reuse conclusion was too broad. Live-model and deployment qualification and reviewer acceptance remain pending under ADR-0060. Requirements/thresholds approved in F0005 plan run `2026-10-23-9a04b327` remain unchanged; Phase B rework `2026-10-25-50fcf658` is pending operator approval after review `2026-10-24-0fbc1de1`. It specifies supervised conversion with a parent-owned 300-second deadline, a host singleton with confirmed provider recovery, and explicit direct-baseline rejection settings. These are planned controls, not runtime proof or activation.
+ 
+ ### 4.9 F0001 Phase B (2026-09-06)
+ 
+@@ -470,7 +470,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
+ 
+ ## 6) Next Step Guidance
+ 
+-Current position (2026-10-23): F0001 to F0004 are done and archived. F0005's synthetic Docling-Graph proof is complete; its local qualification and gated activation plan is approved (plan run `2026-10-23-9a04b327`) and ready for the feature action (section 4.8). F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
++Current position (2026-10-25): F0001 to F0004 are done and archived. F0005's synthetic Docling-Graph proof is complete; its unchanged local-qualification requirements/thresholds were approved in plan run `2026-10-23-9a04b327`. Three high plan-review gaps prompted Phase B rework `2026-10-25-50fcf658`, pending operator approval before the feature action (section 4.8); the old approval does not approve the amended controls. F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
+ 
+ 1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
+ 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
+diff --git a/planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md b/planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+index 76c3c14..c397a39 100644
+--- a/planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
++++ b/planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+@@ -10,6 +10,7 @@
+ **Date:** 2026-09-15
+ **Direction authorized by:** Operator; formal ADR acceptance awaits the proof gates below.
+ **Implementation:** Synthetic development proof complete for the current scope. Docling-Graph 1.9.1 is locked; conversion/reuse, PostgreSQL recovery, dense extraction with recorded responses, and multi-region review mapping have bounded proof. Production acceptance and activation remain future work; see [compatibility evidence](../../features/F0005-one-time-docling-ingestion/compatibility-evidence.md). Plan run `2026-10-23-9a04b327` (2026-10-23) defines the acceptance procedure: local live qualification on a synthetic corpus against operator-approved thresholds, independent QA/Architect/Security verdicts and operator acceptance, then activation through committed configuration with a direct-baseline rollback. See the F0005 [PRD](../../features/F0005-one-time-docling-ingestion/PRD.md) and [assembly plan](../../features/F0005-one-time-docling-ingestion/feature-assembly-plan.md).
++**Pending design rework (2026-10-25):** plan run `2026-10-25-50fcf658`, Phase B existing feature, addresses PM-1/ARCH-1/BLD-1 from [plan review `2026-10-24-0fbc1de1`](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md). The requirements and thresholds above remain approved; these control-design amendments await operator Phase B approval and are not implemented or accepted proof.
+ **Would refine:** ADR-0003, ADR-0004, ADR-0028, ADR-0040, ADR-0055, ADR-0058, ADR-0059. Reconsiders the exclusion recorded after F0001; the current runtime decision, accepted content/evidence contracts, and F0001 measurements remain in force pending proof.
+ 
+ ## Context
+@@ -52,6 +53,14 @@ The candidate `DoclingGraphPipelineAdapter` in `brain-extraction` owns calls int
+ 
+ F0005's candidate includes the checkpoint seam, package declarations, `neuron/uv.lock`, build/run metadata, and opt-in composition wiring. The direct client is now named `OpenAICompatibleExtractionAdapter` and remains the comparison baseline; its old name is a compatibility import. S0004 has recorded-response direct/dense comparison evidence, while production qualification and activation remain future work. A class rename alone is not migration evidence.
+ 
++### Proposed local control amendments — 2026-10-25, pending Phase B approval
++
++The [assembly plan Steps 0a and 2](../../features/F0005-one-time-docling-ingestion/feature-assembly-plan.md) place physical conversion in a supervised conversion-only process group. The parent starts a monotonic 300-second deadline before launch, durably records child ownership before acknowledging conversion start, and alone accepts the validated native-JSON/quality/provenance handoff and publishes ready through the existing current-authority/generation fence. The child runs the same pinned Graph conversion/stage guard, with a serialization callback and no inference/publication capability. Timeout latches failure at 300 seconds before bounded termination/cleanup; late results cannot publish or start extraction. This replaces the prior design's reliance on the model client's cooperative deadline; it does not weaken parse-once, checkpoint ordering or F0004's bundle contract.
++
++The local processing topology is one host-enforced worker per canonical dedicated serving endpoint, with a process-lifetime OS advisory lock in a fixed shared host control directory and a common in-process model semaphore of one. Aliases, model profiles, tenants, workspaces and temporary configs cannot allocate separate locks. The converter never inherits the descriptor. A durable in-flight marker precedes HTTP dispatch; ambiguous outcomes and SIGKILL keep replacement claims/requests stopped until the controlled-host harness/DevOps supervisor observes the dedicated provider group exit and restarts the pinned server under the same guard. Provider health alone is not quiescence. This fail-closed local recovery is measured against the existing recovery bound and is not a distributed quota or a new provider endpoint.
++
++Steps 6–7 explicitly start ordinary new jobs on `direct-baseline` with the v2 writer disabled. Isolated qualification configs select Graph direct/dense without changing that default. Rejection verifies/restores direct-baseline/v1 after restart; acceptance selects Graph dense/v2. Extraction rollback after acceptance selects direct while retaining the qualified v2 writer. New job idempotency includes the pipeline; historical jobs retain their existing keys/pinned meaning. Negative tests cover every branch, deadline races, child/orphan cleanup and competing-worker/provider-crash recovery before activation. None of these proposed controls changes this ADR's status or approves runtime activation.
++
+ ### What becomes simpler
+ 
+ Nebula delegates chunk/extract/validate/graph coordination to one specialist pipeline and one configured model backend. After acceptance, retire duplicated extraction control flow in the current direct-vLLM adapter. Retain thin adapters for artifact publication, profile compilation, scope enforcement, evidence translation, and the provider-neutral result contract. Do not duplicate these business contracts inside upstream templates.
+diff --git a/planning-mds/features/F0005-one-time-docling-ingestion/GETTING-STARTED.md b/planning-mds/features/F0005-one-time-docling-ingestion/GETTING-STARTED.md
+index 50dcdb9..e68c714 100644
+--- a/planning-mds/features/F0005-one-time-docling-ingestion/GETTING-STARTED.md
++++ b/planning-mds/features/F0005-one-time-docling-ingestion/GETTING-STARTED.md
+@@ -2,7 +2,15 @@
+ 
+ The candidate adapter is implemented; the production integration is incomplete. Read [compatibility evidence](compatibility-evidence.md) for the exact pin, tested boundary, and remaining gates. ADR-0060 is Proposed.
+ 
+-The remaining work, local live qualification and gated activation, is specified in the [assembly plan](feature-assembly-plan.md) (plan run `2026-10-23-9a04b327`). Its corpus, harness, fault proxy, `extraction.pipeline` setting and migration 0009 do not exist yet; the commands below cover only what is implemented.
++The remaining work, local live qualification and gated activation, is specified in the [assembly plan](feature-assembly-plan.md). Phase B rework run `2026-10-25-50fcf658` is pending operator approval after [review 2026-10-24-0fbc1de1](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md). The earlier plan `2026-10-23-9a04b327` approved the unchanged Phase A requirements/thresholds and the preceding design, not the current rework. Its corpus, harness, fault proxy, supervised conversion process, singleton guard, `extraction.pipeline` setting and migration 0009 do not exist yet; the commands below cover only what is implemented.
++
++## Planned controls awaiting implementation
++
++- **Initial/rejected qualification:** the future committed default is `extraction.pipeline: direct-baseline` with `content.v2_writer_enabled: false`. Graph direct/dense run only in isolated qualification configs/queues/content roots before acceptance. Acceptance selects Graph dense/v2; rejection explicitly verifies/restores direct/v1 and drains/cancels candidate jobs. Extraction rollback after acceptance selects direct while retaining the qualified v2 writer. New keys include pipeline identity; historical jobs keep their old keys/pinned meaning. Restart/new-source tests verify every branch.
++- **Conversion bound:** a conversion-only child runs the pinned Graph seam and returns a validated native-JSON/quality/provenance handoff. Only the parent can publish ready. It starts a monotonic 300-second deadline before launch, records child ownership durably before the start acknowledgement, and latches timeout before bounded process-group termination/cleanup. Late child results cannot publish or start a model. The model-client deadline described below cannot supply this control.
++- **One host worker:** all engines/configs use the same fixed host `/tmp/nebula-brain-inference-<host-uid>/` directory and endpoint-keyed advisory lock before claims/conversion/model work. Containers must bind that directory with the host UID; aliases, profiles, tenants or separate content roots cannot create independent slots. The existing semaphore remains in-process only. A durable marker is written before each request. After uncertain HTTP outcome or SIGKILL, replacement claims/requests stay blocked until the qualification harness/DevOps supervisor confirms the dedicated provider process group exited and restarts the pinned server under the guard. Health alone cannot clear the marker. The controlled-host sequence is automated per fault and its elapsed time counts toward recovery qualification.
++
++See assembly Steps 0a, 2, 4, 6 and 7 for exact ownership, protocols, bounds and negative tests. These are planning decisions, not delivered controls or runtime qualification. No new public endpoint, shared schema or distributed scheduler is introduced.
+ 
+ From the repository root:
+ 
+diff --git a/planning-mds/features/F0005-one-time-docling-ingestion/README.md b/planning-mds/features/F0005-one-time-docling-ingestion/README.md
+index 3925939..512454b 100644
+--- a/planning-mds/features/F0005-one-time-docling-ingestion/README.md
++++ b/planning-mds/features/F0005-one-time-docling-ingestion/README.md
+@@ -1,6 +1,6 @@
+ # F0005 — One-time document ingestion
+ 
+-**Status:** Planned feature; synthetic development scope complete. Local qualification and gated activation re-planned and approved (Phase A and B) in plan run `2026-10-23-9a04b327`; feature action not started. ADR-0060 remains Proposed.
++**Status:** Planned feature; synthetic development scope complete. Phase B rework in plan run `2026-10-25-50fcf658` addresses three findings from [plan review 2026-10-24-0fbc1de1](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md) and is pending operator approval. Phase A requirements/thresholds remain those approved in `2026-10-23-9a04b327`; that run's Phase B approval does not approve this rework. Feature action not started; ADR-0060 remains Proposed.
+ **Phase:** v0.1A
+ **Roadmap:** Next
+ 
+@@ -11,7 +11,7 @@ Process each document version into an immutable content artifact and reuse it fo
+ ## Documents
+ 
+ - [PRD](PRD.md): scope and acceptance.
+-- [Assembly plan](feature-assembly-plan.md): reconciliation with shipped F0002–F0004, qualification steps, failure injection, pipeline selection, decision and rollback.
++- [Assembly plan](feature-assembly-plan.md): pending rework for supervised conversion with a 300-second deadline, host singleton/provider recovery, and explicit direct-baseline initial/rejection settings; shipped F0002–F0004 reconciliation, qualification, decision and rollback.
+ - [Status](STATUS.md): recommendation audit, pending proofs, and actual signoffs.
+ - [Acceptance criteria checklist](acceptance-criteria-checklist.md): per-criterion verification state.
+ - [Getting started](GETTING-STARTED.md): current baseline and planning checks.
+diff --git a/planning-mds/features/F0005-one-time-docling-ingestion/STATUS.md b/planning-mds/features/F0005-one-time-docling-ingestion/STATUS.md
+index b702341..10bce81 100644
+--- a/planning-mds/features/F0005-one-time-docling-ingestion/STATUS.md
++++ b/planning-mds/features/F0005-one-time-docling-ingestion/STATUS.md
+@@ -1,12 +1,14 @@
+ # F0005 — One-time document ingestion — Status
+ 
+-**Overall Status:** Synthetic development scope complete; local qualification and gated activation re-planned. The opt-in candidate and its development proof are implemented. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).\
+-**Last Updated:** 2026-10-23\
+-**Plan Run:** `2026-10-23-9a04b327` (first F0005 plan run)
++**Overall Status:** Synthetic development scope complete; local qualification and gated activation have pending Phase B rework. The opt-in candidate and its development proof are implemented; the new deadline, singleton and default-selection controls are planned only. ADR-0060 remains Proposed. See [compatibility evidence](compatibility-evidence.md) and the [synthetic comparison](synthetic-comparison.json).\
++**Last Updated:** 2026-10-25\
++**Plan Run:** `2026-10-25-50fcf658` (Phase B, existing feature, pending approval; follows `2026-10-23-9a04b327`)
+ 
+ ## Planning Position
+ 
+-Plan run `2026-10-23-9a04b327` re-plans the remaining work against shipped F0002–F0004. Operator decisions at G1 (2026-10-23): local live qualification on the development host with gated activation; a synthetic qualification corpus with independent expectations and independent agent-role reviewers; F0005 enables the F0004 v2 writer as an activation step (new story S0005); F0016 owns document-date candidates. The PRD fixes the qualification thresholds. Phase A was approved with `approve-phase-a` and Phase B with `approve-phase-b` on 2026-10-23. The plan is ready for the feature action, starting with Step 0 preflight and the Step 1 corpus. Planning does not authorize implementation or change delivery priority.
++Plan run `2026-10-23-9a04b327` re-planned the remaining work against shipped F0002–F0004. Operator decisions at G1 (2026-10-23): local live qualification on the development host with gated activation; a synthetic qualification corpus with independent expectations and independent agent-role reviewers; F0005 enables the F0004 v2 writer as an activation step (new story S0005); F0016 owns document-date candidates. The PRD fixes the qualification thresholds. Phase A was approved with `approve-phase-a` and the preceding Phase B with `approve-phase-b` on 2026-10-23.
++
++[Plan review `2026-10-24-0fbc1de1`](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md) found three high gaps. The operator requested plan-action repairs; run `2026-10-25-50fcf658` is Phase B for this existing feature. Its [assembly plan](feature-assembly-plan.md) addresses PM-1 with initial/rejection direct-baseline settings and isolated candidate configs, ARCH-1 with supervised conversion and a parent-owned 300-second outcome/publication fence, and BLD-1 with an enforced host singleton plus confirmed provider quiescence after uncertain requests. The new negative proof inventory covers restart/rejection, hung/late conversion, process-group cleanup, two-process refusal and in-flight SIGKILL/timeout recovery. Requirements, stories and thresholds are unchanged. Current rework awaits gate validation and explicit operator Phase B approval; it is not ready for implementation merely because the prior plan was approved. Historical plan/review evidence is preserved. Planning does not authorize implementation or change delivery priority.
+ 
+ ## Synthetic development scope (2026-09-20 to 2026-09-22)
+ 
+@@ -75,7 +77,7 @@ The candidate has been merged to main from `feature/docling-graph-delivery`, bas
+ 
+ ## Required Signoff Roles
+ 
+-Architecture reviews the checkpoint and invariants; QA reviews independent results; security reviews boundaries and resource/retention controls; code review covers runtime integration. Named reviewers and their actual verdicts remain pending.
++Every story requires Quality Engineer, Code Reviewer, Security, DevOps and Architect signoff, matching the assembly plan. Architecture reviews the checkpoint/deadline and invariants; QA reviews independent results; Security reviews boundaries and resource/retention controls; Code Reviewer covers runtime integration; DevOps reviews shared host locks, provider recovery, subprocess cleanup and migration/restore/serving proof. Named reviewers and their actual runtime verdicts remain pending. The separate QA/Architect/Security qualification verdicts and operator acceptance gate activation and do not replace the full story signoff set.
+ 
+ ## Story Signoff Provenance
+ 
+diff --git a/planning-mds/kg-source/features/F0005.yaml b/planning-mds/kg-source/features/F0005.yaml
+index cab43d8..9d50efc 100644
+--- a/planning-mds/kg-source/features/F0005.yaml
++++ b/planning-mds/kg-source/features/F0005.yaml
+@@ -6,7 +6,7 @@ registry_section: Planned
+ phase: v0.1A
+ roadmap_section: Next
+ roadmap_order: 4
+-rationale: Docling-Graph 1.9.1 synthetic development proof complete. Plan run 2026-10-23-9a04b327 (Phase A and B approved) re-plans local live qualification on a synthetic corpus against operator-approved thresholds, gated activation (Graph dense default plus the F0004 v2 writer) and a direct-baseline rollback.
++rationale: Docling-Graph 1.9.1 synthetic development proof complete. Phase A requirements and thresholds approved in 2026-10-23-9a04b327 remain unchanged. Phase B rework 2026-10-25-50fcf658 addresses three plan-review gaps with explicit direct-baseline initial/rejection settings, supervised conversion deadline and an enforced host singleton/provider recovery; pending operator approval. Local synthetic-corpus qualification and gated Graph dense/v2 activation remain future work.
+ validation_gate: F0004 artifact contract; F0001 historical baseline. Before activation, prove the pinned ADR-0060
+   integration, pre-extraction checkpoint, native/scanned reuse, evidence translation, and recovery.
+ depends_on:
+@@ -36,6 +36,8 @@ uses_schema:
+ - schema:content-artifact-manifest-v2
+ - schema:interpretation-result
+ notes:
++- Plan-review 2026-10-24-0fbc1de1 PM-1/ARCH-1/BLD-1 repair design is in plan run 2026-10-25-50fcf658, Phase B existing feature, pending approval. No implementation or runtime proof claimed; original planning/review evidence is preserved.
++- Host guard is shared across engines/configs/tenants; uncertain provider activity blocks replacement until confirmed dedicated-server exit and pinned restart. Parent alone owns conversion timeout and ready publication. Rejection explicitly returns new jobs to direct-baseline/v1; historical jobs retain their identity.
+ - Candidate contract evidence is recorded in the feature folder. No production activation or lifecycle approvals claimed; F0001 remains the live-model baseline.
+ - Operator decisions 2026-10-23 - synthetic corpus with agent-role reviewers; F0005 enables the v2 writer at activation; F0016 owns document-date candidates; production host stays F0026.
+ - Fixed proof templates avoid a dependency on the F0015 production compiler; F0002/F0003 contracts are required

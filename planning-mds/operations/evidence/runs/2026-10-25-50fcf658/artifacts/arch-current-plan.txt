@@ -1,0 +1,186 @@
+# F0005 assembly plan
+
+**Status:** Phase B design for local qualification and gated activation, plan run `2026-10-23-9a04b327`, approved by the operator with `approve-phase-b` on 2026-10-23. Supersedes the 2026-09-15 draft delivery plan; that plan's first three steps are delivered as synthetic development scope (see [compatibility evidence](compatibility-evidence.md)). ADR-0060 and ADR-0073 remain Proposed.
+
+## Reconciliation with the 2026-09-15 plan and shipped F0002–F0004
+
+The previous plan is not silently overwritten. Its status per item:
+
+| 2026-09-15 plan item | As built (main) | This plan |
+|---|---|---|
+| Pin Graph, align Docling, regenerate `neuron/uv.lock` | Delivered: Graph 1.9.1, Docling 2.126.0, wheel digest locked | Re-verify against the lock at preflight (S0001-AC1); no upgrade planned |
+| Shared ParseResult DTO, `build_bundle()` publication callback | Delivered; F0004 replaced the publication path with the versioned v1/v2 boundary, `ContentWorkflow` and the shared verifier | Use the F0004 boundary unchanged |
+| Rename the direct client | Delivered: `OpenAICompatibleExtractionAdapter`, old name kept as an import alias | Add a worker path for it so it can be the rollback engine (Step 6) |
+| Job leases, fencing, outbox, recovery | Delivered: `DocumentJobQueue`, migration 0004, nine PostgreSQL cases with recorded responses; job events carry no failure reason | Add live-provider and storage failure injection (Step 4) and a reason column (migration 0009) |
+| Evidence translation | Delivered: mapper v2, multi-region, unresolved fallback | Prove with live output (Step 5) |
+| Corpus comparison, thresholds, reviewers | Only a synthetic recorded-response comparison | Corpus, live harness, thresholds and reviews (Steps 1, 7) |
+| Activation | Not done; the worker uses Graph's `direct` contract while opt-in | Pipeline selection in committed configuration; gated switch (Step 7) |
+| — | F0004 shipped a disabled v2 writer and handed off OCR asset provenance | Step 3 (S0005) |
+
+The open decisions table of the old plan is closed: the pin and checkpoint seam (S0001), the metadata DTOs and publication transaction (F0004), and the corpus, reviewers and thresholds (operator, 2026-10-23 PRD). Concurrency is fixed at one worker replica and model semaphore 1 for qualification.
+
+## Ownership and package boundary
+
+Unchanged from ADR-0060: `brain-extraction` (AI engineer) is the only package calling upstream Graph; `brain-ingestion` owns conversion, item provenance and publication through the F0004 `ContentWorkflow`; the engine owns jobs, authorization, import and audit. Neither engine persistence nor review imports AI implementation modules. New code stays inside these packages plus a qualification harness under `neuron/benchmarks/` and corpus fixtures under `neuron/fixtures/qualification/`.
+
+| Role | Owns in this plan |
+|---|---|
+| Quality Engineer (corpus author session) | Corpus generator, documents, expectations, hashes. Never runs or reviews extraction. |
+| AI Engineer | Live conversion, origin/OCR provenance, evidence proof, comparison harness and runs, direct-baseline worker path |
+| Backend Developer | Pipeline selection config and job pinning, failure-injection composition, cleanup/retention of temporary exports |
+| DevOps | Preflight: vLLM serving, GPU, model and OCR asset cache, database; dependency matrix; C4 runtime update at activation |
+| Quality Engineer (independent review session) | QA verdict over all stories and the report |
+| Architect (independent review session) | Architecture verdict; ADR-0060 status change |
+| Security (independent review session) | Security verdict: data egress, credentials, logs, tenant access, retention |
+
+Review sessions start from fresh context and do not author code, corpus or expectations they judge.
+
+## Build order
+
+| Step | Story | Exit condition |
+|---|---|---|
+| 0 | all | Preflight green: vLLM serves `microsoft/Phi-4-mini-instruct` at revision `cfbefacb99257ffa30c83adab238a50856ac3083` on the host GPU; serving tokenizer cached; Docling and RapidOCR assets cached offline; PostgreSQL at migration head; lock check passes. |
+| 1 | S0004-AC1 | Corpus committed with corpus and expectation hashes recorded in the feature evidence package before any measured run. |
+| 2 | S0001 | Every corpus document converts live; bundles published before the first model call; partial and stage-guard cases pass. |
+| 3 | S0005 AC1–AC4 | Per-item origin and OCR asset identity on every converted document; fallback rate reported; consumer compatibility passes. The switch is not flipped here. |
+| 4 | S0002 | Every injected failure recovers or terminates explicitly with zero post-publication reconversion and no duplicate effects. |
+| 5 | S0003 | Live two-profile runs over saved JSON: zero conversion, grounded evidence, budgets enforced, relationship output fails closed. |
+| 6 | S0004-AC6 support | `extraction.pipeline` selection with job pinning; direct-baseline worker path passes the S0002/S0003 recovery and evidence suites. |
+| 7 | S0004, S0005-AC5 | Measured report; thresholds marked; three verdicts and operator decision; then activation or recorded rejection. |
+
+Steps 2–5 may interleave once Step 1 is committed, but no measured comparison run (Step 7) starts before Steps 2–6 pass.
+
+## Step 0 — Preflight (DevOps)
+
+Use `docker/local-inference-runbook.md` (F0005 candidate revision section). Record GPU model and memory, driver, CUDA, vLLM image digest, model revision, tokenizer revision, max model length 4,096, and the Docling/RapidOCR asset cache paths. Run the existing offline suites (`test_graph_pipeline_contract.py`, `test_vllm_graph_client.py`, `test_document_process_recovery.py` on PostgreSQL) as a regression baseline. Fail preflight on any lock mismatch (S0001-AC1).
+
+## Step 1 — Qualification corpus (QE corpus author)
+
+```
+neuron/fixtures/qualification/
+  build_corpus.py          # deterministic generator; seeds and layout specs in-file
+  corpus.yaml              # document list: id, kind (native|scanned|mixed|partial), case tags, sha256
+  expectations/<doc>.json  # per profile field: value | null (absent), evidence: [{page, text, region?}]
+  CORPUS-HASHES.txt        # sha256 of every PDF and expectation file
+```
+
+- At least 12 GL declarations documents: 6 native, 4 scanned (rasterized pages), 2 mixed (native text plus an image region), plus the partial-conversion case among them (one deliberately damaged page). Case tags must cover unique, repeated, table-borne, split-across-regions and absent values for all five fields of `gl-limits-a` and `gl-limits-b`.
+- Expectations are generated from the generator's input data, not from any conversion or extraction output, so they are independent by construction. Values are verbatim as printed; evidence lists the printed region(s).
+- Insured names, addresses and policy numbers are synthetic. The corpus sits outside `golden-corpus/` and the frozen holdout and is labelled synthetic development data in `corpus.yaml`.
+- The two existing `neuron/fixtures/gl-policy-declarations*.pdf` files stay as regression fixtures and are not counted.
+
+## Step 2 — Live conversion (S0001)
+
+Reuse `DocumentWorker` and `ContentWorkflow` with physical conversion and OCR enabled. Add `neuron/tests/integration/test_live_conversion_qualification.py`, skipped unless `BRAIN_RUN_LIVE_QUALIFICATION=1`, that submits every corpus document and asserts S0001-AC2–AC5 from the persisted bundle after a process restart.
+
+- **Checkpoint before model (AC3):** run with the fault proxy (Step 4) in `stopped` mode; assert the bundle is ready and the job recorded `model_unavailable` with conversion count 1.
+- **Stage guard (AC5):** monkeypatch the installed stage list in a subprocess; the existing guard must raise before extraction and register nothing.
+- **Bounds:** a per-document conversion deadline of 300 s, enforced by the job attempt deadline; exceeding it fails the attempt with `conversion_timeout`.
+
+## Step 3 — Text origin and OCR asset provenance (S0005)
+
+`item_provenance.py` currently records `ProducerIdentity(engine_class, version("rapidocr"), None, None)` for RapidOCR items, with the model fields null.
+
+- Resolve the RapidOCR detection, recognition and classification model files actually loaded by the configured pipeline (read from the engine instance's configured model paths, not from defaults or documentation). Hash each file's bytes at conversion time.
+- Write the result into slots that already exist and are always written empty today:
+  - The v2 manifest's `execution.model_artifact_digests` (array of strings), as `<asset-name>@<revision>:sha256:<hex>`; `content_workflow.py` and `bundle_writer.py` currently write `[]`.
+  - The per-item `ProducerIdentity.model` and `model_version` fields, which are currently `None` for OCR items.
+- No schema change is needed. If the contract cannot express what is observed, stop and return to the architect.
+- An asset path that cannot be resolved, or a digest that differs from the value recorded at preflight, makes the document `ORIGIN_UNAVAILABLE` for its OCR items, so the per-document v1 fallback applies (S0005-AC2/AC3). No guessed identity is written.
+- Run the F0004 consumer-compatibility suites (`test_content_consumer_versions.py`, `test_content_worker_v2.py`, `test_content_restore_v2.py`, the evidence resolver and the importer) against v2 bundles of the corpus with `content.v2_writer_enabled=true` in an isolated config (`BRAIN_LOCAL_CONFIG_PATH`). The committed switch stays `false` until Step 7.
+
+## Step 4 — Failure injection (S0002)
+
+Test-only composition, never shipped in the production worker path:
+
+- **Model fault proxy** `neuron/tests/support/fault_proxy.py`: an HTTP proxy between the worker and vLLM with modes `pass`, `stopped` (connection refused), `timeout` (hold beyond the client timeout), `http_5xx`, `malformed_json` and `schema_invalid` (valid JSON violating the template). Mode is selected per request number so a retry can succeed.
+- **Storage fault** wrapper over the filesystem object store that raises on the Nth write or before the manifest marker.
+- **Process kills:** extend `test_document_process_recovery.py` to run with the live model through the proxy in `pass` mode at the four kill points (after bundle publication, after result publication, mid-import, after import commit).
+- **Assertions:** conversion and OCR counters are instrumented at the converter and RapidOCR entry points (not self-reported). Database row counts prove one accepted artifact, one run per profile and one assertion/evidence/review set. Reason codes are distinct per fault mode.
+- **Concurrency (AC4):** submit 5 jobs with two worker processes on one host; assert via proxy request timestamps that in-flight model requests never exceed the configured limit (default 1), and that cancellation leaves at most one in-flight request and schedules none after it.
+- **Authorization (AC5):** revoke the ServicePrincipal grant or deactivate the principal between attempts; the next boundary denies and audits, and the job does not continue.
+- **Temporary exports (AC6):** after completed, failed and cancelled runs, assert the attempt's temporary directory is removed and retained run outputs carry the source's tenant/KB scope. Retention period and deletion follow the source (F0004); F0005 adds no retention policy.
+
+## Step 5 — Live interpretation and evidence (S0003)
+
+Extend `test_graph_live_inference.py` (opt-in) to run both profiles with `extraction_contract="dense"` over every corpus bundle after a worker restart, with converter/OCR entry points patched to raise.
+
+- **Evidence (AC2):** for every resolved selector, re-read the span or cell from the bundle (`blocks.jsonl`, `tables.jsonl`) and compare it to the value. Unicode code-point offsets follow the F0004 convention.
+- **Unsupported output (AC4):** a dedicated template variant that elicits a relationship asserts the import fails closed with no rows.
+- **Budgets (AC5):** `VllmGraphClient` already reserves input, schema and output tokens with the serving tokenizer; add per-call reservation records to run diagnostics and assert none exceeds 4,096.
+- **Targeting (AC6):** a selected-block request raises `unsupported_targeting` before any call.
+
+## Step 6 — Pipeline selection and rollback path
+
+Add a committed, non-secret section to `config/local.yaml`, loaded beside `ContentWriterConfig`:
+
+```yaml
+extraction:
+  # graph-direct (current opt-in behavior) | graph-dense | direct-baseline
+  pipeline: graph-direct
+```
+
+- **Job pinning:** the selected pipeline is written into the job `payload` at submission, as the profile and schema hash already are, and is covered by the idempotency check. Retries and recovery use the pinned value. A configuration change affects new submissions only, so no run mixes engines (S0004-AC6). No migration is needed: `payload` is JSON.
+- **Run identity:** the interpretation run records the pipeline value, Graph revision and contract, or the direct adapter's identity.
+- **Direct baseline in the worker:** wrap `OpenAICompatibleExtractionAdapter` behind the same interpretation interface as `GraphInterpretationService`, with the same `VllmGraphClient` budget and semaphore policy, evidence mapper and importer. It must pass the Step 4 recovery suite and the Step 5 evidence checks before it can serve as a rollback.
+- An unknown value fails worker startup with a configuration error; there is no environment-variable override.
+
+## Step 7 — Comparison, review and decision (S0004, S0005-AC5)
+
+**Harness:** `neuron/benchmarks/f0005_qualification.py --corpus neuron/fixtures/qualification --pipelines direct-baseline graph-dense graph-direct --output <run>/artifacts/qualification/report.json`. It reuses the scoring of `docling_graph_comparison.py`, runs through the worker composition against live vLLM, and records configuration hashes, pins, corpus and expectation hashes, and per-case rows. Graph direct is reported but is not a candidate.
+
+**Metrics,** exactly as the PRD defines them:
+
+- Accuracy: normalized exact match. Normalization is limited to whitespace collapse and Unicode NFC; no currency or date reformatting.
+- Abstention: computed over expected-null fields.
+- Fabricated evidence: resolved selectors whose re-read text fails the value comparison.
+- Evidence resolution: exact span or cell over correct values.
+- Latency: wall time from interpretation start to result publication per document-profile; p95 by nearest rank.
+- Review workload: review items created per document.
+
+**Void runs:** if the provider fails mid-measurement, the whole report is void and rerun. Reports are immutable; reruns get a new file.
+
+**Decision sequence:**
+
+1. Mark each threshold met or missed in `report-summary.md`.
+2. The three independent review sessions write verdicts with evidence references into STATUS's append-only provenance table.
+3. The operator records acceptance or rejection.
+4. **On acceptance:** in one change, set `extraction.pipeline: graph-dense` and `content.v2_writer_enabled: true`; mark ADR-0060 Accepted with the evidence links; update `docker/DEPENDENCY-MATRIX.md`, build/run metadata, the C4 container description and BLUEPRINT §2.1/§4.8. Then submit one new corpus document and verify the pipeline, run identity and v2 manifest after a restart. Rollback is verified by switching `extraction.pipeline: direct-baseline`, submitting again, and confirming earlier artifacts and runs are unchanged.
+5. **On rejection:** both settings stay as they are. ADR-0060 records the failed gates and stays Proposed, or becomes Rejected if the operator says so. The direct-baseline worker path remains available as built.
+
+## Contracts, data and authorization
+
+- No new endpoint, schema file, role or permission. Existing `ServicePrincipal` `ingest`/`interpret` grants cover all qualification jobs; Casbin policy is unchanged.
+- S0005 fills existing, currently empty fields of `schema:content-artifact-manifest-v2`; no shape change.
+- **Failure reasons (migration 0009, expand-only).** `document_job_event` records only `event` (state); `DocumentJobQueue.retry()` has no reason. Add a nullable `reason VARCHAR(64)` column with a CHECK constraint over this enumeration:
+  - `model_unavailable`, `model_timeout`, `model_http_error`, `model_malformed_output`, `model_schema_invalid`
+  - `storage_write_failed`, `conversion_failed`, `conversion_timeout`, `stage_guard_mismatch`
+  - `unsupported_targeting`, `unsupported_output`, `authorization_denied`, `cancelled`
+
+  `retry()` and the terminal-failure path take a required reason. Existing rows keep `NULL`, with no backfill and no edit to migrations 0001–0008. This is F0003's expand-only discipline; the restore drill covers the new column.
+- Audit: authorization decisions stay in `audit_event` with policy version. Job state changes are the append-only `document_job_event` rows, each carrying job, generation (attempt), event, the new reason and time. Correlation and artifact/run references come from the job row and outbox.
+- Data egress: model requests carry chunk text only (ADR-0055). Diagnostics and reports carry hashes, usage and reason codes, never prompts, responses, source text or keys.
+
+## Test inventory and coverage
+
+| Story | Tests (new or extended) | Mode |
+|---|---|---|
+| S0001 | `test_live_conversion_qualification.py` | live, opt-in |
+| S0002 | `test_document_process_recovery.py` (live variant), `test_fault_injection_qualification.py`, storage-fault unit tests, migration 0009 upgrade/restore test (`engine/tests/integration/test_job_event_reason_migration.py`) | live and PostgreSQL |
+| S0003 | `test_graph_live_inference.py` (dense, corpus), evidence re-read checks | live, opt-in |
+| S0004 | `f0005_qualification.py` harness, `test_pipeline_selection.py` (pinning, unknown value, rollback) | live; unit |
+| S0005 | `test_ocr_asset_provenance.py`, F0004 consumer suites under v2 config | live; existing |
+
+Live suites run on the development host and are recorded in the feature evidence package; CI keeps running the offline and PostgreSQL suites. The feature action records at least 80% coverage for changed runtime scope. Required signoff roles for every story: Quality Engineer, Code Reviewer, Security, DevOps and Architect.
+
+## Non-functional limits
+
+- One worker replica and model semaphore 1 during qualification.
+- Per-call context ≤ 4,096 tokens by the serving tokenizer.
+- Conversion deadline 300 s per document.
+- Latency and accuracy thresholds as in the PRD.
+- GPU memory and tokens are reported, not thresholded.
+
+## Rollout
+
+Keep the current opt-in behavior until Step 7's decision. Activation is a single committed configuration change after recorded acceptance, and rollback is a single setting. Archived F0001 records stay unchanged. The production host (F0026) is out of scope; nothing here is a release approval.

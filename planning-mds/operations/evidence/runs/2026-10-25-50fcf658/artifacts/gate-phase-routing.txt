@@ -1,0 +1,14 @@
+301:    the stage is incomplete, and records the prior attestation inline rather than
+332:                                  f"checkpoint {checkpoint_id!r} has no prior attestation to supersede")
+334:        prior_evidence = previous.get("evidence", [])
+335:        prior_paths = [str(item["path"]) for item in prior_evidence]
+336:        requested_paths = list(dict.fromkeys(evidence or prior_paths))
+337:        if (not prior_paths or len(prior_paths) != len(set(prior_paths))
+338:                or set(requested_paths) != set(prior_paths)
+339:                or len(requested_paths) != len(prior_paths)):
+342:                "re-attestation must name exactly the artifact paths in the prior attestation",
+346:        for rel in prior_paths:
+351:        old_hashes = {item["path"]: item["sha256"] for item in prior_evidence}
+367:                "evidence": prior_evidence,
+426:            pc.require_prior_checks(journal, spec, stage, checks, run_folder)
+555:                pc.require_prior_checks(journal, spec, stage, latest_checks, run_folder)
