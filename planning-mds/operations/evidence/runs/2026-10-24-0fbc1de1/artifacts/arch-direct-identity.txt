@@ -1,0 +1,58 @@
+                profile_version=profile.profile_version,
+            ),
+            counters=Counters(
+                model_calls=len(calls),
+                prompt_tokens=sum(c["prompt_tokens"] or 0 for c in calls),
+                completion_tokens=sum(c["completion_tokens"] or 0 for c in calls),
+            ),
+            provenance_ledger_ref=f"runs/{tenant_id}/{knowledge_base_id}/{run_id}/provenance.json",
+            created_at=datetime.now(UTC),
+        )
+        metadata = {
+            "contract_version": 1,
+            "engine": "docling-graph",
+            "diagnostics": diagnostics,
+            "artifact_sha256": manifest.artifact_sha256,
+            "profile_id": profile.profile_id,
+            "profile_version": profile.profile_version,
+            "schema_sha256": result.run_configuration.schema_hash,
+            "selected_refs": [],
+            "requested_configuration": {
+                "extraction_contract": extraction_contract,
+                "chunk_max_tokens": chunk_max_tokens,
+                "model_id": client.model,
+                "model_revision": diagnostics["model_revision"],
+                "limits": diagnostics["limits"],
+            },
+            "evidence_mapper_version": 2,
+            "pipeline_config": output.effective_configuration if output else None,
+            "package_versions": {
+                name: version(name) for name in ("docling", "docling-core", "docling-graph")
+            },
+        }
+        pipeline: PipelineIdentity | None = None
+        if output_contract_version == 2:
+            pipeline = PipelineIdentity(
+                name="docling-graph",
+                package_version=version("docling-graph"),
+                configuration_sha256=hashlib.sha256(
+                    _json(
+                        {
+                            "requested_configuration": metadata["requested_configuration"],
+                            "effective_configuration": metadata["pipeline_config"],
+                            "profile_id": profile.profile_id,
+                            "profile_version": profile.profile_version,
+                            "schema_sha256": result.run_configuration.schema_hash,
+                        }
+                    )
+                ).hexdigest(),
+            )
+            metadata["pipeline_identity"] = pipeline.model_dump(mode="json")
+            # F0016/F0022 owns a future verified selection producer. This worker
+            # records the exact absence of a selected basis until that exists.
+            metadata["document_date_selection_id"] = None
+        outputs = {
+            "result.json": result.model_dump_json().encode(),
+            "provenance.json": _json(output.provenance if output else None),
+            "graph.json": _json(output.graph if output else None),
+            "metadata.json": _json(metadata),

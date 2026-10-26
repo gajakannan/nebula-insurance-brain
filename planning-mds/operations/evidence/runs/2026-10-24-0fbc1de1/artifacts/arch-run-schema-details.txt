@@ -1,0 +1,56 @@
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "failed_chunks": { "type": "array", "items": { "type": "string" } },
+    "run_configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["backend", "model_id", "endpoint_hash", "prompt_hash", "schema_hash", "context_limit", "profile_id", "profile_version"],
+      "properties": {
+        "backend": { "const": "openai_compatible" },
+        "model_id": { "type": "string" },
+        "model_revision": { "type": ["string", "null"] },
+        "endpoint_hash": { "type": "string" },
+        "prompt_hash": { "type": "string" },
+        "schema_hash": { "type": "string" },
+        "context_limit": { "type": "integer", "minimum": 1 },
+        "profile_id": { "type": "string" },
+        "profile_version": { "type": "string" }
+      }
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["conversion_calls", "ocr_calls", "model_calls", "prompt_tokens", "completion_tokens"],
+      "properties": {
+        "conversion_calls": { "type": "integer", "minimum": 0 },
+        "ocr_calls": { "type": "integer", "minimum": 0 },
+        "model_calls": { "type": "integer", "minimum": 0 },
+        "prompt_tokens": { "type": "integer", "minimum": 0 },
+        "completion_tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "provenance_ledger_ref": { "type": ["string", "null"] },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "precision": { "type": "string", "enum": ["span", "table_cell", "block", "page", "document", "unresolved"] },
+    "interpretation_basis": { "type": "string", "enum": ["EXPLICIT", "INFERRED", "AMBIGUOUS"] },
+    "bounding_box": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["page", "x0", "y0", "x1", "y1"],
+      "properties": {
+        "page": { "type": "integer", "minimum": 1 },
+        "x0": { "type": "number" }, "y0": { "type": "number" }, "x1": { "type": "number" }, "y1": { "type": "number" }
+      }
+    },
+    "evidence_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "precision"],
+      "properties": {
+        "artifact_id": { "type": "string", "format": "uuid" },
+        "block_id": { "type": ["string", "null"] },
+        "page": { "type": ["integer", "null"], "minimum": 1 },
+        "bbox": { "oneOf": [{ "$ref": "#/$defs/bounding_box" }, { "type": "null" }] },
+        "char_start": { "type": ["integer", "null"], "minimum": 0 },
+        "char_end": { "type": ["integer", "null"], "minimum": 0 },

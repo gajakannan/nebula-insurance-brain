@@ -1,0 +1,259 @@
+rg: engine/packages/brain-contracts/src/brain_contracts/interpretation.py: No such file or directory (os error 2)
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-3-from __future__ import annotations
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-4-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-5-import hashlib
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-6-import json
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-7-import tempfile
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-8-from collections.abc import Callable
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-9-from datetime import UTC, datetime
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:10:from importlib.metadata import version
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-11-from pathlib import Path
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-12-from typing import Any, Literal
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-13-from uuid import UUID, uuid5
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-14-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-15-from brain_content.checkpoints import CheckpointStore
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-16-from brain_content.outputs import PipelineIdentity, RunManifestV2
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-17-from brain_content.validation import ArtifactIntegrityError, ArtifactKey
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-18-from brain_interpretation.result import (
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-19-    CandidateAssertion,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-20-    Counters,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-21-    InterpretationResult,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:22:    RunConfiguration,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-23-)
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-24-from docling_core.types.doc import DoclingDocument
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-25-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:26:from brain_extraction.docling_graph_pipeline import DoclingGraphPipelineAdapter
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-27-from brain_extraction.graph_evidence import ground_value
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-28-from brain_extraction.profiles import ExtractionProfile
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-29-from brain_extraction.vllm_graph_client import VllmGraphClient
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-30-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-31-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-32-def _json(value: Any) -> bytes:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-33-    return json.dumps(value, sort_keys=True, ensure_ascii=False, allow_nan=False).encode()
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-34-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-35-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-36-class GraphInterpretationService:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-37-    def __init__(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-38-        self, store: CheckpointStore, authorize: Callable[[UUID, UUID, UUID, str], None]
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-39-    ) -> None:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-40-        self.store = store
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-41-        self.authorize = authorize
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-42-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-43-    def interpret(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-44-        self,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-45-        *,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-46-        tenant_id: UUID,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-47-        knowledge_base_id: UUID,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-48-        artifact_id: UUID,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-49-        run_id: UUID,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-50-        profile: ExtractionProfile,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-51-        client: VllmGraphClient,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-52-        extraction_contract: Literal["direct", "dense"] = "direct",
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-53-        chunk_max_tokens: int = 512,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-54-        selected_refs: tuple[str, ...] = (),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-55-        publish: Callable[[Callable[[], str]], str] | None = None,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-56-        artifact_key: ArtifactKey | None = None,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-57-        output_contract_version: Literal[1, 2] = 1,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-58-    ) -> InterpretationResult:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-59-        # Targeted interpretation cannot quietly become a whole-document request.
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:60:        # The pinned upstream pipeline does not expose a tested ref-preserving slice.
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-61-        if selected_refs:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-62-            raise NotImplementedError("targeted native-item interpretation is not qualified")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-63-        self.authorize(tenant_id, knowledge_base_id, artifact_id, "interpret")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-64-        key = artifact_key or ArtifactKey(artifact_id, tenant_id, knowledge_base_id, 1)
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-65-        if (key.artifact_id, key.tenant_id, key.knowledge_base_id) != (
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-66-            artifact_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-67-            tenant_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-68-            knowledge_base_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-69-        ):
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-70-            raise PermissionError("interpretation key belongs to another artifact")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-71-        bundle = self.store.load_verified(key)
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-72-        manifest, files = bundle.manifest, bundle.files
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-73-        document = DoclingDocument.model_validate_json(files[manifest.docling_document.path])
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-74-        result_ref = f"runs/{tenant_id}/{knowledge_base_id}/{run_id}/manifest.json"
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-75-        if self.store.objects.exists(result_ref):
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-76-            retained = self.store.load_run_bundle(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-77-                tenant_id=tenant_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-78-                knowledge_base_id=knowledge_base_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-79-                artifact_id=artifact_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-80-                run_id=run_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-81-                artifact_key=key,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-82-            )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-83-            prior = retained.files
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-84-            previous = InterpretationResult.model_validate_json(prior["result.json"])
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:85:            prior_metadata = json.loads(prior["metadata.json"])
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-86-            if isinstance(retained.manifest, RunManifestV2):
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:87:                prior_pipeline = PipelineIdentity.model_validate(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:88:                    prior_metadata.get("pipeline_identity")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-89-                )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-90-                if (
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:91:                    retained.manifest.pipeline != prior_pipeline
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-92-                    or retained.manifest.document_date_selection_id
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:93:                    != prior_metadata.get("document_date_selection_id")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-94-                ):
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-95-                    raise ArtifactIntegrityError("run marker differs from retained configuration")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:96:            if prior_metadata.get("requested_configuration") != {
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-97-                "extraction_contract": extraction_contract,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-98-                "chunk_max_tokens": chunk_max_tokens,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-99-                "model_id": client.model,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-100-                "model_revision": client.diagnostics()["model_revision"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-101-                "limits": client.diagnostics()["limits"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-102-            }:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-103-                raise ValueError("run identity belongs to a different configuration")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-104-            if (
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-105-                previous.run_configuration.profile_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-106-                previous.run_configuration.profile_version,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-107-                previous.run_configuration.schema_hash,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-108-            ) != (
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-109-                profile.profile_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-110-                profile.profile_version,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-111-                hashlib.sha256(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-112-                    json.dumps(profile.template.model_json_schema(), sort_keys=True).encode()
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-113-                ).hexdigest(),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-114-            ):
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-115-                raise ValueError("run identity belongs to a different profile")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-116-            return previous
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-117-        output = None
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-118-        warnings = []
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-119-        try:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-120-            with tempfile.TemporaryDirectory(prefix="nebula-interpret-") as temporary:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-121-                source = Path(temporary) / "docling-document.json"
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-122-                source.write_bytes(files[manifest.docling_document.path])
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-123-                output = DoclingGraphPipelineAdapter(llm_client=client, model_id=client.model).run(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-124-                    source=source,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-125-                    template=profile.template,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-126-                    extraction_contract=extraction_contract,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-127-                    chunk_max_tokens=chunk_max_tokens,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-128-                )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-129-        except Exception as exc:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:130:            # Provider and pipeline exceptions can contain source text. Keep only
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-131-            # a type-level failure code in the durable result's ordinary warnings.
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:132:            warnings.append(f"pipeline_failure:{type(exc).__name__}")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-133-        diagnostics = client.diagnostics()
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-134-        calls = diagnostics["calls"]
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-135-        assertions = []
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-136-        if output is not None:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-137-            for index, model in enumerate(output.extracted_models):
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-138-                for field, value in model.model_dump(mode="json").items():
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-139-                    if value is None:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-140-                        continue
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-141-                    evidence = ground_value(document, output.provenance, artifact_id, value)
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-142-                    assertions.append(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-143-                        CandidateAssertion(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-144-                            id=uuid5(run_id, f"{index}:{field}"),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-145-                            subject_type="Policy",
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-146-                            slot_type=field,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-147-                            value={"value": value},
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-148-                            evidence=evidence,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-149-                            model_confidence=None,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-150-                            interpretation_basis="AMBIGUOUS"
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-151-                            if evidence[0].precision == "unresolved"
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-152-                            else "EXPLICIT",
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-153-                        )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-154-                    )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-155-        unresolved = sum(any(e.precision == "unresolved" for e in a.evidence) for a in assertions)
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-156-        if output is not None and not output.extracted_models:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-157-            warnings.append("empty_extraction")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-158-        if unresolved:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-159-            warnings.append("unresolved_property_evidence")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-160-        if manifest.extraction_quality.status != "complete":
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-161-            warnings.append("partial_source_conversion")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-162-        if any(call["outcome"] != "complete" for call in calls):
+--
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-167-            status="failed" if output is None else ("partial" if warnings else "complete"),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-168-            entities=[],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-169-            assertions=assertions,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-170-            relationships=[],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-171-            quality_signals={"unresolved_property_count": float(unresolved)},
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-172-            warnings=warnings,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-173-            failed_chunks=["document"] if output is None else [],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:174:            run_configuration=RunConfiguration(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-175-                backend="openai_compatible",
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-176-                model_id=client.model,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-177-                model_revision=diagnostics["model_revision"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-178-                endpoint_hash=diagnostics["endpoint_hash"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-179-                prompt_hash=hashlib.sha256(_json([c["prompt_hash"] for c in calls])).hexdigest(),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-180-                schema_hash=hashlib.sha256(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-181-                    json.dumps(profile.template.model_json_schema(), sort_keys=True).encode()
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-182-                ).hexdigest(),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-183-                context_limit=diagnostics["limits"]["context_tokens"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-184-                profile_id=profile.profile_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-185-                profile_version=profile.profile_version,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-186-            ),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-187-            counters=Counters(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-188-                model_calls=len(calls),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-189-                prompt_tokens=sum(c["prompt_tokens"] or 0 for c in calls),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-190-                completion_tokens=sum(c["completion_tokens"] or 0 for c in calls),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-191-            ),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-192-            provenance_ledger_ref=f"runs/{tenant_id}/{knowledge_base_id}/{run_id}/provenance.json",
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-193-            created_at=datetime.now(UTC),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-194-        )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:195:        metadata = {
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-196-            "contract_version": 1,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-197-            "engine": "docling-graph",
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-198-            "diagnostics": diagnostics,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-199-            "artifact_sha256": manifest.artifact_sha256,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-200-            "profile_id": profile.profile_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-201-            "profile_version": profile.profile_version,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-202-            "schema_sha256": result.run_configuration.schema_hash,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-203-            "selected_refs": [],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-204-            "requested_configuration": {
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-205-                "extraction_contract": extraction_contract,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-206-                "chunk_max_tokens": chunk_max_tokens,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-207-                "model_id": client.model,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-208-                "model_revision": diagnostics["model_revision"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-209-                "limits": diagnostics["limits"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-210-            },
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:211:            "evidence_mapper_version": 2,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:212:            "pipeline_config": output.effective_configuration if output else None,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-213-            "package_versions": {
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-214-                name: version(name) for name in ("docling", "docling-core", "docling-graph")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-215-            },
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-216-        }
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:217:        pipeline: PipelineIdentity | None = None
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-218-        if output_contract_version == 2:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:219:            pipeline = PipelineIdentity(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-220-                name="docling-graph",
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-221-                package_version=version("docling-graph"),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-222-                configuration_sha256=hashlib.sha256(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-223-                    _json(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-224-                        {
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:225:                            "requested_configuration": metadata["requested_configuration"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:226:                            "effective_configuration": metadata["pipeline_config"],
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-227-                            "profile_id": profile.profile_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-228-                            "profile_version": profile.profile_version,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-229-                            "schema_sha256": result.run_configuration.schema_hash,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-230-                        }
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-231-                    )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-232-                ).hexdigest(),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-233-            )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:234:            metadata["pipeline_identity"] = pipeline.model_dump(mode="json")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-235-            # F0016/F0022 owns a future verified selection producer. This worker
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-236-            # records the exact absence of a selected basis until that exists.
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:237:            metadata["document_date_selection_id"] = None
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-238-        outputs = {
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-239-            "result.json": result.model_dump_json().encode(),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-240-            "provenance.json": _json(output.provenance if output else None),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-241-            "graph.json": _json(output.graph if output else None),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:242:            "metadata.json": _json(metadata),
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-243-        }
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-244-        self.authorize(tenant_id, knowledge_base_id, artifact_id, "interpret")
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-245-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-246-        def save() -> str:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-247-            return self.store.publish_run(
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-248-                tenant_id=tenant_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-249-                knowledge_base_id=knowledge_base_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-250-                artifact_id=artifact_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-251-                run_id=run_id,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-252-                files=outputs,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-253-                artifact_key=key,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-254-                output_contract_version=output_contract_version,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py:255:                pipeline=pipeline,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-256-                document_date_selection_id=None,
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-257-            )
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-258-
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-259-        if publish is None:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-260-            save()
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-261-        else:
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-262-            publish(save)
+neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py-263-        return result

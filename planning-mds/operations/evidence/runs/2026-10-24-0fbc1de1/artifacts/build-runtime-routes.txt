@@ -1,0 +1,22 @@
+rg: neuron/packages/brain-ingestion/src/brain_ingestion/worker.py: No such file or directory (os error 2)
+rg: neuron/packages/brain-ingestion/src/brain_ingestion/composition.py: No such file or directory (os error 2)
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:3:Create one client per interpretation attempt and share its concurrency semaphore
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:17:from threading import BoundedSemaphore, Event, Lock
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:44:    request_timeout_seconds: float = 60
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:45:    run_timeout_seconds: float = 300
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:58:        for value in (self.request_timeout_seconds, self.run_timeout_seconds):
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:60:                raise ValueError("inference timeouts must be finite and positive")
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:130:        slots: BoundedSemaphore,
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:155:        self._deadline = time.monotonic() + limits.run_timeout_seconds
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:165:            timeout=limits.request_timeout_seconds,
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:177:        remaining = self._deadline - time.monotonic()
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:179:            raise InferenceRejected("run_deadline_exceeded")
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:235:        while not self._slots.acquire(timeout=min(0.1, self._check_active())):
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:271:                    timeout=min(self._limits.request_timeout_seconds, self._check_active()),
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:300:                    call["outcome"] = "provider_timeout"
+neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py:301:                raise InferenceRejected("provider_timeout") from None
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:9:from threading import BoundedSemaphore, Event
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:44:    if os.environ.get("BRAIN_ENABLE_GRAPH_CANDIDATE") != "1":
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:46:            "candidate activation requires BRAIN_ENABLE_GRAPH_CANDIDATE=1; ADR-0060 is Proposed"
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:106:            slots = BoundedSemaphore(1)
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:129:        # cap replicas; this semaphore is intentionally not a distributed GPU quota.

@@ -1,0 +1,8 @@
+2:"""Read-only check that each reviewed feature has one current planning approval."""
+6:import json
+11:from approval_history import PLAN_SCOPE, manifests_for, manifest_scope
+16:    manifests = manifests_for(product, feature)
+17:    plans = {p.parent.name: d for p, d in manifests.items() if manifest_scope(d) == PLAN_SCOPE}
+21:        errors.append(f"expected one current planning approval; found {len(approved)}: {approved}")
+34:    # Older approvals may not have links. Validate every explicit successor,
+67:        print(json.dumps({"status": "fail" if any(r["errors"] for r in results) else "pass", "features": results}, indent=2))

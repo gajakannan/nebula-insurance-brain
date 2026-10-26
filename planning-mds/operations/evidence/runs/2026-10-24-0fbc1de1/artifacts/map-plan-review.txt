@@ -1,0 +1,61 @@
+292-        name: phase-b-ontology-sync
+293-        script: {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py
+294-      - gate: approval
+295-        name: phase-b-review
+296-
+297:  plan-review:
+298-    doc: agents/actions/plan-review.md
+299-    description: Independently review completed planning and decide whether it is ready to build
+300-    prerequisites: [plan action completed for target scope]
+301-    min_orchestration: [sequential]   # parallel below is an optimization; sequential is the LCD fallback
+302-    steps:
+303-      - parallel:
+304-          - product-manager
+305-          - architect
+306-          - code-reviewer
+307-      - gate: self-review
+308-        name: plan-review-report-quality
+309-      - gate: readiness
+310-        name: plan-build-readiness
+311-
+312-  build:
+313-    doc: agents/actions/build.md
+314-    description: Implement all planned features with review, signoff, PM closeout, and tracker sync gates
+315-    prerequisites: [plan action completed, SOLUTION-PATTERNS.md exists]
+316-    min_orchestration: [sequential]   # parallel below is an optimization; sequential is the LCD fallback
+317-    steps:
+318-      - agent: architect
+319-        role: assembly-planning
+320-      - gate: self-review
+321-        name: assembly-plan-validation
+322-      - parallel:
+323-          - backend-developer
+324-          - frontend-developer
+325-          - ai-engineer              # conditional — see agent definition
+326-          - quality-engineer
+327-          - devops
+328-        execution: {isolation: fresh, parallel_group: build-impl, returns: summary}
+329-      - gate: self-review
+330-        name: implementation-validation
+331-      - agent: code-reviewer
+332-        execution: {isolation: fresh, parallel_group: null, returns: summary}
+333-      - gate: approval
+334-        name: code-review
+335-      - agent: security
+336-      - gate: approval
+337-        name: security-review
+338-      - gate: signoff
+339-        name: build-signoff
+340-      - agent: product-manager
+341-        role: closeout
+342-      - gate: tracker-sync
+343-        name: build-closeout-sync
+344-
+345-  feature:
+346-    doc: agents/actions/feature.md
+347-    description: Build single vertical slice with review, signoff, PM closeout, and tracker sync
+348-    prerequisites: [plan action completed for this feature, SOLUTION-PATTERNS.md exists]
+349-    min_orchestration: [sequential]   # parallel below is an optimization; sequential is the LCD fallback
+350-    steps:
+351-      - agent: architect
+352-        role: feature-assembly-planning

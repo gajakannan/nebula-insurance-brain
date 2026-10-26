@@ -1,0 +1,116 @@
+     1	# F0005 — Getting started
+     2	
+     3	The candidate adapter is implemented; the production integration is incomplete. Read [compatibility evidence](compatibility-evidence.md) for the exact pin, tested boundary, and remaining gates. ADR-0060 is Proposed.
+     4	
+     5	The remaining work, local live qualification and gated activation, is specified in the [assembly plan](feature-assembly-plan.md) (plan run `2026-10-23-9a04b327`). Its corpus, harness, fault proxy, `extraction.pipeline` setting and migration 0009 do not exist yet; the commands below cover only what is implemented.
+     6	
+     7	From the repository root:
+     8	
+     9	```bash
+    10	uv sync --locked --project neuron
+    11	LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+    12	  neuron/.venv/bin/python -m pytest neuron/tests/integration/test_graph_pipeline_contract.py -q
+    13	python3 scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0005
+    14	python3 scripts/run-lifecycle-gates.py
+    15	```
+    16	
+    17	Native/scanned tests need the Docling model assets cached. The model client returns recorded values: these tests do not measure extraction accuracy. The filesystem checkpoint test executes storage I/O inline because this restricted environment cannot deliver asyncio's thread wakeups; it does not prove worker crash recovery.
+    18	
+    19	`neuron/tests/integration/test_parse_once_reinterpret.py` remains the F0001 direct-vLLM comparison baseline. Local inference setup is documented in `docker/local-inference-runbook.md`. Worker recovery and PostgreSQL queue tests now have recorded results; live Graph comparison and deployment qualification are still required before activation.
+    20	
+    21	## Bounded model client
+    22	
+    23	`brain_extraction.vllm_graph_client.VllmGraphClient` implements Graph's model-client protocol with a self-hosted OpenAI-compatible transport. It disables SDK retries, redirects, and environment proxy discovery on its default transport. Create one client per attempt and share a `BoundedSemaphore` across clients in the worker; close each client after use. Supply the token counter from `cached_model_token_counter(model_id, model_revision)`, using the exact serving model/tokenizer revision. Production worker composition still owns the endpoint allowlist and cross-process concurrency limit.
+    24	
+    25	The client reserves input/schema/output tokens before each request and applies call/token budgets across repairs. Queued work observes cancellation and the attempt deadline. In-flight HTTP work is bounded by transport timeouts; cancellation prevents accepting its result and scheduling another request, but does not interrupt a provider operation already running. The deadline is not a hard process-kill guarantee. Diagnostics contain hashes, usage, and reason codes, not prompts, responses, or API keys. They still need persistence under the authorized run.
+    26	
+    27	Run the offline transport tests:
+    28	
+    29	```bash
+    30	LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 \
+    31	  neuron/.venv/bin/python -m pytest neuron/tests/integration/test_vllm_graph_client.py -q
+    32	```
+    33	
+    34	## Opt-in live smoke proof
+    35	
+    36	Start the dedicated Brain vLLM server using the [candidate revision instructions](../../../docker/local-inference-runbook.md#f0005-candidate-model-revision). Supply its credential through `BRAIN_INFERENCE_API_KEY` as described there. Then run:
+    37	
+    38	```bash
+    39	export BRAIN_INFERENCE_MODEL_REVISION=cfbefacb99257ffa30c83adab238a50856ac3083
+    40	BRAIN_RUN_LIVE_GRAPH_PROOF=1 LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 \
+    41	  neuron/.venv/bin/python -m pytest neuron/tests/integration/test_graph_live_inference.py -q
+    42	```
+    43	
+    44	This test performs actual model requests for two GL profiles over saved JSON with conversion forbidden. It is skipped unless explicitly enabled. It does not replace the chunked corpus comparison, evidence-mapping proof, or worker recovery gates.
+    45	
+    46	## Candidate worker and result import
+    47	
+    48	The candidate now has a runnable composition and engine import. It stays opt-in while ADR-0060 is Proposed. Use one worker process/replica for qualification; its shared model semaphore does not impose a distributed GPU quota. The fixed-template worker currently uses Graph's `direct` contract. Chunked comparison must explicitly exercise the service's `dense` contract; the direct-path tests are not chunking proof.
+    49	
+    50	Install both locked workspaces, then apply the migration to a **development** PostgreSQL database. Set `BRAIN_DATABASE_URL` for Alembic and `BRAIN_WORKER_DATABASE_URL` for the worker to the same `postgresql+psycopg` database through the local secret mechanism. The configured filesystem root must be immutable and shared by the worker and importer.
+    51	
+    52	```bash
+    53	uv sync --locked --project engine
+    54	uv sync --locked --project neuron
+    55	cd engine/migrations
+    56	../.venv/bin/alembic upgrade head
+    57	cd ../..
+    58	```
+    59	
+    60	Provide `BRAIN_WORKER_PRINCIPAL_ID` for an active, provisioned service principal with an unrevoked `ServicePrincipal` membership in the target tenant/knowledge base. The CLI trusts the local operator to select that identity; expose an authenticated application boundary before making submission available to external callers. Do not grant service roles to arbitrary uploaders. Both ingestion and interpretation decisions are checked and audited, including after a job restarts.
+    61	
+    62	Set `NEBULA_TENANT_ID` and `NEBULA_KB_ID` to the provisioned scope. Submit a development fixture:
+    63	
+    64	```bash
+    65	export BRAIN_ENABLE_GRAPH_CANDIDATE=1
+    66	neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+    67	  --policy-dir planning-mds/security/policies \
+    68	  --enqueue neuron/fixtures/gl-policy-declarations.pdf \
+    69	  --tenant "$NEBULA_TENANT_ID" --knowledge-base "$NEBULA_KB_ID" --profile gl-limits-a
+    70	```
+    71	
+    72	For processing, supply `BRAIN_INFERENCE_BASE_URL`, `BRAIN_INFERENCE_API_KEY`, `BRAIN_INFERENCE_MODEL`, and the immutable `BRAIN_INFERENCE_MODEL_REVISION` through the inference runbook's credential mechanism. Cache the matching tokenizer and Docling assets first. `--once` processes at most one job and one pending import; omit it to poll until SIGINT/SIGTERM. Shutdown waits for the current activity; it is not a hard kill for a converter or provider operation already in progress.
+    73	
+    74	```bash
+    75	neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+    76	  --policy-dir planning-mds/security/policies --once
+    77	neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+    78	  --policy-dir planning-mds/security/policies --import-only --once
+    79	```
+    80	
+    81	Submission is idempotent for a source/recipe/actor/profile identity. A second profile reuses the same bundle and creates a separate job/run. Published successful attempts are recovered without new model calls. An outbox import failure leaves the acknowledgement pending and rolls back all imported rows. Investigate the stable failure code, correct the cause, and rerun import; never delete a bundle to clear a model error. Source-bearing outputs and failed/partial runs live beneath the protected object-store root; production retention must include `runs/` as well as `bundles/` and `sources/`. No automatic retention policy is invented here. OS-killed workers can leave private temporary files; cleanup must run with workers stopped or with a reviewed age/lease policy.
+    82	
+    83	## PostgreSQL qualification
+    84	
+    85	Set `BRAIN_TEST_POSTGRES_URL` to a disposable development PostgreSQL database using the psycopg driver. The tests create and drop only their own random schemas. They fail on a configured but unreachable database; they skip only when the variable is absent.
+    86	
+    87	```bash
+    88	neuron/.venv/bin/python -m pytest engine/packages/brain-jobs/tests/test_postgres.py -q
+    89	LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+    90	  neuron/.venv/bin/python -m pytest \
+    91	  neuron/tests/integration/test_document_process_recovery.py -k postgresql -q
+    92	```
+    93	
+    94	Run the combined offline suite documented in [compatibility evidence](compatibility-evidence.md) as well. Neither this PostgreSQL test nor the live model smoke test replaces the approved corpus comparison, operational qualification, and reviewer acceptance gates.
+    95	
+    96	CI's `runtime-stack` job applies the engine migrations to its disposable PostgreSQL database and runs four isolated-schema document-job tests: competing claims, expired-generation fencing, child-process exit/reclaim after checkpoint publication, and lease expiry while publication waits for a row lock.
+    97	
+    98	It also runs five worker/importer process-exit cases: after bundle publication, after extraction-result publication, after job completion, midway through result import, and after import commits. These use real Graph stages, authorization, artifact registration, and result import, with synthetic native content and recorded model responses. Recovery must retain one conversion, one model call, one assertion/evidence/review set, and one acknowledged completion. Each test owns an isolated schema populated from the application metadata; migration execution is a separate CI step.
+    99	
+   100	To run these five cases offline with SQLite, omit the database variable and use `-k sqlite` instead. A configured but unreachable PostgreSQL database is a failure, never a skip. These cases do not establish live provider behavior, machine/database/storage failure recovery, retention acceptance, or extraction quality.
+   101	
+   102	## Synthetic development comparison
+   103	
+   104	The current scope uses synthetic development fixtures. No model endpoint or credential is required:
+   105	
+   106	```bash
+   107	LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+   108	  neuron/.venv/bin/python neuron/benchmarks/docling_graph_comparison.py \
+   109	  --output /tmp/nebula-synthetic-comparison.json
+   110	```
+   111	
+   112	Choose a new output path on each run. The runner creates temporary verified bundles and executes the baseline, Graph direct, and Graph dense using HTTP MockTransport recordings. It forbids conversion during interpretation and checks that saved native JSON is unchanged. Nine runs cover unique, repeated, and multi-region values; the aggregate field is deliberately absent to exercise abstention. The command fails if dense falls back to direct, loses its chunking, or fails the development expectations.
+   113	
+   114	The [recorded report](synthetic-comparison.json) contains per-case schema/value/abstention/evidence checks, model phases and call counts, chunk counts, token estimates, local elapsed time, and review-candidate counts. Token estimates use cl100k_base and elapsed time excludes inference. Recorded responses dictate the values: these measurements demonstrate orchestration and grounding behavior, not accuracy, provider cost, or live latency. Direct Graph evidence on these longer fixtures remains unresolved where upstream supplies no usable item references. Dense preserves the references and passes the evidence expectations.
+   115	
+   116	Live corpus qualification and production signoff are later release work. They do not block this synthetic development scope or change the opt-in activation boundary.

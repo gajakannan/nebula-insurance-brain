@@ -6,7 +6,7 @@ registry_section: Planned
 phase: v0.1A
 roadmap_section: Next
 roadmap_order: 4
-rationale: Docling-Graph 1.9.1 synthetic development proof complete. Plan run 2026-10-23-9a04b327 (Phase A and B approved) re-plans local live qualification on a synthetic corpus against operator-approved thresholds, gated activation (Graph dense default plus the F0004 v2 writer) and a direct-baseline rollback.
+rationale: Docling-Graph 1.9.1 synthetic development proof complete. Phase A requirements and thresholds approved in 2026-10-23-9a04b327 remain unchanged. Phase B rework 2026-10-25-50fcf658 addresses three plan-review gaps with explicit direct-baseline initial/rejection settings, supervised conversion deadline and an enforced host singleton/provider recovery; operator Phase B approval recorded 2026-10-25. Local synthetic-corpus qualification and gated Graph dense/v2 activation remain future work.
 validation_gate: F0004 artifact contract; F0001 historical baseline. Before activation, prove the pinned ADR-0060
   integration, pre-extraction checkpoint, native/scanned reuse, evidence translation, and recovery.
 depends_on:
@@ -36,6 +36,8 @@ uses_schema:
 - schema:content-artifact-manifest-v2
 - schema:interpretation-result
 notes:
+- Plan-review 2026-10-24-0fbc1de1 PM-1/ARCH-1/BLD-1 repair design is in plan run 2026-10-25-50fcf658, Phase B existing feature, explicitly approved by the operator 2026-10-25. No implementation or runtime proof claimed; original planning/review evidence is preserved.
+- Host guard is shared across engines/configs/tenants; uncertain provider activity blocks replacement until confirmed dedicated-server exit and pinned restart. Parent alone owns conversion timeout and ready publication. Rejection explicitly returns new jobs to direct-baseline/v1; historical jobs retain their identity.
 - Candidate contract evidence is recorded in the feature folder. No production activation or lifecycle approvals claimed; F0001 remains the live-model baseline.
 - Operator decisions 2026-10-23 - synthetic corpus with agent-role reviewers; F0005 enables the v2 writer at activation; F0016 owns document-date candidates; production host stays F0026.
 - Fixed proof templates avoid a dependency on the F0015 production compiler; F0002/F0003 contracts are required

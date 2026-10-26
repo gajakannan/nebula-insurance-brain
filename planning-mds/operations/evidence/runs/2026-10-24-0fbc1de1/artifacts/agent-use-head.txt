@@ -1,0 +1,125 @@
+# Agent and Action Usage Guide
+
+## Purpose
+
+This guide shows how to invoke the framework in a fresh session:
+
+- how to set up the session so `{NEBULA_PRODUCT_ROOT}` resolves
+- when to use an **action** versus a direct **agent**
+- how to structure prompts so agents read the right artifacts
+- what each agent typically reads, updates, and validates
+
+Use this guide with:
+
+- `agents/README.md`
+- `agents/actions/README.md`
+- `agents/docs/MANUAL-ORCHESTRATION-RUNBOOK.md`
+- `agents/agent-map.yaml`
+- `CONSUMER-CONTRACT.md`
+
+`agents/agent-map.yaml` is the authoritative action-to-agent wiring source. Action `.md` files remain the human-readable execution docs.
+
+## Session Setup
+
+The framework is consumed as a sibling repo. Every session runs with these two fixed ideas:
+
+- **Session working directory:** `nebula-agents` — the agent reads role definitions, actions, and templates from `agents/` here.
+- **Implementation target:** `{NEBULA_PRODUCT_ROOT}` — a sibling product repo. All product-owned artifacts — `{NEBULA_PRODUCT_ROOT}/planning-mds/`, `{NEBULA_PRODUCT_ROOT}/engine/`, `{NEBULA_PRODUCT_ROOT}/experience/`, `{NEBULA_PRODUCT_ROOT}/neuron/`, and `{NEBULA_PRODUCT_ROOT}/scripts/kg/` — live under the product repo.
+
+### Expected workspace layout
+
+```
+WORKSPACE_ROOT/
+  nebula-agents/          # session working directory (this repo)
+  <product-repo>/         # {NEBULA_PRODUCT_ROOT}, e.g. nebula-insurance-crm
+```
+
+`WORKSPACE_ROOT` must be outside any source backup of `nebula-crm`.
+
+### Resolving `{NEBULA_PRODUCT_ROOT}`
+
+`NEBULA_PRODUCT_ROOT` is the canonical product selection, whether supplied in a
+pasted action prompt or exported in the shell. Normalize its value once to an
+absolute path, then use `{NEBULA_PRODUCT_ROOT}` throughout the action.
+
+1. Explicit operator selection (prompt `NEBULA_PRODUCT_ROOT` or script
+   `--product-root`) wins over the environment. Conflicting explicit selections
+   require clarification; no alternate root variable is supported.
+2. Otherwise read the `NEBULA_PRODUCT_ROOT` environment variable.
+3. If neither is supplied, ask for a product path. Scripts fail with an error.
+   There is no default sibling product and no automatic selection of CWD.
+
+A prompt value is valid even when the shell environment is empty. Pass that value
+explicitly to the resolver; do not discard it because an environment check is empty.
+Resolve `../` against the session's starting directory (normally `nebula-agents`)
+**once, before changing directories**, using:
+
+```sh
+python3 agents/scripts/_product_root.py --product-root ../my-product
+```
+
+Omit the flag only when reading the actual environment. The command prints the
+absolute path to stdout and its source to stderr. Echo that selection before
+product discovery or writes. Use this absolute value for every `{NEBULA_PRODUCT_ROOT}`
+reference, every `--product-root` argument (including init and resume), and every
+agent handoff. An export in one tool shell may not persist into the next shell.
+On resume, reuse the recorded absolute root and reject a conflicting selection.
+Never infer the product from a feature ID or choose among sibling repositories.
+
+Example pasted prompt (no shell export required):
+
+```text
+NEBULA_PRODUCT_ROOT = "../my-product"
+FEATURE_ID = "F0002"
+Follow agents/templates/prompts/evidence-contract/feature-operator-friendly.md.
+```
+
+Keep run-specific values in the invocation, rather than editing generated templates.
+
+### Honoring `.agentignore`
+
+For an opted-in product, load its blueprint and declared instruction text before work and after resume with `python3 agents/scripts/project_context.py --product-root <absolute-product-root> --action <action>`. Resolve the root explicitly; extension commands do not use the legacy fallback. A context error blocks the action. See [Project extensions](PROJECT-EXTENSIONS.md) for gate/CI usage and the current native-launcher limitation.
+
+After resolving `{NEBULA_PRODUCT_ROOT}`, check for `{NEBULA_PRODUCT_ROOT}/.agentignore`
+before broad product discovery. This file is a gitignore-style retrieval guard
+for agents, not a Git ignore file. Honor it for broad reads, globs, greps, and
+file-list operations. For product searches, prefer running from
+`{NEBULA_PRODUCT_ROOT}` with `rg --ignore-file .agentignore ...`.
+
+Bypass ignored paths only for explicit audit, validation, closeout, failure
+triage, or user-requested inspection, and then read exact files rather than
+whole folders. Full semantics live in `agents/docs/AGENTIGNORE.md`.
+
+### What `{NEBULA_PRODUCT_ROOT}` prefixes
+
+Every reference from `agents/**` to product-owned paths uses the `{NEBULA_PRODUCT_ROOT}` placeholder. At baseline the placeholder prefixes all product-owned trees: `{NEBULA_PRODUCT_ROOT}/scripts/kg/...`, `{NEBULA_PRODUCT_ROOT}/planning-mds/...`, `{NEBULA_PRODUCT_ROOT}/engine/...`, `{NEBULA_PRODUCT_ROOT}/experience/...`, `{NEBULA_PRODUCT_ROOT}/neuron/...`, and `{NEBULA_PRODUCT_ROOT}/bruno/...`.
+
+Examples:
+
+- `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py <feature-id>` (product-owned KG tool)
+- `pnpm --dir {NEBULA_PRODUCT_ROOT}/experience lint` (product frontend)
+- Write scope: `{NEBULA_PRODUCT_ROOT}/engine/**` (product backend)
+
+Framework-owned scripts stay framework-relative (no `{NEBULA_PRODUCT_ROOT}` prefix): `python3 agents/scripts/validate-genericness.py`, `python3 agents/scripts/run-lifecycle-gates.py`, `python3 agents/scripts/validate_templates.py`.
+
+### Discovering product-specific concretes
+
+Framework docs and templates do not hardcode product namespaces, API filenames, or entity names. The agent discovers these at session time from the product repo:
+
+- **Tech stack** → `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`
+- **Entity-to-file bindings** → `{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/code-index.yaml` and `canonical-nodes.yaml`
+- **API spec location** → declared in `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`; agents do not assume a filename
+
+## Default Rule
+
+Prefer **actions** for end-to-end workflows, approval gates, and multi-agent sequencing.
+
+Use a direct **agent** prompt when:
+
+- the work belongs to one role
+- you are revising only one phase artifact set
+- a gate requested targeted rework from a specific role
+- you already know the exact feature and artifact scope
+
+## Prompt Anatomy
+

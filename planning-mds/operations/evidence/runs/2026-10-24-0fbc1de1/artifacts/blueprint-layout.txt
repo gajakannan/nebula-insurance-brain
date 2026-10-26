@@ -1,0 +1,46 @@
+- Python package prefix: `brain_` (for example `brain_domain`, `brain_extraction`). Distribution directories keep the hyphenated `brain-*` names from master blueprint section 77
+
+### 2.3 Repository layout and role ownership
+
+Three runtime roots follow the framework convention; master blueprint section 77 holds the full tree.
+
+| Root | Contents | Owning role | Notes |
+|------|----------|-------------|-------|
+| `engine/` | FastAPI API, worker, and the semantic kernel packages: domain, persistence, content, schema, ontology, graph, temporal, process, provenance, resolution (deterministic), search, decisions, governance, review, security; Alembic migrations; backend tests | backend-developer | Business logic and canonical truth live here |
+| `neuron/` | AI and semantic runtime packages: ingestion (bundle publication and checkpoint callback), extraction (Docling-Graph pipeline adapter, templates, and evidence translation), interpretation, reasoning, conversation, learning, evolution, agent-tools (MCP); AI tests | ai-engineer | Proposes assertions and candidates; never writes canonical truth directly (ADR-0001, section 64) |
+| `experience/` | React web app: 360 views, search, evidence, chat, graph explorer | frontend-developer | Semantic-first; chat is one modality (ADR-0036) |
+| `ontology/`, `profiles/`, `schemas/`, `knowledge-packs/` | Authored ontology modules, document and extraction profiles, runtime JSON Schemas, OKF packs | architect (design), backend-developer (compiler and runtime loading) | Versioned, modular, compiled into normalized runtime structures (ADR-0011, ADR-0012) |
+| `golden-corpus/` | Version-controlled regression fixtures exported from Nebula review decisions | quality-engineer | Section 96; frozen holdout rules in section 115.1 |
+| `scripts/kg/` | Product-owned knowledge-graph toolchain | architect | Copied from the framework; `.mcp.json` exposes it over MCP |
+
+Boundary rules:
+
+- Shared semantics (entities, FactSlots, ontology, schemas, policies) change only through the architect and kg-source shards.
+- `neuron/` writes assertions, candidates, and review items through engine commit services under the acting principal; it has no direct canonical SQL write path (sections 64, 69).
+- Frontend consumes contracts from `api/` and `schemas/`; it never embeds business rules.
+
+### 2.4 Path-class extensions (register at init)
+
+The framework defaults cover `engine/**` and `experience/**`. Register these additive extensions in `operations/evidence/README.md`:
+
+| Path class (glob) | Forces |
+|-------------------|--------|
+| `neuron/**` excluding test-only subtrees | `runtime_bearing = true` |
+| `neuron/**/migrations/**` | `runtime_bearing = true` and `deployment_config_changed = true` |
+| `ontology/**`, `profiles/**`, `schemas/**`, `knowledge-packs/**` | `runtime_bearing = true` |
+| `golden-corpus/**` | `runtime_bearing = true` |
+| `**/brain_security/**`, `**/brain-security/**`, `**/auth/**`, `**/authz/**`, `**/identity/**`, `**/principals/**` | `security_sensitive_scope = true` (Python paths are lowercase; the framework defaults match capitalized names only) |
+
+Architecture constraints:
+
+- Clean architecture inside `engine/`: domain → application → infrastructure → api; application depends on repository interfaces.
+- Canonical commit is transactional with audit and outbox in one boundary; projections (AGE, pgvector, FTS) are rebuildable and never authoritative (ADR-0002, ADR-0022, ADR-0023, proposed ADR-0041).
+- Assertions, review decisions, audit events, and canonical fact versions are append-only.
+- Tenant and knowledge-base identifiers are structural on every authoritative row (ADR-0030).
+- API error contract must be consistent across all services (ProblemDetails pattern; confirm in Phase B).
+
+---
+
+## 3) Phase A — Product Manager Spec
+
+Status: epic inventory established; personas, stories, and screens are authored per feature by the plan action.

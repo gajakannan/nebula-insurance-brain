@@ -1,0 +1,27 @@
+76-
+77-## Known failure modes (see the CRM runbook for full detail)
+78-
+79-- **`ERROR: VLLM_API_KEY is not configured`** — `~/.brain-secrets` was not sourced in this shell.
+80-- **CUDA OOM on startup** — another GPU process is running; `nvidia-smi` and free it first (this
+81:  host runs no other GPU workload by default; the CRM's vLLM, if started, must be stopped first
+82-  since a single RTX 5070 cannot serve two 7+ GiB model weights concurrently at this VRAM budget).
+83-- **Port 8000 already bound** — confirm no other local server owns it (`ss -ltn | grep :8000`);
+84-  override with `--port` and update `BRAIN_INFERENCE_BASE_URL` to match.
+85-
+86:## F0005 candidate model revision
+87-
+88-The Graph candidate's offline tokenizer check uses `microsoft/Phi-4-mini-instruct` at cached commit `cfbefacb99257ffa30c83adab238a50856ac3083`. This is an explicit candidate pin, not a claim that F0001's historical server ran that revision. Its tokenizer loads from local assets with remote Python code disabled.
+89-
+90-For the live Graph proof, start a dedicated Brain server with that same model and tokenizer revision; do not infer a revision from the model name returned by `/models`:
+91-
+92-```bash
+93-source ~/.brain-secrets
+94-export BRAIN_INFERENCE_MODEL_REVISION=cfbefacb99257ffa30c83adab238a50856ac3083
+95-~/.venvs/brain-vllm/bin/vllm serve microsoft/Phi-4-mini-instruct \
+96-  --revision "$BRAIN_INFERENCE_MODEL_REVISION" \
+97-  --tokenizer-revision "$BRAIN_INFERENCE_MODEL_REVISION" \
+98-  --host 127.0.0.1 --port 8000 --dtype auto \
+99-  --max-model-len 4096 --gpu-memory-utilization 0.90
+100-```
+101-
+102-The candidate client counts chat-template token IDs plus a conservative schema reservation. If reported usage exceeds its reservation, it records the incurred usage and refuses further calls in that attempt. Follow [F0005's live smoke instructions](../planning-mds/features/F0005-one-time-docling-ingestion/GETTING-STARTED.md#opt-in-live-smoke-proof). Live model quality and serving-revision parity have not been verified by the offline tests.

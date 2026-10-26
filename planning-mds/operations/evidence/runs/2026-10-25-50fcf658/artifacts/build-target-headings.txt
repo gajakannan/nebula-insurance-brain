@@ -1,0 +1,32 @@
+5:## Reconciliation with the 2026-09-15 plan and shipped F0002–F0004
+11:| Pin Graph, align Docling, regenerate `neuron/uv.lock` | Delivered: Graph 1.9.1, Docling 2.126.0, wheel digest locked | Re-verify against the lock at preflight (S0001-AC1); no upgrade planned |
+22:## Ownership and package boundary
+38:## Build order
+42:| 0 | all | Preflight green: vLLM serves `microsoft/Phi-4-mini-instruct` at revision `cfbefacb99257ffa30c83adab238a50856ac3083` on the host GPU; serving tokenizer cached; Docling and RapidOCR assets cached offline; PostgreSQL at migration head; lock check passes. |
+48:| 6 | S0004-AC6 support | `extraction.pipeline` selection with job pinning; direct-baseline worker path passes the S0002/S0003 recovery and evidence suites. |
+53:## Step 0 — Preflight (DevOps)
+55:Use `docker/local-inference-runbook.md` (F0005 candidate revision section). Record GPU model and memory, driver, CUDA, vLLM image digest, model revision, tokenizer revision, max model length 4,096, and the Docling/RapidOCR asset cache paths. Run the existing offline suites (`test_graph_pipeline_contract.py`, `test_vllm_graph_client.py`, `test_document_process_recovery.py` on PostgreSQL) as a regression baseline. Fail preflight on any lock mismatch (S0001-AC1).
+57:## Step 1 — Qualification corpus (QE corpus author)
+72:## Step 2 — Live conversion (S0001)
+78:- **Bounds:** a per-document conversion deadline of 300 s, enforced by the job attempt deadline; exceeding it fails the attempt with `conversion_timeout`.
+80:## Step 3 — Text origin and OCR asset provenance (S0005)
+84:- Resolve the RapidOCR detection, recognition and classification model files actually loaded by the configured pipeline (read from the engine instance's configured model paths, not from defaults or documentation). Hash each file's bytes at conversion time.
+92:## Step 4 — Failure injection (S0002)
+98:- **Process kills:** extend `test_document_process_recovery.py` to run with the live model through the proxy in `pass` mode at the four kill points (after bundle publication, after result publication, mid-import, after import commit).
+100:- **Concurrency (AC4):** submit 5 jobs with two worker processes on one host; assert via proxy request timestamps that in-flight model requests never exceed the configured limit (default 1), and that cancellation leaves at most one in-flight request and schedules none after it.
+104:## Step 5 — Live interpretation and evidence (S0003)
+108:- **Evidence (AC2):** for every resolved selector, re-read the span or cell from the bundle (`blocks.jsonl`, `tables.jsonl`) and compare it to the value. Unicode code-point offsets follow the F0004 convention.
+111:- **Targeting (AC6):** a selected-block request raises `unsupported_targeting` before any call.
+113:## Step 6 — Pipeline selection and rollback path
+120:  pipeline: graph-direct
+123:- **Job pinning:** the selected pipeline is written into the job `payload` at submission, as the profile and schema hash already are, and is covered by the idempotency check. Retries and recovery use the pinned value. A configuration change affects new submissions only, so no run mixes engines (S0004-AC6). No migration is needed: `payload` is JSON.
+124:- **Run identity:** the interpretation run records the pipeline value, Graph revision and contract, or the direct adapter's identity.
+128:## Step 7 — Comparison, review and decision (S0004, S0005-AC5)
+130:**Harness:** `neuron/benchmarks/f0005_qualification.py --corpus neuron/fixtures/qualification --pipelines direct-baseline graph-dense graph-direct --output <run>/artifacts/qualification/report.json`. It reuses the scoring of `docling_graph_comparison.py`, runs through the worker composition against live vLLM, and records configuration hashes, pins, corpus and expectation hashes, and per-case rows. Graph direct is reported but is not a candidate.
+148:4. **On acceptance:** in one change, set `extraction.pipeline: graph-dense` and `content.v2_writer_enabled: true`; mark ADR-0060 Accepted with the evidence links; update `docker/DEPENDENCY-MATRIX.md`, build/run metadata, the C4 container description and BLUEPRINT §2.1/§4.8. Then submit one new corpus document and verify the pipeline, run identity and v2 manifest after a restart. Rollback is verified by switching `extraction.pipeline: direct-baseline`, submitting again, and confirming earlier artifacts and runs are unchanged.
+151:## Contracts, data and authorization
+164:## Test inventory and coverage
+171:| S0004 | `f0005_qualification.py` harness, `test_pipeline_selection.py` (pinning, unknown value, rollback) | live; unit |
+176:## Non-functional limits
+180:- Conversion deadline 300 s per document.
+184:## Rollout

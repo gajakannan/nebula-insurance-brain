@@ -1,0 +1,83 @@
+engine/packages/brain-jobs/src/brain_jobs/queue.py-419-                        jobs.c.knowledge_base_id == str(knowledge_base_id),
+engine/packages/brain-jobs/src/brain_jobs/queue.py-420-                    )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-421-                    .with_for_update()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-422-                )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-423-                .mappings()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-424-                .one_or_none()
+engine/packages/brain-jobs/src/brain_jobs/queue.py-425-            )
+engine/packages/brain-jobs/src/brain_jobs/queue.py-426-            if row is None:
+engine/packages/brain-jobs/src/brain_jobs/queue.py-427-                raise PermissionError("job is not in scope")
+engine/packages/brain-jobs/src/brain_jobs/queue.py-428-            if row["state"] in ("complete", "cancelled", "failed"):
+engine/packages/brain-jobs/src/brain_jobs/queue.py-429-                return
+engine/packages/brain-jobs/src/brain_jobs/queue.py-430-            conn.execute(update(jobs).where(jobs.c.id == str(job_id)).values(state="cancelled"))
+engine/packages/brain-jobs/src/brain_jobs/queue.py:431:            # Keep the artifact lease until timeout: an in-flight converter must not
+engine/packages/brain-jobs/src/brain_jobs/queue.py-432-            # overlap a new one just because its consumer requested cancellation.
+engine/packages/brain-jobs/src/brain_jobs/queue.py-433-            self._event(conn, str(job_id), row["generation"], "cancelled")
+--
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-75-        thread = Thread(target=heartbeat, daemon=True)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-76-        thread.start()
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-77-        try:
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-78-            self._execute(lease, cancelled)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-79-        except LeaseLost:
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-80-            cancelled.set()
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-81-        except Exception:
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-82-            # Job history contains stable state transitions, not source or SDK errors.
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-83-            with suppress(LeaseLost):
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-84-                self.queue.retry(lease)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-85-        finally:
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-86-            stop.set()
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:87:            thread.join(timeout=self.queue.lease_seconds)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-88-        return True
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-89-
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-90-    def _execute(self, lease: JobLease, cancelled: Event) -> None:
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-91-        task = DocumentTask.model_validate(lease.payload)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-92-        profile = load_profile(task.profile_id)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-93-        if (profile.profile_version, profile.schema_sha256) != (
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-94-            task.profile_version,
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-95-            task.schema_sha256,
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-96-        ):
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-97-            raise ValueError("queued extraction profile changed")
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-98-        authorize = self.authorize_for_job(lease)
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-99-        authorize(lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "ingest")
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-100-        authorize(lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "interpret")
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-101-        bundle = load_or_convert_content(
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-102-            lease=lease,
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-103-            task=task,
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-104-            store=self.store,
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-105-            authorize=authorize,
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-106-            publisher=self.publish_content,
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py-107-            load_accepted=self.load_accepted,
+--
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-37-        # PdfReader accepts prefixed PDF polyglots. Reject other magic before
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-38-        # either parser sees untrusted bytes (SEC-H1).
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-39-        with source_path.open("rb") as source:
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-40-            if source.read(5) != b"%PDF-":
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-41-                raise ValueError("Source must begin with a PDF file signature")
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-42-        ocr_page_count = self._count_pages_needing_ocr(source_path)
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-43-        observer = None
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-44-        if self._capture_provenance:
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-45-            # A fresh converter prevents hooks/receipts leaking between sources.
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-46-            self._converter = DocumentConverter(allowed_formats=[InputFormat.PDF])
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-47-            self._converter.initialize_pipeline(InputFormat.PDF)
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-48-            observer = ItemProvenance(self._converter)
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:49:        result = self._converter.convert(str(source_path), raises_on_error=False)
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-50-
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-51-        failed_pages = sorted({e.page_no for e in result.errors if e.page_no is not None})
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-52-        warnings = [f"{e.component_type}/{e.category}: {e.error_message}" for e in result.errors]
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-53-        status = _STATUS_MAP.get(result.status, "failed")
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-54-        provenance, unavailable = observer.project(result.document) if observer else ({}, ())
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-55-        rotations = (
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-56-            {
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-57-                index + 1: page.rotation % 360
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-58-                for index, page in enumerate(PdfReader(str(source_path)).pages)
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-59-            }
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-60-            if observer
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-61-            else {}
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-62-        )
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-63-
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-64-        return ParseResult(
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-65-            document=result.document,
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-66-            page_count=len(rotations) if observer else result.document.num_pages(),
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-67-            failed_pages=failed_pages,
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-68-            ocr_page_count=ocr_page_count,
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py-69-            status=status,

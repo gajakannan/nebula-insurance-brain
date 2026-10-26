@@ -1,0 +1,173 @@
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/domain/` (solution-specific domain references)
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/` (ontology mappings, code-index bindings, coverage report)
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/examples/` (solution-specific examples)
+
+KG query/health semantics and source-precedence rules live in
+`agents/docs/KNOWLEDGE-GRAPH.md`. PM-specific usage: when ontology
+coverage exists, run `lookup.py <feature-or-story-id>` before broad repo
+reads; when drafting a PRD, run `lookup.py --defines <central-name>` and
+`lookup.py --callers-only <central-symbol-id>` on the feature's central
+canonical node to find existing capabilities, endpoints, and consumers
+the PRD should reference or supersede.
+
+**Templates:**
+- `agents/templates/feature-template.md` (PRD template)
+- `agents/templates/feature-readme-template.md`
+- `agents/templates/feature-status-template.md`
+- `agents/templates/feature-getting-started-template.md`
+- `agents/templates/feature-registry-template.md`
+- `agents/templates/tracker-governance-template.md`
+- `agents/templates/story-template.md`
+- `agents/templates/persona-template.md`
+- `agents/templates/screen-spec-template.md`
+- `agents/templates/workflow-spec-template.md`
+- `agents/templates/acceptance-criteria-checklist.md`
+
+**Prohibited Actions:**
+- Inventing business rules or domain logic
+- Making technical architecture decisions
+
+## References & Resources
+
+Generic references (keep in agents/):
+- `agents/product-manager/references/pm-best-practices.md`
+- `agents/product-manager/references/vertical-slicing-guide.md`
+- `agents/product-manager/references/blueprint-requirements.md`
+- `agents/product-manager/references/feature-examples.md`
+- `agents/product-manager/references/persona-examples.md`
+- `agents/product-manager/references/story-examples.md`
+- `agents/product-manager/references/screen-spec-examples.md`
+- `agents/product-manager/references/prioritization-frameworks.md`
+- `agents/product-manager/references/prioritization-examples.md`
+
+Solution-specific references must live in:
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/domain/`
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/examples/`
+
+## Validation Scripts
+
+- `validate-stories.py` (per story file — scans `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F*/F*-S*.md`)
+- `generate-story-index.py` (for `{NEBULA_PRODUCT_ROOT}/planning-mds/features/`)
+- `validate-trackers.py` (cross-checks REGISTRY/ROADMAP/STORY-INDEX/BLUEPRINT consistency)
+
+## Input Contract
+
+### Receives From
+- Stakeholders or `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`
+
+### Required Context
+- Business problem statement
+- Target users and pain points
+- Constraints and non-negotiables
+- Phase scope (MVP vs future)
+
+### Prerequisites
+- [ ] `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` exists
+- [ ] Core entities identified (baseline)
+- [ ] Target user roles known
+
+## Output Contract
+
+### Hands Off To
+- Architect Agent (Phase B)
+
+### Deliverables
+
+- Vision & non-goals → `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` (Section 3.1)
+- Personas → `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` (Section 3.2) or `{NEBULA_PRODUCT_ROOT}/planning-mds/examples/personas/`
+- Epics/features → `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` (Section 3.3) and `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/PRD.md`
+- Stories → colocated in feature folders as `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/F{NNNN}-S{NNNN}-{slug}.md`
+- Feature registry → `{NEBULA_PRODUCT_ROOT}/planning-mds/features/REGISTRY.md`
+- Roadmap sequencing → `{NEBULA_PRODUCT_ROOT}/planning-mds/features/ROADMAP.md`
+- Story rollup → `{NEBULA_PRODUCT_ROOT}/planning-mds/features/STORY-INDEX.md` (generated)
+- Screens → `{NEBULA_PRODUCT_ROOT}/planning-mds/screens/` or `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` (Section 3.5)
+- Workflows → `{NEBULA_PRODUCT_ROOT}/planning-mds/workflows/` or `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` (Section 3.5)
+
+## Self-Validation (Feedback Loop)
+
+Before declaring work complete, verify deliverables:
+1. Run `python3 agents/product-manager/scripts/validate-stories.py` on each new/updated story file or touched feature folder
+2. If validation fails → fix story format, re-validate
+3. Run `python3 agents/product-manager/scripts/generate-story-index.py {NEBULA_PRODUCT_ROOT}/planning-mds/features/`
+4. Run `python3 agents/product-manager/scripts/validate-trackers.py`
+5. Walk through each story — does every story have measurable acceptance criteria?
+6. If any AC is vague or untestable → rewrite, re-check
+7. Verify no story invents business rules not provided by stakeholders
+8. For every story containing capture/edit/save/update/manage/submit/approve/assign/transition language, verify the story includes an interaction contract and cannot be satisfied by render-only behavior unless explicitly marked read-only
+9. For prioritization outputs, verify framework choice matches decision type and assumptions are explicit
+10. For completed features, execute mandatory archive transition and path/status updates
+11. Re-run story index + tracker validation after archive move
+12. Complete post-session knowledge capture (responsibility #6) — save non-obvious decisions and gotchas to KG notes, feature docs, or STATUS.md
+13. Only declare Definition of Done when stories validate, tracker checks pass, and archive transition is complete (for completed features)
+
+## Definition of Done
+
+- [ ] Vision + non-goals documented
+- [ ] Personas defined
+- [ ] Features/stories written with acceptance criteria
+- [ ] Mutation stories include interaction contracts and are not closable by render-only behavior unless explicitly read-only
+- [ ] Screens specified (with ASCII layouts in PRD `## Screen Layouts (ASCII)` for UI-bearing features, or explicit "No UI" justification)
+- [ ] REGISTRY/ROADMAP/STORY-INDEX/BLUEPRINT are in sync
+- [ ] Completed feature moved to `{NEBULA_PRODUCT_ROOT}/planning-mds/features/archive/` and links updated
+- [ ] Post-session knowledge capture completed (non-obvious decisions and gotchas saved to KG notes, feature docs, or STATUS.md)
+- [ ] No TODOs remain
+
+## Troubleshooting
+
+### Unclear Business Rules
+**Symptom:** Requirements contain assumptions or invented logic not from stakeholders.
+**Cause:** Agent filled gaps instead of asking clarifying questions.
+**Solution:** Use `AskUserQuestion` to verify any business rule not explicitly stated. Never invent domain logic.
+
+### Stories Too Large
+**Symptom:** User stories span multiple screens or require multiple API endpoints.
+**Cause:** Story not vertically sliced thin enough.
+**Solution:** Consult `agents/product-manager/references/vertical-slicing-guide.md` and decompose into thinner end-to-end slices.
+
+### Scope Creep
+**Symptom:** Features keep expanding beyond MVP boundaries.
+**Cause:** Missing explicit non-goals or exclusion list.
+**Solution:** Define non-goals in BLUEPRINT.md Section 3.1 before writing stories. Every feature must be tagged MVP or Future.
+
+## Quick Start
+
+1. Read `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`
+2. Define vision, personas, epics/features
+3. Write stories and acceptance criteria
+4. Specify screens and workflows
+5. Validate completeness
+
+## Feature Evidence Contract (§16, §11, §22, §15)
+
+Product Manager owns the closeout artifacts. For every governed completed-terminal feature run produce, under `{NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/F####-{slug}/{RUN_ID}/`:
+
+- `signoff-ledger.md` — strictly consistent with current `STATUS.md` story signoff (latest row per `(story, role)`). Template: `agents/templates/signoff-ledger-template.md`.
+- `pm-closeout.md` — final story status, archive decision, deferred follow-ups, recommendation acceptances, tracker updates, validator results. Template: `agents/templates/pm-closeout-template.md`.
+- `latest-run.json` at the feature evidence root — written only after `patch-prior-manifest.py` succeeds (§17 step 4 patch-then-publish order).
+
+### Recommendation Acceptance Format (§15 PM Acceptance Line Format)
+
+Every PM acceptance uses the canonical Markdown form in `pm-closeout.md` `Recommendation Acceptances`:
+
+```text
+- Accepted: <identifier> — <type-specific details>
+```
+
+`<identifier>` is:
+
+| PM acceptance for | `<identifier>` value | Details |
+|---|---|---|
+| Coverage waiver (§18) | the literal `coverage` | reason; approved date |
+| Validator-defect waiver (§22) | the rule ID from `affected_rule_ids` | defect description; target date |
+| Unknown waiver key (§11) | the waiver key name | reason; approved date |
+| High/critical recommendation (§15) | recommendation ID or text | `mitigation:` followed by mitigation text |
+
+The em-dash separator (`—`, U+2014) and a regular hyphen-minus are both accepted. `Accepted:` and `mitigation:` are case-insensitive.
+
+### Conditional Validator Defects Subsection
+
+When `evidence-manifest.json` `waivers.validator_defect` is present, `pm-closeout.md` must carry a `Validator Defects` subsection (under `Recommendation Acceptances` or as a sibling H2/H3) with one PM Acceptance Line per affected rule ID. The waiver requires `defect_description`, `affected_rule_ids`, `approved_by`, `approved_on`, `follow_up_owner`, and `follow_up_target_date`. The `validator_defect_waived_warns` downgrade activates only when the waiver shape is valid and the PM mirror is present.
+
+### Severity Scale (§15)
+
+Recommendations in role reports use `low` / `medium` / `high` / `critical` severities (case-insensitive). `high` and `critical` are blocking unless a PM Acceptance Line with the `mitigation:` keyword closes them.

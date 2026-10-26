@@ -1,6 +1,6 @@
 # F0005 — One-time document ingestion
 
-**Status:** Planned feature; synthetic development scope complete. Local qualification and gated activation re-planned and approved (Phase A and B) in plan run `2026-10-23-9a04b327`; feature action not started. ADR-0060 remains Proposed.
+**Status:** Planned feature; synthetic development scope complete. Phase B rework in plan run `2026-10-25-50fcf658` addresses three findings from [plan review 2026-10-24-0fbc1de1](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md) and was approved by the operator on 2026-10-25 in response to the Phase B approval question. Phase A requirements/thresholds remain those approved in `2026-10-23-9a04b327`; the amended Phase B design is approved in the current run. Feature action not started; ADR-0060 remains Proposed.
 **Phase:** v0.1A
 **Roadmap:** Next
 
@@ -11,7 +11,7 @@ Process each document version into an immutable content artifact and reuse it fo
 ## Documents
 
 - [PRD](PRD.md): scope and acceptance.
-- [Assembly plan](feature-assembly-plan.md): reconciliation with shipped F0002–F0004, qualification steps, failure injection, pipeline selection, decision and rollback.
+- [Assembly plan](feature-assembly-plan.md): approved design for supervised conversion with a 300-second deadline, host singleton/provider recovery, and explicit direct-baseline initial/rejection settings; shipped F0002–F0004 reconciliation, qualification, decision and rollback.
 - [Status](STATUS.md): recommendation audit, pending proofs, and actual signoffs.
 - [Acceptance criteria checklist](acceptance-criteria-checklist.md): per-criterion verification state.
 - [Getting started](GETTING-STARTED.md): current baseline and planning checks.

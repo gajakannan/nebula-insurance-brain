@@ -1,0 +1,174 @@
+     1	"""Composition of engine-owned jobs, Graph activities, and artifact checkpoints."""
+     2	
+     3	from __future__ import annotations
+     4	
+     5	from collections.abc import Callable
+     6	from contextlib import suppress
+     7	from pathlib import Path
+     8	from threading import Event, Thread
+     9	from typing import Literal
+    10	from uuid import UUID, uuid5
+    11	
+    12	from brain_content.checkpoints import CheckpointStore
+    13	from brain_content.object_store import ObjectNotFoundError
+    14	from brain_content.validation import VerifiedBundle
+    15	from brain_extraction.graph_interpretation import GraphInterpretationService
+    16	from brain_extraction.profiles import load_profile
+    17	from brain_extraction.vllm_graph_client import VllmGraphClient
+    18	from brain_interpretation.parsed_content import ParseResult
+    19	from brain_interpretation.result import InterpretationResult
+    20	from brain_jobs.queue import DocumentJobQueue, JobLease, LeaseLost
+    21	from docling_core.types.doc import DoclingDocument
+    22	from pydantic import BaseModel, ConfigDict, Field
+    23	
+    24	from brain_ingestion.content_workflow import ContentPublisher, load_or_convert_content
+    25	
+    26	
+    27	class DocumentTask(BaseModel):
+    28	    model_config = ConfigDict(extra="forbid")
+    29	    document_id: UUID
+    30	    version_id: UUID
+    31	    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    32	    recipe_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    33	    profile_id: str
+    34	    profile_version: str
+    35	    schema_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    36	    actor_id: UUID
+    37	    correlation_id: UUID
+    38	    content_contract_version: Literal[1, 2] = 1
+    39	
+    40	
+    41	class DocumentWorker:
+    42	    def __init__(
+    43	        self,
+    44	        *,
+    45	        queue: DocumentJobQueue,
+    46	        store: CheckpointStore,
+    47	        authorize_for_job: Callable[[JobLease], Callable[[UUID, UUID, UUID, str], None]],
+    48	        client_factory: Callable[[Event], VllmGraphClient],
+    49	        publish_content: ContentPublisher,
+    50	        converter: Callable[[Path], ParseResult[DoclingDocument]] | None = None,
+    51	        load_accepted: Callable[[JobLease], VerifiedBundle | None] | None = None,
+    52	        v2_writer_enabled: bool = False,
+    53	    ) -> None:
+    54	        self.queue, self.store = queue, store
+    55	        self.authorize_for_job = authorize_for_job
+    56	        self.client_factory = client_factory
+    57	        self.publish_content = publish_content
+    58	        self.converter = converter
+    59	        self.load_accepted, self.v2_writer_enabled = load_accepted, v2_writer_enabled
+    60	
+    61	    def run_one(self) -> bool:
+    62	        lease = self.queue.claim()
+    63	        if lease is None:
+    64	            return False
+    65	        cancelled, stop = Event(), Event()
+    66	
+    67	        def heartbeat() -> None:
+    68	            while not stop.wait(self.queue.lease_seconds / 3):
+    69	                try:
+    70	                    self.queue.heartbeat(lease)
+    71	                except Exception:
+    72	                    cancelled.set()
+    73	                    return
+    74	
+    75	        thread = Thread(target=heartbeat, daemon=True)
+    76	        thread.start()
+    77	        try:
+    78	            self._execute(lease, cancelled)
+    79	        except LeaseLost:
+    80	            cancelled.set()
+    81	        except Exception:
+    82	            # Job history contains stable state transitions, not source or SDK errors.
+    83	            with suppress(LeaseLost):
+    84	                self.queue.retry(lease)
+    85	        finally:
+    86	            stop.set()
+    87	            thread.join(timeout=self.queue.lease_seconds)
+    88	        return True
+    89	
+    90	    def _execute(self, lease: JobLease, cancelled: Event) -> None:
+    91	        task = DocumentTask.model_validate(lease.payload)
+    92	        profile = load_profile(task.profile_id)
+    93	        if (profile.profile_version, profile.schema_sha256) != (
+    94	            task.profile_version,
+    95	            task.schema_sha256,
+    96	        ):
+    97	            raise ValueError("queued extraction profile changed")
+    98	        authorize = self.authorize_for_job(lease)
+    99	        authorize(lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "ingest")
+   100	        authorize(lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "interpret")
+   101	        bundle = load_or_convert_content(
+   102	            lease=lease,
+   103	            task=task,
+   104	            store=self.store,
+   105	            authorize=authorize,
+   106	            publisher=self.publish_content,
+   107	            load_accepted=self.load_accepted,
+   108	            converter=self.converter,
+   109	            client_factory=self.client_factory,
+   110	            cancelled=cancelled,
+   111	            profile=profile,
+   112	            v2_writer_enabled=self.v2_writer_enabled,
+   113	        )
+   114	        key = bundle.key
+   115	        if bundle.manifest.source_sha256 != task.source_sha256:
+   116	            raise ValueError("accepted checkpoint belongs to a different source")
+   117	        # Recover a successfully published prior attempt whose DB completion was
+   118	        # interrupted. Never pay for another model call to rediscover that result.
+   119	        for attempt in range(lease.attempt - 1, 0, -1):
+   120	            run_id = uuid5(lease.job_id, f"attempt:{attempt}")
+   121	            try:
+   122	                outputs = self.store.load_run(
+   123	                    tenant_id=lease.tenant_id,
+   124	                    knowledge_base_id=lease.knowledge_base_id,
+   125	                    artifact_id=key.artifact_id,
+   126	                    run_id=run_id,
+   127	                    artifact_key=key,
+   128	                )
+   129	            except ObjectNotFoundError:
+   130	                continue
+   131	            result = InterpretationResult.model_validate_json(outputs["result.json"])
+   132	            if (
+   133	                result.run_id,
+   134	                result.artifact_id,
+   135	                result.run_configuration.profile_id,
+   136	                result.run_configuration.profile_version,
+   137	                result.run_configuration.schema_hash,
+   138	            ) != (
+   139	                run_id,
+   140	                key.artifact_id,
+   141	                task.profile_id,
+   142	                task.profile_version,
+   143	                task.schema_sha256,
+   144	            ):
+   145	                raise ValueError("published run does not match the queued profile")
+   146	            if result.status != "failed":
+   147	                authorize(lease.tenant_id, lease.knowledge_base_id, key.artifact_id, "interpret")
+   148	                self.queue.finish(
+   149	                    lease,
+   150	                    f"runs/{lease.tenant_id}/{lease.knowledge_base_id}/{run_id}/manifest.json",
+   151	                )
+   152	                return
+   153	        client = self.client_factory(cancelled)
+   154	        run_id = uuid5(lease.job_id, f"attempt:{lease.attempt}")
+   155	        try:
+   156	            result = GraphInterpretationService(self.store, authorize).interpret(
+   157	                tenant_id=lease.tenant_id,
+   158	                knowledge_base_id=lease.knowledge_base_id,
+   159	                artifact_id=key.artifact_id,
+   160	                run_id=run_id,
+   161	                profile=profile,
+   162	                client=client,
+   163	                publish=lambda operation: self.queue.publish(lease, operation),
+   164	                artifact_key=key,
+   165	                output_contract_version=2,
+   166	            )
+   167	        finally:
+   168	            client.close()
+   169	        if result.status == "failed":
+   170	            self.queue.retry(lease)
+   171	        else:
+   172	            self.queue.finish(
+   173	                lease, f"runs/{lease.tenant_id}/{lease.knowledge_base_id}/{run_id}/manifest.json"
+   174	            )
