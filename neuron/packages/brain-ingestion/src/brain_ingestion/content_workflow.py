@@ -20,7 +20,8 @@ from brain_extraction.docling_graph_pipeline import DoclingGraphPipelineAdapter
 from brain_extraction.profiles import ExtractionProfile
 from brain_extraction.vllm_graph_client import VllmGraphClient
 from brain_interpretation.parsed_content import ParseResult
-from brain_jobs.queue import JobLease
+from brain_jobs.queue import JobLease, LeaseLost
+from brain_security.execution import AuthorizationDenied
 from docling_core.types.doc import DoclingDocument
 
 from brain_ingestion.bundle_writer import _environment_digest, build_bundle
@@ -29,11 +30,17 @@ from brain_ingestion.content_projection import (
     OriginUnavailable,
     build_bundle_v2,
 )
+from brain_ingestion.conversion_process import ConversionError, SupervisedConverter
 from brain_ingestion.conversion_recipe import physical_recipe
-from brain_ingestion.docling_adapter import DoclingAdapter
 
 if TYPE_CHECKING:
     from brain_ingestion.document_worker import DocumentTask
+
+
+class PublicationFailed(RuntimeError):
+    """Storage/registration failed before the bundle became ready; no model call follows."""
+
+    code = "storage_write_failed"
 
 
 class ContentPublisher(Protocol):
@@ -61,6 +68,9 @@ def load_or_convert_content(
     cancelled: Event,
     profile: ExtractionProfile,
     v2_writer_enabled: bool,
+    supervisor: SupervisedConverter | None = None,
+    attempt_id: str | None = None,
+    before_conversion: Callable[[], None] | None = None,
 ) -> VerifiedBundle:
     accepted = load_accepted(lease) if load_accepted else None
     if accepted is not None:
@@ -92,9 +102,6 @@ def load_or_convert_content(
     source_bytes = store.objects.read(source_key)
     if hashlib.sha256(source_bytes).hexdigest() != task.source_sha256:
         raise ValueError("source hash mismatch")
-    convert = (
-        converter or DoclingAdapter(capture_provenance=task.content_contract_version == 2).parse
-    )
     published: VerifiedBundle | None = None
 
     def publish(parsed: ParseResult[DoclingDocument]) -> None:
@@ -125,7 +132,7 @@ def load_or_convert_content(
                         parser_package_version=f"docling=={version('docling')}",
                         projection_version=PROJECTION_VERSION,
                         configuration_hash=task.recipe_sha256,
-                        model_artifact_digests=[],
+                        model_artifact_digests=list(parsed.model_artifact_digests),
                         environment_digest=_environment_digest(),
                     ),
                     provenance=parsed.provenance,
@@ -160,11 +167,39 @@ def load_or_convert_content(
                 source_filename="source.pdf",
             )
         authorize(lease.tenant_id, lease.knowledge_base_id, target.artifact_id, "ingest")
-        publisher(
-            lease, manifest, files, writer_fallback_reason=reason, unattributed_item_count=count
-        )
-        published = store.load_verified(target)
+        try:
+            publisher(
+                lease, manifest, files, writer_fallback_reason=reason, unattributed_item_count=count
+            )
+            published = store.load_verified(target)
+        except (PermissionError, LeaseLost, AuthorizationDenied, ParserMigrationRequired):
+            raise
+        except Exception:
+            # The F0004 store keeps an incomplete publication unready (manifest last).
+            raise PublicationFailed("storage_write_failed") from None
 
+    if converter is None:
+        if supervisor is None or attempt_id is None:
+            raise RuntimeError("physical conversion requires the supervised converter")
+        # The child runs the pinned Graph seam and returns a validated handoff. The
+        # parent publishes exactly once and only then may interpretation start.
+        if before_conversion is not None:
+            before_conversion()
+        handoff = supervisor.convert(
+            source_bytes,
+            attempt_id=attempt_id,
+            capture_provenance=task.content_contract_version == 2,
+            cancelled=cancelled,
+        )
+        if handoff.parsed.status == "failed":
+            raise ConversionError("conversion_failed")
+        publish(handoff.parsed)
+        if published is None:
+            raise RuntimeError("conversion did not publish a verified checkpoint")
+        return published
+
+    if before_conversion is not None:
+        before_conversion()
     client = client_factory(cancelled)
     try:
         with tempfile.TemporaryDirectory(prefix="nebula-source-") as directory:
@@ -173,7 +208,7 @@ def load_or_convert_content(
             DoclingGraphPipelineAdapter(llm_client=client, model_id=client.model).run(
                 source=path,
                 template=profile.template,
-                converter=convert,
+                converter=converter,
                 publish=publish,
                 conversion_only=True,
             )

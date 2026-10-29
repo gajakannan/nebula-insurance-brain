@@ -99,6 +99,7 @@ def components(
             classifications=classifications or ["internal"],
             source_acl_ids=[],
             v2_writer_enabled=enabled,
+            pipeline="graph-direct",
         )
 
     return engine, queue, store, authorization, access, publisher, enqueue

@@ -1,0 +1,111 @@
+.........F.
+=================================== FAILURES ===================================
+_ test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer _
+
+tmp_path = PosixPath('/tmp/pytest-of-gajap/pytest-86/test_decision_branches_restart0')
+
+    def test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer(tmp_path):
+        url, settings = require_live()
+        committed_before = hashlib.sha256(COMMITTED.read_bytes()).hexdigest()
+        # gl-q-005 and gl-q-009 are the corpus documents that publish v2: the accepted
+        # and rollback branches use them, so v2 readability is actually exercised (M5).
+        documents = ["gl-q-004", "gl-q-005", "gl-q-002", "gl-q-003", "gl-q-006", "gl-q-009"]
+        rows = []
+        with qualification.isolated(url, "direct-baseline", v2_writer_enabled=False) as env:
+            previous: dict[str, str] = {}
+            pinned: dict[str, dict] = {}
+            for (decision, (pipeline, v2)), document in zip(DECISIONS.items(), documents, strict=True):
+                write_config(env.config_path, pipeline, v2, env.content_root)
+                # Restart: a new composition reads the changed settings.
+>               with qualification.live_session(env, settings) as live:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_pipeline_selection.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <brain_ingestion.worker_guard.HostInferenceGuard object at 0x711d121a2a50>
+
+    def require_quiescent(self) -> None:
+        if self.marker_path.exists():
+>           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError
+=============================== warnings summary ===============================
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_committed_configuration_selects_the_direct_baseline_with_v2_disabled
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_unknown_or_missing_pipeline_fails_startup[graph]
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_unknown_or_missing_pipeline_fails_startup[Graph-Dense]
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_unknown_or_missing_pipeline_fails_startup[]
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_unknown_or_missing_pipeline_fails_startup[None]
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_unknown_or_missing_pipeline_fails_startup[7]
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_no_environment_variable_selects_a_pipeline
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_isolated_config_cannot_move_the_host_guard
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_historical_job_without_pipeline_keeps_its_pre_change_meaning
+PASSED neuron/tests/integration/test_pipeline_selection.py::test_queue_depth_is_committed_and_validated
+FAILED neuron/tests/integration/test_pipeline_selection.py::test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer
+1 failed, 10 passed, 27 warnings in 5.64s

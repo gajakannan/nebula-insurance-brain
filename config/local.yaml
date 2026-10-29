@@ -5,6 +5,16 @@ content:
   # New-source v2 publication needs provenance qualification and all consumers.
   v2_writer_enabled: false
 
+extraction:
+  # direct-baseline | graph-dense | graph-direct (qualification only).
+  # F0005: Graph dense is selected here only after recorded qualification acceptance.
+  pipeline: direct-baseline
+
+jobs:
+  # F0005-S0002: unfinished document jobs (queued, retry, running) allowed at once;
+  # a new submission beyond this is rejected explicitly with queue_depth_exceeded.
+  max_queue_depth: 100
+
 object_store:
   provider: filesystem
   root: ./content

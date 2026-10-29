@@ -391,3 +391,76 @@ def test_dense_legacy_hint_keeps_schema_enforcement(make_client: Any) -> None:
     invalid = make_client(lambda _: httpx.Response(200, json=completion('{"wrong":"value"}')))
     with pytest.raises(InferenceRejected):
         invalid.get_json_response("synthetic", SCHEMA, structured_output=False)
+
+
+@pytest.mark.parametrize(
+    ("failure", "failure_class"),
+    [("context", "budget"), ("cancelled", "cancelled"), ("external_ref", "invalid_request")],
+)
+def test_preflight_rejections_are_recorded_without_spending_the_call_budget(
+    make_client: Any, failure: str, failure_class: str
+) -> None:
+    # F0005 H1: a rejection that never reached the provider must still be visible.
+    cancelled = Event()
+    if failure == "cancelled":
+        cancelled.set()
+    client = make_client(
+        lambda request: httpx.Response(200, json=completion()),
+        cancelled=cancelled,
+        token_counter=lambda messages, schema: 4096 if failure == "context" else 64,
+    )
+    schema = '{"$ref":"https://untrusted.example/schema"}' if failure == "external_ref" else SCHEMA
+    with pytest.raises(InferenceRejected):
+        client.get_json_response("source", schema, response_schema_name="dense_fill")
+    diagnostics = client.diagnostics()
+    assert diagnostics["calls"] == []
+    assert len(diagnostics["rejections"]) == 1
+    assert diagnostics["rejections"][0]["phase"] == "dense_fill"
+    assert diagnostics["rejections"][0]["failure_class"] == failure_class
+    assert "source" not in json.dumps(diagnostics)
+
+
+def test_call_budget_rejection_is_recorded_after_the_budget_is_spent(make_client: Any) -> None:
+    client = make_client(
+        lambda request: httpx.Response(200, json=completion()), limits=replace(LIMITS, max_calls=1)
+    )
+    client.get_json_response("source", SCHEMA, response_schema_name="dense_skeleton")
+    with pytest.raises(InferenceRejected, match="call_budget_exceeded"):
+        client.get_json_response("source", SCHEMA, response_schema_name="dense_fill")
+    diagnostics = client.diagnostics()
+    assert [(call["phase"], call["outcome"]) for call in diagnostics["calls"]] == [
+        ("dense_skeleton", "complete")
+    ]
+    assert diagnostics["rejections"] == [
+        {"phase": "dense_fill", "outcome": "call_budget_exceeded", "failure_class": "budget"}
+    ]
+
+
+@pytest.mark.parametrize(
+    ("content", "finish", "failure_class"),
+    [('{"limit":"ok"}', "length", "malformed"), ('{"limit":42}', "stop", "schema_invalid")],
+)
+def test_post_response_rejections_carry_a_failure_class(
+    make_client: Any, content: str, finish: str, failure_class: str
+) -> None:
+    client = make_client(lambda request: httpx.Response(200, json=completion(content, finish)))
+    with pytest.raises(InferenceRejected):
+        client.get_json_response("source", SCHEMA)
+    assert client.diagnostics()["calls"][0]["failure_class"] == failure_class
+    assert client.diagnostics()["rejections"] == []
+
+
+def test_a_failing_token_counter_is_a_recorded_rejection(make_client: Any) -> None:
+    def broken(messages: list[dict[str, str]], schema: str) -> int:
+        raise RuntimeError("tokenizer unavailable: private source")
+
+    client = make_client(
+        lambda request: httpx.Response(200, json=completion()), token_counter=broken
+    )
+    with pytest.raises(InferenceRejected, match="token_count_failed"):
+        client.get_json_response("source", SCHEMA, response_schema_name="dense_fill")
+    rejection = client.diagnostics()["rejections"]
+    assert rejection == [
+        {"phase": "dense_fill", "outcome": "token_count_failed", "failure_class": "invalid_request"}
+    ]
+    assert "private source" not in json.dumps(client.diagnostics())

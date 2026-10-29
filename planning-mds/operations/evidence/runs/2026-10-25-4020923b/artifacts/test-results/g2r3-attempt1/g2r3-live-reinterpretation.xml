@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="6.538" timestamp="2026-10-28T03:35:37.007636-04:00" hostname="myStarCore-01"><testcase classname="tests.integration.test_live_reinterpretation_qualification" name="test_both_profiles_reinterpret_saved_json_with_zero_conversion" time="0.761"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x783c468fa8b0&gt;
+
+    def test_both_profiles_reinterpret_saved_json_with_zero_conversion(monkeypatch):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        port = proxy.port
+        proxy.stop_listening()
+        documents = corpus_documents()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+&gt;               with qualification.live_session(env, settings, transport_url=proxy.base_url) as live:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_live_reinterpretation_qualification.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x783c4450c2f0&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_live_reinterpretation_qualification" name="test_relationship_output_fails_closed_with_no_rows" time="0.161"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x783c44d97950&gt;
+
+    def test_relationship_output_fails_closed_with_no_rows(monkeypatch):
+        url, settings = require_live()
+        probe = ExtractionProfile("gl-relationship-probe", "1", _RelationshipProbe, "test-only")
+        monkeypatch.setitem(profiles.PROFILES, probe.profile_id, probe)
+        with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+&gt;           with qualification.live_session(env, settings) as live:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_live_reinterpretation_qualification.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x783c445ca210&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_live_reinterpretation_qualification" name="test_targeted_request_fails_before_any_model_call" time="0.584" /></testsuite></testsuites>

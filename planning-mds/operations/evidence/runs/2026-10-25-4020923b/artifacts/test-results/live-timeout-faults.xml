@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="185.693" timestamp="2026-10-26T00:36:11.744130-04:00" hostname="myStarCore-01"><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-direct-baseline]" time="66.922" /><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-graph-dense]" time="114.113"><failure message="AssertionError: assert 2 &lt;= 1&#10; +  where 2 = max_concurrency()&#10; +    where max_concurrency = FaultProxy(upstream='http://127.0.0.1:8000', hold_seconds=30, schedule={1: 'timeout'}, records=[ProxyRecord(number=1, ...200), ProxyRecord(number=3, mode='pass', started=7317.912837516, finished=7318.940295293, status=200)], on_record=None).max_concurrency">pipeline = 'graph-dense', mode = 'timeout', reason = 'model_timeout'
+
+    @pytest.mark.parametrize("pipeline", ["direct-baseline", "graph-dense"])
+    @pytest.mark.parametrize(
+        ("mode", "reason"),
+        [
+            ("stopped", "model_unavailable"),
+            ("http_5xx", "model_http_error"),
+            ("malformed_json", "model_malformed_output"),
+            ("schema_invalid", "model_schema_invalid"),
+            ("timeout", "model_timeout"),
+        ],
+    )
+    def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(pipeline, mode, reason):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=30).start()
+        if mode not in ("stopped",):
+            proxy.schedule = {1: mode}
+        timeline: dict[str, float] = {}
+        try:
+            with (
+                qualification.isolated(url, pipeline, v2_writer_enabled=True) as env,
+                qualification.live_session(
+                    env,
+                    settings,
+                    transport_url=proxy.base_url,
+                    limits=InferenceLimits(request_timeout_seconds=10),
+                ) as live,
+            ):
+                job = live.submit(DOCUMENT, PROFILE)
+                if mode == "stopped":
+                    port = proxy.port
+                    proxy.stop_listening()
+                    assert live.worker.run_one()  # converts, publishes, then connection refused
+                    proxy.port = port
+                    proxy.start()
+                elif mode == "timeout":
+                    timeline["fault"] = time.monotonic()
+                    with pytest.raises(WorkerStopped, match="provider_quiescence_required"):
+                        live.worker.run_one()
+                    assert live.guard.marker_path.exists() and live.guard.uncertain
+                    # A healthy provider does not clear the uncertain marker.
+                    assert httpx.get(f"{upstream(settings)}/health", timeout=5).status_code == 200
+                    assert live.guard.marker_path.exists()
+                    with pytest.raises(WorkerStopped):
+                        live.worker.run_one()  # no claim while dirty
+                    receipt, elapsed = _quiesce(settings, live.guard)
+                    timeline["quiescence_seconds"] = elapsed
+                    assert json.loads(receipt.read_text())["confirmed_exit"] is True
+                else:
+                    assert live.worker.run_one()
+                assert _reasons(env, job)[0] == reason
+                live.drain(timeout=900)
+                if "fault" in timeline:
+                    timeline["recovered_seconds"] = time.monotonic() - timeline["fault"]
+                with env.engine.connect() as conn:
+                    state = conn.scalar(select(jobs.c.state).where(jobs.c.id == str(job)))
+                # Zero conversion after publication: the retry reused the bundle.
+                assert live.converter.launches == 1
+                if state == "complete":
+                    counts = _assert_single_effect(env)
+                else:
+                    # A later organic model failure may exhaust the budget; it must
+                    # still end explicitly, with the bundle retained and readable.
+                    assert state == "failed"
+                    counts = {"terminal_reasons": _reasons(env, job)}
+                calls = [r for r in proxy.records if r.mode != "pass" or r.status is not None]
+&gt;               assert proxy.max_concurrency() &lt;= 1
+E               AssertionError: assert 2 &lt;= 1
+E                +  where 2 = max_concurrency()
+E                +    where max_concurrency = FaultProxy(upstream='http://127.0.0.1:8000', hold_seconds=30, schedule={1: 'timeout'}, records=[ProxyRecord(number=1, ...200), ProxyRecord(number=3, mode='pass', started=7317.912837516, finished=7318.940295293, status=200)], on_record=None).max_concurrency
+
+neuron/tests/integration/test_fault_injection_qualification.py:166: AssertionError</failure></testcase></testsuite></testsuites>

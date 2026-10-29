@@ -4,8 +4,11 @@ from pathlib import Path
 
 import pytest
 from brain_content.config import (
+    DEFAULT_MAX_QUEUE_DEPTH,
     ConfigError,
     load_content_writer_config,
+    load_extraction_config,
+    load_job_queue_config,
     load_local_object_store_config,
 )
 
@@ -93,3 +96,85 @@ def test_non_boolean_writer_activation_fails_closed(tmp_path, monkeypatch, value
     monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(path))
     with pytest.raises(ConfigError):
         load_content_writer_config()
+
+
+def _write_local(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, body: str) -> None:
+    path = tmp_path / "local.yaml"
+    path.write_text(body, encoding="utf-8")
+    monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(path))
+
+
+@pytest.mark.parametrize("pipeline", ["direct-baseline", "graph-dense", "graph-direct"])
+def test_extraction_pipeline_loads_each_known_value(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, pipeline: str
+) -> None:
+    _write_local(tmp_path, monkeypatch, f"extraction:\n  pipeline: {pipeline}\n")
+
+    assert load_extraction_config().pipeline == pipeline
+
+
+@pytest.mark.parametrize(
+    "body",
+    ["{}\n", "extraction: direct-baseline\n", "extraction:\n  other: 1\n"],
+)
+def test_extraction_pipeline_must_be_explicit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, body: str
+) -> None:
+    _write_local(tmp_path, monkeypatch, body)
+
+    with pytest.raises(ConfigError, match="set explicitly"):
+        load_extraction_config()
+
+
+def test_extraction_pipeline_rejects_unknown_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_local(tmp_path, monkeypatch, "extraction:\n  pipeline: graph-sparse\n")
+
+    with pytest.raises(ConfigError, match="not a known pipeline"):
+        load_extraction_config()
+
+
+def test_extraction_and_queue_config_require_the_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(tmp_path / "missing.yaml"))
+
+    with pytest.raises(ConfigError):
+        load_extraction_config()
+    with pytest.raises(ConfigError):
+        load_job_queue_config()
+
+
+def test_queue_depth_defaults_when_unset(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _write_local(tmp_path, monkeypatch, "extraction:\n  pipeline: direct-baseline\n")
+
+    assert load_job_queue_config().max_queue_depth == DEFAULT_MAX_QUEUE_DEPTH
+
+
+def test_queue_depth_loads_a_positive_integer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_local(tmp_path, monkeypatch, "jobs:\n  max_queue_depth: 7\n")
+
+    assert load_job_queue_config().max_queue_depth == 7
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "true", "'5'", "2.5"])
+def test_queue_depth_rejects_non_positive_or_non_integer_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    _write_local(tmp_path, monkeypatch, f"jobs:\n  max_queue_depth: {value}\n")
+
+    with pytest.raises(ConfigError, match="positive integer"):
+        load_job_queue_config()
+
+
+def test_committed_config_selects_the_baseline_and_default_depth(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = Path(__file__).resolve().parents[4] / "config" / "local.yaml"
+    monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(config))
+
+    assert load_extraction_config().pipeline == "direct-baseline"
+    assert load_job_queue_config().max_queue_depth == 100

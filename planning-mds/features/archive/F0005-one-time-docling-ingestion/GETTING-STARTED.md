@@ -1,0 +1,134 @@
+# F0005 — Getting started
+
+The candidate adapter is implemented; the production integration is incomplete. Read [compatibility evidence](compatibility-evidence.md) for the exact pin, tested boundary, and remaining gates. ADR-0060 is Proposed.
+
+The remaining work, local live qualification and gated activation, is specified in the [assembly plan](feature-assembly-plan.md). Phase B rework run `2026-10-25-50fcf658` was approved by the operator on 2026-10-25 after [review 2026-10-24-0fbc1de1](../../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md). The earlier plan `2026-10-23-9a04b327` approved the unchanged Phase A requirements/thresholds and the preceding design, with the current amended design approved separately in the rework run. Feature run `2026-10-25-4020923b` implemented the controls below; their live qualification evidence is in that run folder. Implementation is not activation: ADR-0060 stays Proposed and `extraction.pipeline` stays `direct-baseline` with `content.v2_writer_enabled: false` until the recorded operator decision.
+
+## Implemented controls (run `2026-10-25-4020923b`)
+
+- **Initial/rejected qualification:** the committed default is `extraction.pipeline: direct-baseline` with `content.v2_writer_enabled: false`. Graph direct/dense run only in isolated qualification configs/queues/content roots before acceptance. Acceptance selects Graph dense/v2; rejection explicitly verifies/restores direct/v1 and drains/cancels candidate jobs. Extraction rollback after acceptance selects direct while retaining the qualified v2 writer. New keys include pipeline identity; historical jobs keep their old keys/pinned meaning. Restart/new-source tests verify every branch.
+- **Conversion bound:** a conversion-only child runs the pinned Graph seam and returns a validated native-JSON/quality/provenance handoff. Only the parent can publish ready. It starts a monotonic 300-second deadline before launch, records child ownership durably before the start acknowledgement, and latches timeout before bounded process-group termination/cleanup. Late child results cannot publish or start a model. The model-client deadline described below cannot supply this control.
+- **One host worker:** all engines/configs use the same fixed host `/tmp/nebula-brain-inference-<host-uid>/` directory and endpoint-keyed advisory lock before claims/conversion/model work. Containers must bind that directory with the host UID; aliases, profiles, tenants or separate content roots cannot create independent slots. The existing semaphore remains in-process only. A durable marker is written before each request. After uncertain HTTP outcome or SIGKILL, replacement claims/requests stay blocked until the qualification harness/DevOps supervisor confirms the dedicated provider process group exited and restarts the pinned server under the guard. Health alone cannot clear the marker. The controlled-host sequence is automated per fault and its elapsed time counts toward recovery qualification.
+
+Code: `brain_ingestion/worker_guard.py` and `provider_supervisor.py` (host guard, in-flight marker, confirmed quiescence), `conversion_process.py` (supervised conversion), `config/local.yaml` `extraction.pipeline` with `brain_content.config.load_extraction_config`, migration `0009` (job failure reasons), `neuron/tests/support/fault_proxy.py` and `neuron/benchmarks/f0005_qualification.py`. Operations: [inference runbook](../../../../docker/local-inference-runbook.md#f0005-host-guard-and-provider-quiescence-devops). No new public endpoint, shared schema or distributed scheduler is introduced.
+
+Live qualification suites (opt-in, development host; need `BRAIN_RUN_LIVE_QUALIFICATION=1`, `BRAIN_TEST_POSTGRES_URL`, the recorded provider and its credential):
+
+```bash
+neuron/.venv/bin/python -m pytest neuron/tests/integration/test_live_conversion_qualification.py \
+  neuron/tests/integration/test_fault_injection_qualification.py \
+  neuron/tests/integration/test_live_reinterpretation_qualification.py \
+  neuron/tests/integration/test_pipeline_selection.py -q -s
+neuron/.venv/bin/python neuron/benchmarks/f0005_qualification.py \
+  --corpus neuron/fixtures/qualification --output <run>/artifacts/qualification/report.json
+```
+
+From the repository root:
+
+```bash
+uv sync --locked --project neuron
+LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+  neuron/.venv/bin/python -m pytest neuron/tests/integration/test_graph_pipeline_contract.py -q
+python3 scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0005
+python3 scripts/run-lifecycle-gates.py
+```
+
+Native/scanned tests need the Docling model assets cached. The model client returns recorded values: these tests do not measure extraction accuracy. The filesystem checkpoint test executes storage I/O inline because this restricted environment cannot deliver asyncio's thread wakeups; it does not prove worker crash recovery.
+
+`neuron/tests/integration/test_parse_once_reinterpret.py` remains the F0001 direct-vLLM comparison baseline. Local inference setup is documented in `docker/local-inference-runbook.md`. Worker recovery and PostgreSQL queue tests now have recorded results; live Graph comparison and deployment qualification are still required before activation.
+
+## Bounded model client
+
+`brain_extraction.vllm_graph_client.VllmGraphClient` implements Graph's model-client protocol with a self-hosted OpenAI-compatible transport. It disables SDK retries, redirects, and environment proxy discovery on its default transport. Create one client per attempt and share a `BoundedSemaphore` across clients in the worker; close each client after use. Supply the token counter from `cached_model_token_counter(model_id, model_revision)`, using the exact serving model/tokenizer revision. Production worker composition still owns the endpoint allowlist and cross-process concurrency limit.
+
+The client reserves input/schema/output tokens before each request and applies call/token budgets across repairs. Queued work observes cancellation and the attempt deadline. In-flight HTTP work is bounded by transport timeouts; cancellation prevents accepting its result and scheduling another request, but does not interrupt a provider operation already running. The deadline is not a hard process-kill guarantee. Diagnostics contain hashes, usage, and reason codes, not prompts, responses, or API keys. They still need persistence under the authorized run.
+
+Run the offline transport tests:
+
+```bash
+LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 \
+  neuron/.venv/bin/python -m pytest neuron/tests/integration/test_vllm_graph_client.py -q
+```
+
+## Opt-in live smoke proof
+
+Start the dedicated Brain vLLM server using the [candidate revision instructions](../../../../docker/local-inference-runbook.md#f0005-candidate-model-revision). Supply its credential through `BRAIN_INFERENCE_API_KEY` as described there. Then run:
+
+```bash
+export BRAIN_INFERENCE_MODEL_REVISION=cfbefacb99257ffa30c83adab238a50856ac3083
+BRAIN_RUN_LIVE_GRAPH_PROOF=1 LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 \
+  neuron/.venv/bin/python -m pytest neuron/tests/integration/test_graph_live_inference.py -q
+```
+
+This test performs actual model requests for two GL profiles over saved JSON with conversion forbidden. It is skipped unless explicitly enabled. It does not replace the chunked corpus comparison, evidence-mapping proof, or worker recovery gates.
+
+## Candidate worker and result import
+
+New submissions pin the committed `extraction.pipeline` (currently `direct-baseline`); there is no environment override. Graph runs only in isolated qualification configurations while ADR-0060 is Proposed. Use one worker process/replica for qualification; its shared model semaphore does not impose a distributed GPU quota. The worker runs each job's pinned pipeline: `direct-baseline` (F0001 prompt through the bounded client), `graph-dense` (chunked) or `graph-direct`. Historical jobs without a pinned value keep their pre-change `graph-direct` meaning.
+
+Install both locked workspaces, then apply the migration to a **development** PostgreSQL database. Set `BRAIN_DATABASE_URL` for Alembic and `BRAIN_WORKER_DATABASE_URL` for the worker to the same `postgresql+psycopg` database through the local secret mechanism. The configured filesystem root must be immutable and shared by the worker and importer.
+
+```bash
+uv sync --locked --project engine
+uv sync --locked --project neuron
+cd engine/migrations
+../.venv/bin/alembic upgrade head
+cd ../..
+```
+
+Provide `BRAIN_WORKER_PRINCIPAL_ID` for an active, provisioned service principal with an unrevoked `ServicePrincipal` membership in the target tenant/knowledge base. The CLI trusts the local operator to select that identity; expose an authenticated application boundary before making submission available to external callers. Do not grant service roles to arbitrary uploaders. Both ingestion and interpretation decisions are checked and audited, including after a job restarts.
+
+Set `NEBULA_TENANT_ID` and `NEBULA_KB_ID` to the provisioned scope. Submit a development fixture:
+
+```bash
+neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+  --policy-dir planning-mds/security/policies \
+  --enqueue neuron/fixtures/gl-policy-declarations.pdf \
+  --tenant "$NEBULA_TENANT_ID" --knowledge-base "$NEBULA_KB_ID" --profile gl-limits-a
+```
+
+For processing, supply `BRAIN_INFERENCE_BASE_URL`, `BRAIN_INFERENCE_API_KEY`, `BRAIN_INFERENCE_MODEL`, and the immutable `BRAIN_INFERENCE_MODEL_REVISION` through the inference runbook's credential mechanism. Cache the matching tokenizer and Docling assets first. `--once` processes at most one job and one pending import; omit it to poll until SIGINT/SIGTERM. Shutdown waits for the current activity; it is not a hard kill for a converter or provider operation already in progress.
+
+```bash
+neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+  --policy-dir planning-mds/security/policies --once
+neuron/.venv/bin/python -m brain_ingestion.worker_cli \
+  --policy-dir planning-mds/security/policies --import-only --once
+```
+
+Submission is idempotent for a source/recipe/actor/profile identity. A second profile reuses the same bundle and creates a separate job/run. Published successful attempts are recovered without new model calls. An outbox import failure leaves the acknowledgement pending and rolls back all imported rows. Investigate the stable failure code, correct the cause, and rerun import; never delete a bundle to clear a model error. Source-bearing outputs and failed/partial runs live beneath the protected object-store root; production retention must include `runs/` as well as `bundles/` and `sources/`. No automatic retention policy is invented here. OS-killed workers can leave private temporary files; cleanup must run with workers stopped or with a reviewed age/lease policy.
+
+## PostgreSQL qualification
+
+Set `BRAIN_TEST_POSTGRES_URL` to a disposable development PostgreSQL database using the psycopg driver. The tests create and drop only their own random schemas. They fail on a configured but unreachable database; they skip only when the variable is absent.
+
+```bash
+neuron/.venv/bin/python -m pytest engine/packages/brain-jobs/tests/test_postgres.py -q
+LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+  neuron/.venv/bin/python -m pytest \
+  neuron/tests/integration/test_document_process_recovery.py -k postgresql -q
+```
+
+Run the combined offline suite documented in [compatibility evidence](compatibility-evidence.md) as well. Neither this PostgreSQL test nor the live model smoke test replaces the approved corpus comparison, operational qualification, and reviewer acceptance gates.
+
+CI's `runtime-stack` job applies the engine migrations to its disposable PostgreSQL database and runs four isolated-schema document-job tests: competing claims, expired-generation fencing, child-process exit/reclaim after checkpoint publication, and lease expiry while publication waits for a row lock.
+
+It also runs five worker/importer process-exit cases: after bundle publication, after extraction-result publication, after job completion, midway through result import, and after import commits. These use real Graph stages, authorization, artifact registration, and result import, with synthetic native content and recorded model responses. Recovery must retain one conversion, one model call, one assertion/evidence/review set, and one acknowledged completion. Each test owns an isolated schema populated from the application metadata; migration execution is a separate CI step.
+
+To run these five cases offline with SQLite, omit the database variable and use `-k sqlite` instead. A configured but unreachable PostgreSQL database is a failure, never a skip. These cases do not establish live provider behavior, machine/database/storage failure recovery, retention acceptance, or extraction quality.
+
+## Synthetic development comparison
+
+The current scope uses synthetic development fixtures. No model endpoint or credential is required:
+
+```bash
+LITELLM_LOCAL_MODEL_COST_MAP=True HF_HUB_OFFLINE=1 OMP_NUM_THREADS=2 \
+  neuron/.venv/bin/python neuron/benchmarks/docling_graph_comparison.py \
+  --output /tmp/nebula-synthetic-comparison.json
+```
+
+Choose a new output path on each run. The runner creates temporary verified bundles and executes the baseline, Graph direct, and Graph dense using HTTP MockTransport recordings. It forbids conversion during interpretation and checks that saved native JSON is unchanged. Nine runs cover unique, repeated, and multi-region values; the aggregate field is deliberately absent to exercise abstention. The command fails if dense falls back to direct, loses its chunking, or fails the development expectations.
+
+The [recorded report](synthetic-comparison.json) contains per-case schema/value/abstention/evidence checks, model phases and call counts, chunk counts, token estimates, local elapsed time, and review-candidate counts. Token estimates use cl100k_base and elapsed time excludes inference. Recorded responses dictate the values: these measurements demonstrate orchestration and grounding behavior, not accuracy, provider cost, or live latency. Direct Graph evidence on these longer fixtures remains unresolved where upstream supplies no usable item references. Dense preserves the references and passes the evidence expectations.
+
+Live corpus qualification and production signoff are later release work. They do not block this synthetic development scope or change the opt-in activation boundary.

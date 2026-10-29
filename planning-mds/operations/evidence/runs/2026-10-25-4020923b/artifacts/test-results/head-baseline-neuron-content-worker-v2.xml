@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="5" time="41.112" timestamp="2026-10-28T03:21:09.392738-04:00" hostname="myStarCore-01"><testcase classname="tests.integration.test_content_worker_v2" name="test_publication_import_and_second_profile_reuse[False]" time="24.877"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = scalar(&lt;sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c350&gt;)&#10; +    where scalar = &lt;sqlalchemy.orm.session.Session object at 0x7bb3bf5e5e50&gt;.scalar&#10; +    and   &lt;sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c350&gt; = select_from(Table('content_block', MetaData(), Column('artifact_id', Uuid(), ForeignKey('content_artifact.id'), table=&lt;content_blo...=False)), Column('created_by', Uuid(), ForeignKey('principal.id'), table=&lt;content_block&gt;, nullable=False), schema=None))&#10; +      where select_from = &lt;sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c450&gt;.select_from&#10; +        where &lt;sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c450&gt; = select(&lt;sqlalchemy.sql.functions.count at 0x7bb3bf9a6660; count&gt;)&#10; +          where &lt;sqlalchemy.sql.functions.count at 0x7bb3bf9a6660; count&gt; = &lt;sqlalchemy.sql.functions._FunctionGenerator object at 0x7bb3bf190f30&gt;()&#10; +            where &lt;sqlalchemy.sql.functions._FunctionGenerator object at 0x7bb3bf190f30&gt; = func.count">database = (Engine(postgresql+psycopg://brain:***@127.0.0.1:5432/brain?options=-csearch_path%3Denqueue_proof_40a5816589b0470fb845...sql+psycopg://brain:brain@127.0.0.1:5432/brain?options=-csearch_path%3Denqueue_proof_40a5816589b0470fb845345b94f7f315')
+tmp_path = PosixPath('/tmp/pytest-of-gajap/pytest-80/test_publication_import_and_se0')
+native = (PosixPath('/tmp/pytest-of-gajap/pytest-80/native-receipts0/native.pdf'), ParseResult(document=DoclingDocument(schema_...': 0, 'char_end': 40}], 'native_ref': '#/texts/0'}, confidence=None),)}, origin_unavailable=(), page_rotations={1: 0}))
+fallback = False
+
+    @pytest.mark.parametrize("fallback", [False, True])
+    def test_publication_import_and_second_profile_reuse(
+        database: tuple[Engine, str],
+        tmp_path: Path,
+        native: tuple[Path, ParseResult[DoclingDocument]],
+        fallback: bool,
+    ) -&gt; None:
+        engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
+        path, parsed = native
+        if fallback:
+            parsed = replace(parsed, provenance={}, origin_unavailable=("#/texts/0", "#/texts/1"))
+        job = enqueue(path)
+        lease = queue.claim()
+        assert lease is not None and lease.job_id == job
+        calls: list[httpx.Request] = []
+        conversions: list[Path] = []
+    
+        def convert(_path: Path) -&gt; ParseResult[DoclingDocument]:
+            conversions.append(_path)
+            return parsed
+    
+        worker = DocumentWorker(
+            queue=queue,
+            store=store,
+            authorize_for_job=authorization.for_job,
+            client_factory=client_factory(calls),
+            converter=convert,
+            publish_content=publisher.publish_manifest,
+            load_accepted=access.resolve,
+            v2_writer_enabled=True,
+        )
+        worker._execute(lease, Event())
+        with Session(engine) as session:
+            row = session.scalars(select(ContentArtifact)).one()
+            assert row.publication_state == "ready"
+            assert row.artifact_contract_version == (1 if fallback else 2)
+            assert row.writer_fallback_reason == ("ORIGIN_UNAVAILABLE" if fallback else None)
+            published = session.scalars(
+                select(AuditEventRow).where(AuditEventRow.event_type == "content_artifact_published")
+            ).one()
+            assert published.payload is not None
+            assert published.payload["unattributed_item_count"] == (2 if fallback else 0)
+&gt;           assert session.scalar(select(func.count()).select_from(content_block)) == (
+                0 if fallback else 2
+            )
+E           AssertionError: assert 1 == 2
+E            +  where 1 = scalar(&lt;sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c350&gt;)
+E            +    where scalar = &lt;sqlalchemy.orm.session.Session object at 0x7bb3bf5e5e50&gt;.scalar
+E            +    and   &lt;sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c350&gt; = select_from(Table('content_block', MetaData(), Column('artifact_id', Uuid(), ForeignKey('content_artifact.id'), table=&lt;content_blo...=False)), Column('created_by', Uuid(), ForeignKey('principal.id'), table=&lt;content_block&gt;, nullable=False), schema=None))
+E            +      where select_from = &lt;sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c450&gt;.select_from
+E            +        where &lt;sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c450&gt; = select(&lt;sqlalchemy.sql.functions.count at 0x7bb3bf9a6660; count&gt;)
+E            +          where &lt;sqlalchemy.sql.functions.count at 0x7bb3bf9a6660; count&gt; = &lt;sqlalchemy.sql.functions._FunctionGenerator object at 0x7bb3bf190f30&gt;()
+E            +            where &lt;sqlalchemy.sql.functions._FunctionGenerator object at 0x7bb3bf190f30&gt; = func.count
+
+tests/integration/test_content_worker_v2.py:196: AssertionError</failure></testcase><testcase classname="tests.integration.test_content_worker_v2" name="test_publication_import_and_second_profile_reuse[True]" time="1.042" /><testcase classname="tests.integration.test_content_worker_v2" name="test_concurrent_profiles_share_pending_identity_and_preserve_restrictions" time="0.421" /><testcase classname="tests.integration.test_content_worker_v2" name="test_missing_producer_is_hard_failure_without_ready_or_fallback" time="0.323" /><testcase classname="tests.integration.test_content_worker_v2" name="test_corrupt_accepted_marker_never_becomes_conversion_miss" time="0.472" /></testsuite></testsuites>

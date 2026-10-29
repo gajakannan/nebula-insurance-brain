@@ -1,14 +1,14 @@
 version: 0
-generated_at: '2026-10-22T02:27:20+00:00'
+generated_at: '2026-10-28T09:27:01+00:00'
 summary:
-  total_decisions: 2
+  total_decisions: 7
   by_kind:
     DECISION: 0
     SUPERSEDES: 0
     TRADEOFF: 0
-    WHY: 2
-  resolved_node_count: 2
-  resolved_symbol_count: 2
+    WHY: 7
+  resolved_node_count: 3
+  resolved_symbol_count: 4
   ambiguous_count: 0
 decisions:
 - id: decision:engine-packages-brain-persistence-src-brain-persistence-document-dates-l496-why
@@ -18,10 +18,42 @@ decisions:
   text: READ COMMITTED candidate/selection queries need one stable
   resolved_node: capability:document-date-provenance
   resolved_symbol: symbol:capability-document-date-provenance:document-date-service.read
-- id: decision:neuron-packages-brain-ingestion-src-brain-ingestion-docling-adapter-l36-why
+- id: decision:neuron-packages-brain-extraction-src-brain-extraction-vllm-graph-client-l63-why
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 63
+  kind: WHY
+  text: every rejection gets a failure class, before dispatch or after a response.
+  resolved_node: capability:local-inference-service
+  resolved_symbol: symbol:capability-local-inference-service:vllm-graph-client.recorded
+- id: decision:neuron-packages-brain-extraction-src-brain-extraction-vllm-graph-client-l368-why
+  file: neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+  line: 368
+  kind: WHY
+  text: a refused connection proves the request never reached the
+  resolved_node: capability:local-inference-service
+  resolved_symbol: symbol:capability-local-inference-service:vllm-graph-client.request
+- id: decision:neuron-packages-brain-ingestion-src-brain-ingestion-docling-adapter-l50-why
   file: neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py
-  line: 36
+  line: 50
   kind: WHY
   text: Docling detects archives before applying allowed_formats, and
   resolved_node: capability:parse-once-content-artifact
   resolved_symbol: symbol:capability-parse-once-content-artifact:docling-adapter.parse
+- id: decision:neuron-packages-brain-ingestion-src-brain-ingestion-document-worker-l39-why
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+  line: 39
+  kind: WHY
+  text: failures before a ready bundle may reconvert once (S0002-AC3); never after.
+  resolved_node: capability:parse-once-content-artifact
+- id: decision:neuron-packages-brain-ingestion-src-brain-ingestion-document-worker-l45-why
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+  line: 45
+  kind: WHY
+  text: another attempt cannot change these outcomes, so they are terminal.
+  resolved_node: capability:parse-once-content-artifact
+- id: decision:neuron-packages-brain-ingestion-src-brain-ingestion-document-worker-l74-why
+  file: neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py
+  line: 74
+  kind: WHY
+  text: jobs submitted before pipeline selection were processed by Graph's direct
+  resolved_node: capability:parse-once-content-artifact

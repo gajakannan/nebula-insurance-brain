@@ -1,0 +1,281 @@
+{
+  "schema_version": 1,
+  "feature_id": "F0005",
+  "feature_slug": "one-time-docling-ingestion",
+  "run_id": "2026-10-25-4020923b",
+  "status": "approved",
+  "recorded_on": "2026-10-25",
+  "contract_version": "2026-07-11",
+  "contract_effective_date": "2026-07-11",
+  "feature_path_at_run_start": "planning-mds/features/F0005-one-time-docling-ingestion",
+  "feature_path_at_closeout": "planning-mds/features/archive/F0005-one-time-docling-ingestion",
+  "feature_state": "Done",
+  "rerun_of": null,
+  "changed_paths": [
+    "config/local.yaml",
+    "docker/DEPENDENCY-MATRIX.md",
+    "docker/local-inference-runbook.md",
+    "engine/migrations/versions/0009_f0005_job_event_reason.py",
+    "engine/migrations/versions/0010_f0005_job_event_reason_expand.py",
+    "engine/packages/brain-content/src/brain_content/config.py",
+    "engine/packages/brain-content/src/brain_content/manifest.py",
+    "engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest-v2.schema.json",
+    "engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest.schema.json",
+    "engine/packages/brain-content/tests/test_config.py",
+    "engine/packages/brain-jobs/src/brain_jobs/queue.py",
+    "engine/packages/brain-jobs/tests/test_postgres.py",
+    "engine/packages/brain-jobs/tests/test_queue.py",
+    "engine/tests/integration/test_content_migration_states.py",
+    "engine/tests/integration/test_job_event_reason_migration.py",
+    "neuron/.coverage.myStarCore-01.pid728879.Xku0WMCx.HNQIp837rWOh",
+    "neuron/benchmarks/f0005_qualification.py",
+    "neuron/fixtures/qualification",
+    "neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py",
+    "neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py",
+    "neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py",
+    "neuron/packages/brain-extraction/src/brain_extraction/pins.py",
+    "neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py",
+    "neuron/packages/brain-ingestion/pyproject.toml",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/content_projection.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/conversion_process.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/item_provenance.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/ocr_asset_pins.json",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/provider_supervisor.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/submission.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py",
+    "neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py",
+    "neuron/packages/brain-ingestion/tests/test_conversion_process.py",
+    "neuron/packages/brain-ingestion/tests/test_docling_adapter.py",
+    "neuron/packages/brain-ingestion/tests/test_document_worker_reasons.py",
+    "neuron/packages/brain-ingestion/tests/test_ocr_asset_provenance.py",
+    "neuron/packages/brain-ingestion/tests/test_ocr_quality.py",
+    "neuron/packages/brain-ingestion/tests/test_worker_guard.py",
+    "neuron/packages/brain-interpretation/src/brain_interpretation/parsed_content.py",
+    "neuron/tests/integration/f0005_live_support.py",
+    "neuron/tests/integration/test_content_worker_v2.py",
+    "neuron/tests/integration/test_fault_injection_qualification.py",
+    "neuron/tests/integration/test_interpretation_rejections.py",
+    "neuron/tests/integration/test_live_conversion_qualification.py",
+    "neuron/tests/integration/test_live_reinterpretation_qualification.py",
+    "neuron/tests/integration/test_pipeline_selection.py",
+    "neuron/tests/integration/test_vllm_graph_client.py",
+    "neuron/tests/integration/test_worker_cli_enqueue.py",
+    "neuron/tests/support",
+    "neuron/uv.lock",
+    "planning-mds/BLUEPRINT.md",
+    "planning-mds/architecture",
+    "planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md",
+    "planning-mds/architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md",
+    "planning-mds/architecture/decisions/ADR-0074-local-document-job-execution-controls.md",
+    "planning-mds/features/REGISTRY.md",
+    "planning-mds/features/ROADMAP.md",
+    "planning-mds/features/archive/F0005-one-time-docling-ingestion",
+    "planning-mds/features/archive/F0005-one-time-docling-ingestion/GETTING-STARTED.md",
+    "planning-mds/features/archive/F0005-one-time-docling-ingestion/STATUS.md",
+    "planning-mds/kg-source",
+    "planning-mds/knowledge-graph",
+    "planning-mds/knowledge-graph/canonical-nodes.yaml",
+    "planning-mds/knowledge-graph/code-index.yaml",
+    "planning-mds/knowledge-graph/coverage-report.yaml",
+    "planning-mds/knowledge-graph/decisions-index.yaml",
+    "planning-mds/knowledge-graph/feature-mappings.yaml",
+    "planning-mds/knowledge-graph/symbol-index.yaml",
+    "planning-mds/knowledge-graph/unbound-but-referenced.yaml",
+    "planning-mds/operations/evidence/features/F0005-one-time-docling-ingestion/latest-run.json",
+    "planning-mds/schemas/content-artifact-manifest-v2.schema.json",
+    "planning-mds/schemas/content-artifact-manifest.schema.json"
+  ],
+  "scm": {
+    "base_ref": "plan/f0005-one-time-docling-ingestion",
+    "head_ref": "feature/f0005-live-qualification",
+    "diff_artifact": "artifacts/diffs/changed-files.txt"
+  },
+  "runtime_bearing": true,
+  "deployment_config_changed": true,
+  "frontend_in_scope": false,
+  "security_sensitive_scope": true,
+  "required_roles": [
+    "Quality Engineer",
+    "Code Reviewer",
+    "Security Reviewer",
+    "DevOps",
+    "Architect"
+  ],
+  "gate_results": {
+    "assembly_plan_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g0-assembly-plan-validation.md"
+    },
+    "runtime_preflight": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g1-runtime-preflight.md"
+    },
+    "self_review": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "g2-self-review.md"
+    },
+    "deployability": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "deployability-check.md"
+    },
+    "signoff": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "signoff-ledger.md"
+    },
+    "kg_reconciliation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "kg-reconciliation.md"
+    },
+    "pm_closeout": {
+      "required": true,
+      "result": "APPROVED WITH RECOMMENDATIONS",
+      "artifact": "pm-closeout.md"
+    },
+    "tracker_sync": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "lifecycle-gates.log"
+    }
+  },
+  "files": {
+    "readme": "README.md",
+    "action_context": "action-context.md",
+    "artifact_trace": "artifact-trace.md",
+    "gate_decisions": "gate-decisions.md",
+    "commands_log": "commands.log",
+    "lifecycle_gates_log": "lifecycle-gates.log",
+    "assembly_plan_validation": "g0-assembly-plan-validation.md",
+    "runtime_preflight": "g1-runtime-preflight.md",
+    "self_review": "g2-self-review.md",
+    "test_plan": "test-plan.md",
+    "test_execution_report": "test-execution-report.md",
+    "coverage_report": "coverage-report.md",
+    "deployability": "deployability-check.md",
+    "round1_reviews": [
+      "code-review-report-round1.md",
+      "security-review-report-round1.md",
+      "qa-qualification-verdict-round1.md",
+      "architect-qualification-verdict-round1.md"
+    ],
+    "code_review": "code-review-report.md",
+    "security_review": "security-review-report.md",
+    "qa_qualification_verdict": "qa-qualification-verdict.md",
+    "architect_qualification_verdict": "architect-qualification-verdict.md",
+    "delta_review": "delta-review-report.md",
+    "signoff_ledger": "signoff-ledger.md",
+    "feature_action_execution": "feature-action-execution.md",
+    "kg_reconciliation": "kg-reconciliation.md",
+    "pm_closeout": "pm-closeout.md",
+    "token_usage": "token-usage.json"
+  },
+  "role_results": {
+    "Architect": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g0-assembly-plan-validation.md"
+      ],
+      "verdict_artifact": "g0-assembly-plan-validation.md"
+    },
+    "Quality Engineer": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "required_artifacts": [
+        "test-plan.md",
+        "test-execution-report.md",
+        "coverage-report.md"
+      ],
+      "verdict_artifact": "test-execution-report.md"
+    },
+    "DevOps": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "required_artifacts": [
+        "g1-runtime-preflight.md",
+        "deployability-check.md"
+      ],
+      "verdict_artifact": "deployability-check.md"
+    },
+    "Code Reviewer": {
+      "required": true,
+      "result": "APPROVED WITH RECOMMENDATIONS",
+      "required_artifacts": [
+        "code-review-report.md"
+      ],
+      "verdict_artifact": "code-review-report.md"
+    },
+    "Security Reviewer": {
+      "required": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "required_artifacts": [
+        "security-review-report.md"
+      ],
+      "verdict_artifact": "security-review-report.md"
+    }
+  },
+  "token_usage": {
+    "artifact": "token-usage.json",
+    "agent_tool": "claude-code",
+    "turns": 711,
+    "context_tokens": 287973417,
+    "uncached_input_tokens": 1450,
+    "cached_input_tokens": 285306106,
+    "cache_creation_input_tokens": 2665861,
+    "cache_creation_1h_input_tokens": 2665861,
+    "cache_creation_5m_input_tokens": 0,
+    "output_tokens": 674921,
+    "cache_hit_ratio": 0.9907,
+    "compactions": 2
+  },
+  "security_scans": {
+    "dependency": {
+      "ran": true,
+      "result": "findings",
+      "artifact": "artifacts/security/g2r3/dependency-neuron.json",
+      "additional_artifacts": [
+        "artifacts/security/g2r3/dependency-engine.json"
+      ],
+      "summary": "Final rerun 2026-10-28 in rebuilt locked containers: engine 68 deps / 0 vulns; neuron 181 deps: pypdf (6.21.2) and litellm (1.100.4) cleared; remaining pillow 38, docling/docling-slim 15, aiohttp 8, filelock 3, certifi 1, setuptools 1 (judged by Security G3 round 2: accepted for the local synthetic scope; pillow/docling requalification is an activation precondition). Earlier runs retained under artifacts/security/ and artifacts/security/g2r/"
+    },
+    "secrets": {
+      "ran": true,
+      "result": "findings",
+      "artifact": "artifacts/security/g2r3/secrets-2026-10-25-4020923b.json",
+      "additional_artifacts": [
+        "artifacts/security/g2r3/secrets-engine.json",
+        "artifacts/security/g2r3/secrets-neuron.json",
+        "artifacts/security/g2r3/secrets-scripts.json",
+        "artifacts/security/g2r3/secrets-config.json",
+        "artifacts/security/g2r3/secrets-docker.json"
+      ],
+      "summary": "gitleaks final rerun: 0 leaks in engine/neuron/scripts/config/docker; the same 2 run-folder hits are the public HF model commit sha (tokenizer_revision), judged false positive by Security"
+    },
+    "sast": {
+      "ran": true,
+      "result": "findings",
+      "artifact": "artifacts/security/g2r3/sast.sarif",
+      "summary": "semgrep final rerun: avoid-sqlalchemy-text in pre-existing 0005 migration (suppressed in source), 0010 downgrade (constant IN-list) and benchmark schema DDL (validated pipeline); judged false positives by Security"
+    },
+    "dast": {
+      "ran": true,
+      "result": "PASS WITH RECOMMENDATIONS",
+      "artifact": "artifacts/security/g2r3/dast.json",
+      "summary": "ZAP API scan final rerun: 0 FAIL, 117 PASS, 2 pre-existing passive header WARNs (F0004 SEC-L2); F0005 adds no HTTP endpoint"
+    }
+  },
+  "omissions": [],
+  "waivers": {},
+  "global_evidence_refs": {},
+  "action": "feature",
+  "run_scope": "feature-completion"
+}

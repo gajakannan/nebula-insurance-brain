@@ -6,6 +6,7 @@ import hashlib
 import json
 import tempfile
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from importlib.metadata import version
 from pathlib import Path
@@ -22,11 +23,70 @@ from brain_interpretation.result import (
     RunConfiguration,
 )
 from docling_core.types.doc import DoclingDocument
+from pydantic import BaseModel
 
 from brain_extraction.docling_graph_pipeline import DoclingGraphPipelineAdapter
 from brain_extraction.graph_evidence import ground_value
+from brain_extraction.openai_compatible_adapter import baseline_prompt, strict_json_schema
 from brain_extraction.profiles import ExtractionProfile
 from brain_extraction.vllm_graph_client import VllmGraphClient
+
+Pipeline = Literal["direct-baseline", "graph-dense", "graph-direct"]
+PIPELINES: tuple[Pipeline, ...] = ("direct-baseline", "graph-dense", "graph-direct")
+DIRECT_BASELINE_PROMPT_VERSION = 1
+
+
+class UnsupportedOutput(ValueError):
+    """Relationships or entity types without a downstream mapping (S0003-AC4)."""
+
+
+@dataclass(frozen=True, slots=True)
+class _BaselineOutput:
+    extracted_models: tuple[BaseModel, ...]
+    provenance: dict[str, Any]
+    effective_configuration: dict[str, Any]
+    graph: dict[str, Any]
+
+
+def _direct_baseline(
+    document: DoclingDocument, profile: ExtractionProfile, client: VllmGraphClient
+) -> _BaselineOutput:
+    """F0001's one-call baseline over persisted text, through the bounded client.
+
+    The prompt and strict schema are F0001's; the transport, budgets, semaphore,
+    host guard and evidence mapper are the same ones Graph uses. The whole text
+    sequence was the model's context, so its items form the grounding ledger.
+    """
+    prompt = baseline_prompt(document)
+    schema = strict_json_schema(profile.template)
+    value = client.get_json_response(
+        prompt, json.dumps(schema), response_schema_name=profile.template.__name__
+    )
+    model = profile.template.model_validate(value)
+    return _BaselineOutput(
+        extracted_models=(model,),
+        provenance={
+            "version": 2,
+            "chunks": {"document": {"doc_item_refs": [item.self_ref for item in document.texts]}},
+        },
+        effective_configuration={
+            "engine": "direct-baseline",
+            "prompt_version": DIRECT_BASELINE_PROMPT_VERSION,
+            "schema": "strict",
+        },
+        graph={"nodes": [], "edges": []},
+    )
+
+
+def _reject_unsupported(output: Any, profile: ExtractionProfile) -> None:
+    if output.graph.get("edges"):
+        raise UnsupportedOutput("relationship output has no downstream mapping")
+    for model in output.extracted_models:
+        if type(model) is not profile.template:
+            raise UnsupportedOutput("entity type has no downstream mapping")
+        for value in model.model_dump(mode="json").values():
+            if isinstance(value, dict | list):
+                raise UnsupportedOutput("nested entity has no downstream mapping")
 
 
 def _json(value: Any) -> bytes:
@@ -55,7 +115,14 @@ class GraphInterpretationService:
         publish: Callable[[Callable[[], str]], str] | None = None,
         artifact_key: ArtifactKey | None = None,
         output_contract_version: Literal[1, 2] = 1,
+        pipeline: Pipeline | None = None,
     ) -> InterpretationResult:
+        """Run one pinned pipeline. `None` keeps the legacy Graph `extraction_contract`."""
+        if pipeline is not None:
+            if pipeline not in PIPELINES:
+                raise ValueError("unknown extraction pipeline")
+            if pipeline != "direct-baseline":
+                extraction_contract = "dense" if pipeline == "graph-dense" else "direct"
         # Targeted interpretation cannot quietly become a whole-document request.
         # The pinned upstream pipeline does not expose a tested ref-preserving slice.
         if selected_refs:
@@ -93,13 +160,9 @@ class GraphInterpretationService:
                     != prior_metadata.get("document_date_selection_id")
                 ):
                     raise ArtifactIntegrityError("run marker differs from retained configuration")
-            if prior_metadata.get("requested_configuration") != {
-                "extraction_contract": extraction_contract,
-                "chunk_max_tokens": chunk_max_tokens,
-                "model_id": client.model,
-                "model_revision": client.diagnostics()["model_revision"],
-                "limits": client.diagnostics()["limits"],
-            }:
+            if prior_metadata.get("requested_configuration") != _requested(
+                pipeline, extraction_contract, chunk_max_tokens, client
+            ):
                 raise ValueError("run identity belongs to a different configuration")
             if (
                 previous.run_configuration.profile_id,
@@ -114,24 +177,52 @@ class GraphInterpretationService:
             ):
                 raise ValueError("run identity belongs to a different profile")
             return previous
-        output = None
+        output: Any = None
         warnings = []
         try:
-            with tempfile.TemporaryDirectory(prefix="nebula-interpret-") as temporary:
-                source = Path(temporary) / "docling-document.json"
-                source.write_bytes(files[manifest.docling_document.path])
-                output = DoclingGraphPipelineAdapter(llm_client=client, model_id=client.model).run(
-                    source=source,
-                    template=profile.template,
-                    extraction_contract=extraction_contract,
-                    chunk_max_tokens=chunk_max_tokens,
-                )
+            if pipeline == "direct-baseline":
+                output = _direct_baseline(document, profile, client)
+            else:
+                with tempfile.TemporaryDirectory(prefix="nebula-interpret-") as temporary:
+                    source = Path(temporary) / "docling-document.json"
+                    source.write_bytes(files[manifest.docling_document.path])
+                    output = DoclingGraphPipelineAdapter(
+                        llm_client=client, model_id=client.model
+                    ).run(
+                        source=source,
+                        template=profile.template,
+                        extraction_contract=extraction_contract,
+                        chunk_max_tokens=chunk_max_tokens,
+                    )
+            _reject_unsupported(output, profile)
+        except UnsupportedOutput:
+            # Fail closed: no partial assertions from an unmapped shape.
+            output = None
+            warnings.append("unsupported_output")
         except Exception as exc:
             # Provider and pipeline exceptions can contain source text. Keep only
             # a type-level failure code in the durable result's ordinary warnings.
+            output = None
             warnings.append(f"pipeline_failure:{type(exc).__name__}")
         diagnostics = client.diagnostics()
         calls = diagnostics["calls"]
+        rejections = diagnostics["rejections"]
+        failed_calls = rejections or any(call["outcome"] != "complete" for call in calls)
+        if output is not None and failed_calls:
+            # A result assembled around a failed, rejected or repaired call is not
+            # accepted, including a budget or deadline rejection that never reached
+            # the provider: the attempt fails with its reason and retries from
+            # saved JSON (F0005 H1).
+            output = None
+        if (
+            pipeline != "direct-baseline"
+            and extraction_contract == "dense"
+            and any(not str(call.get("phase", "")).startswith("dense_") for call in calls)
+        ):
+            # Graph 1.9.1 falls back to one direct call when dense yields no model.
+            # That answer would carry dense identity, so it is never accepted.
+            output = None
+            warnings.append("dense_contract_fallback")
         assertions = []
         if output is not None:
             for index, model in enumerate(output.extracted_models):
@@ -159,7 +250,7 @@ class GraphInterpretationService:
             warnings.append("unresolved_property_evidence")
         if manifest.extraction_quality.status != "complete":
             warnings.append("partial_source_conversion")
-        if any(call["outcome"] != "complete" for call in calls):
+        if failed_calls:
             warnings.append("model_call_failures")
         result = InterpretationResult(
             run_id=run_id,
@@ -192,33 +283,37 @@ class GraphInterpretationService:
             provenance_ledger_ref=f"runs/{tenant_id}/{knowledge_base_id}/{run_id}/provenance.json",
             created_at=datetime.now(UTC),
         )
-        metadata = {
+        metadata: dict[str, Any] = {
             "contract_version": 1,
-            "engine": "docling-graph",
+            "engine": "direct-baseline" if pipeline == "direct-baseline" else "docling-graph",
             "diagnostics": diagnostics,
             "artifact_sha256": manifest.artifact_sha256,
             "profile_id": profile.profile_id,
             "profile_version": profile.profile_version,
             "schema_sha256": result.run_configuration.schema_hash,
             "selected_refs": [],
-            "requested_configuration": {
-                "extraction_contract": extraction_contract,
-                "chunk_max_tokens": chunk_max_tokens,
-                "model_id": client.model,
-                "model_revision": diagnostics["model_revision"],
-                "limits": diagnostics["limits"],
-            },
+            "requested_configuration": _requested(
+                pipeline, extraction_contract, chunk_max_tokens, client
+            ),
+            # Never null: a legacy job (no pinned pipeline) ran Graph's direct
+            # contract, and says so explicitly (Architect G3 round 2).
+            "pipeline": pipeline or "graph-direct",
+            "pipeline_source": "pinned" if pipeline is not None else "legacy_default",
             "evidence_mapper_version": 2,
             "pipeline_config": output.effective_configuration if output else None,
             "package_versions": {
                 name: version(name) for name in ("docling", "docling-core", "docling-graph")
             },
         }
-        pipeline: PipelineIdentity | None = None
+        identity: PipelineIdentity | None = None
         if output_contract_version == 2:
-            pipeline = PipelineIdentity(
-                name="docling-graph",
-                package_version=version("docling-graph"),
+            identity = PipelineIdentity(
+                name="direct-baseline" if pipeline == "direct-baseline" else "docling-graph",
+                package_version=(
+                    f"prompt-v{DIRECT_BASELINE_PROMPT_VERSION}"
+                    if pipeline == "direct-baseline"
+                    else version("docling-graph")
+                ),
                 configuration_sha256=hashlib.sha256(
                     _json(
                         {
@@ -231,7 +326,7 @@ class GraphInterpretationService:
                     )
                 ).hexdigest(),
             )
-            metadata["pipeline_identity"] = pipeline.model_dump(mode="json")
+            metadata["pipeline_identity"] = identity.model_dump(mode="json")
             # F0016/F0022 owns a future verified selection producer. This worker
             # records the exact absence of a selected basis until that exists.
             metadata["document_date_selection_id"] = None
@@ -252,7 +347,7 @@ class GraphInterpretationService:
                 files=outputs,
                 artifact_key=key,
                 output_contract_version=output_contract_version,
-                pipeline=pipeline,
+                pipeline=identity,
                 document_date_selection_id=None,
             )
 
@@ -261,3 +356,31 @@ class GraphInterpretationService:
         else:
             publish(save)
         return result
+
+
+def _requested(
+    pipeline: Pipeline | None,
+    extraction_contract: str,
+    chunk_max_tokens: int,
+    client: VllmGraphClient,
+) -> dict[str, Any]:
+    """Requested run identity; legacy Graph runs keep their exact prior shape."""
+    diagnostics = client.diagnostics()
+    requested: dict[str, Any] = {
+        "extraction_contract": extraction_contract,
+        "chunk_max_tokens": chunk_max_tokens,
+        "model_id": client.model,
+        "model_revision": diagnostics["model_revision"],
+        "limits": diagnostics["limits"],
+    }
+    if pipeline == "direct-baseline":
+        requested = {
+            "engine": "direct-baseline",
+            "prompt_version": DIRECT_BASELINE_PROMPT_VERSION,
+            "model_id": client.model,
+            "model_revision": diagnostics["model_revision"],
+            "limits": diagnostics["limits"],
+        }
+    elif pipeline is not None:
+        requested["pipeline"] = pipeline
+    return requested

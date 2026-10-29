@@ -21,6 +21,8 @@ from brain_content.validation import ArtifactKey, inventory_hash, sha256, verify
 from brain_interpretation.parsed_content import BlockOriginInput, ParseResult
 from docling_core.types.doc.document import DoclingDocument
 
+from brain_ingestion.bundle_writer import ocr_quality
+
 PROJECTION_VERSION = "content-projection-v2.0"
 
 
@@ -243,7 +245,10 @@ def build_bundle_v2(
         ],
         execution=execution,
         extraction_quality=ExtractionQuality(
-            status=parsed.status, failed_pages=parsed.failed_pages, warnings=parsed.warnings
+            status=parsed.status,
+            failed_pages=parsed.failed_pages,
+            warnings=parsed.warnings,
+            ocr=ocr_quality(parsed),
         ),
         page_count=parsed.page_count,
         coordinate_origin="top_left",

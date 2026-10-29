@@ -1,0 +1,3 @@
+#!/bin/sh
+set -eu
+exec docker run --rm -v '/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/src:ro' -v '/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-10-25-4020923b/artifacts/security/g2r3:/reports' -e SEMGREP_SEND_METRICS=off sha256:2b33f46ba66cf8cc2ad59ccfa7d22951fd00c632c38f1339e84ec8e6e641a942 semgrep scan --config p/python --config p/security-audit --metrics off --disable-version-check --no-git-ignore --error --sarif --output /reports/sast.sarif --exclude '**/.venv/**' --exclude '**/build/**' /src/engine /src/neuron /src/scripts/ops /src/config

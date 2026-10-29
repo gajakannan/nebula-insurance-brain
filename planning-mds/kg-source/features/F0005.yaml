@@ -1,14 +1,16 @@
 id: feature:F0005
 name: One-time document ingestion
-path: planning-mds/features/F0005-one-time-docling-ingestion
-status: planned
-registry_section: Planned
+path: planning-mds/features/archive/F0005-one-time-docling-ingestion
+status: archived-done
+registry_section: Archived
 phase: v0.1A
-roadmap_section: Next
+roadmap_section: Completed
 roadmap_order: 4
-rationale: Docling-Graph 1.9.1 synthetic development proof complete. Phase A requirements and thresholds approved in 2026-10-23-9a04b327 remain unchanged. Phase B rework 2026-10-25-50fcf658 addresses three plan-review gaps with explicit direct-baseline initial/rejection settings, supervised conversion deadline and an enforced host singleton/provider recovery; operator Phase B approval recorded 2026-10-25. Local synthetic-corpus qualification and gated Graph dense/v2 activation remain future work.
-validation_gate: F0004 artifact contract; F0001 historical baseline. Before activation, prove the pinned ADR-0060
-  integration, pre-extraction checkpoint, native/scanned reuse, evidence translation, and recovery.
+rationale: Closed 2026-10-28 on the S0004-AC7 rejection branch. Graph dense (Docling-Graph 1.9.1, Phi-4-mini)
+  was qualified live on the synthetic corpus and rejected; direct-baseline with the v1 writer stays default.
+  Execution controls ship under the Accepted ADR-0074; ADR-0060 stays Proposed with a reopen deadline.
+validation_gate: Feature G0-G8 passed (G3 after a rework round); operator G4 approval 2026-10-28 for the rejection
+  branch; post-decision check verified direct-baseline/v1. No activation.
 depends_on:
 - feature:F0004
 - feature:F0001
@@ -24,6 +26,7 @@ governed_by:
 - adr:0060
 - adr:0065
 - adr:0073
+- adr:0074
 affects:
 - capability:parse-once-content-artifact
 - capability:semantic-interpretation-run
@@ -36,43 +39,41 @@ uses_schema:
 - schema:content-artifact-manifest-v2
 - schema:interpretation-result
 notes:
-- Plan-review 2026-10-24-0fbc1de1 PM-1/ARCH-1/BLD-1 repair design is in plan run 2026-10-25-50fcf658, Phase B existing feature, explicitly approved by the operator 2026-10-25. No implementation or runtime proof claimed; original planning/review evidence is preserved.
-- Host guard is shared across engines/configs/tenants; uncertain provider activity blocks replacement until confirmed dedicated-server exit and pinned restart. Parent alone owns conversion timeout and ready publication. Rejection explicitly returns new jobs to direct-baseline/v1; historical jobs retain their identity.
-- Candidate contract evidence is recorded in the feature folder. No production activation or lifecycle approvals claimed; F0001 remains the live-model baseline.
-- Operator decisions 2026-10-23 - synthetic corpus with agent-role reviewers; F0005 enables the v2 writer at activation; F0016 owns document-date candidates; production host stays F0026.
-- Fixed proof templates avoid a dependency on the F0015 production compiler; F0002/F0003 contracts are required
-  for production job wiring.
+- Run 2026-10-25-4020923b closed 2026-10-28. Live qualification report SHA-256 55ce3484...aede (void false); Graph dense missed accuracy, abstention, evidence resolution, latency and (like for like) review workload.
+- Shipped for every pipeline (ADR-0074) - supervised conversion with a 300 s parent deadline, host guard with confirmed quiescence, closed failure reasons (migrations 0009/0010), a reconvert-at-most-once launch budget, a bounded queue, and pipeline pinning.
+- ADR-0073 amendment 2026-10-27 adds observed OCR quality to v1/v2 manifests (add-only, deploy together, no rollback).
+- Activation preconditions remain - converter OS isolation (SEC-F5-M1), Docling/pillow requalification, and the provider executable allowlist and minimal restart environment.
 story_mappings:
 - id: story:F0005-S0001
-  path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
   affects:
   - capability:parse-once-content-artifact
   - capability:semantic-interpretation-run
   governed_by:
   - adr:0060
 - id: story:F0005-S0002
-  path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md
   affects:
   - capability:parse-once-content-artifact
   - capability:semantic-interpretation-run
   governed_by:
   - adr:0060
 - id: story:F0005-S0003
-  path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md
   affects:
   - capability:parse-once-content-artifact
   - capability:semantic-interpretation-run
   governed_by:
   - adr:0060
 - id: story:F0005-S0004
-  path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md
   affects:
   - capability:parse-once-content-artifact
   - capability:semantic-interpretation-run
   governed_by:
   - adr:0060
 - id: story:F0005-S0005
-  path: planning-mds/features/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md
   affects:
   - capability:parse-once-content-artifact
   - capability:versioned-content-contracts
@@ -80,3 +81,7 @@ story_mappings:
   - adr:0060
   - adr:0065
   - adr:0073
+archived_date: '2026-10-28'
+completion_state: All five stories closed in feature run 2026-10-25-4020923b on the S0004-AC7 rejection branch;
+  G3 passed after one rework round, G4 approved by the operator; twenty-five story/role signoffs. Final neuron 260,
+  engine 424 (pre-existing failures only), seven live lanes and the post-decision check pass.

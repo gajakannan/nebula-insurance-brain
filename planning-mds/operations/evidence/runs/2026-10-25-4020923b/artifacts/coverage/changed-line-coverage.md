@@ -1,0 +1,21 @@
+| `engine/packages/brain-content/src/brain_content/config.py` | modified | 32 | 32 | 100.0% |
+| `engine/packages/brain-content/src/brain_content/manifest.py` | modified | 19 | 14 | 73.7% |
+| `engine/packages/brain-jobs/src/brain_jobs/queue.py` | modified | 50 | 42 | 84.0% |
+| `neuron/packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py` | modified | 4 | 3 | 75.0% |
+| `neuron/packages/brain-extraction/src/brain_extraction/graph_interpretation.py` | modified | 66 | 63 | 95.5% |
+| `neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py` | modified | 6 | 6 | 100.0% |
+| `neuron/packages/brain-extraction/src/brain_extraction/pins.py` | new | 2 | 2 | 100.0% |
+| `neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py` | modified | 62 | 62 | 100.0% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/bundle_writer.py` | modified | 6 | 6 | 100.0% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/content_projection.py` | modified | 1 | 1 | 100.0% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/content_workflow.py` | modified | 26 | 11 | 42.3% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/conversion_process.py` | new | 345 | 266 | 77.1% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py` | modified | 40 | 35 | 87.5% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py` | modified | 130 | 120 | 92.3% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/item_provenance.py` | modified | 75 | 68 | 90.7% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/provider_supervisor.py` | new | 116 | 84 | 72.4% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/submission.py` | modified | 9 | 8 | 88.9% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py` | modified | 73 | 47 | 64.4% |
+| `neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py` | new | 334 | 295 | 88.3% |
+| `neuron/packages/brain-interpretation/src/brain_interpretation/parsed_content.py` | modified | 6 | 6 | 100.0% |
+TOTAL changed executable lines 1402, covered 1171, 83.5%

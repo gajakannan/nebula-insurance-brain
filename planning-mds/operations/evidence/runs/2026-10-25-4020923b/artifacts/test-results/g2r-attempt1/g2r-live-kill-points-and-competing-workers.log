@@ -1,0 +1,226 @@
+FFFFF
+=================================== FAILURES ===================================
+____ test_worker_killed_at_each_point_recovers_with_single_effects[bundle] _____
+
+kill_point = 'bundle'
+
+    @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
+    def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+                job = None
+>               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:431: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <brain_ingestion.worker_guard.HostInferenceGuard object at 0x7c82445f7380>
+
+    def require_quiescent(self) -> None:
+        if self.marker_path.exists():
+>           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError
+______ test_worker_killed_at_each_point_recovers_with_single_effects[run] ______
+
+kill_point = 'run'
+
+    @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
+    def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+                job = None
+>               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:431: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <brain_ingestion.worker_guard.HostInferenceGuard object at 0x7c82440ebd90>
+
+    def require_quiescent(self) -> None:
+        if self.marker_path.exists():
+>           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError
+____ test_worker_killed_at_each_point_recovers_with_single_effects[import] _____
+
+kill_point = 'import'
+
+    @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
+    def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+                job = None
+>               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:431: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <brain_ingestion.worker_guard.HostInferenceGuard object at 0x7c823fb81590>
+
+    def require_quiescent(self) -> None:
+        if self.marker_path.exists():
+>           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError
+___ test_worker_killed_at_each_point_recovers_with_single_effects[imported] ____
+
+kill_point = 'imported'
+
+    @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
+    def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+                job = None
+>               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:431: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <brain_ingestion.worker_guard.HostInferenceGuard object at 0x7c82440f1810>
+
+    def require_quiescent(self) -> None:
+        if self.marker_path.exists():
+>           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError
+_ test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescence _
+
+    def test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescence():
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=45).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+>               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:468: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <brain_ingestion.worker_guard.HostInferenceGuard object at 0x7c823fba43e0>
+
+    def require_quiescent(self) -> None:
+        if self.marker_path.exists():
+>           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError
+=============================== warnings summary ===============================
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED neuron/tests/integration/test_fault_injection_qualification.py::test_worker_killed_at_each_point_recovers_with_single_effects[bundle]
+FAILED neuron/tests/integration/test_fault_injection_qualification.py::test_worker_killed_at_each_point_recovers_with_single_effects[run]
+FAILED neuron/tests/integration/test_fault_injection_qualification.py::test_worker_killed_at_each_point_recovers_with_single_effects[import]
+FAILED neuron/tests/integration/test_fault_injection_qualification.py::test_worker_killed_at_each_point_recovers_with_single_effects[imported]
+FAILED neuron/tests/integration/test_fault_injection_qualification.py::test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescence
+5 failed, 14 deselected, 27 warnings in 6.94s

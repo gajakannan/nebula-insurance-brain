@@ -184,3 +184,30 @@ def test_postgres_fence_uses_time_after_waiting_for_a_lock(pg_queue):
                 future.result(timeout=10)
         finally:
             event.remove(queue.engine, "before_cursor_execute", before_execute)
+
+
+def test_postgres_concurrent_submissions_never_exceed_the_depth_bound(pg_queue):
+    from brain_jobs.queue import QueueFull
+
+    queue = DocumentJobQueue(pg_queue.engine, lease_seconds=30, max_depth=3)
+    tenant, kb = uuid4(), uuid4()
+    barrier = Barrier(8)
+
+    def submit(index: int) -> str:
+        barrier.wait()
+        try:
+            queue.enqueue(
+                tenant_id=tenant,
+                knowledge_base_id=kb,
+                artifact_id=uuid4(),
+                request_key=f"request-{index}",
+                payload={},
+            )
+            return "admitted"
+        except QueueFull:
+            return "rejected"
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        outcomes = list(pool.map(submit, range(8)))
+    assert outcomes.count("admitted") == 3 and outcomes.count("rejected") == 5
+    assert queue.depth() == 3

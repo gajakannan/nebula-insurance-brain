@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="5" time="7.501" timestamp="2026-10-28T03:35:27.105914-04:00" hostname="myStarCore-01"><testcase classname="tests.integration.test_fault_injection_qualification" name="test_worker_killed_at_each_point_recovers_with_single_effects[bundle]" time="0.520"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">kill_point = 'bundle'
+
+    @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
+    def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+                job = None
+&gt;               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:448: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x719e43f874d0&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_worker_killed_at_each_point_recovers_with_single_effects[run]" time="0.504"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">kill_point = 'run'
+
+    @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
+    def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+                job = None
+&gt;               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:448: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x719e4337f9d0&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_worker_killed_at_each_point_recovers_with_single_effects[import]" time="0.504"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">kill_point = 'import'
+
+    @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
+    def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+                job = None
+&gt;               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:448: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x719e433a7b10&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_worker_killed_at_each_point_recovers_with_single_effects[imported]" time="0.505"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">kill_point = 'imported'
+
+    @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
+    def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+                job = None
+&gt;               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:448: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x719e4339aea0&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescence" time="0.505"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">def test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescence():
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=45).start()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+&gt;               with qualification.live_session(env, settings) as setup:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:485: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x719e43759a70&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase></testsuite></testsuites>

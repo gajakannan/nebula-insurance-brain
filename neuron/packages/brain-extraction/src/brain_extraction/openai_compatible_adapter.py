@@ -38,7 +38,21 @@ Block = tuple[str, TextItem, ProvenanceItem]
 # The candidate Graph pipeline is implemented in docling_graph_pipeline.py.
 
 
-def _strict_json_schema(template: type[BaseModel]) -> dict:
+def baseline_prompt(document: DoclingDocument) -> str:
+    """F0001's one-call prompt over the persisted text items, one line per provenance.
+
+    The single source for this adapter and the F0005 `direct-baseline` pipeline,
+    so the measured baseline cannot drift from F0001.
+    """
+    document_text = "\n".join(item.text for item in document.texts for _prov in item.prov)
+    return (
+        "Extract the requested fields as strict JSON matching the schema. "
+        "Use null for any field not present. Copy values verbatim from the source "
+        f"text; never paraphrase.\n\n--- SOURCE ---\n{document_text}\n--- END SOURCE ---"
+    )
+
+
+def strict_json_schema(template: type[BaseModel]) -> dict:
     """Pydantic's `model_json_schema()` omits `required`/`additionalProperties`, which
     OpenAI/vLLM's `strict: true` structured-output mode needs on *every* property to
     reliably constrain generation. Without them, a live run against this proof's
@@ -114,15 +128,9 @@ class OpenAICompatibleExtractionAdapter:
             for i, text_item in enumerate(doc.texts)
             for prov in text_item.prov
         ]
-        document_text = "\n".join(text_item.text for _bid, text_item, _prov in blocks)
-
-        schema = _strict_json_schema(profile.template)
+        schema = strict_json_schema(profile.template)
         schema_hash = hashlib.sha256(json.dumps(schema, sort_keys=True).encode("utf-8")).hexdigest()
-        prompt = (
-            "Extract the requested fields as strict JSON matching the schema. "
-            "Use null for any field not present. Copy values verbatim from the source "
-            f"text; never paraphrase.\n\n--- SOURCE ---\n{document_text}\n--- END SOURCE ---"
-        )
+        prompt = baseline_prompt(doc)
         prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
         prompt_tokens_estimate = len(self._encoding.encode(prompt))
 

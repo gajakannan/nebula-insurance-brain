@@ -13,6 +13,7 @@ import math
 import re
 import time
 from collections.abc import Callable, Iterator, Mapping
+from contextlib import AbstractContextManager, contextmanager
 from dataclasses import asdict, dataclass
 from threading import BoundedSemaphore, Event, Lock
 from typing import Any, Literal, cast
@@ -21,10 +22,27 @@ from urllib.parse import urlsplit
 import httpx
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError, ValidationError
-from openai import APIError, APITimeoutError, OpenAI
+from openai import APIConnectionError, APIError, APIStatusError, APITimeoutError, OpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
 TokenCounter = Callable[[list[dict[str, str]], str], int]
+
+
+class DispatchConfirmation:
+    """Default handle when no host guard composes the client (offline tests)."""
+
+    def confirm(self) -> None:
+        return None
+
+
+# Opens a durable in-flight record around one HTTP request (F0005 Step 0a). The
+# client confirms only a terminal provider response, or a refused connection.
+DispatchGuard = Callable[[str], AbstractContextManager[Any]]
+
+
+@contextmanager
+def _no_dispatch_guard(_correlation: str) -> Iterator[DispatchConfirmation]:
+    yield DispatchConfirmation()
 
 
 class InferenceRejected(RuntimeError):
@@ -32,7 +50,32 @@ class InferenceRejected(RuntimeError):
 
     def __init__(self, code: str) -> None:
         self.code = code
+        # True once the rejection is in the diagnostics (a call or rejection record).
+        self.recorded = False
         super().__init__(code)
+
+
+def _recorded(exc: InferenceRejected) -> InferenceRejected:
+    exc.recorded = True
+    return exc
+
+
+# WHY: every rejection gets a failure class, before dispatch or after a response.
+# It is always recorded, so no run can complete around one (F0005 H1).
+_REJECTION_CLASS = {
+    "context_limit_exceeded": "budget",
+    "call_budget_exceeded": "budget",
+    "token_budget_exceeded": "budget",
+    "usage_exceeds_reservation": "budget",
+    "run_deadline_exceeded": "deadline",
+    "cancelled": "cancelled",
+    "provider_quiescence_required": "unavailable",
+    "inflight_marker_not_durable": "unavailable",
+}
+# After a response these mean the model's output was unusable.
+_RESPONSE_REJECTIONS = frozenset(
+    {"incomplete_response", "refused_or_empty_response", "invalid_response_type"}
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -131,6 +174,7 @@ class VllmGraphClient:
         limits: InferenceLimits = DEFAULT_LIMITS,
         cancelled: Event | None = None,
         http_client: httpx.Client | None = None,
+        dispatch_guard: DispatchGuard | None = None,
     ) -> None:
         endpoint = urlsplit(base_url)
         if (
@@ -154,8 +198,10 @@ class VllmGraphClient:
         self._lock = Lock()
         self._deadline = time.monotonic() + limits.run_timeout_seconds
         self._calls: list[dict[str, Any]] = []
+        self._rejections: list[dict[str, Any]] = []
         self._reserved = 0
         self._fatal_reason: str | None = None
+        self._dispatch = dispatch_guard or _no_dispatch_guard
         if http_client is not None and http_client.follow_redirects:
             raise ValueError("inference transport must not follow redirects")
         self._provider = OpenAI(
@@ -188,6 +234,7 @@ class VllmGraphClient:
                 "reserved_tokens": self._reserved,
                 "limits": asdict(self._limits),
                 "calls": [dict(call) for call in self._calls],
+                "rejections": [dict(rejection) for rejection in self._rejections],
             }
 
     def get_json_response(
@@ -197,6 +244,33 @@ class VllmGraphClient:
         structured_output: bool = True,
         response_top_level: Literal["object", "array"] = "object",
         response_schema_name: str = "extraction_result",
+    ) -> dict[str, Any] | list[Any]:
+        try:
+            return self._request(prompt, schema_json, response_top_level, response_schema_name)
+        except InferenceRejected as exc:
+            if not exc.recorded:
+                # Rejected before a call record existed (budget, deadline,
+                # cancellation, invalid request): recorded separately so it does
+                # not consume the call budget but still fails the run.
+                with self._lock:
+                    self._rejections.append(
+                        {
+                            "phase": response_schema_name
+                            if re.fullmatch(r"[A-Za-z0-9_-]{1,64}", response_schema_name)
+                            else "invalid",
+                            "outcome": exc.code,
+                            "failure_class": _REJECTION_CLASS.get(exc.code, "invalid_request"),
+                        }
+                    )
+                exc.recorded = True
+            raise
+
+    def _request(
+        self,
+        prompt: str | Mapping[str, str],
+        schema_json: str,
+        response_top_level: Literal["object", "array"],
+        response_schema_name: str,
     ) -> dict[str, Any] | list[Any]:
         self._check_active()
         # Graph 1.9.1 requests its legacy JSON path for dense skeleton/fill calls.
@@ -225,7 +299,12 @@ class VllmGraphClient:
         except (ValueError, SchemaError):
             raise InferenceRejected("invalid_schema") from None
         validator = Draft202012Validator(schema)
-        tokens = self._counter(messages, schema_json)
+        try:
+            tokens = self._counter(messages, schema_json)
+        except Exception:
+            # A failing tokenizer is a rejected request, recorded like any other
+            # (Code Review L-N2), never an unrecorded crash around the run.
+            raise InferenceRejected("token_count_failed") from None
         if type(tokens) is not int or tokens < 0:
             raise InferenceRejected("invalid_token_estimate")
         reservation = tokens + self._limits.output_tokens
@@ -243,6 +322,7 @@ class VllmGraphClient:
                     raise InferenceRejected("token_budget_exceeded")
                 self._reserved += reservation
                 call: dict[str, Any] = {
+                    "phase": response_schema_name,
                     "prompt_hash": hashlib.sha256(json.dumps(messages).encode()).hexdigest(),
                     "schema_hash": hashlib.sha256(schema_json.encode()).hexdigest(),
                     "estimated_input_tokens": tokens,
@@ -253,23 +333,47 @@ class VllmGraphClient:
                 }
                 self._calls.append(call)
             try:
-                response = self._provider.chat.completions.create(
-                    model=self.model,
-                    messages=cast(list[ChatCompletionMessageParam], messages),
-                    response_format={
-                        "type": "json_schema",
-                        "json_schema": {
-                            "name": response_schema_name,
-                            "schema": schema,
-                            "strict": False,
+                # Evaluate the remaining deadline before marking a request in flight.
+                request_timeout = min(self._limits.request_timeout_seconds, self._check_active())
+                try:
+                    dispatch = self._dispatch(call["prompt_hash"])
+                    handle = dispatch.__enter__()
+                except Exception as exc:
+                    # No durable in-flight record: nothing is sent.
+                    raise InferenceRejected(getattr(exc, "code", "dispatch_guard_failed")) from None
+                try:
+                    response = self._provider.chat.completions.create(
+                        model=self.model,
+                        messages=cast(list[ChatCompletionMessageParam], messages),
+                        response_format={
+                            "type": "json_schema",
+                            "json_schema": {
+                                "name": response_schema_name,
+                                "schema": schema,
+                                "strict": False,
+                            },
                         },
-                    },
-                    # Preserve Graph's optional-field schema semantics; independently
-                    # validate the response below rather than changing required fields.
-                    max_tokens=self._limits.output_tokens,
-                    temperature=0,
-                    timeout=min(self._limits.request_timeout_seconds, self._check_active()),
-                )
+                        # Preserve Graph's optional-field schema semantics; independently
+                        # validate the response below rather than changing required fields.
+                        max_tokens=self._limits.output_tokens,
+                        temperature=0,
+                        timeout=request_timeout,
+                    )
+                    handle.confirm()
+                except APIStatusError:
+                    # An HTTP error status is a terminal provider response.
+                    handle.confirm()
+                    raise
+                except APIConnectionError as exc:
+                    # WHY: a refused connection proves the request never reached the
+                    # provider. A timeout or broken transport leaves it uncertain.
+                    if not isinstance(exc, APITimeoutError) and isinstance(
+                        exc.__cause__, httpx.ConnectError
+                    ):
+                        handle.confirm()
+                    raise
+                finally:
+                    dispatch.__exit__(None, None, None)
                 if response.usage is not None:
                     with self._lock:
                         call.update(
@@ -297,19 +401,30 @@ class VllmGraphClient:
                 validator.validate(value)
             except APITimeoutError:
                 with self._lock:
-                    call["outcome"] = "provider_timeout"
-                raise InferenceRejected("provider_timeout") from None
-            except APIError:
+                    call.update(outcome="provider_timeout", failure_class="timeout")
+                raise _recorded(InferenceRejected("provider_timeout")) from None
+            except APIError as exc:
+                failure = "http_error" if isinstance(exc, APIStatusError) else "unavailable"
                 with self._lock:
-                    call["outcome"] = "provider_error"
-                raise InferenceRejected("provider_error") from None
-            except (ValueError, ValidationError):
+                    call.update(outcome="provider_error", failure_class=failure)
+                raise _recorded(InferenceRejected("provider_error")) from None
+            except ValidationError:
                 with self._lock:
-                    call["outcome"] = "invalid_response"
-                raise InferenceRejected("invalid_response") from None
+                    call.update(outcome="invalid_response", failure_class="schema_invalid")
+                raise _recorded(InferenceRejected("invalid_response")) from None
+            except ValueError:
+                with self._lock:
+                    call.update(outcome="invalid_response", failure_class="malformed")
+                raise _recorded(InferenceRejected("invalid_response")) from None
             except InferenceRejected as exc:
                 with self._lock:
                     call["outcome"] = exc.code
+                    call["failure_class"] = (
+                        "malformed"
+                        if exc.code in _RESPONSE_REJECTIONS
+                        else _REJECTION_CLASS.get(exc.code, "invalid_request")
+                    )
+                exc.recorded = True
                 raise
             with self._lock:
                 call["outcome"] = "complete"

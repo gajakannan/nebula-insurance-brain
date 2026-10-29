@@ -1,0 +1,1548 @@
+........................................................................ [ 16%]
+........................................................................ [ 33%]
+........................................................................ [ 50%]
+........................................................................ [ 66%]
+.........................................F..F........................... [ 83%]
+................F.......F..................F...FF.....F.F........F.F..   [100%]
+=================================== FAILURES ===================================
+_____ test_expand_reconcile_constrain_preserves_ids_and_enforces_ownership _____
+
+fresh_db = 'postgresql://brain:brain@127.0.0.1:5432/brain_f0002_mig_9fbf9b594cd7'
+tmp_path = PosixPath('/tmp/pytest-of-gajap/pytest-29/test_expand_reconcile_constrai0')
+
+    def test_expand_reconcile_constrain_preserves_ids_and_enforces_ownership(
+        fresh_db: str, tmp_path: Path
+    ) -> None:
+        legacy = Legacy()
+        migrate("0004")
+        legacy.write(fresh_db)
+        ids_before = _ids(fresh_db)
+        audit_before = _legacy_audit_digest(fresh_db, legacy.audit)
+    
+        migrate("0005")
+        with psycopg.connect(fresh_db) as conn:
+            aliases = conn.execute("SELECT count(*) FROM external_identity").fetchone()[0]
+            revision = conn.execute(
+                "SELECT revision FROM principal_authority WHERE principal_id = %s", (legacy.user,)
+            ).fetchone()[0]
+            job_type = conn.execute(
+                "SELECT data_type FROM information_schema.columns "
+                "WHERE table_name = 'document_job' AND column_name = 'id'"
+            ).fetchone()[0]
+        assert aliases == 2 and revision == 3 and job_type == "uuid"
+    
+        # 0006 refuses un-reconciled data and leaves the schema exactly as 0005 left it.
+        with pytest.raises(RuntimeError, match="0006 preflight failed"):
+            migrate("0006")
+        assert version(fresh_db) == "0005"
+        assert not _constraint_exists(fresh_db, "fk_document_version_source_document_id_owner")
+    
+        mapping = legacy.mapping(tmp_path / "mapping.json")
+        dry = reconcile(fresh_db, mapping, "--dry-run")
+        assert dry.returncode == 0, dry.stdout + dry.stderr
+        report = json.loads(dry.stdout)
+        assert report["blocking"] == [] and "alice" not in dry.stdout  # counts/IDs only
+        wrong = reconcile(
+            fresh_db,
+            mapping,
+            "--apply",
+            "--expected-digest",
+            "0" * 64,
+            "--actor-id",
+            str(uuid4()),
+            "--approval-ref",
+            "CHG-1",
+        )
+        assert wrong.returncode != 0
+        operator = uuid4()
+        applied = reconcile(
+            fresh_db,
+            mapping,
+            "--apply",
+            "--expected-digest",
+            report["digest"],
+            "--actor-id",
+            str(operator),
+            "--approval-ref",
+            "CHG-1",
+            "--activate-policy",
+        )
+>       assert applied.returncode == 0, applied.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+E             self.dialect.do_execute(
+E             ~~~~~~~~~~~~~~~~~~~~~~~^
+E                 cursor, str_statement, effective_parameters, context
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+E             cursor.execute(statement, parameters)
+E             ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/psycopg/cursor.py", line 117, in execute
+E             raise ex.with_traceback(None)
+E         psycopg.errors.UndefinedColumn: column content_artifact.artifact_contract_version does not exist
+E         LINE 1: ...tifact.created_at AS content_artifact_created_at, content_ar...
+E                                                                      ^
+E         
+E         The above exception was the direct cause of the following exception:
+E         
+E         Traceback (most recent call last):
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/dev/reconcile_authx.py", line 577, in <module>
+E             raise SystemExit(main())
+E                              ~~~~^^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/dev/reconcile_authx.py", line 557, in main
+E             receipt = apply(
+E                 conn,
+E             ...<4 lines>...
+E                 args.activate_policy,
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/dev/reconcile_authx.py", line 442, in apply
+E             provision_resource_access(
+E             ~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 session,
+E                 ^^^^^^^^
+E             ...<14 lines>...
+E                 at=at,
+E                 ^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/packages/brain-persistence/src/brain_persistence/tenancy.py", line 354, in provision_resource_access
+E             owner = _record_owner(session, key)
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/packages/brain-persistence/src/brain_persistence/tenancy.py", line 320, in _record_owner
+E             row = session.get(ContentArtifact, key.id)
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 3702, in get
+E             return self._get_impl(
+E                    ~~~~~~~~~~~~~~^
+E                 entity,
+E                 ^^^^^^^
+E             ...<7 lines>...
+E                 bind_arguments=bind_arguments,
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 3881, in _get_impl
+E             return db_load_fn(
+E                 self,
+E             ...<5 lines>...
+E                 bind_arguments=bind_arguments,
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+E             session.execute(
+E             ~~~~~~~~~~~~~~~^
+E                 q,
+E                 ^^
+E             ...<2 lines>...
+E                 bind_arguments=bind_arguments,
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+E             return self._execute_internal(
+E                    ~~~~~~~~~~~~~~~~~~~~~~^
+E                 statement,
+E                 ^^^^^^^^^^
+E             ...<4 lines>...
+E                 _add_event=_add_event,
+E                 ^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+E             result: Result[Any] = compile_state_cls.orm_execute_statement(
+E                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 self,
+E                 ^^^^^
+E             ...<4 lines>...
+E                 conn,
+E                 ^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+E             result = conn.execute(
+E                 statement, params or {}, execution_options=execution_options
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+E             return meth(
+E                 self,
+E                 distilled_parameters,
+E                 execution_options or NO_OPTIONS,
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+E             return connection._execute_clauseelement(
+E                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 self, distilled_params, execution_options
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+E             ret = self._execute_context(
+E                 dialect,
+E             ...<8 lines>...
+E                 cache_hit=cache_hit,
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+E             return self._exec_single_context(
+E                    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 dialect, context, statement, parameters
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+E             self._handle_dbapi_exception(
+E             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 e, str_statement, effective_parameters, cursor, context
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+E             raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+E             self.dialect.do_execute(
+E             ~~~~~~~~~~~~~~~~~~~~~~~^
+E                 cursor, str_statement, effective_parameters, context
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+E             cursor.execute(statement, parameters)
+E             ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/psycopg/cursor.py", line 117, in execute
+E             raise ex.with_traceback(None)
+E         sqlalchemy.exc.ProgrammingError: (psycopg.errors.UndefinedColumn) column content_artifact.artifact_contract_version does not exist
+E         LINE 1: ...tifact.created_at AS content_artifact_created_at, content_ar...
+E                                                                      ^
+E         [SQL: SELECT content_artifact.id AS content_artifact_id, content_artifact.document_version_id AS content_artifact_document_version_id, content_artifact.artifact_sha256 AS content_artifact_artifact_sha256, content_artifact.page_count AS content_artifact_page_count, content_artifact.extraction_status AS content_artifact_extraction_status, content_artifact.tenant_id AS content_artifact_tenant_id, content_artifact.knowledge_base_id AS content_artifact_knowledge_base_id, content_artifact.created_at AS content_artifact_created_at, content_artifact.artifact_contract_version AS content_artifact_artifact_contract_version, content_artifact.recipe_sha256 AS content_artifact_recipe_sha256, content_artifact.manifest_sha256 AS content_artifact_manifest_sha256, content_artifact.supersedes_artifact_id AS content_artifact_supersedes_artifact_id, content_artifact.publication_state AS content_artifact_publication_state, content_artifact.writer_fallback_reason AS content_artifact_writer_fallback_reason 
+E         FROM content_artifact 
+E         WHERE content_artifact.id = %(pk_1)s::UUID]
+E         [parameters: {'pk_1': UUID('02f86b98-1845-4948-b923-4ad06b6dcca6')}]
+E         (Background on this error at: https://sqlalche.me/e/20/f405)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/bin/python', '/home/gaja...1\': UUID(\'02f86b98-1845-4948-b923-4ad06b6dcca6\')}]\n(Background on this error at: https://sqlalche.me/e/20/f405)\n').returncode
+
+tests/integration/test_authx_migration.py:340: AssertionError
+----------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+_ test_safeguards_make_ownership_immutable_audit_append_only_and_restore_deferrable _
+
+fresh_db = 'postgresql://brain:brain@127.0.0.1:5432/brain_f0002_mig_934ccdd4ce0f'
+tmp_path = PosixPath('/tmp/pytest-of-gajap/pytest-29/test_safeguards_make_ownership0')
+
+    def test_safeguards_make_ownership_immutable_audit_append_only_and_restore_deferrable(
+        fresh_db: str, tmp_path: Path
+    ) -> None:
+        """0007 (BLUEPRINT §4.11, operator scope amendment at G4)."""
+        legacy = Legacy()
+        migrate("0004")
+        legacy.write(fresh_db)
+        migrate("0005")
+        mapping = legacy.mapping(tmp_path / "mapping.json")
+        digest = json.loads(reconcile(fresh_db, mapping, "--dry-run").stdout)["digest"]
+        applied = reconcile(
+            fresh_db,
+            mapping,
+            "--apply",
+            "--expected-digest",
+            digest,
+            "--actor-id",
+            str(uuid4()),
+            "--approval-ref",
+            "CHG-7",
+        )
+>       assert applied.returncode == 0, applied.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+E             self.dialect.do_execute(
+E             ~~~~~~~~~~~~~~~~~~~~~~~^
+E                 cursor, str_statement, effective_parameters, context
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+E             cursor.execute(statement, parameters)
+E             ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/psycopg/cursor.py", line 117, in execute
+E             raise ex.with_traceback(None)
+E         psycopg.errors.UndefinedColumn: column content_artifact.artifact_contract_version does not exist
+E         LINE 1: ...tifact.created_at AS content_artifact_created_at, content_ar...
+E                                                                      ^
+E         
+E         The above exception was the direct cause of the following exception:
+E         
+E         Traceback (most recent call last):
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/dev/reconcile_authx.py", line 577, in <module>
+E             raise SystemExit(main())
+E                              ~~~~^^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/dev/reconcile_authx.py", line 557, in main
+E             receipt = apply(
+E                 conn,
+E             ...<4 lines>...
+E                 args.activate_policy,
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/dev/reconcile_authx.py", line 442, in apply
+E             provision_resource_access(
+E             ~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 session,
+E                 ^^^^^^^^
+E             ...<14 lines>...
+E                 at=at,
+E                 ^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/packages/brain-persistence/src/brain_persistence/tenancy.py", line 354, in provision_resource_access
+E             owner = _record_owner(session, key)
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/packages/brain-persistence/src/brain_persistence/tenancy.py", line 320, in _record_owner
+E             row = session.get(ContentArtifact, key.id)
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 3702, in get
+E             return self._get_impl(
+E                    ~~~~~~~~~~~~~~^
+E                 entity,
+E                 ^^^^^^^
+E             ...<7 lines>...
+E                 bind_arguments=bind_arguments,
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 3881, in _get_impl
+E             return db_load_fn(
+E                 self,
+E             ...<5 lines>...
+E                 bind_arguments=bind_arguments,
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+E             session.execute(
+E             ~~~~~~~~~~~~~~~^
+E                 q,
+E                 ^^
+E             ...<2 lines>...
+E                 bind_arguments=bind_arguments,
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+E             return self._execute_internal(
+E                    ~~~~~~~~~~~~~~~~~~~~~~^
+E                 statement,
+E                 ^^^^^^^^^^
+E             ...<4 lines>...
+E                 _add_event=_add_event,
+E                 ^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+E             result: Result[Any] = compile_state_cls.orm_execute_statement(
+E                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 self,
+E                 ^^^^^
+E             ...<4 lines>...
+E                 conn,
+E                 ^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+E             result = conn.execute(
+E                 statement, params or {}, execution_options=execution_options
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+E             return meth(
+E                 self,
+E                 distilled_parameters,
+E                 execution_options or NO_OPTIONS,
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+E             return connection._execute_clauseelement(
+E                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 self, distilled_params, execution_options
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+E             ret = self._execute_context(
+E                 dialect,
+E             ...<8 lines>...
+E                 cache_hit=cache_hit,
+E             )
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+E             return self._exec_single_context(
+E                    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 dialect, context, statement, parameters
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+E             self._handle_dbapi_exception(
+E             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+E                 e, str_statement, effective_parameters, cursor, context
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+E             raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+E             self.dialect.do_execute(
+E             ~~~~~~~~~~~~~~~~~~~~~~~^
+E                 cursor, str_statement, effective_parameters, context
+E                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E             )
+E             ^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+E             cursor.execute(statement, parameters)
+E             ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+E           File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/psycopg/cursor.py", line 117, in execute
+E             raise ex.with_traceback(None)
+E         sqlalchemy.exc.ProgrammingError: (psycopg.errors.UndefinedColumn) column content_artifact.artifact_contract_version does not exist
+E         LINE 1: ...tifact.created_at AS content_artifact_created_at, content_ar...
+E                                                                      ^
+E         [SQL: SELECT content_artifact.id AS content_artifact_id, content_artifact.document_version_id AS content_artifact_document_version_id, content_artifact.artifact_sha256 AS content_artifact_artifact_sha256, content_artifact.page_count AS content_artifact_page_count, content_artifact.extraction_status AS content_artifact_extraction_status, content_artifact.tenant_id AS content_artifact_tenant_id, content_artifact.knowledge_base_id AS content_artifact_knowledge_base_id, content_artifact.created_at AS content_artifact_created_at, content_artifact.artifact_contract_version AS content_artifact_artifact_contract_version, content_artifact.recipe_sha256 AS content_artifact_recipe_sha256, content_artifact.manifest_sha256 AS content_artifact_manifest_sha256, content_artifact.supersedes_artifact_id AS content_artifact_supersedes_artifact_id, content_artifact.publication_state AS content_artifact_publication_state, content_artifact.writer_fallback_reason AS content_artifact_writer_fallback_reason 
+E         FROM content_artifact 
+E         WHERE content_artifact.id = %(pk_1)s::UUID]
+E         [parameters: {'pk_1': UUID('ed0fb747-5e3b-412c-a010-86c204e60376')}]
+E         (Background on this error at: https://sqlalche.me/e/20/f405)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/bin/python', '/home/gaja...1\': UUID(\'ed0fb747-5e3b-412c-a010-86c204e60376\')}]\n(Background on this error at: https://sqlalche.me/e/20/f405)\n').returncode
+
+tests/integration/test_authx_migration.py:504: AssertionError
+----------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+________ test_allowed_and_denied_calls_leave_matching_non_secret_audit _________
+
+client = <httpx2.AsyncClient object at 0x71fd3640e190>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd4a6e9c90>
+
+    async def test_allowed_and_denied_calls_leave_matching_non_secret_audit(
+        client, rsa_key: rsa.RSAPrivateKey
+    ) -> None:
+        """EX-AUTHX-017 / S0006 AC1/AC3/AC4 across content, fact and review consumers."""
+        _t, _kb, service, reviewer, artifact, slot, item, batch = await _world(client)
+        service_token = make_token(rsa_key, await _subject(client, service))
+        reviewer_token = make_token(rsa_key, await _subject(client, reviewer))
+        service_h = {"Authorization": f"Bearer {service_token}"}
+        reviewer_h = {"Authorization": f"Bearer {reviewer_token}"}
+    
+        async def check(response, resource_id, allowed):
+            assert (response.status_code < 300) == allowed, response.text
+            decision = (await decisions_for(client.session_factory, resource_id))[-1]
+            assert decision["allowed"] is allowed
+            assert decision["operation_outcome"] == ("succeeded" if allowed else "denied")
+            assert list(DECISION.iter_errors(decision)) == []
+            assert len(decision["policy_hash"]) == 64
+            assert decision["policy_release"].startswith("sha256:")
+            assert decision["grant_revision"] >= 1 and decision["trace_id"]
+            serialized = json.dumps(decision)
+            for secret in (service_token, reviewer_token, "PDF-1.4", "2000000.00"):
+                assert secret not in serialized
+    
+        review_body = {
+            "decisions": [{"review_item_id": str(item), "action": "ACCEPT", "assertion_version": 1}]
+        }
+>       await check(await client.get(f"/content/{artifact}", headers=service_h), artifact, True)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_authx_audit.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:73: in get_content_artifact_manifest
+    body = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:71: in load
+    return (await _load_verified(session, store, artifact_id)).manifest_bytes
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd49522660>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd37dce7b0>
+artifact_id = UUID('f123caf0-e159-4340-9a7a-eb4576aebe13')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+_____________________ test_measured_local_decision_latency _____________________
+
+client = <httpx2.AsyncClient object at 0x71fd37ecc670>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd36679d90>
+
+    async def test_measured_local_decision_latency(client, rsa_key: rsa.RSAPrivateKey) -> None:
+        """S0006 AC7: measure, do not claim, a production SLO. The QE run exports the
+        sample through BRAIN_AUTHX_LATENCY_OUT."""
+        tenant, kb = uuid4(), uuid4()
+        reader = await seed_principal(client.session_factory, subject="latency-reader")
+        await seed_grant(client.session_factory, reader, tenant_id=tenant, knowledge_base_id=kb)
+        artifact = await seed_content_artifact(
+            client.session_factory, tenant_id=tenant, knowledge_base_id=kb
+        )
+        headers = bearer(rsa_key, "latency-reader")
+        samples = []
+        for _ in range(60):
+            started = time.perf_counter()
+>           response = await client.get(f"/content/{artifact}", headers=headers)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_authx_consumers.py:283: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:73: in get_content_artifact_manifest
+    body = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:71: in load
+    return (await _load_verified(session, store, artifact_id)).manifest_bytes
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd483d1470>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd4997b250>
+artifact_id = UUID('0371c1cb-f80b-4322-883c-c2b3a6608d94')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+______ test_disabled_principal_gets_the_generic_401_and_an_audited_reason ______
+
+client = <httpx2.AsyncClient object at 0x71fd37ef2eb0>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd4bf67d50>
+
+    async def test_disabled_principal_gets_the_generic_401_and_an_audited_reason(
+        client, rsa_key: rsa.RSAPrivateKey
+    ) -> None:
+        """EX-AUTHX-006 / S0002 AC4: no resource existence is disclosed."""
+        tenant, kb = uuid4(), uuid4()
+        principal_id = await seed_principal_and_membership(
+            client.session_factory, subject="to-disable", tenant_id=tenant, knowledge_base_id=kb
+        )
+        artifact = await seed_content_artifact(
+            client.session_factory, tenant_id=tenant, knowledge_base_id=kb
+        )
+        headers = bearer(rsa_key, "to-disable")
+>       assert (await client.get(f"/content/{artifact}", headers=headers)).status_code == 200
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_authx_principals.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:73: in get_content_artifact_manifest
+    body = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:71: in load
+    return (await _load_verified(session, store, artifact_id)).manifest_bytes
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd378b94e0>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd488ce210>
+artifact_id = UUID('6c02d008-2ee3-4240-97ce-5d5e29d7d3f2')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+________ test_each_restriction_denies_independently_with_equivalent_404 ________
+
+client = <httpx2.AsyncClient object at 0x71fd494df230>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd4bec8850>
+
+    async def test_each_restriction_denies_independently_with_equivalent_404(
+        client, rsa_key: rsa.RSAPrivateKey
+    ) -> None:
+        """EX-AUTHX-010/011 / S0004 AC1/AC2/AC7: each conjunct alone denies while all
+        others allow; denied and nonexistent are indistinguishable; no bytes opened."""
+        tenant, kb = uuid4(), uuid4()
+        await _reader(
+            client,
+            "restricted",
+            tenant,
+            kb,
+            selectors=_account_selectors(ACCOUNT_OK),
+            classifications=["internal"],
+            source_acl_ids=["acl-portal"],
+        )
+        headers = bearer(rsa_key, "restricted")
+        permitted = dict(
+            parent_chain=[ScopedId(ScopedKind.ACCOUNT, ACCOUNT_OK)],
+            classifications=["internal"],
+            source_acl_ids=["acl-portal"],
+        )
+        cases = {
+            "allowed": ({}, 200, "allowed"),
+            "parent": (
+                {"parent_chain": [ScopedId(ScopedKind.ACCOUNT, ACCOUNT_OTHER)]},
+                404,
+                "parent_denied",
+            ),
+            "classification": (
+                {"classifications": ["internal", "loss-notes"]},
+                404,
+                "classification_denied",
+            ),
+            "source": ({"source_acl_ids": ["acl-claims"]}, 404, "source_denied"),
+        }
+        missing = await client.get(f"/content/{uuid4()}/files/source.pdf", headers=headers)
+        for label, (override, status, reason) in cases.items():
+            artifact = await seed_content_artifact(
+                client.session_factory,
+                tenant_id=tenant,
+                knowledge_base_id=kb,
+                **{**permitted, **override},
+            )
+            reads_before = len(client.content_store.file_reads)
+>           response = await client.get(f"/content/{artifact}/files/source.pdf", headers=headers)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_authx_restrictions.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:102: in get_content_artifact_file
+    data = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:97: in load
+    bundle = await _load_verified(session, store, artifact_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd495eb2a0>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd48b36ad0>
+artifact_id = UUID('70b9d8fc-1f02-4e00-8179-ce6c921a7459')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+_ test_only_server_hydrated_attributes_count_and_missing_metadata_fails_closed _
+
+client = <httpx2.AsyncClient object at 0x71fd499e33f0>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd4bec8850>
+
+    async def test_only_server_hydrated_attributes_count_and_missing_metadata_fails_closed(
+        client, rsa_key: rsa.RSAPrivateKey
+    ) -> None:
+        """EX-AUTHX-011 / S0004 AC3."""
+        tenant, kb = uuid4(), uuid4()
+        await _reader(client, "forger", tenant, kb, classifications=["internal"])
+        headers = bearer(rsa_key, "forger")
+        secret = await seed_content_artifact(
+            client.session_factory,
+            tenant_id=tenant,
+            knowledge_base_id=kb,
+            classifications=["loss-notes"],
+        )
+        forged = await client.get(
+            f"/content/{secret}",
+            headers={**headers, "X-Classification": "internal"},
+            params={"classification": "internal", "parent_chain": "", "source_acl_ids": ""},
+        )
+        assert forged.status_code == 404
+    
+        visible = await seed_content_artifact(
+            client.session_factory, tenant_id=tenant, knowledge_base_id=kb
+        )
+>       assert (await client.get(f"/content/{visible}", headers=headers)).status_code == 200
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_authx_restrictions.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:73: in get_content_artifact_manifest
+    body = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:71: in load
+    return (await _load_verified(session, store, artifact_id)).manifest_bytes
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd4a55fcb0>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd5069bed0>
+artifact_id = UUID('7b35a302-d3e8-4807-97e3-e605275efd90')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+___________ test_entity_identity_is_tenant_scoped_and_grants_nothing ___________
+
+client = <httpx2.AsyncClient object at 0x71fd36940210>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd4ba8c4b0>
+
+    async def test_entity_identity_is_tenant_scoped_and_grants_nothing(
+        client, rsa_key: rsa.RSAPrivateKey
+    ) -> None:
+        """EX-AUTHX-002/003 / S0001 AC3/AC4, S0003 AC2."""
+        tenant_a, tenant_b = uuid4(), uuid4()
+        kb_a1, kb_a2, kb_b = uuid4(), uuid4(), uuid4()
+        for tenant, kb in ((tenant_a, kb_a1), (tenant_a, kb_a2), (tenant_b, kb_b)):
+            await run_sync(
+                client.session_factory, lambda s, t=tenant, k=kb: fixtures.seed_scope(s, t, k)
+            )
+    
+        def resolve(tenant):
+            return lambda s: resolve_entity(
+                s, tenant, namespace="account", external_key="ACME-001", actor_id=OPERATOR, at=_now()
+            )
+    
+        entity_a = await run_sync(client.session_factory, resolve(tenant_a))
+        assert await run_sync(client.session_factory, resolve(tenant_a)) == entity_a
+        entity_b = await run_sync(client.session_factory, resolve(tenant_b))
+        assert entity_a != entity_b  # identical external key, separate identity spaces
+    
+        for kb in (kb_a1, kb_a2):
+            await run_sync(
+                client.session_factory,
+                lambda s, k=kb: associate_entity(
+                    s, entity_a, tenant_a, k, actor_id=OPERATOR, at=_now()
+                ),
+            )
+        with pytest.raises(OwnershipConflict):  # A's entity cannot join B's KB
+            await run_sync(
+                client.session_factory,
+                lambda s: associate_entity(s, entity_a, tenant_a, kb_b, actor_id=OPERATOR, at=_now()),
+            )
+    
+        reader = await seed_principal(client.session_factory, subject="a1-reader")
+        await seed_grant(client.session_factory, reader, tenant_id=tenant_a, knowledge_base_id=kb_a1)
+        in_a1 = await seed_content_artifact(
+            client.session_factory, tenant_id=tenant_a, knowledge_base_id=kb_a1
+        )
+        in_a2 = await seed_content_artifact(
+            client.session_factory, tenant_id=tenant_a, knowledge_base_id=kb_a2
+        )
+        headers = bearer(rsa_key, "a1-reader")
+>       assert (await client.get(f"/content/{in_a1}", headers=headers)).status_code == 200
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_authx_scope.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:73: in get_content_artifact_manifest
+    body = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:71: in load
+    return (await _load_verified(session, store, artifact_id)).manifest_bytes
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd367e50f0>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd5069b890>
+artifact_id = UUID('8e937453-7639-424b-811b-1a04162b9478')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+______________ test_revocation_and_expiry_deny_the_next_operation ______________
+
+client = <httpx2.AsyncClient object at 0x71fd36e1c050>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd4ba8c4b0>
+
+    async def test_revocation_and_expiry_deny_the_next_operation(
+        client, rsa_key: rsa.RSAPrivateKey
+    ) -> None:
+        """EX-AUTHX-008 / S0003 AC4/AC7: revision and outcome change together; a past
+        business coordinate never reinstates a revoked grant."""
+        tenant, kb = uuid4(), uuid4()
+        principal = await seed_principal(client.session_factory, subject="revocable")
+        membership = await seed_grant(
+            client.session_factory, principal, tenant_id=tenant, knowledge_base_id=kb
+        )
+        slot = await seed_fact_slot(client.session_factory, tenant_id=tenant, knowledge_base_id=kb)
+        artifact = await seed_content_artifact(
+            client.session_factory, tenant_id=tenant, knowledge_base_id=kb
+        )
+        headers = bearer(rsa_key, "revocable")
+>       assert (await client.get(f"/content/{artifact}", headers=headers)).status_code == 200
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_authx_scope.py:287: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:73: in get_content_artifact_manifest
+    body = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:71: in load
+    return (await _load_verified(session, store, artifact_id)).manifest_bytes
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd37815550>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd48648a50>
+artifact_id = UUID('2d47fb10-956a-40ab-b66a-05a20d586bcd')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+_______ test_revocation_is_enforced_on_the_first_request_after_the_write _______
+
+client = <httpx2.AsyncClient object at 0x71fd3660f4d0>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd4a6b7ef0>
+
+    async def test_revocation_is_enforced_on_the_first_request_after_the_write(
+        client, rsa_key: rsa.RSAPrivateKey
+    ) -> None:
+        tenant_id, kb_id = uuid4(), uuid4()
+        await seed_principal_and_membership(
+            client.session_factory,
+            subject="soon-to-be-revoked",
+            tenant_id=tenant_id,
+            knowledge_base_id=kb_id,
+        )
+        artifact_id = await seed_content_artifact(
+            client.session_factory, tenant_id=tenant_id, knowledge_base_id=kb_id
+        )
+        headers = {"Authorization": f"Bearer {make_token(rsa_key, 'soon-to-be-revoked')}"}
+    
+>       before = await client.get(f"/content/{artifact_id}/files/source.pdf", headers=headers)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_revocation_propagation.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:102: in get_content_artifact_file
+    data = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:97: in load
+    bundle = await _load_verified(session, store, artifact_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd37feb310>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd363f9bd0>
+artifact_id = UUID('73118b6c-7abe-4213-b43a-0087fc61f7bd')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+_________ test_principal_a_reads_own_resources_across_all_three_types __________
+
+client = <httpx2.AsyncClient object at 0x71fd36696270>
+rsa_key = <cryptography.hazmat.bindings._rust.openssl.rsa.RSAPrivateKey object at 0x71fd4b97e4f0>
+
+    async def test_principal_a_reads_own_resources_across_all_three_types(
+        client, rsa_key: rsa.RSAPrivateKey
+    ) -> None:
+        tenant_a, kb_a = uuid4(), uuid4()
+        principal_a_id = await seed_principal_and_membership(
+            client.session_factory, subject="scope-a-owner", tenant_id=tenant_a, knowledge_base_id=kb_a
+        )
+        artifact_id = await seed_content_artifact(
+            client.session_factory, tenant_id=tenant_a, knowledge_base_id=kb_a
+        )
+        review_item_id = await seed_review_item(
+            client.session_factory,
+            tenant_id=tenant_a,
+            knowledge_base_id=kb_a,
+            assembling_principal_id=principal_a_id,
+        )
+        fact_slot_id = await seed_fact_slot(
+            client.session_factory, tenant_id=tenant_a, knowledge_base_id=kb_a
+        )
+        headers = {"Authorization": f"Bearer {make_token(rsa_key, 'scope-a-owner')}"}
+    
+>       content_response = await client.get(f"/content/{artifact_id}/files/source.pdf", headers=headers)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/security/test_scope_isolation.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1951: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1635: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1818: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1846: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1881: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_client.py:1915: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx2/_transports/asgi.py:161: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:670: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2734: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1780: in handle
+    await self.original_router.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2789: in handle
+    await included_router._handle_selected(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1800: in _handle_selected
+    await original_route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1279: in handle
+    await app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:158: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:144: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:706: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:352: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:102: in get_content_artifact_file
+    data = await execution.read(
+packages/brain-security/src/brain_security/execution.py:376: in read
+    payload = await load(decision)
+              ^^^^^^^^^^^^^^^^^^^^
+apps/api/src/brain_api/routes/content.py:97: in load
+    bundle = await _load_verified(session, store, artifact_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+session = <sqlalchemy.ext.asyncio.session.AsyncSession object at 0x71fd4858aac0>
+store = <tests.security.conftest.FakeContentStore object at 0x71fd4ac07390>
+artifact_id = UUID('052fdfb9-12c9-42d9-a461-8848a379f067')
+
+    async def _load_verified(
+        session: AsyncSession, store: ContentArtifactStore, artifact_id: UUID
+    ) -> VerifiedBundle:
+        metadata = await session.run_sync(
+            lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+        )
+        try:
+>           bundle = await store.load_verified(metadata.key)
+                           ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'FakeContentStore' object has no attribute 'load_verified'
+
+apps/api/src/brain_api/routes/content.py:39: AttributeError
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/starlette/testclient.py:53
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+packages/brain-security/tests/test_verification.py::test_symmetric_algorithm_confusion_is_rejected
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 19 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/integration/test_authx_migration.py: 10 warnings
+tests/integration/test_content_migration_states.py: 37 warnings
+tests/integration/test_content_restore_v2.py: 3 warnings
+tests/integration/test_job_event_reason_migration.py: 7 warnings
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                         Stmts   Miss  Cover
+--------------------------------------------------------------------------------
+packages/brain-content/src/brain_content/__init__.py             0      0   100%
+packages/brain-content/src/brain_content/checkpoints.py         82      7    91%
+packages/brain-content/src/brain_content/config.py              79      2    97%
+packages/brain-content/src/brain_content/contracts.py           60     12    80%
+packages/brain-content/src/brain_content/dates.py              160      2    99%
+packages/brain-content/src/brain_content/identities.py          32      5    84%
+packages/brain-content/src/brain_content/manifest.py            96      1    99%
+packages/brain-content/src/brain_content/object_store.py        80      2    98%
+packages/brain-content/src/brain_content/outputs.py             52      1    98%
+packages/brain-content/src/brain_content/records.py             96      0   100%
+packages/brain-content/src/brain_content/service.py             24      1    96%
+packages/brain-content/src/brain_content/store.py               48      0   100%
+packages/brain-content/src/brain_content/validation.py         234     15    94%
+packages/brain-content/src/brain_content/verified_store.py      58      5    91%
+packages/brain-jobs/src/brain_jobs/__init__.py                   0      0   100%
+packages/brain-jobs/src/brain_jobs/queue.py                    183     11    94%
+--------------------------------------------------------------------------------
+TOTAL                                                         1284     64    95%
+Coverage XML written to file /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-10-25-4020923b/artifacts/coverage/engine-coverage.xml
+=========================== short test summary info ============================
+FAILED tests/integration/test_authx_migration.py::test_expand_reconcile_constrain_preserves_ids_and_enforces_ownership
+FAILED tests/integration/test_authx_migration.py::test_safeguards_make_ownership_immutable_audit_append_only_and_restore_deferrable
+FAILED tests/security/test_authx_audit.py::test_allowed_and_denied_calls_leave_matching_non_secret_audit
+FAILED tests/security/test_authx_consumers.py::test_measured_local_decision_latency
+FAILED tests/security/test_authx_principals.py::test_disabled_principal_gets_the_generic_401_and_an_audited_reason
+FAILED tests/security/test_authx_restrictions.py::test_each_restriction_denies_independently_with_equivalent_404
+FAILED tests/security/test_authx_restrictions.py::test_only_server_hydrated_attributes_count_and_missing_metadata_fails_closed
+FAILED tests/security/test_authx_scope.py::test_entity_identity_is_tenant_scoped_and_grants_nothing
+FAILED tests/security/test_authx_scope.py::test_revocation_and_expiry_deny_the_next_operation
+FAILED tests/security/test_revocation_propagation.py::test_revocation_is_enforced_on_the_first_request_after_the_write
+FAILED tests/security/test_scope_isolation.py::test_principal_a_reads_own_resources_across_all_three_types
+11 failed, 419 passed, 59 warnings in 66.80s (0:01:06)
+engine exit=1

@@ -87,6 +87,27 @@ parse -> verify -> immutable bytes + manifest -> authorized DB ready + indexes +
 date candidates -> explicit selection +-> pinned run -> separate run outputs
 ```
 
+### 6. Amendment 2026-10-27 — observed OCR quality in both manifest versions (F0005-S0001-AC2)
+
+**Origin:** F0005 feature run `2026-10-25-4020923b`. Code Review C1 found that no manifest version could record the OCR page count, and v1 recorded no OCR engine. At G4 (2026-10-27) the operator directed an Architect-designed add-only fix. G3 round 2 (2026-10-28) reviewed it. The Architect accepted the design and corrected the compatibility statement below.
+
+- `extraction_quality` gains an **optional** `ocr` member in both the v1 and v2 schemas: `{page_count, pages, engine}`.
+  - `pages` lists the 1-based pages on which the OCR engine produced at least one cell during this conversion. It is observed by wrapping the running engine, never estimated from the text layer. `page_count` must equal its length.
+  - **Meaning:** "pages OCR ran on". Docling 2.126 also runs OCR on layout regions of text-layer pages (`base_ocr_model.py`), and the count is taken before Docling merges OCR cells with native text. So a native page can count even when no OCR-derived text survives in the document. It is not "pages with OCR-derived text"; per-item origin (`text_origin: OCR`, v2) answers that.
+  - `engine` is `{name, version, model, model_version}`, using the same identity strings as the per-item `ProducerIdentity` (`ADR-0065`). It is `null` when OCR is configured but its engine or assets are not the approved, pinned ones; it is never guessed.
+- **Absent or `null` means "not observed".** Historical v1/v2 bundles stay valid byte for byte, nothing is backfilled, and the bundle-hash algorithms are unchanged.
+  - **This is an add-only but *incompatible* change within v1 and v2.** It is not a compatible clarification like `source.pdf`.
+    - New readers accept every earlier bundle.
+    - Readers built before this amendment reject new bundles that carry the field: the verifier treats them as invalid, so they return 409 `ARTIFACT_INTEGRITY` and its sweep would quarantine them.
+    - Accepted because readers and writers live in this repository, v1 is the default writer, and no other consumer reads these bundles.
+  - **Deployment rules:**
+    1. **Readers and writers deploy together.**
+    2. **No rollback onto a store that holds OCR-bearing bundles.** Once the new writer has published, code older than this amendment must not run against that store.
+    3. **Clear orphan markers before deploying.** A pre-amendment orphan marker cannot be adopted by the new writer; it fails with `ArtifactConflict`, recorded as `storage_write_failed`. Run the F0004 operator sweep for orphan markers first.
+  - **Proof gate:** the F0004 isolated restore drill must be run with OCR-bearing v1 and v2 bundles before this ADR is accepted. F0005 did not run it.
+- The v1 writer now records the pinned OCR asset digests in `execution.model_artifact_digests` as well, using the same identity rule as v2.
+- The asset "revision" in those digests is the RapidOCR package version that ships the pinned files. `ocr_asset_pins.json` ties the files to that version.
+
 ## Alternatives and Consequences
 
 - Adding mandatory fields to v1 would break strict readers and imply historical provenance that was never captured. Separate versions permit staged deployment.
@@ -104,4 +125,4 @@ All F0004 story criteria plus: v1/new-v2 compatibility; byte-for-byte legacy pre
 
 - [F0004 PRD](../../features/archive/F0004-content-artifact-model/PRD.md), [assembly plan](../../features/archive/F0004-content-artifact-model/feature-assembly-plan.md)
 - [ADR-0040](ADR-0040-lossless-content-and-evidence-contract.md), [ADR-0058 as amended](ADR-0058-evidence-anchoring-and-selector-contract.md), [ADR-0059](ADR-0059-provider-neutral-content-artifact-storage.md)
-- [F0003 persistence ownership](../../features/archive/F0003-postgresql-persistence/feature-assembly-plan.md), [F0005 candidate plan](../../features/F0005-one-time-docling-ingestion/feature-assembly-plan.md)
+- [F0003 persistence ownership](../../features/archive/F0003-postgresql-persistence/feature-assembly-plan.md), [F0005 candidate plan](../../features/archive/F0005-one-time-docling-ingestion/feature-assembly-plan.md)

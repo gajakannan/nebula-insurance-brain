@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="5.449" timestamp="2026-10-27T22:49:28.876995-04:00" hostname="myStarCore-01"><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-direct-baseline]" time="0.522"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">pipeline = 'direct-baseline', mode = 'timeout', reason = 'model_timeout'
+
+    @pytest.mark.parametrize("pipeline", ["direct-baseline", "graph-dense"])
+    @pytest.mark.parametrize(
+        ("mode", "reason"),
+        [
+            ("stopped", "model_unavailable"),
+            ("http_5xx", "model_http_error"),
+            ("malformed_json", "model_malformed_output"),
+            ("schema_invalid", "model_schema_invalid"),
+            ("timeout", "model_timeout"),
+        ],
+    )
+    def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(pipeline, mode, reason):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=30).start()
+        if mode not in ("stopped",):
+            proxy.schedule = {1: mode}
+        timeline: dict[str, float] = {}
+        try:
+            with (
+                qualification.isolated(url, pipeline, v2_writer_enabled=True) as env,
+&gt;               qualification.live_session(
+                    env,
+                    settings,
+                    transport_url=proxy.base_url,
+                    limits=InferenceLimits(request_timeout_seconds=10),
+                ) as live,
+            ):
+
+neuron/tests/integration/test_fault_injection_qualification.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x7929783e3380&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-graph-dense]" time="0.505"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">pipeline = 'graph-dense', mode = 'timeout', reason = 'model_timeout'
+
+    @pytest.mark.parametrize("pipeline", ["direct-baseline", "graph-dense"])
+    @pytest.mark.parametrize(
+        ("mode", "reason"),
+        [
+            ("stopped", "model_unavailable"),
+            ("http_5xx", "model_http_error"),
+            ("malformed_json", "model_malformed_output"),
+            ("schema_invalid", "model_schema_invalid"),
+            ("timeout", "model_timeout"),
+        ],
+    )
+    def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(pipeline, mode, reason):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=30).start()
+        if mode not in ("stopped",):
+            proxy.schedule = {1: mode}
+        timeline: dict[str, float] = {}
+        try:
+            with (
+                qualification.isolated(url, pipeline, v2_writer_enabled=True) as env,
+&gt;               qualification.live_session(
+                    env,
+                    settings,
+                    transport_url=proxy.base_url,
+                    limits=InferenceLimits(request_timeout_seconds=10),
+                ) as live,
+            ):
+
+neuron/tests/integration/test_fault_injection_qualification.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x7929781d7d90&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase></testsuite></testsuites>

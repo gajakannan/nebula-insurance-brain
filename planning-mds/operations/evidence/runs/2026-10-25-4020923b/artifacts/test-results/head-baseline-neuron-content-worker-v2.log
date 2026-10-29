@@ -1,0 +1,195 @@
+F....                                                                    [100%]
+=================================== FAILURES ===================================
+___________ test_publication_import_and_second_profile_reuse[False] ____________
+
+database = (Engine(postgresql+psycopg://brain:***@127.0.0.1:5432/brain?options=-csearch_path%3Denqueue_proof_40a5816589b0470fb845...sql+psycopg://brain:brain@127.0.0.1:5432/brain?options=-csearch_path%3Denqueue_proof_40a5816589b0470fb845345b94f7f315')
+tmp_path = PosixPath('/tmp/pytest-of-gajap/pytest-80/test_publication_import_and_se0')
+native = (PosixPath('/tmp/pytest-of-gajap/pytest-80/native-receipts0/native.pdf'), ParseResult(document=DoclingDocument(schema_...': 0, 'char_end': 40}], 'native_ref': '#/texts/0'}, confidence=None),)}, origin_unavailable=(), page_rotations={1: 0}))
+fallback = False
+
+    @pytest.mark.parametrize("fallback", [False, True])
+    def test_publication_import_and_second_profile_reuse(
+        database: tuple[Engine, str],
+        tmp_path: Path,
+        native: tuple[Path, ParseResult[DoclingDocument]],
+        fallback: bool,
+    ) -> None:
+        engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
+        path, parsed = native
+        if fallback:
+            parsed = replace(parsed, provenance={}, origin_unavailable=("#/texts/0", "#/texts/1"))
+        job = enqueue(path)
+        lease = queue.claim()
+        assert lease is not None and lease.job_id == job
+        calls: list[httpx.Request] = []
+        conversions: list[Path] = []
+    
+        def convert(_path: Path) -> ParseResult[DoclingDocument]:
+            conversions.append(_path)
+            return parsed
+    
+        worker = DocumentWorker(
+            queue=queue,
+            store=store,
+            authorize_for_job=authorization.for_job,
+            client_factory=client_factory(calls),
+            converter=convert,
+            publish_content=publisher.publish_manifest,
+            load_accepted=access.resolve,
+            v2_writer_enabled=True,
+        )
+        worker._execute(lease, Event())
+        with Session(engine) as session:
+            row = session.scalars(select(ContentArtifact)).one()
+            assert row.publication_state == "ready"
+            assert row.artifact_contract_version == (1 if fallback else 2)
+            assert row.writer_fallback_reason == ("ORIGIN_UNAVAILABLE" if fallback else None)
+            published = session.scalars(
+                select(AuditEventRow).where(AuditEventRow.event_type == "content_artifact_published")
+            ).one()
+            assert published.payload is not None
+            assert published.payload["unattributed_item_count"] == (2 if fallback else 0)
+>           assert session.scalar(select(func.count()).select_from(content_block)) == (
+                0 if fallback else 2
+            )
+E           AssertionError: assert 1 == 2
+E            +  where 1 = scalar(<sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c350>)
+E            +    where scalar = <sqlalchemy.orm.session.Session object at 0x7bb3bf5e5e50>.scalar
+E            +    and   <sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c350> = select_from(Table('content_block', MetaData(), Column('artifact_id', Uuid(), ForeignKey('content_artifact.id'), table=<content_blo...=False)), Column('created_by', Uuid(), ForeignKey('principal.id'), table=<content_block>, nullable=False), schema=None))
+E            +      where select_from = <sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c450>.select_from
+E            +        where <sqlalchemy.sql.selectable.Select object at 0x7bb3bed2c450> = select(<sqlalchemy.sql.functions.count at 0x7bb3bf9a6660; count>)
+E            +          where <sqlalchemy.sql.functions.count at 0x7bb3bf9a6660; count> = <sqlalchemy.sql.functions._FunctionGenerator object at 0x7bb3bf190f30>()
+E            +            where <sqlalchemy.sql.functions._FunctionGenerator object at 0x7bb3bf190f30> = func.count
+
+tests/integration/test_content_worker_v2.py:196: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+[32m[INFO] 2026-10-28 03:21:24,519 [RapidOCR] base.py:23: Using engine_name: torch[0m
+[32m[INFO] 2026-10-28 03:21:24,524 [RapidOCR] device_config.py:64: Using GPU device with ID: 0[0m
+[32m[INFO] 2026-10-28 03:21:24,524 [RapidOCR] download_file.py:68: Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv6/det/PP-OCRv6_det_small.pth[0m
+[32m[INFO] 2026-10-28 03:21:26,813 [RapidOCR] download_file.py:82: Download size: 9.77MB[0m
+[32m[INFO] 2026-10-28 03:21:28,583 [RapidOCR] download_file.py:95: Successfully saved to: /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth[0m
+[32m[INFO] 2026-10-28 03:21:28,586 [RapidOCR] main.py:50: Using /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth[0m
+[32m[INFO] 2026-10-28 03:21:29,420 [RapidOCR] base.py:23: Using engine_name: torch[0m
+[32m[INFO] 2026-10-28 03:21:29,421 [RapidOCR] device_config.py:64: Using GPU device with ID: 0[0m
+[32m[INFO] 2026-10-28 03:21:29,421 [RapidOCR] download_file.py:68: Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv4/cls/ch_ptocr_mobile_v2.0_cls_mobile.pth[0m
+[32m[INFO] 2026-10-28 03:21:30,664 [RapidOCR] download_file.py:82: Download size: 0.56MB[0m
+[32m[INFO] 2026-10-28 03:21:30,767 [RapidOCR] download_file.py:95: Successfully saved to: /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ch_ptocr_mobile_v2.0_cls_mobile.pth[0m
+[32m[INFO] 2026-10-28 03:21:30,769 [RapidOCR] main.py:50: Using /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ch_ptocr_mobile_v2.0_cls_mobile.pth[0m
+[32m[INFO] 2026-10-28 03:21:30,828 [RapidOCR] base.py:23: Using engine_name: torch[0m
+[32m[INFO] 2026-10-28 03:21:30,828 [RapidOCR] device_config.py:64: Using GPU device with ID: 0[0m
+[32m[INFO] 2026-10-28 03:21:30,828 [RapidOCR] download_file.py:68: Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv6/rec/PP-OCRv6_rec_small.pth[0m
+[32m[INFO] 2026-10-28 03:21:34,044 [RapidOCR] download_file.py:82: Download size: 20.34MB[0m
+[32m[INFO] 2026-10-28 03:21:36,692 [RapidOCR] download_file.py:95: Successfully saved to: /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_rec_small.pth[0m
+[32m[INFO] 2026-10-28 03:21:36,693 [RapidOCR] main.py:50: Using /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_rec_small.pth[0m
+[32m[INFO] 2026-10-28 03:21:37,110 [RapidOCR] download_file.py:68: Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/paddle/PP-OCRv6/rec/PP-OCRv6_rec_small/ppocrv6_dict.txt[0m
+[32m[INFO] 2026-10-28 03:21:38,537 [RapidOCR] download_file.py:82: Download size: 0.00MB[0m
+[32m[INFO] 2026-10-28 03:21:38,884 [RapidOCR] download_file.py:95: Successfully saved to: /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ppocrv6_dict.txt[0m
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  17%|█▋        | 133/770 [00:00<00:00, 995.41it/s]Loading weights:  30%|███       | 233/770 [00:00<00:01, 535.93it/s]Loading weights:  39%|███▊      | 297/770 [00:00<00:00, 497.58it/s]Loading weights:  48%|████▊     | 373/770 [00:00<00:00, 565.81it/s]Loading weights:  57%|█████▋    | 436/770 [00:00<00:00, 530.12it/s]Loading weights:  64%|██████▍   | 493/770 [00:00<00:00, 482.45it/s]Loading weights:  79%|███████▉  | 612/770 [00:01<00:00, 659.38it/s]Loading weights: 100%|██████████| 770/770 [00:01<00:00, 707.51it/s]
+------------------------------ Captured log setup ------------------------------
+INFO     RapidOCR:base.py:23 Using engine_name: torch
+INFO     RapidOCR:device_config.py:64 Using GPU device with ID: 0
+INFO     RapidOCR:download_file.py:68 Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv6/det/PP-OCRv6_det_small.pth
+INFO     RapidOCR:download_file.py:82 Download size: 9.77MB
+INFO     RapidOCR:download_file.py:95 Successfully saved to: /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth
+INFO     RapidOCR:main.py:50 Using /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth
+INFO     RapidOCR:base.py:23 Using engine_name: torch
+INFO     RapidOCR:device_config.py:64 Using GPU device with ID: 0
+INFO     RapidOCR:download_file.py:68 Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv4/cls/ch_ptocr_mobile_v2.0_cls_mobile.pth
+INFO     RapidOCR:download_file.py:82 Download size: 0.56MB
+INFO     RapidOCR:download_file.py:95 Successfully saved to: /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ch_ptocr_mobile_v2.0_cls_mobile.pth
+INFO     RapidOCR:main.py:50 Using /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ch_ptocr_mobile_v2.0_cls_mobile.pth
+INFO     RapidOCR:base.py:23 Using engine_name: torch
+INFO     RapidOCR:device_config.py:64 Using GPU device with ID: 0
+INFO     RapidOCR:download_file.py:68 Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv6/rec/PP-OCRv6_rec_small.pth
+INFO     RapidOCR:download_file.py:82 Download size: 20.34MB
+INFO     RapidOCR:download_file.py:95 Successfully saved to: /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_rec_small.pth
+INFO     RapidOCR:main.py:50 Using /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_rec_small.pth
+INFO     RapidOCR:download_file.py:68 Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/paddle/PP-OCRv6/rec/PP-OCRv6_rec_small/ppocrv6_dict.txt
+INFO     RapidOCR:download_file.py:82 Download size: 0.00MB
+INFO     RapidOCR:download_file.py:95 Successfully saved to: /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ppocrv6_dict.txt
+------------------------------ Captured log call -------------------------------
+WARNING  docling_graph.core.utils.graph_cleaner:graph_cleaner.py:455 Graph has no edges (1 node(s) only). This can happen when extraction was salvaged and list entities were dropped.
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/pydantic/main.py:542: DeprecationWarning: `force_full_page_ocr` is deprecated; set `mode=OcrMode.FULL_PAGE` instead.
+    return self.__pydantic_serializer__.to_json(
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:606: DeprecationWarning: This field is deprecated. Use `generate_page_images=True` and call `TableItem.get_image()` to extract table images from page images.
+    or self.pipeline_options.generate_table_images
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:442: DeprecationWarning: deprecated
+    if self.options.rec_font_path is not None:
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/heads/multiheadAttention.py:14: SyntaxWarning: "\d" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\d"? A raw string is also an option.
+    \text{MultiHead}(Q, K, V) = \text{Concat}(head_1,\dots,head_h)W^O
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[True]
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[True]
+tests/integration/test_content_worker_v2.py::test_corrupt_accepted_marker_never_becomes_conversion_miss
+  /tmp/claude-1000/-home-gajap-uSandbox-repos-nebula/6494e211-ebf5-4562-b71e-59ab9f7b9271/scratchpad/head-wt/neuron/.venv/lib/python3.14/site-packages/docling_graph/core/utils/alias_reconciler.py:95: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    if id(instance) in seen or not hasattr(instance, "model_fields"):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+1 failed, 4 passed, 36 warnings in 41.11s
+exit=1

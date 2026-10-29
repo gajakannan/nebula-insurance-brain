@@ -229,7 +229,8 @@ adrs:
       - capability:local-dependency-stack
       - capability:parse-once-content-artifact
   - id: adr:0060
-    label: Docling-Graph Document Pipeline Orchestration
+    label: Docling-Graph Document Pipeline Orchestration (Proposed; Graph dense rejected in F0005 2026-10-28,
+      reopen deadline F0014/F0015 planning)
     path: planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
     related_nodes:
       - adr:0003
@@ -240,6 +241,7 @@ adrs:
       - adr:0055
       - adr:0058
       - adr:0059
+      - adr:0074
       - capability:parse-once-content-artifact
       - capability:semantic-interpretation-run
       - entity:content-artifact
@@ -356,12 +358,24 @@ adrs:
       - entity:audit-event
       - entity:semantic-interpretation-run
   - id: adr:0073
-    label: Versioned Content Contracts and Append-Only Document Metadata (Proposed)
+    label: Versioned Content Contracts and Append-Only Document Metadata (Proposed; 2026-10-27 OCR quality
+      amendment)
     path: planning-mds/architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md
     related_nodes:
       - capability:document-date-provenance
       - capability:versioned-content-contracts
       - entity:content-artifact
+  - id: adr:0074
+    label: Local Document-Job Execution Controls (Accepted 2026-10-28)
+    path: planning-mds/architecture/decisions/ADR-0074-local-document-job-execution-controls.md
+    related_nodes:
+      - adr:0003
+      - adr:0004
+      - adr:0055
+      - adr:0060
+      - capability:local-inference-service
+      - capability:parse-once-content-artifact
+      - migration:f0005-job-event-reason
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -596,13 +610,15 @@ capabilities:
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
   - id: capability:parse-once-content-artifact
     label: Parse-once content artifact
-    notes: 'Target: Docling-Graph coordinates Docling conversion; Nebula publishes the immutable native
-      bundle before extraction and reuses it on restart. F0005 must prove ADR-0060; F0001 used Docling
-      directly.'
+    notes: 'As built (F0005, 2026-10-28): Docling converts in a supervised conversion-only child with
+      a 300 s parent deadline; Nebula publishes the immutable native bundle (with observed OCR quality)
+      before extraction and reuses it on restart. The direct-baseline client stays the default; Graph
+      dense was rejected (ADR-0060 Proposed). Execution controls: ADR-0074.'
     related_nodes:
       - adr:0003
       - adr:0004
       - adr:0060
+      - adr:0074
       - capability:versioned-content-contracts
       - entity:content-artifact
       - schema:content-artifact-manifest
@@ -1466,6 +1482,15 @@ migrations:
       - capability:document-date-provenance
       - capability:versioned-content-contracts
       - entity:content-artifact
+  - id: migration:f0005-job-event-reason
+    label: F0005 job failure reasons (revisions 0009, 0010 expand-only)
+    path: engine/migrations/versions/0009_f0005_job_event_reason.py
+    notes: 0009 adds the CHECK-constrained `document_job_event.reason`; 0010 widens it with model_budget_exceeded,
+      model_deadline_exceeded, model_contract_fallback and interpretation_failed. Downgrades refuse while
+      recorded reasons exist. The vocabulary is part of ADR-0074.
+    related_nodes:
+      - adr:0074
+      - capability:parse-once-content-artifact
 policy_rules:
   - id: policy_rule:content-artifact-ingest
     label: content_artifact:ingest

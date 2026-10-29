@@ -34,12 +34,45 @@ class ExecutionRecord(BaseModel):
     environment_digest: str
 
 
+class OcrEngine(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    version: str
+    model: str | None
+    model_version: str | None
+
+
+class OcrQuality(BaseModel):
+    """OCR observed during one conversion (F0005-S0001-AC2, ADR-0073 amendment).
+
+    `engine` is None when OCR is configured but its engine or assets cannot be
+    identified; it is never guessed.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    page_count: StrictInt
+    pages: list[StrictInt]
+    engine: OcrEngine | None
+
+    @model_validator(mode="after")
+    def consistent(self) -> Self:
+        if self.pages != sorted(set(self.pages)) or any(page < 1 for page in self.pages):
+            raise ValueError("OCR pages must be sorted, unique and 1-based")
+        if self.page_count != len(self.pages):
+            raise ValueError("OCR page count must equal the observed pages")
+        return self
+
+
 class ExtractionQuality(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     status: Literal["complete", "partial", "failed"]
     failed_pages: list[int]
     warnings: list[str]
+    # Optional and add-only: historical bundles omit it, meaning "not observed".
+    ocr: OcrQuality | None = None
 
 
 class ArtifactManifest(BaseModel):

@@ -1,0 +1,385 @@
+ Image brain-f0005-engine:2026-10-25-4020923b Building 
+ Image brain-f0005-neuron:2026-10-25-4020923b Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.44kB done
+#1 DONE 0.0s
+
+#2 [neuron-validation internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.49kB 0.0s done
+#2 DONE 0.0s
+
+#3 [engine-validation internal] load metadata for ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437
+#3 DONE 0.6s
+
+#4 [neuron-validation internal] load metadata for docker.io/library/python:3.14.4-slim-bookworm@sha256:fc74d22ffd0d5ac395a4b7bdda75a4539758862c49ebf3005647084631e63789
+#4 DONE 0.6s
+
+#5 [engine-validation internal] load build context
+#5 DONE 0.0s
+
+#6 [engine-validation dependencies 1/7] FROM docker.io/library/python:3.14.4-slim-bookworm@sha256:fc74d22ffd0d5ac395a4b7bdda75a4539758862c49ebf3005647084631e63789
+#6 resolve docker.io/library/python:3.14.4-slim-bookworm@sha256:fc74d22ffd0d5ac395a4b7bdda75a4539758862c49ebf3005647084631e63789 0.1s done
+#6 resolve docker.io/library/python:3.14.4-slim-bookworm@sha256:fc74d22ffd0d5ac395a4b7bdda75a4539758862c49ebf3005647084631e63789 0.1s done
+#6 DONE 0.1s
+
+#7 [engine-validation uv 1/1] FROM ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437
+#7 resolve ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437 0.0s done
+#7 DONE 0.1s
+
+#5 [engine-validation internal] load build context
+#5 transferring context: 1.22MB 0.1s done
+#5 DONE 0.1s
+
+#8 [engine-validation dependencies 4/7] WORKDIR /app/brain
+#8 CACHED
+
+#9 [engine-validation dependencies 2/7] COPY --from=uv /uv /usr/local/bin/uv
+#9 CACHED
+
+#10 [engine-validation dependencies 3/7] RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1 && rm -rf /var/lib/apt/lists/*
+#10 CACHED
+
+#11 [engine-validation dependencies 5/7] COPY engine/ engine/
+#11 CACHED
+
+#12 [engine-validation dependencies 6/7] COPY neuron/ neuron/
+#12 DONE 0.3s
+
+#13 [engine-validation dependencies 7/7] RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --directory /app/brain/engine
+#13 0.607 Using CPython 3.14.4 interpreter at: /usr/local/bin/python3
+#13 0.607 Creating virtual environment at: /opt/venv
+#13 0.620 Resolved 72 packages in 3ms
+#13 2.290 Installed 68 packages in 1.60s
+#13 2.290  + aiosqlite==0.22.1
+#13 2.290  + alembic==1.19.1
+#13 2.290  + annotated-doc==0.0.5
+#13 2.290  + annotated-types==0.8.0
+#13 2.290  + anyio==4.15.0
+#13 2.291  + ast-serialize==0.9.0
+#13 2.291  + asyncpg==0.31.0
+#13 2.291  + attrs==26.1.0
+#13 2.291  + brain-api==0.1.0 (from file:///app/brain/engine/apps/api)
+#13 2.291  + brain-content==0.1.0 (from file:///app/brain/engine/packages/brain-content)
+#13 2.291  + brain-contracts==0.1.0 (from file:///app/brain/engine/packages/brain-contracts)
+#13 2.291  + brain-domain==0.1.0 (from file:///app/brain/engine/packages/brain-domain)
+#13 2.291  + brain-jobs==0.1.0 (from file:///app/brain/engine/packages/brain-jobs)
+#13 2.291  + brain-persistence==0.1.0 (from file:///app/brain/engine/packages/brain-persistence)
+#13 2.291  + brain-review==0.1.0 (from file:///app/brain/engine/packages/brain-review)
+#13 2.291  + brain-security==0.1.0 (from file:///app/brain/engine/packages/brain-security)
+#13 2.291  + brain-temporal==0.1.0 (from file:///app/brain/engine/packages/brain-temporal)
+#13 2.291  + brain-testing==0.1.0 (from file:///app/brain/engine/packages/brain-testing)
+#13 2.291  + brain-worker==0.1.0 (from file:///app/brain/engine/apps/worker)
+#13 2.291  + casbin==1.43.0
+#13 2.291  + cffi==2.1.1
+#13 2.291  + click==8.5.0
+#13 2.291  + coverage==7.16.0
+#13 2.291  + cryptography==50.0.1
+#13 2.291  + fastapi==0.141.1
+#13 2.291  + greenlet==3.5.5
+#13 2.291  + h11==0.16.0
+#13 2.291  + httpcore2==2.12.0
+#13 2.291  + httptools==0.8.0
+#13 2.291  + httpx2==2.12.0
+#13 2.291  + idna==3.19
+#13 2.291  + iniconfig==2.3.0
+#13 2.291  + jsonschema==4.26.0
+#13 2.291  + jsonschema-specifications==2025.9.1
+#13 2.291  + librt==0.15.0
+#13 2.291  + mako==1.4.1
+#13 2.291  + markupsafe==3.0.3
+#13 2.291  + mypy==2.3.1
+#13 2.291  + mypy-extensions==1.1.0
+#13 2.291  + packaging==26.3
+#13 2.292  + pathspec==1.1.1
+#13 2.292  + pluggy==1.6.0
+#13 2.292  + psycopg==3.3.5
+#13 2.292  + psycopg-binary==3.3.5
+#13 2.292  + pycparser==3.0
+#13 2.292  + pydantic==2.13.5
+#13 2.292  + pydantic-core==2.46.5
+#13 2.292  + pygments==2.21.0
+#13 2.292  + pyjwt==2.15.0
+#13 2.292  + pytest==9.1.1
+#13 2.292  + pytest-asyncio==1.4.0
+#13 2.292  + pytest-cov==7.1.0
+#13 2.292  + python-dotenv==1.2.3
+#13 2.292  + pyyaml==6.0.3
+#13 2.292  + referencing==0.37.0
+#13 2.292  + rpds-py==2026.6.3
+#13 2.292  + ruff==0.16.6
+#13 2.292  + simpleeval==1.0.7
+#13 2.292  + sqlalchemy==2.0.52
+#13 2.292  + starlette==1.6.0
+#13 2.292  + truststore==0.10.4
+#13 2.292  + types-pyyaml==6.0.12.20260815
+#13 2.293  + typing-extensions==4.16.0
+#13 2.293  + typing-inspection==0.4.4
+#13 2.293  + uvicorn==0.52.4
+#13 2.293  + uvloop==0.22.1
+#13 2.293  + watchfiles==1.2.0
+#13 2.293  + websockets==17.1
+#13 DONE 2.5s
+
+#14 [neuron-validation dependencies 7/7] RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --directory /app/brain/neuron
+#14 0.606 Using CPython 3.14.4 interpreter at: /usr/local/bin/python3
+#14 0.606 Creating virtual environment at: /opt/venv
+#14 0.625 Resolved 185 packages in 5ms
+#14 0.775    Building brain-extraction @ file:///app/brain/neuron/packages/brain-extraction
+#14 0.777    Building brain-ingestion @ file:///app/brain/neuron/packages/brain-ingestion
+#14 0.777    Building brain-interpretation @ file:///app/brain/neuron/packages/brain-interpretation
+#14 0.874 Downloading litellm (23.0MiB)
+#14 2.193       Built brain-extraction @ file:///app/brain/neuron/packages/brain-extraction
+#14 2.194       Built brain-interpretation @ file:///app/brain/neuron/packages/brain-interpretation
+#14 2.220       Built brain-ingestion @ file:///app/brain/neuron/packages/brain-ingestion
+#14 2.565  Downloaded litellm
+#14 2.565 Prepared 4 packages in 1.79s
+#14 ...
+
+#15 [engine-validation runtime 4/5] COPY --from=uv /uv /usr/local/bin/uv
+#15 CACHED
+
+#16 [engine-validation runtime 2/5] RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1 && rm -rf /var/lib/apt/lists/*
+#16 CACHED
+
+#17 [engine-validation runtime 3/5] COPY --from=dependencies /opt/venv /opt/venv
+#17 CACHED
+
+#18 [engine-validation runtime 5/5] WORKDIR /app/brain
+#18 CACHED
+
+#19 [engine-validation] exporting to image
+#19 exporting layers done
+#19 exporting manifest sha256:80c9b41f90eb2b0c19f6d9e6d447e18630d4d1d0e5df45f08fc61715482cd8b9 done
+#19 exporting config sha256:a868b2883c59c5e885a760b8b95a781efbdb46da99580d8d3f72f0f3665579d3 done
+#19 exporting attestation manifest sha256:255f4e06f1a38a50c4315811bbfe666db5dd1e28c908ff57a5f728e9042e0949
+#19 exporting attestation manifest sha256:255f4e06f1a38a50c4315811bbfe666db5dd1e28c908ff57a5f728e9042e0949 0.1s done
+#19 exporting manifest list sha256:3f6216b871fb8f06d7de8dc219c5baca46b0c4a5bc3b5ff38b88b2166ed3579d 0.0s done
+#19 naming to docker.io/library/brain-f0005-engine:2026-10-25-4020923b
+#19 naming to docker.io/library/brain-f0005-engine:2026-10-25-4020923b done
+#19 unpacking to docker.io/library/brain-f0005-engine:2026-10-25-4020923b 0.0s done
+#19 DONE 0.3s
+
+#14 [neuron-validation dependencies 7/7] RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --directory /app/brain/neuron
+#14 ...
+
+#20 [engine-validation] resolving provenance for metadata file
+#20 DONE 0.0s
+
+#14 [neuron-validation dependencies 7/7] RUN --mount=type=cache,target=/root/.cache/uv uv sync --locked --directory /app/brain/neuron
+#14 17.38 Installed 181 packages in 14.81s
+#14 17.39  + accelerate==1.15.0
+#14 17.39  + aiofiles==25.1.0
+#14 17.39  + aiohappyeyeballs==2.7.1
+#14 17.39  + aiohttp==3.14.3
+#14 17.39  + aiosignal==1.4.0
+#14 17.39  + annotated-doc==0.0.5
+#14 17.39  + annotated-types==0.8.0
+#14 17.39  + antlr4-python3-runtime==4.9.3
+#14 17.39  + anyio==4.15.1
+#14 17.39  + ast-serialize==0.11.1
+#14 17.39  + asyncpg==0.31.0
+#14 17.39  + attrs==26.1.0
+#14 17.39  + beautifulsoup4==4.15.0
+#14 17.39  + boto3==1.43.91
+#14 17.39  + botocore==1.43.91
+#14 17.39  + brain-content==0.1.0 (from file:///app/brain/engine/packages/brain-content)
+#14 17.39  + brain-contracts==0.1.0 (from file:///app/brain/engine/packages/brain-contracts)
+#14 17.39  + brain-domain==0.1.0 (from file:///app/brain/engine/packages/brain-domain)
+#14 17.39  + brain-extraction==0.1.0 (from file:///app/brain/neuron/packages/brain-extraction)
+#14 17.39  + brain-ingestion==0.1.0 (from file:///app/brain/neuron/packages/brain-ingestion)
+#14 17.39  + brain-interpretation==0.1.0 (from file:///app/brain/neuron/packages/brain-interpretation)
+#14 17.39  + brain-jobs==0.1.0 (from file:///app/brain/engine/packages/brain-jobs)
+#14 17.39  + brain-persistence==0.1.0 (from file:///app/brain/engine/packages/brain-persistence)
+#14 17.39  + brain-review==0.1.0 (from file:///app/brain/engine/packages/brain-review)
+#14 17.39  + brain-security==0.1.0 (from file:///app/brain/engine/packages/brain-security)
+#14 17.39  + brain-temporal==0.1.0 (from file:///app/brain/engine/packages/brain-temporal)
+#14 17.39  + brain-testing==0.1.0 (from file:///app/brain/engine/packages/brain-testing)
+#14 17.39  + brain-worker==0.1.0 (from file:///app/brain/engine/apps/worker)
+#14 17.39  + casbin==1.43.0
+#14 17.39  + certifi==2026.7.22
+#14 17.39  + cffi==2.1.1
+#14 17.39  + charset-normalizer==3.5.1
+#14 17.39  + click==8.5.0
+#14 17.39  + colorlog==6.12.0
+#14 17.39  + coverage==7.16.0
+#14 17.39  + cryptography==50.0.1
+#14 17.39  + cuda-bindings==13.3.1
+#14 17.39  + cuda-pathfinder==1.8.1
+#14 17.39  + cuda-toolkit==13.0.3.0
+#14 17.39  + defusedxml==0.7.1
+#14 17.39  + dill==0.4.1
+#14 17.39  + distro==1.9.0
+#14 17.39  + doclang==0.7.3
+#14 17.39  + docling==2.126.0
+#14 17.39  + docling-core==2.95.0
+#14 17.39  + docling-graph==1.9.1
+#14 17.39  + docling-ibm-models==4.0.2
+#14 17.39  + docling-parse==7.18.0
+#14 17.39  + docling-slim==2.126.0
+#14 17.39  + et-xmlfile==2.0.0
+#14 17.39  + faker==40.38.0
+#14 17.39  + fastuuid==0.14.0
+#14 17.39  + filelock==3.32.6
+#14 17.39  + filetype==1.2.0
+#14 17.39  + frozenlist==1.8.0
+#14 17.39  + fsspec==2026.7.0
+#14 17.39  + greenlet==3.5.5
+#14 17.39  + h11==0.16.0
+#14 17.39  + hf-xet==1.6.0
+#14 17.39  + httpcore==1.0.9
+#14 17.39  + httpx==0.28.1
+#14 17.39  + huggingface-hub==1.30.0
+#14 17.39  + idna==3.19
+#14 17.39  + importlib-metadata==8.9.0
+#14 17.39  + iniconfig==2.3.0
+#14 17.39  + jinja2==3.1.6
+#14 17.39  + jiter==0.16.0
+#14 17.39  + jmespath==1.1.0
+#14 17.39  + jsonref==1.1.0
+#14 17.39  + jsonschema==4.26.0
+#14 17.39  + jsonschema-specifications==2025.9.1
+#14 17.39  + latex2mathml==3.81.1
+#14 17.39  + librt==0.15.0
+#14 17.39  + litellm==1.100.4
+#14 17.39  + lxml==6.1.3
+#14 17.39  + mail-parser==4.6.4
+#14 17.39  + markdown-it-py==4.2.0
+#14 17.39  + marko==2.2.4
+#14 17.39  + markupsafe==3.0.3
+#14 17.39  + mdurl==0.1.2
+#14 17.39  + mpire==2.10.2
+#14 17.39  + mpmath==1.3.0
+#14 17.39  + multidict==6.9.1
+#14 17.39  + multiprocess==0.70.19
+#14 17.39  + mypy==2.3.1
+#14 17.39  + mypy-extensions==1.1.0
+#14 17.39  + networkx==3.6.1
+#14 17.39  + numpy==2.5.3
+#14 17.39  + nvidia-cublas==13.1.1.3
+#14 17.39  + nvidia-cuda-cupti==13.0.85
+#14 17.39  + nvidia-cuda-nvrtc==13.0.88
+#14 17.39  + nvidia-cuda-runtime==13.0.96
+#14 17.39  + nvidia-cudnn-cu13==9.24.0.43
+#14 17.39  + nvidia-cufft==12.0.0.61
+#14 17.39  + nvidia-cufile==1.15.1.6
+#14 17.39  + nvidia-curand==10.4.0.35
+#14 17.39  + nvidia-cusolver==12.0.4.66
+#14 17.39  + nvidia-cusparse==12.6.3.3
+#14 17.39  + nvidia-cusparselt-cu13==0.8.1
+#14 17.39  + nvidia-nccl-cu13==2.30.7
+#14 17.39  + nvidia-nvjitlink==13.4.52
+#14 17.39  + nvidia-nvshmem-cu13==3.4.5
+#14 17.39  + nvidia-nvtx==13.0.85
+#14 17.39  + olefile==0.47
+#14 17.39  + omegaconf==2.3.1
+#14 17.39  + openai==2.54.0
+#14 17.39  + opencv-python==5.0.0.93
+#14 17.39  + openpyxl==3.1.5
+#14 17.39  + packaging==26.3
+#14 17.39  + pandas==3.0.5
+#14 17.39  + pathspec==1.1.1
+#14 17.39  + pillow==12.3.0
+#14 17.39  + pluggy==1.6.0
+#14 17.39  + polyfactory==3.3.0
+#14 17.39  + propcache==0.5.2
+#14 17.39  + psutil==7.2.2
+#14 17.39  + psycopg==3.3.5
+#14 17.39  + psycopg-binary==3.3.5
+#14 17.39  + pyclipper==1.4.0
+#14 17.39  + pycparser==3.0
+#14 17.39  + pydantic==2.13.5
+#14 17.39  + pydantic-core==2.46.5
+#14 17.39  + pydantic-settings==2.15.0
+#14 17.39  + pygments==2.21.0
+#14 17.39  + pyjwt==2.15.0
+#14 17.39  + pylatexenc==2.11
+#14 17.39  + pypdf==6.21.2
+#14 17.39  + pypdfium2==5.13.0
+#14 17.39  + pytest==9.1.1
+#14 17.39  + pytest-asyncio==1.4.0
+#14 17.39  + pytest-cov==7.1.0
+#14 17.39  + python-dateutil==2.9.0.post0
+#14 17.39  + python-docx==1.2.0
+#14 17.39  + python-dotenv==1.2.3
+#14 17.39  + python-oxmsg==0.0.2
+#14 17.39  + python-pptx==1.0.2
+#14 17.39  + pyyaml==6.0.3
+#14 17.39  + rapidocr==3.9.2
+#14 17.39  + referencing==0.37.0
+#14 17.39  + regex==2026.9.10
+#14 17.39  + reportlab==5.0.1
+#14 17.39  + requests==2.34.2
+#14 17.39  + rich==15.0.0
+#14 17.39  + rpds-py==2026.6.3
+#14 17.39  + rtree==1.4.1
+#14 17.39  + ruff==0.16.6
+#14 17.39  + s3transfer==0.19.2
+#14 17.39  + safetensors==0.8.0
+#14 17.39  + scipy==1.18.1
+#14 17.39  + semchunk==3.2.5
+#14 17.39  + setuptools==84.0.0
+#14 17.39  + shapely==2.1.2
+#14 17.39  + shellingham==1.5.4
+#14 17.39  + simpleeval==1.0.7
+#14 17.39  + six==1.17.0
+#14 17.39  + sniffio==1.3.1
+#14 17.39  + soupsieve==2.9.2
+#14 17.39  + sqlalchemy==2.0.52
+#14 17.39  + sympy==1.14.0
+#14 17.39  + tabulate==0.10.0
+#14 17.39  + tenacity==9.1.4
+#14 17.39  + tiktoken==0.12.0
+#14 17.39  + tokenizers==0.23.2
+#14 17.39  + torch==2.14.0
+#14 17.39  + torchvision==0.29.0
+#14 17.39  + tqdm==4.70.0
+#14 17.39  + transformers==5.17.0
+#14 17.39  + tree-sitter==0.26.0
+#14 17.39  + tree-sitter-c==0.24.2
+#14 17.39  + tree-sitter-javascript==0.25.0
+#14 17.39  + tree-sitter-python==0.25.0
+#14 17.39  + tree-sitter-typescript==0.23.2
+#14 17.39  + triton==3.8.0
+#14 17.39  + typer==0.26.8
+#14 17.39  + typing-extensions==4.16.0
+#14 17.39  + typing-inspection==0.4.4
+#14 17.39  + urllib3==2.8.0
+#14 17.39  + websockets==16.1.1
+#14 17.39  + xlsxwriter==3.2.9
+#14 17.39  + yarl==1.24.5
+#14 17.39  + zipp==4.1.0
+#14 DONE 17.8s
+
+#7 [neuron-validation uv 1/1] FROM ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437
+#7 CACHED
+
+#16 [neuron-validation runtime 2/5] RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 libgomp1 && rm -rf /var/lib/apt/lists/*
+#16 CACHED
+
+#21 [neuron-validation runtime 3/5] COPY --from=dependencies /opt/venv /opt/venv
+#21 DONE 23.7s
+
+#22 [neuron-validation runtime 4/5] COPY --from=uv /uv /usr/local/bin/uv
+#22 DONE 0.6s
+
+#23 [neuron-validation runtime 5/5] WORKDIR /app/brain
+#23 DONE 0.1s
+
+#24 [neuron-validation] exporting to image
+#24 exporting layers
+#24 exporting layers 125.8s done
+#24 exporting manifest sha256:262fde8f0fb9fb2731caaf8d42c3398ace7f1ae2539d17d32a4868173433fa11 0.0s done
+#24 exporting config sha256:74af088213a37d2dc63b06d0676d3b294578ae17c6ece09de832062c64ca5252 0.0s done
+#24 exporting attestation manifest sha256:7f0315c089e0f3460645402df1d146aed1016f6cb12482a38330c8be4be803e6 0.1s done
+#24 exporting manifest list sha256:d27155a10862f4758b8b43a9e49bea976948f0426c72393f6e5d4e5a5567ccfe
+#24 exporting manifest list sha256:d27155a10862f4758b8b43a9e49bea976948f0426c72393f6e5d4e5a5567ccfe 0.0s done
+#24 naming to docker.io/library/brain-f0005-neuron:2026-10-25-4020923b done
+#24 unpacking to docker.io/library/brain-f0005-neuron:2026-10-25-4020923b
+#24 unpacking to docker.io/library/brain-f0005-neuron:2026-10-25-4020923b 36.9s done
+#24 DONE 163.0s
+
+#25 [neuron-validation] resolving provenance for metadata file
+#25 DONE 0.0s
+ Image brain-f0005-neuron:2026-10-25-4020923b Built 
+ Image brain-f0005-engine:2026-10-25-4020923b Built 
+build exit=0

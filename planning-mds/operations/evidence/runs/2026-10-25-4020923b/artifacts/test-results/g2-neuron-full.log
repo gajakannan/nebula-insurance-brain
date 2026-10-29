@@ -1,0 +1,239 @@
+........................................................................ [ 33%]
+..........................................F............................. [ 66%]
+ssssssssssssssssssss......ssssssss.........s............................ [ 99%]
+.                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_publication_import_and_second_profile_reuse[False] ____________
+
+database = (Engine(postgresql+psycopg://brain:***@127.0.0.1:5432/brain?options=-csearch_path%3Denqueue_proof_74870786e1624e21bddc...sql+psycopg://brain:brain@127.0.0.1:5432/brain?options=-csearch_path%3Denqueue_proof_74870786e1624e21bddc2127604104ae')
+tmp_path = PosixPath('/tmp/pytest-of-gajap/pytest-28/test_publication_import_and_se0')
+native = (PosixPath('/tmp/pytest-of-gajap/pytest-28/native-receipts0/native.pdf'), ParseResult(document=DoclingDocument(schema_...4', 'PP-OCRv6_rec_small.pth@rapidocr==3.9.2:sha256:0107b2ad694ccc9b1db7cf9ed3ffbc93d1795d9e08d9cf823127243a87bce516')))
+fallback = False
+
+    @pytest.mark.parametrize("fallback", [False, True])
+    def test_publication_import_and_second_profile_reuse(
+        database: tuple[Engine, str],
+        tmp_path: Path,
+        native: tuple[Path, ParseResult[DoclingDocument]],
+        fallback: bool,
+    ) -> None:
+        engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
+        path, parsed = native
+        if fallback:
+            parsed = replace(parsed, provenance={}, origin_unavailable=("#/texts/0", "#/texts/1"))
+        job = enqueue(path)
+        lease = queue.claim()
+        assert lease is not None and lease.job_id == job
+        calls: list[httpx.Request] = []
+        conversions: list[Path] = []
+    
+        def convert(_path: Path) -> ParseResult[DoclingDocument]:
+            conversions.append(_path)
+            return parsed
+    
+        worker = DocumentWorker(
+            queue=queue,
+            store=store,
+            authorize_for_job=authorization.for_job,
+            client_factory=client_factory(calls),
+            converter=convert,
+            publish_content=publisher.publish_manifest,
+            load_accepted=access.resolve,
+            v2_writer_enabled=True,
+        )
+        worker._execute(lease, Event())
+        with Session(engine) as session:
+            row = session.scalars(select(ContentArtifact)).one()
+            assert row.publication_state == "ready"
+            assert row.artifact_contract_version == (1 if fallback else 2)
+            assert row.writer_fallback_reason == ("ORIGIN_UNAVAILABLE" if fallback else None)
+            published = session.scalars(
+                select(AuditEventRow).where(AuditEventRow.event_type == "content_artifact_published")
+            ).one()
+            assert published.payload is not None
+            assert published.payload["unattributed_item_count"] == (2 if fallback else 0)
+>           assert session.scalar(select(func.count()).select_from(content_block)) == (
+                0 if fallback else 2
+            )
+E           AssertionError: assert 1 == 2
+E            +  where 1 = scalar(<sqlalchemy.sql.selectable.Select object at 0x713307bb1150>)
+E            +    where scalar = <sqlalchemy.orm.session.Session object at 0x71330f409650>.scalar
+E            +    and   <sqlalchemy.sql.selectable.Select object at 0x713307bb1150> = select_from(Table('content_block', MetaData(), Column('artifact_id', Uuid(), ForeignKey('content_artifact.id'), table=<content_blo...=False)), Column('created_by', Uuid(), ForeignKey('principal.id'), table=<content_block>, nullable=False), schema=None))
+E            +      where select_from = <sqlalchemy.sql.selectable.Select object at 0x713307bb0f50>.select_from
+E            +        where <sqlalchemy.sql.selectable.Select object at 0x713307bb0f50> = select(<sqlalchemy.sql.functions.count at 0x71330f8aaf90; count>)
+E            +          where <sqlalchemy.sql.functions.count at 0x71330f8aaf90; count> = <sqlalchemy.sql.functions._FunctionGenerator object at 0x71330fcfb4d0>()
+E            +            where <sqlalchemy.sql.functions._FunctionGenerator object at 0x71330fcfb4d0> = func.count
+
+tests/integration/test_content_worker_v2.py:197: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+[32m[INFO] 2026-10-26 05:59:55,870 [RapidOCR] base.py:23: Using engine_name: torch[0m
+[32m[INFO] 2026-10-26 05:59:55,870 [RapidOCR] device_config.py:64: Using GPU device with ID: 0[0m
+[32m[INFO] 2026-10-26 05:59:55,875 [RapidOCR] download_file.py:60: File exists and is valid: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth[0m
+[32m[INFO] 2026-10-26 05:59:55,875 [RapidOCR] main.py:50: Using /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth[0m
+[32m[INFO] 2026-10-26 05:59:55,982 [RapidOCR] base.py:23: Using engine_name: torch[0m
+[32m[INFO] 2026-10-26 05:59:55,983 [RapidOCR] device_config.py:64: Using GPU device with ID: 0[0m
+[32m[INFO] 2026-10-26 05:59:55,983 [RapidOCR] download_file.py:60: File exists and is valid: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ch_ptocr_mobile_v2.0_cls_mobile.pth[0m
+[32m[INFO] 2026-10-26 05:59:55,983 [RapidOCR] main.py:50: Using /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ch_ptocr_mobile_v2.0_cls_mobile.pth[0m
+[32m[INFO] 2026-10-26 05:59:56,028 [RapidOCR] base.py:23: Using engine_name: torch[0m
+[32m[INFO] 2026-10-26 05:59:56,028 [RapidOCR] device_config.py:64: Using GPU device with ID: 0[0m
+[32m[INFO] 2026-10-26 05:59:56,038 [RapidOCR] download_file.py:60: File exists and is valid: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_rec_small.pth[0m
+[32m[INFO] 2026-10-26 05:59:56,038 [RapidOCR] main.py:50: Using /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_rec_small.pth[0m
+Loading weights:   0%|          | 0/770 [00:00<?, ?it/s]Loading weights:  41%|████      | 315/770 [00:00<00:00, 3139.86it/s]Loading weights:  82%|████████▏ | 629/770 [00:00<00:00, 2273.71it/s]Loading weights: 100%|██████████| 770/770 [00:00<00:00, 2578.69it/s]
+------------------------------ Captured log setup ------------------------------
+INFO     RapidOCR:base.py:23 Using engine_name: torch
+INFO     RapidOCR:device_config.py:64 Using GPU device with ID: 0
+INFO     RapidOCR:download_file.py:60 File exists and is valid: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth
+INFO     RapidOCR:main.py:50 Using /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth
+INFO     RapidOCR:base.py:23 Using engine_name: torch
+INFO     RapidOCR:device_config.py:64 Using GPU device with ID: 0
+INFO     RapidOCR:download_file.py:60 File exists and is valid: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ch_ptocr_mobile_v2.0_cls_mobile.pth
+INFO     RapidOCR:main.py:50 Using /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/ch_ptocr_mobile_v2.0_cls_mobile.pth
+INFO     RapidOCR:base.py:23 Using engine_name: torch
+INFO     RapidOCR:device_config.py:64 Using GPU device with ID: 0
+INFO     RapidOCR:download_file.py:60 File exists and is valid: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_rec_small.pth
+INFO     RapidOCR:main.py:50 Using /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_rec_small.pth
+------------------------------ Captured log call -------------------------------
+WARNING  docling_graph.core.utils.graph_cleaner:graph_cleaner.py:455 Graph has no edges (1 node(s) only). This can happen when extraction was salvaged and list entities were dropped.
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+packages/brain-ingestion/tests/spikes/test_item_provenance.py: 6 warnings
+packages/brain-ingestion/tests/test_bundle_writer.py: 6 warnings
+packages/brain-ingestion/tests/test_bundle_writer_source_retention.py: 2 warnings
+packages/brain-ingestion/tests/test_content_projection_v2.py: 6 warnings
+packages/brain-ingestion/tests/test_docling_adapter.py: 3 warnings
+packages/brain-ingestion/tests/test_ocr_asset_provenance.py: 6 warnings
+tests/integration/test_content_worker_v2.py: 2 warnings
+tests/integration/test_graph_pipeline_contract.py: 2 warnings
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/pydantic/main.py:542: DeprecationWarning: `force_full_page_ocr` is deprecated; set `mode=OcrMode.FULL_PAGE` instead.
+    return self.__pydantic_serializer__.to_json(
+
+packages/brain-ingestion/tests/spikes/test_item_provenance.py: 3 warnings
+packages/brain-ingestion/tests/test_bundle_writer.py: 6 warnings
+packages/brain-ingestion/tests/test_bundle_writer_source_retention.py: 2 warnings
+packages/brain-ingestion/tests/test_content_projection_v2.py: 3 warnings
+packages/brain-ingestion/tests/test_docling_adapter.py: 3 warnings
+packages/brain-ingestion/tests/test_ocr_asset_provenance.py: 3 warnings
+tests/integration/test_content_worker_v2.py: 1 warning
+tests/integration/test_graph_pipeline_contract.py: 2 warnings
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:606: DeprecationWarning: This field is deprecated. Use `generate_page_images=True` and call `TableItem.get_image()` to extract table images from page images.
+    or self.pipeline_options.generate_table_images
+
+packages/brain-ingestion/tests/spikes/test_item_provenance.py: 3 warnings
+packages/brain-ingestion/tests/test_bundle_writer.py: 6 warnings
+packages/brain-ingestion/tests/test_bundle_writer_source_retention.py: 2 warnings
+packages/brain-ingestion/tests/test_content_projection_v2.py: 3 warnings
+packages/brain-ingestion/tests/test_docling_adapter.py: 3 warnings
+packages/brain-ingestion/tests/test_ocr_asset_provenance.py: 3 warnings
+tests/integration/test_content_worker_v2.py: 1 warning
+tests/integration/test_graph_pipeline_contract.py: 2 warnings
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:442: DeprecationWarning: deprecated
+    if self.options.rec_font_path is not None:
+
+packages/brain-ingestion/tests/spikes/test_item_provenance.py::test_pinned_converter_item_provenance
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/torch/nn/modules/conv.py:560: UserWarning: Using padding='same' with even kernel lengths and odd dilation may require a zero-padded copy of the input be created (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/native/Convolution.cpp:1104.)
+    return F.conv2d(
+
+tests/integration/test_content_consumer_versions.py: 4 warnings
+tests/integration/test_content_worker_v2.py: 4 warnings
+tests/integration/test_document_delivery.py: 1 warning
+tests/integration/test_document_process_recovery.py: 2 warnings
+tests/integration/test_graph_pipeline_contract.py: 7 warnings
+tests/integration/test_synthetic_comparison.py: 6 warnings
+tests/integration/test_vllm_graph_client.py: 1 warning
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling_graph/core/utils/alias_reconciler.py:95: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    if id(instance) in seen or not hasattr(instance, "model_fields"):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                                          Stmts   Miss  Cover
+-------------------------------------------------------------------------------------------------
+packages/brain-extraction/src/brain_extraction/__init__.py                        0      0   100%
+packages/brain-extraction/src/brain_extraction/context_guard.py                  15      5    67%
+packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py           2      2     0%
+packages/brain-extraction/src/brain_extraction/docling_graph_pipeline.py         83      8    90%
+packages/brain-extraction/src/brain_extraction/graph_evidence.py                 53      1    98%
+packages/brain-extraction/src/brain_extraction/graph_interpretation.py          144     22    85%
+packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py     104     14    87%
+packages/brain-extraction/src/brain_extraction/profiles.py                       27      2    93%
+packages/brain-extraction/src/brain_extraction/vllm_graph_client.py             219     16    93%
+packages/brain-ingestion/src/brain_ingestion/__init__.py                          0      0   100%
+packages/brain-ingestion/src/brain_ingestion/bundle_writer.py                    52      2    96%
+packages/brain-ingestion/src/brain_ingestion/content_projection.py              113      6    95%
+packages/brain-ingestion/src/brain_ingestion/content_workflow.py                 98     18    82%
+packages/brain-ingestion/src/brain_ingestion/conversion_process.py              330     78    76%
+packages/brain-ingestion/src/brain_ingestion/conversion_recipe.py                11      0   100%
+packages/brain-ingestion/src/brain_ingestion/docling_adapter.py                  50      5    90%
+packages/brain-ingestion/src/brain_ingestion/document_worker.py                 187      6    97%
+packages/brain-ingestion/src/brain_ingestion/integrity_sweep.py                  95     95     0%
+packages/brain-ingestion/src/brain_ingestion/item_provenance.py                 134     13    90%
+packages/brain-ingestion/src/brain_ingestion/provider_supervisor.py              93     29    69%
+packages/brain-ingestion/src/brain_ingestion/submission.py                       96      5    95%
+packages/brain-ingestion/src/brain_ingestion/worker_cli.py                      130     44    66%
+packages/brain-ingestion/src/brain_ingestion/worker_guard.py                    254     23    91%
+packages/brain-interpretation/src/brain_interpretation/__init__.py                0      0   100%
+packages/brain-interpretation/src/brain_interpretation/counters.py               20      0   100%
+packages/brain-interpretation/src/brain_interpretation/parsed_content.py         32      0   100%
+packages/brain-interpretation/src/brain_interpretation/result.py                 10      0   100%
+packages/brain-interpretation/src/brain_interpretation/runs.py                   12      0   100%
+-------------------------------------------------------------------------------------------------
+TOTAL                                                                          2364    394    83%
+Coverage XML written to file /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-10-25-4020923b/artifacts/coverage/neuron-coverage.xml
+=========================== short test summary info ============================
+FAILED tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+1 failed, 187 passed, 29 skipped, 132 warnings in 124.74s (0:02:04)
+neuron exit=1

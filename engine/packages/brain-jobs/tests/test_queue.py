@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import pytest
 from brain_jobs.queue import DocumentJobQueue, LeaseLost, events, jobs, metadata, outbox
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, func, select
 
 
 @pytest.fixture
@@ -94,13 +94,13 @@ def test_retry_budget_and_event_history_survive_queue_reconstruction(queue):
     queue, clock = queue
     enqueue(queue, max_attempts=2)
     lease = queue.claim()
-    queue.retry(lease, delay_seconds=2)
+    queue.retry(lease, reason="model_unavailable", delay_seconds=2)
     assert queue.claim() is None
     clock[0] += 3
     reopened = DocumentJobQueue(queue.engine, clock=lambda: clock[0])
     second = reopened.claim()
     assert second.attempt == 2
-    reopened.retry(second)
+    reopened.retry(second, reason="model_timeout")
     assert reopened.claim() is None
     with queue.engine.connect() as conn:
         assert conn.scalar(select(jobs.c.state)) == "failed"
@@ -122,3 +122,82 @@ def test_lease_expiring_during_publication_rolls_back_database_effects(queue):
     with queue.engine.connect() as connection:
         assert connection.scalar(select(jobs.c.result_ref)) is None
         assert "checkpoint_published" not in connection.scalars(select(events.c.event)).all()
+
+
+def test_failure_reasons_are_recorded_and_terminal_failure_ends_the_job(queue):
+    queue, clock = queue
+    job_id, _ = enqueue(queue, max_attempts=3)
+    lease = queue.claim()
+    queue.retry(lease, reason="model_schema_invalid", delay_seconds=0)
+    clock[0] += 1
+    second = queue.claim()
+    queue.fail(second, reason="unsupported_output")
+    clock[0] += 10
+    assert queue.claim() is None
+    with queue.engine.connect() as conn:
+        assert conn.scalar(select(jobs.c.state)) == "failed"
+        rows = conn.execute(
+            select(events.c.event, events.c.reason).order_by(events.c.occurred_at, events.c.event)
+        ).all()
+    assert ("retry", "model_schema_invalid") in rows
+    assert ("failed", "unsupported_output") in rows
+    # Non-failure transitions keep a NULL reason.
+    assert {reason for event, reason in rows if event in ("queued", "claimed")} == {None}
+
+
+def test_unknown_failure_reason_is_rejected_without_changing_state(queue):
+    queue, _ = queue
+    enqueue(queue)
+    lease = queue.claim()
+    with pytest.raises(ValueError, match="unknown job failure reason"):
+        queue.retry(lease, reason="provider said: secret text")  # type: ignore[arg-type]
+    with queue.engine.connect() as conn:
+        assert conn.scalar(select(jobs.c.state)) == "running"
+
+
+def test_cancellation_records_the_cancelled_reason(queue):
+    queue, _ = queue
+    job_id, args = enqueue(queue)
+    queue.cancel(job_id, args["tenant_id"], args["knowledge_base_id"])
+    with queue.engine.connect() as conn:
+        assert (
+            conn.execute(select(events.c.reason).where(events.c.event == "cancelled")).scalar_one()
+            == "cancelled"
+        )
+
+
+def test_queue_depth_bound_rejects_new_work_but_keeps_duplicates_idempotent(tmp_path):
+    from brain_jobs.queue import QueueFull
+
+    engine = create_engine(f"sqlite:///{tmp_path / 'bounded.db'}")
+    metadata.create_all(engine)
+    clock = [100.0]
+    queue = DocumentJobQueue(engine, lease_seconds=10, clock=lambda: clock[0], max_depth=2)
+    first, args = enqueue(queue, request_key="one")
+    enqueue(
+        queue,
+        request_key="two",
+        tenant_id=args["tenant_id"],
+        knowledge_base_id=args["knowledge_base_id"],
+        artifact_id=uuid4(),
+    )
+    assert queue.depth() == 2
+    with pytest.raises(QueueFull, match="queue_depth_exceeded"):
+        enqueue(queue, request_key="three")
+    # A duplicate of admitted work is not new work: same job, even when full.
+    assert queue.enqueue(**args) == first
+    with queue.engine.connect() as conn:
+        assert conn.scalar(select(func.count()).select_from(jobs)) == 2
+    # Terminal jobs free capacity; running work still counts.
+    lease = queue.claim()
+    queue.finish(lease, "runs/x/manifest.json")
+    enqueue(queue, request_key="three")
+    assert queue.depth() == 2
+    engine.dispose()
+
+
+def test_queue_depth_bound_must_be_positive(tmp_path):
+    engine = create_engine(f"sqlite:///{tmp_path / 'x.db'}")
+    for bad in (0, -1, 1.5):
+        with pytest.raises(ValueError, match="positive integer"):
+            DocumentJobQueue(engine, max_depth=bad)  # type: ignore[arg-type]

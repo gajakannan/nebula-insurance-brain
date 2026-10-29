@@ -11,8 +11,9 @@ from brain_content.checkpoints import CheckpointStore
 from brain_content.identities import ParserMigrationRequired, fallback_key, new_source_identity
 from brain_content.object_store import ObjectAlreadyExistsError
 from brain_domain.authx import ResourceKey, ResourceType
+from brain_extraction.graph_interpretation import PIPELINES
 from brain_extraction.profiles import load_profile
-from brain_jobs.queue import DocumentJobQueue, JobLease, jobs
+from brain_jobs.queue import DocumentJobQueue, JobLease, QueueFull, jobs
 from brain_persistence.content_repository import ContentArtifactRepository
 from brain_persistence.models import ResourceAccessRow
 from brain_persistence.tenancy import provision_resource_access
@@ -42,7 +43,10 @@ def enqueue_document(
     classifications: list[str],
     source_acl_ids: list[str],
     v2_writer_enabled: bool,
+    pipeline: str,
 ) -> UUID:
+    if pipeline not in PIPELINES:
+        raise ValueError("unknown extraction pipeline")
     source_bytes = source_path.read_bytes()
     source_sha = hashlib.sha256(source_bytes).hexdigest()
     profile = load_profile(profile_id)
@@ -135,11 +139,28 @@ def enqueue_document(
             schema_sha256=profile.schema_sha256,
             actor_id=actor_id,
             correlation_id=uuid4(),
+            pipeline=pipeline,
         )
+        # The selected pipeline is part of identity: a different engine over the same
+        # immutable artifact is a different job/run, not a conflicting payload.
         request_key = hashlib.sha256(
-            f"{key.artifact_id}:{actor_id}:{profile.profile_id}:{profile.profile_version}:{profile.schema_sha256}".encode()
+            f"{key.artifact_id}:{actor_id}:{profile.profile_id}:{profile.profile_version}:{profile.schema_sha256}:{pipeline}".encode()
         ).hexdigest()
         task.correlation_id = uuid5(key.artifact_id, request_key)
+        # Refuse new work beyond the queue bound before provisioning security
+        # metadata or storing source bytes. The queue's locked check stays
+        # authoritative for concurrent submitters; duplicates remain idempotent.
+        if queue.max_depth is not None and queue.depth() >= queue.max_depth:
+            with Session(engine) as session:
+                duplicate = session.execute(
+                    select(jobs.c.id).where(
+                        jobs.c.tenant_id == str(tenant_id),
+                        jobs.c.knowledge_base_id == str(knowledge_base_id),
+                        jobs.c.request_key == request_key,
+                    )
+                ).first()
+            if duplicate is None:
+                raise QueueFull()
         payload = task.model_dump(mode="json", exclude_defaults=True)
         lease = JobLease(uuid4(), tenant_id, knowledge_base_id, key.artifact_id, 0, 0, payload)
         resources = [key]

@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, TypeVar
+from typing import Any, Literal, TypeVar, get_args
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
@@ -91,6 +91,8 @@ events = Table(
     Column("generation", Integer, nullable=False),
     Column("event", String(64), nullable=False),
     Column("occurred_at", Float, nullable=False),
+    # Migration 0009 (F0005): stable failure reason; NULL for non-failure events.
+    Column("reason", String(64), nullable=True),
 )
 outbox = Table(
     "document_job_outbox",
@@ -104,9 +106,47 @@ outbox = Table(
 )
 T = TypeVar("T")
 
+# Mirrors migration 0009's CHECK constraint. Codes only: never source or SDK text.
+FailureReason = Literal[
+    "model_unavailable",
+    "model_timeout",
+    "model_http_error",
+    "model_malformed_output",
+    "model_schema_invalid",
+    "storage_write_failed",
+    "conversion_failed",
+    "conversion_timeout",
+    "stage_guard_mismatch",
+    "unsupported_targeting",
+    "unsupported_output",
+    "authorization_denied",
+    "cancelled",
+    # Migration 0010 (Code Review H1/M1).
+    "model_budget_exceeded",
+    "model_deadline_exceeded",
+    "model_contract_fallback",
+    "interpretation_failed",
+]
+FAILURE_REASONS: frozenset[str] = frozenset(get_args(FailureReason))
+
 
 class LeaseLost(RuntimeError):
     pass
+
+
+class QueueFull(RuntimeError):
+    """Explicit rejection of a new submission beyond the configured depth (F0005-S0002)."""
+
+    code = "queue_depth_exceeded"
+
+    def __init__(self) -> None:
+        super().__init__(self.code)
+
+
+# Unfinished work counts against the bound; terminal jobs never do.
+ACTIVE_STATES = ("queued", "retry", "running")
+# Serializes PostgreSQL depth checks so concurrent submitters cannot overshoot.
+_DEPTH_LOCK_KEY = 0x0F0005
 
 
 @dataclass(frozen=True)
@@ -134,12 +174,47 @@ class DocumentJobQueue:
         *,
         lease_seconds: float = 120,
         clock: Callable[[], float] | None = None,
+        max_depth: int | None = None,
     ) -> None:
         if lease_seconds <= 0:
             raise ValueError("lease duration must be positive")
+        if max_depth is not None and (type(max_depth) is not int or max_depth <= 0):
+            raise ValueError("queue depth bound must be a positive integer")
         self.engine = engine
         self.lease_seconds = lease_seconds
         self.clock = clock
+        self.max_depth = max_depth
+
+    def depth(self) -> int:
+        """Unfinished jobs: queued, waiting to retry, or running."""
+        with self.engine.connect() as conn:
+            return int(
+                conn.scalar(
+                    select(func.count()).select_from(jobs).where(jobs.c.state.in_(ACTIVE_STATES))
+                )
+                or 0
+            )
+
+    def _admit(self, conn: Connection, scope: dict[str, str], request_key: str) -> None:
+        """Reject a new job when the bound is reached; duplicates stay idempotent."""
+        if self.max_depth is None:
+            return
+        if conn.dialect.name == "postgresql":
+            conn.execute(select(func.pg_advisory_xact_lock(_DEPTH_LOCK_KEY)))
+        existing = conn.scalar(
+            select(jobs.c.id).where(
+                jobs.c.tenant_id == scope["tenant_id"],
+                jobs.c.knowledge_base_id == scope["knowledge_base_id"],
+                jobs.c.request_key == request_key,
+            )
+        )
+        if existing is not None:
+            return
+        active = conn.scalar(
+            select(func.count()).select_from(jobs).where(jobs.c.state.in_(ACTIVE_STATES))
+        )
+        if (active or 0) >= self.max_depth:
+            raise QueueFull()
 
     def _now(self, connection: Connection) -> float:
         if self.clock is not None:
@@ -155,7 +230,16 @@ class DocumentJobQueue:
         assert isinstance(value, datetime)
         return value.replace(tzinfo=UTC).timestamp() if value.tzinfo is None else value.timestamp()
 
-    def _event(self, conn: Connection, job_id: str, generation: int, event: str) -> None:
+    def _event(
+        self,
+        conn: Connection,
+        job_id: str,
+        generation: int,
+        event: str,
+        reason: FailureReason | None = None,
+    ) -> None:
+        if reason is not None and reason not in FAILURE_REASONS:
+            raise ValueError("unknown job failure reason")
         conn.execute(
             insert(events).values(
                 id=str(uuid4()),
@@ -163,6 +247,7 @@ class DocumentJobQueue:
                 generation=generation,
                 event=event,
                 occurred_at=self._now(conn),
+                reason=reason,
             )
         )
 
@@ -200,6 +285,7 @@ class DocumentJobQueue:
             )
             if any(artifact[k] != v for k, v in scope.items()):
                 raise PermissionError("artifact scope mismatch")
+            self._admit(conn, scope, request_key)
             job_id = uuid4()
             try:
                 with conn.begin_nested():
@@ -391,11 +477,23 @@ class DocumentJobQueue:
             )
             self._event(conn, str(lease.job_id), lease.generation, "complete")
 
-    def retry(self, lease: JobLease, *, delay_seconds: float = 5) -> None:
+    def retry(self, lease: JobLease, *, reason: FailureReason, delay_seconds: float = 5) -> None:
+        """Record a failed attempt; exhausted attempts end explicitly as `failed`."""
+        self._fail(lease, reason, delay_seconds=delay_seconds, terminal=False)
+
+    def fail(self, lease: JobLease, *, reason: FailureReason) -> None:
+        """Terminal failure for a cause another attempt cannot change."""
+        self._fail(lease, reason, delay_seconds=0, terminal=True)
+
+    def _fail(
+        self, lease: JobLease, reason: FailureReason, *, delay_seconds: float, terminal: bool
+    ) -> None:
+        if reason not in FAILURE_REASONS:
+            raise ValueError("unknown job failure reason")
         with self.engine.begin() as conn:
             self._fence(conn, lease)
             row = conn.execute(select(jobs).where(jobs.c.id == str(lease.job_id))).mappings().one()
-            state = "retry" if lease.attempt < row["max_attempts"] else "failed"
+            state = "retry" if not terminal and lease.attempt < row["max_attempts"] else "failed"
             conn.execute(
                 update(jobs)
                 .where(jobs.c.id == str(lease.job_id))
@@ -406,7 +504,39 @@ class DocumentJobQueue:
                 .where(leases.c.artifact_id == str(lease.artifact_id))
                 .values(leased_until=0)
             )
-            self._event(conn, str(lease.job_id), lease.generation, state)
+            self._event(conn, str(lease.job_id), lease.generation, state, reason)
+
+    def conversion_started(self, lease: JobLease) -> None:
+        """Durably record a physical conversion launch before it starts (F0005 M2).
+
+        Fenced like publication, so a stale attempt cannot record a launch. A crash
+        mid-conversion leaves no failure reason, but the launch still counts.
+        """
+        with self.engine.begin() as conn:
+            self._fence(conn, lease)
+            self._event(conn, str(lease.job_id), lease.generation, "conversion_started")
+
+    def conversion_launches(self, job_id: UUID) -> int:
+        with self.engine.connect() as conn:
+            return int(
+                conn.scalar(
+                    select(func.count())
+                    .select_from(events)
+                    .where(events.c.job_id == str(job_id), events.c.event == "conversion_started")
+                )
+                or 0
+            )
+
+    def failure_reasons(self, job_id: UUID) -> list[str]:
+        """Recorded failure reasons for one job, oldest first (append-only history)."""
+        with self.engine.connect() as conn:
+            return list(
+                conn.scalars(
+                    select(events.c.reason)
+                    .where(events.c.job_id == str(job_id), events.c.reason.is_not(None))
+                    .order_by(events.c.occurred_at)
+                )
+            )
 
     def cancel(self, job_id: UUID, tenant_id: UUID, knowledge_base_id: UUID) -> None:
         with self.engine.begin() as conn:
@@ -430,4 +560,4 @@ class DocumentJobQueue:
             conn.execute(update(jobs).where(jobs.c.id == str(job_id)).values(state="cancelled"))
             # Keep the artifact lease until timeout: an in-flight converter must not
             # overlap a new one just because its consumer requested cancellation.
-            self._event(conn, str(job_id), row["generation"], "cancelled")
+            self._event(conn, str(job_id), row["generation"], "cancelled", "cancelled")

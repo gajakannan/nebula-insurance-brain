@@ -74,3 +74,23 @@ def test_non_pdf_magic_is_rejected_before_any_parser(
         pytest.raises(ValueError, match="PDF file signature"),
     ):
         adapter.parse(source)
+
+
+@pytest.mark.parametrize("capture_provenance", [False, True])
+def test_pypdf_structure_errors_do_not_fail_a_docling_conversion(
+    native_gl_pdf: Path, capture_provenance: bool
+) -> None:
+    # Code Review L-N1: pypdf's own errors are not ValueErrors; the conversion
+    # still publishes, with Docling's page count and an explicit warning.
+    from brain_ingestion import docling_adapter
+    from pypdf.errors import PdfReadError
+
+    def unreadable(*_args: object, **_kwargs: object) -> None:
+        raise PdfReadError("damaged xref")
+
+    with patch.object(docling_adapter, "PdfReader", side_effect=unreadable):
+        result = DoclingAdapter(capture_provenance=capture_provenance).parse(native_gl_pdf)
+
+    assert result.status in ("complete", "partial")
+    assert result.page_count == 1
+    assert "pdf_structure_unreadable" in result.warnings
