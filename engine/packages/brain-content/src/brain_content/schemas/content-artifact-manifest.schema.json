@@ -163,6 +163,76 @@
           "items": {
             "type": "string"
           }
+        },
+        "ocr": {
+          "description": "F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "page_count",
+                "pages",
+                "engine"
+              ],
+              "properties": {
+                "page_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "pages": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "uniqueItems": true
+                },
+                "engine": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "name",
+                        "version",
+                        "model",
+                        "model_version"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "version": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "model": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "model_version": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
         }
       }
     },

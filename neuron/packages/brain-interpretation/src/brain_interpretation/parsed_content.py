@@ -26,6 +26,19 @@ class BlockOriginInput:
 
 
 @dataclass(frozen=True, slots=True)
+class OcrObservation:
+    """What the OCR engine actually did during one conversion (F0005-S0001-AC2).
+
+    `pages` are the 1-based pages on which the engine produced at least one text
+    cell. `engine` is None when OCR is configured but its engine or model assets
+    cannot be identified; it is never guessed.
+    """
+
+    pages: tuple[int, ...]
+    engine: ProducerIdentity | None
+
+
+@dataclass(frozen=True, slots=True)
 class ParseResult[DocumentT]:
     """Conversion checkpoint shared by pipeline and bundle adapters.
 
@@ -43,3 +56,8 @@ class ParseResult[DocumentT]:
     provenance: Mapping[str, tuple[BlockOriginInput, ...]] = field(default_factory=dict)
     origin_unavailable: tuple[str, ...] = ()
     page_rotations: Mapping[int, int] = field(default_factory=dict)
+    # `<asset-name>@<revision>:sha256:<hex>` for each OCR model file the
+    # configured pipeline loaded, hashed at conversion time (F0005-S0005).
+    model_artifact_digests: tuple[str, ...] = ()
+    # None when the producer did not observe OCR (historical or recorded fixtures).
+    ocr: OcrObservation | None = None

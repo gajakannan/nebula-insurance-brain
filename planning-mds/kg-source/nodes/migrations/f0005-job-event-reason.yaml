@@ -1,0 +1,9 @@
+id: migration:f0005-job-event-reason
+label: F0005 job failure reasons (revisions 0009, 0010 expand-only)
+path: engine/migrations/versions/0009_f0005_job_event_reason.py
+notes: 0009 adds the CHECK-constrained `document_job_event.reason`; 0010 widens it with
+  model_budget_exceeded, model_deadline_exceeded, model_contract_fallback and interpretation_failed.
+  Downgrades refuse while recorded reasons exist. The vocabulary is part of ADR-0074.
+related_nodes:
+- capability:parse-once-content-artifact
+- adr:0074

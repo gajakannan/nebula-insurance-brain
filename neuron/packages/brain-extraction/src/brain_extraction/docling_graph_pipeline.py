@@ -25,8 +25,12 @@ from docling_graph.pipeline.stages import (  # noqa: E402
 from docling_graph.protocols import LLMClientProtocol  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
-DOCLING_GRAPH_VERSION = "1.9.1"
-DOCLING_GRAPH_WHEEL_SHA256 = "04538ef0f35517f22c77641eb7dca5a35ee8d54d6e818b0341e479dc4280a62f"
+from brain_extraction.pins import (  # noqa: E402  # one recorded pin
+    DOCLING_GRAPH_VERSION,
+)
+from brain_extraction.pins import (
+    DOCLING_GRAPH_WHEEL_SHA256 as DOCLING_GRAPH_WHEEL_SHA256,  # re-exported
+)
 
 Converter = Callable[[Path], ParseResult[DoclingDocument]]
 Publisher = Callable[[ParseResult[DoclingDocument]], None]
@@ -34,6 +38,10 @@ Publisher = Callable[[ParseResult[DoclingDocument]], None]
 
 class ConversionCheckpointError(RuntimeError):
     """Conversion cannot advance into extraction without a published bundle."""
+
+
+class StageLayoutMismatch(RuntimeError):
+    """The installed Graph stage list differs from the pinned, tested layout."""
 
 
 class _ConversionCheckpoint(PipelineStage):
@@ -144,7 +152,7 @@ class DoclingGraphPipelineAdapter:
             i for i, stage in enumerate(pipeline.stages) if isinstance(stage, ExtractionStage)
         ]
         if len(extraction_positions) != 1:
-            raise RuntimeError("upstream stage layout differs from the tested integration")
+            raise StageLayoutMismatch("upstream stage layout differs from the tested integration")
         pipeline.stages.insert(extraction_positions[0], checkpoint)
         if conversion_only:
             pipeline.stages = pipeline.stages[: extraction_positions[0] + 1]

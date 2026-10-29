@@ -18,7 +18,7 @@ Docling row) was corrected in the process rather than left standing.
 | btree_gist | ships with PostgreSQL contrib | `CREATE EXTENSION btree_gist` in `docker/postgres/init/02-extensions.sql` | PostgreSQL 18 contrib |
 | authentik | 2026.2.0 | `docker-compose.yml`; matches `nebula-insurance-crm`'s validated pin (ADR-006) | nebula-insurance-crm docker-compose.yml |
 | Docling | 2.126.0 | `engine/apps/api/src/brain_api/versions.py` (`DOCLING_PINNED_VERSION`); installed as a `neuron/brain-ingestion` dependency, exercised live against the native fixture by the automated F0001-S0003 test, and against the scanned/OCR fixture by a manual check at F0001-S0007 (2026-09-10: RapidOCR recovers identical content, 4 blocks/542 chars, from both variants) — the OCR path itself is not yet covered by an automated assertion (see ADR-0040 Limitations) | F0001-S0001 (declared); F0001-S0003 (live, native); F0001-S0007 (live, scanned/OCR, manual) |
-| Docling-Graph | **1.9.1 candidate**, locked in `neuron/uv.lock`; not activated | Installed from cache; real Graph stage tests cover native/scanned conversion, saved JSON reuse, and publication ordering with recorded model responses. Live model and operational gates remain open. | [F0005 evidence](../planning-mds/features/F0005-one-time-docling-ingestion/compatibility-evidence.md) |
+| Docling-Graph | **1.9.1, qualified and rejected (F0005, 2026-10-28)**; locked in `neuron/uv.lock`; not activated | Installed from cache; real Graph stage tests cover native/scanned conversion, saved JSON reuse, and publication ordering with recorded model responses. Live model and operational gates remain open. | [F0005 evidence](../planning-mds/features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md) |
 | vLLM | 0.25.1 | `docker/local-inference-runbook.md`; matches the CRM's validated ADR-035 profile; served `microsoft/Phi-4-mini-instruct` live on this host's RTX 5070 for F0001-S0003's proof harness on 2026-09-09 | F0001 G1 clarification (2026-09-06); F0001-S0003 (live) |
 | Inference model | `microsoft/Phi-4-mini-instruct` | Hugging Face revision pinned in `docker/local-inference-runbook.md`; `--max-model-len 4096` | F0001 G1 clarification (2026-09-06); ADR-0055 |
 | Node (experience/ toolchain, proof scope only) | Node 24.16.0 (host tested); React 18.3.1, Vite 6.4.3, TypeScript 5.9.3, Vitest 5.0.0 | `experience/package.json`; `pnpm install`/`pnpm exec tsc -b`/`pnpm exec vitest run`/`pnpm exec vite build` all green on this host 2026-09-09. The full toolchain (ESLint theme rules, Playwright, Lighthouse, contract tests) is F0021's — this proof only needs build+unit-test+lint | F0001-S0004 |
@@ -59,6 +59,17 @@ defect — recorded here for ADR-0040 and F0001-S0007's settlement of context ad
 
 ## Proposed migration — Docling-Graph (ADR-0060, 2026-09-15)
 
+**F0005 outcome (2026-10-28).** Live qualification on the synthetic corpus (run `2026-10-25-4020923b`, report SHA-256 `55ce3484…aede`):
+- Graph dense (1.9.1, wheel `04538ef0…`) missed the accuracy, abstention, evidence-resolution, latency and (like for like) review-workload thresholds.
+- Root cause: Phi-4-mini's skeleton output is truncated at the 512-token reservation or has duplicate keys.
+- Graph dense is rejected and the direct baseline stays default. See the ADR-0060 outcome section.
+
+Locked-environment changes in F0005: pypdf 6.19.0 → 6.21.2 and litellm 1.100.0 → 1.100.4 (advisories).
+
+**Upgrade revalidation required:** the RapidOCR asset-capture hook (`item_provenance.install_ocr_asset_capture`) and the Docling 2.126 OCR observer and provenance hooks. An upstream layout change degrades to "OCR engine unidentified".
+
+**Activation preconditions:** the Docling ≥ 2.132 / pillow ≥ 13 requalification, and converter OS isolation (ADR-0074).
+
 The table and F0001 finding above record the installed proof baseline. [ADR-0060](../planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph as the future document pipeline coordinator; Docling remains its converter. The 1.9.1 candidate is installed and has limited contract evidence; production activation and the complete proof gates remain pending.
 
 | Candidate component | Activation requirement | Owner |
@@ -67,4 +78,4 @@ The table and F0001 finding above record the installed proof baseline. [ADR-0060
 | Docling / docling-core and chunking/model dependencies | Compatible locked versions, native + scanned fixture conversion, stable item/evidence mappings; record any change from the F0001 pin | F0005 |
 | Local vLLM / Phi profile | Revalidate supported backend configuration, structured templates, every-call context guard, and extraction quality at the existing context limit | F0005 / F0015 |
 
-The [F0005 compatibility evidence](../planning-mds/features/F0005-one-time-docling-ingestion/compatibility-evidence.md) records the selected wheel digest and the tested stage seam. The [current input documentation](https://github.com/docling-project/docling-graph/blob/main/docs/fundamentals/pipeline-configuration/input-formats.md) describes native JSON reuse; it does not prove the previously tested package supported it. Record an immutable source identity as well as a version string. The [current orchestrator](https://github.com/docling-project/docling-graph/blob/main/docling_graph/pipeline/orchestrator.py) exports after extraction and disables disk output by default in API mode; verify a supported pre-extraction persistence seam before activation. Keep proof results separate from these pending acceptance requirements.
+The [F0005 compatibility evidence](../planning-mds/features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md) records the selected wheel digest and the tested stage seam. The [current input documentation](https://github.com/docling-project/docling-graph/blob/main/docs/fundamentals/pipeline-configuration/input-formats.md) describes native JSON reuse; it does not prove the previously tested package supported it. Record an immutable source identity as well as a version string. The [current orchestrator](https://github.com/docling-project/docling-graph/blob/main/docling_graph/pipeline/orchestrator.py) exports after extraction and disables disk output by default in API mode; verify a supported pre-extraction persistence seam before activation. Keep proof results separate from these pending acceptance requirements.

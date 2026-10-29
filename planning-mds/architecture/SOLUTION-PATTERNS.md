@@ -336,4 +336,16 @@ docker compose up -d; scripts/dev/check_pins.py; backup and restore drill per sc
 
 The opt-in `brain_ingestion.worker_cli` composes engine-owned jobs/authorization and result import with neuron-owned conversion/extraction activities. `brain-contracts` holds the shared result DTO; engine code does not import the AI runtime. Publication is manifest-last and fenced by the current artifact lease. Missing files under an accepted manifest are corruption, never a cache miss. A completion outbox imports the result and acknowledges delivery in one database transaction; retries do not promote or duplicate canonical facts.
 
-The fixed-template candidate uses Graph direct extraction. Scalar values receive independent native selectors or remain unresolved. Unhandled entity/relationship output fails closed. Production compilation and targeted evolution remain in F0015/F0032. Activation and PostgreSQL/live-model qualification are still gated by ADR-0060; see [F0005 status](../features/F0005-one-time-docling-ingestion/STATUS.md).
+Scalar values receive independent native selectors or remain unresolved. Unhandled entity/relationship output fails closed. Production compilation and targeted evolution remain in F0015/F0032.
+
+**As built (F0005, 2026-10-28).**
+- **Pipeline:** the committed `extraction.pipeline: direct-baseline` (the F0001 one-call prompt, through the bounded client) is the default and is pinned per job. Graph dense was qualified live and **rejected** (ADR-0060 stays Proposed). The v2 writer stays disabled.
+- **Execution controls,** accepted in [ADR-0074](decisions/ADR-0074-local-document-job-execution-controls.md):
+  - a supervised conversion-only child with a 300 s parent-owned deadline;
+  - one host worker per inference endpoint, with a durable in-flight marker and confirmed provider quiescence;
+  - closed failure-reason vocabulary (migrations 0009/0010), reconvert at most once (checked before launch);
+  - a bounded submission queue.
+- **Patterns to reuse:**
+  - every model-call rejection, dispatched or not, is recorded and fails the run;
+  - host or provider faults stop the worker rather than fail jobs;
+  - a genuine model failure is recorded before stopping.

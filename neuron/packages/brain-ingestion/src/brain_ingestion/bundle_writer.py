@@ -15,6 +15,8 @@ from brain_content.manifest import (
     DoclingDocumentRef,
     ExecutionRecord,
     ExtractionQuality,
+    OcrEngine,
+    OcrQuality,
 )
 from brain_interpretation.parsed_content import ParseResult
 from docling_core.types.doc.base import BoundingBox, CoordOrigin
@@ -23,6 +25,26 @@ from docling_core.types.doc.document import DoclingDocument
 
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def ocr_quality(parse_result: ParseResult[DoclingDocument]) -> OcrQuality | None:
+    """The manifest's OCR page count and engine, from what conversion observed."""
+    observed = parse_result.ocr
+    if observed is None:
+        return None
+    engine = observed.engine
+    return OcrQuality(
+        page_count=len(observed.pages),
+        pages=list(observed.pages),
+        engine=None
+        if engine is None
+        else OcrEngine(
+            name=engine.engine,
+            version=engine.engine_version,
+            model=engine.model,
+            model_version=engine.model_version,
+        ),
+    )
 
 
 def _to_top_left_bbox(bbox: BoundingBox, page_height: float) -> dict[str, float]:
@@ -152,7 +174,7 @@ def build_bundle(
         files=artifact_files,
         execution=ExecutionRecord(
             parser_package_version=f"docling=={pkg_version('docling')}",
-            model_artifact_digests=[],
+            model_artifact_digests=list(parse_result.model_artifact_digests),
             configuration_hash=configuration_hash,
             environment_digest=_environment_digest(),
         ),
@@ -160,6 +182,7 @@ def build_bundle(
             status=parse_result.status,
             failed_pages=parse_result.failed_pages,
             warnings=parse_result.warnings,
+            ocr=ocr_quality(parse_result),
         ),
         page_count=parse_result.page_count,
         created_at=datetime.now(UTC),

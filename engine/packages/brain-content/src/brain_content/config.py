@@ -36,6 +36,56 @@ def load_content_writer_config() -> ContentWriterConfig:
     return ContentWriterConfig(v2_writer_enabled=enabled)
 
 
+EXTRACTION_PIPELINES = ("direct-baseline", "graph-dense", "graph-direct")
+
+
+@dataclass(frozen=True)
+class ExtractionConfig:
+    """Committed pipeline for new submissions; jobs pin it, so changes never mix engines."""
+
+    pipeline: str = "direct-baseline"
+
+
+def load_extraction_config() -> ExtractionConfig:
+    # Only the existing isolated-config facility selects another file; there is
+    # deliberately no environment variable naming a pipeline (F0005 Step 6).
+    override = os.environ.get("BRAIN_LOCAL_CONFIG_PATH")
+    path = Path(override) if override else _find_config_file(Path.cwd())
+    if not path.is_file():
+        raise ConfigError("extraction configuration is missing")
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    section = data.get("extraction")
+    if not isinstance(section, dict) or "pipeline" not in section:
+        raise ConfigError("extraction.pipeline must be set explicitly")
+    pipeline = section["pipeline"]
+    if pipeline not in EXTRACTION_PIPELINES:
+        raise ConfigError("extraction.pipeline is not a known pipeline")
+    return ExtractionConfig(pipeline=pipeline)
+
+
+DEFAULT_MAX_QUEUE_DEPTH = 100
+
+
+@dataclass(frozen=True)
+class JobQueueConfig:
+    """Bound on unfinished document jobs; new submissions beyond it are rejected."""
+
+    max_queue_depth: int = DEFAULT_MAX_QUEUE_DEPTH
+
+
+def load_job_queue_config() -> JobQueueConfig:
+    override = os.environ.get("BRAIN_LOCAL_CONFIG_PATH")
+    path = Path(override) if override else _find_config_file(Path.cwd())
+    if not path.is_file():
+        raise ConfigError("job queue configuration is missing")
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    section = data.get("jobs") or {}
+    depth = section.get("max_queue_depth", DEFAULT_MAX_QUEUE_DEPTH)
+    if type(depth) is not int or depth <= 0:
+        raise ConfigError("jobs.max_queue_depth must be a positive integer")
+    return JobQueueConfig(max_queue_depth=depth)
+
+
 def _find_config_file(start: Path) -> Path:
     """Walk upward from `start` looking for `config/local.yaml` (a fresh checkout may
     run the app from the repo root or from within `engine/`)."""

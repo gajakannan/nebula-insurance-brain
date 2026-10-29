@@ -1,0 +1,147 @@
+[transformers] This model config has set a `rope_parameters['original_max_position_embeddings']` field, to be used together with `max_position_embeddings` to determine a scaling factor. Please set the `factor` field of `rope_parameters`with this ratio instead -- we recommend the use of this field over `original_max_position_embeddings`, as it is compatible with most model architectures.
+{"fault_case": "direct-baseline/timeout", "reasons": ["model_timeout"], "final_state": "complete", "conversions": 1, "proxy_requests": 2, "max_concurrency": 1, "proxy_timeline": [{"number": 1, "mode": "timeout", "status": 599, "started": 192466.688279482, "finished": 192556.895672593, "upstream": [192466.688330361, 192556.895695908]}, {"number": 2, "mode": "pass", "status": 200, "started": 192604.087499212, "finished": 192605.343655426, "upstream": [192604.087558607, 192605.338050008]}], "counts": {"ready_artifacts": 1, "runs": 1, "assertions": 3, "assertion_runs": 1, "review_items": 3, "acknowledged": 1, "complete_jobs": 1}, "timeline": {"fault": 192454.842801153, "client_timed_out_after_fault": 41.91529325701413, "quiescence_started_after_fault": 41.91992848101654, "provider_busy_at_quiescence": true, "busy_request_started_after_fault": 11.845529208017979, "quiescence_seconds": 107.13271953299409, "recovered_seconds": 150.65653498700703}}
+.F
+=================================== FAILURES ===================================
+_ test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-graph-dense] _
+
+pipeline = 'graph-dense', mode = 'timeout', reason = 'model_timeout'
+
+    @pytest.mark.parametrize("pipeline", ["direct-baseline", "graph-dense"])
+    @pytest.mark.parametrize(
+        ("mode", "reason"),
+        [
+            ("stopped", "model_unavailable"),
+            ("http_5xx", "model_http_error"),
+            ("malformed_json", "model_malformed_output"),
+            ("schema_invalid", "model_schema_invalid"),
+            ("timeout", "model_timeout"),
+        ],
+    )
+    def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(pipeline, mode, reason):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=30).start()
+        if mode not in ("stopped",):
+            proxy.schedule = {1: mode}
+        timeline: dict[str, float] = {}
+        try:
+            with (
+                qualification.isolated(url, pipeline, v2_writer_enabled=True) as env,
+                qualification.live_session(
+                    env,
+                    settings,
+                    transport_url=proxy.base_url,
+                    # Above the slowest full-reservation dense call on this GPU (~11 s),
+                    # below the ~60 s busy generation the `timeout` mode forwards.
+                    limits=InferenceLimits(request_timeout_seconds=30),
+                ) as live,
+            ):
+                job = live.submit(DOCUMENT, PROFILE)
+                if mode == "stopped":
+                    port = proxy.port
+                    proxy.stop_listening()
+                    assert live.worker.run_one()  # converts, publishes, then connection refused
+                    proxy.port = port
+                    proxy.start()
+                elif mode == "timeout":
+                    timeline["fault"] = time.monotonic()
+                    with pytest.raises(WorkerStopped, match="provider_quiescence_required"):
+                        live.worker.run_one()
+                    timed_out = time.monotonic()
+                    # M4: the client timed out while the provider was still generating.
+                    assert proxy.busy_at(timed_out)
+                    assert live.guard.marker_path.exists() and live.guard.uncertain
+                    # A healthy provider does not clear the uncertain marker.
+                    assert httpx.get(f"{upstream(settings)}/health", timeout=5).status_code == 200
+                    assert live.guard.marker_path.exists()
+                    with pytest.raises(WorkerStopped):
+                        live.worker.run_one()  # no claim while dirty
+                    quiesce_started = time.monotonic()
+                    timeline["client_timed_out_after_fault"] = timed_out - timeline["fault"]
+                    timeline["quiescence_started_after_fault"] = quiesce_started - timeline["fault"]
+                    timeline["provider_busy_at_quiescence"] = proxy.busy_at(quiesce_started)
+                    held = next(r for r in proxy.records if r.mode == "timeout")
+                    timeline["busy_request_started_after_fault"] = (
+                        held.upstream_started - timeline["fault"]
+                    )
+                    receipt, elapsed = _quiesce(settings, live.guard)
+                    timeline["quiescence_seconds"] = elapsed
+                    assert json.loads(receipt.read_text())["confirmed_exit"] is True
+                else:
+                    assert live.worker.run_one()
+>               assert _reasons(env, job)[0] == reason
+                       ^^^^^^^^^^^^^^^^^^^^^
+E               IndexError: list index out of range
+
+neuron/tests/integration/test_fault_injection_qualification.py:165: IndexError
+------------------------------ Captured log call -------------------------------
+ERROR    docling_graph.core.extractors.backends.llm_backend:llm_backend.py:201 Error during LLM call for full document_dense_skeleton_0 InferenceRejected: provider_timeout
+ERROR    docling_graph.core.extractors.backends.llm_backend:llm_backend.py:201 Error during LLM call for full document_dense_skeleton_0 InferenceRejected: provider_quiescence_required
+WARNING  docling_graph.core.extractors.contracts.dense.orchestrator:orchestrator.py:2757 Phase 1 (skeleton) quality gate failed: empty_skeleton
+WARNING  docling_graph.core.extractors.strategies.many_to_one:many_to_one.py:525 Dense extraction returned no model; falling back to direct extraction
+ERROR    docling_graph.core.extractors.backends.llm_backend:llm_backend.py:201 Error during LLM call for full document InferenceRejected: provider_quiescence_required
+WARNING  docling_graph.core.extractors.strategies.many_to_one:many_to_one.py:568 Direct extraction returned no model
+ERROR    docling_graph.pipeline.orchestrator:orchestrator.py:237 Pipeline failed at stage: Extraction
+=============================== warnings summary ===============================
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+_ test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-direct-baseline] _
+------------------------------ Captured log call -------------------------------
+WARNING  transformers.modeling_rope_utils:logging.py:340 This model config has set a `rope_parameters['original_max_position_embeddings']` field, to be used together with `max_position_embeddings` to determine a scaling factor. Please set the `factor` field of `rope_parameters`with this ratio instead -- we recommend the use of this field over `original_max_position_embeddings`, as it is compatible with most model architectures.
+=========================== short test summary info ============================
+PASSED neuron/tests/integration/test_fault_injection_qualification.py::test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-direct-baseline]
+FAILED neuron/tests/integration/test_fault_injection_qualification.py::test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-graph-dense]
+1 failed, 1 passed, 17 deselected, 27 warnings in 307.01s (0:05:07)

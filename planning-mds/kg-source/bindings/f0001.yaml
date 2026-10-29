@@ -1,3 +1,6 @@
+# F0005 G7 (run 2026-10-25-4020923b) appended as-built paths for capability:parse-once-content-artifact.
+# F0005 G7 (run 2026-10-25-4020923b) appended as-built paths for capability:local-inference-service.
+# F0005 G7 (run 2026-10-25-4020923b) appended as-built paths for capability:semantic-interpretation-run.
 bindings:
 - id: capability:runtime-roots-and-toolchain
   paths:
@@ -21,6 +24,12 @@ bindings:
     ai:
     - neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
     - neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+    - neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py
+    - neuron/packages/brain-ingestion/src/brain_ingestion/provider_supervisor.py
+    - neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+    tests:
+    - neuron/packages/brain-ingestion/tests/test_worker_guard.py
+    - neuron/tests/support/fault_proxy.py
 - id: capability:parse-once-content-artifact
   paths:
     ai:
@@ -29,10 +38,28 @@ bindings:
     - engine/packages/brain-content/src/**
     - engine/packages/brain-jobs/src/**
     - engine/apps/worker/src/brain_worker/document_delivery.py
+    - engine/migrations/versions/0009_f0005_job_event_reason.py
+    - engine/migrations/versions/0010_f0005_job_event_reason_expand.py
     tests:
     - neuron/packages/brain-ingestion/tests/**
     - neuron/tests/integration/test_content_*.py
     - neuron/tests/integration/test_document_*.py
+    - engine/tests/integration/test_job_event_reason_migration.py
+    - neuron/tests/integration/f0005_live_support.py
+    - neuron/tests/integration/test_live_conversion_qualification.py
+    - neuron/tests/integration/test_fault_injection_qualification.py
+    - neuron/tests/support/fault_proxy.py
+    - neuron/tests/support/relationship_probe.py
+    - neuron/fixtures/qualification/build_corpus.py
+    - neuron/fixtures/qualification/corpus.yaml
+    - neuron/fixtures/qualification/CORPUS-HASHES.txt
+    - neuron/fixtures/qualification/README.md
+    - neuron/fixtures/qualification/documents
+    - neuron/fixtures/qualification/expectations
+    - neuron/benchmarks/f0005_qualification.py
+    infra:
+    - config/local.yaml
+    - docker/local-inference-runbook.md
 - id: capability:semantic-interpretation-run
   paths:
     ai:
@@ -41,6 +68,11 @@ bindings:
     - neuron/packages/brain-interpretation/src/**
     backend:
     - engine/packages/brain-contracts/src/**
+    tests:
+    - neuron/tests/integration/test_interpretation_rejections.py
+    - neuron/tests/integration/test_live_reinterpretation_qualification.py
+    - neuron/tests/integration/test_pipeline_selection.py
+    - neuron/benchmarks/f0005_qualification.py
 - id: capability:evidence-review-round-trip
   paths:
     backend:

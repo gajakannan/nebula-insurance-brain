@@ -59,11 +59,11 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0005-S0001](./F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) | Pin and process source documents | High | MVP — v0.1A | document intelligence engineer |
-| [F0005-S0002](./F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) | Persist artifacts and recover jobs | High | MVP — v0.1A | platform engineer |
-| [F0005-S0003](./F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) | Reinterpret saved JSON and map evidence | High | MVP — v0.1A | document intelligence engineer |
-| [F0005-S0004](./F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | High | MVP — v0.1A | platform owner |
-| [F0005-S0005](./F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) | Qualify text origin and enable v2 publication | High | MVP — v0.1A | document intelligence engineer |
+| [F0005-S0001](./archive/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) | Pin and process source documents | High | MVP — v0.1A | document intelligence engineer |
+| [F0005-S0002](./archive/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) | Persist artifacts and recover jobs | High | MVP — v0.1A | platform engineer |
+| [F0005-S0003](./archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) | Reinterpret saved JSON and map evidence | High | MVP — v0.1A | document intelligence engineer |
+| [F0005-S0004](./archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | High | MVP — v0.1A | platform owner |
+| [F0005-S0005](./archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) | Qualify text origin and enable v2 publication | High | MVP — v0.1A | document intelligence engineer |
 
 ---
 

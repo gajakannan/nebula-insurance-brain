@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="11" time="4.464" timestamp="2026-10-27T22:49:54.218908-04:00" hostname="myStarCore-01"><testcase classname="tests.integration.test_pipeline_selection" name="test_committed_configuration_selects_the_direct_baseline_with_v2_disabled" time="0.016" /><testcase classname="tests.integration.test_pipeline_selection" name="test_unknown_or_missing_pipeline_fails_startup[graph]" time="0.002" /><testcase classname="tests.integration.test_pipeline_selection" name="test_unknown_or_missing_pipeline_fails_startup[Graph-Dense]" time="0.001" /><testcase classname="tests.integration.test_pipeline_selection" name="test_unknown_or_missing_pipeline_fails_startup[]" time="0.001" /><testcase classname="tests.integration.test_pipeline_selection" name="test_unknown_or_missing_pipeline_fails_startup[None]" time="0.001" /><testcase classname="tests.integration.test_pipeline_selection" name="test_unknown_or_missing_pipeline_fails_startup[7]" time="0.001" /><testcase classname="tests.integration.test_pipeline_selection" name="test_no_environment_variable_selects_a_pipeline" time="0.001" /><testcase classname="tests.integration.test_pipeline_selection" name="test_isolated_config_cannot_move_the_host_guard" time="0.001" /><testcase classname="tests.integration.test_pipeline_selection" name="test_historical_job_without_pipeline_keeps_its_pre_change_meaning" time="0.000" /><testcase classname="tests.integration.test_pipeline_selection" name="test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer" time="0.211"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">tmp_path = PosixPath('/tmp/pytest-of-gajap/pytest-58/test_decision_branches_restart0')
+
+    def test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer(tmp_path):
+        url, settings = require_live()
+        committed_before = hashlib.sha256(COMMITTED.read_bytes()).hexdigest()
+        # gl-q-005 and gl-q-009 are the corpus documents that publish v2: the accepted
+        # and rollback branches use them, so v2 readability is actually exercised (M5).
+        documents = ["gl-q-004", "gl-q-005", "gl-q-002", "gl-q-003", "gl-q-006", "gl-q-009"]
+        rows = []
+        with qualification.isolated(url, "direct-baseline", v2_writer_enabled=False) as env:
+            previous: dict[str, str] = {}
+            pinned: dict[str, dict] = {}
+            for (decision, (pipeline, v2)), document in zip(DECISIONS.items(), documents, strict=True):
+                write_config(env.config_path, pipeline, v2, env.content_root)
+                # Restart: a new composition reads the changed settings.
+&gt;               with qualification.live_session(env, settings) as live:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_pipeline_selection.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x72477ddae900&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_pipeline_selection" name="test_queue_depth_is_committed_and_validated" time="0.004" /></testsuite></testsuites>

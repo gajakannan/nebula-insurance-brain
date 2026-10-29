@@ -303,7 +303,7 @@ def test_ready_registration_indexes_and_audit_commit_once_and_detect_incomplete_
 
 @pytest.fixture
 def publication(database, tmp_path, request):
-    command.upgrade(configuration(), "0008")
+    command.upgrade(configuration(), "head")
     helpers = runpy.run_path(
         str(PRODUCT / "engine/packages/brain-content/tests/test_versioned_content.py")
     )

@@ -1,0 +1,69 @@
+name: brain-f0005-4020923b
+services:
+  engine-validation:
+    build:
+      context: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+      dockerfile: planning-mds/operations/evidence/runs/2026-10-25-4020923b/artifacts/runtime/Dockerfile
+      args:
+        WORKSPACE: engine
+    image: brain-f0005-engine:2026-10-25-4020923b
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+    tmpfs:
+      - /app/brain/content:uid=1000,gid=1000,mode=0700
+    environment:
+      HOME: /tmp
+      XDG_CACHE_HOME: /tmp/.cache
+      BRAIN_DATABASE_URL: postgresql+asyncpg://brain:brain@postgres:5432/brain
+    command: [python, -m, uvicorn, 'brain_api.app:app', --host, 0.0.0.0, --port, '8000']
+    healthcheck:
+      test: [CMD, python, -c, "import json,urllib.request; r=json.load(urllib.request.urlopen('http://localhost:8000/health',timeout=5)); assert r['status']=='ok' and r['storage']=='ok'"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+    networks: [dependencies]
+  neuron-validation:
+    build:
+      context: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+      dockerfile: planning-mds/operations/evidence/runs/2026-10-25-4020923b/artifacts/runtime/Dockerfile
+      args:
+        WORKSPACE: neuron
+    image: brain-f0005-neuron:2026-10-25-4020923b
+    command: [python, -c, "from threading import Event; Event().wait()"]
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+    tmpfs:
+      - /opt/venv/lib/python3.14/site-packages/rapidocr/models:uid=1000,gid=1000,mode=0700
+    environment:
+      HOME: /tmp
+      XDG_CACHE_HOME: /tmp/.cache
+      HF_HOME: /tmp/huggingface
+      BRAIN_WORKER_DATABASE_URL: postgresql+psycopg://brain:brain@postgres:5432/brain
+    healthcheck:
+      test: [CMD, python, -c, "import importlib.metadata as m; import brain_worker; from brain_ingestion.docling_adapter import DoclingAdapter; assert m.version('docling')=='2.126.0'; DoclingAdapter()"]
+      interval: 10s
+      timeout: 30s
+      retries: 6
+    networks: [dependencies]
+  restore-validation:
+    image: brain-f0005-engine:2026-10-25-4020923b
+    command: [python, -c, "from threading import Event; Event().wait()"]
+    networks: [dependencies]
+    group_add: ['1001']
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+      - /usr/bin/docker:/usr/local/bin/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      HOME: /tmp
+      PYTHONDONTWRITEBYTECODE: '1'
+      BRAIN_RESTORE_NETWORK: nebula-insurance-brain_default
+    healthcheck:
+      test: [CMD, python, -c, "import brain_content,brain_persistence,psycopg"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+networks:
+  dependencies:
+    external: true
+    name: nebula-insurance-brain_default

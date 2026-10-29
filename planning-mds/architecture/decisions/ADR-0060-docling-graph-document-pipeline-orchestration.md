@@ -9,8 +9,8 @@
 
 **Date:** 2026-09-15
 **Direction authorized by:** Operator; formal ADR acceptance awaits the proof gates below.
-**Implementation:** Synthetic development proof complete for the current scope. Docling-Graph 1.9.1 is locked; conversion/reuse, PostgreSQL recovery, dense extraction with recorded responses, and multi-region review mapping have bounded proof. Production acceptance and activation remain future work; see [compatibility evidence](../../features/F0005-one-time-docling-ingestion/compatibility-evidence.md). Plan run `2026-10-23-9a04b327` (2026-10-23) defines the acceptance procedure: local live qualification on a synthetic corpus against operator-approved thresholds, independent QA/Architect/Security verdicts and operator acceptance, then activation through committed configuration with a direct-baseline rollback. See the F0005 [PRD](../../features/F0005-one-time-docling-ingestion/PRD.md) and [assembly plan](../../features/F0005-one-time-docling-ingestion/feature-assembly-plan.md).
-**Approved Phase B design rework (2026-10-25):** plan run `2026-10-25-50fcf658`, Phase B existing feature, addresses PM-1/ARCH-1/BLD-1 from [plan review `2026-10-24-0fbc1de1`](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md). The requirements and thresholds above remain approved; the operator approved these control-design amendments on 2026-10-25 with the response `approve`. They remain unimplemented and do not constitute accepted runtime proof or formal ADR acceptance.
+**Implementation:** Synthetic development proof complete for the current scope. Docling-Graph 1.9.1 is locked; conversion/reuse, PostgreSQL recovery, dense extraction with recorded responses, and multi-region review mapping have bounded proof. Production acceptance and activation remain future work; see [compatibility evidence](../../features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md). Plan run `2026-10-23-9a04b327` (2026-10-23) defines the acceptance procedure: local live qualification on a synthetic corpus against operator-approved thresholds, independent QA/Architect/Security verdicts and operator acceptance, then activation through committed configuration with a direct-baseline rollback. See the F0005 [PRD](../../features/archive/F0005-one-time-docling-ingestion/PRD.md) and [assembly plan](../../features/archive/F0005-one-time-docling-ingestion/feature-assembly-plan.md).
+**Approved Phase B design rework (2026-10-25):** plan run `2026-10-25-50fcf658`, Phase B existing feature, addresses PM-1/ARCH-1/BLD-1 from [plan review `2026-10-24-0fbc1de1`](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md). The requirements and thresholds above remain approved; the operator approved these control-design amendments on 2026-10-25 with the response `approve`. They were implemented and qualified live in F0005 run `2026-10-25-4020923b`. They now ship for every pipeline under [ADR-0074](ADR-0074-local-document-job-execution-controls.md). They do not make this ADR accepted (see "F0005 qualification outcome" below).
 **Would refine:** ADR-0003, ADR-0004, ADR-0028, ADR-0040, ADR-0055, ADR-0058, ADR-0059. Reconsiders the exclusion recorded after F0001; the current runtime decision, accepted content/evidence contracts, and F0001 measurements remain in force pending proof.
 
 ## Context
@@ -53,15 +53,17 @@ The candidate `DoclingGraphPipelineAdapter` in `brain-extraction` owns calls int
 
 F0005's candidate includes the checkpoint seam, package declarations, `neuron/uv.lock`, build/run metadata, and opt-in composition wiring. The direct client is now named `OpenAICompatibleExtractionAdapter` and remains the comparison baseline; its old name is a compatibility import. S0004 has recorded-response direct/dense comparison evidence, while production qualification and activation remain future work. A class rename alone is not migration evidence.
 
-### Local control design amendments — Phase B approved 2026-10-25; runtime proof pending
+### Local control design amendments — Phase B approved 2026-10-25; implemented in F0005, now governed by ADR-0074
 
-The [assembly plan Steps 0a and 2](../../features/F0005-one-time-docling-ingestion/feature-assembly-plan.md) place physical conversion in a supervised conversion-only process group. The parent starts a monotonic 300-second deadline before launch, durably records child ownership before acknowledging conversion start, and alone accepts the validated native-JSON/quality/provenance handoff and publishes ready through the existing current-authority/generation fence. The child runs the same pinned Graph conversion/stage guard, with a serialization callback and no inference/publication capability. Timeout latches failure at 300 seconds before bounded termination/cleanup; late results cannot publish or start extraction. This replaces the prior design's reliance on the model client's cooperative deadline; it does not weaken parse-once, checkpoint ordering or F0004's bundle contract.
+The [assembly plan Steps 0a and 2](../../features/archive/F0005-one-time-docling-ingestion/feature-assembly-plan.md) place physical conversion in a supervised conversion-only process group. The parent starts a monotonic 300-second deadline before launch, durably records child ownership before acknowledging conversion start, and alone accepts the validated native-JSON/quality/provenance handoff and publishes ready through the existing current-authority/generation fence. The child runs the same pinned Graph conversion/stage guard, with a serialization callback and no inference/publication capability. Timeout latches failure at 300 seconds before bounded termination/cleanup; late results cannot publish or start extraction. This replaces the prior design's reliance on the model client's cooperative deadline; it does not weaken parse-once, checkpoint ordering or F0004's bundle contract.
 
 The local processing topology is one host-enforced worker per canonical dedicated serving endpoint, with a process-lifetime OS advisory lock in a fixed shared host control directory and a common in-process model semaphore of one. Aliases, model profiles, tenants, workspaces and temporary configs cannot allocate separate locks. The converter never inherits the descriptor. A durable in-flight marker precedes HTTP dispatch; ambiguous outcomes and SIGKILL keep replacement claims/requests stopped until the controlled-host harness/DevOps supervisor observes the dedicated provider group exit and restarts the pinned server under the same guard. Provider health alone is not quiescence. This fail-closed local recovery is measured against the existing recovery bound and is not a distributed quota or a new provider endpoint.
 
 Steps 6–7 explicitly start ordinary new jobs on `direct-baseline` with the v2 writer disabled. Isolated qualification configs select Graph direct/dense without changing that default. Rejection verifies/restores direct-baseline/v1 after restart; acceptance selects Graph dense/v2. Extraction rollback after acceptance selects direct while retaining the qualified v2 writer. New job idempotency includes the pipeline; historical jobs retain their existing keys/pinned meaning. Negative tests cover every branch, deadline races, child/orphan cleanup and competing-worker/provider-crash recovery before activation. None of these proposed controls changes this ADR's status or approves runtime activation.
 
 ### What becomes simpler
+
+> **Not in force.** Graph dense was rejected in F0005 (see below). The direct client stays the runtime default and is not retired. This section describes the design only if a future re-plan is accepted.
 
 Nebula delegates chunk/extract/validate/graph coordination to one specialist pipeline and one configured model backend. After acceptance, retire duplicated extraction control flow in the current direct-vLLM adapter. Retain thin adapters for artifact publication, profile compilation, scope enforcement, evidence translation, and the provider-neutral result contract. Do not duplicate these business contracts inside upstream templates.
 
@@ -88,7 +90,7 @@ ADR acceptance and activation require observed tests against the real upstream p
 
 ## Proof gates before acceptance
 
-These are production-acceptance requirements. The current early-development scope uses synthetic fixtures and is complete without claiming these release gates. The [synthetic comparison](../../features/F0005-one-time-docling-ingestion/synthetic-comparison.json) proves dense skeleton/fill orchestration with recorded responses; its estimated tokens and local timing are not model-quality or serving-cost measurements. On its longer fixtures, Graph direct lacks usable item refs and remains unresolved; dense preserves the refs. Multi-region grounding requires complete character coverage and retains separate selectors through review. Unsupported relationship output still fails closed.
+These are production-acceptance requirements. The current early-development scope uses synthetic fixtures and is complete without claiming these release gates. The [synthetic comparison](../../features/archive/F0005-one-time-docling-ingestion/synthetic-comparison.json) proves dense skeleton/fill orchestration with recorded responses; its estimated tokens and local timing are not model-quality or serving-cost measurements. On its longer fixtures, Graph direct lacks usable item refs and remains unresolved; dense preserves the refs. Multi-region grounding requires complete character coverage and retains separate selectors through review. Unsupported relationship output still fails closed.
 
 - Exact release/commit and digest plus locked dependencies; native and scanned processing, durable parse publication, worker restart, and two saved-JSON profiles with instrumented zero conversion/OCR on reuse.
 - Ground limit amount, currency, basis, effective date, table headers, and values supported by multiple regions; preserve the provenance ledger and unresolved precision.
@@ -97,7 +99,44 @@ These are production-acceptance requirements. The current early-development scop
 
 **Acceptance scope (2026-10-23).** Under the operator's F0005 scope decision, acceptance on F0005's local qualification governs the local Docker Compose runtime only. Production host qualification and frozen-corpus acceptance remain F0026 obligations, and they may reopen this decision. A rejection keeps the direct client as the runtime default and records the failed gates here.
 
-Evidence and reviewer verdicts belong in [F0005 STATUS](../../features/F0005-one-time-docling-ingestion/STATUS.md). The pin, native/scanned conversion, publication ordering, native-JSON reuse, scalar/table evidence, and durable recovery have bounded test evidence, including PostgreSQL queue and worker/importer process-exit recovery with recorded model responses. The synthetic comparison also proves dense extraction orchestration and multi-region grounding through import and review. Production gates remain open: live comparative extraction and property/multi-region evidence qualification, unsupported relationship semantics, full deployment recovery, operational qualification, and reviewer acceptance. Structural planning checks cannot change this ADR to Accepted.
+Evidence and reviewer verdicts belong in [F0005 STATUS](../../features/archive/F0005-one-time-docling-ingestion/STATUS.md). The pin, native/scanned conversion, publication ordering, native-JSON reuse, scalar/table evidence, and durable recovery have bounded test evidence, including PostgreSQL queue and worker/importer process-exit recovery with recorded model responses. The synthetic comparison also proves dense extraction orchestration and multi-region grounding through import and review. Production gates remain open: live comparative extraction and property/multi-region evidence qualification, unsupported relationship semantics, full deployment recovery, operational qualification, and reviewer acceptance. Structural planning checks cannot change this ADR to Accepted.
+
+## F0005 qualification outcome (2026-10-27): Graph dense rejected; ADR stays Proposed
+
+**Decision recorded by the operator at F0005 G4, run `2026-10-25-4020923b` (2026-10-27).** Graph dense is rejected for activation. The direct client (`direct-baseline`) stays the runtime default with the v2 writer disabled. This ADR stays **Proposed** with the failed gates recorded here.
+
+**Reopen condition:** if no re-plan of this candidate is approved by the start of F0014/F0015 planning, the operator marks this ADR Rejected. A re-plan (a larger output reservation, another serving model, or Graph direct as the candidate) is a new plan with full re-measurement, never a re-score of the recorded report.
+
+**Measured gates.** Local live qualification on the synthetic corpus `f0005-gl-qualification-v1` (13 documents, 26 document-profiles per engine). Phi-4-mini-instruct @ `cfbefacb…`, vLLM 0.25.1, context 4,096, output reservation 512, Docling-Graph 1.9.1. Report `artifacts/qualification/report.json`, `void: false`; QA recomputed every value independently.
+
+| PRD threshold | Direct baseline | Graph dense | Gate |
+|---|---|---|---|
+| Field accuracy ≥ 90% and ≤ 5 pp below baseline | 41.4% | 27.6% | **Failed** |
+| Abstention ≥ 95% | 42.9% | 0% | **Failed** |
+| Evidence resolution ≥ 80% and ≥ baseline | 66.7% | 50.0% | **Failed** |
+| Latency p95 ≤ 120 s and ≤ 3× baseline | 1.48 s | 9.84 s (6.6×), completed runs only (report v1) | **Failed** |
+| Review workload ≤ 1.25× baseline | 2.92 per document | 1.54 per document; 1.42–1.64× (1.64× per completed run; 1.42× on the 7 cases both engines completed — corrected after G3 round 2) per completed run | **Failed** like for like (met only because failed runs add no items) |
+| Schema validity, fabricated evidence, context budget, recovery | met | met | Passed. Context budget counts only dispatched calls: this measurement predates H1, so pre-dispatch rejections could not be recorded. The run log shows none. |
+
+Report `artifacts/qualification/report.json`, SHA-256 `55ce348489e253bc2a053adbaf7591d4e678d83470792ab0bf26b0207aabaede`, `report_version` 1. Corpus hash `fbc5e263c861c401dea07e3deac4023a0f660d35bb2edc891f8297ee0a5e2dc9`; expectation-set hash `16a29d67dddddea4e18136465567f67cd63c790fa9eb68018c35e4636933390c`.
+
+**Root cause (model adequacy on this profile, not the orchestration seam).** 18 of 26 Graph-dense runs failed explicitly in the first-stage skeleton call. The response was either cut off at the 512-token output reservation or contained duplicate JSON keys, and repeated identically at temperature 0. The seam itself passed live:
+- checkpoint-before-model ordering;
+- native and scanned conversion;
+- zero reconversion on reuse;
+- bounded concurrency;
+- isolation from canonical tables.
+
+ADR-0055 §4 anticipates proposing an alternative backend in this situation.
+
+**Measured limitations to carry into any re-plan:**
+- **Graph direct** (reported, not a candidate) reached 84.5% accuracy but 0% evidence resolution, because its ledger lacks item references.
+- **The baseline excludes tables,** which flatters the relative thresholds.
+- **84.6% of documents fall back** from v2 to v1, because table cells have no attributable origin.
+- **Docling-Graph 1.9.1 swallows per-call exceptions** and falls back from dense to one direct call. Nebula now fails both cases explicitly (Code Review H1).
+- **The F0005 dense measurement predates that fix,** although its runs show no budget rejections.
+
+**Controls moved.** The Phase B control amendments above (supervised conversion, the host guard and quiescence, failure reasons, the submission bound, pipeline selection) ship for every pipeline. They now have their own record: [ADR-0074](ADR-0074-local-document-job-execution-controls.md). They no longer depend on this ADR's status. The F0005 manifest OCR fields are recorded in the [ADR-0073](ADR-0073-versioned-content-contracts-and-document-metadata.md) amendment of 2026-10-27.
 
 ## References
 

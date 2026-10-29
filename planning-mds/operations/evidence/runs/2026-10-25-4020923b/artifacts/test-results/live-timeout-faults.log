@@ -1,0 +1,237 @@
+[transformers] This model config has set a `rope_parameters['original_max_position_embeddings']` field, to be used together with `max_position_embeddings` to determine a scaling factor. Please set the `factor` field of `rope_parameters`with this ratio instead -- we recommend the use of this field over `original_max_position_embeddings`, as it is compatible with most model architectures.
+{"fault_case": "direct-baseline/timeout", "reasons": ["model_timeout"], "final_state": "complete", "conversions": 1, "proxy_requests": 2, "max_concurrency": 1, "counts": {"ready_artifacts": 1, "runs": 1, "assertions": 3, "assertion_runs": 1, "review_items": 3, "acknowledged": 1, "complete_jobs": 1}, "timeline": {"fault": 7139.25951288, "quiescence_seconds": 42.95489415299926, "recovered_seconds": 65.60398910499953}}
+.----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 48784)
+Traceback (most recent call last):
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 101, in map_httpcore_exceptions
+    yield
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 250, in handle_request
+    resp = self._pool.handle_request(req)
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpcore/_sync/connection_pool.py", line 256, in handle_request
+    raise exc from None
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpcore/_sync/connection_pool.py", line 236, in handle_request
+    response = connection.handle_request(
+        pool_request.request
+    )
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpcore/_sync/connection.py", line 103, in handle_request
+    return self._connection.handle_request(request)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpcore/_sync/http11.py", line 136, in handle_request
+    raise exc
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpcore/_sync/http11.py", line 106, in handle_request
+    ) = self._receive_response_headers(**kwargs)
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpcore/_sync/http11.py", line 177, in _receive_response_headers
+    event = self._receive_event(timeout=timeout)
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpcore/_sync/http11.py", line 231, in _receive_event
+    raise RemoteProtocolError(msg)
+httpcore.RemoteProtocolError: Server disconnected without sending a response.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/http/server.py", line 496, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/http/server.py", line 484, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/tests/support/fault_proxy.py", line 114, in do_POST
+    self._forward("POST")
+    ~~~~~~~~~~~~~^^^^^^^^
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/tests/support/fault_proxy.py", line 84, in _forward
+    upstream = proxy._client.request(
+        method, proxy.upstream + self.path, content=body, headers=headers
+    )
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_client.py", line 914, in send
+    response = self._send_handling_auth(
+        request,
+    ...<2 lines>...
+        history=[],
+    )
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_client.py", line 942, in _send_handling_auth
+    response = self._send_handling_redirects(
+        request,
+        follow_redirects=follow_redirects,
+        history=history,
+    )
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_client.py", line 979, in _send_handling_redirects
+    response = self._send_single_request(request)
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1014, in _send_single_request
+    response = transport.handle_request(request)
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 249, in handle_request
+    with map_httpcore_exceptions():
+         ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/httpx/_transports/default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.RemoteProtocolError: Server disconnected without sending a response.
+----------------------------------------
+F
+=================================== FAILURES ===================================
+_ test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-graph-dense] _
+
+pipeline = 'graph-dense', mode = 'timeout', reason = 'model_timeout'
+
+    @pytest.mark.parametrize("pipeline", ["direct-baseline", "graph-dense"])
+    @pytest.mark.parametrize(
+        ("mode", "reason"),
+        [
+            ("stopped", "model_unavailable"),
+            ("http_5xx", "model_http_error"),
+            ("malformed_json", "model_malformed_output"),
+            ("schema_invalid", "model_schema_invalid"),
+            ("timeout", "model_timeout"),
+        ],
+    )
+    def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(pipeline, mode, reason):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=30).start()
+        if mode not in ("stopped",):
+            proxy.schedule = {1: mode}
+        timeline: dict[str, float] = {}
+        try:
+            with (
+                qualification.isolated(url, pipeline, v2_writer_enabled=True) as env,
+                qualification.live_session(
+                    env,
+                    settings,
+                    transport_url=proxy.base_url,
+                    limits=InferenceLimits(request_timeout_seconds=10),
+                ) as live,
+            ):
+                job = live.submit(DOCUMENT, PROFILE)
+                if mode == "stopped":
+                    port = proxy.port
+                    proxy.stop_listening()
+                    assert live.worker.run_one()  # converts, publishes, then connection refused
+                    proxy.port = port
+                    proxy.start()
+                elif mode == "timeout":
+                    timeline["fault"] = time.monotonic()
+                    with pytest.raises(WorkerStopped, match="provider_quiescence_required"):
+                        live.worker.run_one()
+                    assert live.guard.marker_path.exists() and live.guard.uncertain
+                    # A healthy provider does not clear the uncertain marker.
+                    assert httpx.get(f"{upstream(settings)}/health", timeout=5).status_code == 200
+                    assert live.guard.marker_path.exists()
+                    with pytest.raises(WorkerStopped):
+                        live.worker.run_one()  # no claim while dirty
+                    receipt, elapsed = _quiesce(settings, live.guard)
+                    timeline["quiescence_seconds"] = elapsed
+                    assert json.loads(receipt.read_text())["confirmed_exit"] is True
+                else:
+                    assert live.worker.run_one()
+                assert _reasons(env, job)[0] == reason
+                live.drain(timeout=900)
+                if "fault" in timeline:
+                    timeline["recovered_seconds"] = time.monotonic() - timeline["fault"]
+                with env.engine.connect() as conn:
+                    state = conn.scalar(select(jobs.c.state).where(jobs.c.id == str(job)))
+                # Zero conversion after publication: the retry reused the bundle.
+                assert live.converter.launches == 1
+                if state == "complete":
+                    counts = _assert_single_effect(env)
+                else:
+                    # A later organic model failure may exhaust the budget; it must
+                    # still end explicitly, with the bundle retained and readable.
+                    assert state == "failed"
+                    counts = {"terminal_reasons": _reasons(env, job)}
+                calls = [r for r in proxy.records if r.mode != "pass" or r.status is not None]
+>               assert proxy.max_concurrency() <= 1
+E               AssertionError: assert 2 <= 1
+E                +  where 2 = max_concurrency()
+E                +    where max_concurrency = FaultProxy(upstream='http://127.0.0.1:8000', hold_seconds=30, schedule={1: 'timeout'}, records=[ProxyRecord(number=1, ...200), ProxyRecord(number=3, mode='pass', started=7317.912837516, finished=7318.940295293, status=200)], on_record=None).max_concurrency
+
+neuron/tests/integration/test_fault_injection_qualification.py:166: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    docling_graph.core.extractors.backends.llm_backend:llm_backend.py:201 Error during LLM call for full document_dense_skeleton_0 InferenceRejected: provider_timeout
+ERROR    docling_graph.core.extractors.backends.llm_backend:llm_backend.py:201 Error during LLM call for full document_dense_skeleton_0 InferenceRejected: provider_quiescence_required
+WARNING  docling_graph.core.extractors.contracts.dense.orchestrator:orchestrator.py:2757 Phase 1 (skeleton) quality gate failed: empty_skeleton
+WARNING  docling_graph.core.extractors.strategies.many_to_one:many_to_one.py:525 Dense extraction returned no model; falling back to direct extraction
+ERROR    docling_graph.core.extractors.backends.llm_backend:llm_backend.py:201 Error during LLM call for full document InferenceRejected: provider_quiescence_required
+WARNING  docling_graph.core.extractors.strategies.many_to_one:many_to_one.py:568 Direct extraction returned no model
+ERROR    docling_graph.pipeline.orchestrator:orchestrator.py:237 Pipeline failed at stage: Extraction
+WARNING  docling_graph.core.utils.graph_cleaner:graph_cleaner.py:455 Graph has no edges (1 node(s) only). This can happen when extraction was salvaged and list entities were dropped.
+=============================== warnings summary ===============================
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+tests/integration/test_fault_injection_qualification.py::test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-graph-dense]
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/neuron/.venv/lib/python3.14/site-packages/docling_graph/core/utils/alias_reconciler.py:95: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    if id(instance) in seen or not hasattr(instance, "model_fields"):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================== PASSES ====================================
+_ test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-direct-baseline] _
+------------------------------ Captured log call -------------------------------
+WARNING  transformers.modeling_rope_utils:logging.py:340 This model config has set a `rope_parameters['original_max_position_embeddings']` field, to be used together with `max_position_embeddings` to determine a scaling factor. Please set the `factor` field of `rope_parameters`with this ratio instead -- we recommend the use of this field over `original_max_position_embeddings`, as it is compatible with most model architectures.
+=========================== short test summary info ============================
+PASSED neuron/tests/integration/test_fault_injection_qualification.py::test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-direct-baseline]
+FAILED neuron/tests/integration/test_fault_injection_qualification.py::test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[timeout-model_timeout-graph-dense]
+1 failed, 1 passed, 17 deselected, 28 warnings in 185.69s (0:03:05)

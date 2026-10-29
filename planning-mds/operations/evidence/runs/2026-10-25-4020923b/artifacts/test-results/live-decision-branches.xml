@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="141.359" timestamp="2026-10-26T00:53:57.775191-04:00" hostname="myStarCore-01"><testcase classname="tests.integration.test_pipeline_selection" name="test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer" time="137.132"><failure message="KeyError: 'v2_writer_enabled'">tmp_path = PosixPath('/tmp/pytest-of-gajap/pytest-18/test_decision_branches_restart0')
+
+    def test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer(tmp_path):
+        url, settings = require_live()
+        committed_before = hashlib.sha256(COMMITTED.read_bytes()).hexdigest()
+        documents = ["gl-q-009", "gl-q-005", "gl-q-002", "gl-q-003", "gl-q-006", "gl-q-004"]
+        rows = []
+        with qualification.isolated(url, "direct-baseline", v2_writer_enabled=False) as env:
+            previous: dict[str, str] = {}
+            pinned: dict[str, dict] = {}
+            for (decision, (pipeline, v2)), document in zip(DECISIONS.items(), documents, strict=True):
+                write_config(env.config_path, pipeline, v2, env.content_root)
+                # Restart: a new composition reads the changed settings.
+                with qualification.live_session(env, settings) as live:
+                    job = live.submit(CORPUS / f"documents/{document}.pdf", "gl-limits-b")
+                    live.drain(timeout=900)
+                with env.engine.connect() as conn:
+                    row = conn.execute(select(jobs).where(jobs.c.id == str(job))).mappings().one()
+                assert row["payload"]["pipeline"] == pipeline
+                pinned[str(job)] = row["payload"]
+                case = qualification.score_case(
+                    env,
+                    job,
+                    "gl-limits-b",
+                    json.loads((CORPUS / f"expectations/{document}.json").read_text())["profiles"][
+                        "gl-limits-b"
+                    ],
+                )
+                identity = case.get("pipeline_identity") or {}
+                expected_engine = (
+                    "direct-baseline" if pipeline == "direct-baseline" else "docling-graph"
+                )
+                if case["job_state"] == "complete":
+                    assert identity["name"] == expected_engine
+                    if pipeline == "direct-baseline":
+                        assert case["requested_configuration"]["engine"] == "direct-baseline"
+                # Writer: v1 when disabled; v2 (or the audited per-document v1 fallback) when enabled.
+                if not v2:
+                    assert case.get("bundle_contract") in (1, None)
+                rows.append(
+                    {
+                        "decision": decision,
+                        "pipeline": pipeline,
+                        "v2_writer_enabled": v2,
+                        "document": document,
+                        "job_state": case["job_state"],
+                        "engine": identity.get("name"),
+                        "bundle_contract": case.get("bundle_contract"),
+                        "config_sha256": hashlib.sha256(env.config_path.read_bytes()).hexdigest(),
+                    }
+                )
+                # Every earlier accepted byte and run is unchanged by the new decision.
+                current = _tree_digest(env.content_root, ("bundles", "runs", "sources"))
+                assert all(current.get(path) == digest for path, digest in previous.items())
+                previous = current
+            # A legacy queued candidate (pre-selection payload) keeps graph-direct even
+            # though the current default is the baseline; its payload is not rewritten.
+            write_config(env.config_path, "direct-baseline", False, env.content_root)
+            with qualification.live_session(env, settings) as live:
+                legacy = live.submit(CORPUS / "documents/gl-q-012.pdf", "gl-limits-b")
+                with env.engine.begin() as conn:
+                    payload = conn.execute(
+                        select(jobs.c.payload).where(jobs.c.id == str(legacy))
+                    ).scalar_one()
+                    payload = {k: v for k, v in payload.items() if k != "pipeline"}
+                    conn.execute(jobs.update().where(jobs.c.id == str(legacy)).values(payload=payload))
+                live.drain(timeout=900)
+            legacy_case = qualification.score_case(
+                env,
+                legacy,
+                "gl-limits-b",
+                json.loads((CORPUS / "expectations/gl-q-012.json").read_text())["profiles"][
+                    "gl-limits-b"
+                ],
+            )
+            with env.engine.connect() as conn:
+                assert (
+                    "pipeline"
+                    not in conn.execute(
+                        select(jobs.c.payload).where(jobs.c.id == str(legacy))
+                    ).scalar_one()
+                )
+            if legacy_case["job_state"] == "complete":
+                requested = legacy_case["requested_configuration"]
+                assert requested["extraction_contract"] == "direct" and "pipeline" not in requested
+                assert legacy_case["pipeline_identity"]["name"] == "docling-graph"
+            rows.append(
+                {
+                    "decision": "legacy_queued_candidate",
+                    "job_state": legacy_case["job_state"],
+                    "engine": (legacy_case.get("pipeline_identity") or {}).get("name"),
+                    "reasons": legacy_case["failure_reasons"],
+                }
+            )
+            with env.engine.connect() as conn:
+                for job_id, payload in pinned.items():
+                    assert (
+                        conn.execute(select(jobs.c.payload).where(jobs.c.id == job_id)).scalar_one()
+                        == payload
+                    )
+        assert hashlib.sha256(COMMITTED.read_bytes()).hexdigest() == committed_before
+&gt;       assert any(r["bundle_contract"] == 2 for r in rows if r["v2_writer_enabled"])
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_pipeline_selection.py:220: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;list_iterator object at 0x7f593d796770&gt;
+
+&gt;   assert any(r["bundle_contract"] == 2 for r in rows if r["v2_writer_enabled"])
+                                                          ^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'v2_writer_enabled'
+
+neuron/tests/integration/test_pipeline_selection.py:220: KeyError</failure></testcase></testsuite></testsuites>

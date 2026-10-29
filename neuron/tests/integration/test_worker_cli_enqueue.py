@@ -110,3 +110,45 @@ def test_enqueue_provisions_declared_restrictions_then_authorizes(
         assert sorted(d.action for d in decisions) == ["ingest", "interpret"]
         assert all(d.decision and d.actor_principal_id == actor for d in decisions)
         assert session.scalar(select(jobs.c.state)) == "queued"
+
+
+def test_enqueue_beyond_queue_depth_is_rejected_explicitly(
+    database: tuple[Engine, str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    import yaml
+
+    engine, url = database
+    tenant, kb, actor = _seed(engine)
+    config = tmp_path / "local.yaml"
+    config.write_text(
+        yaml.safe_dump(
+            {
+                "content": {"v2_writer_enabled": False},
+                "extraction": {"pipeline": "direct-baseline"},
+                "jobs": {"max_queue_depth": 1},
+                "object_store": {"provider": "filesystem", "root": str(tmp_path / "objects")},
+            }
+        )
+    )
+    monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(config))
+    outcomes = []
+    for name in ("first.pdf", "second.pdf"):
+        pdf = tmp_path / name
+        pdf.write_bytes(b"%PDF-1.4 synthetic " + name.encode())
+        args = [
+            "--enqueue",
+            str(pdf),
+            "--tenant",
+            str(tenant),
+            "--knowledge-base",
+            str(kb),
+            "--classification",
+            "internal",
+        ]
+        outcomes.append(_run(monkeypatch, tmp_path, url, actor, args))
+    assert outcomes == [0, 4]
+    assert capsys.readouterr().out.strip().splitlines()[-1] == "queue_depth_exceeded"
+    with Session(engine) as session:
+        assert len(session.execute(select(jobs.c.id)).all()) == 1
+    # The rejected source was never stored as accepted work.
+    assert len(list((tmp_path / "objects" / "sources").rglob("*.pdf"))) == 1

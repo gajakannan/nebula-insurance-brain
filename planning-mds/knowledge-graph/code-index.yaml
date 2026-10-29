@@ -80,8 +80,14 @@ node_bindings:
       ai:
         - neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
         - neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+        - neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/provider_supervisor.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py
       infra:
         - docker/local-inference-runbook.md
+      tests:
+        - neuron/packages/brain-ingestion/tests/test_worker_guard.py
+        - neuron/tests/support/fault_proxy.py
   - id: capability:ontology-release-compatibility
     paths:
       architecture:
@@ -106,12 +112,30 @@ node_bindings:
         - neuron/packages/brain-ingestion/src/**
       backend:
         - engine/apps/worker/src/brain_worker/document_delivery.py
+        - engine/migrations/versions/0009_f0005_job_event_reason.py
+        - engine/migrations/versions/0010_f0005_job_event_reason_expand.py
         - engine/packages/brain-content/src/**
         - engine/packages/brain-jobs/src/**
+      infra:
+        - config/local.yaml
+        - docker/local-inference-runbook.md
       tests:
+        - engine/tests/integration/test_job_event_reason_migration.py
+        - neuron/benchmarks/f0005_qualification.py
+        - neuron/fixtures/qualification/CORPUS-HASHES.txt
+        - neuron/fixtures/qualification/README.md
+        - neuron/fixtures/qualification/build_corpus.py
+        - neuron/fixtures/qualification/corpus.yaml
+        - neuron/fixtures/qualification/documents
+        - neuron/fixtures/qualification/expectations
         - neuron/packages/brain-ingestion/tests/**
+        - neuron/tests/integration/f0005_live_support.py
         - neuron/tests/integration/test_content_*.py
         - neuron/tests/integration/test_document_*.py
+        - neuron/tests/integration/test_fault_injection_qualification.py
+        - neuron/tests/integration/test_live_conversion_qualification.py
+        - neuron/tests/support/fault_proxy.py
+        - neuron/tests/support/relationship_probe.py
   - id: capability:postgresql-persistence-contract
     paths:
       backend:
@@ -141,6 +165,11 @@ node_bindings:
         - neuron/packages/brain-interpretation/src/**
       backend:
         - engine/packages/brain-contracts/src/**
+      tests:
+        - neuron/benchmarks/f0005_qualification.py
+        - neuron/tests/integration/test_interpretation_rejections.py
+        - neuron/tests/integration/test_live_reinterpretation_qualification.py
+        - neuron/tests/integration/test_pipeline_selection.py
   - id: capability:structural-tenancy-and-entity-identity
     paths:
       backend:
@@ -174,6 +203,7 @@ node_bindings:
         - engine/tests/integration/test_content_migration_states.py
         - neuron/packages/brain-ingestion/tests/spikes/**
         - neuron/packages/brain-ingestion/tests/test_content_projection_v2.py
+        - neuron/packages/brain-ingestion/tests/test_ocr_quality.py
         - neuron/tests/integration/test_content_*.py
   - id: endpoint:content-artifact-file-get
     paths:
@@ -234,6 +264,11 @@ node_bindings:
         - engine/migrations/versions/0008_f0004_content_contract.*
       tests:
         - engine/tests/integration/test_content_migration_states.py
+  - id: migration:f0005-job-event-reason
+    paths:
+      backend:
+        - engine/migrations/versions/0009_f0005_job_event_reason.py
+        - engine/migrations/versions/0010_f0005_job_event_reason_expand.py
   - id: schema:commercial-pc-example
     paths:
       architecture:

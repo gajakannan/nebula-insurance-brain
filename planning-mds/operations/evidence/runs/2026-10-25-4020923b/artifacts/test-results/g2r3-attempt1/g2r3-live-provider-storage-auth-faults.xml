@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="12" time="274.946" timestamp="2026-10-28T03:30:37.077046-04:00" hostname="myStarCore-01"><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[stopped-model_unavailable-direct-baseline]" time="25.615" /><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[stopped-model_unavailable-graph-dense]" time="33.195" /><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[http_5xx-model_http_error-direct-baseline]" time="21.122" /><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[http_5xx-model_http_error-graph-dense]" time="37.148" /><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[malformed_json-model_malformed_output-direct-baseline]" time="20.290" /><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[malformed_json-model_malformed_output-graph-dense]" time="46.404" /><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[schema_invalid-model_schema_invalid-direct-baseline]" time="34.433" /><testcase classname="tests.integration.test_fault_injection_qualification" name="test_provider_fault_records_distinct_reason_and_resumes_from_saved_json[schema_invalid-model_schema_invalid-graph-dense]" time="50.558"><failure message="brain_ingestion.document_worker.WorkerStopped: provider_quiescence_required">pipeline = 'graph-dense', mode = 'schema_invalid'
+reason = 'model_schema_invalid'
+
+    @pytest.mark.parametrize("pipeline", ["direct-baseline", "graph-dense"])
+    @pytest.mark.parametrize(
+        ("mode", "reason"),
+        [
+            ("stopped", "model_unavailable"),
+            ("http_5xx", "model_http_error"),
+            ("malformed_json", "model_malformed_output"),
+            ("schema_invalid", "model_schema_invalid"),
+            ("timeout", "model_timeout"),
+        ],
+    )
+    def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(pipeline, mode, reason):
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=30).start()
+        if mode not in ("stopped",):
+            proxy.schedule = {1: mode}
+        timeline: dict[str, float] = {}
+        try:
+            with (
+                qualification.isolated(url, pipeline, v2_writer_enabled=True) as env,
+                qualification.live_session(
+                    env,
+                    settings,
+                    transport_url=proxy.base_url,
+                    # Above the slowest full-reservation dense call on this GPU (~11 s),
+                    # below the ~60 s busy generation the `timeout` mode forwards.
+                    limits=InferenceLimits(request_timeout_seconds=30),
+                ) as live,
+            ):
+                job = live.submit(DOCUMENT, PROFILE)
+                if mode == "stopped":
+                    port = proxy.port
+                    proxy.stop_listening()
+                    assert live.worker.run_one()  # converts, publishes, then connection refused
+                    proxy.port = port
+                    proxy.start()
+                elif mode == "timeout":
+                    timeline["fault"] = time.monotonic()
+                    with pytest.raises(WorkerStopped, match="provider_quiescence_required"):
+                        live.worker.run_one()
+                    timed_out = time.monotonic()
+                    # M4: the client timed out while the provider was still generating.
+                    assert proxy.busy_at(timed_out)
+                    assert live.guard.marker_path.exists() and live.guard.uncertain
+                    # A healthy provider does not clear the uncertain marker.
+                    assert httpx.get(f"{upstream(settings)}/health", timeout=5).status_code == 200
+                    assert live.guard.marker_path.exists()
+                    with pytest.raises(WorkerStopped):
+                        live.worker.run_one()  # no claim while dirty
+                    quiesce_started = time.monotonic()
+                    timeline["client_timed_out_after_fault"] = timed_out - timeline["fault"]
+                    timeline["quiescence_started_after_fault"] = quiesce_started - timeline["fault"]
+                    timeline["provider_busy_at_quiescence"] = proxy.busy_at(quiesce_started)
+                    held = next(r for r in proxy.records if r.mode == "timeout")
+                    timeline["busy_request_started_after_fault"] = (
+                        held.upstream_started - timeline["fault"]
+                    )
+                    receipt, elapsed = _quiesce(settings, live.guard)
+                    timeline["quiescence_seconds"] = elapsed
+                    assert json.loads(receipt.read_text())["confirmed_exit"] is True
+                else:
+&gt;                   assert live.worker.run_one()
+                           ^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.document_worker.DocumentWorker object at 0x7e46c3daf680&gt;
+
+    def run_one(self) -&gt; bool:
+        if self.guard is not None:
+            if not self.guard.held:
+                raise WorkerStopped("inference_guard_not_held")
+            if self.guard.uncertain:
+                raise WorkerStopped("provider_quiescence_required")
+        lease = self.queue.claim()
+        if lease is None:
+            return False
+        cancelled, stop = Event(), Event()
+    
+        # Poll at least every second: a cancelled or fenced job must stop model
+        # scheduling within one in-flight call (S0002-AC4), not one lease third.
+        interval = min(self.queue.lease_seconds / 3, 1.0)
+    
+        def heartbeat() -&gt; None:
+            while not stop.wait(interval):
+                try:
+                    self.queue.heartbeat(lease)
+                except Exception:
+                    cancelled.set()
+                    return
+    
+        thread = Thread(target=heartbeat, daemon=True)
+        thread.start()
+        self.last_reason = None
+        self._published = False
+        stopped: WorkerStopped | None = None
+        try:
+            self._execute(lease, cancelled)
+        except LeaseLost:
+            cancelled.set()
+        except WorkerStopped as exc:
+            # Host infrastructure fault: stop claiming and leave the job to be
+            # reclaimed after its lease, instead of failing every queued job.
+            stopped = exc
+        except ConverterCleanupFailed as exc:
+            # Keep the receipt/staging for DevOps; the next startup reaper fails
+            # closed while the group survives. Never start another conversion.
+            stopped = WorkerStopped(exc.code)
+        except Exception as exc:
+            # Job history contains stable reason codes, not source or SDK errors.
+            reason = classify(exc)
+            if self._published and reason in _PRE_PUBLICATION:
+                # After a ready bundle nothing is a conversion failure, and an
+                # unexpected error never spends the reconversion budget.
+                reason = "interpretation_failed"
+            self.last_reason = reason
+            with suppress(LeaseLost):
+                self._record_failure(lease, reason)
+        finally:
+            stop.set()
+            thread.join(timeout=self.queue.lease_seconds)
+        if stopped is not None:
+            raise stopped
+        if self.guard is not None and self.guard.uncertain:
+&gt;           raise WorkerStopped("provider_quiescence_required")
+E           brain_ingestion.document_worker.WorkerStopped: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/document_worker.py:242: WorkerStopped</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_storage_failure_before_marker_is_never_ready_and_reconverts_at_most_once[1]" time="0.159"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">failures = 1
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7e48edb87360&gt;
+
+    @pytest.mark.parametrize("failures", [1, 2])
+    def test_storage_failure_before_marker_is_never_ready_and_reconverts_at_most_once(
+        failures, monkeypatch
+    ):
+        url, settings = require_live()
+        monkeypatch.setattr(_FailingStore, "failures", failures)
+        with qualification.isolated(url, "direct-baseline", v2_writer_enabled=True) as env:
+            env.parts.publication.store.__class__ = _FailingStore
+&gt;           with qualification.live_session(env, settings) as live:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x7e46c25bd150&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_storage_failure_before_marker_is_never_ready_and_reconverts_at_most_once[2]" time="0.151"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">failures = 2
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7e46c3e38c30&gt;
+
+    @pytest.mark.parametrize("failures", [1, 2])
+    def test_storage_failure_before_marker_is_never_ready_and_reconverts_at_most_once(
+        failures, monkeypatch
+    ):
+        url, settings = require_live()
+        monkeypatch.setattr(_FailingStore, "failures", failures)
+        with qualification.isolated(url, "direct-baseline", v2_writer_enabled=True) as env:
+            env.parts.publication.store.__class__ = _FailingStore
+&gt;           with qualification.live_session(env, settings) as live:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x7e46c2038d50&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_revoked_grant_between_attempts_denies_audits_and_stops" time="0.508"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">def test_revoked_grant_between_attempts_denies_audits_and_stops():
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+        proxy.schedule = {1: "http_5xx"}
+        try:
+            with (
+                qualification.isolated(url, "direct-baseline", v2_writer_enabled=True) as env,
+&gt;               qualification.live_session(env, settings, transport_url=proxy.base_url) as live,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            ):
+
+neuron/tests/integration/test_fault_injection_qualification.py:264: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x7e46c204cd70&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase><testcase classname="tests.integration.test_fault_injection_qualification" name="test_cancellation_stops_scheduling_and_temporary_exports_are_removed" time="0.509"><failure message="brain_ingestion.worker_guard.GuardError: provider_quiescence_required">def test_cancellation_stops_scheduling_and_temporary_exports_are_removed():
+        url, settings = require_live()
+        proxy = fault_proxy.FaultProxy(upstream(settings)).start()
+    
+        def exports() -&gt; set[str]:
+            root = Path(tempfile.gettempdir())
+            return {
+                p.name
+                for pattern in ("nebula-source-*", "nebula-interpret-*")
+                for p in root.glob(pattern)
+            }
+    
+        before = exports()
+        try:
+            with qualification.isolated(url, "graph-dense", v2_writer_enabled=True) as env:
+&gt;               with qualification.live_session(env, settings, transport_url=proxy.base_url) as live:
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+neuron/tests/integration/test_fault_injection_qualification.py:308: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.14/contextlib.py:141: in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+neuron/benchmarks/f0005_qualification.py:316: in live_session
+    worker = processing_worker(
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_cli.py:116: in processing_worker
+    guard.require_quiescent()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;brain_ingestion.worker_guard.HostInferenceGuard object at 0x7e46c204f4d0&gt;
+
+    def require_quiescent(self) -&gt; None:
+        if self.marker_path.exists():
+&gt;           raise GuardError("provider_quiescence_required")
+E           brain_ingestion.worker_guard.GuardError: provider_quiescence_required
+
+neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py:281: GuardError</failure></testcase></testsuite></testsuites>

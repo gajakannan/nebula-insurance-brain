@@ -5,7 +5,8 @@ description = "Parse-once Docling adapter and content-artifact bundle writer (F0
 requires-python = ">=3.13"
 dependencies = [
   "docling>=2.126.0",
-  "pypdf>=6.0",
+  # >=6.21.2: the parser reads untrusted PDFs; fixes 11 advisories in 6.19 (SEC G3).
+  "pypdf>=6.21.2",
   "brain-content",
   "brain-interpretation",
   "brain-extraction",
@@ -42,3 +43,6 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.setuptools.package-data]
+brain_ingestion = ["ocr_asset_pins.json"]
