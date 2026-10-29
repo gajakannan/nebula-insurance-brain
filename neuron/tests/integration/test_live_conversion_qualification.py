@@ -15,6 +15,7 @@ import sys
 import textwrap
 import time
 from pathlib import Path
+from typing import Any
 
 import pytest
 from brain_ingestion.conversion_process import ConversionError, SupervisedConverter
@@ -35,7 +36,7 @@ from f0005_live_support import (  # type: ignore[import-not-found]
 PINNED_RAPIDOCR = "docling.models.stages.ocr.rapid_ocr_model.RapidOcrModel"
 
 
-def test_every_corpus_document_publishes_before_the_first_model_request(tmp_path):
+def test_every_corpus_document_publishes_before_the_first_model_request(tmp_path: Path) -> None:
     url, settings = require_live()
     proxy = fault_proxy.FaultProxy(upstream(settings)).start()
     proxy.stop_listening()  # provider "stopped": connection refused
@@ -134,7 +135,7 @@ def test_every_corpus_document_publishes_before_the_first_model_request(tmp_path
         proxy.close()
 
 
-def _payload(env, job) -> dict:
+def _payload(env: Any, job: Any) -> dict[str, Any]:
     with env.engine.connect() as conn:
         return conn.execute(select(jobs.c.payload).where(jobs.c.id == str(job))).scalar_one()
 
@@ -167,7 +168,7 @@ _STAGE_MISMATCH = textwrap.dedent(
 )
 
 
-def test_installed_stage_layout_mismatch_raises_before_extraction_and_registers_nothing():
+def test_installed_stage_layout_mismatch_raises_before_extraction_and_registers_nothing() -> None:
     require_live()
     out = subprocess.run(
         [sys.executable, "-c", _STAGE_MISMATCH, str(CORPUS / "documents/gl-q-001.pdf")],
@@ -178,7 +179,7 @@ def test_installed_stage_layout_mismatch_raises_before_extraction_and_registers_
     assert out.stdout.strip().splitlines()[-1] == "stage_guard_mismatch 0", out.stderr[-2000:]
 
 
-def test_production_300_second_deadline_with_a_real_hung_child(tmp_path):
+def test_production_300_second_deadline_with_a_real_hung_child(tmp_path: Path) -> None:
     """Real subprocess at the production setting; decision separate from cleanup."""
     require_live()
     supervisor = SupervisedConverter(

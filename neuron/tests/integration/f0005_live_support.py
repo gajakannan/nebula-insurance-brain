@@ -44,7 +44,7 @@ def require_live() -> tuple[str, object]:
 
 
 def corpus_documents() -> list[dict]:
-    import yaml
+    import yaml  # type: ignore[import-untyped]
 
     return yaml.safe_load((CORPUS / "corpus.yaml").read_text())["documents"]
 

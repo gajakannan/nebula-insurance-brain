@@ -113,9 +113,12 @@ def test_enqueue_provisions_declared_restrictions_then_authorizes(
 
 
 def test_enqueue_beyond_queue_depth_is_rejected_explicitly(
-    database: tuple[Engine, str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+    database: tuple[Engine, str],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    import yaml
+    import yaml  # type: ignore[import-untyped]
 
     engine, url = database
     tenant, kb, actor = _seed(engine)

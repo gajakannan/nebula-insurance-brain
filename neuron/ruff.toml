@@ -1,6 +1,9 @@
 target-version = "py313"
 line-length = 100
 src = ["packages"]
+# The F0005 qualification corpus generator is the independent corpus author's tool;
+# QA verified it reproduces the hashed corpus byte for byte, so it is kept as authored.
+extend-exclude = ["fixtures/qualification/build_corpus.py"]
 
 [lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

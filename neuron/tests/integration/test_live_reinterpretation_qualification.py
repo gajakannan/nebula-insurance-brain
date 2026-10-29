@@ -11,6 +11,7 @@ import json
 import sys
 from pathlib import Path
 from threading import BoundedSemaphore
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -49,7 +50,9 @@ def _bundle_digest(root: Path) -> dict[str, str]:
     }
 
 
-def test_both_profiles_reinterpret_saved_json_with_zero_conversion(monkeypatch):
+def test_both_profiles_reinterpret_saved_json_with_zero_conversion(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     url, settings = require_live()
     proxy = fault_proxy.FaultProxy(upstream(settings)).start()
     port = proxy.port
@@ -146,7 +149,7 @@ def test_both_profiles_reinterpret_saved_json_with_zero_conversion(monkeypatch):
         proxy.close()
 
 
-def _native_refs(env, job) -> set[str]:
+def _native_refs(env: Any, job: Any) -> set[str]:
     with env.engine.connect() as conn:
         payload = conn.execute(select(jobs.c.payload).where(jobs.c.id == str(job))).scalar_one()
     bundle = env.parts.store.load_verified(qualification._accepted_key(env, payload["version_id"]))
@@ -170,7 +173,7 @@ class _RelationshipProbe(BaseModel):
     insured: _Insured | None = Field(None, description="The named insured party and its address")
 
 
-def test_relationship_output_fails_closed_with_no_rows(monkeypatch):
+def test_relationship_output_fails_closed_with_no_rows(monkeypatch: pytest.MonkeyPatch) -> None:
     url, settings = require_live()
     probe = ExtractionProfile("gl-relationship-probe", "1", _RelationshipProbe, "test-only")
     monkeypatch.setitem(profiles.PROFILES, probe.profile_id, probe)
@@ -194,7 +197,7 @@ def test_relationship_output_fails_closed_with_no_rows(monkeypatch):
         )
 
 
-def test_targeted_request_fails_before_any_model_call(tmp_path):
+def test_targeted_request_fails_before_any_model_call(tmp_path: Path) -> None:
     _url, settings = require_live()
     requests: list[object] = []
     import httpx
@@ -207,7 +210,9 @@ def test_targeted_request_fails_before_any_model_call(tmp_path):
         token_counter=cached_model_token_counter(settings.model, settings.revision),
         slots=BoundedSemaphore(1),
         http_client=httpx.Client(
-            transport=httpx.MockTransport(lambda r: requests.append(r) or httpx.Response(500))
+            transport=httpx.MockTransport(
+                lambda r: requests.append(r) or httpx.Response(500)  # type: ignore[func-returns-value]
+            )
         ),
     )
     service = GraphInterpretationService(store=None, authorize=lambda *_: None)  # type: ignore[arg-type]

@@ -18,6 +18,7 @@ import tempfile
 import time
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import httpx
 import pytest
@@ -53,7 +54,7 @@ PROFILE = "gl-limits-b"
 LEASE_SECONDS = 120.0
 
 
-def _reasons(env, job) -> list[str]:
+def _reasons(env: Any, job: Any) -> list[str]:
     with env.engine.connect() as conn:
         return list(
             conn.scalars(
@@ -64,7 +65,7 @@ def _reasons(env, job) -> list[str]:
         )
 
 
-def _assert_single_effect(env) -> dict[str, int]:
+def _assert_single_effect(env: Any) -> dict[str, int | None]:
     """Exactly one accepted artifact, one run, one assertion/review set, one ack."""
     with Session(env.engine) as session:
         counts = {
@@ -87,12 +88,12 @@ def _assert_single_effect(env) -> dict[str, int]:
     assert counts["ready_artifacts"] == 1
     # Exactly one run; its assertions (if the model found any) belong to it alone.
     assert counts["runs"] == 1
-    assert counts["assertion_runs"] == min(1, counts["assertions"])
+    assert counts["assertion_runs"] == min(1, counts["assertions"] or 0)
     assert counts["acknowledged"] == 1 and counts["complete_jobs"] == 1
     return counts
 
 
-def _quiesce(settings, guard: HostInferenceGuard) -> tuple[Path, float]:
+def _quiesce(settings: Any, guard: HostInferenceGuard) -> tuple[Path, float]:
     started = time.monotonic()
     receipt = provider_supervisor.quiesce_and_restart(
         settings.provider_url, api_key=settings.api_key, guard=guard, ready_timeout=600
@@ -111,7 +112,9 @@ def _quiesce(settings, guard: HostInferenceGuard) -> tuple[Path, float]:
         ("timeout", "model_timeout"),
     ],
 )
-def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(pipeline, mode, reason):
+def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(
+    pipeline: str, mode: str, reason: str
+) -> None:
     url, settings = require_live()
     proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=30).start()
     if mode not in ("stopped",):
@@ -170,8 +173,9 @@ def test_provider_fault_records_distinct_reason_and_resumes_from_saved_json(pipe
                 state = conn.scalar(select(jobs.c.state).where(jobs.c.id == str(job)))
             # Zero conversion after publication: the retry reused the bundle.
             assert live.converter.launches == 1
+            counts: dict[str, Any]
             if state == "complete":
-                counts = _assert_single_effect(env)
+                counts = dict(_assert_single_effect(env))
             else:
                 # A later organic model failure may exhaust the budget; it must
                 # still end explicitly, with the bundle retained and readable.
@@ -216,8 +220,8 @@ class _FailingStore(VerifiedBundleStore):
 
 @pytest.mark.parametrize("failures", [1, 2])
 def test_storage_failure_before_marker_is_never_ready_and_reconverts_at_most_once(
-    failures, monkeypatch
-):
+    failures: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
     url, settings = require_live()
     monkeypatch.setattr(_FailingStore, "failures", failures)
     with qualification.isolated(url, "direct-baseline", v2_writer_enabled=True) as env:
@@ -254,7 +258,7 @@ def test_storage_failure_before_marker_is_never_ready_and_reconverts_at_most_onc
                 assert state == "failed" and ready == 0 and reasons == ["storage_write_failed"] * 2
 
 
-def test_revoked_grant_between_attempts_denies_audits_and_stops():
+def test_revoked_grant_between_attempts_denies_audits_and_stops() -> None:
     url, settings = require_live()
     proxy = fault_proxy.FaultProxy(upstream(settings)).start()
     proxy.schedule = {1: "http_5xx"}
@@ -290,7 +294,7 @@ def test_revoked_grant_between_attempts_denies_audits_and_stops():
         proxy.close()
 
 
-def test_cancellation_stops_scheduling_and_temporary_exports_are_removed():
+def test_cancellation_stops_scheduling_and_temporary_exports_are_removed() -> None:
     url, settings = require_live()
     proxy = fault_proxy.FaultProxy(upstream(settings)).start()
 
@@ -429,7 +433,12 @@ def _child(url: str, handle: dict[str, str], mode: str, transport: str) -> int:
     return 0
 
 
-def _spawn(url, env, mode, proxy) -> subprocess.Popen[str]:
+def _first_line(process: subprocess.Popen[str]) -> str:
+    assert process.stdout is not None
+    return process.stdout.readline().strip()
+
+
+def _spawn(url: str, env: Any, mode: str, proxy: Any) -> subprocess.Popen[str]:
     return subprocess.Popen(
         [sys.executable, __file__, "child", url, json.dumps(env.handle()), mode, proxy.base_url],
         stdout=subprocess.PIPE,
@@ -439,7 +448,7 @@ def _spawn(url, env, mode, proxy) -> subprocess.Popen[str]:
 
 
 @pytest.mark.parametrize("kill_point", ["bundle", "run", "import", "imported"])
-def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
+def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point: str) -> None:
     url, settings = require_live()
     proxy = fault_proxy.FaultProxy(upstream(settings)).start()
     try:
@@ -477,7 +486,7 @@ def test_worker_killed_at_each_point_recovers_with_single_effects(kill_point):
         proxy.close()
 
 
-def test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescence():
+def test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescence() -> None:
     url, settings = require_live()
     proxy = fault_proxy.FaultProxy(upstream(settings), hold_seconds=45).start()
     try:
@@ -488,9 +497,9 @@ def test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescenc
                     for n in (2, 3, 5, 6, 7)
                 ]
             worker_a = _spawn(url, env, "drain", proxy)
-            assert worker_a.stdout.readline().strip() == "acquired"
+            assert _first_line(worker_a) == "acquired"
             worker_b = _spawn(url, env, "drain", proxy)
-            assert worker_b.stdout.readline().strip() == "inference_guard_busy"
+            assert _first_line(worker_b) == "inference_guard_busy"
             assert worker_b.wait(60) == 2
             # Hold the next provider request past A's life, then kill A mid-request.
             proxy.schedule = {len(proxy.records) + 1: "timeout"}
@@ -520,7 +529,7 @@ def test_second_worker_is_refused_and_killed_holder_requires_confirmed_quiescenc
                     select(func.count()).select_from(events).where(events.c.event == "claimed")
                 )
             worker_b = _spawn(url, env, "drain", proxy)
-            assert worker_b.stdout.readline().strip() == "provider_quiescence_required"
+            assert _first_line(worker_b) == "provider_quiescence_required"
             assert worker_b.wait(60) == 2
             with env.engine.connect() as conn:
                 claims_after = conn.scalar(

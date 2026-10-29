@@ -15,7 +15,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
-import yaml
+import yaml  # type: ignore[import-untyped]
 from brain_content.config import ConfigError, load_extraction_config
 from brain_ingestion.document_worker import LEGACY_PIPELINE, DocumentTask
 from brain_ingestion.worker_cli import reject_guard_override
@@ -53,14 +53,16 @@ def write_config(path: Path, pipeline: object, v2: bool, root: Path, **extra: ob
     path.write_text(yaml.safe_dump(data))
 
 
-def test_committed_configuration_selects_the_direct_baseline_with_v2_disabled():
+def test_committed_configuration_selects_the_direct_baseline_with_v2_disabled() -> None:
     data = yaml.safe_load(COMMITTED.read_text())
     assert data["extraction"]["pipeline"] == "direct-baseline"
     assert data["content"]["v2_writer_enabled"] is False
 
 
 @pytest.mark.parametrize("value", ["graph", "Graph-Dense", "", None, 7])
-def test_unknown_or_missing_pipeline_fails_startup(tmp_path, monkeypatch, value):
+def test_unknown_or_missing_pipeline_fails_startup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, value: object
+) -> None:
     config = tmp_path / "local.yaml"
     write_config(config, value, False, tmp_path)
     monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(config))
@@ -71,7 +73,9 @@ def test_unknown_or_missing_pipeline_fails_startup(tmp_path, monkeypatch, value)
         load_extraction_config()
 
 
-def test_no_environment_variable_selects_a_pipeline(tmp_path, monkeypatch):
+def test_no_environment_variable_selects_a_pipeline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     config = tmp_path / "local.yaml"
     write_config(config, "direct-baseline", False, tmp_path)
     monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(config))
@@ -84,7 +88,9 @@ def test_no_environment_variable_selects_a_pipeline(tmp_path, monkeypatch):
     assert load_extraction_config().pipeline == "direct-baseline"
 
 
-def test_isolated_config_cannot_move_the_host_guard(tmp_path, monkeypatch):
+def test_isolated_config_cannot_move_the_host_guard(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     config = tmp_path / "local.yaml"
     write_config(config, "graph-dense", False, tmp_path, inference_guard={"directory": "/tmp/x"})
     monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(config))
@@ -92,7 +98,7 @@ def test_isolated_config_cannot_move_the_host_guard(tmp_path, monkeypatch):
         reject_guard_override()
 
 
-def test_historical_job_without_pipeline_keeps_its_pre_change_meaning():
+def test_historical_job_without_pipeline_keeps_its_pre_change_meaning() -> None:
     legacy = {
         "document_id": str(uuid4()),
         "version_id": str(uuid4()),
@@ -118,7 +124,9 @@ def _tree_digest(root: Path, prefixes: tuple[str, ...]) -> dict[str, str]:
     }
 
 
-def test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer(tmp_path):
+def test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_writer(
+    tmp_path: Path,
+) -> None:
     url, settings = require_live()
     committed_before = hashlib.sha256(COMMITTED.read_bytes()).hexdigest()
     # gl-q-005 and gl-q-009 are the corpus documents that publish v2: the accepted
@@ -246,7 +254,9 @@ def test_decision_branches_restart_and_new_sources_use_the_selected_engine_and_w
     print(json.dumps({"decision_branches": rows}))
 
 
-def test_queue_depth_is_committed_and_validated(tmp_path, monkeypatch):
+def test_queue_depth_is_committed_and_validated(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     from brain_content.config import load_job_queue_config
 
     assert yaml.safe_load(COMMITTED.read_text())["jobs"]["max_queue_depth"] == 100

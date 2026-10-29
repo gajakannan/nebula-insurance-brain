@@ -20,7 +20,7 @@ from uuid import uuid4
 import httpx
 import pytest
 from brain_content.validation import ArtifactKey
-from brain_extraction.graph_interpretation import GraphInterpretationService
+from brain_extraction.graph_interpretation import GraphInterpretationService, Pipeline
 from brain_extraction.profiles import ExtractionProfile, load_profile
 from brain_extraction.vllm_graph_client import InferenceLimits, VllmGraphClient
 
@@ -109,7 +109,7 @@ def _client(
 def _interpret(
     tmp_path: Path,
     client: VllmGraphClient,
-    pipeline: str,
+    pipeline: Pipeline,
     profile: ExtractionProfile | None = None,
 ) -> Any:
     store, key = _published(tmp_path)
@@ -155,7 +155,7 @@ def test_a_budget_rejection_before_dispatch_fails_the_run(tmp_path: Path) -> Non
 
 @pytest.mark.parametrize("pipeline", ["graph-direct", "direct-baseline"])
 def test_direct_contracts_are_unaffected_by_the_dense_fallback_rule(
-    tmp_path: Path, pipeline: str
+    tmp_path: Path, pipeline: Pipeline
 ) -> None:
     result = _interpret(tmp_path, _client({"nodes": []}), pipeline)
 
@@ -164,7 +164,9 @@ def test_direct_contracts_are_unaffected_by_the_dense_fallback_rule(
 
 
 @pytest.mark.parametrize("pipeline", ["direct-baseline", "graph-direct"])
-def test_relationship_output_fails_closed_with_no_assertions(tmp_path: Path, pipeline: str) -> None:
+def test_relationship_output_fails_closed_with_no_assertions(
+    tmp_path: Path, pipeline: Pipeline
+) -> None:
     # S0003-AC4, deterministically: the model returns the related entity, and the
     # whole result is rejected as unsupported rather than partially imported.
     probe = ExtractionProfile("gl-relationship-probe", "1", RelationshipProbe, "test-only")
