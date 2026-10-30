@@ -1,0 +1,392 @@
+
+planning-mds/features/F0065-grounded-gl-guideline-assessment/PRD.md
+1: # F0065 — Grounded GL guideline assessment — PRD
+2:
+3: ## Feature Header
+4:
+5: **Feature ID:** F0065
+6: **Feature Name:** Grounded GL guideline assessment
+7: **Priority:** High
+8: **Phase:** v0.1B
+9: **Status:** Plan approved (Phase A+B), plan run `2026-10-28-5f9c6d6f`, 2026-10-29. Implementation and signoffs pending.
+10:
+11: ## Feature Statement
+12:
+13: **As a** GL underwriter reviewing a policy
+14: **I want** an evidence-backed comparison of its applicable each-occurrence limit with a specified guideline
+15: **So that** I can see the result, the exact inputs and rule used, and why a conclusion could not be reached.
+16:
+17: ## Business Objective
+18:
+19: Deliver a bounded neurosymbolic workflow in v0.1: ontology/profile-guided neural interpretation produces assertions; governed acceptance produces canonical facts; a deterministic rule evaluates those facts. The product question is “Does this applicable limit meet this specified guideline?” The result is a guideline assessment, not a policy approval or a general risk score. No embedding dependency is needed for this workflow.
+20:
+21: ## Scope & Boundaries
+22:
+23: **In Scope:**
+24: - A versioned, explicitly selected guideline rule with one operation: compare an accepted each-occurrence monetary limit against a minimum, using exact decimals and matching currency, coverage, policy term, and scope.
+25: - On-demand evaluation at explicit valid-time and recorded-time coordinates using a consistent semantic snapshot and a pinned rule version.
+26: - Immutable assessment records with input fact versions, rule/ontology versions, evaluator version, comparison, evidence lineage, time basis, actor, and audit linkage.
+27: - An answer-basis record for every assessment, per [ADR-0071](../../architecture/decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md): the inputs, rule, evidence and time basis an explanation may cite. The Entity 360 panel renders it, so assessments share the product's single explanation contract (operator decision 2026-10-28).
+28: - Explicit `MEETS_GUIDELINE`, `BELOW_GUIDELINE`, `UNKNOWN`, `CONFLICT`, and `NOT_APPLICABLE` outcomes; authorization failures and invalid rule definitions are errors outside this outcome vocabulary.
+29: - Reassessment after an accepted correction, retraction, endorsement, or rule release without silently reusing a historical assessment as current.
+30: - An assessment panel in the existing Entity 360, linked to Document 360 evidence and the existing review path.
+31: - A synthetic worked example and challenge cases, linked to concepts, contracts, stories, and future runtime acceptance fixtures.
+32:
+33: **Out of Scope:**
+34: - Arbitrary first-order logic strings, user-supplied executable code, multi-rule chaining, general OWL/Datalog reasoning, or autonomous rule learning (F0055, F0060, F0062).
+35: - Automatic propagation through a graph of persisted derived canonical facts (F0056). Assessment records are not automatically promoted into canonical facts.
+36: - Business approval, issuance, workflow execution, general normative obligations, or a full decision ledger/replay product (F0048–F0059).
+37: - Semantic vector search (F0033, v0.2A), a new graph UI, a rule-authoring workbench, currency conversion, or general coverage interpretation.
+38:
+39: ## Acceptance Criteria Overview
+40:
+41: - [ ] The synthetic $500,000 each-occurrence limit compared with the fictional $1,000,000 minimum yields `BELOW_GUIDELINE`; $1,000,000 and $2,000,000 yield `MEETS_GUIDELINE`.
+42: - [ ] Missing, conflicting, mismatched, and inaccessible inputs follow the [assessment contract](assessment-contract.md), without treating confidence as approval authority.
+43: - [ ] Every evaluated result identifies the exact fact and rule versions and resolves authorized evidence; the comparison uses no model call.
+44: - [ ] An endorsement accepted after its effective date produces distinct answers at the documented valid/recorded coordinates. Earlier assessment records remain unchanged.
+45: - [ ] Revoking access prevents disclosure through assessment outcomes, explanations, history, citations, or caches.
+46: - [ ] F0024 runs the real interpretation-to-assessment path; F0025 proves temporal reassessment; F0026 verifies the challenge suite and reports extraction quality separately from deterministic evaluator correctness.
+47: - [ ] A new contributor can follow the worked example from source to result; structured examples validate and their references resolve.
+48:
+49: ## UX / Screens
+50:
+51: Extend the existing Entity 360 under F0023. The panel displays the guideline name/version, plain-language result, selected time basis, the two compared values, and “Show evidence.” Historical results display their evaluation context. Unknown/conflict results show only authorized reasons and a link to the existing review path where permitted. Loading, unavailable, denied, and invalid-request states are separate from assessment outcomes. An assessment never displays an approval button or changes policy status.
+52:
+53: ## Data Requirements
+54:
+55: Use [assessment-contract.md](assessment-contract.md) for proposed rule, request, result, freshness, and access semantics. Valid-time precision follows [ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md). When an input fact's valid time is coarser than the requested `valid_as_of` and precision cannot decide applicability, the outcome is `UNKNOWN` with the authorized reason `valid_time_imprecise`. No interval endpoint is ever guessed (operator decision 2026-10-28). Reuse canonical identity, typed money, qualifiers, evidence bindings, principal resolution, and bitemporal querying. The educational fixture schema validates the example bundle only; it is not a production persistence or API contract. The architect must bind the service DTOs to the proven kernel contracts before implementation freezes them.
+56:
+57: ## Dependencies
+58:
+59: - F0001 pre-build proofs; F0002/F0003 tenant-aware domain and persistence.
+60: - F0006–F0013 assertions, qualified facts, temporal history, provenance, changes, schemas, and ontology.
+61: - F0015/F0016 interpretation profiles/runs and F0017 entity resolution supply the neural-to-symbolic path.
+62: - F0018/F0019 authorized canonical commits and endorsement supersession; F0020 authorized temporal reads.
+63: - F0021–F0023 supply the shell, evidence review, and Entity 360 for S0005. S0001–S0004 do not depend on the UI.
+64: - F0024/F0025 consume F0065 for integration acceptance; F0026 owns release evaluation. These are downstream consumers, not prerequisites, avoiding a dependency cycle.
+65: - Accepted ADR-0001, ADR-0007, ADR-0010, ADR-0023, ADR-0026 and the proposed [ADR-0056](../../architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md), ADR-0064 (valid-time precision) and ADR-0071 (answer-basis contract). Existing proposed identity, source-authority, and typed-value decisions retain their proof requirements.
+66:
+67: ## Success Criteria
+68:
+
+planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0005-explain-assessment-in-entity-360.md
+16: ## Context & Background
+17:
+18: The v0.1 workflow combines model interpretation with governed facts and a bounded rule. This story implements part of the [PRD](PRD.md) under the proposed [assessment contract](assessment-contract.md). The [worked example](../../examples/neurosymbolic-gl/README.md) supplies a fictional guideline and independently authored expected outcomes; no runtime execution is claimed by those examples.
+19:
+20: ## Acceptance Criteria
+21:
+22: - **Given** an authorized evaluated assessment, **when** the Entity 360 panel opens, **then** it renders the assessment's ADR-0071 answer-basis record: plain-language outcome, guideline/version, time basis, coverage basis, currency, compared values, and links to supporting Document 360 evidence. It displays nothing that the answer basis does not cite.
+23: - **Given** a historical record, **when** opened, **then** its original valid/known coordinates are visible and it is not labeled as a new current evaluation.
+24: - **Given** UNKNOWN, CONFLICT, or NOT_APPLICABLE, **when** displayed, **then** the panel shows its authorized reason and any permitted existing review link; it does not render a successful comparison or a policy approval action.
+25: - **Given** loading, service failure, or invalid rule request, **when** displayed, **then** these states remain distinct from business outcomes and a failed save is not shown as a persisted result.
+26: - **Given** access revocation while the panel is open, **when** data is refreshed or an evidence/history request is made, **then** permission checks deny protected fields and clear stale displayed results through the existing session/revocation contract; result, title, counts, explanation, and citations are included in the negative tests.
+27: - **Given** an assessment creation, **when** shown in the timeline, **then** its audit link identifies the acting principal and snapshot without displaying source text in operational logs.
+28:
+29: ## Data Requirements
+30:
+31: Authorized assessment DTO, existing evidence/review links, display labels, explicit loading/error/outcome states and time context.
+32:
+33: ## Role-Based Visibility
+34:
+35: Use verified principals and current tenant/knowledge-base/resource permissions. Underwriters/reviewers may inspect only authorized assessments and complete relevant evidence lineage. Rule installation requires separately authorized administrative authority; a model assertion or ordinary read permission never grants it. Documentation examples contain synthetic data only.
+36:
+37: ## Non-Functional Expectations
+38:
+39: Exact decimal values, versioned inputs, and a consistent snapshot are required. Keep source text out of operational logs. Record audit events through existing kernel contracts. Measure latency and cost at F0026 without inventing performance thresholds in this story. Runtime assessment uses no neural call for the deterministic comparison; extraction is evaluated separately.
+40:
+41: ## Dependencies
+42:
+43: S0003/S0004; F0021 shell/session, F0022 evidence/review, F0023 Entity 360. Backend/API behavior precedes frontend integration.
+44:
+45: ## Out of Scope
+46:
+47: General rule chaining, OWL/Datalog, vector retrieval, autonomous rule promotion, business approval, and automatic propagation of persisted derived canonical facts remain later features. This story does not bypass the canonical commit or authorization service.
+48:
+49: ## Questions & Assumptions
+50:
+51: The example threshold is fictional. The [assembly plan](feature-assembly-plan.md) assigns production guideline authority and runtime contract binding before implementation, and evaluation thresholds before release. ADR-0056 remains Proposed until proof evidence is recorded.
+52:
+53: ## Definition of Done
+54:
+55: - [ ] Acceptance and boundary cases pass with observed evidence.
+
+planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+97: - Compare the current single-request baseline with Graph chunking on an agreed corpus: schema validity, accuracy, abstention, tokens/calls, latency, and review workload. Cover timeouts, partial conversion, invalid extraction, retries, and worker restart.
+98: - Verify local vLLM configuration, secret redaction, bounded worker/model concurrency (including upstream internal fan-out), and tenant access/retention for source-bearing outputs.
+99:
+100: **Acceptance scope (2026-10-23).** Under the operator's F0005 scope decision, acceptance on F0005's local qualification governs the local Docker Compose runtime only. Production host qualification and frozen-corpus acceptance remain F0026 obligations, and they may reopen this decision. A rejection keeps the direct client as the runtime default and records the failed gates here.
+101:
+102: Evidence and reviewer verdicts belong in [F0005 STATUS](../../features/archive/F0005-one-time-docling-ingestion/STATUS.md). The pin, native/scanned conversion, publication ordering, native-JSON reuse, scalar/table evidence, and durable recovery have bounded test evidence, including PostgreSQL queue and worker/importer process-exit recovery with recorded model responses. The synthetic comparison also proves dense extraction orchestration and multi-region grounding through import and review. Production gates remain open: live comparative extraction and property/multi-region evidence qualification, unsupported relationship semantics, full deployment recovery, operational qualification, and reviewer acceptance. Structural planning checks cannot change this ADR to Accepted.
+103:
+104: ## F0005 qualification outcome (2026-10-27): Graph dense rejected; ADR stays Proposed
+105:
+106: **Decision recorded by the operator at F0005 G4, run `2026-10-25-4020923b` (2026-10-27).** Graph dense is rejected for activation. The direct client (`direct-baseline`) stays the runtime default with the v2 writer disabled. This ADR stays **Proposed** with the failed gates recorded here.
+107:
+108: **Reopen condition:** if no re-plan of this candidate is approved by the start of F0014/F0015 planning, the operator marks this ADR Rejected. A re-plan (a larger output reservation, another serving model, or Graph direct as the candidate) is a new plan with full re-measurement, never a re-score of the recorded report.
+109:
+110: **Measured gates.** Local live qualification on the synthetic corpus `f0005-gl-qualification-v1` (13 documents, 26 document-profiles per engine). Phi-4-mini-instruct @ `cfbefacb…`, vLLM 0.25.1, context 4,096, output reservation 512, Docling-Graph 1.9.1. Report `artifacts/qualification/report.json`, `void: false`; QA recomputed every value independently.
+111:
+112: | PRD threshold | Direct baseline | Graph dense | Gate |
+113: |---|---|---|---|
+114: | Field accuracy ≥ 90% and ≤ 5 pp below baseline | 41.4% | 27.6% | **Failed** |
+115: | Abstention ≥ 95% | 42.9% | 0% | **Failed** |
+
+planning-mds/features/archive/F0005-one-time-docling-ingestion/STATUS.md
+1: # F0005 — One-time document ingestion — Status
+2:
+3: **Overall Status:** Done — closed on the S0004-AC7 rejection branch (2026-10-28). Graph dense was qualified live on the synthetic corpus and rejected (5 PRD thresholds missed); `direct-baseline` with the v1 writer stays the committed default. The shipped execution controls are governed by the Accepted ADR-0074; ADR-0060 stays Proposed with failed gates recorded and a reopen deadline.\
+4: **Last Updated:** 2026-10-28\
+5: **Plan Run:** `2026-10-25-50fcf658` (Phase B, existing feature, approved 2026-10-25; follows `2026-10-23-9a04b327`)
+6:
+7: ## Current Feature Action Run
+8:
+9: Feature-completion run `2026-10-25-4020923b` **closed 2026-10-28** (G0–G8). Gate history:
+10: - G3 round 1 rejected the code (C1, H1). The rework passed G2/G3 round 2 with fresh independent reviews.
+11: - At G4 the operator approved the rejection branch. N1, L5 and the Lows were fixed and verified by an independent delta review and the final live lanes; ADR-0074 was then Accepted.
+12: - The post-decision check passed: the committed config processes an ordinary source on `direct-baseline` with a v1 bundle and no Graph call.
+13:
+14: Evidence: `planning-mds/operations/evidence/runs/2026-10-25-4020923b/` (see `pm-closeout.md`).
+15:
+16: ## Planning Position
+17:
+18: Plan run `2026-10-23-9a04b327` re-planned the remaining work against shipped F0002–F0004. Operator decisions at G1 (2026-10-23): local live qualification on the development host with gated activation; a synthetic qualification corpus with independent expectations and independent agent-role reviewers; F0005 enables the F0004 v2 writer as an activation step (new story S0005); F0016 owns document-date candidates. The PRD fixes the qualification thresholds. Phase A was approved with `approve-phase-a` and the preceding Phase B with `approve-phase-b` on 2026-10-23.
+19:
+20: [Plan review `2026-10-24-0fbc1de1`](../../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md) found three high gaps. The operator requested plan-action repairs; run `2026-10-25-50fcf658` is Phase B for this existing feature. Its [assembly plan](feature-assembly-plan.md) addresses PM-1 with initial/rejection direct-baseline settings and isolated candidate configs, ARCH-1 with supervised conversion and a parent-owned 300-second outcome/publication fence, and BLD-1 with an enforced host singleton plus confirmed provider quiescence after uncertain requests. The new negative proof inventory covers restart/rejection, hung/late conversion, process-group cleanup, two-process refusal and in-flight SIGKILL/timeout recovery. Requirements, stories and thresholds are unchanged. The operator explicitly approved this revised Phase B design on 2026-10-25 with the response `approve`; gate and publication results are recorded in the current run. The approved design is ready for the feature action, starting with preflight. Historical plan/review evidence is preserved. Planning does not authorize implementation or change delivery priority.
+21:
+22: ## Synthetic development scope (2026-09-20 to 2026-09-22)
+23:
+24: The authorized scope uses synthetic development fixtures. Architecture/article reconciliation, the pinned Graph integration, durable recovery, bounded transport, evidence mapping, and a reproducible recorded-response comparison are delivered. This is the completion boundary for the current development work. The production proof gates below remain release requirements, not prerequisites for completing this scope.
+25:
+
+planning-mds/features/F0014-document-profile-model/README.md
+26: > **F0005 outcome (2026-10-28) supersedes the scope amendment below.** Graph dense was qualified live and rejected (F0005 run `2026-10-25-4020923b`, PR #30).
+27: > - **Defaults:** `direct-baseline` and the v1 writer stay the defaults.
+28: > - **ADR-0060 status:** stays **Proposed**, with a reopen deadline. **At F0014/F0015 Phase A planning the operator decides** whether to re-plan a Graph candidate (a larger output reservation, another serving model, or Graph direct, each with full re-qualification) or to mark ADR-0060 **Rejected**.
+29: > - **Until then:** plan against the direct baseline and the accepted execution controls in [ADR-0074](../../architecture/decisions/ADR-0074-local-document-job-execution-controls.md). Read the Docling-Graph requirements below as conditional on a re-plan.
+30: > - **A Graph re-plan must also carry** F0005's activation preconditions (SEC-F5-M1 converter isolation, Docling ≥ 2.132 / pillow ≥ 13 requalification, the SEC-F5-L4 residual) and its qualification process fixes: commit the corpus with its generation command, write `commands.log` at execution time, retain predicted values, add a table-aware baseline, and define OCR-count semantics in the AC. Source: the [F0005 PM closeout](../../operations/evidence/runs/2026-10-25-4020923b/pm-closeout.md).
+31:
+32: [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+33:
+34: - Pass the selected profile/version to the F0015 compiler and F0016 run; do not delegate tenant policy, document classification authority, or ontology release selection to upstream graph inference.
+35:
+36: ## Statements, time, and governance scope amendment (2026-09-25)
+37:
+38: [ADR-0063](../../architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+39:
+40: - Each document profile section declares `interpretation_route` (`TEMPLATE`, `OPEN`, `TEMPLATE_AND_OPEN`). v0.1 GL profiles use `TEMPLATE`; `OPEN` is activated per profile only after F0066's parity gate (ADR-0063).
+41: - **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
+
+planning-mds/features/ROADMAP.md
+28: <!-- generated:begin roadmap:next -->
+29: | Feature | Status | Why Next | Entry Criteria |
+30: |---------|--------|----------|----------------|
+31: | [F0006 — Assertion plane + origin + interpretation basis](./F0006-assertion-plane-origin-and-interpretation-basis/README.md) | Planned | The assertion plane records what sources claim before anything becomes truth; origin and interpretation basis are first-class from the first extraction (section 11). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+32: | [F0007 — FactSlot model](./F0007-factslot-model/README.md) | Planned | FactSlot defines canonical semantic identity for every fact; the GL limits in the v0.1 acceptance question are distinct FactSlots (section 13). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+33: | [F0008 — Bitemporal canonical facts](./F0008-bitemporal-canonical-facts/README.md) | Planned | Full bitemporality with database-level overlap integrity is required before the endorsement slice can be proven (sections 14, 15, 109.2). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+34: | [F0009 — Provenance + human-correction lineage](./F0009-provenance-and-human-correction-lineage/README.md) | Planned | No authoritative fact exists without evidence, and human corrections append with lineage that feeds the Golden Corpus (sections 17, 75). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+35: | [F0010 — Change/retraction semantics](./F0010-change-and-retraction-semantics/README.md) | Planned | Explicit change semantics distinguish a legitimate endorsement from a bad extraction correction (section 16). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+36: | [F0011 — JSON Schema contract system](./F0011-json-schema-contract-system/README.md) | Planned | JSON Schema 2020-12 is the cross-language structural contract shared by Pydantic, AJV, and OpenAPI (sections 25 to 27). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+37: | [F0012 — Foundation ontology](./F0012-foundation-ontology/README.md) | Planned | The foundation ontology module is the versioned base that every insurance module composes on (sections 19 to 22). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+38: | [F0013 — Insurance Core GL ontology](./F0013-insurance-core-gl-ontology/README.md) | Planned | The General Liability module of the insurance core ontology supplies the coverage, limit, and trigger concepts the v0.1 slice extracts (sections 23, 24, 107). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+39: | [F0014 — Document Profile model](./F0014-document-profile-model/README.md) | Planned | Document profiles select which ontology modules and extraction profiles apply to a document type and business context (section 7). Nebula selects the released profile before the Docling-Graph pipeline executes. | F0001 accepted; plan action Phase A and Phase B approved for this feature; Phase A records the operator's ADR-0060 reopen decision (re-plan a Graph candidate, or mark ADR-0060 Rejected). |
+40: | [F0015 — Extraction Profile compiler](./F0015-extraction-profile-compiler/README.md) | Planned | Composable extraction profiles compile a shared base with line-of-business extensions; reinterpretation without reparse depends on them (section 8). ADR-0060 targets trusted Docling-Graph templates and explicit pipeline configuration. | F0001 accepted; plan action Phase A and Phase B approved for this feature; Phase A records the operator's ADR-0060 reopen decision (re-plan a Graph candidate, or mark ADR-0060 Rejected). |
+41: | [F0016 — Semantic interpretation runs](./F0016-semantic-interpretation-runs/README.md) | Planned | Semantic interpretation runs version every extraction over persisted content and are the unit of incremental reinterpretation (sections 28, 29). ADR-0060 adds pipeline/template identity, scoped provenance, and run-owned graph outputs. | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+42: | [F0017 — Deterministic entity resolution](./F0017-deterministic-entity-resolution/README.md) | Planned | Deterministic entity resolution with stable, scoped identifiers ships before probabilistic resolution (sections 53, 107.3). Docling-Graph local deduplication does not replace enterprise identity resolution (ADR-0060). | F0001 accepted; plan action Phase A and Phase B approved for this feature. |
+43: | [F0064 — Repository instructions and planning-check adoption](./F0064-repository-instructions-and-planning-check-adoption/README.md) | Planned | Adopt the generic project extension contract with Brain-local guidance, review criteria, and structural planning checks. User-requested repository tooling; does not alter F0001 or the master blueprint's runtime epic inventory. | Local fixtures and project-wide checks pass through the shared executor; framework release is published and blueprint/CI pins match; Git source-control tools select the child repository. |
+53: | [F0020 — Minimal graph/temporal query API](./F0020-minimal-graph-and-temporal-query-api/README.md) | Planned | A minimal graph and temporal query API answers the v0.1 acceptance questions as of valid time and recorded time (sections 20, 68, 87). |
+54: | [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](./F0021-native-react-semantic-shell-and-oidc-session/README.md) | Planned | The native React semantic shell with the OIDC session contract and safe re-auth behavior is the first user-facing surface (section 3, 120.5). |
+55: | [F0022 — Document 360 + native evidence review panel + parent/classification and reviewer authority](./F0022-document-360-and-native-evidence-review/README.md) | Planned | Document 360 with the Nebula Review Panel is the v0.1 human-correction loop, including the renderer set, the evidence anchoring contract, parent and classification checks, and reviewer authority (sections 71, 75, 111, 125). ADR-0060 adds evidence translation from upstream chunks/items to the existing panel contract. |
+56: | [F0023 — Minimal Entity 360](./F0023-minimal-entity-360/README.md) | Planned | Minimal Entity 360 exposes current and historical facts with evidence pointers for the acceptance question (section 70). |
+57: | [F0065 — Grounded GL guideline assessment](./F0065-grounded-gl-guideline-assessment/README.md) | Planned | Bounded neurosymbolic GL assessment: profile-guided model interpretation, governed canonical facts, and a versioned exact-decimal guideline comparison with snapshot/evidence lineage. After F0018–F0023; before F0024/F0025 integration and F0026 qualification. Draft planning package; runtime not started. |
+58: | [F0024 — GL vertical slice](./F0024-gl-vertical-slice/README.md) | Planned | The GL vertical slice proves actual model interpretation through evidence review and canonical acceptance to the bounded F0065 guideline assessment, with exact rule/fact/evidence lineage and explicit time context (sections 86, 124). The integrated slice must exercise the accepted Docling-Graph path (ADR-0060). |
+59: | [F0025 — Endorsement bitemporal slice](./F0025-endorsement-bitemporal-slice/README.md) | Planned | The endorsement slice proves both fact and F0065 assessment answers at distinct valid/recorded coordinates after retroactive endorsement, preserving historical results and current access checks (sections 87, 124). |
+60: | [F0026 — v0.1 hardening + Golden Corpus workflow + AuthX negative tests and policy parity](./F0026-v0-1-hardening-golden-corpus-and-authx-tests/README.md) | Planned | v0.1 hardening closes Golden Corpus, AuthX, recovery, revocation, and independent frozen evaluation gates, including F0065 assessment correctness, lineage, temporal freshness, and complete derived-result access (sections 96, 115, 121, 124). ADR-0060 adds real Docling-Graph reuse, grounding, recovery, isolation, and quality gates. |
+61: | [F0033 — pgvector retrieval](./F0033-pgvector-retrieval/README.md) | Planned | pgvector adds exact and approximate vector retrieval as a tenant-scoped projection; vectors locate evidence and never define truth (section 50). |
+
+planning-mds/features/TRACKER-GOVERNANCE.md
+1: ---
+2: template: tracker-governance
+3: version: 1.1
+4: applies_to: product-manager, architect, code-reviewer, quality-engineer
+5: ---
+6:
+7: # Tracker Governance Contract
+8:
+9: This document defines how planning trackers stay current and trustworthy.
+10:
+11: ## Why This Exists
+12:
+13: - `REGISTRY.md`, `ROADMAP.md`, `STORY-INDEX.md`, `BLUEPRINT.md`, and per-feature `STATUS.md` are operational controls.
+14: - Feature/story state transitions must update tracker state in the same change set.
+15:
+16: ## Authoritative Tracker Roles
+17:
+18: - `{PRODUCT_ROOT}/planning-mds/features/REGISTRY.md`: authoritative feature inventory, status, and folder paths. (In a compiled-projection repo, the feature **tables** are generated fenced regions from the feature shards via `tracker_gen.py`; the surrounding prose stays authored.)
+19: - `{PRODUCT_ROOT}/planning-mds/features/ROADMAP.md`: authoritative sequencing view (`Now / Next / Later / Completed`).
+20: - `{PRODUCT_ROOT}/planning-mds/features/STORY-INDEX.md`: auto-generated story rollup from strict story filenames.
+21: - `{PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/STATUS.md`: authoritative feature execution state and deferred follow-ups.
+22: - `{PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`: baseline strategy snapshot; must not contradict tracker state.
+23:
+24: ## Ownership
+25:
+26: - Product Manager: updates tracker docs during planning changes.
+27: - Architect: validates tracker consistency at planning-to-build handoff. Owns the required signoff matrix at planning time — sets which roles are mandatory for each feature's completion.
+28: - Implementers: update feature `STATUS.md` when story state changes.
+29: - Code Reviewer: blocks approval when tracker drift is detected.
+30: - Quality Engineer: validates acceptance criteria coverage and records test signoff evidence.
+
+planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+1: # F0065 assessment contract
+2:
+3: **Status:** Proposed design contract, 2026-09-07; proof and architecture acceptance tracked by ADR-0056. Vocabulary below is the v0.1 planning baseline; production DTO/schema bindings remain a feature implementation prerequisite.
+4:
+5: ## Representation boundaries
+6:
+7: An ontology concept defines a kind of thing; an entity is a specific policy, coverage, or assessment subject. Assertions state what a source or model claims. Canonical facts state what the Brain has accepted. A rule defines a scoped operation. An assessment records its application to exact inputs. An embedding is a separately versioned retrieval projection. These records link by identifiers; a combined JSON response is a read view, not a second store of truth.
+8:
+9: `requiresProof` may denote a requirement, while `supportedBy` links an assertion to actual evidence. Neither edge demonstrates that the requirement has been satisfied. A free-form `logic_rules` string is documentation until parsed into a supported, validated rule definition. Model confidence belongs to a particular interpretation; similarity, extraction confidence, source authority, and assessment status must not share one score.
+10:
+11: ## Rule definition and release
+12:
+13: Required fields: `rule_id`, immutable `version`, `ontology_release`, `guideline_source_ref`, approved `authority_ref`, tenant/knowledge-base scope, effective interval, coverage type, limit basis, currency, operation, and decimal minimum. The only v0.1 operation is `money_gte_minimum`: input amount greater than or equal to the minimum. Required fields and scope checks form fixed preconditions, not a general expression language. Negative or malformed monetary values and empty intervals are rejected; no implicit currency conversion or cross-basis comparison occurs.
+14:
+15: The rule release is a reviewed asset installed by an authorized administrator with an audit record. Callers select a rule identity/version; they cannot supply authority, tenant grants, executable strings, or an unapproved threshold in an assessment request. No Ontology Workbench is required. A changed minimum produces a new immutable release. The service verifies that the selected release was available at `known_as_of` and effective at `valid_as_of`; applying a newer rule to an earlier knowledge snapshot is a future scenario operation, not a historical assessment.
+16:
+17: ## Request and snapshot
+18:
+19: The authenticated request identifies the policy term/coverage, rule/version, `valid_as_of`, and `known_as_of`. A “current” request resolves explicit coordinates and a consistent semantic snapshot once at request start and echoes them. Current means that snapshot, not a claim about facts accepted after it. The server resolves tenant, knowledge-base membership, principal, grants, rule authority, and source applicability; client fields never establish permissions.
+20:
+21: Read accepted facts, conflict/completeness state, rule release, and provenance from that snapshot. Resolve coverage basis, currency, policy term, and applicability before comparison. No nearest-neighbor subset or model-generated value substitutes for missing canonical data.
+22:
+23: ## Outcomes and errors
+24:
+25: Apply the following order; invalid request/rule definitions and authorization failures occur before any business outcome is disclosed.
+26:
+27: | Condition | Outcome | Comparison |
+28: |---|---|---|
+29: | Required request/definition malformed, unsupported operation, or unavailable rule release | Typed request/configuration error | None; no successful assessment |
+30: | Principal lacks permission for the subject, rule, relevant inputs, or evidence lineage | Access error under the existing resource contract | None disclosed; no revealing missingness reason |
+31: | Known subject/scope falls outside the rule, or supplied canonical limit has a different basis/currency | `NOT_APPLICABLE` with an authorized reason | None |
+32: | Relevant unresolved conflict exists at the snapshot | `CONFLICT` | None; do not choose highest confidence |
+33: | Required amount, qualifier, applicability, or evidence is unknown/incomplete; no accepted input exists | `UNKNOWN` | None; missing does not mean false or zero |
+34: | An input fact's valid time (ADR-0064 `granularity`) is coarser than `valid_as_of` and cannot decide whether it applies; or the fact carries no valid time (grade-`C` mention) | `UNKNOWN` with reason `valid_time_imprecise` | None; no interval endpoint is inferred or truncated toward a convenient value |
+35: | Complete applicable inputs and amount >= minimum | `MEETS_GUIDELINE` | Exact decimal comparison |
+36: | Complete applicable inputs and amount < minimum | `BELOW_GUIDELINE` | Exact decimal comparison |
+37:
+38: An explicit negative assertion is knowledge with provenance; it is not an extraction failure. For this monetary rule, an explicitly absent applicable coverage is `NOT_APPLICABLE` with its supported reason. A failed page or unknown coverage presence is `UNKNOWN`. A retracted fact has no usable current value and yields `UNKNOWN` unless another accepted value applies. None of these outcomes approves or rejects the policy itself.
+39:
+40: ## Assessment record
+41:
+42: Persist `assessment_id`, subject/scope, outcome and reason codes, exact input fact-version IDs, rule ID/version and source reference, ontology release, evaluator version, semantic snapshot, valid/known coordinates, creation time, acting principal, audit reference, derivation/evidence references, and the typed comparison for evaluated outcomes. Preserve supporting assertion and interpretation-run links through existing provenance. Unknown/conflict results retain authorized gap/conflict references and snapshot context, not invented input facts.
+43:
+44: The record is append-only, tenant/knowledge-base scoped, and outside canonical facts. Its derivation uses exact input versions consistent with ADR-0026. Promoting a result to canonical knowledge would require the canonical commit contract and is outside F0065. Do not describe stored explanations as private model reasoning traces; show values, rule, calculations, evidence, and recorded reasons.
+45:
+46: ## Answer basis (ADR-0071)
+47:
+48: Every saved assessment, whatever its outcome, carries an answer-basis record in the ADR-0071 sense, built from the assessment's own derivation and evidence references:
+49: - **Used in answer:** the exact input fact versions, the rule release, the evidence bindings and the time basis (valid/known coordinates, plus each input's ADR-0064 granularity) behind the outcome.
+50: - **Considered, not used:** candidate facts excluded by conflict, applicability, currency/basis mismatch or valid-time precision, each with its reason code. These are listed explicitly in the same record, never inferred by subtraction.
+51: - **No model internals:** the comparison makes no model call, so none exist to gap. Upstream interpretation boundaries stay on the assertions and interpretation runs (S0003 provenance).
+52:
+53: The Entity 360 panel (S0005) and any explanation cite only this record. The assessment execution is also a semantic execution trace (operation: assessment) whose summary records the ontology release and the valid-as-of/known-as-of coordinates used.
+54:
+55: Until the F0038 read-path trace store exists, the answer-basis record is stored inside the append-only assessment record, in the ADR-0071 schema shape. It is emitted to the trace store once that exists. Either way the same retention, scoping and current-grant checks apply, and no prompt, excerpt or personal data enters the trace.
+56:
+57: ## Freshness, concurrency, and history
+58:
+59: v0.1 always recomputes on demand from the requested snapshot; no cross-request assessment-result cache is required. Historical records are shown only with their original coordinates and versions. A current request resolves a new snapshot, including changed inputs and the selected applicable rule release. A concurrent canonical commit cannot mix pre-change and post-change fact versions within one assessment. A failed persistence operation returns an error rather than a successful saved result; retries with the same idempotency key and identical request/snapshot do not duplicate a record. Reusing a key with different content is rejected.
+60:
+61: An endorsement accepted July 10 but effective July 1 changes the July 5 assessment when `known_as_of` is July 11, while July 5 as known July 8 retains the earlier value. This is historical reconstruction from stored facts/rules, not re-running the extraction model. General dependency propagation, invalidation workers, arbitrary derivation chains, and the full Decision Ledger remain F0056–F0058.
+62:
+63: ## Authorization and audit
+64:
+65: Use current permissions on every assessment and historical record read. Access to a policy entity alone does not grant access to every supporting document or derived result. For v0.1, require permission to the complete relevant input/evidence lineage before returning an assessment; do not partially disclose an outcome supported by inaccessible evidence. Revocation must cover result, title, count, explanation, citations, and any transport cache. Historical queries never restore historical grants.
+66:
+67: Assessment creation records the acting principal, rule release, request/snapshot, and outcome in the existing audit boundary; rule installation and access denials use existing audit controls. An explanation panel and its evidence requests apply the same authorization. No request or model output supplies its own approval authority.
+68:
+69: ## Proof obligations
+70:
+71: Before freezing runtime DTOs, the architect/backend owner demonstrates exact-decimal boundaries, the outcome/error table, immutable lineage, a concurrent snapshot, retroactive endorsement, changed rule release, idempotency, and revocation. QA maps cases in the worked example to executable assertions. Security review checks derived-result visibility. End-to-end extraction and rule integration belongs to F0024/F0025; F0026 owns frozen evaluation and release gates.
+
+planning-mds/schemas/semantic-execution-trace.schema.json
+1: {
+2:   "$schema": "https://json-schema.org/draft/2020-12/schema",
+3:   "$id": "https://nebula.local/schemas/semantic-execution-trace.schema.json",
+4:   "title": "SemanticExecutionTraceBundle",
+5:   "description": "Draft contract for a recorded semantic execution trace: the trace summary, the authorized graph projection it refers to, and its ordered events (proposed ADR-0071; read-only boundary in proposed ADR-0072). Planning draft only: it becomes an API contract when F0036/F0038 or F0041 Phase B binds it. Presentation state (camera, cursor, layout, colours, stage grouping) is deliberately absent. Invariants JSON Schema cannot express are listed in ADR-0071 section 6 and are checked by a validator, not by this file.",
+6:   "type": "object",
+7:   "additionalProperties": false,
+8:   "required": ["trace", "projection", "events"],
+9:   "properties": {
+10:     "$schema": { "type": "string" },
+11:     "trace": { "$ref": "#/$defs/trace_summary" },
+12:     "projection": { "$ref": "#/$defs/graph_projection" },
+13:     "events": { "type": "array", "items": { "$ref": "#/$defs/trace_event" } }
+14:   },
+15:   "$defs": {
+16:     "identifier": { "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[A-Za-z0-9_.:@-]+$" },
+17:     "layer": {
+18:       "description": "Knowledge layer a node or edge belongs to. Layers are never merged: a traversal does not promote a source statement to a canonical fact (ADR-0063, ADR-0019, ADR-0020).",
+19:       "type": "string",
+20:       "enum": ["CONVERSATION", "SOURCE", "OPEN_STATEMENT", "ONTOLOGY", "TYPED_ASSERTION", "CANONICAL", "DERIVED", "LEARNING_CANDIDATE", "GOVERNANCE", "NOT_INSTRUMENTED", "ANSWER"]
+21:     },
+22:     "attribution": {
+23:       "description": "OBSERVED: the operation ran and was recorded. USED_IN_ANSWER: only on ANSWER_BASIS_LINKED, from the grounded answer's own references (ADR-0046). CONSIDERED_NOT_USED is a node classification carried in the basis event, never an event attribution. NOT_INSTRUMENTED: an operation ran but its inside was not recorded.",
+24:       "type": "string",
+25:       "enum": ["OBSERVED", "USED_IN_ANSWER", "NOT_INSTRUMENTED"]
+26:     },
+27:     "trace_summary": {
+28:       "type": "object",
+29:       "additionalProperties": false,
+30:       "required": ["schema_version", "trace_id", "execution_id", "operation", "status", "synthetic", "started_at", "completeness", "semantic_context"],
+31:       "properties": {
+32:         "schema_version": { "type": "string", "pattern": "^0\\.[0-9]+$" },
+33:         "trace_id": { "$ref": "#/$defs/identifier", "description": "Opaque; authorized on every access. Never carries tenant or principal identity." },
+34:         "execution_id": { "$ref": "#/$defs/identifier", "description": "The authoritative execution this trace describes: a conversation turn, interpretation run, or learning run." },
+35:         "operation": { "type": "string", "enum": ["DOCUMENT_CHAT", "ENTITY_CHAT", "SEMANTIC_QUERY", "LEARNING_RUN"] },
+36:         "status": { "type": "string", "enum": ["IN_PROGRESS", "COMPLETE", "PARTIAL", "FAILED", "TIMED_OUT"] },
+37:         "synthetic": { "type": "boolean", "description": "True for fixtures and demos. A synthetic trace must be visibly labelled wherever it is rendered." },
+38:         "started_at": { "type": "string", "format": "date-time" },
+39:         "ended_at": { "type": ["string", "null"], "format": "date-time" },
+40:         "subject": { "type": "string", "maxLength": 500, "description": "Sanitized display text: the question asked or the run described. Never a raw prompt." },
+41:         "completeness": {
+42:           "type": "object",
+43:           "additionalProperties": false,
+44:           "required": ["status", "recorded_events", "gap_count", "truncated"],
+45:           "properties": {
+46:             "status": { "type": "string", "enum": ["COMPLETE", "COMPLETE_WITH_GAPS", "PARTIAL", "TRUNCATED", "UNKNOWN"] },
+47:             "recorded_events": { "type": "integer", "minimum": 0 },
+48:             "gap_count": { "type": "integer", "minimum": 0 },
+49:             "truncated": { "type": "boolean" }
+50:           }
+51:         },
+52:         "semantic_context": {
+53:           "type": "object",
+54:           "additionalProperties": false,
+55:           "required": ["ontology_release_id", "graph_projection_id", "valid_as_of", "known_as_of"],
+56:           "properties": {
+57:             "ontology_release_id": { "type": "string" },
+58:             "graph_projection_id": { "type": "string" },
+59:             "valid_as_of": { "type": "string", "description": "Valid-time coordinate the execution used (ADR-0064 precision applies)." },
+60:             "known_as_of": { "type": "string", "format": "date-time", "description": "Recorded-time coordinate the execution used (ADR-0007, ADR-0032)." }
+61:           }
+62:         }
+63:       }
+64:     },
+65:     "graph_projection": {
+66:       "type": "object",
+67:       "additionalProperties": false,
+68:       "required": ["graph_projection_id", "clusters", "nodes"],
+69:       "properties": {
+70:         "graph_projection_id": { "type": "string" },
+71:         "clusters": {
+72:           "type": "array",
+73:           "items": {
+74:             "type": "object",
+75:             "additionalProperties": false,
+76:             "required": ["id", "label", "aggregate_count"],
+77:             "properties": {
+78:               "id": { "$ref": "#/$defs/identifier" },
+79:               "label": { "type": "string" },
+80:               "aggregate_count": { "type": "integer", "minimum": 0, "description": "Permission-safe count inside the viewer's authorized scope. Rendered as density, never as entities." }

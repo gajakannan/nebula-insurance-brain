@@ -1,0 +1,351 @@
+
+planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0006-reproducible-worked-examples.md
+1: ## Story Header
+2:
+3: **Story ID:** F0065-S0006
+4: **Feature:** F0065 — Grounded GL guideline assessment
+5: **Title:** Reproducible worked examples
+6: **Priority:** High
+7: **Phase:** v0.1B
+8: **Status:** Not Started
+9:
+10: ## User Story
+11:
+12: **As a** new contributor reviewing the semantic architecture
+13: **I want** one linked example through every stage and its boundary cases
+14: **So that** I can understand the concepts and check the expected behavior.
+15:
+16: ## Context & Background
+17:
+18: The v0.1 workflow combines model interpretation with governed facts and a bounded rule. This story implements part of the [PRD](PRD.md) under the proposed [assessment contract](assessment-contract.md). The [worked example](../../examples/neurosymbolic-gl/README.md) supplies a fictional guideline and independently authored expected outcomes; no runtime execution is claimed by those examples.
+19:
+20: ## Acceptance Criteria
+21:
+22: - **Given** EX-GL-001, **when** the walkthrough is read, **then** stable identifiers connect the source excerpt, illustrative model assertion, review, canonical fact, rule, assessment, and late endorsement; every concept links to its definition and owning feature.
+23: - **Given** the structured example bundle, **when** the planning validator runs, **then** schema, reference, and feature/story links pass. A dangling fact/rule/evidence ID or malformed record is rejected; this check does not claim the runtime comparison has executed.
+24: - **Given** the challenge table, **when** reviewed, **then** it includes wrong high-confidence extraction, missing versus explicit negative, conflicts, basis/currency mismatch, temporal change, and access revocation with expected outcomes and story owners.
+25: - **Given** implemented F0024/F0025 integration, **when** the documented reproduction command runs, **then** actual model interpretation flows through governed acceptance into the evaluator and observed results are compared with independently authored expected cases; audit and runtime evidence links are recorded.
+26: - **Given** vector retrieval, scenarios, obligations, or learned-rule examples, **when** displayed, **then** their later release phase and conceptual-only status are explicit. All source and model outputs in this documentation are labeled synthetic/illustrative, and their fixtures are excluded from the frozen evaluation holdout.
+27:
+28: ## Data Requirements
+29:
+30: Synthetic source text, educational example-schema and JSON records, case IDs, feature/story mapping, expected outcomes, and future actual run evidence.
+31:
+32: ## Role-Based Visibility
+33:
+34: Use verified principals and current tenant/knowledge-base/resource permissions. Underwriters/reviewers may inspect only authorized assessments and complete relevant evidence lineage. Rule installation requires separately authorized administrative authority; a model assertion or ordinary read permission never grants it. Documentation examples contain synthetic data only.
+35:
+36: ## Non-Functional Expectations
+37:
+38: Exact decimal values, versioned inputs, and a consistent snapshot are required. Keep source text out of operational logs. Record audit events through existing kernel contracts. Measure latency and cost at F0026 without inventing performance thresholds in this story. Runtime assessment uses no neural call for the deterministic comparison; extraction is evaluated separately.
+39:
+40: ## Dependencies
+41:
+42: Example authoring can start now against the draft contract. Runtime reproduction depends on S0001–S0005 and F0024/F0025; F0026 owns the independent holdout.
+43:
+44: ## Out of Scope
+45:
+46: General rule chaining, OWL/Datalog, vector retrieval, autonomous rule promotion, business approval, and automatic propagation of persisted derived canonical facts remain later features. This story does not bypass the canonical commit or authorization service.
+47:
+48: ## Questions & Assumptions
+49:
+50: The example threshold is fictional. The [assembly plan](feature-assembly-plan.md) assigns production guideline authority and runtime contract binding before implementation, and evaluation thresholds before release. ADR-0056 remains Proposed until proof evidence is recorded.
+51:
+52: ## Definition of Done
+53:
+54: - [ ] Acceptance and boundary cases pass with observed evidence.
+55: - [ ] Permissions, audit, provenance, and temporal behavior meet the contract where applicable.
+56: - [ ] Worked examples and owning concept links reflect the delivered behavior.
+57: - [ ] Relevant runtime or planning checks pass; fixture validation is not claimed as runtime proof.
+58: - [ ] Story status, blueprint links, KG mapping, and generated story index are synchronized.
+59: - [ ] Required reviewers record actual verdicts and evidence in STATUS.md.
+60:
+61: ## Review Provenance
+62:
+63: Pending in [STATUS.md](STATUS.md); no implementation or lifecycle approval is claimed.
+
+planning-mds/features/F0065-grounded-gl-guideline-assessment/feature-assembly-plan.md
+1: # F0065 assembly plan
+2:
+3: **Status:** Approved (Phase A+B), plan run `2026-10-28-5f9c6d6f`, 2026-10-29. No runtime proof claimed.
+4:
+5: ## Ownership and boundaries
+6:
+7: Backend owns the assessment service, deterministic comparison, persistence, snapshots, and authorization in `engine/`. AI engineering owns the existing profile-guided interpretation integration in `neuron/`; it proposes assertions through kernel services. Frontend owns the existing Entity 360 extension in `experience/`. The architect/domain steward owns guideline/ontology definitions; QA owns the independent expected results and release evaluation. These are future runtime deliverables, not paths claimed to exist today.
+8:
+9: ## Build order
+10:
+11: | Step | Stories / owner | Assembly and exit condition |
+12: |---|---|---|
+13: | 1 | S0006 / architect + QA | Agree on the synthetic scenario, vocabulary, and expected-case table; validate example structure. Runtime reproduction remains open until step 7. |
+14: | 2 | S0001 / architect + backend | Bind the draft contract to F0011/F0013 typed values and approved rule-release authority. Reject unsupported syntax; record release audit. |
+15: | 3 | S0002 / backend | Consume F0018–F0020 canonical snapshot reads. Implement the finite outcome table and exact-decimal comparison without model calls. |
+16: | 4 | S0003 / backend + security | Persist immutable assessments with exact lineage, audit and the ADR-0071 answer-basis record (used / considered-not-used, with reasons); prove idempotency and denied access before disclosure. |
+17: | 5 | S0004 / backend + QA | Prove correction, retraction, retroactive endorsement, rule release, concurrent snapshot, historical grant behavior, and ADR-0064 precision handling (`valid_time_imprecise`, no inferred endpoints). |
+18: | 6 | S0005 / frontend + backend | Extend F0023 Entity 360, using F0022 evidence/review links; render only the answer-basis record; include historical, loading, unknown, conflict, and access-error states. |
+19: | 7 | S0006, F0024/F0025 / AI + QA | Run actual model interpretation through reviewed canonical acceptance and assessment, publish runnable instructions and evidence. |
+20: | 8 | F0026 / QA + reviewers | Evaluate the independent frozen slice, report extraction and deterministic-rule results separately, and complete release signoffs. |
+21:
+22: F0065 depends on the canonical kernel, F0018/F0019, and F0020. Only its UI story depends on F0021–F0023. F0024/F0025 depend on F0065 for their expanded integration acceptance, not vice versa. F0030, F0033, F0055, F0056, and Temporal are not build prerequisites.
+23:
+24: ## Interfaces and storage
+25:
+26: Service boundary proposed: `assess(subject, rule_release, time_context, verified_principal, idempotency_key)` and `get_assessment(id, verified_principal)`. The API adapter must use existing principal and ProblemDetails contracts and parameterized kernel queries. Runtime OpenAPI, database migration, DTOs, and permission mapping must be authored against proven upstream contracts before these steps ship; the educational JSON is not imported as canonical SQL.
+27:
+28: Separate `GuidelineRuleVersion` and `AssessmentRecord` repositories from canonical facts. Rules and assessments are immutable versioned records. Inputs refer to `CanonicalFactVersion`; evidence is traversed through existing lineage. Use a single consistent read basis and the existing audited transaction pattern. Define the exact persisted snapshot identifier against F0003/F0018 before implementation; no hidden dependence on a new projection engine.
+29:
+30: ## Validation and review
+31:
+32: Planning now: story validation, project/feature readiness, KG reproducibility, example-schema/reference validation, and tracker synchronization. Runtime later: table-driven evaluator cases; typed decimal and boundary tests; transaction/idempotency/snapshot integration; access and revocation negative cases; Entity 360 interaction checks; real extraction-to-result canary; independent frozen evaluation. Runtime tests must compare observed outputs with authored expected outcomes, not regenerate expectations from the evaluator.
+33:
+34: ADR-0056 remains Proposed until its named proof results and architect/security/QA reviews are recorded. Existing proposed source-authority, typed-value, and access decisions remain governed by their own acceptance conditions. No unexecuted acceptance checkbox or structural tooling pass counts as signoff.
+35:
+36: ## Open decisions before implementation
+37:
+38: | Decision | Owner | Required by |
+39: |---|---|---|
+40: | Production guideline source, applicability scope, and release approver | Product owner + domain steward | F0026 release prerequisite (operator, 2026-10-28); v0.1 uses the explicitly fictional rule |
+41: | Answer-basis storage: inside the assessment record until the F0038 trace store exists, then emitted there; schema binding to `semantic-execution-trace.schema.json` | Architect + backend | S0003; ADR-0071 proof gates stay with F0036/F0038 |
+42: | Reason vocabulary includes `valid_time_imprecise`; mapping from ADR-0064 granularity to applicability decisions | Architect + backend | S0002/S0004 |
+43: | Runtime snapshot identifier, transaction layout, DTO/OpenAPI and schema bindings | Architect + backend | S0002/S0003, after upstream contract proofs |
+44: | Canonical conflict/completeness query binding and reason mapping | Architect + backend | S0002; the full F0028 conflict engine is not required |
+45: | Named evaluation reviewers, licensed holdout, quality/latency/cost thresholds | QA + product owner | F0026 release gate |
+46:
+47: ## Rollout
+48:
+49: Ship the bounded comparison through the existing GL slice in v0.1B and qualify it in v0.1C. Start with a reviewed fixed rule release and scoped internal users. Operational logs record identifiers and outcomes without source text. S0005 exposes the rule and time basis to the user. Later reasoners and dependency propagation reuse these identities and lineage without redefining an assessment as an approval.
+
+planning-mds/features/F0024-gl-vertical-slice/README.md
+1: # F0024 — GL vertical slice
+2:
+3: **Status:** Planned
+4: **Phase:** v0.1B
+5: **Roadmap:** Later
+6:
+7: ## Overview
+8:
+9: The GL vertical slice proves actual model interpretation through evidence review and canonical acceptance to the bounded F0065 guideline assessment, with exact rule/fact/evidence lineage and explicit time context (sections 86, 124).
+10:
+11: Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0005](../../architecture/decisions/ADR-0005-three-plane-knowledge-model.md), [ADR-0006](../../architecture/decisions/ADR-0006-factslot-defines-canonical-semantic-identity.md), [ADR-0010](../../architecture/decisions/ADR-0010-provenance-is-mandatory.md).
+12:
+13: ## Documents
+14:
+15: The integrated slice depends directly on F0013's GL vocabulary, alongside the existing F0001 and F0065 dependencies. Its interpretation and assessment must identify the ontology release used, preserve missing inputs as `UNKNOWN` where required by F0065, and retain exact fact/rule/evidence lineage from the first stored assessment.
+16:
+17: The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0024.yaml`.
+18:
+19: ## Stories
+20:
+21: | ID | Title | Status |
+22: |----|-------|--------|
+23:
+24: **Total Stories:** 0
+25:
+26: ## Scope amendment and required story acceptance (2026-09-07)
+27:
+28: - Run actual interpretation over the synthetic GL package, follow the governed review/commit path, and compare the accepted each-occurrence limit with the reviewed fictional guideline using F0065.
+29: - Show the rule version, comparison, evidence, and time basis; no model confidence may authorize acceptance or approval.
+30: - Include wrong high-confidence extraction and missing/conflicting-input variations. Mocked interpretation alone does not satisfy the end-to-end acceptance.
+31: - Depends on F0065 for assessment integration; existing extraction/commit foundations remain prerequisites.
+32:
+33: Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../../examples/neurosymbolic-gl/cases.md), and [F0065](../F0065-grounded-gl-guideline-assessment/README.md). These requirements must be carried into this feature's PRD/stories when planned; runtime and feature status remain Planned.
+34:
+35: ## Docling-Graph scope amendment (2026-09-15)
+36:
+37: [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+38:
+39: - Run the real F0005/F0015/F0016 pipeline from source conversion through reviewed/accepted facts and the F0065 assessment. A direct-vLLM baseline run or mocked graph adapter does not establish migration acceptance.
+40: - Keep the parse artifact and run outputs traceable through evidence, canonical facts, and the assessment. Report extraction failures separately from deterministic rule failures.
+
+planning-mds/features/F0025-endorsement-bitemporal-slice/README.md
+1: # F0025 — Endorsement bitemporal slice
+2:
+3: **Status:** Planned
+4: **Phase:** v0.1B
+5: **Roadmap:** Later
+6:
+7: ## Overview
+8:
+9: The endorsement slice proves both fact and F0065 assessment answers at distinct valid/recorded coordinates after retroactive endorsement, preserving historical results and current access checks (sections 87, 124).
+10:
+11: Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0007](../../architecture/decisions/ADR-0007-full-bitemporality.md), [ADR-0009](../../architecture/decisions/ADR-0009-explicit-change-semantics.md).
+12:
+13: ## Documents
+14:
+15: The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0025.yaml`.
+16:
+17: ## Stories
+18:
+19: | ID | Title | Status |
+20: |----|-------|--------|
+21:
+22: **Total Stories:** 0
+23:
+24: ## Scope amendment and required story acceptance (2026-09-07)
+25:
+26: - Integrate F0065 reassessment: July 5 as known July 8 uses the old limit; July 5 as known July 11 uses the endorsement accepted July 10; June 30 remains unchanged.
+27: - Preserve old assessments and exact input/rule versions. Current requests recompute from a new consistent snapshot; historical requests never restore historical grants.
+28: - Include correction/retraction and concurrent-commit cases from the shared challenge table.
+29: - Depends on F0065 for assessment integration; the full F0056 propagation engine is not required.
+30:
+31: Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../../examples/neurosymbolic-gl/cases.md), and [F0065](../F0065-grounded-gl-guideline-assessment/README.md). These requirements must be carried into this feature's PRD/stories when planned; runtime and feature status remain Planned.
+32:
+33: ## Statements, time, and governance scope amendment (2026-09-25)
+34:
+35: [ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+36:
+37: - **v0.1 decision (operator, 2026-09-25; validate finding P-1, option b):** F0025 acceptance does not depend on Proposed ADR-0064. The endorsement's valid time comes from the template route's typed effective-date field, reviewed as usual. Recorded time comes from canonical acceptance, and receipt time never dates the document.
+38: - F0016 still stores the time mentions and document time context for every run, so v0.1 captures the data ADR-0064 needs. Resolving a date from a time mention replaces the template field only after ADR-0064 passes its proof gates.
+39: - The grade-C "as of inception" case and the unknown-end case are ADR-0064 proof-gate cases, qualified by F0026. They are not F0025 acceptance criteria.
+40: - **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
+
+planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+1: # ADR-0060: Docling-Graph Document Pipeline Orchestration
+2:
+3: ## Status
+4:
+5: - [x] Proposed
+6: - [ ] Accepted
+7: - [ ] Superseded
+8: - [ ] Rejected
+9:
+10: **Date:** 2026-09-15
+11: **Direction authorized by:** Operator; formal ADR acceptance awaits the proof gates below.
+12: **Implementation:** Synthetic development proof complete for the current scope. Docling-Graph 1.9.1 is locked; conversion/reuse, PostgreSQL recovery, dense extraction with recorded responses, and multi-region review mapping have bounded proof. Production acceptance and activation remain future work; see [compatibility evidence](../../features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md). Plan run `2026-10-23-9a04b327` (2026-10-23) defines the acceptance procedure: local live qualification on a synthetic corpus against operator-approved thresholds, independent QA/Architect/Security verdicts and operator acceptance, then activation through committed configuration with a direct-baseline rollback. See the F0005 [PRD](../../features/archive/F0005-one-time-docling-ingestion/PRD.md) and [assembly plan](../../features/archive/F0005-one-time-docling-ingestion/feature-assembly-plan.md).
+13: **Approved Phase B design rework (2026-10-25):** plan run `2026-10-25-50fcf658`, Phase B existing feature, addresses PM-1/ARCH-1/BLD-1 from [plan review `2026-10-24-0fbc1de1`](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md). The requirements and thresholds above remain approved; the operator approved these control-design amendments on 2026-10-25 with the response `approve`. They were implemented and qualified live in F0005 run `2026-10-25-4020923b`. They now ship for every pipeline under [ADR-0074](ADR-0074-local-document-job-execution-controls.md). They do not make this ADR accepted (see "F0005 qualification outcome" below).
+14: **Would refine:** ADR-0003, ADR-0004, ADR-0028, ADR-0040, ADR-0055, ADR-0058, ADR-0059. Reconsiders the exclusion recorded after F0001; the current runtime decision, accepted content/evidence contracts, and F0001 measurements remain in force pending proof.
+15:
+16: ## Context
+17:
+18: F0001 planned a Docling-Graph proof but recorded a substitution: Docling performed conversion and a Nebula adapter called vLLM directly for extraction. The [dependency matrix](../../../docker/DEPENDENCY-MATRIX.md) records F0001's unsuccessful reuse attempt and the later correction: the pinned 1.9.1 candidate does support a separate native-JSON input path. The archived [F0001 status](../../features/archive/F0001-repository-and-engineering-foundation/STATUS.md) records that deviation. The file name `docling_graph_adapter.py` does not establish use of the upstream package. That adapter joins the persisted document text into one request; `test_parse_once_reinterpret.py` expects one model call per profile. F0001 did not prove chunked extraction. The switch must measure the change in calls, cost, context behavior, and evidence fidelity.
+19:
+20: Upstream's current input guide documents loading DoclingDocument JSON without conversion. This warrants a fresh integration proof; it does not invalidate the recorded F0001 run. Documentation on `main` and an installed release with the same version string need not contain the same code. F0005 must identify the tested release or immutable commit and its dependency lock before enabling the new path.
+21:
+22: ## Proposed Decision
+23:
+24: Use `docling-project/docling-graph` as the document pipeline coordinator in `neuron/`. Docling remains its conversion engine and the source of the native document representation. The switch replaces Nebula's custom coordination of specialist extraction steps; it does not remove Docling from the dependency graph.
+25:
+26: | Owner | Responsibility |
+27: |---|---|
+28: | Docling-Graph | Coordinate document conversion through Docling, template-driven extraction, chunking, model calls, output validation, and extraction graph/provenance production within a processing attempt |
+29: | Nebula ingestion and artifact adapters | Authorize input; identify source/version; publish and reuse the immutable content bundle through `ContentArtifactStore`; map native items to stable evidence references |
+30: | Nebula interpretation adapter | Compile released profiles into supported templates/configuration; map output to `InterpretationResult`; enforce context/cost limits and evidence fidelity |
+31: | Nebula engine | Persist jobs and runs, authorize access, recover failed attempts, review assertions, resolve enterprise identities, and commit canonical facts with audit/outbox |
+32: | Temporal, from F0050 | Durable business workflows, timers, external-system activities, and human waits; invoke the same bounded document operation when needed |
+33:
+34: ### Artifact checkpoint and reuse
+35:
+36: The ingestion operation coordinates conversion through Docling-Graph and publishes a complete, hashed native DoclingDocument plus normalized bundle before fallible semantic extraction proceeds. A retry after this checkpoint loads the saved native JSON. Profile changes create new interpretation runs over that bundle; they never submit the original PDF or a Markdown export as a substitute for the native JSON reuse path.
+37:
+38: F0005 implements and tests a version-pinned checkpoint stage immediately before upstream extraction, with a stage-layout guard. This is a Nebula integration seam, not an upstream durability guarantee. The inspected upstream orchestrator runs extraction before its optional export stages, and API mode does not dump artifacts by default. A single `run_pipeline()` call with an output directory is therefore insufficient evidence of crash-safe parse reuse. Dependency upgrades must revalidate the seam and publication ordering; do not silently relax the invariant or reach into unpinned internals.
+39:
+40: There is one accepted artifact per scoped document version and parser configuration. A crash before durable publication may require a conversion retry; after publication, downstream failures must never repeat conversion or OCR. Record attempts separately from accepted artifacts. Nebula owns leases, heartbeats, cancellation, idempotent publication, and job/outbox recovery under section 114.1; upstream in-process stage execution does not supply those guarantees.
+41:
+42: ### Extraction, provenance, and authority
+43:
+44: - F0015 compiles versioned Nebula profiles to trusted Pydantic templates and explicit pipeline configuration. Templates are application-controlled; user profile fields cannot select arbitrary Python imports. The compiler retains Nebula's ontology annotations, qualifiers, units, and schema hash.
+45: - F0016 records the artifact hash, profile/template and schema hashes, pipeline revision/configuration, model/prompt identity, selected blocks, attempt, token usage, and outcome. Extraction graph, provenance ledger, and effective configuration are immutable run outputs, stored separately from the content bundle. Reinterpretation never mutates the parse artifact.
+46: - F0005 proves a mapping from upstream chunks and native item references into Nebula block/table locators. A node identifier's text match does not ground every property or relationship. Preserve upstream precision and merge/derived lineage; unresolved or document-level grounding cannot become a fabricated span. ADR-0058 continues to govern evidence resolution and review.
+47: - Upstream graph IDs and deduplication are local to extraction. F0017 owns tenant-scoped enterprise identity; F0018 owns canonical commits. Graph exports cannot write directly to canonical tables or the AGE projection. Assertions and relationship candidates enter the existing review and commit path.
+48: - Keep the self-hosted vLLM policy from ADR-0055. Enforce input plus schema/prompt plus output token budgets before every model call, including repair, fill, and reconciliation calls. Revalidate the 4,096-token profile; upstream templates do not establish model adequacy. Keep source-bearing exports access-controlled and outside routine logs.
+49:
+50: ### Runtime ownership and handoff
+51:
+52: The candidate `DoclingGraphPipelineAdapter` in `brain-extraction` owns calls into the upstream package. `brain-ingestion` supplies the conversion checkpoint callback and keeps `build_bundle()` / `ContentArtifactStore` publication. The shared parse-result DTO now lives in a neutral contract rather than the concrete `docling_adapter.py` module; neither package imports the other to construct that DTO. The adapter provides the native document and parse quality (status, failed pages, OCR counts, warnings) to the callback before semantic extraction, through the tested, pinned stage integration. The callback finishes publication before processing continues. Later interpretation enters the same adapter with the persisted native JSON and performs no conversion. `PipelineContext` and upstream export paths remain private adapter details.
+53:
+54: F0005's candidate includes the checkpoint seam, package declarations, `neuron/uv.lock`, build/run metadata, and opt-in composition wiring. The direct client is now named `OpenAICompatibleExtractionAdapter` and remains the comparison baseline; its old name is a compatibility import. S0004 has recorded-response direct/dense comparison evidence, while production qualification and activation remain future work. A class rename alone is not migration evidence.
+55:
+56: ### Local control design amendments — Phase B approved 2026-10-25; implemented in F0005, now governed by ADR-0074
+57:
+58: The [assembly plan Steps 0a and 2](../../features/archive/F0005-one-time-docling-ingestion/feature-assembly-plan.md) place physical conversion in a supervised conversion-only process group. The parent starts a monotonic 300-second deadline before launch, durably records child ownership before acknowledging conversion start, and alone accepts the validated native-JSON/quality/provenance handoff and publishes ready through the existing current-authority/generation fence. The child runs the same pinned Graph conversion/stage guard, with a serialization callback and no inference/publication capability. Timeout latches failure at 300 seconds before bounded termination/cleanup; late results cannot publish or start extraction. This replaces the prior design's reliance on the model client's cooperative deadline; it does not weaken parse-once, checkpoint ordering or F0004's bundle contract.
+59:
+60: The local processing topology is one host-enforced worker per canonical dedicated serving endpoint, with a process-lifetime OS advisory lock in a fixed shared host control directory and a common in-process model semaphore of one. Aliases, model profiles, tenants, workspaces and temporary configs cannot allocate separate locks. The converter never inherits the descriptor. A durable in-flight marker precedes HTTP dispatch; ambiguous outcomes and SIGKILL keep replacement claims/requests stopped until the controlled-host harness/DevOps supervisor observes the dedicated provider group exit and restarts the pinned server under the same guard. Provider health alone is not quiescence. This fail-closed local recovery is measured against the existing recovery bound and is not a distributed quota or a new provider endpoint.
+61:
+62: Steps 6–7 explicitly start ordinary new jobs on `direct-baseline` with the v2 writer disabled. Isolated qualification configs select Graph direct/dense without changing that default. Rejection verifies/restores direct-baseline/v1 after restart; acceptance selects Graph dense/v2. Extraction rollback after acceptance selects direct while retaining the qualified v2 writer. New job idempotency includes the pipeline; historical jobs retain their existing keys/pinned meaning. Negative tests cover every branch, deadline races, child/orphan cleanup and competing-worker/provider-crash recovery before activation. None of these proposed controls changes this ADR's status or approves runtime activation.
+63:
+64: ### What becomes simpler
+65:
+66: > **Not in force.** Graph dense was rejected in F0005 (see below). The direct client stays the runtime default and is not retired. This section describes the design only if a future re-plan is accepted.
+67:
+68: Nebula delegates chunk/extract/validate/graph coordination to one specialist pipeline and one configured model backend. After acceptance, retire duplicated extraction control flow in the current direct-vLLM adapter. Retain thin adapters for artifact publication, profile compilation, scope enforcement, evidence translation, and the provider-neutral result contract. Do not duplicate these business contracts inside upstream templates.
+69:
+70: Docling-Graph does not replace Temporal. v0.1 keeps PostgreSQL-backed durable jobs; F0050 remains v0.3. Temporal should schedule bounded document operations, not reproduce Docling-Graph's internal chunk loop. Both paths call the same authorized application service; neither owns canonical truth.
+71:
+72: ## Delivery and acceptance
+73:
+74: | Feature | Required change / evidence |
+75: |---|---|
+76: | F0004 | Retain the native six-file bundle and parser identity; separately record pipeline identity and interpretation-output manifests. Preserve ADR-0059 storage and hash verification. |
+77: | F0005 | Pin upstream and transitive dependencies; prove native and scanned conversion, durable checkpoint before model failure, zero conversion/OCR on two later profiles, restart reuse, duplicate-job isolation, and cancellation/retry without duplicate accepted effects. |
+78: | F0014 / F0015 | Keep document-profile selection in Nebula; compile templates/configuration with stable hashes and bounded context; expose unsupported mappings as explicit failures. |
+79: | F0016 | Persist run outputs and provenance; prove selected-block scope, partial/failure reporting, versioned reruns, and no conversion during interpretation. |
+80: | F0017 / F0018 | Verify graph-local merging cannot resolve enterprise identity or bypass review, authorization, or commit idempotency. |
+81: | F0022 / F0024 / F0026 | Resolve translated evidence in the native panel; prove the real pipeline through the GL acceptance/assessment slice; measure property/relationship grounding, extraction errors, review burden, latency/cost, authorization, and recovery on the frozen corpus. |
+82: | F0031 | Preview and release the compiled template/configuration together with its profile hash; show unsupported mappings and context estimates before execution. |
+83: | F0032 | Prove affected-content-only reinterpretation through F0016, with stable original references and zero conversion; explicitly reject unsupported targeting. |
+84: | F0034 | Build AGE only from accepted canonical records/outbox; never import the extraction graph as enterprise truth. |
+85: | F0050 | Retain durable business orchestration; call the same document service from activities and preserve run/job idempotency across retries. |
+86:
+87: F0005's proof may use two small fixed templates before the production F0015 compiler exists. F0015/F0016 then deliver the production interpretation path against the accepted adapter. Do not create a circular dependency between the foundation proof and the full compiler.
+88:
+89: ADR acceptance and activation require observed tests against the real upstream package and local model, not a renamed mock or the existing direct client. Failure injection must cover a crash after conversion publication and a model failure before graph export. Keep the F0001 runtime as the measured baseline until those gates pass; do not claim it validates Docling-Graph. Record the selected package/source digest, measured limitations, and results in the dependency matrix. Archived F0001 requirements, results, and Done status remain historical records.
+90:
+91: ## Proof gates before acceptance
+92:
+93: These are production-acceptance requirements. The current early-development scope uses synthetic fixtures and is complete without claiming these release gates. The [synthetic comparison](../../features/archive/F0005-one-time-docling-ingestion/synthetic-comparison.json) proves dense skeleton/fill orchestration with recorded responses; its estimated tokens and local timing are not model-quality or serving-cost measurements. On its longer fixtures, Graph direct lacks usable item refs and remains unresolved; dense preserves the refs. Multi-region grounding requires complete character coverage and retains separate selectors through review. Unsupported relationship output still fails closed.
+94:
+95: - Exact release/commit and digest plus locked dependencies; native and scanned processing, durable parse publication, worker restart, and two saved-JSON profiles with instrumented zero conversion/OCR on reuse.
+96: - Ground limit amount, currency, basis, effective date, table headers, and values supported by multiple regions; preserve the provenance ledger and unresolved precision.
+97: - Compare the current single-request baseline with Graph chunking on an agreed corpus: schema validity, accuracy, abstention, tokens/calls, latency, and review workload. Cover timeouts, partial conversion, invalid extraction, retries, and worker restart.
+98: - Verify local vLLM configuration, secret redaction, bounded worker/model concurrency (including upstream internal fan-out), and tenant access/retention for source-bearing outputs.
+99:
+100: **Acceptance scope (2026-10-23).** Under the operator's F0005 scope decision, acceptance on F0005's local qualification governs the local Docker Compose runtime only. Production host qualification and frozen-corpus acceptance remain F0026 obligations, and they may reopen this decision. A rejection keeps the direct client as the runtime default and records the failed gates here.
+101:
+102: Evidence and reviewer verdicts belong in [F0005 STATUS](../../features/archive/F0005-one-time-docling-ingestion/STATUS.md). The pin, native/scanned conversion, publication ordering, native-JSON reuse, scalar/table evidence, and durable recovery have bounded test evidence, including PostgreSQL queue and worker/importer process-exit recovery with recorded model responses. The synthetic comparison also proves dense extraction orchestration and multi-region grounding through import and review. Production gates remain open: live comparative extraction and property/multi-region evidence qualification, unsupported relationship semantics, full deployment recovery, operational qualification, and reviewer acceptance. Structural planning checks cannot change this ADR to Accepted.
+103:
+104: ## F0005 qualification outcome (2026-10-27): Graph dense rejected; ADR stays Proposed
+105:
+106: **Decision recorded by the operator at F0005 G4, run `2026-10-25-4020923b` (2026-10-27).** Graph dense is rejected for activation. The direct client (`direct-baseline`) stays the runtime default with the v2 writer disabled. This ADR stays **Proposed** with the failed gates recorded here.
+107:
+108: **Reopen condition:** if no re-plan of this candidate is approved by the start of F0014/F0015 planning, the operator marks this ADR Rejected. A re-plan (a larger output reservation, another serving model, or Graph direct as the candidate) is a new plan with full re-measurement, never a re-score of the recorded report.
+109:
+110: **Measured gates.** Local live qualification on the synthetic corpus `f0005-gl-qualification-v1` (13 documents, 26 document-profiles per engine). Phi-4-mini-instruct @ `cfbefacb…`, vLLM 0.25.1, context 4,096, output reservation 512, Docling-Graph 1.9.1. Report `artifacts/qualification/report.json`, `void: false`; QA recomputed every value independently.
+111:
+112: | PRD threshold | Direct baseline | Graph dense | Gate |
+113: |---|---|---|---|
+114: | Field accuracy ≥ 90% and ≤ 5 pp below baseline | 41.4% | 27.6% | **Failed** |
+115: | Abstention ≥ 95% | 42.9% | 0% | **Failed** |
+116: | Evidence resolution ≥ 80% and ≥ baseline | 66.7% | 50.0% | **Failed** |
+117: | Latency p95 ≤ 120 s and ≤ 3× baseline | 1.48 s | 9.84 s (6.6×), completed runs only (report v1) | **Failed** |
+118: | Review workload ≤ 1.25× baseline | 2.92 per document | 1.54 per document; 1.42–1.64× (1.64× per completed run; 1.42× on the 7 cases both engines completed — corrected after G3 round 2) per completed run | **Failed** like for like (met only because failed runs add no items) |
+119: | Schema validity, fabricated evidence, context budget, recovery | met | met | Passed. Context budget counts only dispatched calls: this measurement predates H1, so pre-dispatch rejections could not be recorded. The run log shows none. |
+120:
+121: Report `artifacts/qualification/report.json`, SHA-256 `55ce348489e253bc2a053adbaf7591d4e678d83470792ab0bf26b0207aabaede`, `report_version` 1. Corpus hash `fbc5e263c861c401dea07e3deac4023a0f660d35bb2edc891f8297ee0a5e2dc9`; expectation-set hash `16a29d67dddddea4e18136465567f67cd63c790fa9eb68018c35e4636933390c`.
+122:
+123: **Root cause (model adequacy on this profile, not the orchestration seam).** 18 of 26 Graph-dense runs failed explicitly in the first-stage skeleton call. The response was either cut off at the 512-token output reservation or contained duplicate JSON keys, and repeated identically at temperature 0. The seam itself passed live:
+124: - checkpoint-before-model ordering;
+125: - native and scanned conversion;
+126: - zero reconversion on reuse;
+127: - bounded concurrency;
+128: - isolation from canonical tables.
+129:
+130: ADR-0055 §4 anticipates proposing an alternative backend in this situation.
+131:
+132: **Measured limitations to carry into any re-plan:**
+133: - **Graph direct** (reported, not a candidate) reached 84.5% accuracy but 0% evidence resolution, because its ledger lacks item references.
+134: - **The baseline excludes tables,** which flatters the relative thresholds.
+135: - **84.6% of documents fall back** from v2 to v1, because table cells have no attributable origin.
+136: - **Docling-Graph 1.9.1 swallows per-call exceptions** and falls back from dense to one direct call. Nebula now fails both cases explicitly (Code Review H1).
+137: - **The F0005 dense measurement predates that fix,** although its runs show no budget rejections.
+138:
+139: **Controls moved.** The Phase B control amendments above (supervised conversion, the host guard and quiescence, failure reasons, the submission bound, pipeline selection) ship for every pipeline. They now have their own record: [ADR-0074](ADR-0074-local-document-job-execution-controls.md). They no longer depend on this ADR's status. The F0005 manifest OCR fields are recorded in the [ADR-0073](ADR-0073-versioned-content-contracts-and-document-metadata.md) amendment of 2026-10-27.
+140:
+141: ## References
+142:
+143: Upstream references inspected 2026-09-15; `main` links describe the research baseline, not an approved runtime pin:
+144:
+145: - [Input formats and native JSON reuse](https://github.com/docling-project/docling-graph/blob/main/docs/fundamentals/pipeline-configuration/input-formats.md)
+146: - [Pipeline stage order and API export defaults](https://github.com/docling-project/docling-graph/blob/main/docling_graph/pipeline/orchestrator.py)
+147: - [Provenance ledger and grounding semantics](https://github.com/docling-project/docling-graph/blob/main/docs/fundamentals/graph-management/provenance.md)
+148: - [Docling dependency declaration](https://github.com/docling-project/docling-graph/blob/main/pyproject.toml)
+149: - [Releases](https://github.com/docling-project/docling-graph/releases)
