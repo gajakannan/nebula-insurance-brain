@@ -6,7 +6,7 @@
 **Feature Name:** Grounded GL guideline assessment
 **Priority:** High
 **Phase:** v0.1B
-**Status:** Draft — scope incorporation authorized 2026-09-07; implementation and architecture signoffs pending.
+**Status:** Plan approved (Phase A+B), plan run `2026-10-28-5f9c6d6f`, 2026-10-29. Implementation and signoffs pending.
 
 ## Feature Statement
 
@@ -24,6 +24,7 @@ Deliver a bounded neurosymbolic workflow in v0.1: ontology/profile-guided neural
 - A versioned, explicitly selected guideline rule with one operation: compare an accepted each-occurrence monetary limit against a minimum, using exact decimals and matching currency, coverage, policy term, and scope.
 - On-demand evaluation at explicit valid-time and recorded-time coordinates using a consistent semantic snapshot and a pinned rule version.
 - Immutable assessment records with input fact versions, rule/ontology versions, evaluator version, comparison, evidence lineage, time basis, actor, and audit linkage.
+- An answer-basis record for every assessment, per [ADR-0071](../../architecture/decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md): the inputs, rule, evidence and time basis an explanation may cite. The Entity 360 panel renders it, so assessments share the product's single explanation contract (operator decision 2026-10-28).
 - Explicit `MEETS_GUIDELINE`, `BELOW_GUIDELINE`, `UNKNOWN`, `CONFLICT`, and `NOT_APPLICABLE` outcomes; authorization failures and invalid rule definitions are errors outside this outcome vocabulary.
 - Reassessment after an accepted correction, retraction, endorsement, or rule release without silently reusing a historical assessment as current.
 - An assessment panel in the existing Entity 360, linked to Document 360 evidence and the existing review path.
@@ -51,7 +52,7 @@ Extend the existing Entity 360 under F0023. The panel displays the guideline nam
 
 ## Data Requirements
 
-Use [assessment-contract.md](assessment-contract.md) for proposed rule, request, result, freshness, and access semantics. Reuse canonical identity, typed money, qualifiers, evidence bindings, principal resolution, and bitemporal querying. The educational fixture schema validates the example bundle only; it is not a production persistence or API contract. The architect must bind the service DTOs to the proven kernel contracts before implementation freezes them.
+Use [assessment-contract.md](assessment-contract.md) for proposed rule, request, result, freshness, and access semantics. Valid-time precision follows [ADR-0064](../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md). When an input fact's valid time is coarser than the requested `valid_as_of` and precision cannot decide applicability, the outcome is `UNKNOWN` with the authorized reason `valid_time_imprecise`. No interval endpoint is ever guessed (operator decision 2026-10-28). Reuse canonical identity, typed money, qualifiers, evidence bindings, principal resolution, and bitemporal querying. The educational fixture schema validates the example bundle only; it is not a production persistence or API contract. The architect must bind the service DTOs to the proven kernel contracts before implementation freezes them.
 
 ## Dependencies
 
@@ -61,7 +62,7 @@ Use [assessment-contract.md](assessment-contract.md) for proposed rule, request,
 - F0018/F0019 authorized canonical commits and endorsement supersession; F0020 authorized temporal reads.
 - F0021–F0023 supply the shell, evidence review, and Entity 360 for S0005. S0001–S0004 do not depend on the UI.
 - F0024/F0025 consume F0065 for integration acceptance; F0026 owns release evaluation. These are downstream consumers, not prerequisites, avoiding a dependency cycle.
-- Accepted ADR-0001, ADR-0007, ADR-0010, ADR-0023, ADR-0026 and the proposed [ADR-0056](../../architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md). Existing proposed identity, source-authority, and typed-value decisions retain their proof requirements.
+- Accepted ADR-0001, ADR-0007, ADR-0010, ADR-0023, ADR-0026 and the proposed [ADR-0056](../../architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md), ADR-0064 (valid-time precision) and ADR-0071 (answer-basis contract). Existing proposed identity, source-authority, and typed-value decisions retain their proof requirements.
 
 ## Success Criteria
 
@@ -69,7 +70,7 @@ All specified deterministic and boundary cases pass. The end-to-end suite uses r
 
 ## Risks & Assumptions
 
-The $1,000,000 minimum is a fictional fixture rule, not an insurance-wide requirement. Production guideline authority, applicability, release approval, and benchmark thresholds must be established by the product owner/domain steward during feature planning. Rule definitions are reviewed versioned assets in v0.1. A consistent snapshot and current grant checks are required even when a request asks for historical knowledge. See the assembly plan for proof gates and ownership.
+The $1,000,000 minimum is a fictional fixture rule, not an insurance-wide requirement. For v0.1 the rule stays fictional and clearly labelled (operator decision 2026-10-28). A named domain steward, real guideline authority and applicability, release approval and benchmark thresholds become an F0026 release prerequisite. Rule definitions are reviewed versioned assets in v0.1. A consistent snapshot and current grant checks are required even when a request asks for historical knowledge. See the assembly plan for proof gates and ownership.
 
 ## Related Stories
 

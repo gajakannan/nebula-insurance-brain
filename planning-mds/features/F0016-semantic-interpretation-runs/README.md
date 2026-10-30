@@ -23,6 +23,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 ## Docling-Graph scope amendment (2026-09-15)
 
+> **F0005 outcome (2026-10-28) supersedes the scope amendment below.** Graph dense was qualified live and rejected (F0005 run `2026-10-25-4020923b`, PR #30).
+> - **Defaults:** `direct-baseline` and the v1 writer stay the defaults.
+> - **ADR-0060 status:** stays **Proposed**, with a reopen deadline. **At F0014/F0015 Phase A planning the operator decides** whether to re-plan a Graph candidate (a larger output reservation, another serving model, or Graph direct, each with full re-qualification) or to mark ADR-0060 **Rejected**.
+> - **Until then:** plan against the direct baseline and the accepted execution controls in [ADR-0074](../../architecture/decisions/ADR-0074-local-document-job-execution-controls.md). Read the Docling-Graph requirements below as conditional on a re-plan.
+
 [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
 
 - Load only the published native artifact for initial interpretation and later reruns. Record artifact hash, selected blocks, profile/template/schema/config hashes, explicit chunking/extraction settings, upstream revision, model/prompt identity, attempt, counters, costs, and complete/partial/failed outcome.

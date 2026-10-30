@@ -73,3 +73,9 @@ These are recorded as unresolved requirements, not as satisfied criteria. Each i
 | 2 | Which administrative authority installs a rule release, given that `policy.csv` today declares only TenantMember, Reviewer, and ServicePrincipal | Product owner + Security | S0001 implementation |
 | 3 | Measured quality, latency, and cost thresholds, and the named reviewers and licensed frozen holdout | QA + product owner | F0026 release gate |
 | 4 | Whether the assessment panel needs a persona file, or whether "GL underwriter" and "domain steward" remain role-descriptive only | Product Manager | Not blocking; see G1 decision note |
+
+## Re-approval additions (plan run 2026-10-28-5f9c6d6f)
+
+- [x] Answer-basis record per ADR-0071 saved with every assessment (S0003) and rendered by the Entity 360 panel (S0005)
+- [x] Coarse valid time per ADR-0064 yields UNKNOWN with `valid_time_imprecise`, never an inferred endpoint (S0004)
+- [x] Guideline rule stays fictional for v0.1; real guideline authority and a domain steward are an F0026 release prerequisite (PRD Risks)

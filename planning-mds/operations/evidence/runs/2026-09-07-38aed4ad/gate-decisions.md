@@ -42,3 +42,7 @@ Both tokens were issued by the user in response to the presented evidence, not s
 ## Run status
 
 All five gates of the `plan` action are closed. F0065 stays `status: planned` and every story stays Not Started — this run bound the ontology and completed the planning package; it did not start implementation.
+
+## Retirement — 2026-10-28T23:23:49-04:00
+
+Recorded manual retirement at operator direction. This run's approval was never published (it predates `approve-plan.py`), and it can no longer be resumed: the project context changed (PR #26), so `run-gate` refuses with `project_context_changed`. Status set `draft` → `superseded` so a fresh F0065 plan run can re-approve the plan through the sanctioned tools. `superseded_by` points to that run: `2026-10-28-5f9c6d6f`. Historical gate decisions and attestations above are preserved unchanged. See `evidence-manifest.json` → `retirement`.

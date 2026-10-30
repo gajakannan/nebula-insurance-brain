@@ -31,6 +31,7 @@ Apply the following order; invalid request/rule definitions and authorization fa
 | Known subject/scope falls outside the rule, or supplied canonical limit has a different basis/currency | `NOT_APPLICABLE` with an authorized reason | None |
 | Relevant unresolved conflict exists at the snapshot | `CONFLICT` | None; do not choose highest confidence |
 | Required amount, qualifier, applicability, or evidence is unknown/incomplete; no accepted input exists | `UNKNOWN` | None; missing does not mean false or zero |
+| An input fact's valid time (ADR-0064 `granularity`) is coarser than `valid_as_of` and cannot decide whether it applies; or the fact carries no valid time (grade-`C` mention) | `UNKNOWN` with reason `valid_time_imprecise` | None; no interval endpoint is inferred or truncated toward a convenient value |
 | Complete applicable inputs and amount >= minimum | `MEETS_GUIDELINE` | Exact decimal comparison |
 | Complete applicable inputs and amount < minimum | `BELOW_GUIDELINE` | Exact decimal comparison |
 
@@ -41,6 +42,17 @@ An explicit negative assertion is knowledge with provenance; it is not an extrac
 Persist `assessment_id`, subject/scope, outcome and reason codes, exact input fact-version IDs, rule ID/version and source reference, ontology release, evaluator version, semantic snapshot, valid/known coordinates, creation time, acting principal, audit reference, derivation/evidence references, and the typed comparison for evaluated outcomes. Preserve supporting assertion and interpretation-run links through existing provenance. Unknown/conflict results retain authorized gap/conflict references and snapshot context, not invented input facts.
 
 The record is append-only, tenant/knowledge-base scoped, and outside canonical facts. Its derivation uses exact input versions consistent with ADR-0026. Promoting a result to canonical knowledge would require the canonical commit contract and is outside F0065. Do not describe stored explanations as private model reasoning traces; show values, rule, calculations, evidence, and recorded reasons.
+
+## Answer basis (ADR-0071)
+
+Every saved assessment, whatever its outcome, carries an answer-basis record in the ADR-0071 sense, built from the assessment's own derivation and evidence references:
+- **Used in answer:** the exact input fact versions, the rule release, the evidence bindings and the time basis (valid/known coordinates, plus each input's ADR-0064 granularity) behind the outcome.
+- **Considered, not used:** candidate facts excluded by conflict, applicability, currency/basis mismatch or valid-time precision, each with its reason code. These are listed explicitly in the same record, never inferred by subtraction.
+- **No model internals:** the comparison makes no model call, so none exist to gap. Upstream interpretation boundaries stay on the assertions and interpretation runs (S0003 provenance).
+
+The Entity 360 panel (S0005) and any explanation cite only this record. The assessment execution is also a semantic execution trace (operation: assessment) whose summary records the ontology release and the valid-as-of/known-as-of coordinates used.
+
+Until the F0038 read-path trace store exists, the answer-basis record is stored inside the append-only assessment record, in the ADR-0071 schema shape. It is emitted to the trace store once that exists. Either way the same retention, scoping and current-grant checks apply, and no prompt, excerpt or personal data enters the trace.
 
 ## Freshness, concurrency, and history
 

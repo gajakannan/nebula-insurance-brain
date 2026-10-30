@@ -588,17 +588,21 @@ features:
       - adr:0063
       - adr:0065
     notes:
+      - ? F0005 outcome 2026-10-28 - Graph dense rejected; direct-baseline/v1 stay default; ADR-0074 accepted.
+          ADR-0060 stays Proposed with a reopen deadline
+        : at F0014/F0015 Phase A the operator decides between re-planning a Graph candidate (with full
+          re-qualification) and marking ADR-0060 Rejected. Plan against the direct baseline until then.
+      - The commercial P&C example shows module composition and separate GL/property consumer completeness.
+        It does not introduce ontology into OPEN prompts or commit additional LOB runtime delivery.
       - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
         stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
         at formal plan.
+      - TEMPLATE compilation consumes F0011 contracts and F0012/F0013 vocabulary releases. Preserve constraint
+        context and evidence requirements; OPEN prompts exclude ontology under F0066.
       - Preserve the release reference to projection mappings in packaged artifacts; graph writing remains
         the projection consumer's responsibility.
       - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
         verification.
-      - TEMPLATE compilation consumes F0011 contracts and F0012/F0013 vocabulary releases. Preserve constraint
-        context and evidence requirements; OPEN prompts exclude ontology under F0066.
-      - The commercial P&C example shows module composition and separate GL/property consumer completeness.
-        It does not introduce ontology into OPEN prompts or commit additional LOB runtime delivery.
   - status: planned
     id: feature:F0024
     path: planning-mds/features/F0024-gl-vertical-slice
@@ -716,7 +720,9 @@ features:
       - adr:0023
       - adr:0026
       - adr:0056
+      - adr:0064
       - adr:0068
+      - adr:0071
     notes:
       - Endpoint, policy_rule, and runtime DTO schema nodes are deliberately not declared. brain-api.yaml
         has no assessment path, policy.csv has no assessment resource/action pair (declaring one would
@@ -728,6 +734,10 @@ features:
         reads.
       - Ontology bound at plan run 2026-09-07-38aed4ad (G4, PHASE=A+B, FEATURE_MODE=existing). Planning
         bindings only; no runtime exists and no story has started.
+      - Plan approved (A+B) 2026-10-29 in plan run 2026-10-28-5f9c6d6f (legacy run 2026-09-07-38aed4ad
+        retired). G1 (operator) - the answer basis is bound to ADR-0071; coarse valid time per ADR-0064
+        yields UNKNOWN (valid_time_imprecise); the guideline stays fictional for v0.1, and real authority
+        is an F0026 prerequisite.
     uses_schema:
       - schema:semantic-example
 rules:

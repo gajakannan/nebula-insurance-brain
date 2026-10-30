@@ -19,7 +19,7 @@ The v0.1 workflow combines model interpretation with governed facts and a bounde
 
 ## Acceptance Criteria
 
-- **Given** an authorized evaluated assessment, **when** the Entity 360 panel opens, **then** it displays the plain-language outcome, guideline/version, time basis, coverage basis, currency, compared values, and links to supporting Document 360 evidence.
+- **Given** an authorized evaluated assessment, **when** the Entity 360 panel opens, **then** it renders the assessment's ADR-0071 answer-basis record: plain-language outcome, guideline/version, time basis, coverage basis, currency, compared values, and links to supporting Document 360 evidence. It displays nothing that the answer basis does not cite.
 - **Given** a historical record, **when** opened, **then** its original valid/known coordinates are visible and it is not labeled as a new current evaluation.
 - **Given** UNKNOWN, CONFLICT, or NOT_APPLICABLE, **when** displayed, **then** the panel shows its authorized reason and any permitted existing review link; it does not render a successful comparison or a policy approval action.
 - **Given** loading, service failure, or invalid rule request, **when** displayed, **then** these states remain distinct from business outcomes and a failed save is not shown as a persisted result.
