@@ -20,6 +20,7 @@ The v0.1 workflow combines model interpretation with governed facts and a bounde
 ## Acceptance Criteria
 
 - **Given** an evaluated result, **when** it is saved, **then** an immutable assessment records exact input fact versions, rule/source/ontology/evaluator versions, semantic snapshot, valid/known time, typed comparison, acting principal, derivation references, and an audit reference.
+- **Given** an evaluated, UNKNOWN or CONFLICT result, **when** it is saved, **then** an answer-basis record per ADR-0071 is saved with it, citing exactly the input fact versions, rule version, evidence references and time basis an explanation may use. Nothing outside that record can be cited.
 - **Given** an UNKNOWN or CONFLICT result, **when** saved, **then** its authorized gap/conflict references and snapshot are retained without fabricated input facts or comparison values.
 - **Given** an assessment, **when** provenance is followed, **then** its fact points to supporting assertions, interpretation runs, and immutable evidence; extraction confidence remains on the assertion and is not relabeled as assessment confidence.
 - **Given** a save failure or a repeated idempotency key, **when** the request is retried with the same snapshot/content, **then** there is at most one saved assessment and audit effect; a key reused for different content is rejected.

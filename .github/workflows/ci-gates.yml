@@ -213,6 +213,18 @@ jobs:
             sleep 10
           done
           exit 1
+      # The F0002 AuthX suites skip without PostgreSQL, so they need this job to run
+      # at all. They truncate the AuthX registries, so they run after the
+      # seeded-principal check that reads them. The migration test uses its own
+      # throwaway databases.
+      - name: Prove F0002 AuthX security and expand/reconcile/constrain migration
+        timeout-minutes: 5
+        working-directory: engine
+        env:
+          BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@localhost:5432/brain
+        run: >
+          .venv/bin/python -m pytest
+          tests/security tests/integration/test_authx_migration.py -q
       - name: Capture stack diagnostics on failure
         if: failure()
         run: |

@@ -58,3 +58,18 @@ F0002 (tenancy-aware AuthX kernel) closed with these recommendations assigned to
 - **[medium] Retention for `authentication_event`.** Each rejected credential writes one durable row. Edge rate limiting is F0021's part of this recommendation. This feature sets and proves a production retention policy. Migration 0007 makes `authentication_event` and `audit_event` append-only through row triggers, so retention must run as a reviewed DBA/partition operation, not a row DELETE.
 - **[low] A distinct metric for JWKS outages.** When the JWKS cannot be fetched, the request is denied with a 401, which is correct because there is no fallback. In metrics, though, that looks the same as a bad credential. Add a distinct operational metric when observability lands, and prove it with an injected JWKS outage.
 - **[low] An isolated per-run database for the AuthX suites.** The engine PostgreSQL security/integration suites share the developer's dev database. Between tests they truncate the F0002 registries and the active policy pointer. Today the workaround is to re-run `scripts/dev/reconcile_authx.py --activate-policy` afterwards. Move these suites to an isolated per-run database as part of this feature's AuthX negative-test and policy-parity work.
+
+## F0005 closeout carry-in (2026-10-29)
+
+F0005 (one-time Docling ingestion) closed on the S0004-AC7 rejection branch. Its recommendations were accepted as deferred in the [F0005 PM closeout](../../operations/evidence/runs/2026-10-25-4020923b/pm-closeout.md), with sources in the [security review](../../operations/evidence/runs/2026-10-25-4020923b/security-review-report.md), the [code review](../../operations/evidence/runs/2026-10-25-4020923b/code-review-report.md) and [ADR-0074](../../architecture/decisions/ADR-0074-local-document-job-execution-controls.md). Carry them into this feature's PRD and stories when the feature is planned. The feature status is unchanged.
+
+- **[medium] Queue-race orphan-source sweep** (owner: Backend). This is a known limitation of ADR-0074: a source admitted at the queue bound can be left without a job. Add a sweep and prove it with an injected race.
+- **[low] F0004 SEC-L2 response headers** (owner: Security). Add `X-Content-Type-Options: nosniff` and `Cross-Origin-Resource-Policy` to the engine API, and assert them in the security baseline.
+- **[proof gate] ADR-0073 restore drill with OCR-bearing bundles** (owner: QE/DevOps). Run an F0004 restore drill over v1/v2 bundles that carry the §6 OCR block before ADR-0073 is accepted.
+- **[activation preconditions]** These block any Graph activation and the first non-synthetic documents. This feature verifies they hold before v0.1 release (owners: DevOps/Security/AI):
+  - SEC-F5-M1: converter OS isolation (separate UID or container, no HOME/control/content-store access, no network, `HF_HUB_OFFLINE`, memory cap);
+  - Docling ≥ 2.132 and pillow ≥ 13, with the S0001/S0005 provenance comparison requalified;
+  - the SEC-F5-L4 residual: an executable allowlist for the provider record and a minimal restart environment.
+- **[triage] Pre-existing local test failures** (owner: Backend):
+  - the 11 engine AuthX tests were **fixed 2026-10-29**. They were not local-only: CI never ran them against PostgreSQL (they skipped), so F0004 drift went unnoticed. Two causes: the security suite's content-store fake predated `load_verified`; and `_record_owner` loaded whole ORM rows, which broke the documented 0005 reconcile step once 0008 added columns. The suites now run in CI's `runtime-stack` job. The per-run isolated database item above still stands;
+  - `test_content_worker_v2[False]`, where Docling merges fixture lines on this host.

@@ -3,7 +3,7 @@
   "feature_id": "F0065",
   "feature_slug": "grounded-gl-guideline-assessment",
   "run_id": "2026-09-07-38aed4ad",
-  "status": "draft",
+  "status": "superseded",
   "recorded_on": "2026-09-07",
   "contract_version": "2026-07-11",
   "contract_effective_date": "2026-07-11",
@@ -137,5 +137,15 @@
   "global_evidence_refs": {},
   "run_scope": "base-run-only",
   "run_status": "complete",
-  "run_status_note": "All five plan gates closed; gate-state.json reports every stage completed with no pending checkpoint. F0065 remains status 'planned' and every story remains Not Started \u2014 this run bound the ontology and completed the planning package, it did not start implementation."
+  "run_status_note": "All five plan gates closed; gate-state.json reports every stage completed with no pending checkpoint. F0065 remains status 'planned' and every story remains Not Started \u2014 this run bound the ontology and completed the planning package, it did not start implementation.",
+  "superseded_at": "2026-10-28T23:23:49-04:00",
+  "superseded_by": "2026-10-28-5f9c6d6f",
+  "retirement": {
+    "kind": "recorded-manual-retirement",
+    "actor": "Claude (Product Manager role) at operator direction",
+    "authorized_by": "operator, 2026-10-29 session decision 'Recorded manual retirement'",
+    "timestamp": "2026-10-28T23:23:49-04:00",
+    "reason": "Legacy plan run: G1-G5 completed and both phase checkpoints attested (2026-09-07, merged PR #2), but it predates approve-plan.py and was never published as approved. It cannot be resumed: .nebula-project.yaml changed afterwards (PR #26 placeholder rename), so run-gate refuses with project_context_changed, and approve-plan.py refuses because the journal lacks the post-approval operations the current plan spec requires. No framework operation retires a draft, and init-run rejects a new F0065 plan run while this draft is active. Retired by hand so a fresh F0065 plan run can re-approve the plan through the sanctioned tools; superseded_by is set once that run exists.",
+    "never_approved": true
+  }
 }

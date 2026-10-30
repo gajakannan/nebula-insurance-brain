@@ -1,7 +1,7 @@
 # F0065 — Grounded GL guideline assessment — Status
 
-**Overall Status:** Draft — user authorized incorporation of the v0.1 scope on 2026-09-07; PRD/stories and proposed architecture authored. No completed plan gates, implementation, runtime proof, or reviewer signoffs claimed.
-**Last Updated:** 2026-09-07
+**Overall Status:** Plan approved (Phase A+B) in plan run `2026-10-28-5f9c6d6f` on 2026-10-29, re-approving the 2026-09-07 plan with three operator clarifications: the answer basis is bound to ADR-0071; coarse valid time yields UNKNOWN (`valid_time_imprecise`, ADR-0064); the guideline stays fictional for v0.1. Legacy run `2026-09-07-38aed4ad` was retired by recorded manual retirement. No implementation, runtime proof or signoffs claimed.
+**Last Updated:** 2026-10-29
 
 ## Story Checklist
 

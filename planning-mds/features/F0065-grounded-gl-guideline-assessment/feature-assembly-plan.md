@@ -1,6 +1,6 @@
 # F0065 assembly plan
 
-**Status:** Draft; user-authorized v0.1 scope, no completed Phase A/B gates or runtime proof claimed.
+**Status:** Approved (Phase A+B), plan run `2026-10-28-5f9c6d6f`, 2026-10-29. No runtime proof claimed.
 
 ## Ownership and boundaries
 
@@ -13,9 +13,9 @@ Backend owns the assessment service, deterministic comparison, persistence, snap
 | 1 | S0006 / architect + QA | Agree on the synthetic scenario, vocabulary, and expected-case table; validate example structure. Runtime reproduction remains open until step 7. |
 | 2 | S0001 / architect + backend | Bind the draft contract to F0011/F0013 typed values and approved rule-release authority. Reject unsupported syntax; record release audit. |
 | 3 | S0002 / backend | Consume F0018–F0020 canonical snapshot reads. Implement the finite outcome table and exact-decimal comparison without model calls. |
-| 4 | S0003 / backend + security | Persist immutable assessments with exact lineage and audit; prove idempotency and denied access before disclosure. |
-| 5 | S0004 / backend + QA | Prove correction, retraction, retroactive endorsement, rule release, concurrent snapshot, and historical grant behavior. |
-| 6 | S0005 / frontend + backend | Extend F0023 Entity 360, using F0022 evidence/review links; include historical, loading, unknown, conflict, and access-error states. |
+| 4 | S0003 / backend + security | Persist immutable assessments with exact lineage, audit and the ADR-0071 answer-basis record (used / considered-not-used, with reasons); prove idempotency and denied access before disclosure. |
+| 5 | S0004 / backend + QA | Prove correction, retraction, retroactive endorsement, rule release, concurrent snapshot, historical grant behavior, and ADR-0064 precision handling (`valid_time_imprecise`, no inferred endpoints). |
+| 6 | S0005 / frontend + backend | Extend F0023 Entity 360, using F0022 evidence/review links; render only the answer-basis record; include historical, loading, unknown, conflict, and access-error states. |
 | 7 | S0006, F0024/F0025 / AI + QA | Run actual model interpretation through reviewed canonical acceptance and assessment, publish runnable instructions and evidence. |
 | 8 | F0026 / QA + reviewers | Evaluate the independent frozen slice, report extraction and deterministic-rule results separately, and complete release signoffs. |
 
@@ -37,7 +37,9 @@ ADR-0056 remains Proposed until its named proof results and architect/security/Q
 
 | Decision | Owner | Required by |
 |---|---|---|
-| Production guideline source, applicability scope, and release approver | Product owner + domain steward | S0001; synthetic demo may use its explicitly fictional rule |
+| Production guideline source, applicability scope, and release approver | Product owner + domain steward | F0026 release prerequisite (operator, 2026-10-28); v0.1 uses the explicitly fictional rule |
+| Answer-basis storage: inside the assessment record until the F0038 trace store exists, then emitted there; schema binding to `semantic-execution-trace.schema.json` | Architect + backend | S0003; ADR-0071 proof gates stay with F0036/F0038 |
+| Reason vocabulary includes `valid_time_imprecise`; mapping from ADR-0064 granularity to applicability decisions | Architect + backend | S0002/S0004 |
 | Runtime snapshot identifier, transaction layout, DTO/OpenAPI and schema bindings | Architect + backend | S0002/S0003, after upstream contract proofs |
 | Canonical conflict/completeness query binding and reason mapping | Architect + backend | S0002; the full F0028 conflict engine is not required |
 | Named evaluation reviewers, licensed holdout, quality/latency/cost thresholds | QA + product owner | F0026 release gate |

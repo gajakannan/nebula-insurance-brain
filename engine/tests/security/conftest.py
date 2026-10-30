@@ -25,8 +25,10 @@ import httpx2 as httpx
 import jwt
 import pytest
 import pytest_asyncio
+from brain_content.validation import ArtifactKey
 from brain_domain.authx import PilotRole
 from brain_domain.principal import PrincipalKind
+from brain_persistence.content_repository import ContentArtifactRepository
 from brain_persistence.session import make_engine, make_session_factory, session_scope
 from brain_security.identity_profile import IdentityProfile, IssuerProfile
 from brain_security.verification import VerifiedCredential, decode_verified
@@ -116,20 +118,46 @@ class FakeContentStore:
     Records every manifest/byte access so tests can prove nothing protected is
     opened before an allow decision (F0002-S0004 AC7)."""
 
-    def __init__(self) -> None:
-        self._files: dict[str, bytes] = {"source.pdf": b"%PDF-1.4 fake bytes"}
+    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+        # An index-free bundle: seeded artifacts have no content_block/table rows.
+        self._files: dict[str, bytes] = {
+            "source.pdf": b"%PDF-1.4 fake bytes",
+            "blocks.jsonl": b"",
+            "tables.jsonl": b"",
+        }
+        self._session_factory = session_factory
         self.manifest_reads: list[UUID] = []
         self.file_reads: list[tuple[UUID, str]] = []
 
-    async def get_manifest(self, artifact_id: UUID) -> SimpleNamespace:
+    async def load_verified(self, key: ArtifactKey) -> SimpleNamespace:
+        # F0004: the API reads a whole verified bundle (manifest plus every file)
+        # through `load_verified`, so one call records a manifest read and a read
+        # of each file. The retained manifest agrees with the seeded row, so the
+        # route's real identity and index checks still run against it.
+        artifact_id = key.artifact_id
         self.manifest_reads.append(artifact_id)
-        files = [SimpleNamespace(path=path) for path in self._files]
+        self.file_reads.extend((artifact_id, path) for path in self._files)
+        async with session_scope(self._session_factory) as session:
+            metadata = await session.run_sync(
+                lambda s: ContentArtifactRepository(s).get_metadata(artifact_id)
+            )
         body = json.dumps({"artifact_id": str(artifact_id), "files": sorted(self._files)})
-        return SimpleNamespace(files=files, model_dump_json=lambda: body)
-
-    async def open_file(self, artifact_id: UUID, path: str) -> bytes:
-        self.file_reads.append((artifact_id, path))
-        return self._files[path]
+        manifest = SimpleNamespace(
+            document_id=metadata.document_id,
+            version_id=metadata.version_id,
+            source_sha256=metadata.source_sha256,
+            artifact_sha256=metadata.artifact_sha256,
+        )
+        return SimpleNamespace(
+            key=key,
+            manifest=manifest,
+            manifest_bytes=body.encode(),
+            manifest_sha256=metadata.manifest_sha256,
+            files=dict(self._files),
+            blocks=(),
+            tables=(),
+            layout=(),
+        )
 
 
 @pytest.fixture(scope="module")
@@ -194,7 +222,7 @@ async def client(rsa_key: rsa.RSAPrivateKey, pg_session_factory: async_sessionma
     app.dependency_overrides[get_session_factory] = lambda: pg_session_factory
     app.dependency_overrides[get_credential_verifier] = lambda: FakeVerifier(rsa_key)
     app.dependency_overrides[get_identity_profile] = lambda: IDENTITY_PROFILE
-    content_store = FakeContentStore()
+    content_store = FakeContentStore(pg_session_factory)
     app.dependency_overrides[get_content_store] = lambda: content_store
 
     transport = httpx.ASGITransport(app=app)
