@@ -315,13 +315,20 @@ def _key_json(key: ResourceKey) -> dict[str, str]:
 
 
 def _record_owner(session: Session, key: ResourceKey) -> tuple[UUID, UUID] | None:
-    row: ContentArtifact | ReviewItemRow | FactSlotRow | None
+    model: type[ContentArtifact] | type[ReviewItemRow] | type[FactSlotRow]
     if key.type == ResourceType.CONTENT_ARTIFACT:
-        row = session.get(ContentArtifact, key.id)
+        model = ContentArtifact
     elif key.type == ResourceType.REVIEW_TASK:
-        row = session.get(ReviewItemRow, key.id)
+        model = ReviewItemRow
     else:
-        row = session.get(FactSlotRow, key.id)
+        model = FactSlotRow
+    # WHY: select only the owner columns. AuthX reconciliation runs between
+    # migrations 0005 and 0006, before later migrations add mapped columns
+    # (for example 0008's artifact_contract_version), so loading the whole row
+    # would fail on the documented expand -> reconcile -> constrain path.
+    row = session.execute(
+        select(model.tenant_id, model.knowledge_base_id).where(model.id == key.id)
+    ).one_or_none()
     return (row.tenant_id, row.knowledge_base_id) if row is not None else None
 
 

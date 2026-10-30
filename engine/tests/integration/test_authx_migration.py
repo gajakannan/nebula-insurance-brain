@@ -24,6 +24,7 @@ import psycopg
 import pytest
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from psycopg import sql
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -61,6 +62,14 @@ def migrate(revision: str) -> None:
     config = Config(str(ALEMBIC_INI))
     config.set_main_option("script_location", str(ALEMBIC_INI.parent))
     command.upgrade(config, revision)
+
+
+def head_revision() -> str:
+    config = Config(str(ALEMBIC_INI))
+    config.set_main_option("script_location", str(ALEMBIC_INI.parent))
+    head = ScriptDirectory.from_config(config).get_current_head()
+    assert head is not None
+    return head
 
 
 def version(url: str) -> str:
@@ -502,8 +511,9 @@ def test_safeguards_make_ownership_immutable_audit_append_only_and_restore_defer
         "CHG-7",
     )
     assert applied.returncode == 0, applied.stderr
+    # The 0007 safeguards must hold at head, through every later migration.
     migrate("head")
-    assert version(fresh_db) == "0007"
+    assert version(fresh_db) == head_revision()
 
     rewrites = [
         ("UPDATE document_version SET tenant_id = %s WHERE id = %s", (uuid4(), legacy.version)),
