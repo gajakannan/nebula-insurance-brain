@@ -5,6 +5,7 @@
 **Plan Run:** `2026-11-01-7d6d19ce` — A+B, new
 **Phase A:** Approved by operator token `approve-phase-a` on 2026-11-01; G3 passed
 **Phase B:** Approved by operator token `approve-phase-b` on 2026-11-01 after green preapproval exit checks; final G5 publication is recorded in the plan run manifest/journal
+**Phase B rework:** Correction basis/persistence (plan-review AR-1/AR-2) re-approved by operator token `approve-phase-b` on 2026-11-01 in plan run `2026-11-01-512e9303` (PHASE=B, existing)
 **Implementation:** Not started
 
 ## Story Checklist

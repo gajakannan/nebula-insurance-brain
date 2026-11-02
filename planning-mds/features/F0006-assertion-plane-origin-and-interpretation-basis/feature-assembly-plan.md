@@ -3,7 +3,7 @@
 **Created:** 2026-11-01
 **Author:** Architect
 **Status:** Phase B design approved by operator token `approve-phase-b` on 2026-11-01; implementation not started
-**Run:** `2026-11-01-7d6d19ce` (A+B, new); Phase A approved with `approve-phase-a`.
+**Run:** `2026-11-01-7d6d19ce` (A+B, new); Phase A approved with `approve-phase-a`. Phase B rework `2026-11-01-512e9303` (correction basis and v2 correction persistence, plan-review AR-1/AR-2) re-approved with `approve-phase-b` on 2026-11-01.
 **NEBULA_PRODUCT_ROOT:** `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`
 
 ## Overview and Scope
@@ -189,7 +189,7 @@ New tables retain structural tenant/KB ownership and server actor/time. Every ne
 
 | Table / carrier | Fields and constraints |
 |---|---|
-| Existing `assertion` | Existing 13 scalar columns and both ORM relationships preserved; add `semantic_contract_version SMALLINT NOT NULL DEFAULT 1 CHECK (... IN (1,2))`. New v2 typed core uses the actual predicate as slot_type; open core uses reserved `__OPEN_STATEMENT_V2__` only as an internal compatibility carrier. It is never returned as an ontology predicate or passed to old DTOs. Main value is the source literal object, or an explicit `{literal: scalar}` / `{object_ref: UUID}` carrier; the extension's complete record is authoritative for v2. |
+| Existing `assertion` | Existing 13 scalar columns and both ORM relationships preserved; add `semantic_contract_version SMALLINT NOT NULL DEFAULT 1 CHECK (... IN (1,2))`. New v2 typed core uses the actual predicate as slot_type; open core uses reserved `__OPEN_STATEMENT_V2__` only as an internal compatibility carrier. It is never returned as an ontology predicate or passed to old DTOs. Main value is the source literal object, or an explicit `{literal: scalar}` / `{object_ref: UUID}` carrier; the extension's complete record is authoritative for v2. The v2 carrier's `subject_type` is the admitted subject reference's `entity_type`; it is never inferred from the predicate or value. A correction child copies its original's `subject_type`. The carrier's `interpretation_basis` must equal `record.interpretation_basis`. |
 | `assertion_document_reference` | `id UUID PK`, `document_version_id UUID`, `tenant_id UUID`, `knowledge_base_id UUID`, `entity_type TEXT`, `label TEXT`, `created_by UUID -> principal`, `created_at TIMESTAMPTZ`; all NOT NULL. Unique `(id, document_version_id, tenant_id, knowledge_base_id)`; FK document-version owner. A reference is local to one immutable document version; F0017 attaches canonical identity later. |
 | `assertion_name_claim` | `document_version_id UUID`, `tenant_id UUID`, `knowledge_base_id UUID`, `normalized_name TEXT`, `entity_ref UUID`, `created_by UUID`, `created_at TIMESTAMPTZ`; all NOT NULL. PK `(document_version_id, tenant_id, knowledge_base_id, normalized_name)`; composite FK `(entity_ref,document_version_id,tenant_id,knowledge_base_id)` to reference. Name key uses the documented NFC/case/whitespace normalization only; it is an admission uniqueness key, never a canonical name fact. |
 | `assertion_semantics` | `assertion_id UUID PK`, `document_version_id UUID`, tenant/KB, `subject_ref UUID`, nullable `object_ref UUID`, `assertion_kind TEXT`, `fact_mode TEXT`, `assertion_origin TEXT`, nullable `predicate_id TEXT`, nullable `ontology_release TEXT`, `record JSONB`, `entity_snapshots JSONB`, `verified_evidence JSONB`, `time_reference_snapshot JSONB`, `raw_item_sha256 CHAR(64)`, `admission_sha256 CHAR(64)`, `created_by UUID`, `created_at TIMESTAMPTZ`. All other fields NOT NULL. Composite owner FK to assertion; scoped document/reference FKs for subject and object; principal FK. |
@@ -289,7 +289,27 @@ Mixed evidence: only DESCRIBED restrictions apply when *all* evidence is qualifi
 
 For a v2 reference or lineage, all referenced sources must resolve; unknown/mixed/unowned references cannot switch the operation into the legacy branch. Supplied evidence which disagrees with review lineage is rejected. For all-legacy pilot proposals keep existing behaviour, including unregistered UUIDs: F0006 does not claim to solve F0018's complete provenance orchestration. A caller copying an arbitrary number without attributable assertion lineage cannot be identified by structural checks; this is an explicit legacy boundary, not a new source eligibility grant.
 
-Review correction: `create_corrected_assertion` preserves v2 subject/object identity, kind, mode, property/release, source phrase, qualifiers/mood and original evidence restriction snapshots; stamps HUMAN_REVIEW and the actual reviewer/clock; updates only the value through the existing entry point. If a new evidence locator is supplied, it must be re-admitted against the same authorized source; otherwise retain the original verified evidence. The old endpoint cannot clear mood, change kind or silently reclassify described evidence. Unsupported semantic changes return existing 422; full v2 semantic editing is a later contract amendment. Original claims/decisions are never rewritten.
+Review correction: `create_corrected_assertion` preserves v2 subject/object identity, kind, mode, property/release, source phrase, qualifiers/mood, **interpretation basis** and the original evidence restriction snapshots. It stamps HUMAN_REVIEW and the actual reviewer/clock, and updates only the value through the existing entry point. If a new evidence locator is supplied, it must be re-admitted against the same authorized source. Otherwise the original verified evidence is retained. The old endpoint cannot clear mood, change kind or basis, or silently reclassify described evidence. Unsupported semantic changes return the existing 422; full v2 semantic editing, including a reviewer-supplied basis, is a later contract amendment. Original claims/decisions are never rewritten.
+
+**Correction interpretation basis (resolves plan-review AR-1; operator decision 2026-11-01).**
+
+- *v2 correction:* a correction of a v2 assertion copies the original's `interpretation_basis` unchanged into both the carrier column and `record`. An INFERRED or AMBIGUOUS claim therefore stays INFERRED or AMBIGUOUS after review (S0001 AC4). The review request gains no basis member.
+- *v1 correction:* a correction of a v1 assertion keeps the existing hard-coded `EXPLICIT` behaviour of `repositories.py`. This is an explicit legacy compatibility boundary, not a new rule. It preserves the existing review regression contract (S0005 AC3). A v1 child stays `semantic_contract_version=1`, cannot satisfy any v2 eligibility precondition, and is never cited as evidence that a claim was explicitly supported. Tests must assert both branches.
+
+**v2 correction child persistence (resolves plan-review AR-2).** A correction of a v2 assertion writes a v2 child in the same unit of work as the existing review decision:
+
+1. *Carrier:* a new `assertion` row with a fresh ID, `semantic_contract_version=2`, `run_id` NULL, `origin='HUMAN_REVIEW'` and `original_assertion_id` set. `subject_type`, `slot_type`, tenant/KB and inherited basis are copied from the original. `value` holds the corrected literal carrier, and `model_confidence` is NULL.
+2. *Extension:* one `assertion_semantics` row.
+   - Copied from the original's extension: `document_version_id`, tenant/KB, `subject_ref`, `object_ref`, kind, mode, predicate/release, `entity_snapshots` and `time_reference_snapshot`.
+   - Set for the child: `assertion_origin='HUMAN_REVIEW'`. `record` is the original record with `id` set to the child ID, `origin` set to HUMAN_REVIEW, the inherited basis, and the object replaced by the corrected value. It must validate against assertion-record-v2.
+   - A correction that would change an ENTITY object reference, kind or open-statement wording is rejected with 422.
+   - `verified_evidence` is the original snapshot, or the snapshot from re-admitting the new locator.
+3. *Evidence rows:* new `assertion_evidence` rows owned by the child, with IDs `UUID5(child_id, ordinal)`. They copy artifact, block, page, bbox, character range and precision from the original rows, or take them from the re-admitted locator. Original evidence rows are never updated or re-pointed. This gives every v2 assertion its own evidence set, as the deferred integrity trigger requires, while lineage reaches the original through `original_assertion_id`.
+4. *Hashes:* both use the same canonical JSON serialization as admission.
+   - `raw_item_sha256` is the SHA-256 of the strictly validated correction input `{review_item_id, assertion_version, corrected_value, evidence_seen}`. This is the human-review analogue of the raw model item.
+   - `admission_sha256` is the SHA-256 of `{child record, original_assertion_id, verified evidence snapshots including source hashes/selectors, normalization version, reviewer principal ID, review_item_id}`, excluding server timestamps.
+   - Correction replay is still governed by the existing duplicate/stale decision checks, not by a new hash-replay path.
+5. *Integrity trigger:* `brain_assertion_v2_integrity()` accepts a v2 row with NULL `run_id` only when `origin='HUMAN_REVIEW'` and `original_assertion_id` references a v2 assertion with the same tenant/KB/document version, kind, predicate/release, subject reference, mood qualifiers and basis. A v1 original may only have a v1 child. Any other combination fails at commit.
 
 ## Current HTTP Contract and Mutation Traceability
 
@@ -321,11 +341,11 @@ A denied source stays 404, even if its semantic restriction would otherwise be 4
 
 | Story criteria | Required implementation verification |
 |---|---|
-| S0001 AC1–AC7 | Fresh-session PG records for all dimensions and confidence boundaries; two competing amounts; append-only source/evidence; illegal enum, ownership and no-canonical-write cases |
+| S0001 AC1–AC7 | Fresh-session PG records for all dimensions and confidence boundaries; two competing amounts; append-only source/evidence; illegal enum, ownership and no-canonical-write cases; v2 corrections of INFERRED/AMBIGUOUS claims keep their basis; v1 correction legacy EXPLICIT boundary asserted separately |
 | S0002 AC1–AC7 | Typed/open record invariants and fixture storage without a model; v1/new schemas; old reader refusal; local/dangling/cross-scope refs; no fabricated old fields |
 | S0003 AC1–AC8 | Every reason/signal, raw-item identity, all simultaneous failures, partial/truncated retention; four native formats, repeated values, NFC/case/currency whitespace/hyphen mapping; genuine quote/misread value; no unauthorized content read |
 | S0004 AC1–AC6 | Subjectivity, offered limit, warranty, conditional and operative provision; described-only versus qualified OCR/transcribed/mixed support; unknown origin; independent restrictions and review projection |
-| S0005 AC1–AC7 | Existing importer/review/commit entry points, mixed/correction ancestry guard bypass, source revocation, atomic review insertion failure and retry, migration and guard-preserving rollback, independently authored examples and coverage |
+| S0005 AC1–AC7 | v2 correction child carrier/extension/evidence rows/hashes satisfy the deferred trigger, with `subject_type` copied; trigger rejects mismatched or v1→v2 children; existing importer/review/commit entry points, mixed/correction ancestry guard bypass, source revocation, atomic review insertion failure and retry, migration and guard-preserving rollback, independently authored examples and coverage |
 
 Planning validation: schema-check all three authored contracts and 16 expected valid/invalid examples using offline local references; semantic teaching validator; story/tracker validators; G4 compile/drift and G5 full exit sequence. No current runtime behaviour is inferred from these passes.
 

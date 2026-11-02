@@ -14,7 +14,7 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 - [PRD](PRD.md) — Phase A approved by operator `approve-phase-a` on 2026-11-01; five stories and 35 ACs.
 - [Personas](personas.md), [acceptance checklist](acceptance-criteria-checklist.md), [status](STATUS.md), [getting started](GETTING-STARTED.md).
-- Plan run: `2026-11-01-7d6d19ce` (A+B, new). Phase A+B approved by operator on 2026-11-01. Architecture contracts and ontology bindings are complete for planning; implementation has not started.
+- Plan run: `2026-11-01-7d6d19ce` (A+B, new). Phase A+B approved by operator on 2026-11-01. Architecture contracts and ontology bindings are complete for planning; implementation has not started. Phase B rework for plan-review findings AR-1/AR-2 (correction basis and v2 correction persistence) was re-approved with `approve-phase-b` in plan run `2026-11-01-512e9303`.
 - Feature shard: `planning-mds/kg-source/features/F0006.yaml`; Architect-authored planning mappings cover all five stories; G4 compile and drift validation passed. Registry status remains Planned and roadmap remains Next.
 - [Assembly plan](feature-assembly-plan.md) — Phase B design approved 2026-11-01; implementation files, signatures, migration constraints, authorization, consumer guards and verification matrix.
 - [ADR-0075](../../architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md) — Proposed; bounded versioned semantics and admission design. [Worked examples](worked-examples.md), [structured contract examples](contract-examples.json).
