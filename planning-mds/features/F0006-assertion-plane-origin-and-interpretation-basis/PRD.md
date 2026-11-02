@@ -5,7 +5,7 @@
 **Priority:** Critical
 **Phase:** MVP — v0.1A
 **Status:** Phase A+B approved by operator on 2026-11-01; implementation not started
-**Plan Run:** `2026-11-01-7d6d19ce` (A+B, new)
+**Plan Run:** `2026-11-01-7d6d19ce` (A+B, new); Phase B rework `2026-11-01-512e9303` (requirements unchanged)
 
 ## Feature Statement
 

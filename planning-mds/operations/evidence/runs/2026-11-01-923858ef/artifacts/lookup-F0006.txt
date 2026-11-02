@@ -1,0 +1,869 @@
+{
+  "target": {
+    "status": "planned",
+    "id": "feature:F0006",
+    "path": "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis",
+    "affects": [
+      "capability:assertion-eligibility-guards",
+      "capability:structural-assertion-admission",
+      "capability:versioned-assertion-semantics",
+      "endpoint:fact-commit",
+      "endpoint:review-decisions-submit",
+      "endpoint:review-item-get",
+      "entity:assertion",
+      "entity:assertion-document-reference",
+      "entity:assertion-name-claim",
+      "entity:assertion-semantics"
+    ],
+    "depends_on": [
+      "feature:F0001",
+      "feature:F0002",
+      "feature:F0003",
+      "feature:F0004",
+      "feature:F0005"
+    ],
+    "governed_by": [
+      "adr:0005",
+      "adr:0010",
+      "adr:0013",
+      "adr:0030",
+      "adr:0035",
+      "adr:0037",
+      "adr:0058",
+      "adr:0061",
+      "adr:0062",
+      "adr:0063",
+      "adr:0065",
+      "adr:0075"
+    ],
+    "notes": [
+      "ADR-0065/0075 stay Proposed; a plan approval is not runtime acceptance. Current pilot unregistered legacy evidence behaviour is explicitly retained; new restrictions follow attributable v2 evidence/review/correction lineage.",
+      "Automatic result importer remains v1-only; v2 internal storage seam does not enable a live producer. F0016 owns durable drop/run adoption, F0018 full commit orchestration, F0022 display and F0066 open extraction/alignment.",
+      "Phase A+B approved by explicit operator tokens on 2026-11-01, plan run 2026-11-01-7d6d19ce. All five stories remain Not Started; no feature completion or formal Proposed ADR acceptance is claimed.",
+      "Planning bindings only. Five stories and 35 ACs; no runtime paths are bound as implemented. Roadmap stays Next."
+    ],
+    "uses_api_contract": [
+      "api:brain-api"
+    ],
+    "uses_schema": [
+      "schema:assertion-admission-result-v1",
+      "schema:assertion-record-v2",
+      "schema:interpretation-result",
+      "schema:interpretation-result-v2",
+      "schema:problem-details"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:assertion-eligibility-guards",
+      "label": "Assertion eligibility guards",
+      "notes": "Planned kind/mood/verified evidence-origin restrictions at current review and pilot commit consumers. No new permission grants, automatic acceptance or full F0018 orchestration.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0065",
+        "adr:0075",
+        "endpoint:fact-commit",
+        "entity:assertion",
+        "entity:assertion-semantics",
+        "entity:review-item"
+      ],
+      "source_docs": [
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+        ],
+        "examples": [
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+        ],
+        "schemas": [
+          "planning-mds/schemas/assertion-admission-result-v1.schema.json",
+          "planning-mds/schemas/assertion-record-v2.schema.json",
+          "planning-mds/schemas/interpretation-result-v2.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "capability:structural-assertion-admission",
+      "label": "Structural assertion admission",
+      "notes": "Planned authorized quote/name/time/reference checks with server-computed honest selectors and protected per-item outcomes. F0016 owns durable drops/full run lifecycle; no semantic truth or live extraction proof is claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "entity:assertion",
+        "entity:assertion-name-claim",
+        "entity:content-block",
+        "schema:assertion-admission-result-v1"
+      ],
+      "source_docs": [
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+        ],
+        "examples": [
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+        ],
+        "schemas": [
+          "planning-mds/schemas/assertion-admission-result-v1.schema.json",
+          "planning-mds/schemas/assertion-record-v2.schema.json",
+          "planning-mds/schemas/interpretation-result-v2.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "capability:versioned-assertion-semantics",
+      "label": "Versioned assertion semantics",
+      "notes": "Planned additive typed/open claim contract and immutable semantic extension. Legacy source rows and strict v1 readers are preserved; no runtime delivery is claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "entity:assertion",
+        "entity:assertion-document-reference",
+        "entity:assertion-semantics",
+        "schema:assertion-record-v2",
+        "schema:interpretation-result-v2"
+      ],
+      "source_docs": [
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+        ],
+        "examples": [
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+        ],
+        "schemas": [
+          "planning-mds/schemas/assertion-admission-result-v1.schema.json",
+          "planning-mds/schemas/assertion-record-v2.schema.json",
+          "planning-mds/schemas/interpretation-result-v2.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "endpoint:fact-commit",
+      "label": "POST /facts/{factSlotId}/commits",
+      "method": "POST",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "capability:authorization-enforcement",
+        "capability:bitemporal-canonical-commit"
+      ],
+      "resource": "fact_slot",
+      "route": "/facts/{factSlotId}/commits",
+      "source_docs": [
+        "planning-mds/api/brain-api.yaml",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+      ],
+      "_kind": "endpoint"
+    },
+    {
+      "id": "endpoint:review-decisions-submit",
+      "label": "POST /reviews/batches/{reviewBatchId}/decisions",
+      "method": "POST",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "capability:evidence-review-round-trip"
+      ],
+      "resource": "review_task",
+      "route": "/reviews/batches/{reviewBatchId}/decisions",
+      "source_docs": [
+        "planning-mds/api/brain-api.yaml",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+      ],
+      "_kind": "endpoint"
+    },
+    {
+      "id": "endpoint:review-item-get",
+      "label": "GET /reviews/{reviewItemId}",
+      "method": "GET",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "capability:authorization-enforcement",
+        "capability:evidence-review-round-trip"
+      ],
+      "resource": "review_task",
+      "route": "/reviews/{reviewItemId}",
+      "source_docs": [
+        "planning-mds/api/brain-api.yaml",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+      ],
+      "_kind": "endpoint"
+    },
+    {
+      "id": "entity:assertion",
+      "label": "Assertion",
+      "notes": "Source claim distinct from canonical truth. Existing legacy carrier remains delivered; F0006 proposes versioned typed/open semantics, independent mode/origin/basis, grounded evidence and eligibility guards. Planning bindings do not claim implementation.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_entities": [
+        "entity:review-decision",
+        "entity:semantic-interpretation-run"
+      ],
+      "related_nodes": [
+        "capability:assertion-eligibility-guards",
+        "capability:semantic-interpretation-run",
+        "capability:structural-assertion-admission",
+        "capability:versioned-assertion-semantics",
+        "entity:review-item"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/master-blueprint.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md"
+      ],
+      "_kind": "entity"
+    },
+    {
+      "id": "entity:assertion-document-reference",
+      "label": "Document-local assertion reference",
+      "notes": "Proposed document-version-scoped reference declaration with a quoted introducing name; storage supports assertion subjects/objects without creating or resolving canonical Entity identity.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "entity:assertion",
+        "entity:assertion-name-claim"
+      ],
+      "source_docs": [
+        "planning-mds/domain/glossary.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+      ],
+      "_kind": "entity",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/data-model.md",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+        ]
+      }
+    },
+    {
+      "id": "entity:assertion-name-claim",
+      "label": "Assertion admission name claim",
+      "notes": "Proposed document-scoped normalized-name ownership registry used only for NAME_CLAIMED_BY_ANOTHER checks. Not a canonical name FactSlot or alias projection.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "capability:structural-assertion-admission",
+        "entity:assertion-document-reference"
+      ],
+      "source_docs": [
+        "planning-mds/domain/glossary.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+      ],
+      "_kind": "entity",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/data-model.md",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+        ]
+      }
+    },
+    {
+      "id": "entity:assertion-semantics",
+      "label": "Assertion semantic extension",
+      "notes": "Proposed immutable one-to-one v2 extension keyed to the existing assertion ID; full source record, typed/open identity, mode/origin, verified grounding and scoped reference snapshots. Not a second assertion identity or a canonical fact.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "entity:assertion",
+        "entity:assertion-document-reference",
+        "schema:assertion-record-v2"
+      ],
+      "source_docs": [
+        "planning-mds/domain/glossary.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md",
+        "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+      ],
+      "_kind": "entity",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/data-model.md",
+          "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+        ]
+      }
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0005",
+      "label": "Three-Plane Knowledge Model",
+      "path": "planning-mds/architecture/decisions/ADR-0005-three-plane-knowledge-model.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0010",
+      "label": "Provenance Is Mandatory",
+      "path": "planning-mds/architecture/decisions/ADR-0010-provenance-is-mandatory.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0013",
+      "label": "JSON Schema Is the Structural Contract",
+      "path": "planning-mds/architecture/decisions/ADR-0013-json-schema-is-the-structural-contract.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0030",
+      "label": "Tenancy Is Structural",
+      "path": "planning-mds/architecture/decisions/ADR-0030-tenancy-is-structural.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0035",
+      "label": "Interpretation Basis Is First-Class",
+      "path": "planning-mds/architecture/decisions/ADR-0035-interpretation-basis-is-first-class.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0037",
+      "label": "Human Corrections Append; They Do Not Rewrite Evidence",
+      "path": "planning-mds/architecture/decisions/ADR-0037-human-corrections-append-they-do-not-rewrite-evidence.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0058",
+      "label": "Evidence Anchoring and Selector Contract",
+      "path": "planning-mds/architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md",
+      "related_nodes": [
+        "adr:0040",
+        "adr:0057",
+        "capability:evidence-review-round-trip",
+        "entity:review-decision"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0061",
+      "label": "Tenant identity and structural ownership",
+      "path": "planning-mds/architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md",
+      "related_nodes": [
+        "schema:authx-kernel"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0062",
+      "label": "Current authorization and durable decisions",
+      "path": "planning-mds/architecture/decisions/ADR-0062-current-authorization-and-durable-decisions.md",
+      "related_nodes": [
+        "schema:authx-kernel"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0063",
+      "label": "Open Statements and Signature Alignment",
+      "path": "planning-mds/architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md",
+      "related_nodes": [
+        "adr:0005",
+        "adr:0014",
+        "adr:0015",
+        "adr:0016",
+        "adr:0035",
+        "adr:0060",
+        "capability:semantic-interpretation-run",
+        "entity:assertion"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0065",
+      "label": "Assertion Admission, Text Origin, and Statement Mood",
+      "path": "planning-mds/architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md",
+      "related_nodes": [
+        "adr:0010",
+        "adr:0027",
+        "adr:0040",
+        "adr:0058",
+        "entity:assertion",
+        "entity:content-artifact"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0075",
+      "label": "Versioned Assertion Semantics and Structural Admission (Proposed; Phase B design approved 2026-11-01, runtime proofs pending)",
+      "path": "planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md",
+      "related_nodes": [
+        "adr:0063",
+        "adr:0065",
+        "capability:assertion-eligibility-guards",
+        "capability:structural-assertion-admission",
+        "capability:versioned-assertion-semantics",
+        "entity:assertion"
+      ],
+      "_kind": "adr"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:assertion-admission-result-v1",
+      "label": "Assertion Admission Result V1",
+      "path": "planning-mds/schemas/assertion-admission-result-v1.schema.json",
+      "notes": "F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and producer activation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "capability:structural-assertion-admission",
+        "entity:assertion"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:assertion-record-v2",
+      "label": "Assertion Candidate V2",
+      "path": "planning-mds/schemas/assertion-record-v2.schema.json",
+      "notes": "F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and producer activation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "capability:versioned-assertion-semantics",
+        "entity:assertion"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:interpretation-result",
+      "label": "InterpretationResult",
+      "path": "planning-mds/schemas/interpretation-result.schema.json",
+      "related_nodes": [
+        "capability:semantic-interpretation-run",
+        "entity:semantic-interpretation-run"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:interpretation-result-v2",
+      "label": "Interpretation Result V2",
+      "path": "planning-mds/schemas/interpretation-result-v2.schema.json",
+      "notes": "F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and producer activation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "capability:versioned-assertion-semantics",
+        "entity:assertion"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:problem-details",
+      "label": "ProblemDetails",
+      "path": "planning-mds/schemas/problem-details.schema.json",
+      "related_nodes": [
+        "api:brain-api",
+        "capability:runtime-roots-and-toolchain"
+      ],
+      "_kind": "schema"
+    }
+  ],
+  "uses_api_contract": [
+    {
+      "id": "api:brain-api",
+      "label": "Nebula Insurance Brain API",
+      "path": "planning-mds/api/brain-api.yaml",
+      "related_nodes": [
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:health",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get"
+      ],
+      "_kind": "api_contract"
+    }
+  ],
+  "depends_on": [
+    {
+      "status": "archived-done",
+      "id": "feature:F0001",
+      "path": "planning-mds/features/archive/F0001-repository-and-engineering-foundation",
+      "affects": [
+        "capability:authorization-enforcement",
+        "capability:backup-and-restore",
+        "capability:bitemporal-canonical-commit",
+        "capability:credential-verification-and-principal-resolution",
+        "capability:evidence-review-round-trip",
+        "capability:local-dependency-stack",
+        "capability:local-inference-service",
+        "capability:parse-once-content-artifact",
+        "capability:runtime-roots-and-toolchain",
+        "capability:semantic-interpretation-run",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:health",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get",
+        "entity:assertion",
+        "entity:audit-event",
+        "entity:canonical-fact-version",
+        "entity:content-artifact",
+        "entity:fact-slot",
+        "entity:outbox-event",
+        "entity:principal",
+        "entity:review-decision",
+        "entity:review-item",
+        "entity:semantic-interpretation-run",
+        "workflow:canonical-commit",
+        "workflow:human-review",
+        "workflow:ingestion-interpretation"
+      ],
+      "enforced_by_policy": [
+        "policy_rule:content-artifact-read",
+        "policy_rule:fact-slot-commit",
+        "policy_rule:fact-slot-read",
+        "policy_rule:review-task-annotate",
+        "policy_rule:review-task-read"
+      ],
+      "governed_by": [
+        "adr:0001",
+        "adr:0003",
+        "adr:0004",
+        "adr:0007",
+        "adr:0008",
+        "adr:0009",
+        "adr:0010",
+        "adr:0016",
+        "adr:0035",
+        "adr:0037",
+        "adr:0040",
+        "adr:0041",
+        "adr:0044",
+        "adr:0049",
+        "adr:0050",
+        "adr:0054",
+        "adr:0055",
+        "adr:0057",
+        "adr:0058",
+        "adr:0059"
+      ],
+      "notes": [
+        "ADR-0057 (2026-09-08) replaced Label Studio with the native Nebula Review Panel: S0004 renamed, the webhook endpoint became the review decision submission endpoint, and ADR-0058 added the anchoring contract S0004 also settles.",
+        "Phase A drafted 2026-09-06 in plan run 2026-09-06-cdb5d8cb: seven stories (toolchain, containers, four section 115.4 proofs, contract settlement). coverage_excluded stays until Phase B binds capabilities.",
+        "Phase B approved 2026-09-06: coverage_excluded removed; ten capabilities, ten entities, three workflows, six endpoints, six schemas, three roles, five policy rules declared; code bindings are authored at feature G7 once source exists."
+      ],
+      "restricted_to_role": [
+        "role:reviewer",
+        "role:service-principal",
+        "role:tenant-member"
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "schema:content-artifact-manifest",
+        "schema:interpretation-result",
+        "schema:problem-details",
+        "schema:review-decision"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0002",
+      "path": "planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts",
+      "affects": [
+        "capability:authorization-enforcement",
+        "capability:bounded-delegation",
+        "capability:credential-verification-and-principal-resolution",
+        "capability:current-resource-scope",
+        "capability:durable-authorization-decisions",
+        "capability:structural-tenancy-and-entity-identity",
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get",
+        "entity:audit-event",
+        "entity:delegation",
+        "entity:knowledge-base",
+        "entity:membership",
+        "entity:principal",
+        "entity:resource-scope",
+        "entity:tenant",
+        "entity:tenant-entity-identity",
+        "entity:workspace"
+      ],
+      "depends_on": [
+        "feature:F0001"
+      ],
+      "governed_by": [
+        "adr:0030",
+        "adr:0042",
+        "adr:0049",
+        "adr:0050",
+        "adr:0052",
+        "adr:0053",
+        "adr:0061",
+        "adr:0062"
+      ],
+      "notes": [
+        "F0005 synchronous worker is an impacted consumer requiring adapter regression; its ADR-0060 production activation is not accepted by F0002.",
+        "Historical review-to-commit wording reconciled in ADR-0062: F0002 owns authorization of existing consumers, F0018 owns full orchestration, F0022 owns review UI.",
+        "Identity is tenant-scoped; KB access is explicit. Existing pilot roles only.",
+        "Implemented in feature run 2026-09-27-bb7c8d1d: capabilities bound to as-built source at G7; ADR-0061/0062 accepted for the bounded F0002 scope; ADR-0042/0052/0053 remain Proposed.",
+        "Phases A and B explicitly approved by user with approve-phase-a and approve-phase-b on 2026-09-25."
+      ],
+      "restricted_to_role": [
+        "role:reviewer",
+        "role:service-principal",
+        "role:tenant-member"
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:authx-kernel",
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "schema:problem-details",
+        "schema:review-decision"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0003",
+      "path": "planning-mds/features/archive/F0003-postgresql-persistence",
+      "affects": [
+        "capability:bitemporal-canonical-commit",
+        "capability:postgresql-persistence-contract",
+        "capability:structural-tenancy-and-entity-identity",
+        "entity:assertion",
+        "entity:audit-event",
+        "entity:canonical-fact-version",
+        "entity:content-artifact",
+        "entity:fact-slot",
+        "entity:knowledge-base",
+        "entity:membership",
+        "entity:outbox-event",
+        "entity:principal",
+        "entity:review-decision",
+        "entity:review-item",
+        "entity:semantic-interpretation-run",
+        "entity:tenant",
+        "entity:workspace",
+        "workflow:canonical-commit"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002"
+      ],
+      "governed_by": [
+        "adr:0002",
+        "adr:0003",
+        "adr:0007",
+        "adr:0008",
+        "adr:0009",
+        "adr:0010",
+        "adr:0030",
+        "adr:0059"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0004",
+      "path": "planning-mds/features/archive/F0004-content-artifact-model",
+      "affects": [
+        "capability:document-date-provenance",
+        "capability:parse-once-content-artifact",
+        "capability:versioned-content-contracts",
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "entity:content-artifact",
+        "entity:content-block",
+        "entity:content-table",
+        "entity:content-table-cell",
+        "entity:document-date-candidate",
+        "entity:document-date-selection"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002",
+        "feature:F0003"
+      ],
+      "governed_by": [
+        "adr:0003",
+        "adr:0004",
+        "adr:0037",
+        "adr:0040",
+        "adr:0058",
+        "adr:0059",
+        "adr:0060",
+        "adr:0061",
+        "adr:0062",
+        "adr:0064",
+        "adr:0065",
+        "adr:0073"
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:content-artifact-manifest",
+        "schema:content-artifact-manifest-read",
+        "schema:content-artifact-manifest-v2",
+        "schema:content-records-v2",
+        "schema:document-date-record",
+        "schema:interpretation-output-manifest",
+        "schema:problem-details"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0005",
+      "path": "planning-mds/features/archive/F0005-one-time-docling-ingestion",
+      "affects": [
+        "capability:parse-once-content-artifact",
+        "capability:semantic-interpretation-run",
+        "capability:versioned-content-contracts",
+        "entity:content-artifact",
+        "entity:semantic-interpretation-run",
+        "workflow:ingestion-interpretation"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002",
+        "feature:F0003",
+        "feature:F0004"
+      ],
+      "governed_by": [
+        "adr:0003",
+        "adr:0004",
+        "adr:0040",
+        "adr:0055",
+        "adr:0058",
+        "adr:0059",
+        "adr:0060",
+        "adr:0065",
+        "adr:0073",
+        "adr:0074"
+      ],
+      "notes": [
+        "ADR-0073 amendment 2026-10-27 adds observed OCR quality to v1/v2 manifests (add-only, deploy together, no rollback).",
+        "Activation preconditions remain - converter OS isolation (SEC-F5-M1), Docling/pillow requalification, and the provider executable allowlist and minimal restart environment.",
+        "Run 2026-10-25-4020923b closed 2026-10-28. Live qualification report SHA-256 55ce3484...aede (void false); Graph dense missed accuracy, abstention, evidence resolution, latency and (like for like) review workload.",
+        "Shipped for every pipeline (ADR-0074) - supervised conversion with a 300 s parent deadline, host guard with confirmed quiescence, closed failure reasons (migrations 0009/0010), a reconvert-at-most-once launch budget, a bounded queue, and pipeline pinning."
+      ],
+      "uses_schema": [
+        "schema:content-artifact-manifest",
+        "schema:content-artifact-manifest-v2",
+        "schema:interpretation-result"
+      ],
+      "_kind": "feature"
+    }
+  ]
+}
