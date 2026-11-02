@@ -10,7 +10,7 @@ info:
     unchanged. F0002 runtime is approved in its archived feature evidence. F0004 proposes dual-version verified
     content reads and integrity/unavailable responses; those refinements received Phase B design approval on 2026-10-16;
     implementation proof remains required.'
-  version: 0.3.0
+  version: 0.4.0
   contact:
     name: Nebula Insurance Brain
 servers:
@@ -141,7 +141,7 @@ paths:
         with one audit event per decision. Resubmission of an already-decided batch is a no-op; a decision against
         a superseded assertion version is recorded as stale and not applied; a field whose evidence could not be
         anchored is recorded as BLOCKED with reason code EVIDENCE_UNRESOLVED and produces no assertion (ADR-0058,
-        F0001-S0004). Canonical commit is a separate authorization and never happens here.
+        F0001-S0004). Canonical commit is a separate authorization and never happens here. F0006 approved design retains v2 kind, mood and source restrictions on additive corrections; the legacy request cannot strip them or perform unsupported semantic edits (422). No new screen or request member is introduced.
       operationId: submitReviewDecisions
       tags:
       - Reviews
@@ -238,7 +238,13 @@ paths:
   /facts/{factSlotId}/commits:
     post:
       summary: Propose a canonical commit for a FactSlot
-      description: Executes master blueprint section 109.2 in one transaction (F0001-S0005).
+      description: >-
+        Executes master blueprint section 109.2 in one transaction (F0001-S0005).
+        F0006 approved design adds source eligibility checks before any canonical effect:
+        attributable v2 evidence and review/correction lineage retain kind, mood and verified
+        evidence-origin restrictions. Current source READ and fact-slot COMMIT decisions share
+        one unit of work. No new grants or required request fields; legacy pilot compatibility
+        remains as documented in ADR-0075. Phase B design approved by operator 2026-11-01; runtime not claimed.
       operationId: commitFact
       tags:
       - Facts
@@ -277,6 +283,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '422':
+          description: Authorized request references an ineligible or inconsistent assertion source;
+            code ASSERTION_INELIGIBLE. No canonical mutation and no protected source excerpt.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
         '503':
           $ref: '#/components/responses/AuthorizationUnavailable'
       x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency

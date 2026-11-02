@@ -1,0 +1,48 @@
+session:
+  started: '2026-11-01T19:21:13+00:00'
+  role: product-manager
+  scope: F0006
+  run_id: 2026-11-01-7d6d19ce
+  mode: new
+  scope_label: F0006
+  scope_id: feature:F0006
+decisions:
+- decision_id: 0
+  timestamp: '2026-11-01T19:27:02+00:00'
+  summary: 'Phase A drafted: five stories and 35 ACs; G3 approval required before architecture; F0005 direct-baseline/v1 defaults
+    preserved.'
+  topic: phase-a-scope
+  supersedes: []
+  rationale: Authorized README amendment and final approved dependency evidence govern bounded storage/contracts/checks/hooks
+    scope.
+- decision_id: 1
+  timestamp: '2026-11-01T19:28:27+00:00'
+  summary: G1 and G2 passed; five strict stories, index, trackers and semantic examples pass. G3 paused at approve-phase-a
+    awaiting explicit operator review approval; no Phase B work started.
+  topic: checkpoint-position
+  supersedes: []
+  rationale: run-gate.py journal records the manual checkpoint; manifest remains draft.
+- decision_id: 2
+  timestamp: '2026-11-01T20:16:50+00:00'
+  summary: G3 approved/attested; Architect design and KG source/story mappings complete; G4 passed. G5 preapproval exits all
+    passed and is paused at approve-phase-b. Await explicit operator token, then approval metadata edits, attestation, post-approval
+    refresh and publication.
+  topic: checkpoint-position
+  supersedes:
+  - 1
+  rationale: Durable run-gate journal; do not create a new run or approve manifest manually.
+files_touched: []
+open_questions: []
+escalations:
+- timestamp: '2026-11-01T20:01:30+00:00'
+  reason: Reserved F0006 KG stub has no final bindings; Phase B must inspect raw consumer call sites and define the scoped
+    admission/compatibility contracts.
+  nodes:
+  - entity:assertion
+  - schema:interpretation-result
+  - endpoint:fact-commit
+  opened_raw:
+  - engine/packages/brain-persistence/src/brain_persistence/models.py
+  - engine/apps/worker/src/brain_worker/document_delivery.py
+  - engine/packages/brain-persistence/src/brain_persistence/repositories.py
+  - engine/apps/api/src/brain_api/routes/facts.py

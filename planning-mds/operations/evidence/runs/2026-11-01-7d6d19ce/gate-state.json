@@ -1,0 +1,103 @@
+{
+  "action": "plan",
+  "contract_version": "2026-07-11",
+  "project_context": {
+    "action": "plan",
+    "manifest_hash": "dedbcb948fd89e3e2dce365347f322db03bcd479b5d5823095e2ef2773c3e089",
+    "product_root": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+    "scope": {
+      "plan_scope": "feature",
+      "target": "F0006"
+    }
+  },
+  "run_id": "2026-11-01-7d6d19ce",
+  "schema_version": 1,
+  "stages": {
+    "G1": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G2": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G3": {
+      "attestations": [
+        {
+          "acknowledged_preconditions": [],
+          "actor": "operator",
+          "checkpoint_id": "approve-phase-a",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "9fa0bdaa9c7b526facd17d4f12848ecb1f2fe25e540e28b2e03233f455b2072d"
+            }
+          ],
+          "note": "Operator explicitly replied approve-phase-a after reviewing the Phase A package.",
+          "role": "product-manager",
+          "timestamp": "2026-11-01T14:55:15-05:00"
+        }
+      ],
+      "completed_operations": [
+        "checkpoint:approve-phase-a",
+        "approve-plan-phase-a"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G4": {
+      "attestations": [],
+      "completed_operations": [
+        "kg-compile",
+        "kg-check-drift"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G5": {
+      "attestations": [
+        {
+          "acknowledged_preconditions": [],
+          "actor": "operator",
+          "checkpoint_id": "approve-phase-b",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "9b4dfe10d9abed69ce768db686e55484363546635535b94ac2a4f1664244e211"
+            }
+          ],
+          "note": "Operator explicitly replied approve-phase-b after all G5 preapproval checks passed; approval metadata edits are complete; ADR runtime proofs remain pending.",
+          "role": "architect",
+          "timestamp": "2026-11-01T16:20:16-05:00"
+        }
+      ],
+      "completed_operations": [
+        "validate-stories",
+        "generate-story-index",
+        "validate-trackers",
+        "kg-write-coverage",
+        "kg-check-drift-exit",
+        "kg-check-reproducible",
+        "validate-templates",
+        "checkpoint:approve-phase-b",
+        "kg-compile-post-approval",
+        "kg-write-coverage-post-approval",
+        "kg-check-reproducible-post-approval",
+        "kg-validate-post-approval",
+        "validate-trackers-post-approval",
+        "approve-plan"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    }
+  }
+}

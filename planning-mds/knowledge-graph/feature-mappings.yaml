@@ -4,10 +4,6 @@ coverage_note: Feature mappings are compiled from planning-mds/kg-source/feature
   explicit coverage exclusions until implementation exists.
 coverage:
   excluded_features:
-    - id: feature:F0006
-      path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0007
       path: planning-mds/features/F0007-factslot-model
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -481,6 +477,58 @@ features:
       - schema:content-artifact-manifest
       - schema:content-artifact-manifest-v2
       - schema:interpretation-result
+  - status: planned
+    id: feature:F0006
+    path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis
+    affects:
+      - capability:assertion-eligibility-guards
+      - capability:structural-assertion-admission
+      - capability:versioned-assertion-semantics
+      - endpoint:fact-commit
+      - endpoint:review-decisions-submit
+      - endpoint:review-item-get
+      - entity:assertion
+      - entity:assertion-document-reference
+      - entity:assertion-name-claim
+      - entity:assertion-semantics
+    depends_on:
+      - feature:F0001
+      - feature:F0002
+      - feature:F0003
+      - feature:F0004
+      - feature:F0005
+    governed_by:
+      - adr:0005
+      - adr:0010
+      - adr:0013
+      - adr:0030
+      - adr:0035
+      - adr:0037
+      - adr:0058
+      - adr:0061
+      - adr:0062
+      - adr:0063
+      - adr:0065
+      - adr:0075
+    notes:
+      - ADR-0065/0075 stay Proposed; a plan approval is not runtime acceptance. Current pilot unregistered
+        legacy evidence behaviour is explicitly retained; new restrictions follow attributable v2 evidence/review/correction
+        lineage.
+      - Automatic result importer remains v1-only; v2 internal storage seam does not enable a live producer.
+        F0016 owns durable drop/run adoption, F0018 full commit orchestration, F0022 display and F0066
+        open extraction/alignment.
+      - Phase A+B approved by explicit operator tokens on 2026-11-01, plan run 2026-11-01-7d6d19ce. All
+        five stories remain Not Started; no feature completion or formal Proposed ADR acceptance is claimed.
+      - Planning bindings only. Five stories and 35 ACs; no runtime paths are bound as implemented. Roadmap
+        stays Next.
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:assertion-admission-result-v1
+      - schema:assertion-record-v2
+      - schema:interpretation-result
+      - schema:interpretation-result-v2
+      - schema:problem-details
   - status: planned
     id: feature:F0012
     path: planning-mds/features/F0012-foundation-ontology
@@ -1052,6 +1100,69 @@ stories:
       - adr:0060
       - adr:0065
       - adr:0073
+  - id: story:F0006-S0001
+    feature: feature:F0006
+    path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md
+    affects:
+      - capability:versioned-assertion-semantics
+      - entity:assertion
+    governed_by:
+      - adr:0065
+      - adr:0075
+    uses_schema:
+      - schema:assertion-record-v2
+      - schema:interpretation-result-v2
+  - id: story:F0006-S0002
+    feature: feature:F0006
+    path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md
+    affects:
+      - capability:versioned-assertion-semantics
+      - entity:assertion
+    governed_by:
+      - adr:0065
+      - adr:0075
+    uses_schema:
+      - schema:assertion-record-v2
+      - schema:interpretation-result-v2
+  - id: story:F0006-S0003
+    feature: feature:F0006
+    path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md
+    affects:
+      - capability:structural-assertion-admission
+      - entity:assertion
+    governed_by:
+      - adr:0065
+      - adr:0075
+    uses_schema:
+      - schema:assertion-admission-result-v1
+  - id: story:F0006-S0004
+    feature: feature:F0006
+    path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md
+    affects:
+      - capability:assertion-eligibility-guards
+      - entity:assertion
+    governed_by:
+      - adr:0065
+      - adr:0075
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:assertion-admission-result-v1
+  - id: story:F0006-S0005
+    feature: feature:F0006
+    path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md
+    affects:
+      - capability:assertion-eligibility-guards
+      - capability:structural-assertion-admission
+      - capability:versioned-assertion-semantics
+      - entity:assertion
+    governed_by:
+      - adr:0065
+      - adr:0075
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:assertion-admission-result-v1
   - id: story:F0065-S0001
     feature: feature:F0065
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md

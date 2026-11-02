@@ -1,0 +1,148 @@
+{"timestamp": "2026-11-01T19:27:13.276442+00:00", "check": "G1-clarification", "exit_code": 0, "artifact": "artifacts/test-results/G1-clarification.log"}
+{"timestamp": "2026-11-01T19:27:18.893211+00:00", "check": "phase-a-stories", "exit_code": 1, "artifact": "artifacts/test-results/phase-a-stories.log"}
+{"timestamp": "2026-11-01T19:27:19.028137+00:00", "check": "phase-a-story-index", "exit_code": 0, "artifact": "artifacts/test-results/phase-a-story-index.log"}
+{"timestamp": "2026-11-01T19:27:19.197721+00:00", "check": "phase-a-trackers", "exit_code": 0, "artifact": "artifacts/test-results/phase-a-trackers.log"}
+{"timestamp": "2026-11-01T19:27:35.693551+00:00", "check": "phase-a-stories-repaired", "exit_code": 0, "artifact": "artifacts/test-results/phase-a-stories-repaired.log"}
+{"timestamp": "2026-11-01T19:27:50.455233+00:00", "check": "phase-a-semantic-examples", "exit_code": 0, "artifact": "artifacts/test-results/phase-a-semantic-examples.log"}
+{"timestamp": "2026-11-01T19:27:50.774620+00:00", "check": "G2-tracker-sync", "exit_code": 0, "artifact": "artifacts/test-results/G2-tracker-sync.log"}
+{"timestamp": "2026-11-01T19:27:50.992158+00:00", "check": "G3-phase-a-review-pending", "exit_code": 0, "artifact": "artifacts/test-results/G3-phase-a-review-pending.log"}
+
+### G3
+Command: python3 agents/scripts/approve-plan.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0006 --run-id 2026-11-01-7d6d19ce --stage G3
+Stage: G3
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+{"timestamp": "2026-11-01T19:55:15.453201+00:00", "check": "G3-phase-a-approved", "exit_code": 0, "artifact": "artifacts/test-results/G3-phase-a-approved.log"}
+{"timestamp": "2026-11-01T20:12:41.164709+00:00", "check": "phase-b-api-contract", "exit_code": 0, "artifact": "artifacts/test-results/phase-b-api-contract.log"}
+{"timestamp": "2026-11-01T20:12:41.170101+00:00", "check": "phase-b-contracts", "exit_code": 0, "artifact": "artifacts/test-results/phase-b-contracts.log"}
+
+### G4
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G4
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G4
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+{"timestamp": "2026-11-01T20:12:58.415909+00:00", "check": "G4-ontology-sync", "exit_code": 0, "artifact": "artifacts/test-results/G4-ontology-sync.log"}
+{"timestamp": "2026-11-01T20:13:07.765931+00:00", "check": "phase-b-api-baseline", "exit_code": 0, "artifact": "artifacts/test-results/phase-b-api-baseline.log"}
+{"timestamp": "2026-11-01T20:13:21.066777+00:00", "check": "phase-b-readiness", "exit_code": 0, "artifact": "artifacts/test-results/phase-b-readiness.log"}
+{"timestamp": "2026-11-01T20:13:21.067504+00:00", "check": "phase-b-semantic-examples", "exit_code": 0, "artifact": "artifacts/test-results/phase-b-semantic-examples.log"}
+{"timestamp": "2026-11-01T20:14:25.260661+00:00", "check": "phase-b-diff-impact", "exit_code": 0, "artifact": "artifacts/test-results/phase-b-diff-impact.log"}
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-stories.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/generate-story-index.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --skip-feature-evidence
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --write-coverage-report
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-reproducible
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/scripts/validate_templates.py
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+{"timestamp": "2026-11-01T20:14:25.973406+00:00", "check": "G5-phase-b-exit-review", "exit_code": 0, "artifact": "artifacts/test-results/G5-phase-b-exit-review.log"}
+{"timestamp": "2026-11-01T20:16:57.326058+00:00", "check": "phase-b-durable-contract-check", "exit_code": 0, "artifact": "artifacts/test-results/phase-b-durable-contract-check.log"}
+{"timestamp": "2026-11-01T20:16:57.551803+00:00", "check": "phase-b-kg-freshness", "exit_code": 0, "artifact": "artifacts/test-results/phase-b-kg-freshness.log"}
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/compile.py
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --write-coverage-report
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-reproducible
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --skip-feature-evidence
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### G5
+Command: python3 agents/scripts/approve-plan.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0006 --run-id 2026-11-01-7d6d19ce --stage G5
+Stage: G5
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+{"timestamp": "2026-11-01T21:20:16.491812+00:00", "check": "G5-approved-final-publication", "exit_code": 0, "artifact": "artifacts/test-results/G5-approved-final-publication.log"}
