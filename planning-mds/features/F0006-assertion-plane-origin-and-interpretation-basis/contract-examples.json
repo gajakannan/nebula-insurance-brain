@@ -1,0 +1,753 @@
+{
+  "provenance": "Synthetic development contracts, outside the frozen holdout. Illustrative expectations; no model, PostgreSQL or runtime service was executed.",
+  "phase": "F0006 v0.1A design",
+  "cases": [
+    {
+      "id": "typed",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": true,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "assertion_kind": "TYPED_ASSERTION",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": {
+            "amount": "500000",
+            "currency": "USD"
+          }
+        },
+        "predicate_id": "insurance:eachOccurrenceLimit",
+        "ontology_release": "synthetic-gl:2026-11-01",
+        "source_relation": null,
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-1",
+            "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "open",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": true,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "assertion_kind": "OPEN_STATEMENT",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": "Cedar Subcontractors LLC"
+        },
+        "predicate_id": null,
+        "ontology_release": null,
+        "source_relation": "subcontracts all tear-off work to",
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-2",
+            "quote": "Acme Roofing Inc. subcontracts all tear-off work to Cedar Subcontractors LLC."
+          }
+        ]
+      }
+    },
+    {
+      "id": "open-predicate",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "assertion_kind": "OPEN_STATEMENT",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": "Cedar Subcontractors LLC"
+        },
+        "predicate_id": "insurance:relatedTo",
+        "ontology_release": null,
+        "source_relation": "subcontracts all tear-off work to",
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-2",
+            "quote": "Acme Roofing Inc. subcontracts all tear-off work to Cedar Subcontractors LLC."
+          }
+        ]
+      }
+    },
+    {
+      "id": "open-inferred",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "assertion_kind": "OPEN_STATEMENT",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": "Cedar Subcontractors LLC"
+        },
+        "predicate_id": null,
+        "ontology_release": null,
+        "source_relation": "subcontracts all tear-off work to",
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "INFERRED",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-2",
+            "quote": "Acme Roofing Inc. subcontracts all tear-off work to Cedar Subcontractors LLC."
+          }
+        ]
+      }
+    },
+    {
+      "id": "typed-no-release",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "assertion_kind": "TYPED_ASSERTION",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": {
+            "amount": "500000",
+            "currency": "USD"
+          }
+        },
+        "predicate_id": "insurance:eachOccurrenceLimit",
+        "ontology_release": null,
+        "source_relation": null,
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-1",
+            "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bad-mode",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "assertion_kind": "TYPED_ASSERTION",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": {
+            "amount": "500000",
+            "currency": "USD"
+          }
+        },
+        "predicate_id": "insurance:eachOccurrenceLimit",
+        "ontology_release": "synthetic-gl:2026-11-01",
+        "source_relation": null,
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "HYPOTHETICAL",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-1",
+            "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bad-origin",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "assertion_kind": "TYPED_ASSERTION",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": {
+            "amount": "500000",
+            "currency": "USD"
+          }
+        },
+        "predicate_id": "insurance:eachOccurrenceLimit",
+        "ontology_release": "synthetic-gl:2026-11-01",
+        "source_relation": null,
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "MACHINE_EXTRACTION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-1",
+            "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bad-confidence",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "assertion_kind": "TYPED_ASSERTION",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": {
+            "amount": "500000",
+            "currency": "USD"
+          }
+        },
+        "predicate_id": "insurance:eachOccurrenceLimit",
+        "ontology_release": "synthetic-gl:2026-11-01",
+        "source_relation": null,
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 1.2,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-1",
+            "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "empty-quote",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "assertion_kind": "TYPED_ASSERTION",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": {
+            "amount": "500000",
+            "currency": "USD"
+          }
+        },
+        "predicate_id": "insurance:eachOccurrenceLimit",
+        "ontology_release": "synthetic-gl:2026-11-01",
+        "source_relation": null,
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-1",
+            "quote": ""
+          }
+        ]
+      }
+    },
+    {
+      "id": "empty-mood",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "assertion_kind": "TYPED_ASSERTION",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": {
+            "amount": "500000",
+            "currency": "USD"
+          }
+        },
+        "predicate_id": "insurance:eachOccurrenceLimit",
+        "ontology_release": "synthetic-gl:2026-11-01",
+        "source_relation": null,
+        "qualifiers": {
+          "mood": ""
+        },
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-1",
+            "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+          }
+        ]
+      }
+    },
+    {
+      "id": "unknown-property",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": false,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "assertion_kind": "TYPED_ASSERTION",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": {
+            "amount": "500000",
+            "currency": "USD"
+          }
+        },
+        "predicate_id": "insurance:eachOccurrenceLimit",
+        "ontology_release": "synthetic-gl:2026-11-01",
+        "source_relation": null,
+        "qualifiers": {},
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-1",
+            "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+          }
+        ],
+        "extra": "not allowed"
+      }
+    },
+    {
+      "id": "mood-retained",
+      "schema": "../../schemas/assertion-record-v2.schema.json",
+      "valid": true,
+      "input": {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "assertion_kind": "OPEN_STATEMENT",
+        "subject_ref": "00000000-0000-4000-8000-000000000002",
+        "object": {
+          "kind": "LITERAL",
+          "value": "Cedar Subcontractors LLC"
+        },
+        "predicate_id": null,
+        "ontology_release": null,
+        "source_relation": "subcontracts all tear-off work to",
+        "qualifiers": {
+          "mood": "subject to"
+        },
+        "time_mention_refs": [],
+        "valid_time_claim": null,
+        "mode": "ASSERTED",
+        "origin": "DOCUMENT_INTERPRETATION",
+        "interpretation_basis": "EXPLICIT",
+        "model_confidence": 0.98,
+        "evidence": [
+          {
+            "artifact_id": "00000000-0000-4000-8000-000000000001",
+            "block_id": "block-2",
+            "quote": "Acme Roofing Inc. subcontracts all tear-off work to Cedar Subcontractors LLC."
+          }
+        ]
+      }
+    },
+    {
+      "id": "result-v2",
+      "schema": "../../schemas/interpretation-result-v2.schema.json",
+      "valid": true,
+      "input": {
+        "schema_version": 2,
+        "run_id": "00000000-0000-4000-8000-000000000005",
+        "artifact_id": "00000000-0000-4000-8000-000000000001",
+        "status": "complete",
+        "entities": [
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "entity_type": "Organization",
+            "label": "Acme Roofing Inc.",
+            "introducing_evidence": [
+              {
+                "artifact_id": "00000000-0000-4000-8000-000000000001",
+                "block_id": "block-1",
+                "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+              }
+            ]
+          }
+        ],
+        "assertions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000003",
+            "assertion_kind": "TYPED_ASSERTION",
+            "subject_ref": "00000000-0000-4000-8000-000000000002",
+            "object": {
+              "kind": "LITERAL",
+              "value": {
+                "amount": "500000",
+                "currency": "USD"
+              }
+            },
+            "predicate_id": "insurance:eachOccurrenceLimit",
+            "ontology_release": "synthetic-gl:2026-11-01",
+            "source_relation": null,
+            "qualifiers": {},
+            "time_mention_refs": [],
+            "valid_time_claim": null,
+            "mode": "ASSERTED",
+            "origin": "DOCUMENT_INTERPRETATION",
+            "interpretation_basis": "EXPLICIT",
+            "model_confidence": 0.98,
+            "evidence": [
+              {
+                "artifact_id": "00000000-0000-4000-8000-000000000001",
+                "block_id": "block-1",
+                "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+              }
+            ]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000004",
+            "assertion_kind": "OPEN_STATEMENT",
+            "subject_ref": "00000000-0000-4000-8000-000000000002",
+            "object": {
+              "kind": "LITERAL",
+              "value": "Cedar Subcontractors LLC"
+            },
+            "predicate_id": null,
+            "ontology_release": null,
+            "source_relation": "subcontracts all tear-off work to",
+            "qualifiers": {},
+            "time_mention_refs": [],
+            "valid_time_claim": null,
+            "mode": "ASSERTED",
+            "origin": "DOCUMENT_INTERPRETATION",
+            "interpretation_basis": "EXPLICIT",
+            "model_confidence": 0.98,
+            "evidence": [
+              {
+                "artifact_id": "00000000-0000-4000-8000-000000000001",
+                "block_id": "block-2",
+                "quote": "Acme Roofing Inc. subcontracts all tear-off work to Cedar Subcontractors LLC."
+              }
+            ]
+          }
+        ],
+        "relationships": [],
+        "quality_signals": {},
+        "warnings": [],
+        "failed_chunks": [],
+        "run_configuration": {
+          "backend": "openai_compatible",
+          "model_id": "synthetic/no-model-call",
+          "model_revision": null,
+          "endpoint_hash": "synthetic",
+          "prompt_hash": "synthetic",
+          "schema_hash": "synthetic",
+          "context_limit": 4096,
+          "profile_id": "synthetic-gl",
+          "profile_version": "1"
+        },
+        "counters": {
+          "conversion_calls": 0,
+          "ocr_calls": 0,
+          "model_calls": 0,
+          "prompt_tokens": 0,
+          "completion_tokens": 0
+        },
+        "created_at": "2026-11-01T18:00:00Z"
+      }
+    },
+    {
+      "id": "legacy-remains-valid",
+      "schema": "../../schemas/interpretation-result.schema.json",
+      "valid": true,
+      "input": {
+        "run_id": "00000000-0000-4000-8000-000000000005",
+        "artifact_id": "00000000-0000-4000-8000-000000000001",
+        "status": "complete",
+        "entities": [],
+        "assertions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000003",
+            "subject_type": "Coverage",
+            "slot_type": "EachOccurrence",
+            "value": {
+              "amount": "500000",
+              "currency": "USD"
+            },
+            "evidence": [
+              {
+                "artifact_id": "00000000-0000-4000-8000-000000000001",
+                "precision": "unresolved"
+              }
+            ],
+            "interpretation_basis": "EXPLICIT"
+          }
+        ],
+        "relationships": [],
+        "quality_signals": {},
+        "warnings": [],
+        "failed_chunks": [],
+        "run_configuration": {
+          "backend": "openai_compatible",
+          "model_id": "synthetic/no-model-call",
+          "model_revision": null,
+          "endpoint_hash": "synthetic",
+          "prompt_hash": "synthetic",
+          "schema_hash": "synthetic",
+          "context_limit": 4096,
+          "profile_id": "synthetic-gl",
+          "profile_version": "1"
+        },
+        "counters": {
+          "conversion_calls": 0,
+          "ocr_calls": 0,
+          "model_calls": 0,
+          "prompt_tokens": 0,
+          "completion_tokens": 0
+        },
+        "created_at": "2026-11-01T18:00:00Z"
+      }
+    },
+    {
+      "id": "v2-rejected-by-legacy",
+      "schema": "../../schemas/interpretation-result.schema.json",
+      "valid": false,
+      "input": {
+        "schema_version": 2,
+        "run_id": "00000000-0000-4000-8000-000000000005",
+        "artifact_id": "00000000-0000-4000-8000-000000000001",
+        "status": "complete",
+        "entities": [
+          {
+            "id": "00000000-0000-4000-8000-000000000002",
+            "entity_type": "Organization",
+            "label": "Acme Roofing Inc.",
+            "introducing_evidence": [
+              {
+                "artifact_id": "00000000-0000-4000-8000-000000000001",
+                "block_id": "block-1",
+                "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+              }
+            ]
+          }
+        ],
+        "assertions": [
+          {
+            "id": "00000000-0000-4000-8000-000000000003",
+            "assertion_kind": "TYPED_ASSERTION",
+            "subject_ref": "00000000-0000-4000-8000-000000000002",
+            "object": {
+              "kind": "LITERAL",
+              "value": {
+                "amount": "500000",
+                "currency": "USD"
+              }
+            },
+            "predicate_id": "insurance:eachOccurrenceLimit",
+            "ontology_release": "synthetic-gl:2026-11-01",
+            "source_relation": null,
+            "qualifiers": {},
+            "time_mention_refs": [],
+            "valid_time_claim": null,
+            "mode": "ASSERTED",
+            "origin": "DOCUMENT_INTERPRETATION",
+            "interpretation_basis": "EXPLICIT",
+            "model_confidence": 0.98,
+            "evidence": [
+              {
+                "artifact_id": "00000000-0000-4000-8000-000000000001",
+                "block_id": "block-1",
+                "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+              }
+            ]
+          },
+          {
+            "id": "00000000-0000-4000-8000-000000000004",
+            "assertion_kind": "OPEN_STATEMENT",
+            "subject_ref": "00000000-0000-4000-8000-000000000002",
+            "object": {
+              "kind": "LITERAL",
+              "value": "Cedar Subcontractors LLC"
+            },
+            "predicate_id": null,
+            "ontology_release": null,
+            "source_relation": "subcontracts all tear-off work to",
+            "qualifiers": {},
+            "time_mention_refs": [],
+            "valid_time_claim": null,
+            "mode": "ASSERTED",
+            "origin": "DOCUMENT_INTERPRETATION",
+            "interpretation_basis": "EXPLICIT",
+            "model_confidence": 0.98,
+            "evidence": [
+              {
+                "artifact_id": "00000000-0000-4000-8000-000000000001",
+                "block_id": "block-2",
+                "quote": "Acme Roofing Inc. subcontracts all tear-off work to Cedar Subcontractors LLC."
+              }
+            ]
+          }
+        ],
+        "relationships": [],
+        "quality_signals": {},
+        "warnings": [],
+        "failed_chunks": [],
+        "run_configuration": {
+          "backend": "openai_compatible",
+          "model_id": "synthetic/no-model-call",
+          "model_revision": null,
+          "endpoint_hash": "synthetic",
+          "prompt_hash": "synthetic",
+          "schema_hash": "synthetic",
+          "context_limit": 4096,
+          "profile_id": "synthetic-gl",
+          "profile_version": "1"
+        },
+        "counters": {
+          "conversion_calls": 0,
+          "ocr_calls": 0,
+          "model_calls": 0,
+          "prompt_tokens": 0,
+          "completion_tokens": 0
+        },
+        "created_at": "2026-11-01T18:00:00Z"
+      }
+    },
+    {
+      "id": "protected-admission-result",
+      "schema": "../../schemas/assertion-admission-result-v1.schema.json",
+      "valid": true,
+      "input": {
+        "schema_version": 1,
+        "run_id": "00000000-0000-4000-8000-000000000005",
+        "artifact_id": "00000000-0000-4000-8000-000000000001",
+        "accepted": [
+          {
+            "record": {
+              "id": "00000000-0000-4000-8000-000000000003",
+              "assertion_kind": "TYPED_ASSERTION",
+              "subject_ref": "00000000-0000-4000-8000-000000000002",
+              "object": {
+                "kind": "LITERAL",
+                "value": {
+                  "amount": "500000",
+                  "currency": "USD"
+                }
+              },
+              "predicate_id": "insurance:eachOccurrenceLimit",
+              "ontology_release": "synthetic-gl:2026-11-01",
+              "source_relation": null,
+              "qualifiers": {},
+              "time_mention_refs": [],
+              "valid_time_claim": null,
+              "mode": "ASSERTED",
+              "origin": "DOCUMENT_INTERPRETATION",
+              "interpretation_basis": "EXPLICIT",
+              "model_confidence": 0.98,
+              "evidence": [
+                {
+                  "artifact_id": "00000000-0000-4000-8000-000000000001",
+                  "block_id": "block-1",
+                  "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000"
+                }
+              ]
+            },
+            "server_evidence": [
+              {
+                "evidence_id": "00000000-0000-4000-8000-000000000006",
+                "artifact_id": "00000000-0000-4000-8000-000000000001",
+                "block_id": "block-1",
+                "quote": "Acme Roofing Inc. \u2014 Each Occurrence Limit $500,000",
+                "normalization_version": "f0006-grounding-v1",
+                "precision": "block",
+                "selector": {
+                  "block_id": "block-1"
+                },
+                "text_origin": null,
+                "origin_qualification": "legacy_unqualified",
+                "producer": null,
+                "producer_confidence": null
+              }
+            ],
+            "review_required": true,
+            "reasons": [
+              "LEGACY_UNQUALIFIED"
+            ],
+            "blocked_operations": [
+              "AUTO_ACCEPT"
+            ],
+            "created_by": "00000000-0000-4000-8000-000000000007",
+            "created_at": "2026-11-01T18:00:00Z"
+          }
+        ],
+        "outcomes": [
+          {
+            "item_index": 1,
+            "item_path": "/assertions/1",
+            "candidate_id": "00000000-0000-4000-8000-000000000004",
+            "block_id": "block-1",
+            "disposition": "REJECTED",
+            "reason": "QUOTE_NOT_IN_SOURCE",
+            "raw_item_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "excerpt": null,
+            "model_id": "synthetic/no-model-call",
+            "prompt_hash": "synthetic"
+          }
+        ],
+        "requires_partial": false
+      }
+    }
+  ]
+}

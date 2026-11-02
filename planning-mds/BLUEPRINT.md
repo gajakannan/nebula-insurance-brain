@@ -236,7 +236,12 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0005-S0003](features/archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) — In Progress
   - [F0005-S0004](features/archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) — In Progress — synthetic comparison complete; live comparison planned
   - [F0005-S0005](features/archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) — Not Started
-- [F0006 — Assertion plane + origin + interpretation basis](features/F0006-assertion-plane-origin-and-interpretation-basis/README.md) - Planned
+- [F0006 — Assertion plane + origin + interpretation basis](features/F0006-assertion-plane-origin-and-interpretation-basis/README.md) - Planned (Phase A+B approved by operator 2026-11-01, plan run `2026-11-01-7d6d19ce`; implementation not started)
+  - [F0006-S0001](features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md) — Not Started
+  - [F0006-S0002](features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md) — Not Started
+  - [F0006-S0003](features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md) — Not Started
+  - [F0006-S0004](features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md) — Not Started
+  - [F0006-S0005](features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md) — Not Started
 - [F0007 — FactSlot model](features/F0007-factslot-model/README.md) - Planned
 - [F0008 — Bitemporal canonical facts](features/F0008-bitemporal-canonical-facts/README.md) - Planned
 - [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
@@ -450,6 +455,14 @@ Scope amendments are recorded in each feature README. Master blueprint sections 
 - ownership columns made immutable by trigger (plus the principal links of memberships, identity aliases and delegations), with append-only `audit_event` and `authentication_event`;
 - link tables without an owner column (`outbox_event`, `document_job_event`) have a single parent whose foreign key fixes their ownership, and every multi-parent link table carries owner columns with composite keys since 0006, so no separate link trigger is needed;
 - deferrable (initially immediate) self-references on the assertion correction chain for restore.
+
+---
+
+### 4.12 F0006 Phase B design (approved 2026-11-01; implementation pending)
+
+[Assembly plan](features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md), plan run `2026-11-01-7d6d19ce`: Phase A and Phase B approved by operator tokens `approve-phase-a` and `approve-phase-b`; five unstarted stories and 35 ACs. Proposed [ADR-0075](architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md) defines additive typed/open assertion semantics, document-local references/name admission claims, structural quote/name/time checks and eligibility guards at existing review/commit consumers. The legacy strict result contract and source history remain; new schemas are `assertion-record-v2`, `interpretation-result-v2` and `assertion-admission-result-v1`. Case/spacing normalization is deterministic with original-range mapping; repeated text never justifies a fabricated span.
+
+No new deployable, assertion HTTP route, UI, grants or extraction activation. Current authorization's mutation facade gains optional source READ requirements in the same unit of work; it must not nest a read facade that commits the outer transaction. Existing `direct-baseline` and v1 content writer defaults follow F0005's final approved rejection decision. Full durable drops/run adoption stays F0016; full source-completeness/commit orchestration stays F0018; display stays F0022; open extraction/alignment stays F0066. New restrictions apply to attributable v2 evidence/review/correction lineage; unregistered legacy pilot references remain an explicit compatibility boundary. ADR-0065 and ADR-0075 remain Proposed until their required runtime proofs. Existing C4 topology is unchanged; feature README contains ER/component diagrams. Phase B design is approved; implementation and required runtime proofs remain pending.
 
 ---
 

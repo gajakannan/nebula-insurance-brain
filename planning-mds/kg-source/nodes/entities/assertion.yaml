@@ -1,14 +1,25 @@
 id: entity:assertion
 label: Assertion
-notes: What a source, system, model, or person claims, with evidence bindings and interpretation basis; never truth
-  by itself; versioned so review decisions can detect staleness.
+notes: Source claim distinct from canonical truth. Existing legacy carrier remains delivered; F0006 proposes
+  versioned typed/open semantics, independent mode/origin/basis, grounded evidence and eligibility guards.
+  Planning bindings do not claim implementation.
 source_docs:
 - F0001/F0001-S0003-proof-parse-once-reinterpret-evidence.md
 - F0001/F0001-S0004-proof-native-review-round-trip.md
 - planning-mds/architecture/master-blueprint.md
+- F0006/feature-assembly-plan.md
+- F0006/PRD.md
 related_nodes:
 - capability:semantic-interpretation-run
 - entity:review-item
+- capability:versioned-assertion-semantics
+- capability:structural-assertion-admission
+- capability:assertion-eligibility-guards
 related_entities:
 - entity:semantic-interpretation-run
 - entity:review-decision
+rationale:
+- adr: adr:0075
+  section: Decision
+  summary: Proposed F0006 design preserves legacy records and requires scoped structural admission and source
+    eligibility guards; runtime proof pending.

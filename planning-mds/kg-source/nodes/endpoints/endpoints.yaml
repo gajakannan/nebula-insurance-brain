@@ -29,6 +29,13 @@ endpoints:
   - capability:authorization-enforcement
   source_docs:
   - planning-mds/api/brain-api.yaml
+  - F0006/feature-assembly-plan.md
+  rationale:
+  - &id001
+    adr: adr:0075
+    section: Decision
+    summary: Proposed F0006 design preserves legacy records and requires scoped structural admission and source
+      eligibility guards; runtime proof pending.
 - id: endpoint:review-decisions-submit
   label: POST /reviews/batches/{reviewBatchId}/decisions
   method: POST
@@ -38,6 +45,9 @@ endpoints:
   - capability:evidence-review-round-trip
   source_docs:
   - planning-mds/api/brain-api.yaml
+  - F0006/feature-assembly-plan.md
+  rationale:
+  - *id001
 - id: endpoint:fact-get
   label: GET /facts/{factSlotId}
   method: GET
@@ -58,6 +68,9 @@ endpoints:
   - capability:authorization-enforcement
   source_docs:
   - planning-mds/api/brain-api.yaml
+  - F0006/feature-assembly-plan.md
+  rationale:
+  - *id001
 - id: endpoint:content-artifact-file-get
   label: GET /content/{artifactId}/files/{path}
   method: GET

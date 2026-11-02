@@ -9,3 +9,5 @@ Per-feature plans are authoritative for their approved scope. Planning does not 
 | F0065 | [Grounded GL assessment](../features/F0065-grounded-gl-guideline-assessment/feature-assembly-plan.md) | Downstream consumer of F0002 current authority; separately governed plan |
 
 | F0004 | [Content artifact model](../features/archive/F0004-content-artifact-model/feature-assembly-plan.md) | All four stories implemented in run 2026-10-17-8a6cc79f; G4 approved 2026-10-21; all required signoffs and G7 passed; activation limits retained |
+
+| F0006 | [Assertion semantics and admission](../features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md) | Phase A+B approved by operator 2026-11-01; F0001–F0005 delivered prerequisites; v1 defaults preserved; no runtime implementation claimed |

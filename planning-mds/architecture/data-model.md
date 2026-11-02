@@ -319,3 +319,42 @@ The [close/reopen boundary](../examples/commercial-pc-account/boundaries/account
 [ADR-0073](decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md) and the [F0004 assembly plan](../features/archive/F0004-content-artifact-model/feature-assembly-plan.md) propose version-aware artifact metadata, normalized block/table/cell indexes and append-only date candidates/selections. This is an additive migration design after 0007, not deployed schema. See the [feature ERD](../features/archive/F0004-content-artifact-model/README.md#proposed-entity-relationships) and [SQL design](../features/archive/F0004-content-artifact-model/persistence-design.sql) for exact columns, scoped foreign keys, uniqueness, audit references and immutability rules.
 
 Preserve existing source/version/artifact IDs and tenant/KB constraints. Replace only the one-artifact-per-version uniqueness after reconciliation, permitting explicitly governed replacements. Full text remains in immutable files; index rows retain line ordinal/hash and provenance. Dates belong to the document version, never the manifest. Explicit append-only selections retain a previous selection, sequence and optimistic concurrency token; no selection means undated. The semantic authorization decision UUID is separate from the authorization audit row primary key.
+
+
+## F0006 assertion semantics (proposed design, 2026-11-01)
+
+Phase B design approved by operator on 2026-11-01 in plan run `2026-11-01-7d6d19ce`; no migration has run. [ADR-0075](decisions/ADR-0075-versioned-assertion-semantics-and-admission.md) and the [assembly plan](../features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, constraints and migration steps. Existing assertion/evidence identities remain. The only legacy-row addition is a version discriminator defaulting to 1; missing historical quote/mode/release is not reconstructed. New version-2 assertions require one immutable semantic extension, document-scoped reference FKs and server-verified evidence; deferred trigger integrity prevents a core-only v2 record.
+
+```mermaid
+erDiagram
+    DOCUMENT_VERSION ||--o{ ASSERTION_DOCUMENT_REFERENCE : owns
+    ASSERTION_DOCUMENT_REFERENCE ||--o{ ASSERTION_NAME_CLAIM : claims
+    ASSERTION_DOCUMENT_REFERENCE ||--o{ ASSERTION_SEMANTICS : subject_or_object
+    ASSERTION ||--o| ASSERTION_SEMANTICS : versioned_extension
+    ASSERTION ||--o{ ASSERTION_EVIDENCE : supports
+    ASSERTION ||--o{ ASSERTION : correction_ancestor
+    ASSERTION_SEMANTICS {
+        uuid assertion_id PK,FK
+        uuid subject_ref FK
+        uuid object_ref FK
+        string assertion_kind
+        string fact_mode
+        string assertion_origin
+        string predicate_id
+        string ontology_release
+        json record
+    }
+    ASSERTION_DOCUMENT_REFERENCE {
+        uuid id PK
+        uuid document_version_id FK
+        string entity_type
+        string label
+    }
+    ASSERTION_NAME_CLAIM {
+        uuid document_version_id PK,FK
+        string normalized_name PK
+        uuid entity_ref FK
+    }
+```
+
+A document-local reference is not a canonical Entity. An admission name claim is not a canonical name FactSlot. Proposed ontology/time stores are not claimed as existing FK targets: the scoped time resolver rejects unavailable references, and release identifiers remain pinned opaque contract values until their owning features validate them. Source selectors/origins are server-computed immutable snapshots; no supplied eligibility flag is authoritative. The existing assertion version counter may still increment for stale-review detection, while original claim/evidence fields and new extension/reference/name tables reject mutation.

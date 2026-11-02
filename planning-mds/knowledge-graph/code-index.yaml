@@ -4,6 +4,18 @@ coverage_note: Stable solution node IDs are bound to engine/, neuron/, and exper
   ship so agents can route into implementation without broad repository scans. Bindings are retrieval
   hints; source files remain authoritative.
 node_bindings:
+  - id: capability:assertion-eligibility-guards
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      examples:
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      schemas:
+        - planning-mds/schemas/assertion-admission-result-v1.schema.json
+        - planning-mds/schemas/assertion-record-v2.schema.json
+        - planning-mds/schemas/interpretation-result-v2.schema.json
   - id: capability:authorization-enforcement
     paths:
       backend:
@@ -170,6 +182,18 @@ node_bindings:
         - neuron/tests/integration/test_interpretation_rejections.py
         - neuron/tests/integration/test_live_reinterpretation_qualification.py
         - neuron/tests/integration/test_pipeline_selection.py
+  - id: capability:structural-assertion-admission
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      examples:
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      schemas:
+        - planning-mds/schemas/assertion-admission-result-v1.schema.json
+        - planning-mds/schemas/assertion-record-v2.schema.json
+        - planning-mds/schemas/interpretation-result-v2.schema.json
   - id: capability:structural-tenancy-and-entity-identity
     paths:
       backend:
@@ -180,6 +204,18 @@ node_bindings:
         - engine/packages/brain-persistence/src/brain_persistence/tenancy.py
       infra:
         - scripts/dev/reconcile_authx.py
+  - id: capability:versioned-assertion-semantics
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      examples:
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      schemas:
+        - planning-mds/schemas/assertion-admission-result-v1.schema.json
+        - planning-mds/schemas/assertion-record-v2.schema.json
+        - planning-mds/schemas/interpretation-result-v2.schema.json
   - id: capability:versioned-content-contracts
     paths:
       ai:
@@ -217,6 +253,21 @@ node_bindings:
         - engine/apps/api/src/brain_api/routes/content.py
       tests:
         - engine/apps/api/tests/test_content.py
+  - id: entity:assertion-document-reference
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+  - id: entity:assertion-name-claim
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+  - id: entity:assertion-semantics
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
   - id: entity:content-artifact
     paths:
       backend:
