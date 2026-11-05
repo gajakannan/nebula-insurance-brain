@@ -1,0 +1,52 @@
+72:PRODUCT_ROOT_ARTIFACT_PREFIXES = ("planning-mds", "engine", "experience", "neuron", "bruno", "scripts")
+725:        if part in PRODUCT_ROOT_ARTIFACT_PREFIXES:
+738:    base = product_root if run_folder is None or first in PRODUCT_ROOT_ARTIFACT_PREFIXES else run_folder
+742:def resolve_artifact_reference(product_root: Path, run_folder: Path | None, value: str) -> ArtifactResolution:
+844:def validate_artifact_reference(
+856:    resolution = resolve_artifact_reference(product_root, run_folder, value)
+874:def artifact_references(content: str, relative_prefix: str) -> list[str]:
+1319:def extract_closeout_review_date(feature_path: Path) -> date | None:
+1320:    parsed, _ = extract_closeout_review_date_with_shape(feature_path)
+1324:def extract_closeout_review_date_with_shape(feature_path: Path) -> tuple[date | None, str]:
+1404:            closeout_date, shape = extract_closeout_review_date_with_shape(feature_path_for(product_root, row))
+1577:            resolution = resolve_artifact_reference(result.product_root, manifest_path.parent, diff_artifact)
+1603:            resolution = resolve_artifact_reference(result.product_root, manifest_path.parent, value)
+1665:                    resolution = validate_artifact_reference(
+1996:                validate_artifact_reference(
+2420:                resolution = validate_artifact_reference(
+2552:            validate_artifact_reference(
+2605:            validate_artifact_reference(
+2642:            validate_artifact_reference(
+2694:                validate_artifact_reference(
+2834:    resolution = validate_artifact_reference(
+3045:    coverage_path = run_folder / "coverage-report.md"
+3046:    content = safe_read(coverage_path) or ""
+3049:    common = {"feature": feature_id, "run_id": run_id, "path": str(coverage_path)}
+3174:    """§21 — every artifact referenced from commands.log must resolve on disk.
+3200:            validate_artifact_reference(
+3277:            validate_artifact_reference(
+3339:        resolution = validate_artifact_reference(
+3371:        validate_artifact_reference(
+3442:    for ref in artifact_references(coverage_content, "artifacts/coverage/"):
+3443:        validate_artifact_reference(
+3448:            "coverage-report.md artifact reference",
+3449:            missing_rule_id="coverage_claim_without_artifact_fails",
+3454:    for ref in artifact_references(te_content, "artifacts/test-results/"):
+3455:        validate_artifact_reference(
+3460:            "test-execution-report.md artifact reference",
+3466:    for ref in artifact_references(sec_content, "artifacts/security/"):
+3467:        validate_artifact_reference(
+3472:            "security-review-report.md artifact reference",
+3479:        for ref in artifact_references(body, "artifacts/screenshots/"):
+3480:            validate_artifact_reference(
+3785:            _, shape = extract_closeout_review_date_with_shape(feature_path_for(product_root, row))
+agents/product-manager/scripts/tests/test_validate_feature_evidence_phase2a_recommendations.py
+agents/product-manager/scripts/tests/test_validate_feature_evidence_phase2b.py
+agents/product-manager/scripts/tests/test_validate_feature_evidence_security_scans.py
+agents/product-manager/scripts/tests/test_validate_feature_evidence.py
+agents/product-manager/scripts/tests/test_validate_feature_evidence_section23_closure.py
+agents/product-manager/scripts/tests/test_validate_feature_evidence_phase2a.py
+agents/product-manager/scripts/tests/test_validate_feature_evidence_phase2a_role_status.py
+
+Exit code: 0
+

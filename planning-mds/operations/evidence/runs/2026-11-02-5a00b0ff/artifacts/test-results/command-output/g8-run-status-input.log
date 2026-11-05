@@ -1,0 +1,211 @@
+# F0006 Feature Evidence Run
+
+## Run Summary
+
+- Run ID: `2026-11-02-5a00b0ff`
+- Feature: F0006 — Assertion plane + origin + interpretation basis
+- NEBULA_PRODUCT_ROOT: `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain` (recorded environment selection, normalized once)
+- Mode: clean; slice order: assembly-plan; prior completion run: none
+- Contract: 2026-07-11
+- Resumed: 2026-11-03T00:06:32+00:00
+
+## Status
+
+Run resumed after the operator changed Codex permissions. G0 through G3 PASS.
+The five-story implementation, runtime evidence and independent reviews are
+verified. G4 awaits the operator's explicit mitigation/approval decision.
+Manifest remains in-progress.
+No feature approval, final signoff, graph closeout or archive move is claimed.
+The initial attempt's runtime-blocked README is preserved verbatim
+under `artifacts/test-results/initial-runtime-block-readme.md`.
+
+## Evidence Index
+
+| Evidence | Meaning |
+|---|---|
+| `g0-assembly-plan-validation.md` | Architect assembly judgment and implementation constraints |
+| `artifacts/test-results/g0-migration-lineage.json` | Static source migration head: 0010 |
+| `g1-runtime-preflight.md` | Recovered, passing runtime preflight; original failure retained separately |
+| `g2-self-review.md`, `ai-compatibility-self-review.md` | Bounded implementation and compatibility self-reviews |
+| `test-plan.md`, `test-execution-report.md`, `coverage-report.md` | QE's 35-AC map, observed runtime results and changed-code coverage |
+| `deployability-check.md` | Locked builds, image/source integrity, schema packaging and safe rollback |
+| `artifacts/security/` | All four scan classes and final changed-source snapshot |
+| `artifacts/test-results/runtime-*` | Original Docker discovery and WSL transport evidence |
+| `artifacts/runtime/` | Current run's application runtime definitions, owned by DevOps |
+| `commands.log`, `lifecycle-gates.log`, `gate-state.json` | Executed commands, stage results and durable journal |
+| `artifacts/diffs/changed-files.txt` | Current product-repository changed-path inventory |
+
+## Validation Summary
+
+G0 was attempted through `run-gate.py`. Initial failures exposed missing base-run
+headings/diff/G0 decision row from the stopped attempt and premature scan
+completeness checks at G0. The base-run omissions are addressed here. Parent
+orchestration is fixing the validator's security-scan stage boundary; security
+scope stays true, and pending scans are not represented as runs or waivers.
+The repaired stage was rerun successfully with exit 0. Exact failures remain in the journal/logs
+and `artifacts/test-results/g0-validator-diagnostic.json`.
+
+## Open Follow-ups
+
+G4 approval remains required: [approval-summary.md](approval-summary.md) contains
+the concrete review package, WARNING policy result and proposed SEC-01 mitigation.
+The optional unchanged content-worker OCR module now passes all five PostgreSQL
+cases after model-cache/thread setup and explicit database selection. Initial
+errors, interrupted run and skipped attempt remain in the evidence history.
+Inherited Neuron dependency advisories and the low public-response header warning
+are inputs to Security review, not a silent clean scan or an approved waiver.
+
+## Resolved Validator Repair
+
+VF-G0-001 (owner: framework maintainer / Codex) is resolved without waiver.
+Security scan completeness now waits through G0/G1; G2 through closeout retain
+enforcement. The parent ran seven staging regressions in the application runtime
+container; JUnit: `artifacts/test-results/framework-security-scan-staging.xml`.
+G0 then passed through run-gate.py (validate-g0 exit 0). Scope flags remain true;
+all four scan classes were subsequently executed at G2, with raw findings retained.
+
+## Resume
+
+VF-G2-002 is resolved without waiver: the generic framework artifact-reference
+parser now excludes Markdown delimiters and sentence punctuation while retaining
+containment and missing-file checks. Eleven new Markdown/reference regressions
+and the existing closure/security staging tests passed (45 total):
+`artifacts/test-results/framework-artifact-markdown.xml`.
+
+Reuse this run from the framework checkout:
+
+```bash
+python3 agents/scripts/resume-brief.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-11-02-5a00b0ff
+python3 agents/scripts/project_context.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --action feature
+```
+
+The missing journal from the first attempt is now created by actual G0 execution.
+Never initialize another F0006 completion run or publish latest-run.json before G8.
+# Action Context
+
+## Run Identity
+
+- action: feature
+- feature_id: F0006
+- run_id: 2026-11-02-5a00b0ff
+- NEBULA_PRODUCT_ROOT: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+- framework_root: /home/gajap/uSandbox/repos/nebula/nebula-agents
+- mode: clean
+- slice_order_source: assembly-plan
+- run_id_prior: null
+- rerun_of: null
+- contract_version: 2026-07-11
+
+## Inputs
+
+- Environment-supplied product root, normalized once with the framework resolver.
+- Product context loaded by `project_context.py --action feature`.
+- Framework ROUTER, agent map, AGENT-USE, PROJECT-EXTENSIONS and feature action.
+- Tier-1 F0006 lookup, approved assembly plan, STATUS, GETTING-STARTED and five stories.
+- Concurrent manifest check found no other F0006 feature-completion run.
+
+## Assumptions
+
+The approved plan governs the five stories and 35 ACs. It adds versioned assertion
+storage, structural admission and consumer guards; no UI or live extraction activation.
+Runtime, deployment and security booleans agree with the implemented code, migration
+and authorization consumers; frontend remains out of scope. Actual changed paths and
+source hashes are recorded in the manifest and diff/coverage/security inventories.
+
+## Scope Boundaries
+
+Only the approved F0006 five-story assertion contracts/storage/admission/consumer
+guard slice is authorized. No UI, producer activation, new grants or deferred
+F0016/F0018/F0022/F0066 work is introduced. Required roles remain the five listed
+in STATUS.md. Runtime/deployment/security scope booleans remain true after reconciliation.
+
+## Lifecycle Stage
+
+G0 through G3 passed through run-gate.py, including G2 revalidation after the
+page/bbox and metadata-only discovery repairs. G4 now awaits explicit operator
+approval with SEC-01 mitigation justification; see approval-summary.md. The manifest remains
+in-progress. The initial runtime failure is historical and preserved. No operator
+G4 approval, G5 signoff, G7 graph reconciliation or G8 closeout has occurred.
+
+## Resume Update — 2026-11-03T00:06:32+00:00
+
+The operator resumed this same run after changing Codex permissions. Actual G0
+execution created gate-state.json. G0 readiness judgment is recorded; base evidence
+shape and a premature security-scan validator check are being repaired before
+stage completion. The earlier runtime-blocked lifecycle text is historical.
+
+### G0 completed — 2026-11-03T00:07:47+00:00
+
+Assembly judgment and validate-g0 pass. The journal now supports normal resume; no new run was created.
+# F0006 G4 Approval Brief
+
+Run: `2026-11-02-5a00b0ff`. NEBULA_PRODUCT_ROOT: `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`.
+Operator decision: **APPROVED with SEC-01 local-only mitigation**, recorded 2026-11-04T02:37:42.390119+00:00.
+G0 through G3 passed; G4 validation and subsequent signoff/closeout are proceeding.
+
+## Delivered Scope
+
+All five stories and 35 acceptance criteria have observed proof. The additive
+assertion v2 contracts/storage preserve typed/open claims, independent basis/origin/
+mode/confidence and immutable evidence. Structural admission derives locations from
+retained content. Current read, review and commit paths enforce source authority and
+eligibility. New producers, routes, UI, grants, extraction/default activation and
+broader F0016/F0018 orchestration remain outside this approved feature scope.
+
+## Evidence
+
+| Assessment | Current result |
+|---|---|
+| Product acceptance | 35/35 ACs mapped; 306 engine, 15 importer, ten SQLite/PG recovery and five existing content-worker cases passed (336 unique cases across final lanes) |
+| Additional review probes | 25 focused authority/consumer, 17 migration cases overlap final engine suite; two explicit basis-boundary probes also passed |
+| Changed-code coverage | 1170/1266 executable changed production lines, 92.4171%; 20 production files, no instrumentation gaps |
+| Code review | APPROVED; zero open Code Reviewer findings |
+| Architect review | PASS; both implementation findings resolved; independent second review recorded |
+| Security review | PASS WITH RECOMMENDATIONS; zero Critical, one High, one Medium, two Low |
+| Runtime/deployment | Locked non-root images match reviewed sources without source bind mounts; healthy current runtime, migration0011 guard and unchanged defaults verified |
+| Scans | Final secrets/SAST clean; dependency findings retained; anonymous OpenAPI ZAP has no failing rules and one Low header warning |
+
+Canonical evidence: [QE](test-execution-report.md), [coverage](coverage-report.md),
+[Code Reviewer](code-review-report.md), [Architect](architect-implementation-review.md),
+[Security Reviewer](security-review-report.md), [DevOps](deployability-check.md).
+The final engine suite is [g3-sec04-regression.xml](artifacts/test-results/g3-sec04-regression.xml).
+
+A-IMPL-01 (High page/bbox carrier integrity) and SEC-04/A-IMPL-02 (Medium
+pre-READ payload materialization) are repaired and independently re-reviewed.
+Historical failed/retried commands remain in the evidence; they are not described
+as passing. The strict global security-planning audit failed and is carried as SEC-02.
+
+## Severity Policy and Proposed Decision
+
+The actual [standard policy result](artifacts/test-results/command-output/g4-severity-policy.log)
+is **WARNING**, critical=0/high=1. Allowed options are **fix issues**, **approve with
+justification**, or **reject**. Approval requires explicit mitigation justification.
+
+**SEC-01 High, inherited conversion dependency/PDF memory risk.** Accepted PDF input
+can reach vulnerable parser paths. Existing deadlines do not provide effective memory
+containment. External dependency versions are unchanged by F0006; the risk is retained,
+not called clean. Proposed mitigation: accept only the reviewed local, trusted synthetic
+fixture feature completion; preserve the existing pipeline/writer defaults and authorize
+no broader production/untrusted deployment or new producer activation. Parser/dependency
+remediation, resource isolation and qualification are prerequisites to that broader
+exposure. Proposed owners: AI Engineer + DevOps, with Security verification; target
+2026-11-10 and before production/untrusted shared conversion. This is a proposal,
+not a PM acceptance, waiver or owner commitment.
+
+Other proposed follow-ups are SEC-02 (Medium global planning security documents;
+Security + Architect, target2026-11-10/before production qualification), SEC-03 (Low
+nosniff hardening; Backend + DevOps, target2026-11-17), and SEC-05 (Low KG caller-map
+coverage; Architect, required G7 reconciliation or precise static-analysis limitation).
+Their exact evidence, scope and proposed dispositions remain in the Security report.
+
+## Next Required Gates
+
+After an explicit approving operator decision, the PM records its justification
+and validates G4. G5 verifies all required role signoffs, G6 validates candidate
+evidence/trackers, G7 reconciles the graph as Architect, and G8 performs PM archive,
+tracker and manifest closeout. No latest-run pointer or completion approval has
+been published. Primary-owner acknowledgement is also still required before any
+future PR approval/merge; this local feature review does not fabricate it.
+
+Exit code: 0
+

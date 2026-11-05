@@ -1,0 +1,74 @@
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-486-                            at=item.created_at,
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-487-                            add_dependency_on_source=True,
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-488-                        )
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-489-                    )
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-490-        return item
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-491-
+engine/packages/brain-persistence/src/brain_persistence/assertions.py:492:    async def source_keys(self, assertion_id: UUID) -> tuple[ResourceKey, ...]:
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-493-        lineage = await resolve_lineage(self.session, (), None, assertion_ids=(assertion_id,))
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-494-        if not lineage.assertions:
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-495-            raise LookupError("assertion not found")
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-496-        return lineage.keys
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-497-
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-498-    async def project(self, assertion_id: UUID) -> dict:
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-499-        row = await self.session.get(Assertion, assertion_id)
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-500-        if row is None:
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-501-            raise LookupError("assertion not found")
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-502-        sem = await self.session.get(AssertionSemantics, assertion_id)
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-503-        result = {
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-504-            "id": str(row.id),
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-505-            "semantic_contract_version": row.semantic_contract_version,
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-506-            "run_id": str(row.run_id) if row.run_id else None,
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-507-            "origin": row.origin,
+engine/packages/brain-persistence/src/brain_persistence/assertions.py-508-            "original_assertion_id": str(row.original_assertion_id)
+--
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-183-    ) -> None:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-184-        self._session = session
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-185-        self._actor_id = actor_id
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-186-        self._content_store = content_store
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-187-        self._current_items: dict[UUID, ReviewItemRow] = {}
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-188-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py:189:    async def source_keys(self, review_item_ids: list[UUID]) -> tuple[ResourceKey, ...]:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-190-        from brain_persistence.assertions import resolve_lineage
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-191-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-192-        sources: set[ResourceKey] = set()
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-193-        for item_id in sorted(set(review_item_ids), key=str):
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-194-            item = await self._session.get(ReviewItemRow, item_id)
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-195-            if item is not None:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-196-                lineage = await resolve_lineage(
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-197-                    self._session, (), None, assertion_ids=(item.assertion_id,)
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-198-                )
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-199-                if lineage.has_v2:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-200-                    sources.update(lineage.keys)
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-201-        return tuple(sorted(sources))
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-202-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-203-    async def get(self, review_item_id: UUID) -> ReviewItem | None:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-204-        row = await self._session.get(ReviewItemRow, review_item_id)
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-205-        if row is not None:
+--
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-379-    relies on the constraint to arbitrate a race — the constraint only fires if the
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-380-    algorithm itself has a bug."""
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-381-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-382-    def __init__(self, session: AsyncSession) -> None:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-383-        self._session = session
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-384-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py:385:    async def commit_source_keys(
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-386-        self, evidence_refs, review_decision_id
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-387-    ) -> tuple[ResourceKey, ...]:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-388-        from brain_persistence.assertions import resolve_lineage
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-389-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-390-        lineage = await resolve_lineage(self._session, evidence_refs, review_decision_id)
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-391-        return lineage.keys if lineage.has_v2 else ()
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-392-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-393-    def source_access_proof(self, decisions) -> SourceAccessProof | None:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-394-        from brain_persistence.assertions import issue_source_access
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-395-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-396-        return issue_source_access(self._session, decisions)
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-397-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-398-    async def require_commit_sources(self, **kwargs) -> None:
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-399-        from brain_persistence.assertions import require_commit_sources
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-400-
+engine/packages/brain-persistence/src/brain_persistence/repositories.py-401-        await require_commit_sources(self._session, **kwargs)
+
+Exit code: 0
+

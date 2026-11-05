@@ -1,0 +1,15 @@
+E501 Line too long (102 > 100)
+  --> engine/tests/integration/test_assertion_migration.py:21:101
+   |
+19 | def insert_legacy(connection, identity, owner, *, slot="limit", parent=None, version=1):
+20 |     connection.execute(
+21 |         "INSERT INTO assertion(id,run_id,origin,original_assertion_id,version,subject_type,slot_type,"
+   |                                                                                                     ^^
+22 |         "value,model_confidence,interpretation_basis,created_at,tenant_id,knowledge_base_id) "
+23 |         "VALUES(%s,NULL,'MACHINE_EXTRACTION',%s,%s,'Policy',%s,"
+   |
+
+Found 4 errors (3 fixed, 1 remaining).
+
+Exit code: 1
+

@@ -1,0 +1,161 @@
+GATE_SPEC: dict[str, dict[str, Any]] = {
+    "assembly_plan_validation": {
+        "stages": {"G0", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "closeout"},
+        "passing": PASSING_PASS_RESULTS,
+        "artifact": "g0-assembly-plan-validation.md",
+        "condition": "always",
+    },
+    "runtime_preflight": {
+        "stages": {"G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "closeout"},
+        "passing": PASSING_PASS_RESULTS,
+        "artifact": "g1-runtime-preflight.md",
+        "condition": "runtime_bearing",
+    },
+    "self_review": {
+        "stages": {"G2", "G3", "G4", "G5", "G6", "G7", "G8", "closeout"},
+        "passing": PASSING_PASS_RESULTS,
+        "artifact": "g2-self-review.md",
+        "condition": "always",
+    },
+    "deployability": {
+        "stages": {"G2", "G3", "G4", "G5", "G6", "G7", "G8", "closeout"},
+        "passing": PASSING_PASS_RESULTS,
+        "artifact": "deployability-check.md",
+        "condition": "always",
+    },
+    "signoff": {
+        "stages": {"G5", "G6", "G7", "G8", "closeout"},
+        "passing": PASSING_PASS_RESULTS,
+        "artifact": "signoff-ledger.md",
+        "condition": "always",
+    },
+    "pm_closeout": {
+        "stages": {"G8", "closeout"},
+        "passing": PASSING_APPROVED_RESULTS,
+        "artifact": "pm-closeout.md",
+        "condition": "always",
+    },
+    "tracker_sync": {
+        "stages": {"G8", "closeout"},
+        "passing": PASSING_PASS_RESULTS,
+        "artifact": "lifecycle-gates.log",
+        "condition": "always",
+    },
+    "kg_reconciliation": {
+        "stages": {"G7", "G8", "closeout"},
+        "passing": PASSING_PASS_RESULTS,
+        "artifact": "kg-reconciliation.md",
+        "condition": "always",
+    },
+}
+
+# §11 role_results requirement matrix.
+ROLE_SPEC: dict[str, dict[str, Any]] = {
+
+def main():
+    parser = argparse.ArgumentParser(description="Validate user story files for completeness and quality")
+    parser.add_argument(
+        "--strict-warnings",
+        action="store_true",
+        help="Promote key quality warnings (testability/security/audit gaps) to errors",
+    )
+    add_product_root_arg(parser)
+    parser.add_argument(
+        "--story-root-fd",
+        type=int,
+        default=None,
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help=(
+            "Story files or directories to validate. "
+            "Defaults to {NEBULA_PRODUCT_ROOT}/planning-mds/features."
+        ),
+    )
+    args = parser.parse_args()
+
+    product_root = resolve_product_root(args.product_root)
+    paths = args.paths if args.paths else [str(product_root / "planning-mds" / "features")]
+
+        index_content = self.generate_index()
+
+        try:
+            output_path.write_text(index_content, encoding='utf-8')
+            print(f"✅ Story index generated: {output_path}")
+        except Exception as e:
+            print(f"❌ Failed to write index: {e}")
+            sys.exit(1)
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate STORY-INDEX.md for planning features")
+    add_product_root_arg(parser)
+    parser.add_argument(
+        "features_dir",
+        nargs="?",
+        default=None,
+        help="Path to planning features directory (default: {NEBULA_PRODUCT_ROOT}/planning-mds/features)",
+    )
+    args = parser.parse_args()
+
+    if args.features_dir:
+        features_dir = args.features_dir
+    else:
+        product_root = resolve_product_root(args.product_root)
+        features_dir = str(product_root / "planning-mds" / "features")
+
+    print(f"Generating story index for: {features_dir}")
+    print("-" * 60)
+
+    generator = StoryIndexGenerator(features_dir)
+    generator.scan_stories()
+    generator.write_index()
+
+            raise GateDriverError("wrong_run", f"journal run_id {data.get('run_id')} != {run_id}")
+        return data
+    return {"schema_version": JOURNAL_SCHEMA_VERSION, "run_id": run_id, "action": action,
+            "contract_version": contract_version, "stages": {}}
+
+
+def _stage_state(journal: dict[str, Any], stage: str) -> dict[str, Any]:
+    return journal["stages"].setdefault(
+        stage, {"status": "pending", "completed_operations": [],
+                "pending_checkpoint": None, "attestations": []})
+
+
+# --------------------------------------------------------------------------- #
+# Operation identity + hashing
+# --------------------------------------------------------------------------- #
+def op_kind(op: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    kind, body = next(iter(op.items()))
+    return kind, body if isinstance(body, dict) else {}
+
+
+def op_id(op: dict[str, Any], index: int) -> str:
+    kind, body = op_kind(op)
+    if kind == "run":
+        return body.get("id") or f"run:{index}"
+    if kind == "checkpoint":
+        return f"checkpoint:{body.get('id')}"
+    if kind == "write":
+        return f"write:{body.get('artifact')}"
+    return f"{kind}:{index}"
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    h.update(path.read_bytes())
+    return h.hexdigest()
+
+
+def _resolve_evidence(run_folder: Path, rel: str) -> Path:
+    if ".." in Path(rel).parts or Path(rel).is_absolute():
+        raise GateDriverError("evidence_escapes_run", f"evidence path escapes run folder: {rel!r}")
+    return run_folder / rel
+
+
+# A checkpoint's `requires` mixes two kinds of entry: run-folder artifacts
+
+Exit code: 0
+

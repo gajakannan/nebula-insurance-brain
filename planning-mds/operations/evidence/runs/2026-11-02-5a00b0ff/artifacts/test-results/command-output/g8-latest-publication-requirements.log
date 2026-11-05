@@ -1,0 +1,171 @@
+1444:def validate_latest_run(
+
+def extract_closeout_review_date(feature_path: Path) -> date | None:
+    parsed, _ = extract_closeout_review_date_with_shape(feature_path)
+    return parsed
+
+
+def extract_closeout_review_date_with_shape(feature_path: Path) -> tuple[date | None, str]:
+    """Returns (parsed_date, shape) where shape is one of 'parseable',
+    'malformed', 'absent'. 'malformed' means the row exists with a non-empty
+    value that did not parse."""
+    status_path = feature_path / "STATUS.md"
+    if not status_path.exists():
+        return None, "absent"
+    content = safe_read(status_path)
+    if content is None:
+        return None, "absent"
+    section = extract_section(content, "Closeout Summary")
+    for row in parse_table(section):
+        field_name = row.get("Field", "").strip().casefold()
+        if field_name == "closeout review date":
+            value = (row.get("Value", "") or "").strip()
+            parsed = parse_iso_date(value) if value else None
+            if parsed is not None:
+                return parsed, "parseable"
+            if value:
+                return None, "malformed"
+            return None, "absent"
+    return None, "absent"
+
+
+def emit_reopened_reentry_rule_if_missing(
+    row: RegistryRow, product_root: Path, result: Result,
+) -> None:
+    """When an archived feature carries a post-contract `Evidence Reentry Date`
+    and no canonical evidence package exists, fire
+    `reopened_historical_missing_evidence_fails` so the cause is clear in
+    operator output (it complements `post_contract_archived_missing_evidence_fails`).
+    """
+    feature_index_root = feature_index_root_for(product_root, row)
+    if not feature_index_root.exists() or not (feature_index_root / "latest-run.json").exists():
+        result.add_error(
+            "reopened_historical_missing_evidence_fails",
+            "Archived feature has Evidence Reentry Date on/after the effective date but no canonical evidence",
+            feature=row.feature_id, path=str(feature_index_root),
+        )
+
+
+def emit_malformed_closeout_date_rule_if_missing(
+    row: RegistryRow, product_root: Path, result: Result,
+) -> None:
+    """When an active Done feature's STATUS.md has a malformed closeout date,
+    the feature stays governed; fire
+    `active_done_pre_contract_malformed_date_requires_evidence_fails` only if
+    canonical evidence is also missing, so operators see both the cause and
+    the missing package together."""
+    feature_index_root = feature_index_root_for(product_root, row)
+    if not feature_index_root.exists() or not (feature_index_root / "latest-run.json").exists():
+        result.add_error(
+            "active_done_pre_contract_malformed_date_requires_evidence_fails",
+            "Active Done feature has a malformed Closeout review date and no canonical evidence; date cannot qualify for the pre-contract skip",
+            feature=row.feature_id, path=str(feature_index_root),
+        )
+
+
+def governed_rows(rows: dict[str, RegistryRow], product_root: Path, result: Result, effective_date: date) -> list[RegistryRow]:
+    governed: list[RegistryRow] = []
+    for row in rows.values():
+        if row.section == "Retired Features":
+            classify_retired(row, result)
+            continue
+        if row.section == "Archived Features":
+            row_archived_date = archived_date(row)
+            if row_archived_date is None:
+                result.add_error("archived_missing_date_fails", "Archived feature is missing a parseable Archived Date", feature=row.feature_id)
+                continue
+            reentry = evidence_reentry_date(row)
+            if row_archived_date < effective_date and (reentry is None or reentry < effective_date):
+                result.features_skipped_pre_contract_archived += 1
+                continue
+            if row_archived_date < effective_date and reentry is not None and reentry >= effective_date:
+                emit_reopened_reentry_rule_if_missing(row, product_root, result)
+            governed.append(row)
+            continue
+        if row.section == "Active Features":
+            if not is_terminal_active(row):
+                continue
+            closeout_date, shape = extract_closeout_review_date_with_shape(feature_path_for(product_root, row))
+            if shape == "parseable" and closeout_date is not None and closeout_date < effective_date:
+                result.features_skipped_active_done_pre_contract += 1
+                result.add_warning(
+                    "active_done_pre_contract_parseable_skip_warns",
+                    "Active terminal feature has pre-contract Closeout review date; completion evidence skipped",
+                    feature=row.feature_id,
+                )
+                continue
+            if shape == "malformed":
+                emit_malformed_closeout_date_rule_if_missing(row, product_root, result)
+            governed.append(row)
+    return governed
+
+
+def relative_json_path(product_root: Path, value: str) -> Path:
+    cleaned = strip_code(value).rstrip("/")
+    return product_root / cleaned
+
+
+# --------------------------------------------------------------------------- #
+# Latest-run + run resolution
+# --------------------------------------------------------------------------- #
+
+
+def _find_attestation(stage_state: dict[str, Any], checkpoint_id: str) -> dict[str, Any] | None:
+    # Re-attestations append a superseding record so the original verification
+    # remains in the audit trail. The newest record is the operative one.
+    for att in reversed(stage_state.get("attestations", [])):
+        if att.get("checkpoint_id") == checkpoint_id:
+            return att
+    return None
+
+
+def _verify_attested(stage_state: dict[str, Any], checkpoint_id: str, run_folder: Path) -> bool:
+    """True if the checkpoint is attested AND its hashed evidence is unchanged."""
+    att = _find_attestation(stage_state, checkpoint_id)
+    if att is None:
+        return False
+    for ev in att.get("evidence", []):
+        path = _resolve_evidence(run_folder, ev["path"])
+        if not path.exists():
+            raise GateDriverError("checkpoint_output_missing",
+                                  f"attested evidence missing: {ev['path']}")
+        if sha256_file(path) != ev["sha256"]:
+            raise GateDriverError("checkpoint_output_changed",
+                                  f"attested evidence changed since attestation: {ev['path']}")
+    return True
+
+
+# --------------------------------------------------------------------------- #
+# Variables + constraints + lifecycle log
+# --------------------------------------------------------------------------- #
+def build_variables(*, product_root: Path, feature_id: str, slug: str, run_id: str,
+                    run_folder: Path, stage: str) -> dict[str, str]:
+    variables = {
+        "NEBULA_PRODUCT_ROOT": str(product_root),
+        "FEATURE_ID": feature_id,
+        "RUN_ID": run_id,
+        "RUN_FOLDER": str(run_folder),
+        "start_tier": "1",
+        "stage": stage,
+    }
+    # Feature-scoped paths only exist once the slug resolves. Omitting them rather than
+    # interpolating a falsy slug makes _expand() raise unresolved_placeholder for an
+    # action that needs them, instead of silently building ".../F0003-None" and failing
+    # later as a confusing validator error. Base-run-only actions never reference them.
+    if slug:
+        variables["FEATURE_SLUG"] = slug
+        variables["FEATURE_INDEX_ROOT"] = str(
+            product_root / "planning-mds" / "operations" / "evidence" / "features" / f"{feature_id}-{slug}")
+        variables["FEATURE_PATH"] = str(
+            product_root / "planning-mds" / "features" / f"{feature_id}-{slug}")
+    return variables
+
+
+def check_constraints(gate: dict[str, Any], argv: list[str], stage: str) -> None:
+    for constraint in gate.get("constraints", []) or []:
+        forbid = constraint.get("forbid")
+        if forbid and any(forbid in token for token in argv):
+            raise GateDriverError("forbidden_flag",
+
+Exit code: 0
+

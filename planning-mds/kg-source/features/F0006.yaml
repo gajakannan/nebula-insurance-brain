@@ -1,18 +1,17 @@
 id: feature:F0006
 name: Assertion plane + origin + interpretation basis
-path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis
-status: planned
-registry_section: Planned
+path: planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis
+status: archived-done
+registry_section: Archived
 phase: v0.1A
-roadmap_section: Next
+roadmap_section: Completed
 roadmap_order: 5
-rationale: 'F0006 A+B design approved by operator 2026-11-01 in plan run 2026-11-01-7d6d19ce: typed/open claim
-  storage, structural admission and current-consumer guards. Legacy direct-baseline/v1 defaults remain unchanged;
-  implementation not started.'
-validation_gate: Operator approve-phase-a and approve-phase-b recorded in plan run 2026-11-01-7d6d19ce, and
-  approve-phase-b re-recorded in Phase B rework run 2026-11-01-512e9303, after
-  green preapproval checks; final G5 validation and automated approval publication are enforced by the gate
-  journal.
+rationale: 'Completed 2026-11-05 in feature run 2026-11-02-5a00b0ff: five stories / 35 ACs implement additive assertion
+  v2 storage, structural admission and current-consumer guards. Operator G4 accepted SEC-01 for trusted local synthetic
+  fixtures only; direct-baseline/v1 defaults remain unchanged.'
+validation_gate: G0-G7 passed through the gate journal; G8 PM archive/publish/final validation is enforced by the
+  same journal. Explicit operator G4 approval with SEC-01 mitigation recorded 2026-11-05; required role signoffs
+  cover all five stories.
 depends_on:
 - feature:F0001
 - feature:F0002
@@ -52,19 +51,19 @@ uses_schema:
 - schema:interpretation-result
 - schema:problem-details
 notes:
-- Planning bindings only. Five stories and 35 ACs; no runtime paths are bound as implemented. Roadmap stays
-  Next.
-- Automatic result importer remains v1-only; v2 internal storage seam does not enable a live producer. F0016
-  owns durable drop/run adoption, F0018 full commit orchestration, F0022 display and F0066 open extraction/alignment.
-- ADR-0065/0075 stay Proposed; a plan approval is not runtime acceptance. Current pilot unregistered legacy
-  evidence behaviour is explicitly retained; new restrictions follow attributable v2 evidence/review/correction
-  lineage.
-- Phase A+B approved by explicit operator tokens on 2026-11-01, plan run 2026-11-01-7d6d19ce; Phase B rework
-  (v2 corrections inherit basis, v1 legacy EXPLICIT boundary, v2 correction child persistence) re-approved in plan
-  run 2026-11-01-512e9303. All five stories remain Not Started; no feature completion or formal Proposed ADR acceptance is claimed.
+- As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/kg-reconciliation.md;
+  archive path/status and generated trackers are PM G8 ownership.
+- Automatic importer remains v1-only. No live producer/model, UI, grants or broader extraction activation. F0016
+  owns durable drop/run adoption, F0018 full canonical orchestration, F0022 display and F0066 open extraction/alignment.
+- ADR-0065/0075 remain Proposed; bounded feature completion does not accept the broader ADR proof gates. Unregistered
+  legacy pilot evidence compatibility remains explicit; attributable v2 correction lineage retains basis/mood/evidence
+  restrictions.
+- SEC-01 High is accepted only for trusted local synthetic fixtures; AI Engineer + DevOps remediate/qualify dependencies
+  and verify resource isolation, Security verifies, target2026-11-10 and before untrusted/production PDFs. SEC-02
+  Medium global planning-audit carryover targets2026-11-10; SEC-03 Low nosniff follow-up targets2026-11-17.
 story_mappings:
 - id: story:F0006-S0001
-  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md
+  path: planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md
   affects:
   - capability:versioned-assertion-semantics
   - entity:assertion
@@ -75,7 +74,7 @@ story_mappings:
   - adr:0075
   - adr:0065
 - id: story:F0006-S0002
-  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md
+  path: planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md
   affects:
   - capability:versioned-assertion-semantics
   - entity:assertion
@@ -86,7 +85,7 @@ story_mappings:
   - adr:0075
   - adr:0065
 - id: story:F0006-S0003
-  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md
+  path: planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md
   affects:
   - capability:structural-assertion-admission
   - entity:assertion
@@ -96,7 +95,7 @@ story_mappings:
   - adr:0075
   - adr:0065
 - id: story:F0006-S0004
-  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md
+  path: planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md
   affects:
   - capability:assertion-eligibility-guards
   - entity:assertion
@@ -108,7 +107,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0006-S0005
-  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md
+  path: planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md
   affects:
   - capability:versioned-assertion-semantics
   - capability:structural-assertion-admission
@@ -121,3 +120,7 @@ story_mappings:
   - adr:0065
   uses_api_contract:
   - api:brain-api
+archived_date: '2026-11-05'
+completion_state: Five Done stories, 35 observed ACs, 336 unique passing final product cases; changed-code coverage
+  1170/1266 (92.4171%). Both implementation review findings repaired. SEC-01 dependency/resource-isolation remediation
+  is required before untrusted or production PDF ingestion.

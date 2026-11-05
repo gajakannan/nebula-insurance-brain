@@ -1,0 +1,161 @@
+) -> None:
+    """§21 — every PM Acceptance Line identifier that is not a recognized waiver
+    key, coverage, validator-defect rule ID, or §15 keyword should map to a
+    recommendation appearing somewhere in the role reports."""
+    if stage not in {"G8", "closeout"}:
+        return
+    pm_path = run_folder / "pm-closeout.md"
+    pm_content = safe_read(pm_path)
+    if pm_content is None:
+        return
+    acceptances = parse_pm_acceptance_lines(pm_content)
+    if not acceptances:
+        return
+
+    waivers = manifest.get("waivers") or {}
+    waiver_keys = set(waivers.keys()) if isinstance(waivers, dict) else set()
+    validator_defect = waivers.get("validator_defect") if isinstance(waivers, dict) else None
+    rule_ids: set[str] = set()
+    if isinstance(validator_defect, dict):
+        affected = validator_defect.get("affected_rule_ids") or []
+        if isinstance(affected, list):
+            rule_ids = {str(item) for item in affected}
+
+    # Gather all recommendation texts from role reports.
+    rec_texts: list[str] = []
+    for filename in RECOMMENDATION_BEARING_REPORTS:
+        content = safe_read(run_folder / filename) or ""
+        for rec in parse_recommendations(content):
+            rec_texts.append(rec.text.casefold())
+
+    feature_id = row.feature_id
+    run_id = manifest.get("run_id") if isinstance(manifest.get("run_id"), str) else None
+    common = {"feature": feature_id, "run_id": run_id, "path": str(pm_path)}
+
+    for entry in acceptances:
+        identifier = entry.identifier.strip()
+        identifier_lower = identifier.casefold()
+        if identifier_lower in {"coverage"}:
+            continue
+        if identifier in waiver_keys:
+            continue
+        if identifier in rule_ids:
+            continue
+        # If the identifier looks like a recommendation, it must appear in a role report.
+        if any(identifier_lower in text or text in identifier_lower for text in rec_texts):
+            continue
+        # Story-role acceptances (status_recommendation_without_acceptance_fails) are tolerated.
+        if STORY_REF_RE.fullmatch(identifier) or "-" in identifier and identifier.startswith("F"):
+            continue
+        result.add_error(
+            "recommendation_acceptance_mismatch_fails",
+            f"PM Acceptance Line identifier {identifier!r} does not match any role report recommendation, waiver key, or rule ID",
+            **common,
+        )
+
+
+def validate_omissions_filesystem(
+    row: RegistryRow,
+    manifest: dict[str, Any],
+    run_folder: Path,
+    result: Result,
+) -> None:
+    """§21 — an omitted artifact must not actually be present on disk."""
+    omissions = manifest.get("omissions") or []
+    if not isinstance(omissions, list):
+        return
+    feature_id = row.feature_id
+    run_id = manifest.get("run_id") if isinstance(manifest.get("run_id"), str) else None
+    for omission in omissions:
+        if not isinstance(omission, dict):
+            continue
+        artifact = omission.get("artifact")
+        if not isinstance(artifact, str):
+            continue
+        target = run_folder / artifact
+        if target.exists() and target.is_file():
+            result.add_error(
+                "omission_filesystem_mismatch_fails",
+                f"Artifact {artifact!r} is declared as an omission but exists on disk",
+                feature=feature_id,
+                run_id=run_id,
+                path=str(target),
+            )
+
+
+def validate_command_artifact_filesystem(
+    row: RegistryRow,
+    manifest: dict[str, Any],
+    run_folder: Path,
+    result: Result,
+) -> None:
+        if cleaned:
+            body_lines = [line for line in cleaned.splitlines() if line.strip() and not line.lstrip().startswith("#")]
+            non_ref_lines = [line for line in body_lines if "frontend-quality" not in line and "frontend-ux" not in line]
+            if body_lines and not non_ref_lines:
+                result.add_error(
+                    "frontend_global_substituted_for_feature_report_fails",
+                    "test-execution-report.md only points at the global frontend lane; feature-level notes are required",
+                    **common,
+                )
+
+    # stage_g8_requires_tracker_results_fails — at G8/closeout the
+    # lifecycle-gates.log must reference the tracker-sync invocation.
+    if stage in {"G8", "closeout"}:
+        log_path = run_folder / "lifecycle-gates.log"
+        log_content = safe_read(log_path) or ""
+        if not re.search(r"validate-trackers|tracker.?sync", log_content, re.IGNORECASE):
+            result.add_error(
+                "stage_g8_requires_tracker_results_fails",
+                "G8/closeout requires tracker-sync results to appear in lifecycle-gates.log before final validation",
+                **common,
+            )
+
+    # Generated KG layers must be rebuilt, not only checked from a previously
+    # committed snapshot. G7 owns the code-path-derived layers; G8/closeout adds
+    # the path-sensitive coverage layer after the feature archive move.
+    if kg_generated_regeneration_required(manifest, stage):
+        flags = successful_kg_generated_command_flags(run_folder / "commands.log")
+        required = [
+            "symbol regeneration",
+            "symbol validation",
+            "decision regeneration",
+            "decision validation",
+        ]
+        if stage in {"G8", "closeout"}:
+            required.append("coverage report regeneration")
+        missing = [flag for flag in required if not flags.get(flag, False)]
+        if missing:
+            result.add_error(
+                "kg_generated_regeneration_missing_fails",
+                "KG reconciliation must record successful generated-layer rebuild evidence in commands.log: "
+                "`validate.py --regenerate-symbols --check-symbols "
+                "--regenerate-decisions --check-decisions` at G7, plus "
+                "`validate.py --write-coverage-report` after the G8 archive move; "
+                f"missing {', '.join(missing)}",
+                **common,
+            )
+
+    # Artifact-reference cross-checks (§10 / §21).
+    coverage_content = safe_read(run_folder / "coverage-report.md") or ""
+    for ref in artifact_references(coverage_content, "artifacts/coverage/"):
+        validate_artifact_reference(
+            result,
+            result.product_root,
+            run_folder,
+            ref,
+            "coverage-report.md artifact reference",
+            missing_rule_id="coverage_claim_without_artifact_fails",
+            missing_message=f"coverage-report.md references {ref!r} but the artifact is missing",
+            **common,
+        )
+    te_content = safe_read(run_folder / "test-execution-report.md") or ""
+    for ref in artifact_references(te_content, "artifacts/test-results/"):
+        validate_artifact_reference(
+            result,
+            result.product_root,
+            run_folder,
+zsh:1: no matches found: agents/scripts/lib/gate*.py
+
+Exit code: 1
+

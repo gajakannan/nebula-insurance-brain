@@ -13,6 +13,7 @@ exclude-newer-span = "P7D"
 [manifest]
 members = [
     "brain-api",
+    "brain-assertions",
     "brain-content",
     "brain-contracts",
     "brain-domain",
@@ -190,6 +191,7 @@ name = "brain-api"
 version = "0.1.0"
 source = { editable = "apps/api" }
 dependencies = [
+    { name = "brain-assertions" },
     { name = "brain-content" },
     { name = "brain-domain" },
     { name = "brain-persistence" },
@@ -204,6 +206,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "brain-assertions", editable = "packages/brain-assertions" },
     { name = "brain-content", editable = "packages/brain-content" },
     { name = "brain-domain", editable = "packages/brain-domain" },
     { name = "brain-persistence", editable = "packages/brain-persistence" },
@@ -214,6 +217,25 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.9" },
     { name = "sqlalchemy", specifier = ">=2.0.52" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32" },
+]
+
+[[package]]
+name = "brain-assertions"
+version = "0.1.0"
+source = { editable = "packages/brain-assertions" }
+dependencies = [
+    { name = "brain-content" },
+    { name = "brain-contracts" },
+    { name = "brain-domain" },
+    { name = "brain-security" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "brain-content", editable = "packages/brain-content" },
+    { name = "brain-contracts", editable = "packages/brain-contracts" },
+    { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "brain-security", editable = "packages/brain-security" },
 ]
 
 [[package]]
@@ -247,11 +269,17 @@ name = "brain-contracts"
 version = "0.1.0"
 source = { editable = "packages/brain-contracts" }
 dependencies = [
+    { name = "brain-domain" },
+    { name = "jsonschema" },
     { name = "pydantic" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.9" }]
+requires-dist = [
+    { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "jsonschema", specifier = ">=4.23" },
+    { name = "pydantic", specifier = ">=2.9" },
+]
 
 [[package]]
 name = "brain-domain"
@@ -277,6 +305,7 @@ version = "0.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "brain-api" },
+    { name = "brain-assertions" },
     { name = "brain-content" },
     { name = "brain-domain" },
     { name = "brain-persistence" },
@@ -305,6 +334,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "brain-api", editable = "apps/api" },
+    { name = "brain-assertions", editable = "packages/brain-assertions" },
     { name = "brain-content", editable = "packages/brain-content" },
     { name = "brain-domain", editable = "packages/brain-domain" },
     { name = "brain-persistence", editable = "packages/brain-persistence" },
@@ -351,6 +381,7 @@ version = "0.1.0"
 source = { editable = "packages/brain-persistence" }
 dependencies = [
     { name = "asyncpg" },
+    { name = "brain-assertions" },
     { name = "brain-content" },
     { name = "brain-domain" },
     { name = "brain-review" },
@@ -371,6 +402,7 @@ test = [
 requires-dist = [
     { name = "aiosqlite", marker = "extra == 'test'", specifier = ">=0.20" },
     { name = "asyncpg", specifier = ">=0.30" },
+    { name = "brain-assertions", editable = "packages/brain-assertions" },
     { name = "brain-content", editable = "packages/brain-content" },
     { name = "brain-domain", editable = "packages/brain-domain" },
     { name = "brain-review", editable = "packages/brain-review" },

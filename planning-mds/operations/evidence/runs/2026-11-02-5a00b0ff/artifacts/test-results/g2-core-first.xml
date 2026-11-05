@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="14" skipped="0" tests="118" time="0.495" timestamp="2026-11-03T02:05:09.570795+00:00" hostname="5f128650028e"><testcase classname="packages.brain-assertions.tests.test_admission" name="test_genuine_quote_keeps_misread_value_without_claiming_semantic_truth" time="0.006"><failure message="IndexError: tuple index out of range">sample = (ProducerContext(tenant_id=UUID('229deec3-4490-416c-9a73-054ab630814f'), knowledge_base_id=UUID('82472b90-8a23-4519-ab...ubject_ref': '880f5363-e729-40b7-a335-9dbee36acaae', 'object': {'kind': 'LITERAL', 'value': {'amount': 5000000}}, ...})
+
+    async def test_genuine_quote_keeps_misread_value_without_claiming_semantic_truth(sample):
+        context, sources, entity, record = sample
+        raw = canonical_json(record)
+        batch = await AssertionAdmissionService(sources).check_items(context, [entity], [raw])
+&gt;       assert batch.accepted[0].record.object.value == {"amount": 5000000}
+               ^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+engine/packages/brain-assertions/tests/test_admission.py:60: IndexError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_admission" name="test_all_structural_failures_and_partial_outcomes_survive" time="0.004"><failure message="AssertionError: assert {'BLOCK_UNINT...CATED_OUTPUT'} == {'BLOCK_UNINT...CATED_OUTPUT'}&#10;  &#10;  Extra items in the right set:&#10;  'QUOTE_NOT_IN_SOURCE'&#10;  'NAME_NOT_IN_QUOTE'&#10;  'TIME_NOT_IN_QUOTE'&#10;  Use -v to get more diff">sample = (ProducerContext(tenant_id=UUID('eef9268d-b992-4f1f-87f2-78ad21886ef6'), knowledge_base_id=UUID('ecd51a6d-a913-4467-b2...ubject_ref': '0cc94b56-c7db-4dc4-868c-f427cfd2336f', 'object': {'kind': 'LITERAL', 'value': {'amount': 5000000}}, ...})
+
+    async def test_all_structural_failures_and_partial_outcomes_survive(sample):
+        context, sources, entity, record = sample
+        time_id = uuid4()
+        sources.time[time_id] = TimeReference(time_id, context.tenant_id, context.knowledge_base_id,
+                                            context.artifact_id, "b", "December 31")
+        record["time_mention_refs"] = [str(time_id)]
+        record["evidence"][0] = {**record["evidence"][0], "quote": "Cedar invented quote"}
+        entity["label"] = "Missing Name"
+        batch = await AssertionAdmissionService(sources).check_items(
+            context, [entity], [canonical_json(record), b'{"broken":'],
+            truncated=True, uninterpreted_blocks=["lost-block"],
+        )
+        assert not batch.accepted and batch.requires_partial
+&gt;       assert {o.reason for o in batch.outcomes} == {
+            "NAME_NOT_IN_QUOTE", "QUOTE_NOT_IN_SOURCE", "TIME_NOT_IN_QUOTE", "MALFORMED_ITEM",
+            "TRUNCATED_OUTPUT", "BLOCK_UNINTERPRETED",
+        }
+E       AssertionError: assert {'BLOCK_UNINT...CATED_OUTPUT'} == {'BLOCK_UNINT...CATED_OUTPUT'}
+E         
+E         Extra items in the right set:
+E         'QUOTE_NOT_IN_SOURCE'
+E         'NAME_NOT_IN_QUOTE'
+E         'TIME_NOT_IN_QUOTE'
+E         Use -v to get more diff
+
+engine/packages/brain-assertions/tests/test_admission.py:81: AssertionError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_admission" name="test_partial_batch_retains_independent_complete_items" time="0.003"><failure message="AssertionError: assert [] == ['efec8212-63...61e111ae613d']&#10;  &#10;  Right contains one more item: 'efec8212-63a4-4dd1-9075-61e111ae613d'&#10;  Use -v to get more diff">sample = (ProducerContext(tenant_id=UUID('4ce9ae56-c0b6-4be8-99d3-8d679ff909e9'), knowledge_base_id=UUID('79ab8eae-d5b3-4720-8c...ubject_ref': '53f5a18f-0000-4a09-9eed-137b544f5078', 'object': {'kind': 'LITERAL', 'value': {'amount': 5000000}}, ...})
+
+    async def test_partial_batch_retains_independent_complete_items(sample):
+        context, sources, entity, record = sample
+        batch = await AssertionAdmissionService(sources).check_items(
+            context, [entity], [canonical_json(record), b'{'], truncated=True,
+        )
+&gt;       assert [str(item.record.id) for item in batch.accepted] == [record["id"]]
+E       AssertionError: assert [] == ['efec8212-63...61e111ae613d']
+E         
+E         Right contains one more item: 'efec8212-63a4-4dd1-9075-61e111ae613d'
+E         Use -v to get more diff
+
+engine/packages/brain-assertions/tests/test_admission.py:93: AssertionError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_admission" name="test_undeclared_named_object_is_retained_as_literal_signal" time="0.002"><failure message="IndexError: tuple index out of range">sample = (ProducerContext(tenant_id=UUID('b9c84661-24cc-4733-a9b6-55e98dc13057'), knowledge_base_id=UUID('1ad075cb-03de-4ccc-b9...972c-ca46a511fbcd', 'object': {'kind': 'ENTITY', 'ref': '72f1d1d9-e4df-419b-9e4c-9a9cf43bda4b', 'name': 'Cedar'}, ...})
+
+    async def test_undeclared_named_object_is_retained_as_literal_signal(sample):
+        context, sources, entity, record = sample
+        record["object"] = {"kind": "ENTITY", "ref": str(uuid4()), "name": "Cedar"}
+        batch = await AssertionAdmissionService(sources).check_items(context, [entity], [canonical_json(record)])
+&gt;       assert batch.accepted[0].record.object.value == "Cedar"
+               ^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+engine/packages/brain-assertions/tests/test_admission.py:101: IndexError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_admission" name="test_unknown_subject_and_time_are_not_dropped_silently" time="0.003"><failure message="assert 0 == 2&#10; +  where 0 = len([])">sample = (ProducerContext(tenant_id=UUID('fae86748-6be8-4abb-b2b7-c56993d65436'), knowledge_base_id=UUID('8d7a9117-ac61-48d8-a5...ubject_ref': 'edea2029-fa92-4875-9e30-4f1cab666d78', 'object': {'kind': 'LITERAL', 'value': {'amount': 5000000}}, ...})
+
+    async def test_unknown_subject_and_time_are_not_dropped_silently(sample):
+        context, sources, entity, record = sample
+        record.update(subject_ref=str(uuid4()), time_mention_refs=[str(uuid4())])
+        batch = await AssertionAdmissionService(sources).check_items(context, [entity], [canonical_json(record)])
+        assert not batch.accepted
+&gt;       assert len([o for o in batch.outcomes if o.reason == "UNKNOWN_REFERENCE"]) == 2
+E       assert 0 == 2
+E        +  where 0 = len([])
+
+engine/packages/brain-assertions/tests/test_admission.py:110: AssertionError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_admission" name="test_foreign_evidence_is_rejected_before_the_source_port" time="0.003"><failure message="AssertionError: assert {'MALFORMED_ITEM'} == {'UNKNOWN_REFERENCE'}&#10;  &#10;  Extra items in the left set:&#10;  'MALFORMED_ITEM'&#10;  Extra items in the right set:&#10;  'UNKNOWN_REFERENCE'&#10;  Use -v to get more diff">sample = (ProducerContext(tenant_id=UUID('c846d6aa-79a5-48d8-988b-636b42e59312'), knowledge_base_id=UUID('580824a6-c905-4f85-b9...ubject_ref': '72e3ac75-2d85-4a41-bdb1-12575a2d27a2', 'object': {'kind': 'LITERAL', 'value': {'amount': 5000000}}, ...})
+
+    async def test_foreign_evidence_is_rejected_before_the_source_port(sample):
+        context, sources, entity, record = sample
+        record["evidence"][0] = {**record["evidence"][0], "artifact_id": str(uuid4())}
+        entity["introducing_evidence"] = record["evidence"]
+        batch = await AssertionAdmissionService(sources).check_items(context, [entity], [canonical_json(record)])
+        assert not batch.accepted and not sources.calls
+&gt;       assert {o.reason for o in batch.outcomes} == {"UNKNOWN_REFERENCE"}
+E       AssertionError: assert {'MALFORMED_ITEM'} == {'UNKNOWN_REFERENCE'}
+E         
+E         Extra items in the left set:
+E         'MALFORMED_ITEM'
+E         Extra items in the right set:
+E         'UNKNOWN_REFERENCE'
+E         Use -v to get more diff
+
+engine/packages/brain-assertions/tests/test_admission.py:119: AssertionError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_admission" name="test_source_authorization_and_infrastructure_errors_abort_batch" time="0.002"><failure message="Failed: DID NOT RAISE PermissionError">sample = (ProducerContext(tenant_id=UUID('002d6944-9380-49fe-8c04-6af47d5846c9'), knowledge_base_id=UUID('790ac334-f121-4776-95...ubject_ref': '6d2e22d6-4cc0-4b54-8c90-a8a98435865f', 'object': {'kind': 'LITERAL', 'value': {'amount': 5000000}}, ...})
+
+    async def test_source_authorization_and_infrastructure_errors_abort_batch(sample):
+        context, sources, entity, record = sample
+        sources.denied = True
+&gt;       with pytest.raises(PermissionError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+engine/packages/brain-assertions/tests/test_admission.py:125: Failed</failure></testcase><testcase classname="packages.brain-assertions.tests.test_admission" name="test_model_offsets_do_not_disambiguate_repeated_text" time="0.002"><failure message="IndexError: tuple index out of range">sample = (ProducerContext(tenant_id=UUID('4be3a655-1f27-476d-9923-657360ef1ca2'), knowledge_base_id=UUID('cc931100-5676-4e7b-80...ubject_ref': 'f230f79b-d032-481a-ae36-d1905c60ba1d', 'object': {'kind': 'LITERAL', 'value': {'amount': 5000000}}, ...})
+
+    async def test_model_offsets_do_not_disambiguate_repeated_text(sample):
+        context, sources, entity, record = sample
+        sources.text += " " + sources.text
+        batch = await AssertionAdmissionService(sources).check_items(context, [entity], [canonical_json(record)])
+&gt;       locator = batch.accepted[0].server_evidence[0]
+                  ^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+engine/packages/brain-assertions/tests/test_admission.py:133: IndexError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[typed]" time="0.002"><failure message="brain_contracts.assertions.AssertionContractError: ASSERTION_CONTRACT_INVALID">case = {'id': 'typed', 'schema': '../../schemas/assertion-record-v2.schema.json', 'valid': True, 'input': {'id': '00000000-00...00-0000-4000-8000-000000000002', 'object': {'kind': 'LITERAL', 'value': {'amount': '500000', 'currency': 'USD'}}, ...}}
+
+    @pytest.mark.parametrize("case", CASES, ids=[c["id"] for c in CASES])
+    def test_authored_contract_shape_expectations_and_packaged_schema_equality(case):
+        name = Path(case["schema"]).name
+        packaged = ROOT / "engine/packages/brain-contracts/src/brain_contracts/schemas" / name
+        assert packaged.read_bytes() == (ROOT / "planning-mds/schemas" / name).read_bytes()
+        if case["valid"]:
+            validate_contract(name, case["input"])
+            if name == "assertion-record-v2.schema.json":
+&gt;               assert parse_assertion(canonical_json(case["input"])).model_dump(mode="json") == {
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    **case["input"], "evidence": [{**e, "model_selector": None} for e in case["input"]["evidence"]],
+                }
+
+engine/packages/brain-assertions/tests/test_contracts.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'{"assertion_kind":"TYPED_ASSERTION","evidence":[{"artifact_id":"00000000-0000-4000-8000-000000000001","block_id":"bl...ce_relation":null,"subject_ref":"00000000-0000-4000-8000-000000000002","time_mention_refs":[],"valid_time_claim":null}'
+
+    def parse_assertion(raw: bytes | str) -&gt; AssertionRecordV2:
+        try:
+            value = decode_json(raw)
+            validate_contract("assertion-record-v2.schema.json", value)
+            return AssertionRecordV2.model_validate_json(canonical_json(value))
+        except (ValueError, TypeError):
+&gt;           raise AssertionContractError() from None
+E           brain_contracts.assertions.AssertionContractError: ASSERTION_CONTRACT_INVALID
+
+engine/packages/brain-contracts/src/brain_contracts/assertions.py:310: AssertionContractError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[open]" time="0.001"><failure message="brain_contracts.assertions.AssertionContractError: ASSERTION_CONTRACT_INVALID">case = {'id': 'open', 'schema': '../../schemas/assertion-record-v2.schema.json', 'valid': True, 'input': {'id': '00000000-000...ref': '00000000-0000-4000-8000-000000000002', 'object': {'kind': 'LITERAL', 'value': 'Cedar Subcontractors LLC'}, ...}}
+
+    @pytest.mark.parametrize("case", CASES, ids=[c["id"] for c in CASES])
+    def test_authored_contract_shape_expectations_and_packaged_schema_equality(case):
+        name = Path(case["schema"]).name
+        packaged = ROOT / "engine/packages/brain-contracts/src/brain_contracts/schemas" / name
+        assert packaged.read_bytes() == (ROOT / "planning-mds/schemas" / name).read_bytes()
+        if case["valid"]:
+            validate_contract(name, case["input"])
+            if name == "assertion-record-v2.schema.json":
+&gt;               assert parse_assertion(canonical_json(case["input"])).model_dump(mode="json") == {
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    **case["input"], "evidence": [{**e, "model_selector": None} for e in case["input"]["evidence"]],
+                }
+
+engine/packages/brain-assertions/tests/test_contracts.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'{"assertion_kind":"OPEN_STATEMENT","evidence":[{"artifact_id":"00000000-0000-4000-8000-000000000001","block_id":"blo...tear-off work to","subject_ref":"00000000-0000-4000-8000-000000000002","time_mention_refs":[],"valid_time_claim":null}'
+
+    def parse_assertion(raw: bytes | str) -&gt; AssertionRecordV2:
+        try:
+            value = decode_json(raw)
+            validate_contract("assertion-record-v2.schema.json", value)
+            return AssertionRecordV2.model_validate_json(canonical_json(value))
+        except (ValueError, TypeError):
+&gt;           raise AssertionContractError() from None
+E           brain_contracts.assertions.AssertionContractError: ASSERTION_CONTRACT_INVALID
+
+engine/packages/brain-contracts/src/brain_contracts/assertions.py:310: AssertionContractError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[open-predicate]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[open-inferred]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[typed-no-release]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[bad-mode]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[bad-origin]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[bad-confidence]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[empty-quote]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[empty-mood]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[unknown-property]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[mood-retained]" time="0.001"><failure message="brain_contracts.assertions.AssertionContractError: ASSERTION_CONTRACT_INVALID">case = {'id': 'mood-retained', 'schema': '../../schemas/assertion-record-v2.schema.json', 'valid': True, 'input': {'id': '000...ref': '00000000-0000-4000-8000-000000000002', 'object': {'kind': 'LITERAL', 'value': 'Cedar Subcontractors LLC'}, ...}}
+
+    @pytest.mark.parametrize("case", CASES, ids=[c["id"] for c in CASES])
+    def test_authored_contract_shape_expectations_and_packaged_schema_equality(case):
+        name = Path(case["schema"]).name
+        packaged = ROOT / "engine/packages/brain-contracts/src/brain_contracts/schemas" / name
+        assert packaged.read_bytes() == (ROOT / "planning-mds/schemas" / name).read_bytes()
+        if case["valid"]:
+            validate_contract(name, case["input"])
+            if name == "assertion-record-v2.schema.json":
+&gt;               assert parse_assertion(canonical_json(case["input"])).model_dump(mode="json") == {
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    **case["input"], "evidence": [{**e, "model_selector": None} for e in case["input"]["evidence"]],
+                }
+
+engine/packages/brain-assertions/tests/test_contracts.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'{"assertion_kind":"OPEN_STATEMENT","evidence":[{"artifact_id":"00000000-0000-4000-8000-000000000001","block_id":"blo...tear-off work to","subject_ref":"00000000-0000-4000-8000-000000000002","time_mention_refs":[],"valid_time_claim":null}'
+
+    def parse_assertion(raw: bytes | str) -&gt; AssertionRecordV2:
+        try:
+            value = decode_json(raw)
+            validate_contract("assertion-record-v2.schema.json", value)
+            return AssertionRecordV2.model_validate_json(canonical_json(value))
+        except (ValueError, TypeError):
+&gt;           raise AssertionContractError() from None
+E           brain_contracts.assertions.AssertionContractError: ASSERTION_CONTRACT_INVALID
+
+engine/packages/brain-contracts/src/brain_contracts/assertions.py:310: AssertionContractError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[result-v2]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[legacy-remains-valid]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[v2-rejected-by-legacy]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_authored_contract_shape_expectations_and_packaged_schema_equality[protected-admission-result]" time="0.001"><failure message="pydantic_core._pydantic_core.ValidationError: 2 validation errors for AdmissionBatch&#10;accepted&#10;  Input should be a valid array [type=tuple_type, input_value=[{'blocked_operations': [... 'text_origin': None}]}], input_type=list]&#10;    For further information visit https://errors.pydantic.dev/2.13/v/tuple_type&#10;outcomes&#10;  Input should be a valid array [type=tuple_type, input_value=[{'block_id': 'block-1', ... 'QUOTE_NOT_IN_SOURCE'}], input_type=list]&#10;    For further information visit https://errors.pydantic.dev/2.13/v/tuple_type">case = {'id': 'protected-admission-result', 'schema': '../../schemas/assertion-admission-result-v1.schema.json', 'valid': Tru...Inc. — Each Occurrence Limit $500,000', ...}], 'review_required': True, 'reasons': ['LEGACY_UNQUALIFIED'], ...}], ...}}
+
+    @pytest.mark.parametrize("case", CASES, ids=[c["id"] for c in CASES])
+    def test_authored_contract_shape_expectations_and_packaged_schema_equality(case):
+        name = Path(case["schema"]).name
+        packaged = ROOT / "engine/packages/brain-contracts/src/brain_contracts/schemas" / name
+        assert packaged.read_bytes() == (ROOT / "planning-mds/schemas" / name).read_bytes()
+        if case["valid"]:
+            validate_contract(name, case["input"])
+            if name == "assertion-record-v2.schema.json":
+                assert parse_assertion(canonical_json(case["input"])).model_dump(mode="json") == {
+                    **case["input"], "evidence": [{**e, "model_selector": None} for e in case["input"]["evidence"]],
+                }
+            if name == "assertion-admission-result-v1.schema.json":
+&gt;               AdmissionBatch.model_validate_json(canonical_json(case["input"]))
+E               pydantic_core._pydantic_core.ValidationError: 2 validation errors for AdmissionBatch
+E               accepted
+E                 Input should be a valid array [type=tuple_type, input_value=[{'blocked_operations': [... 'text_origin': None}]}], input_type=list]
+E                   For further information visit https://errors.pydantic.dev/2.13/v/tuple_type
+E               outcomes
+E                 Input should be a valid array [type=tuple_type, input_value=[{'block_id': 'block-1', ... 'QUOTE_NOT_IN_SOURCE'}], input_type=list]
+E                   For further information visit https://errors.pydantic.dev/2.13/v/tuple_type
+
+engine/packages/brain-assertions/tests/test_contracts.py:33: ValidationError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[{&quot;id&quot;:1,&quot;id&quot;:2}]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[{&quot;nested&quot;:{&quot;x&quot;:1,&quot;x&quot;:2}}]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[{&quot;x&quot;:NaN}]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[{&quot;x&quot;:Infinity}]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[{&quot;x&quot;:1e999}]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[{&quot;x&quot;:&quot;\ud800&quot;}]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[{&quot;x&quot;:&quot;\xff&quot;}]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[[]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_strict_json_rejects_invalid_nested_values_without_echoing_input[null garbage]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_unknown_python_values_cannot_enter_json_contract" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_every_other_explicit_version_is_unsupported[None]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_every_other_explicit_version_is_unsupported[True]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_every_other_explicit_version_is_unsupported[False]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_every_other_explicit_version_is_unsupported[1]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_every_other_explicit_version_is_unsupported[3]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_every_other_explicit_version_is_unsupported[2.0]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_every_other_explicit_version_is_unsupported[2]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_explicit_v2_is_refused_by_legacy_reader_before_shape_validation" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_contracts" name="test_v2_result_dispatch_and_legacy_behavior" time="0.016"><failure message="brain_contracts.assertions.AssertionContractError: ASSERTION_CONTRACT_INVALID">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x763d99c2df40&gt;
+
+    def test_v2_result_dispatch_and_legacy_behavior(monkeypatch):
+        v2 = copy.deepcopy(next(c["input"] for c in CASES if c["id"] == "v2-rejected-by-legacy"))
+        import urllib.request
+        monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **kw: pytest.fail("remote schema resolution"))
+&gt;       assert parse_result(canonical_json(v2)).schema_version == 2
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+engine/packages/brain-assertions/tests/test_contracts.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+raw = b'{"artifact_id":"00000000-0000-4000-8000-000000000001","assertions":[{"assertion_kind":"TYPED_ASSERTION","evidence":[...sh":"synthetic"},"run_id":"00000000-0000-4000-8000-000000000005","schema_version":2,"status":"complete","warnings":[]}'
+allow_v2 = True
+
+    def parse_result(raw: bytes | str, *, allow_v2: bool = True) -&gt; InterpretationResult | InterpretationResultV2:
+        value = decode_json(raw)
+        if not isinstance(value, dict):
+            raise AssertionContractError()
+        if "schema_version" not in value:
+            try:
+                validate_contract("interpretation-result.schema.json", value)
+                return InterpretationResult.model_validate_json(canonical_json(value))
+            except (ValueError, TypeError):
+                raise AssertionContractError() from None
+        if type(value["schema_version"]) is not int or value["schema_version"] != 2 or not allow_v2:
+            raise AssertionContractUnsupported()
+        try:
+            return InterpretationResultV2.model_validate_json(canonical_json(value))
+        except (ValueError, TypeError):
+&gt;           raise AssertionContractError() from None
+E           brain_contracts.assertions.AssertionContractError: ASSERTION_CONTRACT_INVALID
+
+engine/packages/brain-contracts/src/brain_contracts/dispatch.py:51: AssertionContractError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_supplied_mood_cannot_be_cleared_by_confidence_mode_or_review[subject to]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_supplied_mood_cannot_be_cleared_by_confidence_mode_or_review[offered]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_supplied_mood_cannot_be_cleared_by_confidence_mode_or_review[warrants]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_supplied_mood_cannot_be_cleared_by_confidence_mode_or_review[if sprinkler installed]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_open_and_mood_are_independent" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_described_initial_use_needs_review_and_cannot_close_after_review" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_unqualified_or_unresolved_addition_does_not_clear_described[extra0]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_unqualified_or_unresolved_addition_does_not_clear_described[extra1]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_verified_support_clears_described_only_and_operative_policy_is_admissible[STATED]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_verified_support_clears_described_only_and_operative_policy_is_admissible[OCR]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_verified_support_clears_described_only_and_operative_policy_is_admissible[TRANSCRIBED]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_eligibility" name="test_unknown_origin_and_unresolved_support_keep_review_restrictions" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_matches_without_changing_originals[Caf\xe9-Cafe\u0301]" time="0.001" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_matches_without_changing_originals[Stra\xdfe-STRASSE]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_matches_without_changing_originals[Cedar\t Roofing\nCo.-cedar roofing co.]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_matches_without_changing_originals[a $ 500,000 limit-A $500,000 LIMIT]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_matches_without_changing_originals[indemni-\nfication-indemnification]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_matches_without_changing_originals[indemni\u2010\r\nfication-indemnification]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_matches_without_changing_originals[\u1100\u1161-\uac00]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_preserves_numbers_symbols_and_non_line_hyphens[$500,000-$5,000,000]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_preserves_numbers_symbols_and_non_line_hyphens[500.00-50000]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_preserves_numbers_symbols_and_non_line_hyphens[USD 5-EUR 5]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_preserves_numbers_symbols_and_non_line_hyphens[part-\n2-part2]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_normalization_preserves_numbers_symbols_and_non_line_hyphens[pre-existing-preexisting]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_original_ranges_are_not_model_offsets" time="0.000"><failure message="assert 37 == 36">def test_original_ranges_are_not_model_offsets():
+        source = "Limit: $ \t500,000 only"
+        location = locate_quote(source, "$500,000", {"block_id": "b", "native_ref": "p:2", "char_start": 20})
+        assert location.precision == "span"
+        assert location.selector["char_start"] == 27
+&gt;       assert location.selector["char_end"] == 36
+E       assert 37 == 36
+
+engine/packages/brain-assertions/tests/test_normalization.py:42: AssertionError</failure></testcase><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_repetition_and_multiregion_never_fabricate_unique_span" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_verified_cell_identity_survives_equal_text_without_guessing_cells" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_partial_casefold_and_combining_clusters_coarsen_honestly" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_coarse_and_unresolved_locations_stay_honest[selector0-page]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_coarse_and_unresolved_locations_stay_honest[selector1-document]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_coarse_and_unresolved_locations_stay_honest[selector2-unresolved]" time="0.000" /><testcase classname="packages.brain-assertions.tests.test_normalization" name="test_coarse_and_unresolved_locations_stay_honest[selector3-unresolved]" time="0.000" /><testcase classname="packages.brain-security.tests.test_execution" name="test_allowed_read_loads_after_the_decision_and_commits_audit_first" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_denied_read_never_loads_and_durably_audits_the_denial" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_nonexistent_resource_is_the_same_denial_with_null_scope" time="0.001" /><testcase classname="packages.brain-security.tests.test_execution" name="test_audit_failure_releases_no_payload" time="0.001" /><testcase classname="packages.brain-security.tests.test_execution" name="test_load_failure_is_audited_as_failed_in_a_fresh_transaction" time="0.001" /><testcase classname="packages.brain-security.tests.test_execution" name="test_stale_policy_or_unreadable_authority_fails_closed" time="0.001" /><testcase classname="packages.brain-security.tests.test_execution" name="test_mutation_commits_effect_and_decision_together" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_batch_is_all_authorized_before_any_effect" time="0.001" /><testcase classname="packages.brain-security.tests.test_execution" name="test_failed_mutation_rolls_back_and_audits_failure" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_mutation_commit_failure_is_unavailable_not_success" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_mutation_audit_staging_failure_prevents_effect" time="0.005" /><testcase classname="packages.brain-security.tests.test_execution" name="test_mutation_expiry_while_staging_audit_rolls_back_success" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_expiry_between_decision_and_effect_denies" time="0.001" /><testcase classname="packages.brain-security.tests.test_execution" name="test_delegated_read_binds_executor_and_acting_user" time="0.001" /><testcase classname="packages.brain-security.tests.test_execution" name="test_dependencies_are_hydrated_through_the_store" time="0.001" /><testcase classname="packages.brain-security.tests.test_execution" name="test_additional_source_read_commits_with_mutation_once" time="0.003" /><testcase classname="packages.brain-security.tests.test_execution" name="test_denied_primary_never_discovers_sources" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_source_denial_prevents_effect_and_audits_combined_decisions[foreign]" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_source_denial_prevents_effect_and_audits_combined_decisions[revoked]" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_source_denial_prevents_effect_and_audits_combined_decisions[expired]" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_source_discovery_failure_rolls_back_and_audits_primary_failure" time="0.002" /><testcase classname="packages.brain-security.tests.test_execution" name="test_source_audit_failure_prevents_mutation" time="0.003" /><testcase classname="packages.brain-temporal.tests.test_commit" name="test_first_commit_on_an_empty_slot_creates_one_open_version" time="0.001" /><testcase classname="packages.brain-temporal.tests.test_commit" name="test_endorsement_answers_the_section_87_matrix" time="0.001" /><testcase classname="packages.brain-temporal.tests.test_commit" name="test_retroactive_correction_splits_the_endorsement_into_two_pieces" time="0.001" /><testcase classname="packages.brain-temporal.tests.test_commit" name="test_stale_expected_version_is_rejected" time="0.001" /><testcase classname="packages.brain-temporal.tests.test_commit" name="test_empty_range_is_rejected_before_any_write" time="0.001" /><testcase classname="packages.brain-temporal.tests.test_commit" name="test_missing_slot_raises_not_found" time="0.001" /><testcase classname="packages.brain-temporal.tests.test_commit" name="test_slot_outside_the_authorized_scope_is_not_found" time="0.001" /><testcase classname="packages.brain-temporal.tests.test_outbox" name="test_run_once_processes_all_unprocessed_events" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_outbox" name="test_replay_after_a_partial_run_only_processes_what_remains_unprocessed" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_outbox" name="test_run_once_respects_the_limit" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_inverted_range_is_rejected" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_empty_range_is_rejected" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_open_ended_range_is_valid" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_disjoint_ranges_do_not_overlap" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_touching_ranges_do_not_overlap_half_open" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_overlapping_ranges_overlap" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_open_ended_range_overlaps_anything_after_its_start" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_split_remainder_new_fully_covers_old_leaves_nothing" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_split_remainder_new_in_the_middle_leaves_two_pieces" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_split_remainder_new_at_the_start_leaves_one_trailing_piece" time="0.000" /><testcase classname="packages.brain-temporal.tests.test_ranges" name="test_split_remainder_new_at_the_open_end_leaves_one_leading_piece" time="0.000" /></testsuite></testsuites>

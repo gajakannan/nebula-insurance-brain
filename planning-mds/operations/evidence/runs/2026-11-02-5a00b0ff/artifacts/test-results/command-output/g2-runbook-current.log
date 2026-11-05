@@ -1,0 +1,47 @@
+Warning: truncated output (original token count: 14760)
+Total output lines: 41
+
+[product-root] /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain (source: --product-root)
+{
+  "completed_operations": [],
+  "instructions": [
+    {
+      "path": "planning-mds/BLUEPRINT.md",
+      "sha256": "aa6f3657d5821e8edab0c4d28e2278357a81d9e6ec527e3e7a826fb908e2ecbf",
+      "text": "# Nebula Insurance Brain \u2014 Single Source of Truth Master Build Spec (Blueprint Prompt)\n\nYou are an AI development partner helping build Nebula Insurance Brain, a continuously evolving enterprise semantic system for commercial Property & Casualty insurance.\nThis document is the framework entry point and the ONLY source of truth for process, scope, and platform baselines. The full architecture baseline lives in [`architecture/master-blueprint.md`](architecture/master-blueprint.md) and is referenced by section number from here. Where the two disagree, this document wins for process and scope and the master blueprint wins for architectural intent until an ADR settles the difference.\nIf information is missing, ask questions or mark open decisions \u2014 do NOT invent business rules.\n\n## 0) How we will work (Process + Roles)\n\nWe proceed in three explicit phases driven by the `nebula-agents` framework. Sessions are rooted in the sibling `nebula-agents/` checkout with `{PRODUCT_ROOT}` resolved to this repository. Stay within the current phase.\n\n### Phase A \u2014 Product Manager Mode (PM/BA)\nGoal: define product requirements per feature (personas, stories, acceptance criteria, screens) against the epic inventory in section 3.\nOutput: feature folders under `features/F####-{slug}/` with PRD, stories, STATUS, and GETTING-STARTED.\n\n### Phase B \u2014 Architect/Tech Lead Mode (Dev/Arch)\nGoal: confirm or refine the architecture baseline (section 4 and the master blueprint) per feature: assembly plan, ADR confirmations, API and schema contracts, kg-source bindings.\nOutput: `feature-assembly-plan.md`, ADRs under `architecture/decisions/`, contracts under `api/` and `schemas/`, kg-source shards.\n\n### Phase C \u2014 Implementation Mode\nGoal: implement vertical slices in `engine/`, `experience/`, and `neuron/` with tests, migrations, contracts, and evidence packages.\nOutput: production-quality code + tests + run instructions + a feature evidence package per run.\n\nIMPORTANT RULES:\n\n- Single source of truth for process and scope is THIS document; architectural intent is the master blueprint until superseded by an ADR.\n- If a requirement is not written here or in an approved feature folder, do not implement it.\n- If there is ambiguity, list questions and propose minimal default assumptions labeled clearly.\n- No scope creep. Build only what is specified for the current phase and feature.\n- Proposed decisions in the master blueprint (sections 106 to 122, ADR-0038 to ADR-0053) are not accepted until their stated tests, owners, and release gates are satisfied.\n\n### Framework binding\n\n- Framework: `nebula-agents` pinned at commit `308c81d2233c045481f23d6d7da3764a4191c40f` (2026-10-20). Advance the pin deliberately, in step with `.github/workflows/ci-gates.yml`, and record the new commit here.\n- Session setup: export `NEBULA_PRODUCT_ROOT=<absolute path to this repo>` before running any framework script. The framework default points at the CRM repo, not this one.\n- Layout convention: `engine/`, `experience/`, `neuron/` runtime roots (section 2.3). Path-class extensions for the additional roots are declared in section 2.4 and registered in `operations/evidence/README.md` at init.\n- Local guidance: [agent instructions](../docs/agent-instructions.md) and [plan review checklist](../docs/plan-review-checklist.md), declared in `../.nebula-project.yaml`, supplement this blueprint without changing its authority.\n- Extension rollout: complete. The pinned revision carries `agents/scripts/project_checks.py` and `agents/scripts/project_context.py`, so the checks declared in `../.nebula-project.yaml` execute at the framework's `plan-rev…12760 tokens truncated…&C handoff](architecture/commercial-pc-example-handoff.md).\n4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.\n"
+    },
+    {
+      "path": "docs/agent-instructions.md",
+      "sha256": "a7645e80a39f2aca95b31f01b711353754630c1e62fd47812dba0fe5ed9aaae2",
+      "text": "# Working in Nebula Insurance Brain\n\nRead `planning-mds/BLUEPRINT.md` for process, scope, technology, and phase status. Architectural intent comes from `planning-mds/architecture/master-blueprint.md` and its governing ADRs. Feature-specific accepted requirements live in their feature folders. Report conflicts between these sources; do not invent product rules.\n\n## Repository boundaries\n\n- Keep product requirements, insurance terminology, review criteria, and validation scripts here. Generic framework mechanisms belong in the sibling `nebula-agents` repository.\n- Framework sessions start in that sibling repository. Always pass this repository's absolute path as `--product-root`, or set `NEBULA_PRODUCT_ROOT` explicitly. Do not rely on a default product or the shell's current directory.\n- `BOUNDARY-POLICY.md` in the framework describes the separation of framework and product content. It is not an insurance regulatory policy.\n- Runtime directories and proof harnesses named in a plan may not exist yet. Distinguish a proposed implementation path from a required existing planning artifact.\n\n## Planning and knowledge graph\n\n- Keep the blueprint, feature status, and trackers aligned under `planning-mds/features/TRACKER-GOVERNANCE.md`.\n- Edit `planning-mds/kg-source/**` as the authored graph source. Generate projections and tracker tables with `scripts/kg/compile.py`; do not hand-edit generated regions.\n- Use KG lookup for routing. Inspect the source planning artifacts before making readiness judgments.\n- KG coverage means a feature has retrieval mappings, including planning-only stubs. It does not imply a PRD, completed Phase B, approval, or implementation; read status and mapping notes before making readiness claims.\n- Honor `.agentignore` for broad searches. Read exact evidence references when a review requires them.\n- Proposed ADRs stay proposed until their stated proof and acceptance conditions are met. Structural readiness checks do not settle them.\n\n## Local validation\n\nFrom this repository, run:\n\n```bash\npython3 scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0001\npython3 scripts/validation/validate_plan_readiness.py --plan-scope project --target project\npython3 scripts/run-lifecycle-gates.py\n```\n\nThe readiness validator emits JSON and exits 0 for a structurally valid plan, 1 for failed checks, and 2 for invalid invocation. Architectural adequacy remains a reviewer decision. During `plan-review`, also read `docs/plan-review-checklist.md` and cite actual planning evidence for findings.\n\n## Semantic examples\n\nFor each introduced or changed concept, maintain its glossary definition, worked example, boundary case, and owning feature/story/contract links in `planning-mds/examples/README.md`. Reuse the continuing EX-GL-001 case where it fits. Label synthetic/illustrative outputs and future delivery phases explicitly. Validate structured examples; runtime delivery must add actual reproduction evidence and keep development examples outside the frozen holdout.\n"
+    }
+  ],
+  "log_refs": [],
+  "operations": [
+    {
+      "run": {
+        "argv": [
+          "python3",
+          "agents/product-manager/scripts/validate-feature-evidence.py",
+          "--product-root",
+          "{NEBULA_PRODUCT_ROOT}",
+          "--feature",
+          "{FEATURE_ID}",
+          "--run-id",
+          "{RUN_ID}",
+          "--stage",
+          "G2"
+        ],
+        "cwd": "framework",
+        "id": "validate-g2",
+        "timeout_seconds": 600
+      }
+    }
+  ],
+  "project_checks": [],
+  "stage": "G2",
+  "status": "dry-run"
+}
+
+Exit code: 0
+

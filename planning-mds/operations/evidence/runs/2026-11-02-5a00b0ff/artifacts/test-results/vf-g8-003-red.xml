@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="17" time="2.661" timestamp="2026-11-05T01:11:25.671633+00:00" hostname="06e1f449ca96"><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_nonempty_acceptance_checklists_validate_in_each_completion_state[- ]" time="0.156" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_nonempty_acceptance_checklists_validate_in_each_completion_state[-x]" time="0.157"><failure message="AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check1/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md&#10;  ------------------------------------------------------------&#10;  &#10;  ❌ ERRORS (Must Fix):&#10;    1. Acceptance criteria section exists but has no criteria (use Given/When/Then or checklist)&#10;  &#10;  ⚠️  WARNINGS (Should Fix):&#10;    1. No edge cases or error scenarios documented - consider adding&#10;  &#10;  ============================================================&#10;  ❌ Story validation FAILED with 1 error(s) and 1 warning(s)&#10;  [product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check1/product (source: --product-root)&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check1/product (source: --product-root)\n').returncode">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check1')
+marker = 'x', indent = ''
+
+    @pytest.mark.parametrize("marker", [" ", "x", "X"])
+    @pytest.mark.parametrize("indent", ["", "  "])
+    def test_nonempty_acceptance_checklists_validate_in_each_completion_state(
+        tmp_path: Path, marker: str, indent: str
+    ):
+        result = validate_story(
+            tmp_path, f"{indent}- [{marker}] Customer identifiers appear in ascending order."
+        )
+&gt;       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check1/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md
+E         ------------------------------------------------------------
+E         
+E         ❌ ERRORS (Must Fix):
+E           1. Acceptance criteria section exists but has no criteria (use Given/When/Then or checklist)
+E         
+E         ⚠️  WARNINGS (Should Fix):
+E           1. No edge cases or error scenarios documented - consider adding
+E         
+E         ============================================================
+E         ❌ Story validation FAILED with 1 error(s) and 1 warning(s)
+E         [product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check1/product (source: --product-root)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check1/product (source: --product-root)\n').returncode
+
+../framework/agents/product-manager/scripts/tests/test_validate_stories.py:88: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_nonempty_acceptance_checklists_validate_in_each_completion_state[-X]" time="0.153"><failure message="AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check2/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md&#10;  ------------------------------------------------------------&#10;  &#10;  ❌ ERRORS (Must Fix):&#10;    1. Acceptance criteria section exists but has no criteria (use Given/When/Then or checklist)&#10;  &#10;  ⚠️  WARNINGS (Should Fix):&#10;    1. No edge cases or error scenarios documented - consider adding&#10;  &#10;  ============================================================&#10;  ❌ Story validation FAILED with 1 error(s) and 1 warning(s)&#10;  [product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check2/product (source: --product-root)&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check2/product (source: --product-root)\n').returncode">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check2')
+marker = 'X', indent = ''
+
+    @pytest.mark.parametrize("marker", [" ", "x", "X"])
+    @pytest.mark.parametrize("indent", ["", "  "])
+    def test_nonempty_acceptance_checklists_validate_in_each_completion_state(
+        tmp_path: Path, marker: str, indent: str
+    ):
+        result = validate_story(
+            tmp_path, f"{indent}- [{marker}] Customer identifiers appear in ascending order."
+        )
+&gt;       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check2/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md
+E         ------------------------------------------------------------
+E         
+E         ❌ ERRORS (Must Fix):
+E           1. Acceptance criteria section exists but has no criteria (use Given/When/Then or checklist)
+E         
+E         ⚠️  WARNINGS (Should Fix):
+E           1. No edge cases or error scenarios documented - consider adding
+E         
+E         ============================================================
+E         ❌ Story validation FAILED with 1 error(s) and 1 warning(s)
+E         [product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check2/product (source: --product-root)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check2/product (source: --product-root)\n').returncode
+
+../framework/agents/product-manager/scripts/tests/test_validate_stories.py:88: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_nonempty_acceptance_checklists_validate_in_each_completion_state[  - ]" time="0.153" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_nonempty_acceptance_checklists_validate_in_each_completion_state[  -x]" time="0.159"><failure message="AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check4/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md&#10;  ------------------------------------------------------------&#10;  &#10;  ❌ ERRORS (Must Fix):&#10;    1. Acceptance criteria section exists but has no criteria (use Given/When/Then or checklist)&#10;  &#10;  ⚠️  WARNINGS (Should Fix):&#10;    1. No edge cases or error scenarios documented - consider adding&#10;  &#10;  ============================================================&#10;  ❌ Story validation FAILED with 1 error(s) and 1 warning(s)&#10;  [product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check4/product (source: --product-root)&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check4/product (source: --product-root)\n').returncode">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check4')
+marker = 'x', indent = '  '
+
+    @pytest.mark.parametrize("marker", [" ", "x", "X"])
+    @pytest.mark.parametrize("indent", ["", "  "])
+    def test_nonempty_acceptance_checklists_validate_in_each_completion_state(
+        tmp_path: Path, marker: str, indent: str
+    ):
+        result = validate_story(
+            tmp_path, f"{indent}- [{marker}] Customer identifiers appear in ascending order."
+        )
+&gt;       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check4/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md
+E         ------------------------------------------------------------
+E         
+E         ❌ ERRORS (Must Fix):
+E           1. Acceptance criteria section exists but has no criteria (use Given/When/Then or checklist)
+E         
+E         ⚠️  WARNINGS (Should Fix):
+E           1. No edge cases or error scenarios documented - consider adding
+E         
+E         ============================================================
+E         ❌ Story validation FAILED with 1 error(s) and 1 warning(s)
+E         [product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check4/product (source: --product-root)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check4/product (source: --product-root)\n').returncode
+
+../framework/agents/product-manager/scripts/tests/test_validate_stories.py:88: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_nonempty_acceptance_checklists_validate_in_each_completion_state[  -X]" time="0.153"><failure message="AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check5/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md&#10;  ------------------------------------------------------------&#10;  &#10;  ❌ ERRORS (Must Fix):&#10;    1. Acceptance criteria section exists but has no criteria (use Given/When/Then or checklist)&#10;  &#10;  ⚠️  WARNINGS (Should Fix):&#10;    1. No edge cases or error scenarios documented - consider adding&#10;  &#10;  ============================================================&#10;  ❌ Story validation FAILED with 1 error(s) and 1 warning(s)&#10;  [product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check5/product (source: --product-root)&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check5/product (source: --product-root)\n').returncode">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check5')
+marker = 'X', indent = '  '
+
+    @pytest.mark.parametrize("marker", [" ", "x", "X"])
+    @pytest.mark.parametrize("indent", ["", "  "])
+    def test_nonempty_acceptance_checklists_validate_in_each_completion_state(
+        tmp_path: Path, marker: str, indent: str
+    ):
+        result = validate_story(
+            tmp_path, f"{indent}- [{marker}] Customer identifiers appear in ascending order."
+        )
+&gt;       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check5/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md
+E         ------------------------------------------------------------
+E         
+E         ❌ ERRORS (Must Fix):
+E           1. Acceptance criteria section exists but has no criteria (use Given/When/Then or checklist)
+E         
+E         ⚠️  WARNINGS (Should Fix):
+E           1. No edge cases or error scenarios documented - consider adding
+E         
+E         ============================================================
+E         ❌ Story validation FAILED with 1 error(s) and 1 warning(s)
+E         [product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check5/product (source: --product-root)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_nonempty_acceptance_check5/product (source: --product-root)\n').returncode
+
+../framework/agents/product-manager/scripts/tests/test_validate_stories.py:88: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_mixed_completed_and_incomplete_criteria_remain_valid" time="0.152" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_given_when_then_criteria_keep_the_existing_validation_path" time="0.150" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[]" time="0.160" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[   ]" time="0.151" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[Customers appear in ascending identifier order.]" time="0.150" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[- [ ]]" time="0.150"><failure message="AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_missing_or_noncriteria_co3/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md&#10;  ------------------------------------------------------------&#10;  &#10;  ⚠️  WARNINGS (Should Fix):&#10;    1. No edge cases or error scenarios documented - consider adding&#10;  &#10;  ============================================================&#10;  ⚠️  Story validation PASSED with 1 warning(s)&#10;  [product-root] /tmp/pytest-of-unknown/pytest-0/test_missing_or_noncriteria_co3/product (source: --product-root)&#10;  &#10;assert 0 == 1&#10; +  where 0 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_missing_or_noncriteria_co3/product (source: --product-root)\n').returncode">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-0/test_missing_or_noncriteria_co3')
+criteria = '- [ ]'
+
+    @pytest.mark.parametrize(
+        "criteria",
+        [
+            "",
+            "   ",
+            "Customers appear in ascending identifier order.",
+            "- [ ]",
+            "- [x]   ",
+            "- [X]\t",
+            "- [z] Customers appear in ascending identifier order.",
+            "- [xx] Customers appear in ascending identifier order.",
+            "A description mentioning - [x] a checkbox is not a checklist item.",
+        ],
+    )
+    def test_missing_or_noncriteria_content_still_fails(tmp_path: Path, criteria: str):
+        result = validate_story(tmp_path, criteria)
+&gt;       assert result.returncode == 1, result.stdout + result.stderr
+E       AssertionError: Validating story: /tmp/pytest-of-unknown/pytest-0/test_missing_or_noncriteria_co3/product/planning-mds/features/F0001-customer-directory/F0001-S0001-view-customers.md
+E         ------------------------------------------------------------
+E         
+E         ⚠️  WARNINGS (Should Fix):
+E           1. No edge cases or error scenarios documented - consider adding
+E         
+E         ============================================================
+E         ⚠️  Story validation PASSED with 1 warning(s)
+E         [product-root] /tmp/pytest-of-unknown/pytest-0/test_missing_or_noncriteria_co3/product (source: --product-root)
+E         
+E       assert 0 == 1
+E        +  where 0 = CompletedProcess(args=['/opt/venv/bin/python', '/app/framework/agents/product-manager/scripts/validate-stories.py', '-...rr='[product-root] /tmp/pytest-of-unknown/pytest-0/test_missing_or_noncriteria_co3/product (source: --product-root)\n').returncode
+
+../framework/agents/product-manager/scripts/tests/test_validate_stories.py:126: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[- [x]   ]" time="0.161" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[- [X]\t]" time="0.151" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[- [z] Customers appear in ascending identifier order.]" time="0.163" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[- [xx] Customers appear in ascending identifier order.]" time="0.151" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_stories" name="test_missing_or_noncriteria_content_still_fails[A description mentioning - [x] a checkbox is not a checklist item.]" time="0.152" /></testsuite></testsuites>

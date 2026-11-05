@@ -1,0 +1,19 @@
+# Gate Decisions
+
+| Gate | Role | Decision | Reviewer | Date | Evidence | Rationale |
+|---|---|---|---|---|---|---|
+| G0 | Architect | PASS | Codex / Architect | 2026-11-03T00:06:32+00:00 | g0-assembly-plan-validation.md | Approved design, scope split, dependencies, checkpoints and ownership are implementation-ready; validate-g0 passed after evidence repair and scan-staging fix |
+
+## 2026-11-02T20:49:04.283619+00:00 — runtime stop condition
+
+- Decision by: Codex, applying the operator-provided feature contract.
+- Decision: stop before implementation; retain the run as draft.
+- Evidence: g1-runtime-preflight.md and its raw runtime-discovery artifacts.
+- Rationale: no usable Docker runtime is reachable; the contract explicitly stops when
+  runtime preflight cannot be restored.
+- No feature approval, mitigation acceptance, signoff, waiver or closeout decision exists.
+
+| G1 | PASS | Codex (DevOps) | 2026-11-03T00:08:30.065388+00:00 | Runtime restored; API/storage and PG0010 healthy; g1-runtime-preflight.md | No | Rebuild images after dependency changes |
+
+Exit code: 0
+

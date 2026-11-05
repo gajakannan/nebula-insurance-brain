@@ -1,0 +1,50 @@
+name: brain-f0006-5a00b0ff
+services:
+  engine-validation:
+    image: brain-f0006-engine:2026-11-02-5a00b0ff
+    build:
+      context: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+      dockerfile: planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/Dockerfile
+      target: engine-runtime
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+    tmpfs:
+      - /app/brain/content:uid=1000,gid=1000,mode=0700
+    environment:
+      HOME: /tmp
+      XDG_CACHE_HOME: /tmp/.cache
+      BRAIN_DATABASE_URL: postgresql+asyncpg://brain:brain@postgres:5432/brain_f0006_runtime
+      BRAIN_WORKER_DATABASE_URL: postgresql+psycopg://brain:brain@postgres:5432/brain_f0006_runtime
+    command: [python, -m, uvicorn, 'brain_api.app:app', --host, 0.0.0.0, --port, '8000']
+    healthcheck:
+      test: [CMD, python, -c, "import json,urllib.request; r=json.load(urllib.request.urlopen('http://localhost:8000/health',timeout=5)); assert r['status']=='ok' and r['storage']=='ok'"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+    networks: [dependencies]
+  neuron-validation:
+    image: brain-f0006-neuron:2026-11-02-5a00b0ff
+    build:
+      context: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+      dockerfile: planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/Dockerfile
+      target: neuron-runtime
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+    environment:
+      HOME: /tmp
+      XDG_CACHE_HOME: /tmp/.cache
+      HF_HOME: /tmp/huggingface
+      BRAIN_WORKER_DATABASE_URL: postgresql+psycopg://brain:brain@postgres:5432/brain_f0006_runtime
+    command: [python, -c, "from threading import Event; Event().wait()"]
+    healthcheck:
+      test: [CMD, python, -c, "import brain_worker,brain_contracts,brain_extraction,brain_ingestion"]
+      interval: 5s
+      timeout: 30s
+      retries: 12
+    networks: [dependencies]
+networks:
+  dependencies:
+    external: true
+    name: nebula-insurance-brain_default

@@ -1,0 +1,129 @@
+  END IF;
+  SELECT r.entity_type INTO subject_type FROM assertion_document_reference r
+    WHERE r.id=s.subject_ref AND r.document_version_id=s.document_version_id
+      AND r.tenant_id=s.tenant_id AND r.knowledge_base_id=s.knowledge_base_id;
+  IF subject_type IS NULL OR a.subject_type IS DISTINCT FROM subject_type THEN
+    RAISE EXCEPTION 'v2 assertion subject carrier mismatch' USING ERRCODE = 'check_violation';
+  END IF;
+  IF s.record->'object'->>'kind' = 'ENTITY' THEN
+    expected_value := jsonb_build_object('object_ref',s.object_ref::text);
+  ELSIF jsonb_typeof(s.record->'object'->'value') = 'object' THEN
+    expected_value := s.record->'object'->'value';
+  ELSE
+    expected_value := jsonb_build_object('literal',s.record->'object'->'value');
+  END IF;
+  IF a.value IS DISTINCT FROM expected_value THEN
+    RAISE EXCEPTION 'v2 assertion value carrier mismatch' USING ERRCODE = 'check_violation';
+  END IF;
+  IF a.original_assertion_id IS NULL THEN
+    IF a.run_id IS NULL OR NOT EXISTS (
+      SELECT 1 FROM semantic_interpretation_run r JOIN content_artifact c ON c.id=r.artifact_id
+      WHERE r.id=a.run_id AND r.tenant_id=a.tenant_id AND r.knowledge_base_id=a.knowledge_base_id
+        AND c.tenant_id=a.tenant_id AND c.knowledge_base_id=a.knowledge_base_id
+        AND c.document_version_id=s.document_version_id) THEN
+      RAISE EXCEPTION 'v2 assertion run/source mismatch' USING ERRCODE = 'check_violation';
+    END IF;
+  ELSE
+    SELECT * INTO parent FROM assertion WHERE id=a.original_assertion_id;
+    SELECT * INTO parent_s FROM assertion_semantics WHERE assertion_id=a.original_assertion_id;
+    IF a.run_id IS NOT NULL OR a.origin <> 'HUMAN_REVIEW' OR parent.id IS NULL
+      OR parent.semantic_contract_version <> 2 OR parent_s.assertion_id IS NULL
+      OR (a.tenant_id,a.knowledge_base_id,a.subject_type,a.slot_type,a.interpretation_basis)
+        IS DISTINCT FROM
+    (parent.tenant_id,parent.knowledge_base_id,parent.subject_type,parent.slot_type,parent.interpretation_basis)
+      OR
+    (s.document_version_id,s.subject_ref,s.object_ref,s.assertion_kind,s.fact_mode,s.predicate_id,s.ontology_release)
+        IS DISTINCT FROM
+    (parent_s.document_version_id,parent_s.subject_ref,parent_s.object_ref,parent_s.assertion_kind,parent_s.fact_mode,parent_s.predicate_id,parent_s.ontology_release)
+      OR s.record->'qualifiers' IS DISTINCT FROM parent_s.record->'qualifiers'
+      OR s.record->'source_relation' IS DISTINCT FROM parent_s.record->'source_relation'
+      OR s.record->'valid_time_claim' IS DISTINCT FROM parent_s.record->'valid_time_claim'
+      OR s.record->'time_mention_refs' IS DISTINCT FROM parent_s.record->'time_mention_refs'
+      OR s.entity_snapshots IS DISTINCT FROM parent_s.entity_snapshots
+      OR s.time_reference_snapshot IS DISTINCT FROM parent_s.time_reference_snapshot
+      OR (s.assertion_kind='OPEN_STATEMENT' AND s.record->'object' IS DISTINCT FROM
+    parent_s.record->'object') THEN
+      RAISE EXCEPTION 'v2 correction changes immutable semantics' USING ERRCODE = 'check_violation';
+    END IF;
+  END IF;
+  IF (SELECT count(*) FROM assertion_evidence e WHERE e.assertion_id=a.id) <>
+    jsonb_array_length(s.verified_evidence)
+    OR EXISTS (
+      SELECT 1 FROM jsonb_array_elements(s.verified_evidence) v
+      WHERE NOT EXISTS (
+        SELECT 1 FROM assertion_evidence e JOIN content_artifact c ON c.id=e.artifact_id
+        WHERE e.id::text=v->>'evidence_id' AND e.assertion_id=a.id
+          AND (e.tenant_id,e.knowledge_base_id)=(a.tenant_id,a.knowledge_base_id)
+          AND e.artifact_id::text=v->>'artifact_id' AND e.block_id IS NOT DISTINCT FROM
+    (v->>'block_id')
+          AND e.precision=v->>'precision'
+          AND e.char_start IS NOT DISTINCT FROM (v->'selector'->>'char_start')::integer
+          AND e.char_end IS NOT DISTINCT FROM (v->'selector'->>'char_end')::integer
+          AND c.document_version_id=s.document_version_id
+          AND (c.tenant_id,c.knowledge_base_id)=(a.tenant_id,a.knowledge_base_id))) THEN
+    RAISE EXCEPTION 'v2 assertion verified evidence mismatch' USING ERRCODE = 'check_violation';
+  END IF;
+  RETURN NULL;
+END $$;
+CREATE CONSTRAINT TRIGGER trg_assertion_v2_integrity AFTER INSERT ON assertion
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION brain_assertion_v2_integrity();
+CREATE CONSTRAINT TRIGGER trg_assertion_semantics_v2_integrity AFTER INSERT ON assertion_semantics
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION brain_assertion_v2_integrity();
+CREATE CONSTRAINT TRIGGER trg_assertion_evidence_v2_integrity AFTER INSERT ON assertion_evidence
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION brain_assertion_v2_integrity();
+"""
+
+
+def upgrade() -> None:
+    op.execute(SCHEMA)
+
+
+def downgrade() -> None:
+def _review_locator(evidence: Mapping[str, Any]) -> dict:
+    precision = {"span": "exact-span", "table_cell": "table-cell"}.get(
+        evidence["precision"], evidence["precision"]
+    )
+    return {
+        "source": str(evidence["artifact_id"]),
+        "precision": precision,
+        "part": evidence["block_id"],
+        "unresolved_reason": "unresolved" if precision == "unresolved" else None,
+        "selector": [copy.deepcopy(evidence["selector"])],
+    }
+
+
+def _evidence_row(
+    assertion_id: UUID, tenant_id: UUID, kb_id: UUID, value: Mapping[str, Any]
+) -> AssertionEvidence:
+    selector = value["selector"]
+    return AssertionEvidence(
+        id=UUID(str(value["evidence_id"])),
+        assertion_id=assertion_id,
+        artifact_id=UUID(str(value["artifact_id"])),
+        block_id=value["block_id"],
+        page=selector.get("page"),
+        bbox=selector.get("bbox"),
+        char_start=selector.get("char_start"),
+        char_end=selector.get("char_end"),
+        precision=value["precision"],
+        tenant_id=tenant_id,
+        knowledge_base_id=kb_id,
+    )
+
+
+@dataclass
+class SourceLineage:
+    assertions: list[Assertion]
+    semantics: list[AssertionSemantics]
+    evidence: list[AssertionEvidence]
+    keys: tuple[ResourceKey, ...]
+    has_v2: bool
+    incomplete: bool
+    invalid: bool
+    reviewed: bool
+
+
+async def resolve_lineage(
+
+Exit code: 0
+

@@ -1,0 +1,121 @@
+                except (ValueError, TypeError, KeyError, AttributeError, IndexError):
+                    pass
+                outcomes.append(
+                    outcome(
+                        index=index,
+                        path=path,
+                        candidate_id=candidate_id,
+                        block_id=block_id,
+                        reason="MALFORMED_ITEM",
+                        raw=raw,
+                    )
+                )
+                continue
+
+            item_outcomes: list[AdmissionOutcome] = []
+            evidence: list[ServerEvidence] = []
+            source_hashes: dict[str, str] = {}
+            time_snapshots: list[dict[str, Any]] = []
+            selected: dict[UUID, EntityReferenceV2] = {}
+
+            def fail(reason: str, *, block_id: str | None = None, item_path: str = path) -> None:
+                entry = outcome(
+                    index=index,
+                    path=item_path,
+                    candidate_id=candidate.id,
+                    block_id=block_id,
+                    reason=reason,
+                    raw=raw,
+                    excerpt=raw.decode("utf-8", errors="replace")[:256],
+                )
+                if not any(
+                    (e.reason, e.item_path, e.block_id)
+                    == (entry.reason, entry.item_path, entry.block_id)
+                    for e in item_outcomes
+                ):
+                    item_outcomes.append(entry)
+
+            if candidate.origin != context.origin:
+                fail("MALFORMED_ITEM")
+            required_refs = [candidate.subject_ref]
+            if (
+                isinstance(candidate.object, EntityObjectV2)
+                and candidate.object.ref in declarations
+            ):
+                required_refs.append(candidate.object.ref)
+            for ref in dict.fromkeys(required_refs):
+                if ref not in declarations or ref in invalid_entities:
+                    fail("UNKNOWN_REFERENCE")
+"""Source-claim carriers. None of these values establishes canonical truth."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import Literal, TypeAlias
+from uuid import UUID
+
+Kind: TypeAlias = Literal["OPEN_STATEMENT", "TYPED_ASSERTION"]
+Mode: TypeAlias = Literal["ASSERTED", "OBSERVED", "DERIVED"]
+Origin: TypeAlias = Literal[
+    "DOCUMENT_INTERPRETATION",
+    "SYSTEM_OBSERVATION",
+    "HUMAN_REVIEW",
+    "CONVERSATION_DISCOVERY",
+    "RULE_DERIVATION",
+    "AGENT_ANALYSIS",
+]
+Basis: TypeAlias = Literal["EXPLICIT", "INFERRED", "AMBIGUOUS"]
+Json: TypeAlias = None | bool | int | float | str | list["Json"] | dict[str, "Json"]
+
+
+@dataclass(frozen=True)
+class EvidenceClaim:
+    artifact_id: UUID
+    block_id: str
+    quote: str
+    model_selector: Mapping[str, Json] | None = None
+
+
+@dataclass(frozen=True)
+class EntityReference:
+    id: UUID
+    entity_type: str
+    label: str
+    introducing_evidence: tuple[EvidenceClaim, ...]
+
+
+@dataclass(frozen=True)
+class EntityObject:
+    kind: Literal["ENTITY"]
+    ref: UUID
+    name: str
+                            status="open",
+                            assertion_id=item.record.id,
+                            assertion_version=1,
+                            tenant_id=context.tenant_id,
+                            knowledge_base_id=context.knowledge_base_id,
+                            evidence=_review_locator(first),
+                        )
+                    )
+                    await self.session.flush()
+                    await self.session.run_sync(
+                        lambda s: inherit_resource_access(
+                            s,
+                            ResourceKey(ResourceType.CONTENT_ARTIFACT, context.artifact_id),
+                            ResourceKey(ResourceType.REVIEW_TASK, review_id),
+                            actor_id=context.actor_id,
+                            at=item.created_at,
+                            add_dependency_on_source=True,
+                        )
+                    )
+        return item
+
+    async def source_keys(self, assertion_id: UUID) -> tuple[ResourceKey, ...]:
+        lineage = await resolve_lineage(self.session, (), None, assertion_ids=(assertion_id,))
+        if not lineage.assertions:
+            raise LookupError("assertion not found")
+        return lineage.keys
+
+Exit code: 0
+

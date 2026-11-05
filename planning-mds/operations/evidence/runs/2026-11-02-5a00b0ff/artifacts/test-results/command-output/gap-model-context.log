@@ -1,0 +1,263 @@
+"""Observed F0006 service/PG behavior over independently authored retained sources."""
+
+import asyncio
+import copy
+from dataclasses import replace
+from uuid import UUID, uuid4
+
+import pytest
+from brain_persistence.models import ReviewItemRow
+from brain_security.execution import AuthorizationDenied
+from engine.tests.fixtures.assertions import harness
+from sqlalchemy import event
+
+_clean_fact_tables = harness._clean_fact_tables
+database = harness.database
+world = harness.world
+world_factory = harness.world_factory
+counts = harness.counts
+configuration = harness.configuration
+
+
+async def test_typed_competing_claims_reload_without_canonical_effects(world, database):
+    first = world.candidate(interpretation_basis="INFERRED", model_confidence=0.91)
+    second = world.candidate(
+        object={"kind": "LITERAL", "value": {"amount": 1000000}},
+        interpretation_basis="AMBIGUOUS",
+        model_confidence=None,
+    )
+    batch = await world.admit([first, second])
+    assert len(batch.accepted) == 2 and not batch.outcomes
+    async with world.service() as (service, _, _):
+        a = await service.read(world.reviewer, UUID(first["id"]))
+        b = await service.read(world.reviewer, UUID(second["id"]))
+    assert a["record"] == first and b["record"] == second
+    assert a["created_by"] == str(world.actor.id)
+    assert a["record"]["model_confidence"] == 0.91
+    assert b["interpretation_basis"] == "AMBIGUOUS" and b["model_confidence"] is None
+    state = counts(database)
+    assert state["assertion"] == state["assertion_semantics"] == state["assertion_evidence"] == 2
+    assert state["canonical_commit"] == state["canonical_fact_version"] == 0
+
+
+async def test_open_storage_and_replay_are_lossless(world, database):
+    record = world.candidate(
+        assertion_kind="OPEN_STATEMENT",
+        predicate_id=None,
+        ontology_release=None,
+        source_relation="has a limit of",
+        object={"kind": "LITERAL", "value": "$500,000"},
+        qualifiers={"mood": "offered subject to inspection"},
+    )
+    first = await world.admit([record])
+    second = await world.admit([record])
+    assert first.accepted[0].created_at == second.accepted[0].created_at
+    assert set(second.accepted[0].blocked_operations) == {
+        "RESOLVE",
+        "CREATE",
+        "AUTO_ACCEPT",
+        "CLOSE",
+        "SUPERSEDE",
+    }
+    async with world.service() as (service, _, _):
+        loaded = await service.read(world.reviewer, UUID(record["id"]))
+    assert loaded["record"] == record and "slot_type" not in loaded
+    assert counts(database)["assertion"] == 1
+
+
+@pytest.mark.parametrize("kind", ["pdf", "docx", "xlsx", "csv"])
+async def test_native_formats_derive_locations_from_verified_stored_content(world_factory, kind):
+    world = world_factory(kind=kind)
+    record = world.candidate()
+    batch = await world.admit([record])
+    evidence = batch.accepted[0].server_evidence[0]
+    assert evidence.selector["format"] == kind
+    assert evidence.selector.get("char_start", 0) != 99999
+    assert evidence.quote == world.text
+    assert evidence.text_origin == "STATED" and evidence.origin_qualification == "qualified"
+
+
+@pytest.mark.parametrize("origin", ["DESCRIBED", "OCR", "TRANSCRIBED"])
+async def test_actual_block_origin_and_producer_confidence_are_retained(world_factory, origin):
+    world = world_factory(origin=origin)
+    batch = await world.admit([world.candidate()])
+    evidence = batch.accepted[0].server_evidence[0]
+    assert evidence.text_origin == origin
+    if origin == "DESCRIBED":
+        assert batch.accepted[0].review_required
+        assert "DESCRIBED_EVIDENCE" in batch.accepted[0].reasons
+    else:
+        assert evidence.producer_confidence == 0.87
+
+
+async def test_name_conflict_does_not_reserve_failed_references(world, database):
+    assert len((await world.admit([world.candidate()])).accepted) == 1
+    before = counts(database)
+    entity = copy.deepcopy(world.entity)
+    entity["id"] = str(uuid4())
+    record = world.candidate(subject_ref=entity["id"])
+    rejected = await world.admit([record], entities=[entity])
+    assert not rejected.accepted
+    assert [o.reason for o in rejected.outcomes] == ["NAME_CLAIMED_BY_ANOTHER"]
+    assert counts(database) == before
+
+
+async def test_unauthorized_producer_and_cross_scope_context_have_no_claim_effects(world, database):
+"""F0006 additive assertion tables; migration 0011 owns database backstops."""
+
+from __future__ import annotations
+
+from datetime import datetime
+from uuid import UUID
+
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Index,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+)
+from sqlalchemy.orm import Mapped, mapped_column
+
+from brain_persistence.base import Base
+from brain_persistence.models import _JSONVariant
+
+
+class AssertionDocumentReference(Base):
+    __tablename__ = "assertion_document_reference"
+    __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "document_version_id",
+            "tenant_id",
+            "knowledge_base_id",
+            name="uq_assertion_reference_owner",
+        ),
+        ForeignKeyConstraint(
+            ["document_version_id", "tenant_id", "knowledge_base_id"],
+            [
+                "document_version.id",
+                "document_version.tenant_id",
+                "document_version.knowledge_base_id",
+            ],
+            name="fk_assertion_reference_document",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    document_version_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    knowledge_base_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    entity_type: Mapped[str] = mapped_column(Text, nullable=False)
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    created_by: Mapped[UUID] = mapped_column(ForeignKey("principal.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class AssertionNameClaim(Base):
+    __tablename__ = "assertion_name_claim"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["entity_ref", "document_version_id", "tenant_id", "knowledge_base_id"],
+            [
+                "assertion_document_reference.id",
+                "assertion_document_reference.document_version_id",
+                "assertion_document_reference.tenant_id",
+                "assertion_document_reference.knowledge_base_id",
+            ],
+            name="fk_assertion_name_reference",
+        ),
+    )
+
+    document_version_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    knowledge_base_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    normalized_name: Mapped[str] = mapped_column(Text, primary_key=True)
+    entity_ref: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    created_by: Mapped[UUID] = mapped_column(ForeignKey("principal.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class AssertionSemantics(Base):
+    __tablename__ = "assertion_semantics"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["assertion_id", "tenant_id", "knowledge_base_id"],
+            ["assertion.id", "assertion.tenant_id", "assertion.knowledge_base_id"],
+            name="fk_assertion_semantics_owner",
+        ),
+        ForeignKeyConstraint(
+            ["document_version_id", "tenant_id", "knowledge_base_id"],
+            [
+                "document_version.id",
+                "document_version.tenant_id",
+                "document_version.knowledge_base_id",
+            ],
+            name="fk_assertion_semantics_document",
+        ),
+        ForeignKeyConstraint(
+            ["subject_ref", "document_version_id", "tenant_id", "knowledge_base_id"],
+            [
+                "assertion_document_reference.id",
+                "assertion_document_reference.document_version_id",
+                "assertion_document_reference.tenant_id",
+                "assertion_document_reference.knowledge_base_id",
+            ],
+            name="fk_assertion_semantics_subject",
+        ),
+        ForeignKeyConstraint(
+            ["object_ref", "document_version_id", "tenant_id", "knowledge_base_id"],
+            [
+                "assertion_document_reference.id",
+                "assertion_document_reference.document_version_id",
+                "assertion_document_reference.tenant_id",
+                "assertion_document_reference.knowledge_base_id",
+            ],
+            name="fk_assertion_semantics_object",
+        ),
+        CheckConstraint(
+            "assertion_kind IN ('OPEN_STATEMENT','TYPED_ASSERTION')", name="ck_assertion_kind"
+        ),
+        CheckConstraint("fact_mode IN ('ASSERTED','OBSERVED','DERIVED')", name="ck_assertion_mode"),
+        Index("ix_assertion_semantics_subject", "tenant_id", "knowledge_base_id", "subject_ref"),
+        Index(
+            "ix_assertion_semantics_document",
+            "tenant_id",
+            "knowledge_base_id",
+            "document_version_id",
+        ),
+    )
+
+    assertion_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    document_version_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    tenant_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    knowledge_base_id: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    subject_ref: Mapped[UUID] = mapped_column(Uuid, nullable=False)
+    object_ref: Mapped[UUID | None] = mapped_column(Uuid, nullable=True)
+    assertion_kind: Mapped[str] = mapped_column(Text, nullable=False)
+    fact_mode: Mapped[str] = mapped_column(Text, nullable=False)
+    assertion_origin: Mapped[str] = mapped_column(Text, nullable=False)
+    predicate_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ontology_release: Mapped[str | None] = mapped_column(Text, nullable=True)
+    record: Mapped[dict] = mapped_column(_JSONVariant, nullable=False)
+    entity_snapshots: Mapped[list] = mapped_column(_JSONVariant, nullable=False)
+    verified_evidence: Mapped[list] = mapped_column(_JSONVariant, nullable=False)
+    time_reference_snapshot: Mapped[list] = mapped_column(_JSONVariant, nullable=False)
+    raw_item_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    words: str
+
+
+@dataclass(frozen=True)
+class SourceAccessProof:
+    tenant_id: UUID
+    knowledge_base_id: UUID
+    unit_of_work_id: UUID
+    source_artifact_ids: tuple[UUID, ...]
+    authorization_decision_ids: tuple[UUID, ...]
+
+Exit code: 0
+

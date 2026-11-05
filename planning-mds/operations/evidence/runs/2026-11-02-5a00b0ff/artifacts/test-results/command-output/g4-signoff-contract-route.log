@@ -1,0 +1,39 @@
+224:| `§15` | Recommendation and PM acceptance format |
+226:| `§17` | Stage validation, run resolution, and closeout publish order |
+241:- Missing, placeholder, or malformed active closeout dates do not qualify for the pre-contract skip; validators treat those features as governed by the current validation date.
+279:  pm-closeout.md
+286:Run IDs use `YYYY-MM-DD-XXXXXXXX`, where the date is local-at-session-start and `XXXXXXXX` is 8 lowercase hex characters from cryptographic randomness. The run ID is recorded at run creation and carried unchanged through closeout.
+288:`evidence-manifest.json` is required for feature profile runs. It records feature identity, run identity, status, effective date, feature start/closeout paths, changed paths, SCM diff evidence, conditional scope booleans, required roles, gate results, role results, files, omissions, waivers, and global evidence references. Paths in manifest fields must be repo-relative and must not traverse upward.
+299:Quality Engineer and Code Reviewer evidence is required for every governed completed-terminal feature. DevOps is required when `deployment_config_changed = true` or marked required in `STATUS.md`. Security Reviewer is required when `security_sensitive_scope = true` or marked required in `STATUS.md`. Architect evidence is required when marked required in `STATUS.md`; the feature action also requires G0 assembly-plan validation and, for runs effective on or after `2026-06-01`, G7 knowledge-graph reconciliation at closeout.
+308:- `G6` candidate validation uses `--run-id` and runs before tracker/story-index/KG/template closeout results are finalized.
+310:- `G8`/`closeout` validation requires `latest-run.json`, `kg-reconciliation.md` when applicable, `pm-closeout.md`, and tracker/story-index/KG/template validator results recorded in `lifecycle-gates.log` and summarized in `pm-closeout.md`.
+312:When publishing a newly approved completion run, closeout must first run `agents/product-manager/scripts/patch-prior-manifest.py --product-root {NEBULA_PRODUCT_ROOT} --feature {FEATURE_ID} --new-run-id {RUN_ID}` to mark prior approved **feature-completion** manifests for the feature as `superseded`. Missing `run_scope` means legacy `feature-completion`; `base-run-only` planning approvals are independent and remain untouched. The helper records `supersedes` on the successor and `superseded_by`/`superseded_at` on predecessors. Only after that helper exits 0 may closeout write the feature's new `latest-run.json`. If the helper fails, do not publish the new pointer; follow the partial-closeout recovery guidance in `agents/docs/MANUAL-ORCHESTRATION-RUNBOOK.md`.
+316:Plan-review PR2 runs the read-only `check-plan-approvals.py` for its feature, feature-set or project scope. It requires one current planning approval and no active planning rework, and validates explicit supersession chains. Legacy superseded planning records without links remain readable. Ambiguity blocks readiness and routes to plan closeout; plan-review does not repair approval state.
+320:- Plan runs perform tracker/base-run validation only: `python3 agents/product-manager/scripts/validate-trackers.py --product-root {NEBULA_PRODUCT_ROOT} --skip-feature-evidence`. Plan operators must not call `validate-feature-evidence.py` for the current plan run. Plan closeout also records a dependency impact evidence audit for direct or impacted feature dependencies; automated dependency discovery/validation may be added by a later framework step.
+322:- Feature closeout runs scoped current feature/run validation: closeout evidence via `python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root {NEBULA_PRODUCT_ROOT} --feature {FEATURE_ID} --stage closeout`, and tracker sync via `python3 agents/product-manager/scripts/validate-trackers.py --product-root {NEBULA_PRODUCT_ROOT} --feature {FEATURE_ID} --run-id {RUN_ID}`.
+323:- Repo health/audit validation is explicit only: `python3 agents/product-manager/scripts/validate-trackers.py --product-root {NEBULA_PRODUCT_ROOT} --all-feature-evidence` performs repo-wide feature-evidence validation after tracker validation. This mode is not an implicit blocker for every plan or feature closeout.
+332:- `agents/product-manager/scripts/validate-trackers.py` — tracker/registry consistency. Tracker-only/base-run validation is available with `--skip-feature-evidence`; scoped feature closeout validation uses `--feature {FEATURE_ID} --run-id {RUN_ID}` and invokes feature-evidence validation at `--stage G6`; repo-wide feature-evidence validation requires explicit `--all-feature-evidence`.
+333:- `agents/product-manager/scripts/patch-prior-manifest.py` — closeout supersession helper called before writing `latest-run.json`.
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/testing/validate-frontend-quality-gate.py` (frontend quality)
+- Additional product-local equivalents for `api_contract`, `infra_strict`, `security_planning_strict` as each product matures
+
+---
+
+## 8. Genericness contract
+
+No framework file may reference product-specific terms.
+
+Enforcement has two layers:
+
+- **Domain-term denylist** via `python3 agents/scripts/validate-genericness.py`. The denylist is embedded in the script as a transitional safeguard; pass `--glossary <path>` to extend with product-specific terms during a split or migration.
+- **Path / brand / namespace grep gates** (see `BOUNDARY-POLICY.md`). These catch leaks the domain-term validator cannot see: product-owned directory names (`planning-mds/`, backend/frontend/AI layer names, `scripts/kg/`), brand namespaces (e.g. `Nebula.<PascalCase>`), and product API filenames.
+
+CI runs the domain-term validator automatically (`lifecycle-stage.yaml` → `boundary_genericness` gate). The grep gates are run manually during framework-side refactors and major migrations.
+
+---
+
+## 9. Workspace layout convention
+
+
+Exit code: 0
+

@@ -1,0 +1,69 @@
+[product-root] /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain (source: --product-root)
+# Resume brief — 2026-11-02-5a00b0ff
+
+Cold-start context for this run, assembled from evidence on disk. Treat it as authoritative: do not re-derive what it states.
+
+## Where you are
+
+- **action:** feature
+- **NEBULA_PRODUCT_ROOT:** /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+- **feature:** F0006 — assertion-plane-origin-and-interpretation-basis
+- **manifest status:** in-progress
+- **run folder:** /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff
+- **gates completed:** G0 G1 G2
+- **next gate:** all gates complete — run is at closeout
+
+## Decisions already made
+
+- (no workstate recorded — decisions made in this run were not captured, so anything not in the evidence artifacts is lost)
+
+## Current story
+
+- **F0006-S0001** — Preserve typed source claims (status: In Progress)
+- spec: `planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-*.md`
+
+## Assumptions
+
+The approved plan governs the five stories and 35 ACs. It adds versioned assertion
+storage, structural admission and consumer guards; no UI or live extraction activation.
+Runtime, deployment and security booleans agree with the implemented code, migration
+and authorization consumers; frontend remains out of scope. Actual changed paths and
+source hashes are recorded in the manifest and diff/coverage/security inventories.
+
+## Scope Boundaries
+
+Only the approved F0006 five-story assertion contracts/storage/admission/consumer
+guard slice is authorized. No UI, producer activation, new grants or deferred
+F0016/F0018/F0022/F0066 work is introduced. Required roles remain the five listed
+in STATUS.md. Runtime/deployment/security scope booleans remain true after reconciliation.
+
+## Forbidden in this action
+
+- Generate RUN_ID with uuid4 or any non-contract format.
+- Write or consume current-run.json.
+- Write latest-run.json before G8 final validation passes.
+- Leave a prior approved feature-completion manifest at status approved after writing a new completion approval; planning approvals are independent.
+- Skip per-gate validate-feature-evidence.py --stage calls.
+- Write terminal-feature role reports into FEATURE_PATH instead of RUN_FOLDER.
+- Cite the global frontend evidence lane as a substitute for a feature-level role report.
+- Hand-enumerate schema/ADR/contract files when lookup output is available.
+- Treat lookup/KG mappings as authoritative over raw artifacts.
+- Edit code without prior hint.py, or shared semantics without prior blast.py.
+- Skip any gate G0 through G8, or declare Done without the PM role switch at G8.
+- Widen scope outside FEATURE_ID, or pass --evidence-effective-date earlier than the framework default.
+
+## Read these, in order
+
+1. `2026-11-02-5a00b0ff/action-context.md` — run identity, assumptions, scope
+2. `planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md` — the implementation spec
+3. `planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-*.md` — the story you are on
+
+## Do not re-read
+
+- **Validator and runner sources** (`validate-feature-evidence.py`, `run-gate.py`, `lookup.py`). Run the gate and read its error output; the message names the rule.
+- **commands.log or whole manifests.** Query them with `jq`/`rg` for the one field you need — printing them puts the whole file in context for the rest of the run.
+- **Anything stated above.** It came from the evidence; re-reading the source costs context and changes nothing.
+
+
+Exit code: 0
+

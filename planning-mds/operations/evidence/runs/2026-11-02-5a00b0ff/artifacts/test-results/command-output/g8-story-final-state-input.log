@@ -1,0 +1,189 @@
+id: feature:F0006
+name: Assertion plane + origin + interpretation basis
+path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis
+status: planned
+registry_section: Planned
+phase: v0.1A
+roadmap_section: Next
+roadmap_order: 5
+rationale: 'F0006 A+B design approved by operator 2026-11-01 in plan run 2026-11-01-7d6d19ce: typed/open claim
+  storage, structural admission and current-consumer guards. Legacy direct-baseline/v1 defaults remain unchanged;
+  implementation not started.'
+validation_gate: Operator approve-phase-a and approve-phase-b recorded in plan run 2026-11-01-7d6d19ce, and
+  approve-phase-b re-recorded in Phase B rework run 2026-11-01-512e9303, after
+  green preapproval checks; final G5 validation and automated approval publication are enforced by the gate
+  journal.
+depends_on:
+- feature:F0001
+- feature:F0002
+- feature:F0003
+- feature:F0004
+- feature:F0005
+governed_by:
+- adr:0005
+- adr:0010
+- adr:0013
+- adr:0030
+- adr:0035
+- adr:0037
+- adr:0058
+- adr:0061
+- adr:0062
+- adr:0063
+- adr:0065
+- adr:0075
+affects:
+- capability:versioned-assertion-semantics
+- capability:structural-assertion-admission
+- capability:assertion-eligibility-guards
+- entity:assertion
+- entity:assertion-semantics
+- entity:assertion-document-reference
+- entity:assertion-name-claim
+- endpoint:fact-commit
+- endpoint:review-decisions-submit
+- endpoint:review-item-get
+uses_api_contract:
+- api:brain-api
+uses_schema:
+- schema:assertion-record-v2
+- schema:interpretation-result-v2
+- schema:assertion-admission-result-v1
+- schema:interpretation-result
+- schema:problem-details
+notes:
+- Planning bindings only. Five stories and 35 ACs; no runtime paths are bound as implemented. Roadmap stays
+  Next.
+- Automatic result importer remains v1-only; v2 internal storage seam does not enable a live producer. F0016
+  owns durable drop/run adoption, F0018 full commit orchestration, F0022 display and F0066 open extraction/alignment.
+- ADR-0065/0075 stay Proposed; a plan approval is not runtime acceptance. Current pilot unregistered legacy
+  evidence behaviour is explicitly retained; new restrictions follow attributable v2 evidence/review/correction
+  lineage.
+- Phase A+B approved by explicit operator tokens on 2026-11-01, plan run 2026-11-01-7d6d19ce; Phase B rework
+  (v2 corrections inherit basis, v1 legacy EXPLICIT boundary, v2 correction child persistence) re-approved in plan
+  run 2026-11-01-512e9303. All five stories remain Not Started; no feature completion or formal Proposed ADR acceptance is claimed.
+story_mappings:
+- id: story:F0006-S0001
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md
+  affects:
+  - capability:versioned-assertion-semantics
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-record-v2
+  - schema:interpretation-result-v2
+  governed_by:
+  - adr:0075
+  - adr:0065
+- id: story:F0006-S0002
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md
+  affects:
+  - capability:versioned-assertion-semantics
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-record-v2
+  - schema:interpretation-result-v2
+  governed_by:
+  - adr:0075
+  - adr:0065
+- id: story:F0006-S0003
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md
+  affects:
+  - capability:structural-assertion-admission
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-admission-result-v1
+  governed_by:
+  - adr:0075
+  - adr:0065
+- id: story:F0006-S0004
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md
+  affects:
+  - capability:assertion-eligibility-guards
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-admission-result-v1
+  governed_by:
+  - adr:0075
+  - adr:0065
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0006-S0005
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md
+  affects:
+  - capability:versioned-assertion-semantics
+  - capability:structural-assertion-admission
+  - capability:assertion-eligibility-guards
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-admission-result-v1
+  governed_by:
+  - adr:0075
+  - adr:0065
+  uses_api_contract:
+  - api:brain-api
+# Preserve typed source claims
+
+**Story ID:** F0006-S0001
+**Feature:** F0006 — Assertion plane + origin + interpretation basis
+**Title:** Preserve typed source claims
+**Priority:** Critical
+**Phase:** MVP
+**Status:** Not Started
+
+## User Story
+
+**As a** Ingrid the Persistence Engineer
+**I want** independently evidenced source claims to survive disagreement
+**So that** accepted knowledge can later be resolved without erasing what either source said.
+
+## Context & Background
+
+Master blueprint §11, ADR-0005 and ADR-0035 distinguish claims from truth and separate mode, origin and basis. The existing assertion table is a foundation, not the complete feature.
+
+## Acceptance Criteria
+
+- [ ] **AC1:** Given an authorized producer, when a typed claim is persisted and reloaded, its identity, subject candidate, ontology property/release, value or object, qualifiers, claimed time, run/source/evidence references and actor/time equal the submitted validated record.
+- [ ] **AC2:** Two sources claiming $5M and $10M for the same subject/property retain two distinct assertion identities and both evidence sets; no canonical fact is created by either write.
+- [ ] **AC3:** Mode accepts only `ASSERTED`, `OBSERVED`, `DERIVED`; origin accepts the six PRD §Data Requirements values; basis accepts `EXPLICIT`, `INFERRED`, `AMBIGUOUS`. They round-trip independently. Unknown values are rejected with no assertion write.
+- [ ] **AC4:** Supplied confidence is preserved independently from basis; `INFERRED`/`AMBIGUOUS` claims are not silently converted to `EXPLICIT` or automatically accepted. Confidence, where provided, is in [0,1]; invalid values are rejected.
+- [ ] **AC5:** Cross-tenant/KB run, subject, correction or evidence references and unauthorized writers are denied with zero new authoritative rows; existing authorization audit records the decision.
+- [ ] **AC6:** Corrections append a new assertion referencing the original; reload preserves the original claim and correction lineage. An attempt to overwrite source evidence or the original claim fails.
+- [ ] **AC7:** PostgreSQL evidence proves round trips, competing claims, ownership rejection and additive corrections. Assertion processing performs zero conversion/OCR calls.
+
+## Interaction Contract
+
+| Surface / Entry Point | User Action | Editable State | Save / Mutation Result | Reload / Persistence Evidence | Roles / Status Constraints |
+|---|---|---|---|---|---|
+| Authorized assertion import/application service | Submit typed candidate | New candidate only; existing claim immutable | Append claim/evidence or reject atomically | Fresh PostgreSQL session reads identity, dimensions and evidence | Existing service principal in granted tenant/KB; no canonical approval |
+| Existing review correction service | Submit correction | Existing reviewer rules apply | Append linked correction; retain original | Fresh query returns both and the review decision | Verified reviewer; existing stale-task checks |
+
+Validation failures create no partial assertion/evidence effects. Preserve existing authorization, review and import audit semantics; new events are an Architect contract decision. Rendered values cannot satisfy persistence criteria.
+
+## Data Requirements
+
+Typed claim fields and independent enums are specified in PRD §Data Requirements. Required evidence or applicable lineage must be retained. Claimed valid time does not assert canonical acceptance time.
+
+# F0006 acceptance criteria checklist
+
+**Status:** Phase A+B approved 2026-11-01; runtime criteria unverified
+**Total:** 35 acceptance criteria across five unstarted stories. Checkboxes indicate observed implementation evidence, not planning completeness.
+
+| Story | Criteria | Required evidence in the future feature run | State |
+|---|---|---|---|
+| S0001 | AC1–AC7 (7) | PostgreSQL typed-claim round trips, conflicting claims, independent enums/confidence, ownership rejection and additive correction | Not Started |
+| S0002 | AC1–AC7 (7) | Open-statement round trip, kind invariants, legacy/new schema validation, unsupported-reader rejection and scoped refs | Not Started |
+| S0003 | AC1–AC8 (8) | Each ADR-0065 reason/signal, normalization/source mapping, four-format server selectors, truncated and unparsed outcomes, semantic-review boundary | Not Started |
+| S0004 | AC1–AC6 (6) | Mood fixtures, operative-policy boundary, described/OCR/transcribed/legacy origin cases and independent eligibility guards | Not Started |
+| S0005 | AC1–AC7 (7) | Existing import/replay/review/commit integration, legacy migration, atomic rollback/retry, unauthorized attempts and independently authored examples | Not Started |
+
+- [ ] Every story criterion has an observed test/result reference in the feature action's evidence package.
+- [ ] Changed-code coverage is at least 80%; real PostgreSQL and current consumer paths are exercised.
+- [ ] Rejected claims and ineligible canonical attempts have zero prohibited effects.
+- [ ] Original claims, correction history and legacy provenance survive.
+- [ ] Existing defaults and permission grants remain as specified in the PRD.
+- [ ] Future F0016/F0018/F0022/F0066 obligations are not reported as delivered by F0006.
+
+Requirements review occurs at plan G3; architecture review and KG exit checks occur at G5. Neither review supplies runtime acceptance evidence.
+
+Exit code: 0
+

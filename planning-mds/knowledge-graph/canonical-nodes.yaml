@@ -402,13 +402,17 @@ api_contracts:
 capabilities:
   - id: capability:assertion-eligibility-guards
     label: Assertion eligibility guards
-    notes: Planned kind/mood/verified evidence-origin restrictions at current review and pilot commit
-      consumers. No new permission grants, automatic acceptance or full F0018 orchestration.
+    notes: 'Implemented for F0006 run 2026-11-02-5a00b0ff: conjunctive kind/mood/verified-origin restrictions
+      at existing review/correction and mandatory pilot commit guards. Source discovery projects metadata
+      only; current source READ and same-UoW proof precede protected semantic loading. Basis remains visible
+      with existing policy, not a new compulsory review rule. Legacy unregistered pilot behavior remains
+      explicit; no new grants, auto-acceptance or full F0018 orchestration.'
     rationale:
       - adr: adr:0075
         section: Decision
-        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
-          and source eligibility guards; runtime proof pending.
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
     related_nodes:
       - adr:0065
       - adr:0075
@@ -417,9 +421,9 @@ capabilities:
       - entity:assertion-semantics
       - entity:review-item
     source_docs:
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
   - id: capability:authorization-enforcement
     label: Authorization enforcement
     notes: F0002 replaced the F0001 snapshot authorizer with the pure conjunctive evaluator (brain_security/evaluation.py)
@@ -533,7 +537,9 @@ capabilities:
     notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): AuthorizationExecution commits a schema-v1
       Decision to append-only audit_event before any payload or with the mutation atomically; denials/failures
       audited in a fresh transaction; audit failure is a sanitized 503. The single lock/load orchestration
-      is execution.decide (API and worker).'
+      is execution.decide (API and worker). F0006 extends the same mutation UoW with source READ discovery/recheck/audit
+      for assertion, review and commit consumers; metadata-only discovery precedes protected loads and
+      direct v2 commits require current source proof. No new grants or nested read-facade commit is introduced.'
     rationale:
       - adr: adr:0062
         section: Decision
@@ -547,6 +553,7 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
   - id: capability:evidence-review-round-trip
     label: Evidence review round trip
     notes: ReviewItem routing into a review batch, rendering and anchor resolution in the native Review
@@ -737,14 +744,16 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:structural-assertion-admission
     label: Structural assertion admission
-    notes: Planned authorized quote/name/time/reference checks with server-computed honest selectors and
-      protected per-item outcomes. F0016 owns durable drops/full run lifecycle; no semantic truth or live
-      extraction proof is claimed.
+    notes: 'Implemented for F0006 run 2026-11-02-5a00b0ff: authorized deterministic quote/name/time/reference
+      checks with server-derived honest selectors, atomic scoped name ownership and protected per-item
+      outcomes. Admission performs zero model/conversion/canonical writes. F0016 still owns durable drops,
+      time production and full run adoption; native examples are synthetic retained-source proof.'
     rationale:
       - adr: adr:0075
         section: Decision
-        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
-          and source eligibility guards; runtime proof pending.
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
     related_nodes:
       - adr:0075
       - entity:assertion
@@ -752,9 +761,9 @@ capabilities:
       - entity:content-block
       - schema:assertion-admission-result-v1
     source_docs:
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
   - id: capability:structural-tenancy-and-entity-identity
     label: Structural tenancy and entity identity
     notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): Tenant/Workspace/KB registries with composite
@@ -778,13 +787,16 @@ capabilities:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
   - id: capability:versioned-assertion-semantics
     label: Versioned assertion semantics
-    notes: Planned additive typed/open claim contract and immutable semantic extension. Legacy source
-      rows and strict v1 readers are preserved; no runtime delivery is claimed.
+    notes: 'Implemented for F0006 run 2026-11-02-5a00b0ff: strict typed/open contracts, explicit version
+      dispatch, independent dimensions and immutable semantic extensions. Legacy source rows and v1-only
+      importer/defaults are preserved. Qualified synthetic fixture proof does not activate a live producer
+      or grant canonical acceptance; ADR-0075 remains Proposed.'
     rationale:
       - adr: adr:0075
         section: Decision
-        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
-          and source eligibility guards; runtime proof pending.
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
     related_nodes:
       - adr:0075
       - entity:assertion
@@ -793,9 +805,9 @@ capabilities:
       - schema:assertion-record-v2
       - schema:interpretation-result-v2
     source_docs:
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
   - id: capability:versioned-content-contracts
     label: Versioned verified content contracts
     notes: Implemented F0004 shared v1/v2 byte/record verification, manifest-last immutable storage, fenced
@@ -849,7 +861,7 @@ endpoints:
     route: /facts/{factSlotId}/commits
     source_docs:
       - planning-mds/api/brain-api.yaml
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
   - id: endpoint:fact-get
     label: GET /facts/{factSlotId}
     method: GET
@@ -882,7 +894,7 @@ endpoints:
     route: /reviews/batches/{reviewBatchId}/decisions
     source_docs:
       - planning-mds/api/brain-api.yaml
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
   - id: endpoint:review-item-get
     label: GET /reviews/{reviewItemId}
     method: GET
@@ -898,7 +910,7 @@ endpoints:
     route: /reviews/{reviewItemId}
     source_docs:
       - planning-mds/api/brain-api.yaml
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
 entities:
   - id: entity:account
     label: Insurance account
@@ -950,14 +962,16 @@ entities:
       - planning-mds/features/F0023-minimal-entity-360/README.md
   - id: entity:assertion
     label: Assertion
-    notes: Source claim distinct from canonical truth. Existing legacy carrier remains delivered; F0006
-      proposes versioned typed/open semantics, independent mode/origin/basis, grounded evidence and eligibility
-      guards. Planning bindings do not claim implementation.
+    notes: Source claim distinct from canonical truth. F0006 run 2026-11-02-5a00b0ff adds versioned typed/open
+      semantics, independent mode/origin/basis, server-grounded evidence and current-consumer eligibility.
+      The legacy carrier remains a compatibility projection; v2 meaning resides in its immutable one-to-one
+      extension. Admission creates no canonical fact and does not activate a producer.
     rationale:
       - adr: adr:0075
         section: Decision
-        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
-          and source eligibility guards; runtime proof pending.
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
     related_entities:
       - entity:review-decision
       - entity:semantic-interpretation-run
@@ -969,54 +983,62 @@ entities:
       - entity:review-item
     source_docs:
       - planning-mds/architecture/master-blueprint.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
   - id: entity:assertion-document-reference
     label: Document-local assertion reference
-    notes: Proposed document-version-scoped reference declaration with a quoted introducing name; storage
-      supports assertion subjects/objects without creating or resolving canonical Entity identity.
+    notes: Implemented document-version-scoped reference declaration with a grounded introducing name
+      and structural tenant/KB keys. Only references used by accepted claims are retained atomically.
+      These local subjects/objects do not create or resolve canonical Entity identity; F0017 owns later
+      identity work.
     rationale:
       - adr: adr:0075
         section: Decision
-        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
-          and source eligibility guards; runtime proof pending.
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
     related_nodes:
       - adr:0075
       - entity:assertion
       - entity:assertion-name-claim
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
   - id: entity:assertion-name-claim
     label: Assertion admission name claim
-    notes: Proposed document-scoped normalized-name ownership registry used only for NAME_CLAIMED_BY_ANOTHER
-      checks. Not a canonical name FactSlot or alias projection.
+    notes: Implemented append-only document-scoped NFC/case/whitespace name ownership, protected by document
+      locking and a scoped unique key. It supplies NAME_CLAIMED_BY_ANOTHER checks with rollback/replay
+      behavior; it is not a canonical name FactSlot or alias projection.
     rationale:
       - adr: adr:0075
         section: Decision
-        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
-          and source eligibility guards; runtime proof pending.
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
     related_nodes:
       - adr:0075
       - capability:structural-assertion-admission
       - entity:assertion-document-reference
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
   - id: entity:assertion-semantics
     label: Assertion semantic extension
-    notes: Proposed immutable one-to-one v2 extension keyed to the existing assertion ID; full source
-      record, typed/open identity, mode/origin, verified grounding and scoped reference snapshots. Not
-      a second assertion identity or a canonical fact.
+    notes: Implemented immutable one-to-one v2 extension keyed to the existing assertion ID, retaining
+      the complete source record, independent dimensions, verified evidence/source hashes and scoped reference/time
+      snapshots. PostgreSQL deferred integrity mirrors carrier and evidence coordinates, and v2 corrections
+      own their extension/evidence while inheriting basis. It is not a second assertion identity or canonical
+      fact.
     rationale:
       - adr: adr:0075
         section: Decision
-        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
-          and source eligibility guards; runtime proof pending.
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
     related_nodes:
       - adr:0075
       - entity:assertion
@@ -1024,8 +1046,8 @@ entities:
       - schema:assertion-record-v2
     source_docs:
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
   - id: entity:assessment-record
     label: Assessment record
     notes: Append-only result of applying one guideline rule version to exact canonical inputs at explicit

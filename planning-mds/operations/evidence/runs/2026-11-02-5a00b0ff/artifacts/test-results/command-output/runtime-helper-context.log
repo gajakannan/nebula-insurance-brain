@@ -1,0 +1,263 @@
+"""F0006's independently authored PostgreSQL and immutable-source test harness.
+
+Each test owns a new database. The historical development database is used only
+as an administrative connection if explicitly configured; it is never changed.
+"""
+
+from __future__ import annotations
+
+import io
+import json
+import os
+import secrets
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+from pathlib import Path
+from uuid import uuid4
+from zipfile import ZIP_DEFLATED, ZipFile
+
+import psycopg
+import pytest
+from alembic import command
+from alembic.config import Config
+from brain_content.config import LocalObjectStoreConfig
+from brain_content.manifest import parse_manifest
+from brain_content.object_store import LocalFilesystemObjectStore
+from brain_content.store import LocalContentArtifactStore
+from brain_content.validation import ArtifactKey, inventory_hash, sha256, verify_bundle
+from brain_content.verified_store import VerifiedBundleStore
+from brain_domain.assertions import ProducerContext
+from brain_domain.authx import ResourceKey, ResourceType
+from brain_domain.principal import PrincipalKind
+from brain_jobs.queue import DocumentJobQueue
+from brain_persistence.authx import SqlAlchemyAuthorityStore
+from brain_persistence.models import SemanticInterpretationRun
+from brain_security.casbin_adapter import CasbinAuthorizationAdapter
+from brain_security.execution import AuthorizationExecution
+from brain_testing import fixtures
+from psycopg import sql
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import Session
+
+from brain_worker.content_publication import AuthorizedContentPublisher
+
+PRODUCT = Path(__file__).resolve().parents[4]
+POLICIES = PRODUCT / "planning-mds/security/policies"
+NATIVE = json.loads(Path(__file__).with_name("native-sources.json").read_text())
+
+
+@pytest.fixture(autouse=True)
+def _clean_fact_tables():
+    # Override integration/conftest.py's cleanup of the shared development DB.
+    yield
+
+
+def configuration():
+    path = PRODUCT / "engine/migrations/alembic.ini"
+    config = Config(str(path))
+    config.set_main_option("script_location", str(path.parent))
+    return config
+
+
+@pytest.fixture
+def database(monkeypatch):
+    admin = os.environ.get("BRAIN_MIGRATION_ADMIN_URL")
+    if not admin:
+        pytest.fail("F0006 requires explicit BRAIN_MIGRATION_ADMIN_URL for owned test databases")
+    admin = admin.replace("postgresql+psycopg://", "postgresql://")
+    name = "f0006_qe_" + secrets.token_hex(6)
+    assert name.startswith("f0006_qe_") and name != "brain"
+    with psycopg.connect(admin, autocommit=True) as connection:
+        connection.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
+    url = admin.rsplit("/", 1)[0] + "/" + name
+    monkeypatch.setenv("BRAIN_DATABASE_URL", url.replace("postgresql://", "postgresql+psycopg://"))
+    try:
+        with psycopg.connect(url, autocommit=True) as connection:
+            connection.execute("CREATE EXTENSION IF NOT EXISTS btree_gist")
+        yield url
+    finally:
+        with psycopg.connect(admin, autocommit=True) as connection:
+            connection.execute(
+                sql.SQL("DROP DATABASE {} WITH (FORCE)").format(sql.Identifier(name))
+            )
+
+
+def encoded(record):
+    return json.dumps(record, ensure_ascii=False, separators=(",", ":")).encode()
+
+
+def native_bytes(kind, text):
+    if kind == "csv":
+        return ('account,limit\nCedar Bridge Roofing,"' + text + '"\n').encode()
+    if kind == "pdf":
+        return ("%PDF-1.4\n% synthetic retained-source fixture\n" + text + "\n%%EOF\n").encode()
+    buffer = io.BytesIO()
+    with ZipFile(buffer, "w", ZIP_DEFLATED) as archive:
+        archive.writestr(
+            "[Content_Types].xml",
+            '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>',
+        )
+        if kind == "docx":
+            archive.writestr(
+                "word/document.xml",
+                '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>'
+                + text
+                + "</w:t></w:r></w:p></w:body></w:document>",
+            )
+        else:
+            archive.writestr(
+                "xl/worksheets/sheet1.xml",
+                '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+                '<sheetData><row r="2"><c r="B2" t="inlineStr"><is><t>'
+                + text
+                + "</t></is></c></row></sheetData></worksheet>",
+            )
+    return buffer.getvalue()
+
+
+def bundle_fixture(*, kind="pdf", text=None, origin="STATED", owner=None, qualified=True):
+    text = text or NATIVE["default_text"]
+    tenant, kb = owner or (uuid4(), uuid4())
+    native = {
+        "texts": [
+            {
+                "self_ref": "#/texts/0",
+                "text": text,
+                "source_locator": NATIVE["sources"][kind]["locator"],
+            }
+        ],
+        "pages": {"1": {"size": {"width": 612, "height": 792}}},
+        "tables": [],
+    }
+    region = {
+        "page": 1,
+        "bbox": {"x0": 10.0, "y0": 20.0, "x1": 500.0, "y1": 60.0},
+        "char_start": 0,
+        "char_end": len(text),
+    }
+    anchor = {"kind": "native_text", "native_ref": "#/texts/0", "regions": [region]}
+    if origin == "OCR":
+"""Create only this run's dedicated runtime DB; preserve historical databases."""
+import os
+from pathlib import Path
+
+import psycopg
+from alembic import command
+from alembic.config import Config
+from psycopg import sql
+
+name = "brain_f0006_runtime"
+with psycopg.connect("postgresql://brain:brain@postgres:5432/postgres", autocommit=True) as connection:
+    if not connection.execute("SELECT 1 FROM pg_database WHERE datname=%s", (name,)).fetchone():
+        connection.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
+with psycopg.connect(f"postgresql://brain:brain@postgres:5432/{name}", autocommit=True) as connection:
+    connection.execute("CREATE EXTENSION IF NOT EXISTS btree_gist")
+os.environ["BRAIN_DATABASE_URL"] = f"postgresql+psycopg://brain:brain@postgres:5432/{name}"
+config = Config("engine/migrations/alembic.ini")
+config.set_main_option("script_location", str(Path("engine/migrations").resolve()))
+command.upgrade(config, "head")
+print("Dedicated F0006 runtime database ready at migration 0011")
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
+
+
+class ConfigError(Exception):
+    """Raised when the committed local object-store configuration cannot be found or parsed."""
+
+
+@dataclass(frozen=True)
+class LocalObjectStoreConfig:
+    provider: str
+    root: Path
+    immutable: bool
+
+
+@dataclass(frozen=True)
+class ContentWriterConfig:
+    v2_writer_enabled: bool = False
+
+
+def load_content_writer_config() -> ContentWriterConfig:
+    override = os.environ.get("BRAIN_LOCAL_CONFIG_PATH")
+    path = Path(override) if override else _find_config_file(Path.cwd())
+    if not path.is_file():
+        raise ConfigError("content writer configuration is missing")
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    section = data.get("content", {})
+    enabled = section.get("v2_writer_enabled", False)
+    if type(enabled) is not bool:
+        raise ConfigError("content.v2_writer_enabled must be a boolean")
+    return ContentWriterConfig(v2_writer_enabled=enabled)
+
+
+EXTRACTION_PIPELINES = ("direct-baseline", "graph-dense", "graph-direct")
+
+
+@dataclass(frozen=True)
+class ExtractionConfig:
+    """Committed pipeline for new submissions; jobs pin it, so changes never mix engines."""
+
+    pipeline: str = "direct-baseline"
+
+
+def load_extraction_config() -> ExtractionConfig:
+    # Only the existing isolated-config facility selects another file; there is
+    # deliberately no environment variable naming a pipeline (F0005 Step 6).
+    override = os.environ.get("BRAIN_LOCAL_CONFIG_PATH")
+    path = Path(override) if override else _find_config_file(Path.cwd())
+    if not path.is_file():
+        raise ConfigError("extraction configuration is missing")
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    section = data.get("extraction")
+    if not isinstance(section, dict) or "pipeline" not in section:
+        raise ConfigError("extraction.pipeline must be set explicitly")
+    pipeline = section["pipeline"]
+    if pipeline not in EXTRACTION_PIPELINES:
+        raise ConfigError("extraction.pipeline is not a known pipeline")
+    return ExtractionConfig(pipeline=pipeline)
+
+
+DEFAULT_MAX_QUEUE_DEPTH = 100
+
+
+@dataclass(frozen=True)
+class JobQueueConfig:
+    """Bound on unfinished document jobs; new submissions beyond it are rejected."""
+
+    max_queue_depth: int = DEFAULT_MAX_QUEUE_DEPTH
+
+
+def load_job_queue_config() -> JobQueueConfig:
+    override = os.environ.get("BRAIN_LOCAL_CONFIG_PATH")
+    path = Path(override) if override else _find_config_file(Path.cwd())
+    if not path.is_file():
+        raise ConfigError("job queue configuration is missing")
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    section = data.get("jobs") or {}
+    depth = section.get("max_queue_depth", DEFAULT_MAX_QUEUE_DEPTH)
+    if type(depth) is not int or depth <= 0:
+        raise ConfigError("jobs.max_queue_depth must be a positive integer")
+    return JobQueueConfig(max_queue_depth=depth)
+
+
+def _find_config_file(start: Path) -> Path:
+    """Walk upward from `start` looking for `config/local.yaml` (a fresh checkout may
+    run the app from the repo root or from within `engine/`)."""
+    for candidate_dir in (start, *start.parents):
+        candidate = candidate_dir / "config" / "local.yaml"
+        if candidate.is_file():
+            return candidate
+    raise ConfigError(
+        f"config/local.yaml not found by walking up from {start}; "
+        "no storage environment variables are supported as a substitute (ADR-0059)."
+    )
+
+
+Exit code: 0
+

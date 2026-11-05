@@ -1,0 +1,98 @@
+[
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T neuron-validation pytest neuron/tests/integration/test_document_process_recovery.py --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g2-neuron-recovery.xml -q",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/g2-neuron-recovery.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T -e BRAIN_TEST_POSTGRES_URL=postgresql+psycopg://brain:brain@postgres:5432/brain_f0006_runtime neuron-validation pytest neuron/tests/integration/test_document_process_recovery.py -k postgresql --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g2-neuron-postgres-second.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/g2-neuron-postgres-second.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T -e PYTHONPATH=/app/brain -e BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@postgres:5432/postgres -e COVERAGE_FILE=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.coverage engine-validation pytest engine/packages/brain-assertions/tests engine/tests/integration/test_assertion_admission.py engine/tests/integration/test_assertion_consumers.py engine/tests/integration/test_assertion_migration.py engine/tests/integration/test_assertion_ownership.py engine/tests/integration/test_commit_concurrency.py engine/packages/brain-security/tests engine/packages/brain-temporal/tests engine/packages/brain-review/tests engine/packages/brain-persistence/tests engine/apps/api/tests/test_facts.py engine/apps/api/tests/test_reviews.py engine/apps/api/tests/test_errors.py --cov=brain_assertions --cov=brain_contracts.assertions --cov=brain_contracts.dispatch --cov=brain_domain.assertions --cov=brain_persistence.assertions --cov=brain_persistence.assertion_models --cov=brain_persistence.models --cov=brain_persistence.repositories --cov=brain_security.execution --cov=brain_temporal.commit --cov=brain_api.routes.facts --cov=brain_api.routes.reviews --cov=brain_api.errors --cov=brain_worker.document_delivery --cov=engine/migrations --cov-report=json:/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.json --cov-report=xml:/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.xml --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g2-full-changed-code.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/g2-full-changed-code.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T engine-validation python /app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/measure_changed_coverage.py",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/changed-coverage-first.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T -e OMP_NUM_THREADS=1 -e MKL_NUM_THREADS=1 -e OPENBLAS_NUM_THREADS=1 -e COVERAGE_FILE=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/neuron-importer.coverage neuron-validation pytest neuron/tests/integration/test_document_delivery.py --cov=brain_worker.document_delivery --cov=brain_contracts.dispatch --cov-report=json:/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/neuron-importer.json --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g2-neuron-importer-isolated.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/g2-neuron-importer-isolated.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T engine-validation python /app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/measure_changed_coverage.py",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/changed-coverage-final.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T engine-validation pytest /app/framework/agents/product-manager/scripts/tests/test_validate_feature_evidence_artifact_markdown.py /app/framework/agents/product-manager/scripts/tests/test_validate_feature_evidence_section23_closure.py /app/framework/agents/product-manager/scripts/tests/test_validate_feature_evidence_security_scans.py --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/framework-artifact-markdown.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/framework-artifact-markdown-tests.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T -e OMP_NUM_THREADS=1 -e MKL_NUM_THREADS=1 -e OPENBLAS_NUM_THREADS=1 -e BRAIN_TEST_POSTGRES_URL=postgresql+psycopg://brain:brain@postgres:5432/brain_f0006_runtime neuron-validation pytest neuron/tests/integration/test_content_worker_v2.py --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g2-existing-content-worker-postgres.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/g2-existing-content-worker-postgres.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T -e PYTHONPATH=/app/brain -e BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@postgres:5432/postgres engine-validation pytest engine/tests/integration/test_assertion_migration.py --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g3-evidence-tamper-final.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/g3-evidence-tamper-final.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T -e PYTHONPATH=/app/brain -e BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@postgres:5432/postgres -e COVERAGE_FILE=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.coverage engine-validation pytest engine/packages/brain-assertions/tests engine/tests/integration/test_assertion_admission.py engine/tests/integration/test_assertion_consumers.py engine/tests/integration/test_assertion_migration.py engine/tests/integration/test_assertion_ownership.py engine/tests/integration/test_commit_concurrency.py engine/packages/brain-security/tests engine/packages/brain-temporal/tests engine/packages/brain-review/tests engine/packages/brain-persistence/tests engine/apps/api/tests/test_facts.py engine/apps/api/tests/test_reviews.py engine/apps/api/tests/test_errors.py --cov=brain_assertions --cov=brain_contracts.assertions --cov=brain_contracts.dispatch --cov=brain_domain.assertions --cov=brain_persistence.assertions --cov=brain_persistence.assertion_models --cov=brain_persistence.models --cov=brain_persistence.repositories --cov=brain_security.execution --cov=brain_temporal.commit --cov=brain_api.routes.facts --cov=brain_api.routes.reviews --cov=brain_api.errors --cov=brain_worker.document_delivery --cov=engine/migrations --cov-report=json:/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.json --cov-report=xml:/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.xml --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g3-carrier-regression-final.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/g3-carrier-regression-final.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T -e PYTHONPATH=/app/brain -e BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@postgres:5432/postgres engine-validation pytest engine/tests/integration/test_assertion_authority_projection.py engine/tests/integration/test_assertion_consumers.py --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g3-sec04-focused.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/sec04-focused.log"
+    ]
+  },
+  {
+    "cwd": "{NEBULA_PRODUCT_ROOT}",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/compose.yaml exec -T -e PYTHONPATH=/app/brain -e BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@postgres:5432/postgres -e COVERAGE_FILE=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.coverage engine-validation pytest engine/packages/brain-assertions/tests engine/tests/integration/test_assertion_admission.py engine/tests/integration/test_assertion_consumers.py engine/tests/integration/test_assertion_migration.py engine/tests/integration/test_assertion_ownership.py engine/tests/integration/test_assertion_authority_projection.py engine/tests/integration/test_commit_concurrency.py engine/packages/brain-security/tests engine/packages/brain-temporal/tests engine/packages/brain-review/tests engine/packages/brain-persistence/tests engine/apps/api/tests/test_facts.py engine/apps/api/tests/test_reviews.py engine/apps/api/tests/test_errors.py --cov=brain_assertions --cov=brain_contracts.assertions --cov=brain_contracts.dispatch --cov=brain_domain.assertions --cov=brain_persistence.assertions --cov=brain_persistence.assertion_models --cov=brain_persistence.models --cov=brain_persistence.repositories --cov=brain_security.execution --cov=brain_temporal.commit --cov=brain_api.routes.facts --cov=brain_api.routes.reviews --cov=brain_api.errors --cov=brain_worker.document_delivery --cov=engine/migrations --cov-report=json:/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.json --cov-report=xml:/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/engine-changed.xml --junitxml=/app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/g3-sec04-regression.xml -q --tb=short",
+    "exit_code": 0,
+    "artifacts": [
+      "planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/command-output/sec04-full-regression.log"
+    ]
+  }
+]

@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from typing import Protocol
 from uuid import UUID, uuid4
 
+from brain_domain.assertions import SourceAccessProof
 from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
 
 from brain_temporal.ranges import TimeRange, split_remainder
@@ -20,6 +21,18 @@ class StaleVersionError(Exception):
 
 
 class FactCommitRepository(Protocol):
+    async def require_commit_sources(
+        self,
+        *,
+        evidence_refs: tuple[UUID, ...],
+        review_decision_id: UUID | None,
+        authorized_scope: tuple[UUID, UUID],
+        closes_existing: bool,
+        source_access: SourceAccessProof | None,
+    ) -> None:
+        """Refuse ineligible or unauthorized attributable sources before effects."""
+        ...
+
     async def lock_slot(self, slot_id: UUID) -> tuple[UUID, UUID] | None:
         """`SELECT ... FOR UPDATE` the slot; returns `(tenant_id, knowledge_base_id)`,
         or `None` if the slot does not exist. Serializes concurrent commits on the
@@ -101,6 +114,7 @@ class CanonicalCommitService:
         *,
         authorized_scope: tuple[UUID, UUID],
         authorization_decision_id: UUID | None,
+        source_access: SourceAccessProof | None = None,
     ) -> CommitResult:
         locked = await self._repository.lock_slot(proposal.slot_id)
         if locked is None or locked != authorized_scope:
@@ -115,6 +129,16 @@ class CanonicalCommitService:
             current_ids = {v.id for v in current}
             if proposal.expected_current_version_id not in current_ids:
                 raise StaleVersionError(str(proposal.expected_current_version_id))
+
+        await self._repository.require_commit_sources(
+            evidence_refs=proposal.evidence_refs,
+            review_decision_id=proposal.review_decision_id,
+            authorized_scope=authorized_scope,
+            closes_existing=any(
+                TimeRange(v.valid_start, v.valid_end).overlaps(new_valid) for v in current
+            ),
+            source_access=source_access,
+        )
 
         now = self._clock()
         commit_id = uuid4()

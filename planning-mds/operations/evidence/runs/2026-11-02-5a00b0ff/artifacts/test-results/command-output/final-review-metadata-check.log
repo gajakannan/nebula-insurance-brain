@@ -1,0 +1,85 @@
+# F0006 Architect Implementation Review
+
+- Run: `2026-11-02-5a00b0ff`
+- NEBULA_PRODUCT_ROOT: `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`
+- Reviewer: Codex / Architect (`/root/g0_architect`)
+- Review date: 2026-11-03T14:17:54+00:00
+- Verdict: PASS
+- Open findings: critical=0; high=0; medium=0; low=0. A-IMPL-01 (High) was repaired and independently re-reviewed.
+- Scope: as-built conformance and independent second review of the production contract/domain/admission/persistence/current-consumer changes.
+
+## Independence and Sources
+
+I authored the G0 plan-validation report and independent QE expectations/tests,
+but did not author the production assertion contracts, domain carriers or their
+runtime implementation. This is an implementation review separate from the G0
+assembly-readiness judgment and from the parallel Code Reviewer and Security
+Reviewer reports.
+
+The approved feature assembly plan governs, including the correction-basis and
+v2 correction-persistence rework approved in planning run
+`2026-11-01-512e9303`. Raw ADR-0075, the authored candidate/result/admission
+schemas, the current fact/review API contract, SOLUTION-PATTERNS and the G0
+constraints were compared with source. Tier-2 lookup supplied routing; the
+planned graph state does not override the implementation or raw requirements.
+
+[Architect static checks](artifacts/test-results/architect-conformance-checks.json)
+record the reviewed production inventory, SHA-256 values, schema comparisons,
+legacy preservation and observed JUnit totals. The review covers all 20 Python
+acknowledgement. No PR/merge approval is fabricated. Attach this review to the
+eventual PR and obtain the owner's acknowledgement before PR approval/merge.
+
+The graph still has planning bindings for the new untracked source. G7 owns
+as-built `kg-source/bindings/**` and node-shard reconciliation, compiled
+projection/symbol/decision regeneration and drift validation. G8 owns the
+archive move and path-sensitive coverage refresh. Those future publication
+steps have not been represented as completed here. ADR-0065/0075 remain at their
+recorded status pending the prescribed acceptance process. F0016 durable
+outcomes/time/run adoption, F0018 full canonical orchestration, F0022 display,
+F0066 open extraction/alignment and production activation remain outside this
+feature review.
+
+No source, schema, graph, manifest, STATUS or gate was changed by this review.
+# F0006 Test Execution Report
+
+- Run: `2026-11-02-5a00b0ff`
+- NEBULA_PRODUCT_ROOT: `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`
+- Reviewer: Codex / Quality Engineer
+- Review date: 2026-11-03T14:19:15+00:00
+- Verdict: PASS
+- Scope: the approved F0006 five stories and 35 ACs, including current-consumer compatibility.
+
+## Acceptance Assessment
+
+All **35 ACs** have mapped observed proof in `test-plan.md`. Initial independent
+review identified missing two-source competition, positive ENTITY/time retention,
+operative-policy versus embedded-condition, composite owner-FK and restricted SQL
+role cases. Targeted tests now pass in the final engine execution. No blocking
+QE finding remains within this feature scope, and no waiver is taken.
+
+## Final Executed Layers
+
+| Artifact | Observed result | Scope |
+|---|---|---|
+| [artifacts/test-results/g3-carrier-regression-final.xml](artifacts/test-results/g3-carrier-regression-final.xml) | **297 passed**, zero failures/errors/skips; 57.358 s | Final engine assertion unit/admission/normalization/eligibility/PG/current-consumer tests, ownership matrix, review/security/API/persistence/temporal regressions and real PG commit/concurrency |
+| [artifacts/test-results/g3-evidence-tamper-final.xml](artifacts/test-results/g3-evidence-tamper-final.xml) | **17 passed**, zero failures/errors/skips; 15.152 s | Focused PostgreSQL migration suite: four page/bbox INSERT-tamper rejections, three honest/null positives and existing integrity/rollback cases; overlaps final 297 |
+| [artifacts/test-results/g2-neuron-importer-isolated.xml](artifacts/test-results/g2-neuron-importer-isolated.xml) | **15 passed**, zero failures/errors/skips; 21.884 s | Current v1 delivery/importer atomicity/replay, selector and worker restart compatibility |
+| [artifacts/test-results/g2-neuron-postgres-second.xml](artifacts/test-results/g2-neuron-postgres-second.xml) | **5 passed**, zero failures/errors/skips; 91.904 s | PostgreSQL process recovery at bundle/run/completion/import/imported crash points |
+| [artifacts/test-results/g2-neuron-recovery.xml](artifacts/test-results/g2-neuron-recovery.xml) | **5 SQLite cases passed**; the first attempt skipped its PostgreSQL variants | SQLite process recovery at the same five crash points; explicit PG proof is supplied by the separate successful rerun above |
+| [artifacts/test-results/g2-existing-content-worker-postgres.xml](artifacts/test-results/g2-existing-content-worker-postgres.xml) | **5 passed**, zero failures/errors/skips; 25.380 s | Unchanged actual-OCR worker publication/import, profile reuse, concurrent restrictions, missing-producer and corrupt-marker compatibility with explicit PostgreSQL and bounded threads |
+| [artifacts/test-results/framework-security-scan-staging.xml](artifacts/test-results/framework-security-scan-staging.xml) | **7 passed** | Framework G0/G1 pending-scan regression and G2+ enforcement |
+| [artifacts/test-results/framework-artifact-markdown.xml](artifacts/test-results/framework-artifact-markdown.xml) | **45 passed**, zero failures/errors/skips; 9.384 s | Framework parser and evidence-validator regressions, including 11 new Markdown/plain-path, missing-file and traversal cases; separate from product test counts |
+
+Earlier [g2-complete-assertions.xml](artifacts/test-results/g2-complete-assertions.xml) (141), `g2-regression-final.xml` (126),
+`g2-review-regression.xml` (22) and `g2-ownership-first.xml` (15) are retained
+diagnostic/focused evidence. They overlap the final 297 and are **not** added to
+that count. The prior 290-case engine result is replaced by the clean 297-case run,
+which includes 148 feature cases; its focused 17 migration cases are not added again.
+The two process-recovery executions together prove all five crash
+points on SQLite and PostgreSQL; skipped cases are not described as passing.
+
+## Runtime, Commands and Isolation
+
+
+Exit code: 0
+

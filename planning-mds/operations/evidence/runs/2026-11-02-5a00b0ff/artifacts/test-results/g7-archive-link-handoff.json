@@ -1,0 +1,60 @@
+{
+  "external_physical_refs": [
+    {
+      "file": "planning-mds/architecture/data-model.md",
+      "line": 326,
+      "text": "Phase B design approved by operator on 2026-11-01 in plan run `2026-11-01-7d6d19ce`; no migration has run. [ADR-0075](decisions/ADR-0075-versioned-assertion-semantics-and-admission.md) and the [assembly plan](../features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, constraints and migration steps. Existing assertion/evidence identities remain. The only legacy-row addition is a version discriminator defaulting to 1; missing historical quote/mode/release is not reconstructed. New version-2 assertions require one immutable semantic extension, document-scoped reference FKs and server-verified evidence; deferred trigger integrity prevents a core-only v2 record. A review correction of a v2 assertion is a v2 child. It has its own extension, child-owned evidence rows and deterministic correction hashes, and it inherits the original basis. Corrections of v1 rows keep the legacy EXPLICIT basis and stay version 1 (plan run `2026-11-01-512e9303`).",
+      "owner": "architect mechanical archive-link maintenance"
+    },
+    {
+      "file": "planning-mds/architecture/feature-assembly-plan.md",
+      "line": 13,
+      "text": "| F0006 | [Assertion semantics and admission](../features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md) | Phase A+B approved by operator 2026-11-01; F0001\u2013F0005 delivered prerequisites; v1 defaults preserved; no runtime implementation claimed |",
+      "owner": "architect mechanical archive-link maintenance"
+    },
+    {
+      "file": "planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md",
+      "line": 87,
+      "text": "No performance SLO, insurance acceptance rule, model accuracy result or production activation is established by this ADR. See the [assembly plan](../../features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md), [PRD](../../features/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md) and [worked examples](../../features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md).",
+      "owner": "architect mechanical archive-link maintenance"
+    },
+    {
+      "file": "planning-mds/kg-source/features/F0006.yaml",
+      "line": 3,
+      "text": "path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis",
+      "owner": "product-manager"
+    },
+    {
+      "file": "planning-mds/kg-source/features/F0006.yaml",
+      "line": 67,
+      "text": "  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md",
+      "owner": "product-manager"
+    },
+    {
+      "file": "planning-mds/kg-source/features/F0006.yaml",
+      "line": 78,
+      "text": "  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md",
+      "owner": "product-manager"
+    },
+    {
+      "file": "planning-mds/kg-source/features/F0006.yaml",
+      "line": 89,
+      "text": "  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md",
+      "owner": "product-manager"
+    },
+    {
+      "file": "planning-mds/kg-source/features/F0006.yaml",
+      "line": 99,
+      "text": "  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md",
+      "owner": "product-manager"
+    },
+    {
+      "file": "planning-mds/kg-source/features/F0006.yaml",
+      "line": 111,
+      "text": "  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md",
+      "owner": "product-manager"
+    }
+  ],
+  "logical_node_docs": "F0006/... resolves through feature shard path in compile.py; no authored node edits needed at archive",
+  "bindings": "active feature-folder paths removed from F0006 bindings; new code/test/resource paths stable"
+}

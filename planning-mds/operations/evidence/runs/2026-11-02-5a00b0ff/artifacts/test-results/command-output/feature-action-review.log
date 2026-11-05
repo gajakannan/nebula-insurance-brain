@@ -1,0 +1,218 @@
+# Action: Feature
+
+## User Intent
+
+Build a single feature as a complete vertical slice (backend + frontend + tests + deployability checks) that can be deployed and tested independently. Ideal for incremental delivery.
+
+## Agent Flow
+
+```
+Architect (Implementation Orchestration)
+  ↓
+(Backend Developer + Frontend Developer + AI Engineer [if AI scope] + Quality Engineer + DevOps)
+  ↓ [Parallel Implementation]
+[SELF-REVIEW GATE: Each agent validates their work]
+  ↓
+Code Reviewer + Security
+  ↓ [Parallel Reviews]
+[Review Gate: resolve critical findings]
+  ↓
+[APPROVAL GATE: User reviews and approves]
+  ↓
+[SIGNOFF GATE: required reviewer evidence verified]
+  ↓
+[CANDIDATE EVIDENCE GATE: pre-closeout evidence + tracker validation]
+  ↓
+Architect (Knowledge-Graph Reconciliation)
+  ↓ [ARCHITECT KG GATE: bind the as-built source into the graph for future runs]
+[PRODUCT MANAGER CLOSEOUT: status, archive, supersession, tracker sync, story index]
+  ↓
+Feature Complete
+```
+
+**Flow Type:** Mixed (architect-led orchestration kickoff, parallel implementation including deployability checks, parallel code+security reviews, single approval gate, required signoff verification, pre-closeout candidate evidence validation, a post-build architect knowledge-graph reconciliation, and PM closeout including tracker sync; AI Engineer runs when feature includes AI scope)
+
+---
+
+## Contract (generated — the spec is the source of truth)
+
+The fixed procedure for this action — gates, artifacts, ordering, typed commands,
+ownership, forbidden actions, stop conditions, and conflict resolution — is declared
+once in [`agents/actions/spec/feature.yaml`](spec/feature.yaml) and compiled into the
+operator/automation prompt pair at
+`agents/templates/prompts/evidence-contract/feature-operator-friendly.md` and
+`feature-automation-safe.md`. Regenerate with `python3 agents/scripts/render-prompts.py`;
+the `prompt_drift` lifecycle gate fails if the committed prompts drift from the spec.
+**Edit the spec, not this doc or the generated prompts.**
+
+Run the mechanics through the scripts (do not hand-transcribe them here):
+
+- Session setup + evidence skeleton — `python3 agents/scripts/init-run.py --action feature --feature {FEATURE_ID} --product-root {NEBULA_PRODUCT_ROOT}`
+- Gate execution (ordered ops, durable checkpoints, telemetry) — `python3 agents/scripts/run-gate.py --action feature --stage <G0..G8> ...` (`--list` prints the ordered runbook)
+- Severity arithmetic at the approval gate — `python3 agents/scripts/gate_policy.py --profile standard ...`
+
+Evidence lives under `{NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/` per the Feature
+Evidence Contract in `CONSUMER-CONTRACT.md`; per-gate acceptance is
+`validate-feature-evidence.py --stage <Gn>` (invoked by `run-gate.py`).
+
+### Gate flow
+
+G0 Architect assembly plan → G1 Runtime preflight → G2 Self-review + QE + deployability
+→ G3 Code + security review → G4 Approval → G5 Signoff → G6 Candidate validation
+→ G7 Architect KG reconciliation → G8 PM closeout.
+
+Ownership in brief (the full map is in the spec's `ownership:`): the **product-manager**
+owns closeout, trackers, and final status; the **architect** owns the assembly plan,
+shared semantics, and G7 KG reconciliation; **implementation** agents (backend, frontend,
+AI, QE, DevOps) own their runtime layer and role reports, and route shared-semantics
+changes back to the architect. Per-step judgment follows below.
+
+**Progress visibility:** keep the `## Story × Role Progress` matrix in the feature's
+`STATUS.md` current as each slice/role advances — implementation cells flip at G2, the
+Code Review / Security cells resolve at G3, and the Overall column rolls up (spec
+`notes.story_progress`). It is advisory (not validator-enforced) and gives per-story ×
+per-role visibility during the run instead of a single status that flips only at closeout.
+
+## Runtime Execution Boundary
+
+- The builder runtime orchestrates feature flow and gates; keep it stack-agnostic.
+- Stack-specific compile/test/lint/security execution must run in application runtime containers (or CI jobs built from those container definitions).
+- Review and approval decisions must cite evidence produced by those application runtime executions.
+
+## Runtime Preflight & Failure Triage (Mandatory)
+
+Before any compile/test/lint/security scan command:
+
+1. Verify required application runtime containers/jobs are running and healthy.
+   - Example (containerized stacks): `docker compose ps` + health checks/log probe.
+   - Non-containerized stacks: run the equivalent runtime readiness command(s).
+2. Record preflight evidence path (command + timestamp + result) in the feature execution log.
+3. If runtime is unavailable, restore runtime first, then re-run preflight before executing feature validation commands.
+
+If a validation command fails with runtime symptoms (for example connection refused, DNS/network resolution errors, dependency service unavailable, missing container):
+
+1. **Stop code edits immediately.**
+2. Classify failure as `runtime-blocked` in feature execution notes.
+3. Re-run runtime preflight and restore runtime health.
+4. Re-run the same failed validation command **without code changes**.
+5. Only treat it as a code defect if failure persists after runtime is healthy.
+
+---
+
+## Execution Steps
+
+### Step 0: Architect-Led Feature Assembly Planning
+
+**Execution Instructions:**
+
+1. **Activate Architect agent** by reading `agents/architect/SKILL.md`
+2. **Read context:**
+   - Feature stories in `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/F{NNNN}-S{NNNN}-{slug}.md`
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` scope and constraints
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/architecture/SOLUTION-PATTERNS.md`
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/api/` contracts for this feature
+3. **Produce feature assembly plan:**
+   - Required backend/frontend/AI changes for this feature only
+   - Integration checkpoints and dependency order
+   - Test and release checklist for the vertical slice
+   - **Knowledge-Graph Binding Plan** — the *intended* semantic-graph delta: which capabilities/canonical nodes this feature is expected to add or extend, and the anticipated binding glob(s) (`kg-source/bindings/**`). This is a prediction, not a contract; it is the baseline the `G7` reconciliation diffs the as-built source against. "No new nodes; reuses existing semantics" is a valid declaration.
+4. **Output artifacts:**
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/feature-assembly-plan.md` (canonical per-feature execution plan; use `agents/templates/feature-assembly-plan-template.md`)
+   - Update `{NEBULA_PRODUCT_ROOT}/planning-mds/architecture/feature-assembly-plan.md` to reference the feature-local plan from the umbrella cross-feature sequencing view
+5. **Initialize signoff requirements in feature status:**
+   - Update `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/STATUS.md` section `Required Signoff Roles`
+   - Mark baseline required roles as `Yes`: `Quality Engineer`, `Code Reviewer`
+   - Add risk-based required roles (`Security Reviewer`, `DevOps`, `Architect`) when scope warrants
+
+**Completion Criteria for Step 0:**
+- [ ] Feature assembly plan exists
+- [ ] Feature scope and handoffs are explicit
+- [ ] Integration/test checkpoints defined
+- [ ] Required signoff role matrix initialized in feature `STATUS.md`
+
+---
+
+### Step 0.5: Assembly Plan Validation
+
+**Execution Instructions:**
+
+Validate the feature assembly plan before parallel implementation:
+
+- [ ] Scope split matches feature story requirements
+- [ ] Dependencies between agents are identified
+- [ ] Integration checkpoints are feasible
+- [ ] No missing or conflicting artifact ownership
+
+Validator:
+- Code Reviewer or a second Architect review (lightweight checklist is sufficient)
+
+---
+
+### Step 1: Parallel Feature Implementation
+
+**Execution Instructions:**
+
+Execute these agents **in parallel** for the specific feature. Run AI Engineer when the feature touches `{NEBULA_PRODUCT_ROOT}/neuron/`, LLM workflows, prompts, or MCP.
+All stack-specific execution (compile/tests/scans) must run in application runtime containers produced for this project.
+
+Mandatory preflight before implementation validation runs:
+- [ ] Runtime preflight executed and recorded per `Runtime Preflight & Failure Triage (Mandatory)`
+
+**AI Scope Checklist — include AI Engineer if ANY apply:**
+- [ ] Story mentions LLM, AI, or machine learning behavior
+- [ ] Story requires MCP server/tool/resource work
+- [ ] Story involves prompts, agent behavior, or tool orchestration
+- [ ] Story changes files under `{NEBULA_PRODUCT_ROOT}/neuron/`
+- [ ] Story requires model selection, cost controls, or guardrails
+
+#### 1a. Backend Developer (Feature Scope)
+1. **Activate Backend Developer agent** by reading `agents/backend-developer/SKILL.md`
+2. **Read context:**
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` Section 4 (architecture for this feature)
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/architecture/SOLUTION-PATTERNS.md`
+   - User stories for THIS FEATURE ONLY
+3. **Execute responsibilities (feature-scoped):**
+   - Implement domain entities for this feature
+   - Create or update EF Core entities
+   - Generate migration (if schema changes needed)
+   - Implement API endpoints for this feature
+   - Write application services for feature business logic
+   - Create unit tests for feature domain logic
+   - Write integration tests for feature API endpoints
+4. **Follow SOLUTION-PATTERNS.md:**
+   - Casbin ABAC for authorization
+   - ActivityTimelineEvent for mutations
+   - ProblemDetails for errors
+   - Clean architecture layers
+   - Audit fields, soft delete
+5. **Outputs (feature-specific):**
+   - Domain entities (created or updated)
+   - EF Core migration (if needed)
+   - API endpoints (controllers)
+   - Application services
+   - Unit tests
+   - Integration tests
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/STATUS.md` updates (Backend Progress section, validation evidence)
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/GETTING-STARTED.md` updates (key files, seed data, verification steps)
+
+#### 1b. Frontend Developer (Feature Scope)
+1. **Activate Frontend Developer agent** by reading `agents/frontend-developer/SKILL.md`
+2. **Read context:**
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` Section 3 (screens for this feature)
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/architecture/SOLUTION-PATTERNS.md`
+   - API contracts for THIS FEATURE ONLY
+   - `agents/frontend-developer/references/ux-audit-ruleset.md`
+3. **Execute responsibilities (feature-scoped):**
+   - Create React components for feature screens
+   - Implement forms for this feature (React Hook Form + AJV with JSON Schema)
+   - Set up TanStack Query hooks for feature API calls
+   - Add routing for feature screens
+   - Style with Tailwind + shadcn/ui
+   - Write component tests
+   - Apply and pass UX rule-set checks for this feature's UI changes
+4. **Follow SOLUTION-PATTERNS.md:**
+   - React Hook Form for forms
+   - AJV + JSON Schema for validation
+
+Exit code: 0
+

@@ -1,0 +1,121 @@
+async def resolve_lineage(
+    session: AsyncSession,
+    evidence_refs: Sequence[UUID],
+    review_decision_id: UUID | None,
+    *,
+    assertion_ids: Sequence[UUID] = (),
+) -> SourceLineage:
+    seeds = set(assertion_ids)
+    supplied = (
+        list(
+            (
+                await session.execute(
+                    select(AssertionEvidence).where(AssertionEvidence.id.in_(evidence_refs))
+                )
+            ).scalars()
+        )
+        if evidence_refs
+        else []
+    )
+    seeds.update(e.assertion_id for e in supplied)
+    incomplete = len({e.id for e in supplied}) != len(set(evidence_refs))
+    reviewed = False
+    review_seeds: set[UUID] = set()
+    invalid = False
+    if review_decision_id is not None:
+        decision = await session.get(ReviewDecisionRow, review_decision_id)
+        if decision is None:
+            incomplete = True
+        else:
+            item = await session.get(ReviewItemRow, decision.review_item_id)
+            if item is None:
+                invalid = True
+            else:
+                review_seeds.add(item.assertion_id)
+                if (decision.tenant_id, decision.knowledge_base_id) != (
+                    item.tenant_id,
+                    item.knowledge_base_id,
+                ):
+                    invalid = True
+            if decision.corrected_assertion_id is not None:
+                review_seeds.add(decision.corrected_assertion_id)
+            seeds.update(review_seeds)
+            reviewed = not decision.stale and decision.action in ("ACCEPT", "CORRECT")
+    rows: dict[UUID, Assertion] = {}
+    review_chain: set[UUID] = set()
+    for seed in sorted(seeds, key=str):
+        seen: set[UUID] = set()
+        current: UUID | None = seed
+        while current is not None:
+            if current in seen or len(seen) >= 256:
+                invalid = True
+                break
+            seen.add(current)
+            row = await session.get(Assertion, current)
+            if row is None:
+                invalid = True
+                break
+            if seed in review_seeds:
+                review_chain.add(current)
+            rows[current] = row
+            current = row.original_assertion_id
+    if review_seeds and any(e.assertion_id not in review_chain for e in supplied):
+        invalid = True
+    semantics: list[AssertionSemantics] = []
+    all_evidence = (
+        list(
+            (
+                await session.execute(
+                    select(AssertionEvidence).where(AssertionEvidence.assertion_id.in_(rows))
+                )
+            ).scalars()
+        )
+        if rows
+        else []
+    )
+    has_v2 = any(a.semantic_contract_version == 2 for a in rows.values())
+    for row in rows.values():
+        sem = await session.get(AssertionSemantics, row.id)
+        if row.semantic_contract_version == 2:
+            if sem is None:
+                invalid = True
+            else:
+                semantics.append(sem)
+                if (sem.tenant_id, sem.knowledge_base_id) != (row.tenant_id, row.knowledge_base_id):
+                    invalid = True
+        elif sem is not None:
+            invalid = True
+    keys = tuple(
+        sorted({ResourceKey(ResourceType.CONTENT_ARTIFACT, e.artifact_id) for e in all_evidence})
+    )
+    for evidence in all_evidence:
+        owner = rows[evidence.assertion_id]
+        artifact = await session.get(ContentArtifact, evidence.artifact_id)
+        if (
+            artifact is None
+            or (evidence.tenant_id, evidence.knowledge_base_id)
+            != (owner.tenant_id, owner.knowledge_base_id)
+            or (artifact.tenant_id, artifact.knowledge_base_id)
+            != (owner.tenant_id, owner.knowledge_base_id)
+        ):
+            invalid = True
+    return SourceLineage(
+        list(rows.values()), semantics, all_evidence, keys, has_v2, incomplete, invalid, reviewed
+    )
+
+
+def issue_source_access(
+            reasons=list(eligibility.reasons),
+            blocked_operations=list(eligibility.blocked_operations),
+            created_by=str(sem.created_by),
+            created_at=sem.created_at.isoformat(),
+        )
+        # The reserved carrier has no meaning in an old reader.
+        result.pop("slot_type")
+        return result
+
+
+def _review_locator(evidence: Mapping[str, Any]) -> dict:
+
+Exit code: 0
+

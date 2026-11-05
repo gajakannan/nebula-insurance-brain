@@ -1,0 +1,57 @@
+.....FF..........                                                        [100%]
+=================================== FAILURES ===================================
+_ test_matching_evidence_carriers_accept_honest_and_absent_regions[TRANSCRIBED-False] _
+engine/tests/integration/test_assertion_migration.py:82: in test_matching_evidence_carriers_accept_honest_and_absent_regions
+    assert original.server_evidence[0].selector.get("page") is None
+E   AssertionError: assert 1 is None
+E    +  where 1 = <built-in method get of dict object at 0x733b086a9dc0>('page')
+E    +    where <built-in method get of dict object at 0x733b086a9dc0> = {'kind': 'time_span', 'start_ms': 0, 'end_ms': 5000, 'speaker': 'synthetic-speaker', ...}.get
+E    +      where {'kind': 'time_span', 'start_ms': 0, 'end_ms': 5000, 'speaker': 'synthetic-speaker', ...} = ServerEvidence(evidence_id=UUID('cdc03878-94d8-5f3b-83a6-5908652860cf'), artifact_id=UUID('c17cbc0c-f3e8-48f7-9d75-3ef...'independent-synthetic-source', 'engine_version': '1', 'model': None, 'model_version': None}, producer_confidence=0.87).selector
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+_ test_matching_evidence_carriers_accept_honest_and_absent_regions[TRANSCRIBED-True] _
+engine/tests/integration/test_assertion_migration.py:82: in test_matching_evidence_carriers_accept_honest_and_absent_regions
+    assert original.server_evidence[0].selector.get("page") is None
+E   AssertionError: assert 1 is None
+E    +  where 1 = <built-in method get of dict object at 0x733b0703adc0>('page')
+E    +    where <built-in method get of dict object at 0x733b0703adc0> = {'kind': 'time_span', 'start_ms': 0, 'end_ms': 5000, 'speaker': 'synthetic-speaker', ...}.get
+E    +      where {'kind': 'time_span', 'start_ms': 0, 'end_ms': 5000, 'speaker': 'synthetic-speaker', ...} = ServerEvidence(evidence_id=UUID('b94ace23-aa65-59c0-8787-93753cd782f7'), artifact_id=UUID('8f666b05-564b-450b-a125-458...'independent-synthetic-source', 'engine_version': '1', 'model': None, 'model_version': None}, producer_confidence=0.87).selector
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+=============================== warnings summary ===============================
+tests/integration/test_assertion_migration.py: 21 warnings
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED engine/tests/integration/test_assertion_migration.py::test_matching_evidence_carriers_accept_honest_and_absent_regions[TRANSCRIBED-False]
+FAILED engine/tests/integration/test_assertion_migration.py::test_matching_evidence_carriers_accept_honest_and_absent_regions[TRANSCRIBED-True]
+2 failed, 15 passed, 21 warnings in 11.27s
+
+Exit code: 1
+

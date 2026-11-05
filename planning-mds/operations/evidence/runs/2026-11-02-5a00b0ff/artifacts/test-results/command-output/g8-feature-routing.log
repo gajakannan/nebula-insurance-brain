@@ -1,0 +1,204 @@
+{
+  "target": {
+    "status": "planned",
+    "id": "feature:F0006",
+    "path": "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis",
+    "affects": [
+      "capability:assertion-eligibility-guards",
+      "capability:structural-assertion-admission",
+      "capability:versioned-assertion-semantics",
+      "endpoint:fact-commit",
+      "endpoint:review-decisions-submit",
+      "endpoint:review-item-get",
+      "entity:assertion",
+      "entity:assertion-document-reference",
+      "entity:assertion-name-claim",
+      "entity:assertion-semantics"
+    ],
+    "depends_on": [
+      "feature:F0001",
+      "feature:F0002",
+      "feature:F0003",
+      "feature:F0004",
+      "feature:F0005"
+    ],
+    "governed_by": [
+      "adr:0005",
+      "adr:0010",
+      "adr:0013",
+      "adr:0030",
+      "adr:0035",
+      "adr:0037",
+      "adr:0058",
+      "adr:0061",
+      "adr:0062",
+      "adr:0063",
+      "adr:0065",
+      "adr:0075"
+    ],
+    "notes": [
+      "ADR-0065/0075 stay Proposed; a plan approval is not runtime acceptance. Current pilot unregistered legacy evidence behaviour is explicitly retained; new restrictions follow attributable v2 evidence/review/correction lineage.",
+      "Automatic result importer remains v1-only; v2 internal storage seam does not enable a live producer. F0016 owns durable drop/run adoption, F0018 full commit orchestration, F0022 display and F0066 open extraction/alignment.",
+      "Phase A+B approved by explicit operator tokens on 2026-11-01, plan run 2026-11-01-7d6d19ce; Phase B rework (v2 corrections inherit basis, v1 legacy EXPLICIT boundary, v2 correction child persistence) re-approved in plan run 2026-11-01-512e9303. All five stories remain Not Started; no feature completion or formal Proposed ADR acceptance is claimed.",
+      "Planning bindings only. Five stories and 35 ACs; no runtime paths are bound as implemented. Roadmap stays Next."
+    ],
+    "uses_api_contract": [
+      "api:brain-api"
+    ],
+    "uses_schema": [
+      "schema:assertion-admission-result-v1",
+      "schema:assertion-record-v2",
+      "schema:interpretation-result",
+      "schema:interpretation-result-v2",
+      "schema:problem-details"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:assertion-eligibility-guards",
+      "label": "Assertion eligibility guards"
+    },
+    {
+      "id": "capability:structural-assertion-admission",
+      "label": "Structural assertion admission"
+    },
+    {
+      "id": "capability:versioned-assertion-semantics",
+      "label": "Versioned assertion semantics"
+    },
+    {
+      "id": "endpoint:fact-commit",
+      "label": "POST /facts/{factSlotId}/commits"
+    },
+    {
+      "id": "endpoint:review-decisions-submit",
+      "label": "POST /reviews/batches/{reviewBatchId}/decisions"
+    },
+    {
+      "id": "endpoint:review-item-get",
+      "label": "GET /reviews/{reviewItemId}"
+    },
+    {
+      "id": "entity:assertion",
+      "label": "Assertion"
+    },
+    {
+      "id": "entity:assertion-document-reference",
+      "label": "Document-local assertion reference"
+    },
+    {
+      "id": "entity:assertion-name-claim",
+      "label": "Assertion admission name claim"
+    },
+    {
+      "id": "entity:assertion-semantics",
+      "label": "Assertion semantic extension"
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0005",
+      "label": "Three-Plane Knowledge Model"
+    },
+    {
+      "id": "adr:0010",
+      "label": "Provenance Is Mandatory"
+    },
+    {
+      "id": "adr:0013",
+      "label": "JSON Schema Is the Structural Contract"
+    },
+    {
+      "id": "adr:0030",
+      "label": "Tenancy Is Structural"
+    },
+    {
+      "id": "adr:0035",
+      "label": "Interpretation Basis Is First-Class"
+    },
+    {
+      "id": "adr:0037",
+      "label": "Human Corrections Append; They Do Not Rewrite Evidence"
+    },
+    {
+      "id": "adr:0058",
+      "label": "Evidence Anchoring and Selector Contract"
+    },
+    {
+      "id": "adr:0061",
+      "label": "Tenant identity and structural ownership"
+    },
+    {
+      "id": "adr:0062",
+      "label": "Current authorization and durable decisions"
+    },
+    {
+      "id": "adr:0063",
+      "label": "Open Statements and Signature Alignment"
+    },
+    {
+      "id": "adr:0065",
+      "label": "Assertion Admission, Text Origin, and Statement Mood"
+    },
+    {
+      "id": "adr:0075",
+      "label": "Versioned Assertion Semantics and Structural Admission (Proposed; Phase B design approved 2026-11-01, runtime proofs pending)"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:assertion-admission-result-v1",
+      "label": "Assertion Admission Result V1"
+    },
+    {
+      "id": "schema:assertion-record-v2",
+      "label": "Assertion Candidate V2"
+    },
+    {
+      "id": "schema:interpretation-result",
+      "label": "InterpretationResult"
+    },
+    {
+      "id": "schema:interpretation-result-v2",
+      "label": "Interpretation Result V2"
+    },
+    {
+      "id": "schema:problem-details",
+      "label": "ProblemDetails"
+    }
+  ],
+  "uses_api_contract": [
+    {
+      "id": "api:brain-api",
+      "label": "Nebula Insurance Brain API"
+    }
+  ],
+  "depends_on": [
+    {
+      "id": "feature:F0001"
+    },
+    {
+      "id": "feature:F0002"
+    },
+    {
+      "id": "feature:F0003"
+    },
+    {
+      "id": "feature:F0004"
+    },
+    {
+      "id": "feature:F0005"
+    }
+  ]
+}
+
+Exit code: 0
+

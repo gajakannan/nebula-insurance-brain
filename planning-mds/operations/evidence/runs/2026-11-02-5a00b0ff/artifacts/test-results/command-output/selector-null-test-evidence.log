@@ -1,0 +1,75 @@
+    async def block(self, context: ProducerContext, block_id: str) -> VerifiedBlock:
+        _, bundle = await self._bundle(context)
+        native = decode_json(bundle.files["docling-document.json"])
+        if bundle.key.contract_version == 2:
+            block = next((b for b in bundle.blocks if b.block_id == block_id), None)
+            if block is None:
+                raise LookupError("source block missing")
+            anchor = block.origin_anchor.model_dump(mode="json")
+            selector = {
+                **anchor,
+                "block_id": block_id,
+                "native_ref": block.native_ref,
+                "precision": "block",
+            }
+            regions = anchor.get("regions", [])
+            if len(regions) == 1:
+                selector.update({k: v for k, v in regions[0].items() if v is not None})
+            node: Any = native
+            try:
+                for part in block.native_ref.removeprefix("#/").split("/"):
+                    part = part.replace("~1", "/").replace("~0", "~")
+                    node = node[int(part)] if isinstance(node, list) else node[part]
+            except (KeyError, IndexError, TypeError, ValueError):
+                raise ArtifactIntegrityError("native selector is unresolved") from None
+            if isinstance(node, dict) and isinstance(node.get("source_locator"), dict):
+                selector.update(copy.deepcopy(node["source_locator"]))
+            cells = [
+                (t, cell) for t in bundle.tables for cell in t.cells if block_id in cell.block_ids
+            ]
+            if len(cells) == 1:
+                table, cell = cells[0]
+                selector.update(
+                    table_id=table.table_id,
+                    cell_id=cell.cell_id,
+                    row=cell.row_start,
+                    column=cell.col_start,
+                    precision="table_cell",
+                )
+            return VerifiedBlock(
+                context.artifact_id,
+                block_id,
+                block.text,
+                selector,
+                block.text_origin,
+                "qualified",
+                block.producer.model_dump(mode="json"),
+                block.confidence,
+            )
+        records = [
+            decode_json(line) for line in bundle.files["blocks.jsonl"].splitlines() if line.strip()
+        ]
+        block = next((b for b in records if str(b.get("block_id", b.get("id"))) == block_id), None)
+        if block is None or not isinstance(block.get("text"), str):
+            raise LookupError("source block missing")
+        selector = {
+            key: copy.deepcopy(value)
+            for key, value in block.items()
+            if key not in ("text", "text_origin", "producer", "confidence")
+        }
+        selector.update(block_id=block_id, precision="block")
+        return VerifiedBlock(
+            context.artifact_id,
+{
+  "provenance": "Independently authored synthetic retained-source snapshots for F0006. Development fixtures, outside the frozen holdout; no conversion, OCR or model execution is represented.",
+  "default_text": "Cedar Bridge Roofing has a general aggregate limit of $ 5,000,000. The each occurrence limit is $500,000. Effective 2026-06-01.",
+  "sources": {
+    "pdf": {"filename": "source.pdf", "locator": {"format": "pdf", "page": 1, "bbox": {"x0": 10.0, "y0": 20.0, "x1": 500.0, "y1": 60.0}}},
+    "docx": {"filename": "source.docx", "locator": {"format": "docx", "part": "word/document.xml", "paragraph": 0, "run": 0}},
+    "xlsx": {"filename": "source.xlsx", "locator": {"format": "xlsx", "sheet": "Declarations", "cell": "B2"}},
+    "csv": {"filename": "source.csv", "locator": {"format": "csv", "row": 2, "column": "limit", "column_index": 1}}
+  }
+}
+
+Exit code: 0
+

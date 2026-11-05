@@ -1,0 +1,118 @@
+
+Feature: [Feature Name]
+
+Application Assembly:
+  ✓ Architect
+    - Feature assembly plan created
+    - Dependencies and checkpoints validated
+
+Implementation:
+  ✓ Backend Developer
+    - [count] entities created/updated
+    - [count] API endpoints implemented
+    - [count] unit tests passing
+    - [count] integration tests passing
+
+  ✓ Frontend Developer
+    - [count] components created
+    - [count] screens implemented
+    - [count] forms with validation
+    - Component tests passing
+
+  ✓ Quality Engineer
+    - Test plan complete
+    - [count] E2E tests passing
+    - [percentage]% coverage for feature code
+
+  ✓ DevOps
+    - Feature deployability checks passed
+    - Runtime configuration updates verified
+    - Evidence paths recorded
+
+  ✓ AI Engineer (if AI scope)
+    - [count] AI workflows/prompts delivered
+    - [count] AI tests passing
+
+Code Review:
+  ✓ Code Reviewer: APPROVED
+  ✓ Vertical slice complete
+  ✓ Acceptance criteria met
+  Status: APPROVED
+
+Security Review:
+  ✓ Security Agent: PASS
+  ✓ No critical vulnerabilities (high findings fixed or justified)
+  ✓ Authorization and validation checks complete
+  Status: PASS
+
+Closeout:
+  ✓ Required signoff ledger complete
+  ✓ Product Manager closeout recorded
+  ✓ Trackers and story index synchronized
+
+═══════════════════════════════════════════════════════════
+Next Steps:
+═══════════════════════════════════════════════════════════
+
+Feature is ready to:
+1. Merge to main branch
+2. Deploy to staging
+3. Get stakeholder feedback
+
+To continue building:
+- Run "feature" action for next feature
+- Run "build" action for remaining features
+- Run "document" action to update docs
+
+Feature delivered! ✓
+═══════════════════════════════════════════════════════════
+```
+
+---
+
+## Validation Criteria
+
+**Overall Feature Action Success:**
+- [ ] Feature assembly plan created and followed
+- [ ] Feature is complete vertical slice (backend + frontend + tests + DevOps deployability checks + AI when in scope)
+- [ ] All feature tests passing in application runtime containers
+- [ ] AI tests passing (if AI scope) in AI runtime container
+- [ ] Code review approved
+- [ ] Security review approved
+- [ ] Signoff gate passed for all required reviewer roles
+- [ ] All feature acceptance criteria met
+42:# `gate_results.kg_reconciliation`. Earlier runs are exempt so pre-existing
+178:def kg_reconciliation_required(manifest: dict[str, Any], stage: str) -> bool:
+192:        kg_reconciliation_required(manifest, stage)
+292:GATE_SPEC: dict[str, dict[str, Any]] = {
+323:    "pm_closeout": {
+329:    "tracker_sync": {
+335:    "kg_reconciliation": {
+396:    spec = GATE_SPEC.get(key)
+1699:    if kg_reconciliation_required(manifest, stage):
+1701:        kg_gate = gate_results.get("kg_reconciliation") if isinstance(gate_results, dict) else None
+1704:                "kg_reconciliation_gate_missing_fails",
+1705:                "Manifest gate_results.kg_reconciliation is missing (G7 architect KG reconciliation is required at closeout)",
+1712:                    "kg_reconciliation_gate_not_passing_fails",
+1713:                    f"gate_results.kg_reconciliation.result must be passing ({sorted(PASSING_PASS_RESULTS)}), got {kg_gate.get('result')!r}",
+1763:def _load_pm_acceptances(pm_closeout_path: Path) -> list[PmAcceptance]:
+1764:    content = safe_read(pm_closeout_path)
+1793:    if kg_reconciliation_required(manifest, stage):
+1807:        "pm-closeout.md": "missing_pm_closeout_fails",
+1808:        "kg-reconciliation.md": "kg_reconciliation_artifact_missing_fails",
+1839:                "pm-closeout.md": "missing_pm_closeout_fails",
+1900:    if not kg_reconciliation_required(manifest, stage):
+1914:    if kg_reconciliation_required(manifest, stage) and "G7" not in present:
+2100:    pm_closeout_path = run_folder / "pm-closeout.md"
+2101:    acceptances: list[PmAcceptance] = parse_pm_acceptance_lines(safe_read(pm_closeout_path) or "")
+2183:    pm_closeout_path = run_folder / "pm-closeout.md"
+2184:    acceptances = parse_pm_acceptance_lines(safe_read(pm_closeout_path) or "")
+2191:            path=str(pm_closeout_path),
+2254:    pm_closeout = run_folder / "pm-closeout.md"
+agents/product-manager/scripts/validate-stories.py:488:    parser.add_argument(
+agents/product-manager/scripts/validate-stories.py:494:    parser.add_argument(
+agents/product-manager/scripts/validate-stories.py:500:    parser.add_argument(
+agents/product-manager/scripts/generate-story-index.py:285:    parser.add_argument(
+
+Exit code: 0
+

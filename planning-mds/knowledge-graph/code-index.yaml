@@ -8,14 +8,23 @@ node_bindings:
     paths:
       architecture:
         - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      examples:
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      backend:
+        - engine/packages/brain-assertions/src/brain_assertions/eligibility.py
+        - engine/packages/brain-assertions/src/brain_assertions/ports.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/repositories.py
       schemas:
         - planning-mds/schemas/assertion-admission-result-v1.schema.json
         - planning-mds/schemas/assertion-record-v2.schema.json
         - planning-mds/schemas/interpretation-result-v2.schema.json
+      tests:
+        - engine/packages/brain-assertions/tests/test_eligibility.py
+        - engine/tests/integration/test_assertion_authority_projection.py
+        - engine/tests/integration/test_assertion_consumers.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
+        - neuron/tests/integration/test_document_delivery.py
+        - neuron/tests/integration/test_document_process_recovery.py
   - id: capability:authorization-enforcement
     paths:
       backend:
@@ -36,6 +45,9 @@ node_bindings:
       backend:
         - engine/migrations/versions/0003_fact_slots_and_commits.py
         - engine/packages/brain-temporal/src/**
+      tests:
+        - engine/apps/api/tests/test_facts.py
+        - engine/packages/brain-temporal/tests/**
   - id: capability:bounded-delegation
     paths:
       backend:
@@ -72,15 +84,23 @@ node_bindings:
   - id: capability:durable-authorization-decisions
     paths:
       backend:
+        - engine/apps/api/src/brain_api/routes/facts.py
+        - engine/apps/api/src/brain_api/routes/reviews.py
+        - engine/packages/brain-assertions/src/brain_assertions/service.py
         - engine/packages/brain-domain/src/brain_domain/audit.py
         - engine/packages/brain-security/src/brain_security/audit.py
         - engine/packages/brain-security/src/brain_security/execution.py
+      tests:
+        - engine/packages/brain-security/tests/test_execution.py
   - id: capability:evidence-review-round-trip
     paths:
       backend:
         - engine/packages/brain-review/src/**
       frontend:
         - experience/src/review-panel/**
+      tests:
+        - engine/apps/api/tests/test_reviews.py
+        - engine/packages/brain-review/tests/**
   - id: capability:local-dependency-stack
     paths:
       infra:
@@ -178,6 +198,7 @@ node_bindings:
       backend:
         - engine/packages/brain-contracts/src/**
       tests:
+        - engine/packages/brain-assertions/tests/test_contracts.py
         - neuron/benchmarks/f0005_qualification.py
         - neuron/tests/integration/test_interpretation_rejections.py
         - neuron/tests/integration/test_live_reinterpretation_qualification.py
@@ -186,14 +207,25 @@ node_bindings:
     paths:
       architecture:
         - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      examples:
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      backend:
+        - engine/packages/brain-assertions/src/brain_assertions/__init__.py
+        - engine/packages/brain-assertions/src/brain_assertions/admission.py
+        - engine/packages/brain-assertions/src/brain_assertions/eligibility.py
+        - engine/packages/brain-assertions/src/brain_assertions/normalization.py
+        - engine/packages/brain-assertions/src/brain_assertions/ports.py
+        - engine/packages/brain-assertions/src/brain_assertions/py.typed
+        - engine/packages/brain-assertions/src/brain_assertions/service.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
       schemas:
         - planning-mds/schemas/assertion-admission-result-v1.schema.json
         - planning-mds/schemas/assertion-record-v2.schema.json
         - planning-mds/schemas/interpretation-result-v2.schema.json
+      tests:
+        - engine/packages/brain-assertions/tests/test_admission.py
+        - engine/packages/brain-assertions/tests/test_normalization.py
+        - engine/tests/fixtures/assertions/harness.py
+        - engine/tests/fixtures/assertions/native-sources.json
+        - engine/tests/integration/test_assertion_admission.py
   - id: capability:structural-tenancy-and-entity-identity
     paths:
       backend:
@@ -208,14 +240,34 @@ node_bindings:
     paths:
       architecture:
         - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
-      examples:
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+      backend:
+        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+        - engine/packages/brain-contracts/src/brain_contracts/assertions.py
+        - engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+        - engine/packages/brain-domain/src/brain_domain/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/models.py
+      resources:
+        - engine/apps/api/pyproject.toml
+        - engine/packages/brain-assertions/pyproject.toml
+        - engine/packages/brain-contracts/pyproject.toml
+        - engine/packages/brain-persistence/pyproject.toml
+        - engine/pyproject.toml
+        - engine/uv.lock
+        - neuron/uv.lock
       schemas:
+        - engine/packages/brain-contracts/src/brain_contracts/schemas/assertion-admission-result-v1.schema.json
+        - engine/packages/brain-contracts/src/brain_contracts/schemas/assertion-record-v2.schema.json
+        - engine/packages/brain-contracts/src/brain_contracts/schemas/interpretation-result-v2.schema.json
+        - engine/packages/brain-contracts/src/brain_contracts/schemas/interpretation-result.schema.json
         - planning-mds/schemas/assertion-admission-result-v1.schema.json
         - planning-mds/schemas/assertion-record-v2.schema.json
         - planning-mds/schemas/interpretation-result-v2.schema.json
+      tests:
+        - engine/packages/brain-assertions/tests/test_contracts.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
   - id: capability:versioned-content-contracts
     paths:
       ai:
@@ -253,21 +305,52 @@ node_bindings:
         - engine/apps/api/src/brain_api/routes/content.py
       tests:
         - engine/apps/api/tests/test_content.py
+  - id: entity:assertion
+    paths:
+      backend:
+        - engine/packages/brain-domain/src/brain_domain/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/models.py
+      tests:
+        - engine/tests/integration/test_assertion_admission.py
+        - engine/tests/integration/test_assertion_consumers.py
+        - engine/tests/integration/test_assertion_migration.py
   - id: entity:assertion-document-reference
     paths:
       architecture:
         - planning-mds/architecture/data-model.md
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      backend:
+        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+      tests:
+        - engine/tests/integration/test_assertion_admission.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
   - id: entity:assertion-name-claim
     paths:
       architecture:
         - planning-mds/architecture/data-model.md
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      backend:
+        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+      tests:
+        - engine/tests/integration/test_assertion_admission.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
   - id: entity:assertion-semantics
     paths:
       architecture:
         - planning-mds/architecture/data-model.md
-        - planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      backend:
+        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+      tests:
+        - engine/tests/integration/test_assertion_admission.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
   - id: entity:content-artifact
     paths:
       backend:

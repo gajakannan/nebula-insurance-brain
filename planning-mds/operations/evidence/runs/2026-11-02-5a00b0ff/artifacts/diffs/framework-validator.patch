@@ -1,0 +1,129 @@
+diff --git a/agents/product-manager/scripts/tests/test_validate_feature_evidence_security_scans.py b/agents/product-manager/scripts/tests/test_validate_feature_evidence_security_scans.py
+index 7cdc9e0..5d2b48c 100644
+--- a/agents/product-manager/scripts/tests/test_validate_feature_evidence_security_scans.py
++++ b/agents/product-manager/scripts/tests/test_validate_feature_evidence_security_scans.py
+@@ -22,8 +22,8 @@ from test_validate_feature_evidence import (
+ LATE_DATE = "2026-05-25"
+ 
+ 
+-def _error_ids(product: Path) -> set[str]:
+-    result = run_validator(product, "--feature", "F0001", "--run-id", RUN_ID, "--stage", "G0", "--json")
++def _error_ids(product: Path, stage: str = "G2") -> set[str]:
++    result = run_validator(product, "--feature", "F0001", "--run-id", RUN_ID, "--stage", stage, "--json")
+     return {entry["rule_id"] for entry in json_result(result)["errors"]}
+ 
+ 
+@@ -131,3 +131,18 @@ def test_pre_effective_date_run_is_exempt(tmp_path: Path) -> None:
+         manifest_updates={"security_sensitive_scope": True, "contract_effective_date": "2026-05-19"},
+     )
+     assert "security_scans_missing_fails" not in _error_ids(product)
++
++
++def test_security_scans_are_not_required_before_qe_handoff(tmp_path: Path) -> None:
++    """Security scope can be known at setup without fabricating scan waivers."""
++    product = tmp_path / "product"
++    write_registry(product, archived="| F0001 | New Feature | 2026-05-19 |  | `archive/F0001-new/` |")
++    write_manifest_run(
++        product, "F0001-new", "F0001",
++        latest=True,
++        manifest_updates={"security_sensitive_scope": True, "contract_effective_date": LATE_DATE},
++    )
++    for stage in ("G0", "G1"):
++        assert not any(rule.startswith("security_scan") for rule in _error_ids(product, stage))
++    for stage in ("G2", "G3", "G4", "G5", "G6", "closeout"):
++        assert "security_scans_missing_fails" in _error_ids(product, stage)
+diff --git a/agents/product-manager/scripts/validate-feature-evidence.py b/agents/product-manager/scripts/validate-feature-evidence.py
+index 1596b44..9ea65fe 100644
+--- a/agents/product-manager/scripts/validate-feature-evidence.py
++++ b/agents/product-manager/scripts/validate-feature-evidence.py
+@@ -873,8 +873,15 @@ def validate_artifact_reference(
+ 
+ def artifact_references(content: str, relative_prefix: str) -> list[str]:
+     prefix = re.escape(relative_prefix)
+-    pattern = re.compile(rf"(?:\{{(?:NEBULA_PRODUCT_ROOT|PRODUCT_ROOT)\}}[\\/]|[A-Za-z]:[\\/]|/)?[^\s)\]]*{prefix}[^\s)\]]+")
+-    return pattern.findall(content)
++    # Markdown delimiters surround paths; they are not part of the filesystem
++    # reference. Keep absolute/placeholder prefixes and traversal components so
++    # the resolver still performs the existing containment checks.
++    token = r"[^\s`<>\[\]()\"']"
++    pattern = re.compile(
++        rf"(?:\{{(?:NEBULA_PRODUCT_ROOT|PRODUCT_ROOT)\}}[\\/]|[A-Za-z]:[\\/]|/)?"
++        rf"{token}*{prefix}{token}+"
++    )
++    return list(dict.fromkeys(value.rstrip(".,;:") for value in pattern.findall(content)))
+ 
+ 
+ # --------------------------------------------------------------------------- #
+@@ -1626,10 +1633,13 @@ def validate_manifest_deep(
+     # output under artifacts/security/; Security is Accountable for the verdict.
+     # A Security PASS is only defensible when every class either ran with a
+     # resolvable artifact or carries a complete in-line waiver. Gated on the
+-    # run's own contract_effective_date so earlier packages stay valid.
++    # run's own contract_effective_date so earlier packages stay valid. Scans
++    # are produced by QE at G2: G0/G1 validate setup and runtime readiness,
++    # before the implementation and scan handoff exist.
+     manifest_effective = parse_iso_date(str(manifest.get("contract_effective_date", "")))
+     if (
+         manifest.get("security_sensitive_scope") is True
++        and stage not in {"G0", "G1"}
+         and manifest_effective is not None
+         and manifest_effective >= SECURITY_SCANS_EFFECTIVE_DATE
+     ):
+
+diff --git a/agents/product-manager/scripts/tests/test_validate_feature_evidence_artifact_markdown.py b/agents/product-manager/scripts/tests/test_validate_feature_evidence_artifact_markdown.py
+new file mode 100644
+index 0000000..4458bd8
+--- /dev/null
++++ b/agents/product-manager/scripts/tests/test_validate_feature_evidence_artifact_markdown.py
+@@ -0,0 +1,51 @@
++"""Real G2 reports can cite artifacts using normal Markdown punctuation."""
++from pathlib import Path
++
++import pytest
++
++from test_validate_feature_evidence import (
++    RUN_ID,
++    json_result,
++    run_validator,
++    write_manifest_run,
++    write_registry,
++)
++
++
++@pytest.mark.parametrize("reference", [
++    "`artifacts/coverage/cov.json`.",
++    "[Coverage JSON](artifacts/coverage/cov.json).",
++    "[artifacts/coverage/cov.json](artifacts/coverage/cov.json).",
++    "artifacts/coverage/cov.json,",
++    "<artifacts/coverage/cov.json>;",
++])
++@pytest.mark.parametrize("exists", [True, False])
++def test_markdown_reference_resolves_and_missing_artifact_still_fails(
++    tmp_path: Path, reference: str, exists: bool
++) -> None:
++    product = tmp_path / "product"
++    write_registry(product, archived="| F0001 | New Feature | 2026-05-19 |  | `archive/F0001-new/` |")
++    run = write_manifest_run(product, "F0001-new", "F0001", stage="G2")
++    artifact = run / "artifacts/coverage/cov.json"
++    if exists:
++        artifact.parent.mkdir(parents=True, exist_ok=True)
++        artifact.write_text('{"coverage":90}\n')
++    (run / "coverage-report.md").write_text("# Coverage\n\nResult: PASS\n\nRaw: " + reference + "\n")
++    result = run_validator(product, "--feature", "F0001", "--run-id", RUN_ID, "--stage", "G2", "--json")
++    rules = {item["rule_id"] for item in json_result(result)["errors"]}
++    assert ("coverage_claim_without_artifact_fails" in rules) is not exists
++    if exists:
++        assert "artifact_missing_fails" not in rules
++
++
++def test_markdown_does_not_hide_traversal_reference(tmp_path: Path) -> None:
++    product = tmp_path / "product"
++    write_registry(product, archived="| F0001 | New Feature | 2026-05-19 |  | `archive/F0001-new/` |")
++    run = write_manifest_run(product, "F0001-new", "F0001", stage="G2")
++    (run / "coverage-report.md").write_text(
++        "# Coverage\n\nResult: PASS\n\n[Escape](../../../../artifacts/coverage/outside.json).\n"
++    )
++    result = run_validator(product, "--feature", "F0001", "--run-id", RUN_ID, "--stage", "G2", "--json")
++    assert result.returncode == 1
++    rules = {item["rule_id"] for item in json_result(result)["errors"]}
++    assert any("artifact" in rule for rule in rules)

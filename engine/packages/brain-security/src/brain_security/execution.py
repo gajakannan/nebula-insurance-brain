@@ -30,6 +30,7 @@ from uuid import UUID, uuid4
 
 from brain_domain.authx import (
     NO_FILTER,
+    Action,
     AuthorizationContext,
     AuthorizationDecision,
     Delegation,
@@ -395,6 +396,7 @@ class AuthorizationExecution:
         operation: Callable[[Sequence[AuthorizationDecision]], Awaitable[T]],
         requested: RequestedScope = NO_FILTER,
         delegation_id: UUID | None = None,
+        additional_reads: Callable[[], Awaitable[Sequence[ResourceKey]]] | None = None,
     ) -> T:
         """Authorize every key (resolved and locked before any mutation), run the
         operation in the same UoW, and commit its effects with the decisions."""
@@ -408,6 +410,29 @@ class AuthorizationExecution:
         evaluated = self._recheck_all(evaluated)
         if not all(e.decision.allowed for e in evaluated):
             raise await self._deny(evaluated)
+        if additional_reads is not None:
+            # WHY: source access joins this mutation's UoW. Calling the read
+            # facade here would commit the caller's transaction prematurely.
+            try:
+                source_keys = sorted(set(await additional_reads()))
+                source_evaluated = (
+                    await self._guarded_decide(
+                        authenticated, source_keys, Action.READ, requested, trace_id, delegation_id
+                    )
+                    if source_keys
+                    else []
+                )
+            except Exception:
+                await self._persist_fresh(
+                    [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
+                )
+                raise
+            evaluated.extend(source_evaluated)
+            if not all(e.decision.allowed for e in evaluated):
+                raise await self._deny(evaluated)
+            evaluated = self._recheck_all(evaluated)
+            if not all(e.decision.allowed for e in evaluated):
+                raise await self._deny(evaluated)
         decisions = [e.decision for e in evaluated]
         try:
             # Mutation rows may reference this audit through an immediate FK.

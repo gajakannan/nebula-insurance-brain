@@ -1,0 +1,176 @@
+world = harness.world
+world_factory = harness.world_factory
+counts = harness.counts
+configuration = harness.configuration
+
+
+def slot(world):
+    with Session(world.sync_engine) as session, session.begin():
+        return fixtures.seed_fact_slot(session, *world.owner)
+
+
+def proposal(slot_id, evidence, review=None):
+    now = datetime.now(UTC)
+    return CommitProposal(
+        slot_id=slot_id,
+        value={"amount": 500000},
+        valid_from=now,
+        valid_to=None,
+        change_reason=None,
+        evidence_refs=tuple(evidence),
+        review_decision_id=review,
+        source_received_at=now,
+        artifact_created_at=now,
+        assertion_created_at=now,
+        expected_current_version_id=None,
+        idempotency_key=None,
+    )
+
+
+async def commit(world, slot_id, evidence, review=None, *, authorized=True):
+    async with AsyncSession(world.engine, expire_on_commit=False) as session:
+        repository = SqlAlchemyFactCommitRepository(session)
+        service = CanonicalCommitService(repository)
+        request = proposal(slot_id, evidence, review)
+        if not authorized:
+            return await service.commit(
+                request, authorized_scope=world.owner, authorization_decision_id=None
+            )
+        execution = AuthorizationExecution(
+            SqlAlchemyAuthorityStore(session), world.policy, world.policy.release
+        )
+
+        async def sources():
+            return await repository.commit_source_keys(evidence, review)
+
+        async def effect(decisions):
+            primary = next(d for d in decisions if d.action == Action.COMMIT)
+            return await service.commit(
+                request,
+                authorized_scope=world.owner,
+                authorization_decision_id=primary.decision_id,
+                source_access=repository.source_access_proof(decisions),
+            )
+
+        return await execution.mutate(
+            world.actor,
+            [ResourceKey(ResourceType.FACT_SLOT, slot_id)],
+            Action.COMMIT,
+            trace_id="independent-commit",
+            operation=effect,
+            additional_reads=sources,
+        )
+
+
+async def review(world, assertion_id, *, correct=None, evidence_seen=None):
+    with Session(world.sync_engine) as session, session.begin():
+        item = session.scalars(
+            select(ReviewItemRow).where(ReviewItemRow.assertion_id == assertion_id)
+        ).first()
+        batch = ReviewBatchRow(
+            id=uuid4(),
+            assembling_principal_id=world.reviewer.id,
+            tenant_id=world.owner[0],
+            knowledge_base_id=world.owner[1],
+        )
+        session.add(batch)
+        session.flush()
+        item.review_batch_id = batch.id
+        item_id = item.id
+    async with AsyncSession(world.engine, expire_on_commit=False) as session:
+        repository = SqlAlchemyReviewItemRepository(
+            session, actor_id=world.reviewer.id, content_store=world.content
+        )
+        execution = AuthorizationExecution(
+            SqlAlchemyAuthorityStore(session), world.policy, world.policy.release
+        )
+
+        async def sources():
+            return await repository.source_keys([item_id])
+
+        async def effect(decisions):
+            authorizations = {d.resource.id: d for d in decisions if d.action == Action.ANNOTATE}
+            audit = ReviewDecisionAuditSink(SqlAlchemyAuditEventRepository(session), authorizations)
+            return await ReviewDecisionService(repository, audit).submit(
+                DecisionRequest(
+                    review_item_id=item_id,
+                    action=ReviewDecisionAction.CORRECT
+                    if correct is not None
+                    else ReviewDecisionAction.ACCEPT,
+                    reviewer_principal_id=world.reviewer.id,
+                    assertion_version=1,
+                    corrected_value=correct,
+                    evidence_seen=evidence_seen,
+                )
+            )
+
+        return await execution.mutate(
+            world.reviewer,
+            [ResourceKey(ResourceType.REVIEW_TASK, item_id)],
+            Action.ANNOTATE,
+            trace_id="independent-review",
+            operation=effect,
+            additional_reads=sources,
+        )
+
+
+async def test_qualified_typed_commit_uses_same_uow_source_authority(world, database):
+    batch = await world.admit([world.candidate()])
+    evidence = [batch.accepted[0].server_evidence[0].evidence_id]
+    result = await commit(world, slot(world), evidence)
+    assert len(result.fact_version_ids) == 1
+    assert counts(database)["canonical_commit"] == 1
+
+
+@pytest.mark.parametrize("kind", ["mood", "open", "described"])
+async def test_independent_restrictions_prevent_canonical_effects(world_factory, database, kind):
+    world = world_factory(origin="DESCRIBED" if kind == "described" else "STATED")
+    updates = {"qualifiers": {"mood": "offered subject to inspection"}} if kind == "mood" else {}
+    if kind == "open":
+        updates.update(
+            assertion_kind="OPEN_STATEMENT",
+"""F0006 scoped assertion persistence and existing-consumer enforcement.
+
+Every method uses the caller's unit of work. This adapter never commits or
+constructs authority; source reads require current, staged authorization audit.
+"""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+import unicodedata
+from collections.abc import Awaitable, Callable, Mapping, Sequence
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from typing import Any
+from uuid import UUID, uuid4, uuid5
+
+from brain_assertions.eligibility import AssertionIneligible, evaluate_eligibility, require_eligible
+from brain_assertions.normalization import locate_quote
+from brain_assertions.ports import NameClaimConflict
+from brain_content.contracts import decode_json
+from brain_content.service import ArtifactMetadata
+from brain_content.store import ContentArtifactStore
+from brain_content.validation import ArtifactIntegrityError, VerifiedBundle
+from brain_contracts.assertions import AdmittedAssertion, AssertionRecordV2
+from brain_domain.assertions import ProducerContext, SourceAccessProof, TimeReference, VerifiedBlock
+from brain_domain.authx import Action, AuthorizationDecision, ResourceKey, ResourceType
+from brain_domain.review import EvidenceLocator
+from sqlalchemy import select, text
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from brain_persistence.assertion_models import (
+    AssertionDocumentReference,
+    AssertionNameClaim,
+    AssertionSemantics,
+)
+from brain_persistence.content_repository import ContentArtifactRepository
+from brain_persistence.models import (
+    Assertion,
+engine/packages/brain-review/src/brain_review/decisions.py:42:class DecisionRequest:
+engine/packages/brain-domain/src/brain_domain/assertions.py:109:class SourceAccessProof:
+
+Exit code: 0
+

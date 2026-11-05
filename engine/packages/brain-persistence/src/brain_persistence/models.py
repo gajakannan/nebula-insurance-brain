@@ -56,6 +56,11 @@ class DocumentVersion(Base):
     version per source; later features (F0009/F0010) add re-upload/replacement versions."""
 
     __tablename__ = "document_version"
+    # Mirror migration 0005 so isolated ORM-created test schemas can resolve
+    # F0006's composite foreign keys to this existing ownership key.
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "knowledge_base_id", name="uq_document_version_owner"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True, default=uuid.uuid4)
     source_document_id: Mapped[uuid.UUID] = mapped_column(
@@ -148,6 +153,13 @@ class Assertion(Base):
     corrections append and never rewrite the original, F0001-S0004)."""
 
     __tablename__ = "assertion"
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "knowledge_base_id", name="uq_assertion_owner"),
+    )
+
+    semantic_contract_version: Mapped[int] = mapped_column(
+        SmallInteger, nullable=False, default=1, server_default="1"
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True)
     run_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -631,4 +643,5 @@ class CanonicalCommitRow(Base):
 
 
 # Register the additive F0004 Core tables after their parent models exist.
+from brain_persistence import assertion_models as _assertion_models  # noqa: E402, F401
 from brain_persistence import content_models as _content_models  # noqa: E402, F401

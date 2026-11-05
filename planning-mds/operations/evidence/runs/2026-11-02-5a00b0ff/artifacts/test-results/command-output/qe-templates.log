@@ -1,0 +1,97 @@
+agents/templates/test-plan-template.md
+agents/templates/deployability-check-template.md
+agents/templates/coverage-report-template.md
+agents/templates/test-execution-report-template.md
+agents/templates/self-review-template.md
+# Test Execution Report — F####-{slug} run {run-id}
+
+> Required per §10. Quality Engineer-owned. The QE verdict artifact for `role_results['Quality Engineer']`.
+
+## Commands Executed
+
+```text
+- pnpm test --runInBand → 0 failures
+- dotnet test → 0 failures
+- pnpm exec playwright test → 2 retries, 0 failures
+```
+
+Each line should appear in `commands.log` with matching exit codes.
+
+## Pass/Fail Counts
+
+| Lane | Total | Pass | Fail | Skip | Retries |
+|------|------:|-----:|-----:|-----:|--------:|
+| Unit (engine) | 142 | 142 | 0 | 0 | 0 |
+| Unit (experience) | 87 | 87 | 0 | 0 | 0 |
+| Component | 24 | 24 | 0 | 0 | 0 |
+| Integration | 18 | 18 | 0 | 0 | 0 |
+| E2E | 6 | 6 | 0 | 0 | 2 |
+
+## Skipped Tests And Rationale
+
+List skipped tests by ID and why. An empty section may say `- None`.
+
+## Raw Test Artifact Paths
+
+Cite the path of every test artifact relied upon (junit XML, playwright reports). Validator checks they resolve.
+
+- `artifacts/test-results/junit-engine.xml`
+- `artifacts/test-results/playwright-report/`
+
+## Failed / Retried Command History
+
+Document the chronology of any failure-then-retry events. Helps reviewers reason about flakiness vs real defects.
+
+## AC Coverage Result
+
+Map each AC to its evidence and final outcome (covered / partial / deferred).
+
+## Recommendations (when `WITH RECOMMENDATIONS`)
+
+Use §15 canonical bullet. Severity `low`/`medium`/`high`/`critical`.
+
+## Result
+
+One of: `PASS`, `PASS WITH RECOMMENDATIONS`, `FAIL`.
+# Coverage Report — F####-{slug} run {run-id}
+
+> Required per §10 — the file must exist even when coverage is waived. QE-owned.
+
+## Coverage Target And Actual Per Layer
+
+| Layer | Target | Actual | Source |
+|-------|------:|------:|--------|
+| Unit (engine) | 80% | 86% | `artifacts/coverage/engine-cobertura.xml` |
+| Unit (experience) | 70% | 78% | `artifacts/coverage/experience-lcov.info` |
+| Integration | 60% | 64% | `artifacts/coverage/integration-cobertura.xml` |
+
+## Raw Artifact Paths
+
+Cite each coverage artifact path. External (implementation-layer) coverage paths are allowed and should be linked from `artifact-trace.md`.
+
+## Feature-Scoped Notes
+
+Coverage scoped to this feature's changed surfaces. Note any cross-feature regressions or trade-offs.
+
+## Waiver Block (when coverage cannot be produced or is below target)
+
+Required only when `manifest.waivers.coverage` is set. The waiver block here must echo the waiver fields and the PM Acceptance Line in `pm-closeout.md`.
+
+- Owner: <Quality Engineer name>
+- Date: YYYY-MM-DD
+- Scope: <what is waived>
+- Reason: <why coverage cannot be produced or is below target>
+- Follow-up: <ticket or "None">
+
+PM Acceptance must use `<identifier> = coverage` per §15 PM Acceptance Line Format.
+
+## Recommendations (when `WITH RECOMMENDATIONS`)
+
+§15 canonical bullet form. Severity `low`/`medium`/`high`/`critical`.
+
+## Result
+
+One of: `PASS`, `PASS WITH RECOMMENDATIONS`, `FAIL`.
+
+Exit code: 0
+

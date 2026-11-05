@@ -1,9 +1,15 @@
 id: capability:durable-authorization-decisions
 label: Durable authorization decisions
-notes: "Implemented in F0002 (run 2026-09-27-bb7c8d1d): AuthorizationExecution commits a schema-v1 Decision to append-only audit_event before any payload or with the mutation atomically; denials/failures audited in a fresh transaction; audit failure is a sanitized 503. The single lock/load orchestration is execution.decide (API and worker)."
+notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): AuthorizationExecution commits a schema-v1 Decision
+  to append-only audit_event before any payload or with the mutation atomically; denials/failures audited in
+  a fresh transaction; audit failure is a sanitized 503. The single lock/load orchestration is execution.decide
+  (API and worker). F0006 extends the same mutation UoW with source READ discovery/recheck/audit for assertion,
+  review and commit consumers; metadata-only discovery precedes protected loads and direct v2 commits require
+  current source proof. No new grants or nested read-facade commit is introduced.'
 source_docs:
 - F0002/PRD.md
 - F0002/feature-assembly-plan.md
+- F0006/feature-assembly-plan.md
 related_nodes:
 - entity:audit-event
 - capability:authorization-enforcement

@@ -1,0 +1,56 @@
+from __future__ import annotations
+
+import copy
+import json
+from pathlib import Path
+
+import pytest
+from brain_contracts.assertions import (
+    SCHEMA_NAMES,
+    AdmissionBatch,
+    AssertionContractError,
+    AssertionContractUnsupported,
+    canonical_json,
+    decode_json,
+    parse_assertion,
+    validate_contract,
+)
+from brain_contracts.dispatch import parse_interpretation_result, parse_legacy_result, parse_result
+from brain_contracts.result import InterpretationResult
+
+ROOT = Path(__file__).resolve().parents[4]
+EXAMPLES = (
+    ROOT
+    / "planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json"
+)
+if not EXAMPLES.exists():
+    EXAMPLES = (
+        ROOT
+        / "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json"
+    )
+CASES = json.loads(EXAMPLES.read_text())["cases"]
+
+
+@pytest.mark.parametrize("case", CASES, ids=[c["id"] for c in CASES])
+def test_authored_contract_shape_expectations_and_packaged_schema_equality(case):
+    name = Path(case["schema"]).name
+    packaged = ROOT / "engine/packages/brain-contracts/src/brain_contracts/schemas" / name
+    assert packaged.read_bytes() == (ROOT / "planning-mds/schemas" / name).read_bytes()
+    if case["valid"]:
+        validate_contract(name, case["input"])
+                "word/document.xml",
+                '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>'
+                + text
+                + "</w:t></w:r></w:p></w:body></w:document>",
+            )
+        else:
+            archive.writestr(
+                "xl/worksheets/sheet1.xml",
+                '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData><row r="2"><c r="B2" t="inlineStr"><is><t>'
+                + text
+                + "</t></is></c></row></sheetData></worksheet>",
+            )
+    return buffer.getvalue()
+
+Exit code: 0
+

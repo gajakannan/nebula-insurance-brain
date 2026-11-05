@@ -1,0 +1,47 @@
+1:# Security Review Report — F0006 assertion-plane-origin-and-interpretation-basis run 2026-11-02-5a00b0ff
+3:## Scope
+16:## Reviewed Surfaces
+25:## Threat Boundary
+34:| Local converter / PDF input | Worker CPU, memory and parser process | Existing PDF signature restriction and supervised deadline reduce some exposure; SEC-01 remains |
+36:STRIDE assessment: spoofing is controlled by existing verified principals/current grants and server context; tampering by immutable source verification, composite FKs and append-only/deferred constraints; repudiation by atomic durable authorization/review/commit audits; disclosure by source authorization and sanitized errors, with SEC-04's pre-authorization materialization repaired; denial of service by deterministic admission/replay and existing worker controls, with inherited parser memory exposure in SEC-01; elevation of privilege by independent source READ, annotation/commit separation and conjunctive eligibility guards. No new authority is accepted from model flags, client actor fields or supplied eligibility booleans.
+38:## Auth / Authz
+48:HTTP tests exercise source denial as non-disclosing 404 before authorized ASSERTION_INELIGIBLE 422, application/problem+json, no quote/mood excerpt and zero canonical effects. No new permission rows or grants were added. SEC-04 is resolved: discover_sources uses Core column projections only for all three pre-READ discovery paths; the direct guard checks current READ authority before full semantic resolution. SEC-05 records incomplete KG caller edges rather than a demonstrated authorization bypass.
+50:## Validation
+58:## Audit / Logging
+62:## Secrets / Config
+64:Final gitleaks reported zero results over the recorded source scope. No new production secret, token transport, identity provider or remote integration was added. Local synthetic runtime configuration is not evidence of production secret-store or TLS readiness. Existing committed non-secret defaults remain unchanged. The project-wide secrets/data-protection planning gap is SEC-02.
+66:## Scan Disposition
+72:| dependency | Yes | Engine 0 advisories; Neuron 85 advisory records over 8 packages; SEC-01 | artifacts/security/dependency-summary.json; dependency-engine.json; dependency-neuron.json |
+79:The additional role-required strict planning audit actually ran in engine-validation and exited 1. Raw output: artifacts/test-results/command-output/g3-planning-security-audit.log. An earlier reviewer attempt hit Docker socket permissions and the approval was interrupted; it did not execute a scanner. The parent's completed existing-container audit supersedes that tooling limitation. Its failure is retained as SEC-02.
+85:| pypdf 6.21.2 / 7 | PDF xref/dictionary/page-tree memory amplification and encrypted page-count, labels, missing-trailer or clone loops. PdfReader and page traversal are actually called by DoclingAdapter on accepted PDF bytes. Deadline does not cap allocation. Realistic inherited High risk, SEC-01; scan lists fixes through 6.21.4. |
+87:| docling 2.126.0 / 8 and docling-slim 2.126.0 / 7 | Table-span and archive-detection resource exhaustion, local-image JSON disclosure, remote-fetch SSRF/credential forwarding, configured KServe policy gap, installed-plugin import and optional Tectonic file/shell access. Existing converter permits PDF and checks leading %PDF- before either parser, reducing non-PDF/archive/HTML/JSON/LaTeX routes. Remote fetching/headers, KServe, Tectonic and malicious installed plugin preconditions are not introduced/enabled by F0006. Detection-before-format checking is why allowed_formats alone is insufficient. Listed fixes 2.131.0/2.132.0; retain patch work under SEC-01. |
+93:## OWASP Top 10 Coverage
+97:| A01 Broken Access Control | OK with audit-map recommendation | Current server authority/owner/proof/eligibility enforced; SEC-04 minimization repair verified; SEC-05 audit-map gap |
+98:| A02 Cryptographic Failures | Inherited risk | SEC-01 certifi preconditions; no new cryptography |
+101:| A05 Security Misconfiguration | Issue | SEC-03 public nosniff header; local proof is not production hardening |
+102:| A06 Vulnerable / Outdated Components | Issue | SEC-01 real inherited advisories, not a clean dependency result |
+105:| A09 Security Logging & Monitoring | OK with planning gap | Atomic durable decisions tested; SEC-02 global documentation incomplete |
+106:| A10 Server-Side Request Forgery | No new path | Offline schema retrieval; inherited optional Docling remote-fetch preconditions retained in SEC-01 |
+110:## Findings
+114:### SEC-01 — High: inherited PDF parser and conversion dependency exposure
+122:Remediation: update and qualify pypdf to a fixed compatible version (scan: 6.21.4+) and address the other seven dependency packages using the precondition table; rebuild images and rerun conversion/worker recovery plus raw dependency scans. Add tested memory/CPU/process isolation for untrusted conversion rather than relying on wall-clock timeout. Preserve PDF magic and offline/remote-fetch restrictions. Owner: AI Engineer + DevOps, with Security verification. Proposed target: 2026-11-10, and before production/untrusted shared conversion exposure. Tracking: SEC-01 in this report / proposed F0026 security carryover.
+124:Proposed bounded G4 mitigation: allow only the reviewed local synthetic-fixture feature acceptance; keep current pipeline/writer defaults, no new producer or public/untrusted deployment activation; treat ingestion/conversion dependency remediation and memory containment as explicit preconditions to broader production exposure. F0006 does not introduce or amplify the inherited route. This is a **proposal**, not PM/operator acceptance or a waiver.
+126:### SEC-02 — Medium: inherited project security planning audit fails
+132:Remediation: Security and Architect complete the authored baseline artifacts, normalize required metadata, and rerun the strict audit. Owner: Security + Architect; proposed target 2026-11-10 / before production security qualification. Tracking: SEC-02. Proposed disposition is a bounded local feature carryover because these existing global documents are outside approved F0006 implementation scope; no passing audit or approval is fabricated.
+134:### SEC-03 — Low: public responses omit X-Content-Type-Options
+138:Remediation: set X-Content-Type-Options: nosniff consistently at the response/proxy boundary and verify public/error/protected responses. Owner: Backend Developer + DevOps; proposed target 2026-11-17. Tracking: SEC-03. Proposed hardening carryover; not an authenticated DAST pass.
+140:### SEC-04 — Medium, resolved: discovery originally materialized protected payloads before READ
+148:### SEC-05 — Low: KG authorization caller coverage is incomplete
+152:Remediation: reconcile the actual callers/bindings in required G7 or explicitly document the tool's unresolved dynamic-call limitation, preserving the source/manual caller inventory. Owner: Architect; target G7 before closeout. Tracking: SEC-05. This is a coverage-map finding, not evidence those routes omit authorization.
+154:## Recommendation Disposition
+156:- [high] SEC-01: patch/qualify inherited conversion dependencies and enforce effective resource isolation before broader untrusted/production conversion; proposed local synthetic-only mitigation requires explicit G4/PM disposition — owner: AI Engineer + DevOps; follow-up: SEC-01
+157:- [medium] SEC-02: complete inherited global security planning artifacts and pass the strict audit; bounded local carryover is proposed, not accepted — owner: Security + Architect; follow-up: SEC-02
+158:- [low] SEC-03: add and verify nosniff on public and protected/error responses — owner: Backend Developer + DevOps; follow-up: SEC-03
+160:- [low] SEC-05: reconcile authorization callers at G7 or record precise static-analysis limitations — owner: Architect; follow-up: SEC-05
+162:All open dispositions are **proposed**. No ticket, owner acknowledgement, target-date commitment, user approval or PM acceptance is inferred. Canonical recommendation severity is retained; SEC-01's High status requires explicit mitigation through the subsequent gate contract. A-IMPL-01 and SEC-04 are mitigated in source with observed PG proof, not deferred.
+164:## Per-Story Security Assessment
+176:## Result
+178:**PASS WITH RECOMMENDATIONS** for G3's bounded feature security review. The reviewed implementation controls and all five story security assessments support this result; A-IMPL-01 and SEC-04 are resolved with source-bound PostgreSQL proof. Open findings are Critical 0, High 1, Medium 1 and Low 2: inherited conversion dependency exposure, the failed global security planning audit, public nosniff header hardening, and incomplete KG caller coverage. G4 must make the explicit High mitigation decision required by the contract. This report supplies no PM acceptance and authorizes no production or new producer activation.
+
+Exit code: 0
+

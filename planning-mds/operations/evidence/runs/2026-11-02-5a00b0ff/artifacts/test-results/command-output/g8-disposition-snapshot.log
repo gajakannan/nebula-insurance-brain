@@ -1,0 +1,135 @@
+ M engine/apps/api/pyproject.toml
+ M engine/apps/api/src/brain_api/errors.py
+ M engine/apps/api/src/brain_api/routes/facts.py
+ M engine/apps/api/src/brain_api/routes/reviews.py
+ M engine/apps/worker/src/brain_worker/document_delivery.py
+ M engine/packages/brain-contracts/pyproject.toml
+ M engine/packages/brain-persistence/pyproject.toml
+ M engine/packages/brain-persistence/src/brain_persistence/models.py
+ M engine/packages/brain-persistence/src/brain_persistence/repositories.py
+ M engine/packages/brain-security/src/brain_security/execution.py
+ M engine/packages/brain-security/tests/test_execution.py
+ M engine/packages/brain-temporal/src/brain_temporal/commit.py
+ M engine/packages/brain-temporal/tests/conftest.py
+ M engine/pyproject.toml
+ M engine/uv.lock
+ M neuron/uv.lock
+ M planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/GETTING-STARTED.md
+ M planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/STATUS.md
+ M planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+ M planning-mds/kg-source/bindings/f0001.yaml
+ M planning-mds/kg-source/bindings/f0002.yaml
+ M planning-mds/kg-source/bindings/f0006-planning.yaml
+ M planning-mds/kg-source/nodes/capabilities/assertion-eligibility-guards.yaml
+ M planning-mds/kg-source/nodes/capabilities/durable-authorization-decisions.yaml
+ M planning-mds/kg-source/nodes/capabilities/structural-assertion-admission.yaml
+ M planning-mds/kg-source/nodes/capabilities/versioned-assertion-semantics.yaml
+ M planning-mds/kg-source/nodes/entities/assertion-document-reference.yaml
+ M planning-mds/kg-source/nodes/entities/assertion-name-claim.yaml
+ M planning-mds/kg-source/nodes/entities/assertion-semantics.yaml
+ M planning-mds/kg-source/nodes/entities/assertion.yaml
+ M planning-mds/knowledge-graph/canonical-nodes.yaml
+ M planning-mds/knowledge-graph/code-index.yaml
+ M planning-mds/knowledge-graph/decisions-index.yaml
+ M planning-mds/knowledge-graph/symbol-index.yaml
+ M planning-mds/knowledge-graph/unbound-but-referenced.yaml
+?? engine/migrations/versions/0011_f0006_assertion_semantics.py
+?? engine/packages/brain-assertions/
+?? engine/packages/brain-contracts/src/brain_contracts/assertions.py
+?? engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+?? engine/packages/brain-contracts/src/brain_contracts/schemas/
+?? engine/packages/brain-domain/src/brain_domain/assertions.py
+?? engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+?? engine/packages/brain-persistence/src/brain_persistence/assertions.py
+?? engine/tests/fixtures/
+?? engine/tests/integration/test_assertion_admission.py
+?? engine/tests/integration/test_assertion_authority_projection.py
+?? engine/tests/integration/test_assertion_consumers.py
+?? engine/tests/integration/test_assertion_migration.py
+?? engine/tests/integration/test_assertion_ownership.py
+?? planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/
+35:| Local converter / PDF input | Worker CPU, memory and parser process | Existing PDF signature restriction and supervised deadline reduce some exposure; SEC-01 remains |
+37:STRIDE assessment: spoofing is controlled by existing verified principals/current grants and server context; tampering by immutable source verification, composite FKs and append-only/deferred constraints; repudiation by atomic durable authorization/review/commit audits; disclosure by source authorization and sanitized errors, with SEC-04's pre-authorization materialization repaired; denial of service by deterministic admission/replay and existing worker controls, with inherited parser memory exposure in SEC-01; elevation of privilege by independent source READ, annotation/commit separation and conjunctive eligibility guards. No new authority is accepted from model flags, client actor fields or supplied eligibility booleans.
+49:HTTP tests exercise source denial as non-disclosing 404 before authorized ASSERTION_INELIGIBLE 422, application/problem+json, no quote/mood excerpt and zero canonical effects. No new permission rows or grants were added. SEC-04 is resolved: discover_sources uses Core column projections only for all three pre-READ discovery paths; the direct guard checks current READ authority before full semantic resolution. SEC-05 records incomplete KG caller edges rather than a demonstrated authorization bypass.
+65:Final gitleaks reported zero results over the recorded source scope. No new production secret, token transport, identity provider or remote integration was added. Local synthetic runtime configuration is not evidence of production secret-store or TLS readiness. Existing committed non-secret defaults remain unchanged. The project-wide secrets/data-protection planning gap is SEC-02.
+73:| dependency | Yes | Engine 0 advisories; Neuron 85 advisory records over 8 packages; SEC-01 | artifacts/security/dependency-summary.json; dependency-engine.json; dependency-neuron.json |
+80:The additional role-required strict planning audit actually ran in engine-validation and exited 1. Raw output: artifacts/test-results/command-output/g3-planning-security-audit.log. An earlier reviewer attempt hit Docker socket permissions and the approval was interrupted; it did not execute a scanner. The parent's completed existing-container audit supersedes that tooling limitation. Its failure is retained as SEC-02.
+86:| pypdf 6.21.2 / 7 | PDF xref/dictionary/page-tree memory amplification and encrypted page-count, labels, missing-trailer or clone loops. PdfReader and page traversal are actually called by DoclingAdapter on accepted PDF bytes. Deadline does not cap allocation. Realistic inherited High risk, SEC-01; scan lists fixes through 6.21.4. |
+88:| docling 2.126.0 / 8 and docling-slim 2.126.0 / 7 | Table-span and archive-detection resource exhaustion, local-image JSON disclosure, remote-fetch SSRF/credential forwarding, configured KServe policy gap, installed-plugin import and optional Tectonic file/shell access. Existing converter permits PDF and checks leading %PDF- before either parser, reducing non-PDF/archive/HTML/JSON/LaTeX routes. Remote fetching/headers, KServe, Tectonic and malicious installed plugin preconditions are not introduced/enabled by F0006. Detection-before-format checking is why allowed_formats alone is insufficient. Listed fixes 2.131.0/2.132.0; retain patch work under SEC-01. |
+98:| A01 Broken Access Control | OK with audit-map recommendation | Current server authority/owner/proof/eligibility enforced; SEC-04 minimization repair verified; SEC-05 audit-map gap |
+99:| A02 Cryptographic Failures | Inherited risk | SEC-01 certifi preconditions; no new cryptography |
+102:| A05 Security Misconfiguration | Issue | SEC-03 public nosniff header; local proof is not production hardening |
+103:| A06 Vulnerable / Outdated Components | Issue | SEC-01 real inherited advisories, not a clean dependency result |
+106:| A09 Security Logging & Monitoring | OK with planning gap | Atomic durable decisions tested; SEC-02 global documentation incomplete |
+107:| A10 Server-Side Request Forgery | No new path | Offline schema retrieval; inherited optional Docling remote-fetch preconditions retained in SEC-01 |
+113:Open grouped findings: **Critical 0; High 1; Medium 1; Low 2.** These counts are review findings, not advisory-record counts. Resolved A-IMPL-01 and SEC-04 are excluded from open counts. No unresolved implementation blocker remains in the reviewed source. The four open recommendations are explicitly non-blocking/deferred for the accepted trusted local synthetic-fixture scope under the named PM dispositions below; SEC-05 still requires G7 reconciliation or a precise documented limitation before G8 closeout.
+115:### SEC-01 — High: inherited PDF parser and conversion dependency exposure
+123:Remediation: update and qualify pypdf to a fixed compatible version (scan: 6.21.4+) and address the other seven dependency packages using the precondition table; rebuild images and rerun conversion/worker recovery plus raw dependency scans. Add tested memory/CPU/process isolation for untrusted conversion rather than relying on wall-clock timeout. Preserve PDF magic and offline/remote-fetch restrictions. Owner: AI Engineer + DevOps, with Security verification. Accepted follow-up target: 2026-11-10, and before untrusted or production PDF ingestion. Tracking: SEC-01 in this report; preproduction conversion-security carryover.
+125:Accepted bounded G4 mitigation: **trusted local synthetic fixtures only**. Remediate/qualify affected conversion dependencies and verify memory/CPU/process isolation before untrusted or production PDF ingestion. Keep the reviewed pipeline/writer defaults and producer boundary. The operator explicitly approved the quoted mitigation; Codex / Product Manager recorded the named SEC-01 acceptance in [gate-decisions.md](gate-decisions.md#named-pm-recommendation-acceptances). SEC-01 remains an **open High technical finding**, deferred and non-blocking only within that accepted local scope. The acceptance is neither a remediation claim nor a dependency waiver or production activation.
+127:### SEC-02 — Medium: inherited project security planning audit fails
+133:Remediation: Security and Architect complete the authored baseline artifacts, normalize required metadata, and rerun the strict audit. Owner: Security + Architect; accepted follow-up target 2026-11-10 / before production security qualification. Tracking: SEC-02. Codex / Product Manager explicitly accepted this non-blocking local feature carryover in [gate-decisions.md](gate-decisions.md#named-pm-recommendation-acceptances), because these existing global documents are outside approved F0006 implementation scope. The strict audit remains failed and the Medium finding remains open.
+135:### SEC-03 — Low: public responses omit X-Content-Type-Options
+139:Remediation: set X-Content-Type-Options: nosniff consistently at the response/proxy boundary and verify public/error/protected responses. Owner: Backend Developer + DevOps; accepted follow-up target 2026-11-17. Tracking: SEC-03. Codex / Product Manager accepted this non-blocking local feature hardening follow-up in [gate-decisions.md](gate-decisions.md#named-pm-recommendation-acceptances). The Low finding remains open; the anonymous DAST limitation remains unchanged.
+149:### SEC-05 — Low: KG authorization caller coverage is incomplete
+153:Remediation: reconcile the actual callers/bindings in required G7 or explicitly document the tool's unresolved dynamic-call limitation, preserving the source/manual caller inventory. Owner: Architect; accepted follow-up target G7 before G8 closeout. Tracking: SEC-05. Codex / Product Manager accepted this non-blocking feature follow-up in [gate-decisions.md](gate-decisions.md#named-pm-recommendation-acceptances), with mandatory G7 reconciliation or a precise source-backed static-analysis limitation before closeout. The Low coverage-map finding remains open until that evidence exists; no missing runtime authorization is inferred.
+155:## Recommendation Disposition
+159:- [high] SEC-01: accepted bounded mitigation restricts feature use to trusted local synthetic fixtures; qualify/remediate affected conversion dependencies and verify memory/CPU/process isolation before untrusted or production PDF ingestion; target 2026-11-10; PM acceptance: Codex / Product Manager, gate-decisions.md, Named PM Recommendation Acceptances — owner: AI Engineer + DevOps (Security verifies); follow-up: SEC-01
+160:- [medium] SEC-02: accepted non-blocking local carryover to complete global security artifacts and rerun the strict audit, target 2026-11-10 and before production security qualification; PM acceptance: Codex / Product Manager, gate-decisions.md, Named PM Recommendation Acceptances — owner: Security + Architect; follow-up: SEC-02
+161:- [low] SEC-03: accepted non-blocking local hardening follow-up for nosniff across public/protected/error responses, target 2026-11-17; PM acceptance: Codex / Product Manager, gate-decisions.md, Named PM Recommendation Acceptances — owner: Backend Developer + DevOps; follow-up: SEC-03
+162:- [low] SEC-05: accepted non-blocking feature follow-up with mandatory G7 authorization-caller reconciliation or a precise source-backed limitation before G8 closeout; PM acceptance: Codex / Product Manager, gate-decisions.md, Named PM Recommendation Acceptances — owner: Architect; follow-up: SEC-05
+166:> Approve F0006 with SEC-01 mitigation: trusted local synthetic fixtures only. Before untrusted or production PDF ingestion, remediate affected dependencies and verify resource isolation. Owners: AI Engineer + DevOps, with Security verification; target November 10, 2026.
+168:Named PM: **Codex / Product Manager**, under that explicit operator approval. The gate record separately accepts SEC-01's bounded mitigation and the SEC-02/03/05 routine carryovers. [G4 validation output](artifacts/test-results/command-output/g4-approved-validation.log) records status pass and exit 0. G8 pm-closeout.md will mirror the canonical acceptances; that future mirroring is not represented as already completed.
+170:SEC-04 and A-IMPL-01 are mitigated in source with observed PostgreSQL proof and are excluded from open counts. SEC-01 remains open High; its accepted mitigation is scope containment, not demonstrated parser remediation/resource isolation. No dependency waiver, broader deployment approval or primary-owner PR acknowledgement is inferred.
+188:The operator approved the quoted SEC-01 mitigation, Codex / Product Manager explicitly accepted each open recommendation in [gate-decisions.md](gate-decisions.md#named-pm-recommendation-acceptances), and actual G4 validation passed. These recommendations are non-blocking/deferred only within the recorded bounded scope, with severity, owner and follow-up retained. SEC-05 must be reconciled or precisely documented at G7 before G8 closeout. Untrusted or production PDF ingestion still requires the recorded dependency remediation/qualification and verified resource isolation; SEC-01 is not technically resolved and no production or new producer activation is granted.
+# Gate Decisions
+
+| Gate | Role | Decision | Reviewer | Date | Evidence | Rationale |
+|---|---|---|---|---|---|---|
+| G0 | Architect | PASS | Codex / Architect | 2026-11-03T00:06:32+00:00 | g0-assembly-plan-validation.md | Approved design, scope split, dependencies, checkpoints and ownership are implementation-ready; validate-g0 passed after evidence repair and scan-staging fix |
+| G1 | DevOps | PASS | Codex / DevOps | 2026-11-03T00:08:30+00:00 | g1-runtime-preflight.md | Runtime restored; API/storage and PostgreSQL healthy; later dependency rebuild evidence is in deployability-check.md |
+| G2 | Quality Engineer / DevOps / implementation | PASS | Codex / QE and implementation roles | 2026-11-03 | test-execution-report.md; coverage-report.md; g2-self-review.md; deployability-check.md | All 35 ACs mapped to observed passing evidence; changed-code coverage92.4171%; scope booleans reconciled; all scan classes executed with findings retained for independent G3 interpretation |
+| G3 | Code Reviewer / Security / Architect | PASS WITH RECOMMENDATIONS | Codex g3_code_review / g3_security_review / g0_architect | 2026-11-03T23:09:21.804337+00:00 | code-review-report.md; security-review-report.md; architect-implementation-review.md | Code open=0; Security critical=0/high=1/medium=1/low=2; implementation findings resolved; all five story reviews PASS; inherited High mitigation requires explicit G4 operator decision |
+| G4 | Product Manager | APPROVED | Operator; recorded by Codex / Product Manager | 2026-11-04T02:37:42.390119+00:00 | approval-summary.md; security-review-report.md | Explicit operator approval with mitigation token SEC-01: trusted local synthetic fixtures only; dependency remediation and verified resource isolation before untrusted/production PDF ingestion; AI Engineer + DevOps with Security verification, target2026-11-10 |
+| G5 | Product Manager | PASS | Codex / Product Manager | 2026-11-04T02:40:24.215659+00:00 | signoff-ledger.md; STATUS.md provenance | Five required roles have named reviewer, ISO date and durable run evidence; Security recommendations carry explicit G4/PM mitigation acceptance |
+| G6 | Quality Engineer | PASS | Codex / Quality Engineer | 2026-11-04T02:43:10.365092+00:00 | feature-action-execution.md | G0-G5 evidence and signoffs verified; actual scope/path inventory reconciled; candidate remains in-progress with no closeout/tracker/pointer publication |
+
+## 2026-11-02T20:49:04.283619+00:00 — runtime stop condition
+
+- Decision by: Codex, applying the operator-provided feature contract.
+- Decision: stop before implementation; retain the run as draft.
+- Evidence: g1-runtime-preflight.md and its raw runtime-discovery artifacts.
+- Rationale: no usable Docker runtime is reachable; the contract explicitly stops when
+  runtime preflight cannot be restored.
+- No feature approval, mitigation acceptance, signoff, waiver or closeout decision exists.
+
+
+## G4 awaiting operator decision
+
+G0-G3 validation passed. Standard policy WARNING: critical=0, high=1.
+Allowed outcomes: fix issues; approve with justification; reject.
+The proposed SEC-01 bounded local-only mitigation and other follow-ups are in approval-summary.md.
+No approval, mitigation acceptance, signoff or closeout is recorded.
+
+## G4 operator approval recorded
+
+Recorded at 2026-11-04T02:37:42.390119+00:00 by Codex / Product Manager.
+
+Operator message: "yes i am approvingf with the message you mentioned".
+
+The approved referenced wording was:
+
+> Approve F0006 with SEC-01 mitigation: trusted local synthetic fixtures only. Before untrusted or production PDF ingestion, remediate affected dependencies and verify resource isolation. Owners: AI Engineer + DevOps, with Security verification; target November 10, 2026.
+
+### Named PM Recommendation Acceptances
+
+PM: Codex / Product Manager, under the explicit operator approval above.
+
+- Accepted: SEC-01 — mitigation: trusted local synthetic fixtures only; remediate/qualify affected conversion dependencies and verify memory/CPU/process isolation before untrusted or production PDF ingestion. AI Engineer + DevOps own remediation, Security verifies; target2026-11-10. This is bounded risk acceptance, not a claim of remediation or production activation.
+- Accepted: SEC-02 — non-blocking local feature carryover; Security + Architect own the missing global security-planning artifacts and strict-audit rerun, target2026-11-10 and before production security qualification.
+- Accepted: SEC-03 — non-blocking local feature hardening follow-up; Backend Developer + DevOps own nosniff coverage across public/protected/error responses, target2026-11-17.
+- Accepted: SEC-05 — Architect must reconcile the affected authorization caller mappings at G7, or record the precise static-analysis limitation backed by source evidence, before G8 closeout.
+
+SEC-01 remains an open High technical finding with accepted bounded mitigation; no waiver, broad deployment approval or primary-owner PR acknowledgement is inferred. Canonical acceptances will be mirrored into pm-closeout.md at G8.
+
+Exit code: 0
+

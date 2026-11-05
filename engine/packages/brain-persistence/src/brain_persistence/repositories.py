@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
+from brain_content.store import ContentArtifactStore
+from brain_domain.assertions import SourceAccessProof
 from brain_domain.audit import AuditEvent
 from brain_domain.authx import AuthorizationDecision, ResourceKey, ResourceType
 from brain_domain.facts import ChangeReason, FactVersion
@@ -172,12 +174,38 @@ class SqlAlchemyReviewItemRepository:
     """`brain_review.decisions.ReviewItemRepository` over SQLAlchemy (F0001-S0004).
     `actor_id` attributes derived security metadata to the authenticated reviewer."""
 
-    def __init__(self, session: AsyncSession, *, actor_id: UUID | None = None) -> None:
+    def __init__(
+        self,
+        session: AsyncSession,
+        *,
+        actor_id: UUID | None = None,
+        content_store: ContentArtifactStore | None = None,
+    ) -> None:
         self._session = session
         self._actor_id = actor_id
+        self._content_store = content_store
+        self._current_items: dict[UUID, ReviewItemRow] = {}
+
+    async def source_keys(self, review_item_ids: list[UUID]) -> tuple[ResourceKey, ...]:
+        from brain_persistence.assertions import discover_sources
+
+        sources: set[ResourceKey] = set()
+        for item_id in sorted(set(review_item_ids), key=str):
+            assertion_id = await self._session.scalar(
+                select(ReviewItemRow.assertion_id).where(ReviewItemRow.id == item_id)
+            )
+            if assertion_id is not None:
+                discovery = await discover_sources(
+                    self._session, (), None, assertion_ids=(assertion_id,)
+                )
+                if discovery.has_v2:
+                    sources.update(discovery.keys)
+        return tuple(sorted(sources))
 
     async def get(self, review_item_id: UUID) -> ReviewItem | None:
         row = await self._session.get(ReviewItemRow, review_item_id)
+        if row is not None:
+            self._current_items[row.assertion_id] = row
         return _review_item_from_row(row) if row is not None else None
 
     async def get_decision_by_event_sha256(
@@ -249,6 +277,18 @@ class SqlAlchemyReviewItemRepository:
         original = await self._session.get(Assertion, original_assertion_id)
         if original is None:
             raise ValueError(f"original assertion {original_assertion_id} not found")
+        if original.semantic_contract_version == 2:
+            from brain_persistence.assertions import correct_assertion_v2
+
+            return await correct_assertion_v2(
+                self._session,
+                original,
+                value=value,
+                evidence=evidence,
+                actor_id=self._actor_id,
+                item=self._current_items.get(original.id),
+                content_store=self._content_store,
+            )
 
         corrected = Assertion(
             id=uuid4(),
@@ -343,6 +383,24 @@ class SqlAlchemyFactCommitRepository:
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def commit_source_keys(
+        self, evidence_refs, review_decision_id
+    ) -> tuple[ResourceKey, ...]:
+        from brain_persistence.assertions import discover_sources
+
+        discovery = await discover_sources(self._session, evidence_refs, review_decision_id)
+        return discovery.keys if discovery.has_v2 else ()
+
+    def source_access_proof(self, decisions) -> SourceAccessProof | None:
+        from brain_persistence.assertions import issue_source_access
+
+        return issue_source_access(self._session, decisions)
+
+    async def require_commit_sources(self, **kwargs) -> None:
+        from brain_persistence.assertions import require_commit_sources
+
+        await require_commit_sources(self._session, **kwargs)
 
     async def lock_slot(self, slot_id: UUID) -> tuple[UUID, UUID] | None:
         row = (

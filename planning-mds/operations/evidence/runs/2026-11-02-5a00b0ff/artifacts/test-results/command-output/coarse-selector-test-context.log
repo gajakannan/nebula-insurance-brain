@@ -1,0 +1,151 @@
+            item[0] == " "
+            and (
+                (index > 0 and unicodedata.category(collapsed[index - 1][0]) == "Sc")
+                or (
+                    index + 1 < len(collapsed)
+                    and unicodedata.category(collapsed[index + 1][0]) == "Sc"
+                )
+            )
+        )
+    ]
+    return NormalizedText("".join(c for c, _ in final), tuple(interval for _, interval in final))
+
+
+def normalize(text: str) -> str:
+    return normalize_with_mapping(text).text
+
+
+def normalize_name(text: str) -> str:
+    """Document-local admission key; deliberately excludes grounding rewrites."""
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFC", text).casefold()).strip()
+
+
+def match_positions(source: str, quote: str) -> tuple[tuple[int, int], ...]:
+    haystack, needle = normalize(source), normalize(quote)
+    if not needle:
+        return ()
+    result: list[tuple[int, int]] = []
+    start = 0
+    while (index := haystack.find(needle, start)) >= 0:
+        result.append((index, index + len(needle)))
+        start = index + 1
+    return tuple(result)
+
+
+@dataclass(frozen=True)
+class GroundedLocation:
+    precision: str
+    selector: dict[str, Any]
+
+
+def locate_quote(
+    source: str, quote: str, native_selector: Mapping[str, Any]
+) -> GroundedLocation | None:
+    """Locate in retained text, retaining native coordinates and honest ambiguity."""
+    normalized = normalize_with_mapping(source)
+    matches = match_positions(source, quote)
+    if not matches:
+        return None
+    selector = dict(native_selector)
+    declared = selector.pop("precision", None)
+    regions = selector.get("regions", [])
+    if selector.get("kind") == "unresolved":
+        return GroundedLocation("unresolved", selector)
+    if selector.get("cell_id") is not None or declared == "table_cell":
+        # A source-verified cell identifies the cell even when its text repeats.
+        return GroundedLocation("table_cell", selector)
+    if (
+        len(matches) == 1
+        and declared not in ("page", "document", "unresolved")
+        and len(regions) <= 1
+    ):
+        first, last = matches[0]
+        ranges = normalized.ranges[first:last]
+        start, end = min(a for a, _ in ranges), max(b for _, b in ranges)
+        # Case folding can expand ß→ss, and NFC can reorder combining marks.
+        # Only a complete original interval that normalizes exactly may be a span.
+        if normalize(source[start:end]) == normalize(quote) and (
+            selector.get("native_ref") or selector.get("block_id")
+        ):
+            base = selector.get("char_start")
+            if type(base) is not int:
+                base = 0
+            selector.update(char_start=base + start, char_end=base + end)
+            return GroundedLocation("span", selector)
+    selector.pop("char_start", None)
+    selector.pop("char_end", None)
+    if selector.get("block_id") or selector.get("native_ref"):
+        return GroundedLocation("block", selector)
+    if type(selector.get("page")) is int:
+        return GroundedLocation("page", selector)
+    if declared == "document" or selector.get("document_version_id"):
+        return GroundedLocation("document", selector)
+    return GroundedLocation("unresolved", selector)
+    if origin == "OCR":
+        anchor = {"kind": "page_region", "regions": [region]}
+    elif origin == "TRANSCRIBED":
+        anchor = {
+            "kind": "time_span",
+            "start_ms": 0,
+            "end_ms": 5000,
+            "speaker": "synthetic-speaker",
+        }
+    elif origin == "DESCRIBED":
+        anchor = {"kind": "figure", "figure_ref": "#/pictures/0", "regions": [region]}
+        native["pictures"] = [{"self_ref": "#/pictures/0"}]
+    block = {
+        "record_type": "block",
+        "contract_version": 2,
+        "block_id": "#/texts/0",
+        "native_ref": "#/texts/0",
+        "reading_order": 0,
+        "section_path": [],
+        "text": text,
+        "text_origin": origin,
+        "confidence": 0.87 if origin in ("OCR", "TRANSCRIBED") else None,
+        "producer": {
+            "engine": "independent-synthetic-source",
+            "engine_version": "1",
+            "model": "synthetic" if origin == "DESCRIBED" else None,
+            "model_version": "1" if origin == "DESCRIBED" else None,
+        },
+        "origin_anchor": anchor,
+    }
+    # F0004 v2 keeps a PDF source/rendition. Non-PDF synthetic fixtures also
+    # retain immutable original assets and format-specific native locators.
+    # This does not activate a new content writer or claim conversion proof.
+    source_name = "source.pdf"
+    if kind != "pdf":
+        native["retained_original"] = {"uri": f"assets/source.{kind}"}
+    files = {
+        "docling-document.json": encoded(native),
+        "normalized.md": text.encode(),
+        "blocks.jsonl": encoded(block) + b"\n",
+        "tables.jsonl": b"",
+        "layout.jsonl": encoded(
+            {
+                "record_type": "layout",
+                "contract_version": 2,
+                "page": 1,
+                "geometry_state": "available",
+                "width": 612,
+                "height": 792,
+                "rotation_degrees": 0,
+                "native_to_canonical": [1, 0, 0, 1, 0, 0],
+                "unavailable_reason": None,
+            }
+        )
+        + b"\n",
+        source_name: native_bytes("pdf", text),
+        **({f"assets/source.{kind}": native_bytes(kind, text)} if kind != "pdf" else {}),
+    }
+    manifest = {
+        "tenant_id": str(tenant),
+        "knowledge_base_id": str(kb),
+        "document_id": str(uuid4()),
+        "version_id": str(uuid4()),
+        "artifact_id": str(uuid4()),
+        "artifact_contract_version": 2,
+
+Exit code: 0
+

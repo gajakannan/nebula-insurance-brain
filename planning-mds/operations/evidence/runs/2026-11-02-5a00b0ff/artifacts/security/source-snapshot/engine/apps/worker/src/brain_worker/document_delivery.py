@@ -1,0 +1,468 @@
+"""Engine-owned authorization and transactional import of candidate Graph results.
+
+The outbox is a delivery boundary, never an instruction to commit canonical facts.
+Only fixed-template assertions are supported; unhandled entity/relationship output
+fails closed instead of silently losing it.
+"""
+
+from __future__ import annotations
+
+import json
+from collections.abc import Callable
+from dataclasses import asdict
+from datetime import UTC, datetime
+from pathlib import Path
+from uuid import UUID, uuid4, uuid5
+
+from brain_content.checkpoints import ArtifactIntegrityError, CheckpointStore
+from brain_content.identities import is_fallback_pair
+from brain_content.manifest import ArtifactManifest, Manifest
+from brain_content.outputs import parse_run_manifest
+from brain_content.store import ArtifactNotFound
+from brain_content.validation import ArtifactKey, VerifiedBundle
+from brain_contracts.dispatch import parse_legacy_result
+from brain_domain.authx import (
+    AuthorizationDecision,
+    RequestedScope,
+    ResourceKey,
+    ResourceType,
+)
+from brain_jobs.queue import JobLease, jobs, leases, outbox
+from brain_persistence.authx import SyncAuthorityStore
+from brain_persistence.content_repository import ContentArtifactRepository
+from brain_persistence.models import (
+    Assertion,
+    AssertionEvidence,
+    ContentArtifact,
+    DocumentVersion,
+    ReviewItemRow,
+    SemanticInterpretationRun,
+    SourceDocument,
+)
+from brain_persistence.tenancy import inherit_resource_access
+from brain_review.evidence import combine_evidence_locators, evidence_binding_to_locator
+from brain_security.casbin_adapter import CasbinAuthorizationAdapter
+from brain_security.execution import AuthorizationUnavailable, decide
+from sqlalchemy import func, select, update
+from sqlalchemy.engine import Connection, Engine
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
+
+Authorizer = Callable[[UUID, UUID, UUID, str], None]
+WORKER_ACTIONS = frozenset({"ingest", "interpret"})
+
+
+class DocumentJobAuthorization:
+    """Sync worker adapter over the shared F0002 evaluator (ADR-0062 parity).
+
+    Before every sensitive job step it reloads, inside its own transaction: the
+    current policy-release pointer, the executor's (and, for delegated work, the
+    acting user's) status and authority revision, the trusted delegation, the
+    acting principal's current grant slices and the artifact's security metadata;
+    then it calls the same pure `evaluate` the API uses and commits the decision
+    audit (allow and deny) before returning. A durable job carries only trusted
+    references (`actor_id` = executor, optional `delegation_id`) created by its
+    trusted submitter — never an allow result — so no stale context can authorize
+    the next step. Storage failures raise `AuthorizationUnavailable`, which the
+    existing job policy retries; they never become an allow.
+    """
+
+    def __init__(
+        self,
+        engine: Engine,
+        model_path: Path,
+        policy_path: Path,
+        *,
+        clock: Callable[[], datetime] | None = None,
+    ) -> None:
+        self.engine = engine
+        self._policy = CasbinAuthorizationAdapter(model_path, policy_path)
+        self._clock = clock or (lambda: datetime.now(UTC))
+
+    def decide(
+        self,
+        *,
+        executor_id: UUID,
+        delegation_id: UUID | None,
+        knowledge_base_id: UUID,
+        artifact_id: UUID,
+        action: str,
+        trace_id: str,
+    ) -> AuthorizationDecision:
+        """Same `brain_security.execution.decide` orchestration the API uses. The
+        lease's KB is a request-scope filter, so an artifact whose trusted metadata
+        names another KB is a recorded `scope_denied`, not an allow refused later.
+        A KB has exactly one tenant, and migration 0006 constrains the job row's
+        tenant/KB pair to the KB registry, so the KB filter also pins the tenant."""
+        key = ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact_id)
+        try:
+            with Session(self.engine) as session, session.begin():
+                store = SyncAuthorityStore(session)
+                (evaluated,) = decide(
+                    store,
+                    self._policy,
+                    self._policy.release,
+                    authenticated_id=executor_id,
+                    keys=[key],
+                    action=action,
+                    requested=RequestedScope(frozenset({knowledge_base_id}), (), None, None),
+                    trace_id=trace_id,
+                    delegation_id=delegation_id,
+                    clock=self._clock,
+                    new_id=uuid4,
+                    # The trusted submitter provisions the artifact's security metadata
+                    # before the record exists; an existing record must still agree.
+                    require_record=False,
+                )
+                decision = evaluated.decision
+                # Permission allow is not a completed business effect: the job step
+                # runs after this gate, under its own lease fence.
+                store.append_decision(decision)
+                return decision
+        except SQLAlchemyError as exc:
+            raise AuthorizationUnavailable("current authority unavailable") from exc
+
+    def for_job(self, lease: JobLease) -> Authorizer:
+        executor_id = UUID(lease.payload["actor_id"])
+        delegation_ref = lease.payload.get("delegation_id")
+        delegation_id = UUID(delegation_ref) if delegation_ref else None
+        trace_id = str(UUID(lease.payload["correlation_id"]))
+
+        def related(artifact: UUID) -> bool:
+            if artifact == lease.artifact_id:
+                return True
+            source_sha = lease.payload.get("source_sha256")
+            if not source_sha:
+                return False
+            # A registered historical/accepted artifact must have the same
+            # trusted source and owner; its own restrictions are still evaluated.
+            try:
+                with Session(self.engine) as session:
+                    metadata = ContentArtifactRepository(session).get_metadata(artifact)
+                return (
+                    metadata.key.tenant_id,
+                    metadata.key.knowledge_base_id,
+                    metadata.source_sha256,
+                ) == (lease.tenant_id, lease.knowledge_base_id, source_sha)
+            except ArtifactNotFound:
+                pass
+            if lease.payload.get("content_contract_version") != 2:
+                return False
+            try:
+                return is_fallback_pair(
+                    ArtifactKey(lease.artifact_id, lease.tenant_id, lease.knowledge_base_id, 2),
+                    ArtifactKey(artifact, lease.tenant_id, lease.knowledge_base_id, 1),
+                    document_id=UUID(lease.payload["document_id"]),
+                    version_id=UUID(lease.payload["version_id"]),
+                    source_sha256=source_sha,
+                    recipe_sha256=lease.payload["recipe_sha256"],
+                )
+            except (ValueError, KeyError):
+                return False
+
+        def authorize(tenant: UUID, kb: UUID, artifact: UUID, action: str) -> None:
+            if (tenant, kb) != (lease.tenant_id, lease.knowledge_base_id) or (
+                action not in WORKER_ACTIONS or not related(artifact)
+            ):
+                raise PermissionError("job authorization scope mismatch")
+            decision = self.decide(
+                executor_id=executor_id,
+                delegation_id=delegation_id,
+                knowledge_base_id=kb,
+                artifact_id=artifact,
+                action=action,
+                trace_id=trace_id,
+            )
+            if not decision.allowed:
+                raise PermissionError("document job authorization denied")
+
+        return authorize
+
+
+def _register_artifact(session: Session, manifest: ArtifactManifest) -> None:
+    source = session.get(SourceDocument, manifest.document_id)
+    if source is None:
+        source = SourceDocument(
+            id=manifest.document_id,
+            tenant_id=manifest.tenant_id,
+            knowledge_base_id=manifest.knowledge_base_id,
+            source_sha256=manifest.source_sha256,
+        )
+        session.add(source)
+        session.flush()
+    if (source.tenant_id, source.knowledge_base_id, source.source_sha256) != (
+        manifest.tenant_id,
+        manifest.knowledge_base_id,
+        manifest.source_sha256,
+    ):
+        raise ArtifactIntegrityError("source identity conflict")
+    version = session.get(DocumentVersion, manifest.version_id)
+    owner = {"tenant_id": manifest.tenant_id, "knowledge_base_id": manifest.knowledge_base_id}
+    if version is None:
+        session.add(DocumentVersion(id=manifest.version_id, source_document_id=source.id, **owner))
+        session.flush()
+    elif version.source_document_id != source.id:
+        raise ArtifactIntegrityError("version identity conflict")
+    artifact = session.get(ContentArtifact, manifest.artifact_id)
+    if artifact is None:
+        session.add(
+            ContentArtifact(
+                id=manifest.artifact_id,
+                document_version_id=manifest.version_id,
+                artifact_sha256=manifest.artifact_sha256,
+                page_count=manifest.page_count,
+                extraction_status=manifest.extraction_quality.status,
+                **owner,
+            )
+        )
+        session.flush()
+    elif (artifact.document_version_id, artifact.artifact_sha256) != (
+        manifest.version_id,
+        manifest.artifact_sha256,
+    ):
+        raise ArtifactIntegrityError("content identity conflict")
+
+
+def register_document_artifact(connection: Connection, manifest: ArtifactManifest) -> None:
+    """Register readable source metadata before model extraction, in the caller's fence.
+
+    A later extraction failure leaves the artifact available to authorized review.
+    A database failure after filesystem publication is repaired on the next attempt.
+    """
+    with Session(bind=connection) as session:
+        _register_artifact(session, manifest)
+
+
+class DocumentResultImporter:
+    def __init__(
+        self,
+        engine: Engine,
+        store: CheckpointStore,
+        authorize_for_job: Callable[[JobLease], Authorizer],
+        read_artifact: Callable[[JobLease, UUID], VerifiedBundle] | None = None,
+    ) -> None:
+        self.engine, self.store, self.authorize_for_job = engine, store, authorize_for_job
+        self.read_artifact = read_artifact
+
+    def run_one(self) -> bool:
+        with self.engine.begin() as conn:
+            row = (
+                conn.execute(
+                    select(outbox)
+                    .where(outbox.c.delivered_at.is_(None))
+                    .order_by(outbox.c.created_at)
+                    .with_for_update(skip_locked=True)
+                    .limit(1)
+                )
+                .mappings()
+                .first()
+            )
+            if row is None:
+                return False
+            job = (
+                conn.execute(select(jobs).where(jobs.c.id == row["job_id"]).with_for_update())
+                .mappings()
+                .one()
+            )
+            if job["state"] != "complete" or job["result_ref"] != row["result_ref"]:
+                raise ArtifactIntegrityError("outbox completion mismatch")
+            lease = JobLease(
+                UUID(job["id"]),
+                UUID(job["tenant_id"]),
+                UUID(job["knowledge_base_id"]),
+                UUID(job["artifact_id"]),
+                job["generation"],
+                job["attempt"],
+                job["payload"],
+            )
+            if (row["tenant_id"], row["knowledge_base_id"]) != (
+                job["tenant_id"],
+                job["knowledge_base_id"],
+            ):
+                raise ArtifactIntegrityError("outbox scope mismatch")
+            self.authorize_for_job(lease)(
+                lease.tenant_id, lease.knowledge_base_id, lease.artifact_id, "interpret"
+            )
+            # Serialize imports for two profiles sharing a not-yet-imported artifact.
+            conn.execute(
+                select(leases)
+                .where(leases.c.artifact_id == str(lease.artifact_id))
+                .with_for_update()
+            ).one()
+            prefix = f"runs/{lease.tenant_id}/{lease.knowledge_base_id}/"
+            result_ref = row["result_ref"]
+            if not result_ref.startswith(prefix) or not result_ref.endswith("/manifest.json"):
+                raise ArtifactIntegrityError("outbox result namespace mismatch")
+            run_id = UUID(result_ref[len(prefix) : -len("/manifest.json")])
+            manifest: Manifest
+            bundle = None
+            if self.read_artifact is None:
+                manifest, _ = self.store.load(
+                    lease.artifact_id, lease.tenant_id, lease.knowledge_base_id
+                )
+                key = ArtifactKey(lease.artifact_id, lease.tenant_id, lease.knowledge_base_id, 1)
+            else:
+                marker = parse_run_manifest(self.store.objects.read(result_ref))
+                if (marker.tenant_id, marker.knowledge_base_id, marker.run_id) != (
+                    lease.tenant_id,
+                    lease.knowledge_base_id,
+                    run_id,
+                ):
+                    raise ArtifactIntegrityError("run output marker has another owner")
+                bundle = self.read_artifact(lease, marker.artifact_id)
+                manifest, key = bundle.manifest, bundle.key
+                self.authorize_for_job(lease)(
+                    lease.tenant_id, lease.knowledge_base_id, key.artifact_id, "interpret"
+                )
+            files = self.store.load_run(
+                tenant_id=lease.tenant_id,
+                knowledge_base_id=lease.knowledge_base_id,
+                artifact_id=key.artifact_id,
+                run_id=run_id,
+                artifact_key=key,
+            )
+            result = parse_legacy_result(files["result.json"])
+            if (result.run_id, result.artifact_id) != (run_id, key.artifact_id):
+                raise ArtifactIntegrityError("interpretation identity mismatch")
+            if (
+                result.run_configuration.profile_id,
+                result.run_configuration.profile_version,
+                result.run_configuration.schema_hash,
+            ) != (
+                lease.payload["profile_id"],
+                lease.payload["profile_version"],
+                lease.payload["schema_sha256"],
+            ):
+                raise ArtifactIntegrityError("interpretation profile mismatch")
+            if result.entities or result.relationships or result.status == "failed":
+                raise ValueError("unsupported or failed interpretation output")
+            if bundle is None and (
+                str(manifest.document_id),
+                str(manifest.version_id),
+                manifest.source_sha256,
+                manifest.execution.configuration_hash,
+            ) != (
+                lease.payload["document_id"],
+                lease.payload["version_id"],
+                lease.payload["source_sha256"],
+                lease.payload["recipe_sha256"],
+            ):
+                raise ArtifactIntegrityError("job source identity mismatch")
+            if manifest.source_sha256 != lease.payload["source_sha256"]:
+                raise ArtifactIntegrityError("job source fingerprint mismatch")
+            with Session(bind=conn) as session:
+                if bundle is None:
+                    assert isinstance(manifest, ArtifactManifest)
+                    _register_artifact(session, manifest)
+                else:
+                    repository = ContentArtifactRepository(session)
+                    repository.get_metadata(key.artifact_id).verify_identity(bundle)
+                    repository.verify_indexes(bundle)
+                # The outbox delivered marker and all rows commit together. A pre-existing
+                # run with a pending outbox is not a retry of this transaction.
+                if session.get(SemanticInterpretationRun, run_id) is not None:
+                    raise ArtifactIntegrityError("run already imported outside this outbox")
+                config = result.run_configuration.model_dump(mode="json")
+                config["graph_run"] = json.loads(files["metadata.json"])
+                session.add(
+                    SemanticInterpretationRun(
+                        id=run_id,
+                        artifact_id=manifest.artifact_id,
+                        profile_id=result.run_configuration.profile_id,
+                        profile_version=result.run_configuration.profile_version,
+                        status=result.status,
+                        counters=result.counters.model_dump(),
+                        run_configuration=config,
+                        created_at=result.created_at,
+                        tenant_id=manifest.tenant_id,
+                        knowledge_base_id=manifest.knowledge_base_id,
+                    )
+                )
+                session.flush()
+                for candidate in result.assertions:
+                    if not candidate.evidence or any(
+                        e.artifact_id != manifest.artifact_id for e in candidate.evidence
+                    ):
+                        raise ArtifactIntegrityError("assertion evidence scope mismatch")
+                    session.add(
+                        Assertion(
+                            id=candidate.id,
+                            run_id=run_id,
+                            origin="MACHINE_EXTRACTION",
+                            version=1,
+                            subject_type=candidate.subject_type,
+                            slot_type=candidate.slot_type,
+                            value=candidate.value,
+                            model_confidence=candidate.model_confidence,
+                            interpretation_basis=candidate.interpretation_basis,
+                            tenant_id=manifest.tenant_id,
+                            knowledge_base_id=manifest.knowledge_base_id,
+                        )
+                    )
+                    session.flush()
+                    for index, evidence in enumerate(candidate.evidence):
+                        session.add(
+                            AssertionEvidence(
+                                id=uuid5(candidate.id, f"evidence:{index}"),
+                                assertion_id=candidate.id,
+                                **evidence.model_dump(exclude={"bbox"}),
+                                bbox=evidence.bbox.model_dump() if evidence.bbox else None,
+                                tenant_id=manifest.tenant_id,
+                                knowledge_base_id=manifest.knowledge_base_id,
+                            )
+                        )
+                    locator = combine_evidence_locators(
+                        [
+                            evidence_binding_to_locator(
+                                **evidence.model_dump(),
+                                unresolved_reason="property_not_uniquely_located"
+                                if evidence.precision == "unresolved"
+                                else None,
+                            )
+                            for evidence in candidate.evidence
+                        ]
+                    )
+                    unresolved = locator.precision == "unresolved"
+                    # Unknown model confidence is not a confidence of 1. Candidate
+                    # adoption has no automatic acceptance policy.
+                    if (
+                        unresolved
+                        or candidate.model_confidence is None
+                        or candidate.model_confidence < 0.5
+                    ):
+                        session.add(
+                            ReviewItemRow(
+                                id=uuid5(candidate.id, "review"),
+                                type="PROVENANCE_CORRECTION"
+                                if unresolved
+                                else "EXTRACTION_CORRECTION",
+                                status="open",
+                                assertion_id=candidate.id,
+                                assertion_version=1,
+                                tenant_id=manifest.tenant_id,
+                                knowledge_base_id=manifest.knowledge_base_id,
+                                evidence=asdict(locator),
+                            )
+                        )
+                        session.flush()
+                        # The review task inherits the artifact's restrictions and
+                        # depends on it as evidence (F0002-S0004).
+                        inherit_resource_access(
+                            session,
+                            ResourceKey(ResourceType.CONTENT_ARTIFACT, manifest.artifact_id),
+                            ResourceKey(ResourceType.REVIEW_TASK, uuid5(candidate.id, "review")),
+                            actor_id=UUID(lease.payload["actor_id"]),
+                            at=datetime.now(UTC),
+                            add_dependency_on_source=True,
+                        )
+                session.flush()
+            conn.execute(
+                update(outbox)
+                .where(outbox.c.job_id == row["job_id"])
+                .values(
+                    delivered_at=func.extract("epoch", func.clock_timestamp())
+                    if conn.dialect.name == "postgresql"
+                    else func.strftime("%s", "now")
+                )
+            )
+        return True

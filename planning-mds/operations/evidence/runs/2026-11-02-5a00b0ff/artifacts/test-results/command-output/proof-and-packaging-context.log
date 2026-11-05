@@ -1,0 +1,194 @@
+            artifact is None
+            or (evidence.tenant_id, evidence.knowledge_base_id)
+            != (owner.tenant_id, owner.knowledge_base_id)
+            or (artifact.tenant_id, artifact.knowledge_base_id)
+            != (owner.tenant_id, owner.knowledge_base_id)
+        ):
+            invalid = True
+    return SourceLineage(
+        list(rows.values()), semantics, all_evidence, keys, has_v2, incomplete, invalid, reviewed
+    )
+
+
+def issue_source_access(
+    session: AsyncSession, decisions: Sequence[AuthorizationDecision]
+) -> SourceAccessProof | None:
+    reads = [
+        d
+        for d in decisions
+        if str(d.action) == str(Action.READ)
+        and d.resource.type == ResourceType.CONTENT_ARTIFACT
+        and d.allowed
+        and d.scope is not None
+    ]
+    if not reads:
+        return None
+    owner = (reads[0].scope.tenant_id, reads[0].scope.knowledge_base_id)
+    if any((d.scope.tenant_id, d.scope.knowledge_base_id) != owner for d in reads):
+        raise AssertionIneligible()
+    proof = SourceAccessProof(
+        owner[0],
+        owner[1],
+        uuid4(),
+        tuple(sorted({d.resource.id for d in reads}, key=str)),
+        tuple(d.decision_id for d in reads),
+    )
+    session.info["f0006_source_proof"] = (
+        proof,
+        session.get_transaction(),
+        reads[0].actor_principal_id,
+    )
+    return proof
+
+
+async def require_commit_sources(
+    session: AsyncSession,
+    *,
+    evidence_refs: Sequence[UUID],
+    review_decision_id: UUID | None,
+    authorized_scope: tuple[UUID, UUID],
+    closes_existing: bool,
+    source_access: SourceAccessProof | None,
+) -> None:
+    lineage = await resolve_lineage(session, evidence_refs, review_decision_id)
+    if lineage.invalid:
+        raise AssertionIneligible()
+    if not lineage.has_v2:
+        return  # Explicit pilot compatibility: unregistered legacy UUIDs remain accepted.
+    issued = session.info.get("f0006_source_proof")
+    if (
+        source_access is None
+        or issued is None
+        or issued[0] is not source_access
+        or issued[1] is not session.get_transaction()
+        or (source_access.tenant_id, source_access.knowledge_base_id) != authorized_scope
+        or set(source_access.source_artifact_ids) != {k.id for k in lineage.keys}
+    ):
+        raise AssertionIneligible()
+    try:
+        await _current_audits(
+            session,
+            keys=lineage.keys,
+            action=Action.READ,
+            actor_id=issued[2],
+            owner=authorized_scope,
+            decision_ids=source_access.authorization_decision_ids,
+        )
+    except PermissionError as exc:
+        raise AssertionIneligible() from exc
+    if (
+        lineage.incomplete
+        or not lineage.keys
+        or any((a.tenant_id, a.knowledge_base_id) != authorized_scope for a in lineage.assertions)
+    ):
+        raise AssertionIneligible()
+    for sem in lineage.semantics:
+        require_eligible(
+            sem.record,
+            [wire_evidence(e) for e in sem.verified_evidence],
+            closes_existing=closes_existing,
+            reviewed=lineage.reviewed,
+        )
+
+
+async def correct_assertion_v2(
+"""Independent server-side source restrictions; confidence never grants truth."""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Any
+
+from brain_contracts.assertions import wire_value
+
+ALL_OPERATIONS = ("RESOLVE", "CREATE", "AUTO_ACCEPT", "CLOSE", "SUPERSEDE")
+
+
+class AssertionIneligible(ValueError):
+    code = "ASSERTION_INELIGIBLE"
+
+    def __init__(self) -> None:
+        super().__init__(self.code)
+
+
+@dataclass(frozen=True)
+class Eligibility:
+    review_required: bool
+    reasons: tuple[str, ...]
+    blocked_operations: tuple[str, ...]
+
+
+def evaluate_eligibility(record: Any, evidence: Sequence[Any]) -> Eligibility:
+    record = wire_value(record)
+    support = [wire_value(item) for item in evidence]
+    reasons: list[str] = []
+    blocked: set[str] = set()
+    if record["assertion_kind"] == "OPEN_STATEMENT":
+        reasons.append("OPEN_STATEMENT")
+        blocked.update(ALL_OPERATIONS)
+    if "mood" in record["qualifiers"]:
+        reasons.append("MOOD")
+        blocked.update(ALL_OPERATIONS)
+    qualified_non_described = any(
+        e.get("origin_qualification") == "qualified"
+        and e.get("text_origin") in ("STATED", "OCR", "TRANSCRIBED")
+        and e.get("precision") != "unresolved"
+        for e in support
+    )
+    described = any(
+        e.get("origin_qualification") == "qualified" and e.get("text_origin") == "DESCRIBED"
+        for e in support
+    )
+    if described and not qualified_non_described:
+        reasons.append("DESCRIBED_EVIDENCE")
+        blocked.update(("AUTO_ACCEPT", "CLOSE", "SUPERSEDE"))
+    if not support or any(e.get("precision") == "unresolved" for e in support):
+        reasons.append("UNRESOLVED_EVIDENCE")
+        blocked.add("AUTO_ACCEPT")
+    if any(
+        e.get("origin_qualification") != "qualified" or e.get("text_origin") is None
+        for e in support
+    ):
+        reasons.append("LEGACY_UNQUALIFIED")
+        blocked.add("AUTO_ACCEPT")
+    return Eligibility(
+        bool(reasons), tuple(reasons), tuple(op for op in ALL_OPERATIONS if op in blocked)
+    )
+
+
+def require_eligible(
+    record: Any,
+    evidence: Sequence[Any],
+    *,
+    closes_existing: bool,
+    reviewed: bool = False,
+) -> None:
+    eligibility = evaluate_eligibility(record, evidence)
+    if "CREATE" in eligibility.blocked_operations:
+        raise AssertionIneligible()
+    if closes_existing and any(
+        op in eligibility.blocked_operations for op in ("CLOSE", "SUPERSEDE")
+    ):
+        raise AssertionIneligible()
+    if eligibility.review_required and not reviewed:
+        raise AssertionIneligible()
+[project]
+name = "brain-contracts"
+version = "0.1.0"
+description = "Versioned DTOs shared by engine and document activities."
+requires-python = ">=3.13"
+dependencies = ["pydantic>=2.9", "jsonschema>=4.23", "brain-domain"]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+brain_contracts = ["py.typed", "schemas/*.schema.json"]
+
+Exit code: 0
+

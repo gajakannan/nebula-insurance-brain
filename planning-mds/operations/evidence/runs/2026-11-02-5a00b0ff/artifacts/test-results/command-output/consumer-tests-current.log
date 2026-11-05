@@ -1,0 +1,135 @@
+
+
+async def test_direct_caller_and_mixed_unknown_refs_cannot_bypass_source_guard(world, database):
+    batch = await world.admit([world.candidate()])
+    evidence = [batch.accepted[0].server_evidence[0].evidence_id]
+    slot_id = slot(world)
+    with pytest.raises(AssertionIneligible):
+        await commit(world, slot_id, evidence, authorized=False)
+    with pytest.raises(AssertionIneligible):
+        await commit(world, slot_id, [*evidence, uuid4()])
+    assert counts(database)["canonical_commit"] == 0
+    # The documented legacy pilot boundary remains for wholly unregistered refs.
+    await commit(world, slot_id, [uuid4()])
+    assert counts(database)["canonical_commit"] == 1
+
+
+async def test_reviewed_described_initial_use_cannot_close_or_supersede(world_factory, database):
+    world = world_factory(origin="DESCRIBED")
+    batch = await world.admit([world.candidate()])
+    assertion_id = batch.accepted[0].record.id
+    evidence = [batch.accepted[0].server_evidence[0].evidence_id]
+    decision = (await review(world, assertion_id)).decision
+    slot_id = slot(world)
+    await commit(world, slot_id, evidence, decision.id)
+    with pytest.raises(AssertionIneligible):
+        await commit(world, slot_id, evidence, decision.id)
+    assert counts(database)["canonical_commit"] == 1
+
+
+@pytest.mark.parametrize("basis", ["INFERRED", "AMBIGUOUS"])
+async def test_v2_correction_preserves_basis_and_owns_new_evidence(world, basis, database):
+    record = world.candidate(interpretation_basis=basis, model_confidence=0.2)
+    original = (await world.admit([record])).accepted[0]
+    outcome = await review(world, original.record.id, correct={"amount": 700000})
+    child_id = outcome.decision.corrected_assertion_id
+    with Session(world.sync_engine) as session:
+        parent = session.get(Assertion, original.record.id)
+        child = session.get(Assertion, child_id)
+        sem = session.get(AssertionSemantics, child_id)
+        evidence = session.scalars(
+            select(AssertionEvidence).where(AssertionEvidence.assertion_id == child_id)
+        ).all()
+        assert parent.value == {"amount": 500000, "currency": "USD"}
+        assert child.value == {"amount": 700000} and child.original_assertion_id == parent.id
+        assert child.semantic_contract_version == 2 and child.run_id is None
+        assert child.subject_type == parent.subject_type == "Policy"
+        assert child.interpretation_basis == sem.record["interpretation_basis"] == basis
+        assert child.origin == sem.record["origin"] == "HUMAN_REVIEW"
+        assert len(evidence) == 1 and evidence[0].id != original.server_evidence[0].evidence_id
+        assert len(sem.raw_item_sha256) == len(sem.admission_sha256) == 64
+    assert counts(database)["assertion"] == 2
+
+
+async def test_correction_and_mixed_ancestry_cannot_clear_mood(world, database):
+    original = (
+        await world.admit([world.candidate(qualifiers={"mood": "subject to inspection"})])
+    ).accepted[0]
+    decision = (await review(world, original.record.id, correct={"amount": 700000})).decision
+    with Session(world.sync_engine) as session:
+        child_evidence = session.scalars(
+            select(AssertionEvidence).where(
+                AssertionEvidence.assertion_id == decision.corrected_assertion_id
+            )
+        ).one()
+        child_id = child_evidence.id
+    with pytest.raises(AssertionIneligible):
+        await commit(world, slot(world), [child_id], decision.id)
+    assert counts(database)["canonical_fact_version"] == 0
+
+
+async def test_correction_rederives_a_new_locator_instead_of_trusting_offsets(world):
+    original = (await world.admit([world.candidate(model_confidence=0.2)])).accepted[0]
+    locator = EvidenceLocator(
+        source=str(world.bundle.key.artifact_id),
+        precision="exact-span",
+        part="#/texts/0",
+        selector=({"char_start": 99999, "char_end": 100000},),
+    )
+    result = await review(
+        world, original.record.id, correct={"amount": 700000}, evidence_seen=locator
+    )
+    with Session(world.sync_engine) as session:
+        sem = session.get(AssertionSemantics, result.decision.corrected_assertion_id)
+        assert sem.verified_evidence[0]["selector"]["char_start"] == 0
+        assert sem.verified_evidence[0]["selector"]["char_end"] == len(world.text)
+        assert sem.record["evidence"][0]["model_selector"] is None
+
+
+@pytest.mark.parametrize("deny_source", [True, False])
+async def test_http_source_denial_precedes_sanitized_eligibility_error(
+    world, database, deny_source
+):
+    original = (
+        await world.admit([world.candidate(qualifiers={"mood": "offered subject to inspection"})])
+    ).accepted[0]
+    with Session(world.sync_engine) as session, session.begin():
+        slot_id = fixtures.seed_fact_slot(session, *world.owner, classifications=("commit-only",))
+        principal = world.actor
+        if deny_source:
+            principal = fixtures.seed_principal(
+                session,
+                issuer="urn:f0006:limited",
+                subject=str(uuid4()),
+                kind=PrincipalKind.SERVICE,
+            )
+            fixtures.seed_grant(
+                session,
+                principal.id,
+                *world.owner,
+                "ServicePrincipal",
+                classifications={"commit-only"},
+            )
+    app = create_app()
+
+    async def session_override():
+        async with AsyncSession(world.engine, expire_on_commit=False) as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = session_override
+    app.dependency_overrides[current_principal] = lambda: principal
+    body = wire_value(proposal(slot_id, [original.server_evidence[0].evidence_id]))
+    body.pop("slot_id")
+    body["idempotency_key"] = "f0006-http-fixture"
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://test"
+    ) as client:
+        response = await client.post(f"/facts/{slot_id}/commits", json=body)
+    assert response.status_code == (404 if deny_source else 422)
+    assert response.json()["code"] == ("not_found" if deny_source else "ASSERTION_INELIGIBLE")
+    assert "application/problem+json" in response.headers["content-type"]
+    assert world.text not in response.text and "offered subject to inspection" not in response.text
+    assert counts(database)["canonical_fact_version"] == 0
+
+Exit code: 0
+

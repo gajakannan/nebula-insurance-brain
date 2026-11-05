@@ -1,0 +1,174 @@
+from __future__ import annotations
+
+import json
+import subprocess
+from pathlib import Path
+from typing import Any
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+VALIDATOR = REPO_ROOT / "agents" / "product-manager" / "scripts" / "validate-feature-evidence.py"
+FIXTURE_ROOT = REPO_ROOT / "agents" / "product-manager" / "scripts" / "tests" / "fixtures" / "feature-evidence"
+RUN_ID = "2026-05-19-5ab6f922"
+
+
+def latest_run_path(product_root: Path, feature_slug: str) -> Path:
+    return product_root / "planning-mds" / "operations" / "evidence" / "features" / feature_slug / "latest-run.json"
+
+
+def run_validator(product_root: Path | None, *args: str) -> subprocess.CompletedProcess[str]:
+    command = ["python3", str(VALIDATOR)]
+    if product_root is not None:
+        command.extend(["--product-root", str(product_root)])
+    command.extend(args)
+    return subprocess.run(command, cwd=REPO_ROOT, capture_output=True, text=True, check=False)
+
+
+def json_result(result: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+    return json.loads(result.stdout)
+
+
+def assert_rule(result: subprocess.CompletedProcess[str], rule_id: str, code: int) -> None:
+    """For invocation `_fails` (exit 2), expect exactly one error.
+    For content `_fails` (exit 1), the validator continues after each failure
+    and may surface more errors — assert the named rule is present."""
+    assert result.returncode == code, result.stdout + result.stderr
+    payload = json_result(result)
+    ids = [item["rule_id"] for item in payload["errors"]]
+    if code == 2:
+        assert ids == [rule_id], ids
+    else:
+        assert rule_id in ids, ids
+
+
+def write_registry(product_root: Path, *, active: str = "", archived: str = "", retired: str = "") -> None:
+    features = product_root / "planning-mds" / "features"
+    features.mkdir(parents=True, exist_ok=True)
+    (features / "REGISTRY.md").write_text(
+        f"""# Feature Registry
+
+## Active Features
+
+| Feature ID | Name | Status | Phase | Folder |
+|------------|------|--------|-------|--------|
+{active}
+
+## Planned (Reserved IDs)
+
+| Feature ID | Name | Status | Phase | Folder |
+|------------|------|--------|-------|--------|
+
+## Archived Features
+
+| Feature ID | Name | Archived Date | Evidence Reentry Date | Folder |
+|------------|------|---------------|-----------------------|--------|
+{archived}
+
+## Retired Features
+
+| Feature ID | Name | Terminal Status | Superseded By | Retired Date | Folder | Reason |
+|------------|------|-----------------|---------------|--------------|--------|--------|
+# --------------------------------------------------------------------------- #
+
+
+def test_stage_g8_requires_tracker_results_fails(tmp_path: Path) -> None:
+    product = tmp_path / "product"
+    write_registry(product, archived="| F0001 | New Feature | 2026-05-19 |  | `archive/F0001-new/` |")
+    run_folder = write_manifest_run(
+        product, "F0001-new", "F0001", status="approved", latest=True, stage="closeout",
+        manifest_updates={"status": "approved", "feature_state": "Archived", "feature_path_at_closeout": "planning-mds/features/archive/F0001-new"},
+    )
+    # Blank out the lifecycle log so no tracker-sync line exists.
+    (run_folder / "lifecycle-gates.log").write_text("# Lifecycle Gate Run\n\n## Command\n\n## Stage\n\n## Exit Code\n\n## Result\n\n## Output References\n\n## Skipped Gates\n", encoding="utf-8")
+    result = run_validator(product, "--feature", "F0001", "--stage", "closeout", "--json")
+    rules = {entry["rule_id"] for entry in json_result(result)["errors"]}
+    assert "stage_g8_requires_tracker_results_fails" in rules
+
+
+# --------------------------------------------------------------------------- #
+# Artifact-reference rules
+# --------------------------------------------------------------------------- #
+
+
+def test_coverage_claim_without_artifact_fails(tmp_path: Path) -> None:
+    product = tmp_path / "product"
+    write_registry(product, archived="| F0001 | New Feature | 2026-05-19 |  | `archive/F0001-new/` |")
+    run_folder = write_manifest_run(product, "F0001-new", "F0001", stage="G2")
+    (run_folder / "coverage-report.md").write_text(
+        "# Coverage\n\nResult: PASS\n\nRaw artifact: artifacts/coverage/cov.lcov\n", encoding="utf-8",
+    )
+    result = run_validator(product, "--feature", "F0001", "--run-id", RUN_ID, "--stage", "G2", "--json")
+    rules = {entry["rule_id"] for entry in json_result(result)["errors"]}
+    assert "coverage_claim_without_artifact_fails" in rules
+
+
+def test_test_results_reference_missing_fails(tmp_path: Path) -> None:
+    product = tmp_path / "product"
+    write_registry(product, archived="| F0001 | New Feature | 2026-05-19 |  | `archive/F0001-new/` |")
+    run_folder = write_manifest_run(product, "F0001-new", "F0001", stage="G2")
+    (run_folder / "test-execution-report.md").write_text(
+        "# Test Execution\n\nResult: PASS\n\nArtifacts: artifacts/test-results/pnpm-test.log\n", encoding="utf-8",
+    )
+    result = run_validator(product, "--feature", "F0001", "--run-id", RUN_ID, "--stage", "G2", "--json")
+    rules = {entry["rule_id"] for entry in json_result(result)["errors"]}
+    assert "test_results_reference_missing_fails" in rules
+
+
+def test_security_scan_reference_missing_fails(tmp_path: Path) -> None:
+    product = tmp_path / "product"
+    write_registry(product, archived="| F0001 | New Feature | 2026-05-19 |  | `archive/F0001-new/` |")
+    run_folder = write_manifest_run(
+        product, "F0001-new", "F0001", stage="G3",
+        manifest_updates={"security_sensitive_scope": True, "required_roles": ["Quality Engineer", "Code Reviewer", "Security Reviewer"]},
+    )
+    (run_folder / "security-review-report.md").write_text(
+        "# Security Review\n\nResult: PASS\n\nScan output: artifacts/security/trivy.txt\n", encoding="utf-8",
+    )
+"""Phase 2b §23 closure additions.
+
+Each test drives one of the 33 fixtures listed in §23 that were not
+runnable until Phase 2b closeout. They are grouped by registry-level
+rules, manifest schema rules, frontend-lane rules, artifact-reference
+rules, and the cross-artifact reconciliation rules.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from test_validate_feature_evidence import (
+    RUN_ID,
+    json_result,
+    latest_run_path,
+    run_validator,
+    write_manifest_run,
+    write_registry,
+)
+
+
+# --------------------------------------------------------------------------- #
+# Registry-level rules
+# --------------------------------------------------------------------------- #
+
+
+def test_reopened_historical_missing_evidence_fails(tmp_path: Path) -> None:
+    product = tmp_path / "product"
+    write_registry(
+        product,
+        archived="| F0001 | Reopened | 2026-03-10 | 2026-05-20 | `archive/F0001-reopened/` |",
+    )
+    result = run_validator(product, "--feature", "F0001", "--stage", "closeout", "--json")
+    rules = {entry["rule_id"] for entry in json_result(result)["errors"]}
+    assert "reopened_historical_missing_evidence_fails" in rules
+
+
+def test_active_done_pre_contract_malformed_date_requires_evidence_fails(tmp_path: Path) -> None:
+    product = tmp_path / "product"
+    write_registry(product, active="| F0001 | Reopened | Done | MVP | `F0001-reopened/` |")
+    feature_path = product / "planning-mds" / "features" / "F0001-reopened"
+    feature_path.mkdir(parents=True)
+    (feature_path / "STATUS.md").write_text(
+
+Exit code: 0
+

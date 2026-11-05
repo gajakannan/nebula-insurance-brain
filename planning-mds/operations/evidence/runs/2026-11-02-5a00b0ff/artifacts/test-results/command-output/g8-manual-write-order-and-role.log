@@ -1,0 +1,159 @@
+                    "requires": list(body.get("requires", []) or []),
+                    "produces": list(body.get("produces", []) or []),
+                }
+                stage_state["status"] = "pending-checkpoint"
+                if not dry_run:
+                    _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+                return {"stage": stage, "status": "paused", "pending_checkpoint": cid,
+                        "requires": list(body.get("requires", []) or []),
+                        "message": f"MANUAL: {body.get('description')} — attest with "
+                                   f"--attest-checkpoint {cid}", "log_refs": log_refs}
+
+            elif kind == "write":
+                artifact = body.get("artifact")
+                if artifact == "latest-run.json" and "FEATURE_INDEX_ROOT" not in variables:
+                    raise GateDriverError(
+                        "unresolved_feature_slug",
+                        f"{stage} writes latest-run.json under the feature index, but the "
+                        "feature slug did not resolve; pass --feature-slug or run in a run "
+                        "folder whose evidence-manifest.json records feature_slug")
+                artifact_path = (
+                    Path(variables["FEATURE_INDEX_ROOT"]) / artifact
+                    if artifact == "latest-run.json"
+                    else run_folder / artifact
+                )
+                if artifact_path.exists():
+                    stage_state["completed_operations"].append(oid)
+                    _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+                    continue
+                stage_state["pending_checkpoint"] = {
+                    "id": oid, "description": f"write {artifact} after {body.get('after')}",
+                    "requires": [], "produces": [artifact]}
+                stage_state["status"] = "pending-checkpoint"
+                if not dry_run:
+                    _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+                return {"stage": stage, "status": "paused", "pending_write": artifact,
+                        "message": f"MANUAL: write {artifact}", "log_refs": log_refs}
+
+        for check in stage_checks:
+            record = records.get(check["id"])
+        return body.get("id") or f"run:{index}"
+    if kind == "checkpoint":
+        return f"checkpoint:{body.get('id')}"
+    if kind == "write":
+        return f"write:{body.get('artifact')}"
+    return f"{kind}:{index}"
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    h.update(path.read_bytes())
+    return h.hexdigest()
+
+
+def _resolve_evidence(run_folder: Path, rel: str) -> Path:
+    if ".." in Path(rel).parts or Path(rel).is_absolute():
+        raise GateDriverError("evidence_escapes_run", f"evidence path escapes run folder: {rel!r}")
+    return run_folder / rel
+
+
+# A checkpoint's `requires` mixes two kinds of entry: run-folder artifacts
+# (`gate-decisions.md`, `reports/x.json`) and prose preconditions
+# ("the drafted post at TARGET_PATH"). Only the former can be hashed. A prose
+# entry contains whitespace or punctuation a relative path never needs, so it
+# never matches.
+ARTIFACT_REF_RE = re.compile(r"^[A-Za-z0-9_.{}-]+(/[A-Za-z0-9_.{}-]+)*$")
+
+
+def is_artifact_ref(token: str) -> bool:
+    return bool(ARTIFACT_REF_RE.match(token))
+
+4. Run candidate stage validation:
+   - `python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root {NEBULA_PRODUCT_ROOT} --feature {FEATURE_ID} --run-id {RUN_ID} --stage G6`
+5. Run tracker validation (it internally calls feature-evidence at `--stage G6`) and append the result to `lifecycle-gates.log`:
+   - `python3 agents/product-manager/scripts/validate-trackers.py --product-root {NEBULA_PRODUCT_ROOT} --feature {FEATURE_ID} --run-id {RUN_ID}`
+
+**Gate Criteria:**
+- [ ] All `G0`–`G5` evidence present with passing verdicts
+- [ ] `feature-action-execution.md` complete with a gate-by-gate timeline
+- [ ] Manifest is a valid pre-closeout candidate (no closeout artifacts yet)
+- [ ] `validate-feature-evidence.py --stage G6` exits 0
+- [ ] Scoped `validate-trackers.py --feature {FEATURE_ID} --run-id {RUN_ID}` passes and its result is recorded in `lifecycle-gates.log`
+
+---
+
+### Step 7: ARCHITECT KNOWLEDGE-GRAPH RECONCILIATION (Mandatory)
+
+**Gate `G7`.** Runs after signoff (`G5`) and candidate validation (`G6`), before PM closeout (`G8`). The graph is now reconciled against the **as-built** source — what actually shipped, not what G0 predicted — so the knowledge-graph the *next* feature's architect reads at G0 is correct. This gate owns the **semantic** graph only; it binds **code** paths (`experience/...`, `api/...`, etc.) that do **not** move during the closeout archive step, so it is safe to run before the move.
+
+**Execution Instructions:**
+
+1. **Activate Architect agent** by reading `agents/architect/SKILL.md`.
+2. Diff the as-built source against the graph's G0 declaration (the `feature-assembly-plan.md` "Knowledge-Graph Binding Plan", if present) to find the binding delta — capabilities, modules, or shared semantics that emerged during implementation.
+3. For every new source surface that represents a capability or shared semantic, add or update its **binding shard** in `{NEBULA_PRODUCT_ROOT}/planning-mds/kg-source/bindings/**`. Bind by **directory glob** where a cohesive folder represents one capability (e.g. `experience/src/features/forms/**`), not file-by-file. Existing globs that already cover new files need no change — confirm coverage rather than duplicating.
+4. If the feature introduced new canonical nodes or rationale (`WHY`) entries, add **node shards** to `{NEBULA_PRODUCT_ROOT}/planning-mds/kg-source/nodes/**` (logical `F####/` doc refs only). If it introduced none, state that explicitly. Then run `compile.py` — it regenerates `code-index.yaml`/`canonical-nodes.yaml` (never hand-edit them).
+5. Regenerate and validate all code-path-derived generated layers: `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --regenerate-symbols --check-symbols --regenerate-decisions --check-decisions`. This refreshes `symbol-index.yaml`, `unbound-but-referenced.yaml`, and `decisions-index.yaml`; it is mandatory even when the authored KG files appear unchanged. (Editing a bound method body without first consulting `lookup.py --symbol` / `hint.py --symbol` is forbidden — the symbol layer keeps edits narrow.)
+6. Run `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --check-drift` and resolve any errors. Do **not** run `--write-coverage-report` here — coverage binds feature-doc paths that the PM closeout archive move will relocate; regenerating it now re-stales it on the move. Coverage regeneration is a `G8` step, after the move.
+7. Record the outcome in `kg-reconciliation.md` (template: `agents/templates/kg-reconciliation-template.md`): the binding delta applied, new/affirmed canonical nodes, and the green generated-layer + drift validator results.
+
+**Completion Criteria:**
+- [ ] Architect agent activated for the reconciliation
+- [ ] `code-index.yaml` bindings exist for every new capability/shared-semantic source surface (glob-based; existing coverage confirmed, not duplicated)
+- [ ] New canonical nodes/rationale recorded in `canonical-nodes.yaml`, or "none introduced" stated explicitly
+- [ ] `validate.py --regenerate-symbols --check-symbols --regenerate-decisions --check-decisions` exits 0
+- [ ] `validate.py --check-drift` exits 0
+- [ ] `coverage-report.yaml` was **not** regenerated at this gate (deferred to `G8`, post-archive-move)
+- [ ] `kg-reconciliation.md` written
+
+---
+
+### Step 8: PRODUCT MANAGER CLOSEOUT (Mandatory)
+
+**Execution Instructions:**
+
+1. **Activate Product Manager agent** by reading `agents/product-manager/SKILL.md`
+2. Reconcile feature closure artifacts:
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/STATUS.md` (final status, deferred follow-ups, mitigation notes)
+   - `STATUS.md` required signoff matrix + story signoff provenance entries
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/features/REGISTRY.md` (status/path transitions, including archive moves)
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/features/ROADMAP.md` (Now/Next/Later/Completed placement)
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md` (feature/story status labels and links, if changed)
+3. For completed features (`Overall Status: Done`), move the feature folder to archive when appropriate:
+   - From `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/`
+   - To `{NEBULA_PRODUCT_ROOT}/planning-mds/features/archive/F{NNNN}-{slug}/`
+   - Then update impacted feature-local links and registry paths
+4. If ontology-backed planning exists for the feature, update feature/path/status references in:
+   - `{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/feature-mappings.yaml`
+5. Record any orphaned stories, deferred follow-ups, or explicit mitigation carry-overs before final validation
+6. **Knowledge-graph: verify, then regenerate the path-sensitive layer (do not author bindings here):**
+   - The **semantic** graph shards (`kg-source/bindings/**`, `kg-source/nodes/**`, compiled to `code-index.yaml`/`canonical-nodes.yaml`) were authored by the Architect at `G7` and `kg-reconciliation.md` records it. Closeout **verifies** the compiled graph is green — it does not author shards. If a binding gap is discovered now (a capability surface the `G7` pass missed), route back to the Architect for a `G7` delta pass (author shards + recompile) rather than editing the graph in closeout.
+   - After the archive folder move (step 3) and the feature-shard `path:`/`status:` edit + `compile.py` (step 4), regenerate the **path-sensitive** coverage layer: `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --write-coverage-report`. (Because logical `F####/` refs resolve through the shard `path:`, the archive move needs no doc-ref repoint anywhere — the F0005 payoff.)
+   - Run `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --check-drift` to confirm the post-move graph is green.
+7. **Publish the approved run** in the supersession-and-publish order (see "Closeout Supersession-And-Publish Sequence"): run `patch-prior-manifest.py` to mark prior approved manifests `superseded`, then write `latest-run.json` pointing at this run, then finalize the manifest to `status: approved`.
+8. **Tracker sync:** regenerate the story rollup when story files moved/changed (`python3 agents/product-manager/scripts/generate-story-index.py {NEBULA_PRODUCT_ROOT}/planning-mds/features/`), then run final closeout validation (`python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root {NEBULA_PRODUCT_ROOT} --feature {FEATURE_ID} --stage closeout`) and scoped tracker validation (`python3 agents/product-manager/scripts/validate-trackers.py --product-root {NEBULA_PRODUCT_ROOT} --feature {FEATURE_ID} --run-id {RUN_ID}`). Treat any tracker drift as blocking and re-run after repair.
+
+**Completion Criteria:**
+- [ ] Product Manager closeout executed after signoff and `G7` architect KG reconciliation passed
+- [ ] Final feature status and archive decision recorded
+- [ ] Deferred follow-ups and mitigation notes captured
+- [ ] `feature-mappings.yaml` status/path updated for the archive move (lifecycle-coupled, PM-owned)
+- [ ] `kg-reconciliation.md` present and its semantic-graph checks green (verified, not re-authored, by closeout)
+- [ ] `coverage-report.yaml` regenerated **after** the archive move
+- [ ] `validate.py --check-drift` exits 0 on the post-move graph
+- [ ] Prior approved manifests patched to `superseded` and `latest-run.json` written (supersession-and-publish order)
+- [ ] REGISTRY/ROADMAP/BLUEPRINT synchronized; STORY-INDEX regenerated if story files changed
+- [ ] Final `validate-feature-evidence.py --stage closeout` and scoped `validate-trackers.py --feature {FEATURE_ID} --run-id {RUN_ID}` pass (tracker results recorded in `lifecycle-gates.log`)
+
+---
+
+### Step 9: Feature Complete
+
+**Execution Instructions:**
+
+Present completion summary:
+
+```
+═══════════════════════════════════════════════════════════
+
+Exit code: 0
+

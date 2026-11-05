@@ -1,0 +1,97 @@
+## Recommendation Disposition
+
+- [high] SEC-01: patch/qualify inherited conversion dependencies and enforce effective resource isolation before broader untrusted/production conversion; proposed local synthetic-only mitigation requires explicit G4/PM disposition — owner: AI Engineer + DevOps; follow-up: SEC-01
+- [medium] SEC-02: complete inherited global security planning artifacts and pass the strict audit; bounded local carryover is proposed, not accepted — owner: Security + Architect; follow-up: SEC-02
+- [low] SEC-03: add and verify nosniff on public and protected/error responses — owner: Backend Developer + DevOps; follow-up: SEC-03
+SEC-04 is mitigated now by minimal-column discovery, pre-payload authority validation and observed PostgreSQL projection regressions; it is not an open recommendation.
+- [low] SEC-05: reconcile authorization callers at G7 or record precise static-analysis limitations — owner: Architect; follow-up: SEC-05
+
+All open dispositions are **proposed**. No ticket, owner acknowledgement, target-date commitment, user approval or PM acceptance is inferred. Canonical recommendation severity is retained; SEC-01's High status requires explicit mitigation through the subsequent gate contract. A-IMPL-01 and SEC-04 are mitigated in source with observed PG proof, not deferred.
+
+## Per-Story Security Assessment
+
+| Story | Verdict | Security basis and limits |
+|---|---|---|
+| S0001 AC1–7 | PASS | Scoped authorized writes, independent dimensions/confidence, append-only correction/evidence and composite-owner rejection; real PG proof |
+| S0002 AC1–7 | PASS | Strict typed/open/version contract, offline schemas, legacy-reader refusal, scoped references and no canonical eligibility |
+| S0003 AC1–8 | PASS | Authorization before source-port inspection; server grounding/selectors, protected outcomes, zero model/conversion/canonical effect; SEC-04 lineage discovery minimization is repaired and verified |
+| S0004 AC1–6 | PASS | Independent mood/open/described restrictions and inherited basis/evidence; sanitized authorized versus unauthorized error behavior |
+| S0005 AC1–7 | PASS | Existing importer/review/commit and PG rollback/recovery preserved; current source proof and repair verified; SEC-04 minimal-projection/direct-guard repair and real SQL-projection proof verified |
+
+All 35 ACs have concrete mappings in test-plan.md; these judgments evaluate their security aspects and do not replace QE functional acceptance. Final g3-sec04-regression.xml has 306 passing cases; g3-sec04-focused.xml has 25 overlapping cases and g3-evidence-tamper-final.xml has 17 overlapping migration passes; do not sum them. Additional 15 importer passes, SQLite five crash points, PostgreSQL five crash points, and five actual-OCR worker cases are recorded separately. Changed executable-line coverage is 1,170 / 1,266 = 92.4171% with 20 matching production hashes and no waiver. The native-format/time examples are synthetic trusted fixture proof, not live parser quality, producer activation, frozen evaluation or production qualification.
+
+## Result
+
+**PASS WITH RECOMMENDATIONS** for G3's bounded feature security review. The reviewed implementation controls and all five story security assessments support this result; A-IMPL-01 and SEC-04 are resolved with source-bound PostgreSQL proof. Open findings are Critical 0, High 1, Medium 1 and Low 2: inherited conversion dependency exposure, the failed global security planning audit, public nosniff header hardening, and incomplete KG caller coverage. G4 must make the explicit High mitigation decision required by the contract. This report supplies no PM acceptance and authorizes no production or new producer activation.
+# F0006 — Assertion plane + origin + interpretation basis — Status
+
+**Overall Status:** In Progress — implementation and reviews verified; G4 decision pending
+**Last Updated:** 2026-11-02
+**Plan Run:** `2026-11-01-7d6d19ce` — A+B, new
+**Phase A:** Approved by operator token `approve-phase-a` on 2026-11-01; G3 passed
+**Phase B:** Approved by operator token `approve-phase-b` on 2026-11-01 after green preapproval exit checks; final G5 publication is recorded in the plan run manifest/journal
+**Phase B rework:** Correction basis/persistence (plan-review AR-1/AR-2) re-approved by operator token `approve-phase-b` on 2026-11-01 in plan run `2026-11-01-512e9303` (PHASE=B, existing)
+**Implementation:** Run `2026-11-02-5a00b0ff`; G0–G3 passed, including both review repairs; G4 operator mitigation/approval decision pending
+
+## Story Checklist
+
+| Story | Title | Status |
+|---|---|---|
+| F0006-S0001 | Preserve typed source claims | In Progress |
+| F0006-S0002 | Retain open statements and version contracts | In Progress |
+| F0006-S0003 | Check structural admission and evidence | In Progress |
+| F0006-S0004 | Guard mood and described evidence | In Progress |
+| F0006-S0005 | Preserve existing consumer boundaries | In Progress |
+
+## Story × Role Progress
+
+| Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
+|---|---|---|---|---|---|---|---|---|
+| F0006-S0001 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | in-progress |
+| F0006-S0002 | done | not-in-scope | done | done | PASS | PASS | done | in-progress |
+| F0006-S0003 | done | not-in-scope | done | done | PASS | PASS | done | in-progress |
+| F0006-S0004 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | in-progress |
+| F0006-S0005 | done | not-in-scope | done | done | PASS | PASS | done | in-progress |
+
+Feature action `2026-11-02-5a00b0ff` initialized the contract cell vocabulary at
+G0. AI cells cover shared result/producer compatibility review only; no model,
+prompt, live producer or new Neuron runtime is authorized. Review cells become
+PASS/FAIL at G3. Implementation exists; final regression, scanner interpretation,
+and independent review remain required before any story can be Done.
+
+## Required Signoff Roles (Set in Planning)
+
+Architect-set completion roles reaffirmed at feature-action G0 on 2026-11-02. None has signed off implementation.
+
+| Role | Required | Why Required | Set By | Date |
+|---|---|---|---|---|
+| Quality Engineer | Yes | Acceptance criteria and regression evidence | Architect | 2026-11-01 |
+| Code Reviewer | Yes | Independent correctness and compatibility review | Architect | 2026-11-01 |
+| Security Reviewer | Yes | Source access, restriction inheritance and non-disclosure | Architect | 2026-11-01 |
+| DevOps | Yes | Additive migration, packaged schemas and guarded rollout/rollback | Architect | 2026-11-01 |
+| Architect | Yes | Semantic, evidence and legacy compatibility constraints | Architect | 2026-11-01 |
+
+## Story Signoff Provenance
+
+Append-only history. No implementation or role signoff has occurred. Latest row per story/role determines the current verdict; passing evidence belongs to the later feature action's run.
+
+| Story | Role | Reviewer | Verdict | Evidence | Date | Notes |
+|---|---|---|---|---|---|---|
+
+## Planning Decisions and Delivery Boundaries
+
+- F0006 is the storage/contracts/admission-checks/review-hooks feature described in the dated README amendment and PRD. It adds no screen or permission grant.
+- Existing `direct-baseline` and v1 writer defaults follow the final F0005 rejection decision. New assertion contract versions do not enable v2 content publication or a new extraction pipeline.
+- F0016 owns durable drops, full interpretation outcomes and time mentions; F0018 owns full canonical orchestration; F0022 owns new display; F0066 owns open extraction/alignment. Those are scope boundaries, not unfinished F0006 acceptance criteria.
+- Proposed ADR-0065 remains Proposed; the plan does not claim its broader proof gates passed.
+
+## Tracker Sync
+
+Phase A strict story validation, story-index generation and tracker validation passed before G3, with zero tracker errors/warnings. Semantic educational examples also pass. The Architect-authored feature/node shards now map all five stories and the design contracts; G4 compiled the generated projections, removed the reserved exclusion and passed drift validation. Roadmap remains Next; planning this feature does not silently move implementation into Now.
+
+## Closeout Summary
+
+Not applicable yet. No implementation evidence, completion date or archive approval is claimed.
+
+Exit code: 0
+

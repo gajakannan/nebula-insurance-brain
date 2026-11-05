@@ -1,0 +1,29 @@
+...................F........................................             [100%]
+=================================== FAILURES ===================================
+__ test_recommendation_tracker_pass_still_runs_real_deep_evidence_validation ___
+
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-3/test_recommendation_tracker_pa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7a916224b5c0>
+capfd = <_pytest.capture.CaptureFixture object at 0x7a91620cd160>
+
+    def test_recommendation_tracker_pass_still_runs_real_deep_evidence_validation(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str]
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product)
+        module = load_validator()
+        # The complete local provenance has no evidence manifest. The actual child
+        # validator must reject it; no mock replaces the feature-evidence invocation.
+        assert run_main(module, monkeypatch, product, "--feature", "F0038", "--run-id", RUN_ID) == 1
+        output = capfd.readouterr().out
+        assert "errors: 0" in output
+>       assert "ERROR missing_manifest_fails:" in output
+E       AssertionError: assert 'ERROR missing_manifest_fails:' in '\nSummary:\n  errors: 0\n  warnings: 0\n  result: PASS\nERROR registry_required_section_missing_fails: REGISTRY.md is...e_contract_archived=0, skipped_active_done_pre_contract=0, skipped_retired_abandoned=0, skipped_retired_superseded=0\n'
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:168: AssertionError
+=========================== short test summary info ============================
+FAILED ../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py::test_recommendation_tracker_pass_still_runs_real_deep_evidence_validation
+1 failed, 59 passed in 6.19s
+
+Exit code: 1
+

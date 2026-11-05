@@ -1,0 +1,165 @@
+63:def canonical_json(value: Any) -> bytes:
+64:    def serialize(item: Any) -> Any:
+81:def hash_json(value: Any) -> str:
+85:def normalized_name(value: str) -> str:
+90:def carrier_value(record: Mapping[str, Any]) -> dict:
+98:def wire_evidence(value: Mapping[str, Any]) -> dict:
+103:async def _current_audits(
+145:    def __init__(
+158:    async def _bundle(self, context: ProducerContext) -> tuple[ArtifactMetadata, VerifiedBundle]:
+180:    async def block(self, context: ProducerContext, block_id: str) -> VerifiedBlock:
+251:    async def time_reference(self, context: ProducerContext, ref: UUID) -> TimeReference:
+266:    def __init__(
+272:    async def lock_context(self, context: ProducerContext) -> None:
+304:    async def _retain_references(self, context: ProducerContext, item: AdmittedAssertion) -> None:
+357:    async def persist(
+492:    async def source_keys(self, assertion_id: UUID) -> tuple[ResourceKey, ...]:
+498:    async def project(self, assertion_id: UUID) -> dict:
+542:def _review_locator(evidence: Mapping[str, Any]) -> dict:
+555:def _evidence_row(
+586:async def resolve_lineage(
+692:def issue_source_access(
+723:async def require_commit_sources(
+773:async def correct_assertion_v2(
+[project]
+name = "brain-engine-workspace"
+version = "0.0.0"
+description = "uv workspace root for the engine/ runtime (F0001-S0001). No source of its own; see apps/api and packages/*."
+requires-python = ">=3.13"
+dependencies = ["brain-api", "brain-content", "brain-persistence", "brain-domain", "brain-security", "brain-review", "brain-temporal", "brain-worker", "brain-assertions"]
+
+[tool.uv]
+package = false
+exclude-newer = "7 days"
+
+[tool.uv.sources]
+brain-api = { workspace = true }
+brain-content = { workspace = true }
+brain-persistence = { workspace = true }
+brain-domain = { workspace = true }
+brain-security = { workspace = true }
+brain-review = { workspace = true }
+brain-temporal = { workspace = true }
+brain-worker = { workspace = true }
+brain-assertions = { workspace = true }
+brain-contracts = { workspace = true }
+brain-testing = { workspace = true }
+
+[tool.uv.workspace]
+members = ["apps/*", "packages/*"]
+
+[dependency-groups]
+dev = [
+  "brain-testing",
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pytest-asyncio>=0.24",
+  "httpx2>=2.12",
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "alembic>=1.13",
+  "types-PyYAML>=6.0",
+  "aiosqlite>=0.20",
+  "psycopg[binary]>=3.2",
+  "jsonschema>=4.23",
+]
+
+[tool.pytest.ini_options]
+# Every package (apps/api, packages/*) ships its own tests/ directory — the default
+# prepend import mode collides on the shared bare module name "tests" once more than
+# one is collected in the same run. importlib mode keys each module by file path.
+addopts = "--import-mode=importlib"
+asyncio_mode = "auto"
+"""Worker/importer process-crash proof with real Graph and recorded model responses.
+
+SQLite runs offline. PostgreSQL uses an isolated schema when BRAIN_TEST_POSTGRES_URL
+is set; a configured but unavailable service fails instead of skipping.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+from collections.abc import Iterator, Mapping
+from pathlib import Path
+from threading import BoundedSemaphore, Event
+from typing import Any
+from uuid import uuid4
+
+import httpx
+import pytest
+from brain_content.checkpoints import CheckpointStore
+from brain_content.config import LocalObjectStoreConfig
+from brain_content.manifest import Manifest
+from brain_content.object_store import LocalFilesystemObjectStore
+from brain_content.validation import ArtifactKey, VerifiedBundle
+from brain_content.verified_store import VerifiedBundleStore
+from brain_domain.authx import ResourceKey, ResourceType
+from brain_domain.principal import PrincipalKind
+from brain_extraction.profiles import load_profile
+from brain_extraction.vllm_graph_client import VllmGraphClient
+from brain_ingestion.document_worker import DocumentTask, DocumentWorker
+from brain_interpretation.parsed_content import ParseResult
+from brain_jobs.queue import DocumentJobQueue, JobLease, jobs, metadata, outbox
+from brain_persistence.base import Base
+from brain_persistence.models import (
+    Assertion,
+    AssertionEvidence,
+    AuditEventRow,
+    ContentArtifact,
+    ReviewItemRow,
+    SemanticInterpretationRun,
+)
+from brain_security.casbin_adapter import CasbinAuthorizationAdapter
+from brain_testing import fixtures
+from brain_worker.content_publication import AuthorizedContentPublisher
+from brain_worker.document_delivery import (
+    DocumentJobAuthorization,
+    DocumentResultImporter,
+)
+from docling_core.types.doc import DocItemLabel, DoclingDocument
+from docling_core.types.doc.base import BoundingBox, CoordOrigin, Size
+from docling_core.types.doc.document import ProvenanceItem
+from sqlalchemy import create_engine, event, func, select, text
+from sqlalchemy.engine import Connection, Engine
+from sqlalchemy.orm import Session
+
+ROOT = Path(__file__).resolve().parents[3]
+EXIT_CODE = 29
+
+
+def database(url: str, schema: str | None) -> Engine:
+    # No public fallback: create_all must not mistake migrated public tables for
+    # this proof's tables and accidentally share data between isolated cases.
+    options = {"options": f"-csearch_path={schema}"} if schema else {}
+    return create_engine(url, connect_args=options)
+
+
+@pytest.fixture(params=["sqlite", "postgresql"])
+def recovery_database(
+    request: pytest.FixtureRequest, tmp_path: Path
+) -> Iterator[tuple[Engine, str, str | None]]:
+    schema = None
+    admin = None
+    if request.param == "postgresql":
+        url = os.environ.get("BRAIN_TEST_POSTGRES_URL")
+        if not url:
+            pytest.skip("set BRAIN_TEST_POSTGRES_URL for PostgreSQL process recovery")
+        if not url.startswith("postgresql+psycopg://"):
+            pytest.fail("BRAIN_TEST_POSTGRES_URL must use postgresql+psycopg")
+        schema = f"delivery_proof_{uuid4().hex}"
+        admin = create_engine(url)
+        with admin.begin() as conn:
+            conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+    else:
+        url = f"sqlite:///{tmp_path / 'recovery.db'}"
+    engine = database(url, schema)
+    try:
+        metadata.create_all(engine)
+
+Exit code: 0
+

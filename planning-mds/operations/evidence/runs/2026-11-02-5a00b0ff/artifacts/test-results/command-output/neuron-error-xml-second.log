@@ -1,0 +1,35 @@
+failed on setup with "sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table "document_version"
+[SQL: 
+CREATE TABLE assertion_document_reference (
+	id UUID NOT NULL, 
+	document_version_id UUID NOT NULL, 
+	tenant_id UUID NOT NULL, 
+	knowledge_base_id UUID NOT NULL, 
+	entity_type TEXT NOT NULL, 
+	label TEXT NOT NULL, 
+	created_by UUID NOT NULL, 
+	created_at TIMESTAMP WITH TIME ZONE NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), 
+	CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), 
+	FOREIGN KEY(created_by) REFERENCES principal (id)
+)
+
+]
+(Background on this error at: https://sqlalche.me/e/20/f405)"
+dialect = <sqlalchemy.dialects.postgresql.psycopg.PGDialect_psycopg object at 0x732e9dbd7110>
+context = <sqlalchemy.dialects.postgresql.psycopg.PGExecutionContext_psycopg object at 0x732e9d3bd590>
+self = <psycopg.Cursor [closed] [BAD] at 0x732e9cf4c650>
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+E           psycopg.errors.InvalidForeignKey: there is no unique constraint matching given keys for referenced table "document_version"
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: InvalidForeignKey
+            if not url.startswith("postgresql+psycopg://"):
+                pytest.fail("BRAIN_TEST_POSTGRES_URL must use postgresql+psycopg")
+self = <psycopg.Cursor [closed] [BAD] at 0x732e9cf4c650>
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+E           sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table "document_version"
+E           CREATE TABLE assertion_document_reference (
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: ProgrammingError
+
+Exit code: 0
+

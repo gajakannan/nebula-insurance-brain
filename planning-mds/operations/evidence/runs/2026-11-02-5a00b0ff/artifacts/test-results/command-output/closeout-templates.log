@@ -1,0 +1,86 @@
+# Signoff Ledger — F####-{slug} run {run-id}
+
+> Required at G5 per §10. Strictly consistent with `STATUS.md` current signoff state (latest row per `(story, role)`). PM-owned.
+
+## Required Role Matrix
+
+Echo the STATUS.md `Required Role Matrix` table for this feature.
+
+| Role | Required |
+|------|----------|
+| Quality Engineer | Yes |
+| Code Reviewer | Yes |
+| Security Reviewer | <Yes/No based on §7 scope> |
+| DevOps | <Yes/No> |
+| Architect | <Yes/No> |
+
+## Current Signoff State
+
+Latest passing row per `(story, role)` derived from STATUS.md provenance. Validator cross-checks `signoff_ledger_stale_fails` against STATUS rows.
+
+```text
+- F####-S0001 / Quality Engineer: PASS by <reviewer> on YYYY-MM-DD (test-execution-report.md)
+- F####-S0001 / Code Reviewer: APPROVED by <reviewer> on YYYY-MM-DD (code-review-report.md)
+```
+
+## Recommendation Acceptances
+
+Mirror or cross-reference each `WITH RECOMMENDATIONS` row from STATUS.md. Where this run's `pm-closeout.md` carries the canonical PM Acceptance Line, summarize it here.
+
+## Waivers And Omissions
+
+List every entry from `manifest.omissions[]` and `manifest.waivers` with the human-readable rationale. Per §18, omissions are only allowed for non-required artifacts.
+# PM Closeout — F####-{slug} run {run-id}
+
+> Required at G8/closeout per §10. PM-owned. Final approval artifact.
+
+## Final Story Status
+
+Per-story final status table. Each row references the STATUS.md current signoff and the evidence path.
+
+| Story | Final Status | Evidence | Notes |
+|-------|--------------|----------|-------|
+| F####-S0001 | Done | test-execution-report.md / code-review-report.md | - |
+
+## Archive Decision
+
+State whether the feature is `Done`, `Completed`, or `Archived`. If archived, note the `Archived Date` (also recorded in `REGISTRY.md`).
+
+## Deferred Follow-ups
+
+Items the PM is explicitly deferring beyond closeout. Each has an owner and a ticket or target date.
+
+## Recommendation Acceptances
+
+Each accepted recommendation uses the §15 PM Acceptance Line Format:
+
+```text
+- Accepted: <identifier> — <type-specific details>
+```
+
+`<identifier>` examples:
+- `coverage` — for a coverage waiver
+- `<rule_id>` — for a validator_defect waiver (mirrored in `Validator Defects` subsection)
+- `<recommendation text or ID>` — for a deferred role-report recommendation
+- `<custom waiver key>` — for a product-specific waiver key
+
+For `high`/`critical` recommendations, details must begin with `mitigation:` (case-insensitive).
+
+## Tracker Updates
+
+Confirm `REGISTRY.md`, `ROADMAP.md`, `STORY-INDEX.md`, `BLUEPRINT.md` were updated. Cite the `validate-trackers.py` invocation in `lifecycle-gates.log`.
+
+## Validator Results
+
+Summarize every validator run for this closeout — tracker, story-index, KG, template, feature-evidence — with exit codes and rule IDs. Mirror `lifecycle-gates.log`.
+
+<!--
+## Validator Defects (conditional)
+
+Activate this subsection only when `manifest.waivers.validator_defect` is present. One acceptance line per affected rule ID:
+
+- Accepted: <rule_id> — defect: <description>; target: YYYY-MM-DD
+-->
+
+Exit code: 0
+

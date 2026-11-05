@@ -1,0 +1,141 @@
+def validate_latest_run(
+    row: RegistryRow,
+    result: Result,
+    latest_path: Path,
+    supplied_run_id: str | None,
+    require_match_rule: str | None,
+) -> LatestRunResolution:
+    loaded, error = load_json_file(latest_path)
+    if error or not isinstance(loaded, dict):
+        result.add_error("latest_run_wrong_manifest_fails", "latest-run.json is missing or unparseable", feature=row.feature_id, path=str(latest_path))
+        return LatestRunResolution(None, None, unloadable=True)
+    latest_run_id = str(loaded.get("run_id", ""))
+    if not RUN_ID_RE.fullmatch(latest_run_id):
+        result.add_error("latest_run_wrong_manifest_fails", "latest-run.json run_id is malformed", feature=row.feature_id, path=str(latest_path))
+        return LatestRunResolution(None, None, unloadable=True)
+    if supplied_run_id and supplied_run_id != latest_run_id and require_match_rule:
+        result.add_error(
+            require_match_rule,
+            f"--run-id {supplied_run_id} does not match latest-run.json run_id {latest_run_id}",
+            feature=row.feature_id,
+            run_id=supplied_run_id,
+            path=str(latest_path),
+        )
+        return LatestRunResolution(latest_run_id, None, mismatch=True)
+    manifest_value = str(loaded.get("manifest_path", ""))
+    manifest_path = relative_json_path(result.product_root, manifest_value) if manifest_value else None
+    if manifest_path is None or not manifest_path.exists():
+        result.add_error("latest_run_wrong_manifest_fails", "latest-run.json manifest_path does not resolve", feature=row.feature_id, run_id=latest_run_id, path=str(latest_path))
+        return LatestRunResolution(latest_run_id, None, unloadable=True)
+    return LatestRunResolution(latest_run_id, manifest_path)
+
+
+def resolve_run(row: RegistryRow, stage: str, run_id: str | None, result: Result) -> tuple[str | None, Path | None, bool]:
+    root = feature_index_root_for(result.product_root, row)
+    latest_path = root / "latest-run.json"
+    if stage in {"G0", "G1", "G2", "G3", "G4", "G5"}:
+        if not run_id:
+            result.add_error("stage_without_run_id_before_g6_fails", f"{stage} validation requires --run-id", feature=row.feature_id)
+            return None, None, False
+        run_folder = run_folder_for(result.product_root, run_id)
+        if not run_folder.exists():
+            result.add_error("run_folder_not_found_fails", "Run folder does not exist", feature=row.feature_id, run_id=run_id, path=str(run_folder))
+            return run_id, None, False
+        return run_id, run_folder / "evidence-manifest.json", False
+
+    if stage in {"G6", "G7"}:
+        if run_id:
+            if latest_path.exists():
+                resolution = validate_latest_run(row, result, latest_path, run_id, "stage_g6_run_id_mismatch_with_latest_run_fails")
+                if resolution.mismatch or resolution.unloadable:
+                    return run_id, None, False
+            run_folder = run_folder_for(result.product_root, run_id)
+            if not run_folder.exists():
+                result.add_error("run_folder_not_found_fails", "Run folder does not exist", feature=row.feature_id, run_id=run_id, path=str(run_folder))
+                return run_id, None, False
+            return run_id, run_folder / "evidence-manifest.json", False
+        if not latest_path.exists():
+            result.add_error("stage_g6_without_run_id_or_latest_run_fails", f"{stage} validation requires --run-id or latest-run.json", feature=row.feature_id, path=str(root))
+            return None, None, False
+        resolution = validate_latest_run(row, result, latest_path, None, None)
+        return resolution.run_id, resolution.manifest_path, True
+
+    if not latest_path.exists():
+        if not root.exists() and row.section == "Archived Features":
+            result.add_error("post_contract_archived_missing_evidence_fails", "Post-contract archived feature lacks canonical evidence", feature=row.feature_id, path=str(root))
+        elif not root.exists() and row.section == "Active Features":
+            result.add_error("active_done_post_contract_missing_evidence_fails", "Active Done/completed feature lacks canonical evidence", feature=row.feature_id, path=str(root))
+        else:
+            result.add_error("missing_latest_run_fails", "latest-run.json is required for closeout validation", feature=row.feature_id, path=str(latest_path))
+        return None, None, True
+    resolution = validate_latest_run(row, result, latest_path, run_id, "stage_g8_run_id_mismatch_fails")
+    return resolution.run_id, resolution.manifest_path, True
+
+
+# --------------------------------------------------------------------------- #
+# Manifest deep validation
+# --------------------------------------------------------------------------- #
+
+
+def _is_repo_relative(value: str) -> tuple[bool, bool]:
+    """Returns (absolute, traverses). Both False means safe relative path."""
+    if not value:
+        return False, False
+    if value.startswith("/") or re.match(r"^[A-Za-z]:[\\/]", value):
+        return True, False
+    parts = re.split(r"[\\/]+", value)
+    return False, ".." in parts
+
+
+def validate_manifest_deep(
+    row: RegistryRow,
+    run_id: str | None,
+    manifest: dict[str, Any],
+    manifest_path: Path,
+    result: Result,
+    stage: str,
+) -> None:
+    """Layered manifest schema validation. Phase 2a covers path safety,
+    boolean presence, waiver shape, rerun_of/changed_paths shape, status
+    transitions, and feature_state terminality at closeout."""
+    feature_id = row.feature_id
+    common = {"feature": feature_id, "run_id": run_id or None, "path": str(manifest_path)}
+
+109:| Role | Stories Reviewed | Verdict | Closeout Reference |
+123:## Closeout Summary (Fill at archive time)
+128:| Closeout review date | [YYYY-MM-DD] |
+165:- The `Closeout Summary` table's `Closeout review date` row is the parseable signal §6 uses to classify a feature as pre-contract or post-contract. Missing/malformed values default the feature to post-contract and require canonical evidence.
+
+def _find_gate(spec: dict[str, Any], stage: str) -> dict[str, Any]:
+    for gate in spec.get("gates", []) or []:
+        if isinstance(gate, dict) and gate.get("id") == stage:
+            return gate
+    raise GateDriverError("unknown_stage", f"action has no gate {stage!r}")
+
+
+# --------------------------------------------------------------------------- #
+# Attest
+# --------------------------------------------------------------------------- #
+def attest_checkpoint(*, spec_dir: Path, action: str, stage: str, product_root: Path,
+                      run_id: str, run_folder: Path, checkpoint_id: str,
+                      evidence: list[str], actor: str, role: str, note: str = "",
+                      lock_timeout: float = DEFAULT_LOCK_TIMEOUT) -> dict[str, Any]:
+    policy, _ = _load_spec(spec_dir, action)
+    contract_version = str(policy.contract.get("active_version"))
+    lock = run_folder / LOCK_NAME
+    acquire_lock(lock, lock_timeout)
+    try:
+        journal = load_journal(run_folder, run_id=run_id, action=action, contract_version=contract_version)
+        stage_state = _stage_state(journal, stage)
+        pending = stage_state.get("pending_checkpoint")
+        if not pending or pending.get("id") != checkpoint_id:
+            raise GateDriverError("no_pending_checkpoint",
+                                  f"no pending checkpoint {checkpoint_id!r} at {stage}")
+        requires = [str(r) for r in (pending.get("requires", []) or [])]
+        required_files = [r for r in requires if is_artifact_ref(r)]
+        described = [r for r in requires if not is_artifact_ref(r)]
+        to_hash = list(dict.fromkeys(required_files + list(evidence or [])))
+        if not to_hash:
+
+Exit code: 0
+

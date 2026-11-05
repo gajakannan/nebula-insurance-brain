@@ -1,0 +1,78 @@
+971:def _find_recommendations_section(content: str) -> str:
+972-    """Locate the most likely Recommendations section in a role report."""
+973-    for heading in ("Recommendations", "Findings", "Recommendation Acceptances"):
+974-        section = extract_section(content, heading)
+975-        if section:
+976-            return section
+977-    return ""
+978-
+979-
+980-def parse_recommendations(content: str) -> list[Recommendation]:
+981-    """Parse recommendation bullets from a role report.
+982-
+983-    Looks inside a `Recommendations` (or `Findings`) section first; falls back
+984-    to scanning the whole document for bullets that carry either a `[severity]`
+985-    tag or an `owner:`/`follow-up:` disposition.
+986-    """
+987-    target_section = _find_recommendations_section(content) or content
+988-    recs: list[Recommendation] = []
+989-    for match in RECOMMENDATION_BULLET_RE.finditer(target_section):
+990-        severity_raw = match.group("severity")
+991-        owner = match.group("owner")
+992-        # Only treat as a recommendation if it has *some* structural marker —
+993-        # severity tag OR explicit owner — so we don't mistake every bullet for
+994-        # a recommendation.
+995-        if not severity_raw and not owner:
+996-            continue
+997-        severity = severity_raw.strip().lower() if severity_raw else None
+998-        recs.append(
+999-            Recommendation(
+1000-                severity=severity,
+1001-                severity_raw=severity_raw.strip() if severity_raw else None,
+1002-                text=match.group("text").strip(),
+1003-                owner=owner.strip() if owner else None,
+1004-                follow_up=match.group("followup").strip() if match.group("followup") else None,
+1005-                raw=match.group(0).strip(),
+1006-            )
+1007-        )
+1008-    return recs
+1009-
+1010-
+1011-VERDICT_LINE_RE = re.compile(r"^\s*\*{0,2}Result\*{0,2}:\s*(?P<verdict>.+?)\s*$", re.IGNORECASE | re.MULTILINE)
+
+### SEC-05 — Low, resolved: KG authorization caller reconciliation verified at G7
+
+Original finding: the required mutate callers lookup returned an empty set despite real facade callers in the fact/review routes and AssertionWriteService. The Low finding concerned retrieval-map coverage, not a demonstrated missing authorization check.
+
+Completed evidence: [kg-reconciliation.md](kg-reconciliation.md#sec-05-authorization-caller-reconciliation--resolved) records PASS. The final [G7 gate output](artifacts/test-results/command-output/g7-gate-final.log) records status pass and all three ordered operations: compile, symbol/decision regeneration and checks, then drift validation. The manifest records kg_reconciliation PASS. The [caller artifact](artifacts/test-results/g7-authorization-callers.json) contains 15 mutate callers: **four production methods** (AssertionWriteService.admit/read, facts.commit_fact, reviews.submit_review_decisions) and **eleven test methods**. They are not fifteen production entry points.
+
+Security independently reran the exact mutate callers lookup and obtained the same 15 IDs. A separate source search confirmed all **seven read/mutate facade call sites**: facts.py:75/:133, reviews.py:101/:175, and brain_assertions/service.py:111/:129/:140. The [manual source inventory](artifacts/test-results/g7-authorization-source-callers.json) records these call sites and fingerprints; Security independently verified all seven entries against the current three source-file hashes. The [reference audit](artifacts/test-results/g7-symbol-reference-audit.json) reports zero unknown caller/callee IDs across 1,785 symbols. Commands and outputs are retained in commands.log.
+
+Precise caveat, verified against scripts/kg/symbols.py: files are assigned to their first claiming canonical node; Python bare instance-call names use same-node fallback. Imported module/class-qualified calls have additional resolution, but injected or untyped instance receivers do not gain full type inference. The unbound-file sidecar skips unresolved local-instance calls rather than guessing from bare names. Closures, Protocol dispatch, property access and framework-driven calls are not exhaustively modeled. Same-node matching can over-link names; therefore the map is a retrieval aid, not exhaustive reachability, runtime authority or complete test coverage. The reviewed manual call inventory and existing PostgreSQL authorization/projection/denial tests remain the behavioral authority.
+
+Disposition: **resolved through actual G7 reconciliation plus the precise documented static-analysis limitation**, independently checked by Security. Architect owned the follow-up; the historical G4 PM acceptance remains in gate-decisions.md. SEC-05 is no longer an open recommendation and needs no further risk acceptance. No runtime code change or scanner/test rerun was needed for this evidence-only closure.
+
+## Recommendation Disposition
+
+The three remaining recommendations, SEC-01/02/03, are **accepted, non-blocking/deferred only for the trusted local synthetic-fixture feature scope**. Their original severities are retained. Each has an owner, follow-up and named PM acceptance in the actual [G4 record](gate-decisions.md#g4-operator-approval-recorded). SEC-05 is closed by the independently verified G7 evidence above; its historical acceptance is retained in the gate record.
+
+- [high] SEC-01: accepted bounded mitigation restricts feature use to trusted local synthetic fixtures; qualify/remediate affected conversion dependencies and verify memory/CPU/process isolation before untrusted or production PDF ingestion; target 2026-11-10; PM acceptance: Codex / Product Manager, gate-decisions.md, Named PM Recommendation Acceptances — owner: AI Engineer + DevOps (Security verifies); follow-up: SEC-01
+- [medium] SEC-02: accepted non-blocking local carryover to complete global security artifacts and rerun the strict audit, target 2026-11-10 and before production security qualification; PM acceptance: Codex / Product Manager, gate-decisions.md, Named PM Recommendation Acceptances — owner: Security + Architect; follow-up: SEC-02
+- [low] SEC-03: accepted non-blocking local hardening follow-up for nosniff across public/protected/error responses, target 2026-11-17; PM acceptance: Codex / Product Manager, gate-decisions.md, Named PM Recommendation Acceptances — owner: Backend Developer + DevOps; follow-up: SEC-03
+
+The approval source is the operator's actual message, **"yes i am approvingf with the message you mentioned"**, recorded at 2026-11-04T02:37:42.390119+00:00. Its quoted reference was:
+
+> Approve F0006 with SEC-01 mitigation: trusted local synthetic fixtures only. Before untrusted or production PDF ingestion, remediate affected dependencies and verify resource isolation. Owners: AI Engineer + DevOps, with Security verification; target November 10, 2026.
+
+Named PM: **Codex / Product Manager**, under that explicit operator approval. The gate record separately accepts SEC-01's bounded mitigation and the SEC-02/03 routine carryovers; its SEC-05 acceptance is historical because that follow-up is now complete. [G4 validation output](artifacts/test-results/command-output/g4-approved-validation.log) records status pass and exit 0. The actual G4 record remains the acceptance source for the three open recommendations.
+
+SEC-04 and A-IMPL-01 are mitigated in source with observed PostgreSQL proof; SEC-05 is resolved by verified G7 reconciliation. All three are excluded from open counts. SEC-01 remains open High; its accepted mitigation is scope containment, not demonstrated parser remediation/resource isolation. No dependency waiver, broader deployment approval or primary-owner PR acknowledgement is inferred.
+
+## Per-Story Security Assessment
+
+| Story | Verdict | Security basis and limits |
+112:## Findings
+162:## Recommendation Disposition
+
+Exit code: 0
+

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="2.805" timestamp="2026-11-03T02:10:44.770786+00:00" hostname="5f128650028e"><testcase classname="tests.integration.test_assertion_admission" name="test_typed_competing_claims_reload_without_canonical_effects" time="0.752" /><testcase classname="tests.integration.test_assertion_admission" name="test_open_storage_and_replay_are_lossless" time="0.638" /><testcase classname="tests.integration.test_assertion_admission" name="test_native_formats_derive_locations_from_verified_stored_content[pdf]" time="0.568" /><testcase classname="tests.integration.test_assertion_admission" name="test_native_formats_derive_locations_from_verified_stored_content[docx]" time="0.301"><failure message="brain_content.validation.ArtifactIntegrityError: native asset inventory mismatch">world_factory = &lt;function world_factory.&lt;locals&gt;.create at 0x7a5f3dea4670&gt;
+kind = 'docx'
+
+    @pytest.mark.parametrize("kind", ["pdf", "docx", "xlsx", "csv"])
+    async def test_native_formats_derive_locations_from_verified_stored_content(world_factory, kind):
+&gt;       world = world_factory(kind=kind)
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+
+engine/tests/integration/test_assertion_admission.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+engine/tests/fixtures/assertions/harness.py:193: in create
+    world = World(database, tmp_path/str(len(worlds)), **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/fixtures/assertions/harness.py:130: in __init__
+    self.bundle = bundle_fixture(kind=kind, text=text, origin=origin, owner=owner)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/fixtures/assertions/harness.py:124: in bundle_fixture
+    return verify_bundle(key, encoded(manifest), files)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-content/src/brain_content/validation.py:357: in verify_bundle
+    _asset_closure(native, files, key.contract_version)
+engine/packages/brain-content/src/brain_content/validation.py:149: in _asset_closure
+    _require(referenced == declared, "native asset inventory mismatch")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, message = 'native asset inventory mismatch'
+
+    def _require(condition: bool, message: str) -&gt; None:
+        if not condition:
+&gt;           raise ArtifactIntegrityError(message)
+E           brain_content.validation.ArtifactIntegrityError: native asset inventory mismatch
+
+engine/packages/brain-content/src/brain_content/validation.py:103: ArtifactIntegrityError</failure></testcase></testsuite></testsuites>
