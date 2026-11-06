@@ -30,7 +30,7 @@ IMPORTANT RULES:
 
 ### Framework binding
 
-- Framework: `nebula-agents` pinned at commit `5b3acf0681873a44b4d5977a97aa3f52ecf26110` (2026-11-03). Advance the pin deliberately, in step with `.github/workflows/ci-gates.yml`, and record the new commit here.
+- Framework: `nebula-agents` pinned at commit `d90bbb6fc70dffcfa6d70379d42015e895a49fa0` (2026-11-05). Advance the pin deliberately, in step with `.github/workflows/ci-gates.yml`, and record the new commit here.
 - Session setup: export `NEBULA_PRODUCT_ROOT=<absolute path to this repo>` before running any framework script. The framework default points at the CRM repo, not this one.
 - Layout convention: `engine/`, `experience/`, `neuron/` runtime roots (section 2.3). Path-class extensions for the additional roots are declared in section 2.4 and registered in `operations/evidence/README.md` at init.
 - Local guidance: [agent instructions](../docs/agent-instructions.md) and [plan review checklist](../docs/plan-review-checklist.md), declared in `../.nebula-project.yaml`, supplement this blueprint without changing its authority.
