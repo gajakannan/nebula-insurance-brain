@@ -64,7 +64,7 @@ def configuration():
 def database(monkeypatch):
     admin = os.environ.get("BRAIN_MIGRATION_ADMIN_URL")
     if not admin:
-        pytest.fail("F0006 requires explicit BRAIN_MIGRATION_ADMIN_URL for owned test databases")
+        pytest.skip("Set BRAIN_MIGRATION_ADMIN_URL for owned F0006 PostgreSQL test databases")
     admin = admin.replace("postgresql+psycopg://", "postgresql://")
     name = "f0006_qe_" + secrets.token_hex(6)
     assert name.startswith("f0006_qe_") and name != "brain"

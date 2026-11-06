@@ -9,7 +9,7 @@ from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime
 from functools import lru_cache
 from importlib.resources import files
-from typing import Any, ClassVar, Literal, Self
+from typing import Any, ClassVar, Final, Literal, Self
 from uuid import UUID
 
 from brain_domain.assertions import (
@@ -23,12 +23,12 @@ from brain_domain.assertions import (
     Mode,
     Origin,
 )
-from jsonschema import Draft202012Validator, FormatChecker
+from jsonschema import Draft202012Validator, FormatChecker  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, PrivateAttr, model_validator
 from referencing import Registry, Resource
 from referencing.exceptions import NoSuchResource
 
-NORMALIZATION_VERSION = "f0006-grounding-v1"
+NORMALIZATION_VERSION: Final = "f0006-grounding-v1"
 SCHEMA_NAMES = (
     "assertion-record-v2.schema.json",
     "interpretation-result-v2.schema.json",
@@ -123,7 +123,9 @@ def decode_json(raw: bytes | str) -> Any:
 
 
 def _no_remote_reference(uri: str) -> Resource:
-    raise NoSuchResource(ref=uri)
+    # WHY: referencing builds these with its own attrs wrapper, which mypy's
+    # attrs plugin does not see; the keyword is the documented constructor.
+    raise NoSuchResource(ref=uri)  # type: ignore[call-arg]
 
 
 @lru_cache(maxsize=1)
@@ -132,7 +134,7 @@ def _contracts() -> tuple[dict[str, dict[str, Any]], Registry]:
         name: decode_json(files("brain_contracts").joinpath("schemas", name).read_bytes())
         for name in SCHEMA_NAMES
     }
-    registry = Registry(retrieve=_no_remote_reference).with_resources(
+    registry = Registry(retrieve=_no_remote_reference).with_resources(  # type: ignore[call-arg]
         (value["$id"], Resource.from_contents(value)) for value in contracts.values()
     )
     return contracts, registry

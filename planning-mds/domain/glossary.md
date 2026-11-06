@@ -380,7 +380,7 @@ These are proposed storage refinements under ADR-0073; they do not activate broa
 
 ## F0006 assertion contract refinements (proposed design)
 
-These terms refine representation and admission under [ADR-0075](../architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md); Phase B design was approved by operator on 2026-11-01; runtime proofs remain pending. All examples are synthetic and illustrative in [EX-ASSERT-001–009](../features/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md).
+These terms refine representation and admission under [ADR-0075](../architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md); Phase B design was approved by operator on 2026-11-01; runtime proofs remain pending. All examples are synthetic and illustrative in [EX-ASSERT-001–009](../features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md).
 
 | Term | Definition | Worked / boundary | Owning story / contract |
 |---|---|---|---|

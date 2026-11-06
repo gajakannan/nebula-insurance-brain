@@ -46,4 +46,7 @@ dev = [
 # prepend import mode collides on the shared bare module name "tests" once more than
 # one is collected in the same run. importlib mode keys each module by file path.
 addopts = "--import-mode=importlib"
+# F0006 integration suites import `engine.tests.fixtures`; expose the repo root
+# so they collect from engine/ (runtime-suites) and the repo root (runtime-stack).
+pythonpath = [".."]
 asyncio_mode = "auto"

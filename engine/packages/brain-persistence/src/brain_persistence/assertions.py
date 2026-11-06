@@ -13,6 +13,7 @@ import unicodedata
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
+from functools import partial
 from typing import Any
 from uuid import UUID, uuid4, uuid5
 
@@ -478,10 +479,10 @@ class SqlAlchemyAssertionRepository:
                     )
                     await self.session.flush()
                     await self.session.run_sync(
-                        lambda s, review_id=review_id: inherit_resource_access(
-                            s,
-                            ResourceKey(ResourceType.CONTENT_ARTIFACT, context.artifact_id),
-                            ResourceKey(ResourceType.REVIEW_TASK, review_id),
+                        partial(
+                            inherit_resource_access,
+                            source=ResourceKey(ResourceType.CONTENT_ARTIFACT, context.artifact_id),
+                            target=ResourceKey(ResourceType.REVIEW_TASK, review_id),
                             actor_id=context.actor_id,
                             at=item.created_at,
                             add_dependency_on_source=True,
@@ -792,11 +793,12 @@ def issue_source_access(
         and d.allowed
         and d.scope is not None
     ]
-    if not reads:
+    owners = {(d.scope.tenant_id, d.scope.knowledge_base_id) for d in reads if d.scope is not None}
+    if not owners:
         return None
-    owner = (reads[0].scope.tenant_id, reads[0].scope.knowledge_base_id)
-    if any((d.scope.tenant_id, d.scope.knowledge_base_id) != owner for d in reads):
+    if len(owners) > 1:
         raise AssertionIneligible()
+    (owner,) = owners
     proof = SourceAccessProof(
         owner[0],
         owner[1],
@@ -929,6 +931,8 @@ async def correct_assertion_v2(
         if location is None:
             raise UnsupportedAssertionCorrection("quote is absent from new locator")
         artifact = await session.get(ContentArtifact, artifact_id)
+        if artifact is None:
+            raise UnsupportedAssertionCorrection("source artifact not found")
         verified = [
             {
                 "artifact_id": str(artifact_id),

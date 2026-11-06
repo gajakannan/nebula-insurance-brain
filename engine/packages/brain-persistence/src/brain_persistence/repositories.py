@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
@@ -385,22 +386,39 @@ class SqlAlchemyFactCommitRepository:
         self._session = session
 
     async def commit_source_keys(
-        self, evidence_refs, review_decision_id
+        self, evidence_refs: Sequence[UUID], review_decision_id: UUID | None
     ) -> tuple[ResourceKey, ...]:
         from brain_persistence.assertions import discover_sources
 
         discovery = await discover_sources(self._session, evidence_refs, review_decision_id)
         return discovery.keys if discovery.has_v2 else ()
 
-    def source_access_proof(self, decisions) -> SourceAccessProof | None:
+    def source_access_proof(
+        self, decisions: Sequence[AuthorizationDecision]
+    ) -> SourceAccessProof | None:
         from brain_persistence.assertions import issue_source_access
 
         return issue_source_access(self._session, decisions)
 
-    async def require_commit_sources(self, **kwargs) -> None:
+    async def require_commit_sources(
+        self,
+        *,
+        evidence_refs: Sequence[UUID],
+        review_decision_id: UUID | None,
+        authorized_scope: tuple[UUID, UUID],
+        closes_existing: bool,
+        source_access: SourceAccessProof | None,
+    ) -> None:
         from brain_persistence.assertions import require_commit_sources
 
-        await require_commit_sources(self._session, **kwargs)
+        await require_commit_sources(
+            self._session,
+            evidence_refs=evidence_refs,
+            review_decision_id=review_decision_id,
+            authorized_scope=authorized_scope,
+            closes_existing=closes_existing,
+            source_access=source_access,
+        )
 
     async def lock_slot(self, slot_id: UUID) -> tuple[UUID, UUID] | None:
         row = (
