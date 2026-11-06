@@ -1,0 +1,64 @@
+# PM Closeout — F####-{slug} run {run-id}
+
+> Required at G8/closeout per §10. PM-owned. Final approval artifact.
+
+## Final Story Status
+
+Per-story final status table. Each row references the STATUS.md current signoff and the evidence path.
+
+| Story | Final Status | Evidence | Notes |
+|-------|--------------|----------|-------|
+| F####-S0001 | Done | test-execution-report.md / code-review-report.md | - |
+
+## Archive Decision
+
+State whether the feature is `Done`, `Completed`, or `Archived`. If archived, note the `Archived Date` (also recorded in `REGISTRY.md`).
+
+## Deferred Follow-ups
+
+Items the PM is explicitly deferring beyond closeout. Each has an owner and a ticket or target date.
+
+## Recommendation Acceptances
+
+Each accepted recommendation uses the §15 PM Acceptance Line Format:
+
+```text
+- Accepted: <identifier> — <type-specific details>
+```
+
+`<identifier>` examples:
+- `coverage` — for a coverage waiver
+- `<rule_id>` — for a validator_defect waiver (mirrored in `Validator Defects` subsection)
+- `<recommendation text or ID>` — for a deferred role-report recommendation
+- `<custom waiver key>` — for a product-specific waiver key
+
+For `high`/`critical` recommendations, details must begin with `mitigation:` (case-insensitive).
+
+## Tracker Updates
+
+Confirm `REGISTRY.md`, `ROADMAP.md`, `STORY-INDEX.md`, `BLUEPRINT.md` were updated. Cite the `validate-trackers.py` invocation in `lifecycle-gates.log`.
+
+## Validator Results
+
+Summarize every validator run for this closeout — tracker, story-index, KG, template, feature-evidence — with exit codes and rule IDs. Mirror `lifecycle-gates.log`.
+
+<!--
+## Validator Defects (conditional)
+
+Activate this subsection only when `manifest.waivers.validator_defect` is present. One acceptance line per affected rule ID:
+
+- Accepted: <rule_id> — defect: <description>; target: YYYY-MM-DD
+-->
+205:        reason: "path-sensitive; deferred to G8 after the archive move relocates evidence paths"
+210:      (stable across the G8 archive move). Manifest stays in-progress; record gate_results.kg_reconciliation.
+212:  - id: G8
+219:          id: archive-move
+285:      tracker/STATUS edit at the archive-move checkpoint; any planning edit after G8 completes needs
+295:  - "Write latest-run.json before G8 final validation passes."
+303:  - "Skip any gate G0 through G8, or declare Done without the PM role switch at G8."
+332:    states: approved (superseded at G8), superseded, or no prior runs.
+351:    defects are logged as open follow-ups in README.md (not waivers yet); if unresolved at G8, record a
+362:    changed/runtime_bearing; Security = security_sensitive_scope). At G8 the PM verifies the matrix is
+
+Exit code: 0
+

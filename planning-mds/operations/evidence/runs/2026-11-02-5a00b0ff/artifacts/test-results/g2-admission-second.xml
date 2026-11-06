@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="2.921" timestamp="2026-11-03T02:08:36.254403+00:00" hostname="5f128650028e"><testcase classname="tests.integration.test_assertion_admission" name="test_typed_competing_claims_reload_without_canonical_effects" time="0.734" /><testcase classname="tests.integration.test_assertion_admission" name="test_open_storage_and_replay_are_lossless" time="0.664" /><testcase classname="tests.integration.test_assertion_admission" name="test_native_formats_derive_locations_from_verified_stored_content[pdf]" time="0.673" /><testcase classname="tests.integration.test_assertion_admission" name="test_native_formats_derive_locations_from_verified_stored_content[docx]" time="0.293"><failure message="ValueError: CONTENT_CONTRACT_INVALID">world_factory = &lt;function world_factory.&lt;locals&gt;.create at 0x7061628a4670&gt;
+kind = 'docx'
+
+    @pytest.mark.parametrize("kind", ["pdf", "docx", "xlsx", "csv"])
+    async def test_native_formats_derive_locations_from_verified_stored_content(world_factory, kind):
+&gt;       world = world_factory(kind=kind)
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+
+engine/tests/integration/test_assertion_admission.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+engine/tests/fixtures/assertions/harness.py:192: in create
+    world = World(database, tmp_path/str(len(worlds)), **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/fixtures/assertions/harness.py:129: in __init__
+    self.bundle = bundle_fixture(kind=kind, text=text, origin=origin, owner=owner)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/fixtures/assertions/harness.py:121: in bundle_fixture
+    model = parse_manifest(encoded(manifest))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-content/src/brain_content/manifest.py:168: in parse_manifest
+    validate_contract(name, value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'content-artifact-manifest-v2.schema.json'
+value = {'tenant_id': '49654f45-fc11-4fbd-9ac2-3e20db699058', 'knowledge_base_id': '837f10c9-90a3-4502-a253-e0f14e80e442', 'document_id': 'abcdedc4-7cb8-4b28-9ae6-e290382f263b', 'version_id': '65e092c2-f8c4-4751-8bd5-a9b7f2c2bdbc', ...}
+definition = None
+
+    def validate_contract(name: str, value: Any, definition: str | None = None) -&gt; None:
+        contract = schema(name)
+        if definition is not None:
+            contract = {"$ref": f"#/$defs/{definition}", "$defs": contract["$defs"]}
+        validator = Draft202012Validator(contract, format_checker=FormatChecker())
+        errors = list(validator.iter_errors(value))
+        if errors:
+            # Do not place protected values, quotes, paths or schema reprs in errors.
+&gt;           raise ValueError("CONTENT_CONTRACT_INVALID")
+E           ValueError: CONTENT_CONTRACT_INVALID
+
+engine/packages/brain-content/src/brain_content/contracts.py:91: ValueError</failure></testcase></testsuite></testsuites>

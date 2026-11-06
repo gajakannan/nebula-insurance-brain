@@ -20,7 +20,7 @@ from brain_content.manifest import ArtifactManifest, Manifest
 from brain_content.outputs import parse_run_manifest
 from brain_content.store import ArtifactNotFound
 from brain_content.validation import ArtifactKey, VerifiedBundle
-from brain_contracts.result import InterpretationResult
+from brain_contracts.dispatch import parse_legacy_result
 from brain_domain.authx import (
     AuthorizationDecision,
     RequestedScope,
@@ -321,7 +321,7 @@ class DocumentResultImporter:
                 run_id=run_id,
                 artifact_key=key,
             )
-            result = InterpretationResult.model_validate_json(files["result.json"])
+            result = parse_legacy_result(files["result.json"])
             if (result.run_id, result.artifact_id) != (run_id, key.artifact_id):
                 raise ArtifactIntegrityError("interpretation identity mismatch")
             if (

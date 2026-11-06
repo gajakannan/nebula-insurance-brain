@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from uuid import UUID
 
+from brain_content.store import ContentArtifactStore
 from brain_domain.authx import Action, AuthorizationDecision, ResourceKey, ResourceType
 from brain_domain.principal import Principal
 from brain_domain.review import (
@@ -10,6 +11,7 @@ from brain_domain.review import (
     ReviewDecisionAction,
     ReviewDecisionReasonCode,
 )
+from brain_persistence.assertions import UnsupportedAssertionCorrection
 from brain_persistence.repositories import (
     ReviewDecisionAuditSink,
     SqlAlchemyAuditEventRepository,
@@ -30,6 +32,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from brain_api.deps import (
     current_principal,
     get_authorization_execution,
+    get_content_store,
     get_db_session,
     new_trace_id,
 )
@@ -107,18 +110,25 @@ async def submit_review_decisions(
     principal: Principal = Depends(current_principal),
     execution: AuthorizationExecution = Depends(get_authorization_execution),
     session: AsyncSession = Depends(get_db_session),
+    content_store: ContentArtifactStore = Depends(get_content_store),
 ) -> ReviewDecisionReceiptOut:
     """Every item is authorized (current grant, restrictions, `review_task:annotate`)
     and locked before any decision is written; an inaccessible item is a
     non-disclosing 404 before any batch-membership check. The whole batch commits
     with its decisions, or rolls back and durably audits the failure (S0004 AC5/AC6).
     Annotation never grants `fact_slot:commit` and never promotes to canonical truth."""
-    repository = SqlAlchemyReviewItemRepository(session, actor_id=principal.id)
+    repository = SqlAlchemyReviewItemRepository(
+        session, actor_id=principal.id, content_store=content_store
+    )
 
     async def operation(
         decisions: Sequence[AuthorizationDecision],
     ) -> ReviewDecisionReceiptOut:
-        authorizations = {d.resource.id: d for d in decisions}
+        authorizations = {
+            d.resource.id: d
+            for d in decisions
+            if d.resource.type == ResourceType.REVIEW_TASK and d.action == Action.ANNOTATE
+        }
         audit = ReviewDecisionAuditSink(SqlAlchemyAuditEventRepository(session), authorizations)
         service = ReviewDecisionService(repository, audit)
         decision_ids: list[UUID] = []
@@ -137,6 +147,7 @@ async def submit_review_decisions(
                 ReviewItemAlreadyDecided,
                 UnresolvedEvidenceRequiresBlocked,
                 InvalidBlockedReasonCode,
+                UnsupportedAssertionCorrection,
             ) as exc:
                 raise UnprocessableError() from exc
 
@@ -158,10 +169,14 @@ async def submit_review_decisions(
             blocked=blocked,
         )
 
+    async def source_keys() -> Sequence[ResourceKey]:
+        return await repository.source_keys([d.review_item_id for d in batch.decisions])
+
     return await execution.mutate(
         principal,
         [_task(d.review_item_id) for d in batch.decisions],
         Action.ANNOTATE,
         trace_id=new_trace_id(),
         operation=operation,
+        additional_reads=source_keys,
     )

@@ -1,0 +1,107 @@
+
+   Security Findings:
+     - Critical: [count]
+     - High: [count]
+     - Medium: [count]
+     - Low: [count]
+
+   ✓ Pattern Compliance
+     - Clean Architecture: [Yes/No]
+     - SOLID Principles: [Yes/No]
+     - SOLUTION-PATTERNS.md: [Yes/No]
+     - Test Coverage: [percentage]% (feature code)
+
+   ✓ Acceptance Criteria
+     - [count]/[total] feature ACs met
+     - Edge cases: [Handled/Needs work]
+     - Errors: [Covered/Needs work]
+
+   ═══════════════════════════════════════════════════════════
+   Review Details:
+   [Link to feature code review report]
+   [Link to feature security review report]
+   ═══════════════════════════════════════════════════════════
+   ```
+
+2. **Present approval checklist:**
+   ```
+   Feature Approval Checklist:
+   - [ ] Feature is a complete vertical slice
+   - [ ] Backend implementation complete
+   - [ ] Frontend implementation complete
+   - [ ] AI implementation complete (if AI scope)
+   - [ ] Tests cover feature completely with evidence from application runtime containers
+   - [ ] No critical issues (approval blocked if any remain)
+   - [ ] High-severity issues fixed OR approved with mitigation justification
+   - [ ] SOLUTION-PATTERNS.md followed
+   - [ ] All feature acceptance criteria met
+   - [ ] Feature can be deployed independently
+   ```
+
+3. **Enforce approval gate based on combined findings severity:**
+   ```
+   total_critical = code_critical + security_critical
+   total_high = code_high + security_high
+
+   IF total_critical > 0:
+     STATUS: ❌ BLOCKED
+     OPTIONS: ["fix critical", "reject"]
+     APPROVE_ENABLED: false
+
+   ELSE IF total_high > 0:
+     STATUS: ⚠️ WARNING
+     OPTIONS: ["fix issues", "approve with justification", "reject"]
+     APPROVE_ENABLED: true (requires justification)
+
+   ELSE:
+     STATUS: ✓ ACCEPTABLE
+     OPTIONS: ["approve", "fix issues", "reject"]
+     APPROVE_ENABLED: true
+   ```
+
+4. **Handle user response:**
+   - **If "fix critical":**
+     - Identify critical issues to fix
+     - Agents fix issues
+     - Return to Step 3 (re-run code and security reviews)
+
+   - **If "fix issues":**
+     - Identify selected issues to fix
+     - Agents fix issues
+     - Return to Step 3 (re-run code and security reviews)
+
+   - **If "approve with justification":**
+     - Capture explicit mitigation justification for remaining high issues
+     - Log decision with mitigation plan
+     - Proceed to Step 5 (Signoff Gate)
+
+   - **If "approve":**
+     - Proceed to Step 5 (Signoff Gate)
+
+   - **If "reject":**
+     - Capture feedback
+     - Return to Step 0 (re-plan and re-implement feature)
+
+   - **If user input is not in current state's allowed options:**
+     - Do not transition
+     - Re-present current state and allowed options
+
+5. After an approving decision is recorded in `gate-decisions.md`, run scoped G4 validation before signoff:
+   - `python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root {NEBULA_PRODUCT_ROOT} --feature {FEATURE_ID} --run-id {RUN_ID} --stage G4`
+
+**Gate Criteria:**
+- [ ] Code + security critical issues = 0 before approval is enabled
+- [ ] High issues fixed or approved with explicit mitigation justification
+- [ ] Feature is complete vertical slice
+- [ ] User decision recorded with rationale when required
+- [ ] `validate-feature-evidence.py --stage G4` exits 0 before signoff
+
+agents/code-reviewer/SKILL.md:258:- Abstractions with exactly one implementation and no reason to expect a second
+agents/code-reviewer/SKILL.md:285:- If a touched node has `hotspot_rank` ≤ 5 (or `hotspot_score` ≥ 0.80), require explicit second-reviewer evidence on the PR. Approving without it is a **High** severity finding.
+agents/code-reviewer/SKILL.md:286:- If a touched node has `bus_factor_flag: true`, require acknowledgement from `primary_owner` on the PR. Missing acknowledgement is a **High** severity finding.
+agents/code-reviewer/SKILL.md:287:- Thresholds and customers/orders examples live in `agents/architect/references/hotspot-review-guide.md`.
+agents/code-reviewer/SKILL.md:292:- If the score lands in the **high** band (`kg.risk` ≥ 7), require an additional reviewer beyond the PR author. Approving without that second reviewer is a **High** severity finding.
+agents/code-reviewer/SKILL.md:293:- If the score lands in the **critical** band (`kg.risk` ≥ 9), require an explicit `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/workstate.py decision --topic risk-acknowledgement` entry referenced from the PR description before merge. Missing acknowledgement is a **High** severity finding.
+
+Exit code: 0
+

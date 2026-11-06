@@ -1,0 +1,1371 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="5" failures="0" skipped="0" tests="10" time="96.967" timestamp="2026-11-03T02:40:06.269971+00:00" hostname="abeb34c4d8bc"><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[sqlite-bundle]" time="16.843" /><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[sqlite-run]" time="17.546" /><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[sqlite-completion]" time="15.654" /><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[sqlite-import]" time="16.181" /><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[sqlite-imported]" time="15.960" /><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[postgresql-bundle]" time="0.227"><error message="failed on setup with &quot;sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table &quot;document_version&quot;&#10;[SQL: &#10;CREATE TABLE assertion_document_reference (&#10;&#09;id UUID NOT NULL, &#10;&#09;document_version_id UUID NOT NULL, &#10;&#09;tenant_id UUID NOT NULL, &#10;&#09;knowledge_base_id UUID NOT NULL, &#10;&#09;entity_type TEXT NOT NULL, &#10;&#09;label TEXT NOT NULL, &#10;&#09;created_by UUID NOT NULL, &#10;&#09;created_at TIMESTAMP WITH TIME ZONE NOT NULL, &#10;&#09;PRIMARY KEY (id), &#10;&#09;CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), &#10;&#09;CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), &#10;&#09;FOREIGN KEY(created_by) REFERENCES principal (id)&#10;)&#10;&#10;]&#10;(Background on this error at: https://sqlalche.me/e/20/f405)&quot;">self = &lt;sqlalchemy.engine.base.Connection object at 0x732e9cf2a210&gt;
+dialect = &lt;sqlalchemy.dialects.postgresql.psycopg.PGDialect_psycopg object at 0x732e9dbd7110&gt;
+context = &lt;sqlalchemy.dialects.postgresql.psycopg.PGExecutionContext_psycopg object at 0x732e9d3bd590&gt;
+statement = &lt;sqlalchemy.dialects.postgresql.base.PGDDLCompiler object at 0x732e9d3eb570&gt;
+parameters = [immutabledict({})]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -&gt; CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+&gt;                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4c650&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidForeignKey: there is no unique constraint matching given keys for referenced table "document_version"
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: InvalidForeignKey
+
+The above exception was the direct cause of the following exception:
+
+request = &lt;SubRequest 'recovery_database' for &lt;Function test_process_recovery_delivers_one_reviewed_assertion[postgresql-bundle]&gt;&gt;
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_process_recovery_delivers5')
+
+    @pytest.fixture(params=["sqlite", "postgresql"])
+    def recovery_database(
+        request: pytest.FixtureRequest, tmp_path: Path
+    ) -&gt; Iterator[tuple[Engine, str, str | None]]:
+        schema = None
+        admin = None
+        if request.param == "postgresql":
+            url = os.environ.get("BRAIN_TEST_POSTGRES_URL")
+            if not url:
+                pytest.skip("set BRAIN_TEST_POSTGRES_URL for PostgreSQL process recovery")
+            if not url.startswith("postgresql+psycopg://"):
+                pytest.fail("BRAIN_TEST_POSTGRES_URL must use postgresql+psycopg")
+            schema = f"delivery_proof_{uuid4().hex}"
+            admin = create_engine(url)
+            with admin.begin() as conn:
+                conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+        else:
+            url = f"sqlite:///{tmp_path / 'recovery.db'}"
+        engine = database(url, schema)
+        try:
+            metadata.create_all(engine)
+            # Canonical promotion is outside this importer and has PG-only range types.
+            excluded = {"fact_slot", "canonical_fact_version", "canonical_fact_change", "outbox_event"}
+&gt;           Base.metadata.create_all(
+                engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in excluded]
+            )
+
+neuron/tests/integration/test_document_process_recovery.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/schema.py:5929: in create_all
+    bind._run_ddl_visitor(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3270: in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2469: in _run_ddl_visitor
+    ).traverse_single(element)
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:985: in visit_metadata
+    self.traverse_single(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:1023: in visit_table
+    )._invoke_with(self.connection)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:322: in _invoke_with
+    return bind.execute(self)
+           ^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1421: in execute
+    return meth(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:188: in _execute_on_connection
+    return connection._execute_ddl(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1532: in _execute_ddl
+    ret = self._execute_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1848: in _execute_context
+    return self._exec_single_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4c650&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table "document_version"
+E           [SQL: 
+E           CREATE TABLE assertion_document_reference (
+E           	id UUID NOT NULL, 
+E           	document_version_id UUID NOT NULL, 
+E           	tenant_id UUID NOT NULL, 
+E           	knowledge_base_id UUID NOT NULL, 
+E           	entity_type TEXT NOT NULL, 
+E           	label TEXT NOT NULL, 
+E           	created_by UUID NOT NULL, 
+E           	created_at TIMESTAMP WITH TIME ZONE NOT NULL, 
+E           	PRIMARY KEY (id), 
+E           	CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), 
+E           	CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), 
+E           	FOREIGN KEY(created_by) REFERENCES principal (id)
+E           )
+E           
+E           ]
+E           (Background on this error at: https://sqlalche.me/e/20/f405)
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: ProgrammingError</error></testcase><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[postgresql-run]" time="0.071"><error message="failed on setup with &quot;sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table &quot;document_version&quot;&#10;[SQL: &#10;CREATE TABLE assertion_document_reference (&#10;&#09;id UUID NOT NULL, &#10;&#09;document_version_id UUID NOT NULL, &#10;&#09;tenant_id UUID NOT NULL, &#10;&#09;knowledge_base_id UUID NOT NULL, &#10;&#09;entity_type TEXT NOT NULL, &#10;&#09;label TEXT NOT NULL, &#10;&#09;created_by UUID NOT NULL, &#10;&#09;created_at TIMESTAMP WITH TIME ZONE NOT NULL, &#10;&#09;PRIMARY KEY (id), &#10;&#09;CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), &#10;&#09;CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), &#10;&#09;FOREIGN KEY(created_by) REFERENCES principal (id)&#10;)&#10;&#10;]&#10;(Background on this error at: https://sqlalche.me/e/20/f405)&quot;">self = &lt;sqlalchemy.engine.base.Connection object at 0x732e977f49b0&gt;
+dialect = &lt;sqlalchemy.dialects.postgresql.psycopg.PGDialect_psycopg object at 0x732e9cf59f90&gt;
+context = &lt;sqlalchemy.dialects.postgresql.psycopg.PGExecutionContext_psycopg object at 0x732e9d3bdae0&gt;
+statement = &lt;sqlalchemy.dialects.postgresql.base.PGDDLCompiler object at 0x732e97ff0ff0&gt;
+parameters = [immutabledict({})]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -&gt; CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+&gt;                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4d550&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidForeignKey: there is no unique constraint matching given keys for referenced table "document_version"
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: InvalidForeignKey
+
+The above exception was the direct cause of the following exception:
+
+request = &lt;SubRequest 'recovery_database' for &lt;Function test_process_recovery_delivers_one_reviewed_assertion[postgresql-run]&gt;&gt;
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_process_recovery_delivers6')
+
+    @pytest.fixture(params=["sqlite", "postgresql"])
+    def recovery_database(
+        request: pytest.FixtureRequest, tmp_path: Path
+    ) -&gt; Iterator[tuple[Engine, str, str | None]]:
+        schema = None
+        admin = None
+        if request.param == "postgresql":
+            url = os.environ.get("BRAIN_TEST_POSTGRES_URL")
+            if not url:
+                pytest.skip("set BRAIN_TEST_POSTGRES_URL for PostgreSQL process recovery")
+            if not url.startswith("postgresql+psycopg://"):
+                pytest.fail("BRAIN_TEST_POSTGRES_URL must use postgresql+psycopg")
+            schema = f"delivery_proof_{uuid4().hex}"
+            admin = create_engine(url)
+            with admin.begin() as conn:
+                conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+        else:
+            url = f"sqlite:///{tmp_path / 'recovery.db'}"
+        engine = database(url, schema)
+        try:
+            metadata.create_all(engine)
+            # Canonical promotion is outside this importer and has PG-only range types.
+            excluded = {"fact_slot", "canonical_fact_version", "canonical_fact_change", "outbox_event"}
+&gt;           Base.metadata.create_all(
+                engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in excluded]
+            )
+
+neuron/tests/integration/test_document_process_recovery.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/schema.py:5929: in create_all
+    bind._run_ddl_visitor(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3270: in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2469: in _run_ddl_visitor
+    ).traverse_single(element)
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:985: in visit_metadata
+    self.traverse_single(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:1023: in visit_table
+    )._invoke_with(self.connection)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:322: in _invoke_with
+    return bind.execute(self)
+           ^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1421: in execute
+    return meth(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:188: in _execute_on_connection
+    return connection._execute_ddl(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1532: in _execute_ddl
+    ret = self._execute_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1848: in _execute_context
+    return self._exec_single_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4d550&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table "document_version"
+E           [SQL: 
+E           CREATE TABLE assertion_document_reference (
+E           	id UUID NOT NULL, 
+E           	document_version_id UUID NOT NULL, 
+E           	tenant_id UUID NOT NULL, 
+E           	knowledge_base_id UUID NOT NULL, 
+E           	entity_type TEXT NOT NULL, 
+E           	label TEXT NOT NULL, 
+E           	created_by UUID NOT NULL, 
+E           	created_at TIMESTAMP WITH TIME ZONE NOT NULL, 
+E           	PRIMARY KEY (id), 
+E           	CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), 
+E           	CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), 
+E           	FOREIGN KEY(created_by) REFERENCES principal (id)
+E           )
+E           
+E           ]
+E           (Background on this error at: https://sqlalche.me/e/20/f405)
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: ProgrammingError</error></testcase><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[postgresql-completion]" time="0.071"><error message="failed on setup with &quot;sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table &quot;document_version&quot;&#10;[SQL: &#10;CREATE TABLE assertion_document_reference (&#10;&#09;id UUID NOT NULL, &#10;&#09;document_version_id UUID NOT NULL, &#10;&#09;tenant_id UUID NOT NULL, &#10;&#09;knowledge_base_id UUID NOT NULL, &#10;&#09;entity_type TEXT NOT NULL, &#10;&#09;label TEXT NOT NULL, &#10;&#09;created_by UUID NOT NULL, &#10;&#09;created_at TIMESTAMP WITH TIME ZONE NOT NULL, &#10;&#09;PRIMARY KEY (id), &#10;&#09;CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), &#10;&#09;CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), &#10;&#09;FOREIGN KEY(created_by) REFERENCES principal (id)&#10;)&#10;&#10;]&#10;(Background on this error at: https://sqlalche.me/e/20/f405)&quot;">self = &lt;sqlalchemy.engine.base.Connection object at 0x732e977f6e40&gt;
+dialect = &lt;sqlalchemy.dialects.postgresql.psycopg.PGDialect_psycopg object at 0x732e9cf5b610&gt;
+context = &lt;sqlalchemy.dialects.postgresql.psycopg.PGExecutionContext_psycopg object at 0x732e9d3be9c0&gt;
+statement = &lt;sqlalchemy.dialects.postgresql.base.PGDDLCompiler object at 0x732e97ff28f0&gt;
+parameters = [immutabledict({})]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -&gt; CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+&gt;                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4d790&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidForeignKey: there is no unique constraint matching given keys for referenced table "document_version"
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: InvalidForeignKey
+
+The above exception was the direct cause of the following exception:
+
+request = &lt;SubRequest 'recovery_database' for &lt;Function test_process_recovery_delivers_one_reviewed_assertion[postgresql-completion]&gt;&gt;
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_process_recovery_delivers7')
+
+    @pytest.fixture(params=["sqlite", "postgresql"])
+    def recovery_database(
+        request: pytest.FixtureRequest, tmp_path: Path
+    ) -&gt; Iterator[tuple[Engine, str, str | None]]:
+        schema = None
+        admin = None
+        if request.param == "postgresql":
+            url = os.environ.get("BRAIN_TEST_POSTGRES_URL")
+            if not url:
+                pytest.skip("set BRAIN_TEST_POSTGRES_URL for PostgreSQL process recovery")
+            if not url.startswith("postgresql+psycopg://"):
+                pytest.fail("BRAIN_TEST_POSTGRES_URL must use postgresql+psycopg")
+            schema = f"delivery_proof_{uuid4().hex}"
+            admin = create_engine(url)
+            with admin.begin() as conn:
+                conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+        else:
+            url = f"sqlite:///{tmp_path / 'recovery.db'}"
+        engine = database(url, schema)
+        try:
+            metadata.create_all(engine)
+            # Canonical promotion is outside this importer and has PG-only range types.
+            excluded = {"fact_slot", "canonical_fact_version", "canonical_fact_change", "outbox_event"}
+&gt;           Base.metadata.create_all(
+                engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in excluded]
+            )
+
+neuron/tests/integration/test_document_process_recovery.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/schema.py:5929: in create_all
+    bind._run_ddl_visitor(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3270: in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2469: in _run_ddl_visitor
+    ).traverse_single(element)
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:985: in visit_metadata
+    self.traverse_single(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:1023: in visit_table
+    )._invoke_with(self.connection)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:322: in _invoke_with
+    return bind.execute(self)
+           ^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1421: in execute
+    return meth(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:188: in _execute_on_connection
+    return connection._execute_ddl(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1532: in _execute_ddl
+    ret = self._execute_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1848: in _execute_context
+    return self._exec_single_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4d790&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table "document_version"
+E           [SQL: 
+E           CREATE TABLE assertion_document_reference (
+E           	id UUID NOT NULL, 
+E           	document_version_id UUID NOT NULL, 
+E           	tenant_id UUID NOT NULL, 
+E           	knowledge_base_id UUID NOT NULL, 
+E           	entity_type TEXT NOT NULL, 
+E           	label TEXT NOT NULL, 
+E           	created_by UUID NOT NULL, 
+E           	created_at TIMESTAMP WITH TIME ZONE NOT NULL, 
+E           	PRIMARY KEY (id), 
+E           	CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), 
+E           	CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), 
+E           	FOREIGN KEY(created_by) REFERENCES principal (id)
+E           )
+E           
+E           ]
+E           (Background on this error at: https://sqlalche.me/e/20/f405)
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: ProgrammingError</error></testcase><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[postgresql-import]" time="0.067"><error message="failed on setup with &quot;sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table &quot;document_version&quot;&#10;[SQL: &#10;CREATE TABLE assertion_document_reference (&#10;&#09;id UUID NOT NULL, &#10;&#09;document_version_id UUID NOT NULL, &#10;&#09;tenant_id UUID NOT NULL, &#10;&#09;knowledge_base_id UUID NOT NULL, &#10;&#09;entity_type TEXT NOT NULL, &#10;&#09;label TEXT NOT NULL, &#10;&#09;created_by UUID NOT NULL, &#10;&#09;created_at TIMESTAMP WITH TIME ZONE NOT NULL, &#10;&#09;PRIMARY KEY (id), &#10;&#09;CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), &#10;&#09;CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), &#10;&#09;FOREIGN KEY(created_by) REFERENCES principal (id)&#10;)&#10;&#10;]&#10;(Background on this error at: https://sqlalche.me/e/20/f405)&quot;">self = &lt;sqlalchemy.engine.base.Connection object at 0x732e97579130&gt;
+dialect = &lt;sqlalchemy.dialects.postgresql.psycopg.PGDialect_psycopg object at 0x732e9cba0e10&gt;
+context = &lt;sqlalchemy.dialects.postgresql.psycopg.PGExecutionContext_psycopg object at 0x732e9cf8c050&gt;
+statement = &lt;sqlalchemy.dialects.postgresql.base.PGDDLCompiler object at 0x732e97ff3cf0&gt;
+parameters = [immutabledict({})]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -&gt; CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+&gt;                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4da90&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidForeignKey: there is no unique constraint matching given keys for referenced table "document_version"
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: InvalidForeignKey
+
+The above exception was the direct cause of the following exception:
+
+request = &lt;SubRequest 'recovery_database' for &lt;Function test_process_recovery_delivers_one_reviewed_assertion[postgresql-import]&gt;&gt;
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_process_recovery_delivers8')
+
+    @pytest.fixture(params=["sqlite", "postgresql"])
+    def recovery_database(
+        request: pytest.FixtureRequest, tmp_path: Path
+    ) -&gt; Iterator[tuple[Engine, str, str | None]]:
+        schema = None
+        admin = None
+        if request.param == "postgresql":
+            url = os.environ.get("BRAIN_TEST_POSTGRES_URL")
+            if not url:
+                pytest.skip("set BRAIN_TEST_POSTGRES_URL for PostgreSQL process recovery")
+            if not url.startswith("postgresql+psycopg://"):
+                pytest.fail("BRAIN_TEST_POSTGRES_URL must use postgresql+psycopg")
+            schema = f"delivery_proof_{uuid4().hex}"
+            admin = create_engine(url)
+            with admin.begin() as conn:
+                conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+        else:
+            url = f"sqlite:///{tmp_path / 'recovery.db'}"
+        engine = database(url, schema)
+        try:
+            metadata.create_all(engine)
+            # Canonical promotion is outside this importer and has PG-only range types.
+            excluded = {"fact_slot", "canonical_fact_version", "canonical_fact_change", "outbox_event"}
+&gt;           Base.metadata.create_all(
+                engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in excluded]
+            )
+
+neuron/tests/integration/test_document_process_recovery.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/schema.py:5929: in create_all
+    bind._run_ddl_visitor(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3270: in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2469: in _run_ddl_visitor
+    ).traverse_single(element)
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:985: in visit_metadata
+    self.traverse_single(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:1023: in visit_table
+    )._invoke_with(self.connection)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:322: in _invoke_with
+    return bind.execute(self)
+           ^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1421: in execute
+    return meth(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:188: in _execute_on_connection
+    return connection._execute_ddl(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1532: in _execute_ddl
+    ret = self._execute_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1848: in _execute_context
+    return self._exec_single_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4da90&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table "document_version"
+E           [SQL: 
+E           CREATE TABLE assertion_document_reference (
+E           	id UUID NOT NULL, 
+E           	document_version_id UUID NOT NULL, 
+E           	tenant_id UUID NOT NULL, 
+E           	knowledge_base_id UUID NOT NULL, 
+E           	entity_type TEXT NOT NULL, 
+E           	label TEXT NOT NULL, 
+E           	created_by UUID NOT NULL, 
+E           	created_at TIMESTAMP WITH TIME ZONE NOT NULL, 
+E           	PRIMARY KEY (id), 
+E           	CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), 
+E           	CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), 
+E           	FOREIGN KEY(created_by) REFERENCES principal (id)
+E           )
+E           
+E           ]
+E           (Background on this error at: https://sqlalche.me/e/20/f405)
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: ProgrammingError</error></testcase><testcase classname="tests.integration.test_document_process_recovery" name="test_process_recovery_delivers_one_reviewed_assertion[postgresql-imported]" time="0.068"><error message="failed on setup with &quot;sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table &quot;document_version&quot;&#10;[SQL: &#10;CREATE TABLE assertion_document_reference (&#10;&#09;id UUID NOT NULL, &#10;&#09;document_version_id UUID NOT NULL, &#10;&#09;tenant_id UUID NOT NULL, &#10;&#09;knowledge_base_id UUID NOT NULL, &#10;&#09;entity_type TEXT NOT NULL, &#10;&#09;label TEXT NOT NULL, &#10;&#09;created_by UUID NOT NULL, &#10;&#09;created_at TIMESTAMP WITH TIME ZONE NOT NULL, &#10;&#09;PRIMARY KEY (id), &#10;&#09;CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), &#10;&#09;CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), &#10;&#09;FOREIGN KEY(created_by) REFERENCES principal (id)&#10;)&#10;&#10;]&#10;(Background on this error at: https://sqlalche.me/e/20/f405)&quot;">self = &lt;sqlalchemy.engine.base.Connection object at 0x732e9757ad50&gt;
+dialect = &lt;sqlalchemy.dialects.postgresql.psycopg.PGDialect_psycopg object at 0x732e9cba1bd0&gt;
+context = &lt;sqlalchemy.dialects.postgresql.psycopg.PGExecutionContext_psycopg object at 0x732e9cf8cc00&gt;
+statement = &lt;sqlalchemy.dialects.postgresql.base.PGDDLCompiler object at 0x732e975e1270&gt;
+parameters = [immutabledict({})]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -&gt; CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+&gt;                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4e150&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           psycopg.errors.InvalidForeignKey: there is no unique constraint matching given keys for referenced table "document_version"
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: InvalidForeignKey
+
+The above exception was the direct cause of the following exception:
+
+request = &lt;SubRequest 'recovery_database' for &lt;Function test_process_recovery_delivers_one_reviewed_assertion[postgresql-imported]&gt;&gt;
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_process_recovery_delivers9')
+
+    @pytest.fixture(params=["sqlite", "postgresql"])
+    def recovery_database(
+        request: pytest.FixtureRequest, tmp_path: Path
+    ) -&gt; Iterator[tuple[Engine, str, str | None]]:
+        schema = None
+        admin = None
+        if request.param == "postgresql":
+            url = os.environ.get("BRAIN_TEST_POSTGRES_URL")
+            if not url:
+                pytest.skip("set BRAIN_TEST_POSTGRES_URL for PostgreSQL process recovery")
+            if not url.startswith("postgresql+psycopg://"):
+                pytest.fail("BRAIN_TEST_POSTGRES_URL must use postgresql+psycopg")
+            schema = f"delivery_proof_{uuid4().hex}"
+            admin = create_engine(url)
+            with admin.begin() as conn:
+                conn.execute(text(f'CREATE SCHEMA "{schema}"'))
+        else:
+            url = f"sqlite:///{tmp_path / 'recovery.db'}"
+        engine = database(url, schema)
+        try:
+            metadata.create_all(engine)
+            # Canonical promotion is outside this importer and has PG-only range types.
+            excluded = {"fact_slot", "canonical_fact_version", "canonical_fact_change", "outbox_event"}
+&gt;           Base.metadata.create_all(
+                engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in excluded]
+            )
+
+neuron/tests/integration/test_document_process_recovery.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/schema.py:5929: in create_all
+    bind._run_ddl_visitor(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:3270: in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2469: in _run_ddl_visitor
+    ).traverse_single(element)
+      ^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:985: in visit_metadata
+    self.traverse_single(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/visitors.py:661: in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:1023: in visit_table
+    )._invoke_with(self.connection)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:322: in _invoke_with
+    return bind.execute(self)
+           ^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1421: in execute
+    return meth(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/sql/ddl.py:188: in _execute_on_connection
+    return connection._execute_ddl(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1532: in _execute_ddl
+    ret = self._execute_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1848: in _execute_context
+    return self._exec_single_context(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1988: in _exec_single_context
+    self._handle_dbapi_exception(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:2365: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/base.py:1969: in _exec_single_context
+    self.dialect.do_execute(
+/opt/venv/lib/python3.14/site-packages/sqlalchemy/engine/default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;psycopg.Cursor [closed] [BAD] at 0x732e9cf4e150&gt;
+query = '\nCREATE TABLE assertion_document_reference (\n\tid UUID NOT NULL, \n\tdocument_version_id UUID NOT NULL, \n\ttenant_...NCES document_version (id, tenant_id, knowledge_base_id), \n\tFOREIGN KEY(created_by) REFERENCES principal (id)\n)\n\n'
+params = immutabledict({}), prepare = None, binary = None
+
+    def execute(
+        self,
+        query: Query,
+        params: Params | None = None,
+        *,
+        prepare: bool | None = None,
+        binary: bool | None = None,
+    ) -&gt; Self:
+        """
+        Execute a query or command to the database.
+        """
+        try:
+            with self._conn.lock:
+                self._conn.wait(
+                    self._execute_gen(query, params, prepare=prepare, binary=binary)
+                )
+        except e._NO_TRACEBACK as ex:
+&gt;           raise ex.with_traceback(None)
+E           sqlalchemy.exc.ProgrammingError: (psycopg.errors.InvalidForeignKey) there is no unique constraint matching given keys for referenced table "document_version"
+E           [SQL: 
+E           CREATE TABLE assertion_document_reference (
+E           	id UUID NOT NULL, 
+E           	document_version_id UUID NOT NULL, 
+E           	tenant_id UUID NOT NULL, 
+E           	knowledge_base_id UUID NOT NULL, 
+E           	entity_type TEXT NOT NULL, 
+E           	label TEXT NOT NULL, 
+E           	created_by UUID NOT NULL, 
+E           	created_at TIMESTAMP WITH TIME ZONE NOT NULL, 
+E           	PRIMARY KEY (id), 
+E           	CONSTRAINT uq_assertion_reference_owner UNIQUE (id, document_version_id, tenant_id, knowledge_base_id), 
+E           	CONSTRAINT fk_assertion_reference_document FOREIGN KEY(document_version_id, tenant_id, knowledge_base_id) REFERENCES document_version (id, tenant_id, knowledge_base_id), 
+E           	FOREIGN KEY(created_by) REFERENCES principal (id)
+E           )
+E           
+E           ]
+E           (Background on this error at: https://sqlalche.me/e/20/f405)
+
+/opt/venv/lib/python3.14/site-packages/psycopg/cursor.py:117: ProgrammingError</error></testcase></testsuite></testsuites>

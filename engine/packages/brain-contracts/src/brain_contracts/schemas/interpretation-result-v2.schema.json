@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/interpretation-result-v2.schema.json",
+  "title": "InterpretationResultV2",
+  "description": "F0006 additive result version. No live producer is activated; the existing importer continues to accept only legacy v1. Candidate entities are document-local references, never canonical entities. Complete items may be checked independently; F0016 owns durable drops and run lifecycle.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "artifact_id",
+    "status",
+    "entities",
+    "assertions",
+    "relationships",
+    "quality_signals",
+    "warnings",
+    "failed_chunks",
+    "run_configuration",
+    "counters",
+    "created_at",
+    "schema_version"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "artifact_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "partial",
+        "failed"
+      ]
+    },
+    "entities": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "assertion-record-v2.schema.json#/$defs/entity_reference"
+      }
+    },
+    "assertions": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "assertion-record-v2.schema.json"
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "maxItems": 0,
+      "items": false
+    },
+    "quality_signals": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "failed_chunks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "run_configuration": {
+      "$ref": "interpretation-result.schema.json#/properties/run_configuration"
+    },
+    "counters": {
+      "$ref": "interpretation-result.schema.json#/properties/counters"
+    },
+    "provenance_ledger_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schema_version": {
+      "const": 2
+    }
+  }
+}

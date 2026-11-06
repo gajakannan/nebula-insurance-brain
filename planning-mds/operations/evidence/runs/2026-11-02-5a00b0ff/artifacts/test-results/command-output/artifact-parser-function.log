@@ -1,0 +1,127 @@
+                missing_rule_id,
+                missing_message or f"{context} {value!r} does not resolve",
+                **common,
+            )
+    elif resolution.error_kind:
+        add_artifact_resolution_error(result, resolution, context, **common)
+    return resolution
+
+
+def artifact_references(content: str, relative_prefix: str) -> list[str]:
+    prefix = re.escape(relative_prefix)
+    pattern = re.compile(rf"(?:\{{(?:NEBULA_PRODUCT_ROOT|PRODUCT_ROOT)\}}[\\/]|[A-Za-z]:[\\/]|/)?[^\s)\]]*{prefix}[^\s)\]]+")
+    return pattern.findall(content)
+
+
+# --------------------------------------------------------------------------- #
+# §15 PM Acceptance Line Format
+# --------------------------------------------------------------------------- #
+
+
+# A line of the form `- Accepted: <identifier> — <details>` (§15).
+# Separator is em-dash OR hyphen-minus, but in either case it MUST have
+# surrounding whitespace so a hyphen inside an identifier (e.g. `custom-key`)
+# is not mistakenly treated as the separator.
+PM_ACCEPTANCE_LINE_RE = re.compile(
+    r"""
+    ^\s*-\s+                       # bullet
+    accepted:\s*                   # keyword (case-insensitive)
+    (?P<identifier>\S(?:.*?\S)?)   # identifier (no leading/trailing space, lazy)
+    \s+[—-]\s+                     # em-dash or hyphen-minus with required surrounding spaces
+    (?P<details>.+?)\s*$           # details
+    """,
+    re.IGNORECASE | re.MULTILINE | re.VERBOSE,
+)
+
+
+"""Phase 2b tests: SCM diff parsing, §21 cross-artifact rules, §22 downgrade."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from test_validate_feature_evidence import (
+    RUN_ID,
+    ROLE_FILES,
+    json_result,
+    latest_run_path,
+    run_validator,
+    write_manifest_run,
+    write_registry,
+)
+
+
+def write_future_kg_closeout_run(product: Path, commands: list[dict[str, object]]) -> Path:
+    write_registry(product, archived="| F0001 | New Feature | 2026-07-05 |  | `archive/F0001-new/` |")
+    gate_results = {
+        "assembly_plan_validation": {"required": True, "result": "PASS", "artifact": "g0-assembly-plan-validation.md"},
+        "self_review": {"required": True, "result": "PASS", "artifact": "g2-self-review.md"},
+        "deployability": {"required": True, "result": "PASS", "artifact": "deployability-check.md"},
+        "signoff": {"required": True, "result": "PASS", "artifact": "signoff-ledger.md"},
+        "kg_reconciliation": {"required": True, "result": "PASS", "artifact": "kg-reconciliation.md"},
+        "pm_closeout": {"required": True, "result": "APPROVED", "artifact": "pm-closeout.md"},
+        "tracker_sync": {"required": True, "result": "PASS", "artifact": "lifecycle-gates.log"},
+    }
+    run_folder = write_manifest_run(
+        product,
+        "F0001-new",
+        "F0001",
+        status="approved",
+        latest=True,
+        stage="closeout",
+        manifest_updates={
+            "contract_effective_date": "2026-07-05",
+            "status": "approved",
+            "feature_state": "Archived",
+            "feature_path_at_closeout": "planning-mds/features/archive/F0001-new",
+            "gate_results": gate_results,
+        },
+    )
+    gate_rows = "\n".join(
+        f"| {gate} | PASS | role | 2026-07-05 | ok | No | - |"
+        for gate in ("G0", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8")
+    )
+    (run_folder / "gate-decisions.md").write_text(
+        "# Gate Decisions\n\n"
+        "| Gate | Decision | Decider | Timestamp | Rationale | Blocking | Follow-up |\n"
+        "|---|---|---|---|---|---|---|\n"
+        f"{gate_rows}\n",
+        encoding="utf-8",
+    )
+    (run_folder / "kg-reconciliation.md").write_text(
+        "# KG Reconciliation\n\n"
+        "## Binding Delta\n\nAs-built source bindings reconciled.\n\n"
+        "## Canonical Nodes\n\nNo new canonical nodes.\n\n"
+        "## Validator Results\n\nSymbol and drift validators recorded in commands.log.\n\n"
+        "## Handoff to Closeout\n\nReady for PM closeout.\n",
+        encoding="utf-8",
+    )
+    (run_folder / "commands.log").write_text(
+        "\n".join(json.dumps(record) for record in commands) + "\n",
+        encoding="utf-8",
+    )
+    return run_folder
+
+
+# --------------------------------------------------------------------------- #
+# SCM diff parsing + changed_paths_missing_diff_entry + boolean contradictions
+# --------------------------------------------------------------------------- #
+
+
+def test_changed_paths_missing_diff_entry_fires(tmp_path: Path) -> None:
+    product = tmp_path / "product"
+    write_registry(product, archived="| F0001 | New Feature | 2026-05-19 |  | `archive/F0001-new/` |")
+    run_folder = write_manifest_run(
+        product,
+        "F0001-new",
+        "F0001",
+        manifest_updates={"changed_paths": ["planning-mds/features/F0001-new"]},
+agents/product-manager/scripts/tests/test_validate_feature_evidence.py:717:    "coverage_claim_without_artifact_fails", "test_results_reference_missing_fails",
+agents/product-manager/scripts/tests/test_validate_feature_evidence_section23_closure.py:287:def test_coverage_claim_without_artifact_fails(tmp_path: Path) -> None:
+agents/product-manager/scripts/tests/test_validate_feature_evidence_section23_closure.py:296:    assert "coverage_claim_without_artifact_fails" in rules
+
+Exit code: 0
+

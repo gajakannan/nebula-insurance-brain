@@ -1,0 +1,110 @@
+Validating genericness of agents/
+------------------------------------------------------------
+[Scope]  Scanning only:       agents/
+[Scope]  Not scanned:          {NEBULA_PRODUCT_ROOT}/planning-mds/ (solution-specific content is allowed)
+
+[Info] Using embedded fallback denylist (9 terms); pass --glossary to override.
+[Terms]  9 blocked term(s): Broker, MGA, Underwriter, Underwriting, Premium, Claim, Insured, Submission, Renewal
+[Source] Term list from:      embedded fallback denylist (agents/scripts/validate-genericness.py)
+[Note]   Source file is used only to derive denylist terms for agents/ validation.
+
+[PASS] agents/ directory is generic — no blocked terms found
+[PASS] Skill regression checks passed for 12 skills (max_lines=500, cases=/app/framework/agents/scripts/skill-regression-cases.yaml)
+agent-map OK: 12 roles tiered, 12 actions checked.
+{
+  "drift": [],
+  "missing": [],
+  "ok": true,
+  "policy_version": "2026-07-11",
+  "undeclared_extra": []
+}
+action-policy validation: OK
+spec_dir: /app/framework/agents/actions/spec
+active_version: 2026-07-11 (newest history: 2026-07-11)
+
+versions:
+  - 2026-05-19 (effective_from 2026-05-19)
+  - 2026-05-25 (effective_from 2026-05-25)
+  - 2026-06-01 (effective_from 2026-06-01)
+  - 2026-07-05 (effective_from 2026-07-05)
+  - 2026-07-11 (effective_from 2026-07-11) *active
+
+actions:
+  - blog [base-run-only] v2026-07-11
+      gates: B0:blogger, B1:blogger, B2:blogger, B3:blogger, B4:blogger, B5:blogger
+  - build [base-run-only] v2026-07-11
+      gates: B0:product-manager, B1:product-manager, B2:product-manager, B3:product-manager, B4:product-manager, B4.5:product-manager, B5:product-manager
+  - defect-bugfix [base-run-only] v2026-07-11
+      gates: D0:architect, D1:architect, D2:architect, D3:frontend-developer, D4:quality-engineer, D5:architect
+  - document [base-run-only] v2026-07-11
+      gates: D0:technical-writer, D1:technical-writer, D2:technical-writer, D3:technical-writer
+  - feature [feature-completion] v2026-07-11
+      gates: G0:architect, G1:devops, G2:quality-engineer, G3:code-reviewer, G4:product-manager, G5:product-manager, G6:quality-engineer, G7:architect, G8:product-manager
+  - feature-review [read-only-audit] v2026-07-11
+      gates: FR0:product-manager, FR1:product-manager, FR2:product-manager, FR3:product-manager, FR4:product-manager
+  - init [base-run-only] v2026-07-11
+      gates: I0:product-manager, I1:product-manager, I2:product-manager, I3:product-manager, I4:product-manager, I5:product-manager, I6:product-manager
+  - integrate [merge] v2026-07-11
+      gates: I0:integrator, I1:integrator, I2:integrator, I3:integrator, I4:integrator, I5:integrator, I6:integrator
+  - plan [base-run-only] v2026-07-11
+      gates: G1:product-manager, G2:product-manager, G3:product-manager, G4:architect, G5:architect
+  - plan-review [read-only-audit] v2026-07-11
+      gates: PR0:product-manager, PR1:product-manager, PR2:product-manager, PR3:product-manager, PR4:product-manager
+  - review [base-run-only] v2026-07-11
+      gates: R0:code-reviewer, R1:code-reviewer, R2:code-reviewer, R3:code-reviewer
+  - test [base-run-only] v2026-07-11
+      gates: T0:quality-engineer, T1:quality-engineer, T2:quality-engineer, T3:quality-engineer, T4:quality-engineer, T5:quality-engineer
+  - validate [base-run-only] v2026-07-11
+      gates: V0:product-manager, V1:product-manager, V2:product-manager, V3:product-manager
+
+shared:
+  coverage_min_pct: 80
+  base_run_files: 6 files
+  requirements: {"compile_projection_contract": true, "kg_generated_regen_required": true, "kg_reconciliation_required": true, "required_security_scan_classes": ["dependency", "secrets", "sast", "dast"], "security_scans_required": true}
+contract conformance: OK
+spec_dir: /app/framework/agents/actions/spec
+baseline: /app/framework/agents/scripts/conformance-baseline.yaml
+
+historical baseline matrix:
+  - 2026-05-19: expected=pass actual=pass [ok]
+  - 2026-05-25: expected=pass actual=pass [ok]
+  - 2026-06-01: expected=pass actual=pass [ok]
+  - 2026-07-05: expected=pass actual=pass [ok]
+  - 2026-07-11: expected=pass actual=pass [ok]
+Running lifecycle gates for stage: framework-bootstrap
+------------------------------------------------------------
+[GATE] boundary_genericness
+  Prevent solution-specific leakage into generic framework agents. Embedded denylist is authoritative; --glossary override is optional.
+  command: python3 agents/scripts/validate-genericness.py
+[PASS] boundary_genericness
+
+[GATE] skill_regression
+  Validate skill metadata, structure quality, and routing regressions.
+  command: python3 agents/scripts/run-skill-regression.py
+[PASS] skill_regression
+
+[GATE] agent_map_schema
+  Validate agent-map.yaml model_tier/execution annotations (Phase 3a) — valid tiers, known execution values, a sequential fallback for parallel actions, and no vendor model ids.
+  command: python3 agents/scripts/validate_agent_map.py
+[PASS] agent_map_schema
+
+[GATE] prompt_drift
+  Committed generated evidence-contract prompts must match what render-prompts.py produces from the action policy (F0007-S0006). Fails on drift or a hand edit to a generated file.
+  command: python3 agents/scripts/render-prompts.py --check
+[PASS] prompt_drift
+
+[GATE] action_spec_schema
+  Validate the versioned action policy — JSON Schema, semantic invariants, and manifest-version resolution (F0007-S0001).
+  command: python3 agents/scripts/validate_action_specs.py
+[PASS] action_spec_schema
+
+[GATE] contract_conformance
+  Independent conformance invariants plus the historical baseline matrix for the action policy (F0007-S0002). Catches a weakened contract even when generated output matches.
+  command: python3 agents/scripts/contract-conformance.py
+[PASS] contract_conformance
+
+============================================================
+[SUMMARY] PASSED (6 gate(s))
+
+Exit code: 0
+

@@ -1,0 +1,24 @@
+name: brain-f0006-immutable-5a00b0ff
+services:
+  engine-smoke:
+    image: brain-f0006-engine:2026-11-02-5a00b0ff
+    user: "1000:1000"
+    working_dir: /app/brain
+    entrypoint: [python]
+    command: [/evidence/runtime/verify_image.py, engine]
+    healthcheck:
+      disable: true
+    network_mode: none
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts:/evidence
+  neuron-smoke:
+    image: brain-f0006-neuron:2026-11-02-5a00b0ff
+    user: "1000:1000"
+    working_dir: /app/brain
+    entrypoint: [python]
+    command: [/evidence/runtime/verify_image.py, neuron]
+    healthcheck:
+      disable: true
+    network_mode: none
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts:/evidence

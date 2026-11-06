@@ -1,0 +1,159 @@
+"""F0006 PostgreSQL ownership backstops, independent of application checks."""
+
+from __future__ import annotations
+
+import copy
+import secrets
+from uuid import uuid4
+
+import psycopg
+import pytest
+from engine.tests.fixtures.assertions import harness
+from psycopg import sql
+from psycopg.rows import dict_row
+from psycopg.types.json import Jsonb
+
+_clean_fact_tables = harness._clean_fact_tables
+database = harness.database
+world = harness.world
+world_factory = harness.world_factory
+counts = harness.counts
+
+
+def row(connection, table, identity, *, key="id"):
+    return connection.execute(
+        sql.SQL("SELECT * FROM {} WHERE {}=%s").format(sql.Identifier(table), sql.Identifier(key)),
+        (identity,),
+    ).fetchone()
+
+
+def insert(connection, table, values):
+    connection.execute(
+        sql.SQL("INSERT INTO {} ({}) VALUES ({})").format(
+            sql.Identifier(table),
+            sql.SQL(",").join(sql.Identifier(name) for name in values),
+            sql.SQL(",").join(sql.Placeholder() for _ in values),
+        ),
+        [Jsonb(value) if isinstance(value, (dict, list)) else value for value in values.values()],
+    )
+
+
+CONSTRAINTS = {
+    "run": "fk_assertion_run_id_owner",
+    "correction": "fk_assertion_original_assertion_id_owner",
+    "evidence": "fk_assertion_evidence_artifact_id_owner",
+    "reference": "fk_assertion_reference_document",
+    "name": "fk_assertion_name_reference",
+    "subject": "fk_assertion_semantics_subject",
+    "object": "fk_assertion_semantics_object",
+}
+
+
+def attempt_foreign_link(connection, own, foreign, own_assertion, foreign_assertion, target):
+    core = copy.deepcopy(row(connection, "assertion", own_assertion))
+    core["id"] = uuid4()
+    if target == "run":
+        # Use a valid v1 carrier so only the structural owner FK rejects it.
+        core.update(
+            semantic_contract_version=1,
+            origin="MACHINE_EXTRACTION",
+            run_id=foreign.context.run_id,
+        )
+        insert(connection, "assertion", core)
+    elif target == "correction":
+        core.update(
+            semantic_contract_version=1,
+            origin="HUMAN_REVIEW",
+            run_id=None,
+            original_assertion_id=foreign_assertion,
+        )
+        insert(connection, "assertion", core)
+    elif target == "evidence":
+        evidence = connection.execute(
+            "SELECT * FROM assertion_evidence WHERE assertion_id=%s", (own_assertion,)
+        ).fetchone()
+        evidence.update(id=uuid4(), artifact_id=foreign.bundle.key.artifact_id)
+        insert(connection, "assertion_evidence", evidence)
+    elif target == "reference":
+        reference = copy.deepcopy(row(connection, "assertion_document_reference", own.subject_id))
+        reference.update(id=uuid4(), document_version_id=foreign.context.document_version_id)
+        insert(connection, "assertion_document_reference", reference)
+    elif target == "name":
+        claim = connection.execute(
+            "SELECT * FROM assertion_name_claim WHERE entity_ref=%s", (own.subject_id,)
+        ).fetchone()
+        claim.update(normalized_name="foreign fixture attempt", entity_ref=foreign.subject_id)
+        insert(connection, "assertion_name_claim", claim)
+    else:
+        semantics = copy.deepcopy(
+            row(connection, "assertion_semantics", own_assertion, key="assertion_id")
+        )
+        semantics["assertion_id"] = core["id"]
+        semantics["record"]["id"] = str(core["id"])
+        if target == "subject":
+            semantics["subject_ref"] = foreign.subject_id
+            semantics["record"]["subject_ref"] = str(foreign.subject_id)
+        elif target == "object":
+            semantics["object_ref"] = foreign.subject_id
+            semantics["record"]["object"] = {
+                "kind": "ENTITY",
+                "ref": str(foreign.subject_id),
+                "name": foreign.entity["label"],
+            }
+            core["value"] = {"object_ref": str(foreign.subject_id)}
+        else:
+            raise AssertionError(target)
+        insert(connection, "assertion", core)
+        insert(connection, "assertion_semantics", semantics)
+
+
+@pytest.mark.parametrize("scope", ["tenant", "knowledge-base"])
+@pytest.mark.parametrize("target", list(CONSTRAINTS))
+async def test_composite_foreign_keys_reject_cross_scope_claim_links(
+    world, world_factory, database, scope, target
+):
+    foreign = world_factory(owner=(world.owner[0], uuid4()) if scope == "knowledge-base" else None)
+  s assertion_semantics%ROWTYPE;
+  parent assertion%ROWTYPE;
+  parent_s assertion_semantics%ROWTYPE;
+  subject_type text;
+  expected_value jsonb;
+BEGIN
+  IF TG_TABLE_NAME = 'assertion' THEN candidate_id := NEW.id;
+  ELSE candidate_id := NEW.assertion_id;
+  END IF;
+  SELECT * INTO a FROM assertion WHERE id = candidate_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'assertion semantic carrier missing' USING ERRCODE = 'check_violation';
+  END IF;
+  SELECT * INTO s FROM assertion_semantics WHERE assertion_id = candidate_id;
+  IF a.semantic_contract_version = 1 THEN
+    IF FOUND OR a.slot_type = '__OPEN_STATEMENT_V2__' THEN
+      RAISE EXCEPTION 'legacy assertion cannot carry v2 semantics' USING ERRCODE =
+    'check_violation';
+    END IF;
+    IF a.original_assertion_id IS NOT NULL AND EXISTS (
+      SELECT 1 FROM assertion WHERE id = a.original_assertion_id AND semantic_contract_version <>
+    1) THEN
+      RAISE EXCEPTION 'correction contract mismatch' USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN NULL;
+  END IF;
+  IF NOT FOUND OR (s.tenant_id,s.knowledge_base_id) IS DISTINCT FROM
+    (a.tenant_id,a.knowledge_base_id)
+    OR s.assertion_origin IS DISTINCT FROM a.origin
+    OR s.record->>'interpretation_basis' IS DISTINCT FROM a.interpretation_basis
+    OR coalesce(to_jsonb(a.model_confidence),'null'::jsonb) IS DISTINCT FROM
+    s.record->'model_confidence'
+    OR a.slot_type IS DISTINCT FROM coalesce(s.predicate_id,'__OPEN_STATEMENT_V2__') THEN
+    RAISE EXCEPTION 'v2 assertion carrier disagrees with semantic extension' USING ERRCODE =
+    'check_violation';
+  END IF;
+  SELECT r.entity_type INTO subject_type FROM assertion_document_reference r
+    WHERE r.id=s.subject_ref AND r.document_version_id=s.document_version_id
+      AND r.tenant_id=s.tenant_id AND r.knowledge_base_id=s.knowledge_base_id;
+  IF subject_type IS NULL OR a.subject_type IS DISTINCT FROM subject_type THEN
+    RAISE EXCEPTION 'v2 assertion subject carrier mismatch' USING ERRCODE = 'check_violation';
+
+Exit code: 0
+

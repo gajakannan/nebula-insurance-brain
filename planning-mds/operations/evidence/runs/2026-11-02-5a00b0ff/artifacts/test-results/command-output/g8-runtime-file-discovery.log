@@ -1,0 +1,97 @@
+agents/scripts/run-gate.py
+agents/scripts/tests/test_gate_runtime.py
+agents/scripts/gate_runtime.py
+def validate_role_and_gate_results(
+    row: RegistryRow,
+    manifest: dict[str, Any],
+    run_folder: Path,
+    stage: str,
+    result: Result,
+    status_required: set[str],
+) -> None:
+    """§11 + §14 — deep verdict reconciliation.
+
+    Validates manifest.gate_results, manifest.role_results, manifest.required_roles,
+    manifest.files, manifest.omissions, and manifest.global_evidence_refs. Each rule
+    is keyed to the stage at which the underlying gate/role becomes required, so
+    earlier stages don't fire on artifacts that legitimately have not landed yet.
+    """
+    feature_id = row.feature_id
+    run_id = manifest.get("run_id") if isinstance(manifest.get("run_id"), str) else None
+    common = {"feature": feature_id, "run_id": run_id, "path": str(run_folder)}
+
+    runtime_bearing = bool(manifest.get("runtime_bearing"))
+
+    # gate_results shape + verdicts
+    gate_results = manifest.get("gate_results")
+    if not isinstance(gate_results, dict):
+        result.add_error("manifest_missing_gate_results_fails", "Manifest gate_results must be an object", **common)
+        gate_results = {}
+    for key, spec in GATE_SPEC.items():
+        if key == "kg_reconciliation" and not kg_reconciliation_required(manifest, stage):
+            continue
+        if not gate_required_at_stage(key, stage, runtime_bearing):
+            continue
+        entry = gate_results.get(key)
+        if not isinstance(entry, dict):
+            result.add_error(
+                "manifest_missing_gate_results_fails",
+                f"Manifest gate_results.{key} is missing or not an object",
+                **common,
+            )
+            continue
+        if entry.get("required") is not True:
+            result.add_error(
+                "manifest_missing_gate_results_fails",
+                f"Manifest gate_results.{key}.required must be true at stage {stage}",
+                **common,
+            )
+        verdict = entry.get("result")
+        if not isinstance(verdict, str) or verdict.strip() not in spec["passing"]:
+            result.add_error(
+                "gate_verdict_mismatch_fails",
+                f"Manifest gate_results.{key}.result={verdict!r} is not a passing verdict at stage {stage}",
+                **common,
+            )
+        artifact_value = entry.get("artifact")
+        if isinstance(artifact_value, str) and artifact_value:
+            validate_artifact_reference(
+                result,
+                result.product_root,
+                run_folder,
+                artifact_value,
+                f"gate_results.{key}.artifact",
+                missing_rule_id="manifest_file_path_missing_fails",
+                missing_message=f"gate_results.{key}.artifact does not resolve: {artifact_value!r}",
+                **common,
+            )
+
+    # role_results shape + verdicts
+    role_results = manifest.get("role_results")
+    if not isinstance(role_results, dict):
+        result.add_error("manifest_role_results_mismatch_fails", "Manifest role_results must be an object", **common)
+        role_results = {}
+    effective = effective_required_roles(manifest, status_required)
+    for role_name, spec in ROLE_SPEC.items():
+        if not role_required_at_stage(role_name, stage, manifest, status_required):
+            continue
+        entry = role_results.get(role_name)
+        if not isinstance(entry, dict):
+            result.add_error(
+                "manifest_role_results_mismatch_fails",
+                f"Manifest role_results[{role_name!r}] is missing or not an object at stage {stage}",
+                **common,
+            )
+            continue
+        if entry.get("required") is not True:
+            result.add_error(
+                "manifest_role_results_mismatch_fails",
+                f"role_results[{role_name!r}].required must be true",
+                **common,
+            )
+        verdict = entry.get("result")
+        if not isinstance(verdict, str) or verdict.strip() not in spec["passing"]:
+            result.add_error(
+
+Exit code: 0
+

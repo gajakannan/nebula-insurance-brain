@@ -1,0 +1,173 @@
+# F0006 G7 Knowledge-Graph Reconciliation
+
+- Run: `2026-11-02-5a00b0ff`
+- NEBULA_PRODUCT_ROOT: `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`
+- Reviewer: Codex / Architect
+- Review date: 2026-11-05T01:07:01+00:00
+- Verdict: PASS
+- Manifest disposition: in-progress; G8 closeout remains pending.
+
+## Binding Delta
+
+The G0 predicted contract/domain, cohesive assertion application, additive
+storage/migration and current-consumer safeguards match the as-built source.
+[Binding audit](artifacts/test-results/g7-binding-coverage.json) confirms all
+**45 changed runtime/test/resource paths** resolve through declared bindings;
+all **20 production Python hashes** match the measured code.
+
+| Authored bundle | As-built delta |
+|---|---|
+| `kg-source/bindings/f0006-planning.yaml` | Extends the three assertion capabilities and three local-reference/extension entities; adds the existing Assertion node binding. Covers strict adapters, domain carriers, assertion package, storage/migration, packaged schemas, package resources and scoped tests/fixtures. The historical filename is retained. |
+| `kg-source/bindings/f0002.yaml` | Adds fact/review routes and AssertionWriteService as real facade callers under durable authorization decisions, with its execution unit tests. |
+| `kg-source/bindings/f0001.yaml` | Adds relevant contract/review/temporal test classification to existing owning capabilities. Existing cohesive importer, contract-directory and temporal source bindings are retained. |
+
+G0's new-package/fixture glob prediction was refined to exact current source
+paths because `kg_common.expand_declared_pattern` intentionally expands
+wildcards over Git-tracked paths only. The new files are still untracked in
+this worktree; staging was not used to alter retrieval. Existing tracked
+cohesive globs are preserved. This changes index declarations, not feature
+scope or runtime behavior.
+
+Physical active-feature-folder paths were removed from the F0006 binding
+bundle. New paths are stable code/test/resources. Canonical node `source_docs`
+use logical `F0006/...` references, resolved by `compile.py` through the
+PM-owned feature shard's `path`. G8 recompilation therefore relocates generated
+document references without re-authoring canonical nodes.
+
+## Canonical Nodes
+
+Eight existing node notes/rationale were reconciled: the three assertion
+capabilities, Assertion, AssertionSemantics, AssertionDocumentReference,
+AssertionNameClaim and durable authorization decisions. No new canonical
+semantic node was needed. [Authored shard inventory](artifacts/test-results/g7-authored-shards.json)
+lists the exact eleven changed source shards.
+
+The notes retain independent kind/mode/origin/basis/confidence, structural
+grounding versus truth, append-only correction/evidence, metadata-only source
+discovery/current READ authority, explicit legacy pilot behavior and the
+deferred F0016/F0018/F0022/F0066 boundaries. ADR-0065/0075 remain Proposed.
+No grants, default, live producer or production activation changed; the
+operator's trusted local synthetic-fixture approval is not widened.
+
+## SEC-05 Authorization Caller Reconciliation — Resolved
+
+[Fresh facade lookup](artifacts/test-results/g7-authorization-callers.json)
+now returns **15 mutate callers: four production and eleven tests**. The
+production callers are AssertionWriteService.admit/read, facts.commit_fact and
+reviews.submit_review_decisions. This repairs the previously empty caller map.
+The [manual source inventory](artifacts/test-results/g7-authorization-source-callers.json)
+records all seven read/mutate facade call sites in those three source files,
+with line numbers, keywords and fingerprints.
+
+The resolver is a retrieval aid. Python extraction records bare instance-call
+names and resolves their call edges within the file's first claiming node;
+import/class-qualified calls have additional resolution. It does not infer
+receiver types for injected/untyped instances or completely model closures,
+Protocol dispatch, property access and framework-driven calls. These limits
+explain remaining cross-node/direct-test-edge omissions; no fabricated call
+edge or authorization proof is inferred from them. Actual boundary authority
+is the reviewed source plus the SQL projection/negative cases in
+[g3-sec04-focused.xml](artifacts/test-results/g3-sec04-focused.xml) and the
+[306-case regression](artifacts/test-results/g3-sec04-regression.xml).
+These verify metadata discovery before READ, proof before full semantic
+loading, denial before protected payloads and zero refused canonical effects.
+
+Clean official symbol regeneration removed the initial cache-derived stale
+edges. The [reference audit](artifacts/test-results/g7-symbol-reference-audit.json)
+finds **zero unknown caller/callee IDs across 1,785 symbols**. SEC-05's required
+G7 reconciliation is satisfied; the Security Reviewer owns its report
+disposition. A future PR still requires its separately recorded primary-owner
+acknowledgement; none is fabricated here.
+
+## Node-Scoped Untested Triage
+
+All 20 touched feature/consumer/schema nodes were queried with
+`lookup.py --untested`; raw per-node JSON is retained under artifacts/test-results.
+Counts below are advisory immediate-test-caller gaps, not failed runtime cases.
+
+| Queried node | Advisory symbols |
+|---|---|
+| `capability:assertion-eligibility-guards` | 38 |
+| `capability:bitemporal-canonical-commit` | 13 |
+| `capability:durable-authorization-decisions` | 25 |
+| `capability:evidence-review-round-trip` | 10 |
+| `capability:parse-once-content-artifact` | 64 |
+| `capability:runtime-roots-and-toolchain` | 13 |
+| `capability:semantic-interpretation-run` | 20 |
+| `capability:structural-assertion-admission` | 0 |
+| `capability:versioned-assertion-semantics` | 18 |
+| `endpoint:fact-commit` | 0 |
+| `endpoint:review-decisions-submit` | 0 |
+| `endpoint:review-item-get` | 0 |
+| `entity:assertion-document-reference` | 0 |
+| `entity:assertion-name-claim` | 0 |
+| `entity:assertion-semantics` | 0 |
+| `entity:assertion` | 0 |
+| `schema:assertion-admission-result-v1` | 0 |
+| `schema:assertion-record-v2` | 0 |
+| `schema:interpretation-result-v2` | 0 |
+| `schema:interpretation-result` | 0 |
+
+[Per-symbol triage](artifacts/test-results/g7-untested-triage.json) accounts
+for all 201 records: **59** have measured indirect execution with exact covered
+body lines and runtime artifacts; **48** are Protocol declarations without an
+implementation body; **91** are unchanged bodies surfaced by existing cohesive
+capabilities, with exact scope/line evidence and no new test-completeness claim.
+No unrelated node is exempted.
+
+Exactly three runtime helper symbols receive explicit, narrow exemptions from
+the direct-caller-test advisory: EvidenceClaimV2.to_domain,
+EntityReferenceV2.to_domain and AssertionRecordV2.to_domain. They are unused
+conversion adapters outside the shipped admission/writer/importer/review/commit
+entry points, with only inter-adapter references. Their unexecuted status is
+disclosed. Tests for each conversion are required before a future consumer
+adopts that helper. No runtime annotation, broad node exemption or coverage-floor
+waiver was added. Their uncovered lines remain in measured coverage.
+
+Current QE evidence remains **306 engine tests (157 feature cases)**, with
+25 overlapping discovery/consumer and 17 overlapping migration cases, plus the
+separate importer/recovery/worker lanes in test-execution-report.md. Changed
+executable-line coverage remains **1,170/1,266 (92.4171%)** without a floor waiver.
+The graph's immediate-edge heuristic does not replace that behavior proof.
+
+## Validator Results
+
+The final [gate execution](artifacts/test-results/command-output/g7-gate-final.log)
+returned status pass, exit 0 and all three operations completed in order:
+
+| Operation | Actual result |
+|---|---|
+| Product compile.py | PASS, exit 0; authored shards generated the projection trio and tracker regions. |
+| validate.py --regenerate-symbols --check-symbols --regenerate-decisions --check-decisions | PASS, exit 0; official symbol/decision regeneration and checks completed. |
+| validate.py --check-drift | PASS, exit 0. |
+
+gate-state.json and lifecycle-gates.log retain the durable execution order.
+The first attempt failed on the two new-untracked-only globs; the diagnostic
+identified the intended tracked-file expansion rule. A resume-from attempt
+preserved completed compile state, so `--force` was then used to recompile and
+rerun the entire stage. Official clean regeneration removed stale cached edges;
+the final full stage passed. No check was bypassed or effective date lowered.
+
+No `--write-coverage-report` or plain validate.py was run for G7. Their
+path-sensitive final checks remain after the archive move.
+
+## Handoff to Closeout
+
+[Exact archive references](artifacts/test-results/g7-archive-link-handoff.json)
+records the PM-owned feature shard's folder path and five physical story paths.
+PM owns final feature state, STATUS, tracker/BLUEPRINT updates, archive move,
+prior-manifest supersession, final manifest/latest-run publication and G8's
+post-move compile/coverage/telemetry/drift/plain validation.
+
+After PM moves the feature, Architect will mechanically update the external
+links in architecture/data-model.md:326, architecture/feature-assembly-plan.md:13
+and ADR-0075:87, retaining ADR Proposed status; stale implementation-at-planning
+sentences in the first two docs will be reconciled to bounded delivered proof.
+The moved feature-assembly-plan.md's parent Markdown paths also require one
+additional `../`; same-folder links/anchors remain. PM handles remaining
+feature-local Markdown paths. Any changed decision-source hash will be
+regenerated through the official decision tool, never hand-edited.
+
+G7 changes are authored graph shards, generated projections and this run's
+evidence only. Runtime sources, PM trackers/lifecycle state and archive are
+unchanged by this handoff.

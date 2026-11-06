@@ -1,0 +1,181 @@
+2356-
+2357-    status_required = parse_status_required_roles(row, result)
+2358-    effective_roles = effective_required_roles(manifest, status_required)
+2359-
+2360-    # Local story breakdown (story files under the feature folder) — used by
+2361-    # `status_story_value_unknown_story_fails`. Source-of-truth per §16.
+2362-    feature_path = feature_path_for(result.product_root, row)
+2363-    local_story_ids: set[str] = set()
+2364-    if feature_path.exists():
+2365-        for child in feature_path.rglob("*.md"):
+2366-            stem = child.stem
+2367-            # Story file naming convention: F####-S####-...
+2368-            match = re.match(r"^(F\d{4}-S\d{4})", stem)
+2369-            if match:
+2370-                local_story_ids.add(match.group(1))
+2371-
+2372:    # PM acceptances for status_recommendation_without_acceptance_fails
+2373-    pm_acceptances = parse_pm_acceptance_lines(safe_read(run_folder / "pm-closeout.md") or "")
+2374-
+2375-    # Validate per-row content.
+2376-    stories_seen: set[str] = set()
+2377-    for (story, role), entry in current.items():
+2378-        stories_seen.add(story)
+2379-        if not STORY_REF_RE.fullmatch(story):
+2380-            result.add_error(
+2381-                "status_story_value_bad_format_fails",
+2382-                f"STATUS.md story value {story!r} does not match F####-S####",
+2383-                **common,
+2384-            )
+2385-            continue
+--
+2388-            result.add_error(
+2389-                "status_story_value_unknown_story_fails",
+2390-                f"STATUS.md story {story!r} is not present in the feature's local story breakdown",
+2391-                **common,
+2392-            )
+2393-
+2394-        verdict = strip_code(entry.get("verdict", ""))
+2395-        if "WITH RECOMMENDATIONS" in verdict.upper() and stage in {"G8", "closeout"}:
+2396-            # Look for a PM acceptance whose identifier matches this story/role.
+2397-            matched = False
+2398-            for needle in (f"{story}-{role}", story, role):
+2399-                if _pm_acceptance_for(pm_acceptances, needle):
+2400-                    matched = True
+2401-                    break
+2402-            if not matched:
+2403-                result.add_error(
+2404:                    "status_recommendation_without_acceptance_fails",
+2405-                    f"STATUS.md row ({story}, {role}) is WITH RECOMMENDATIONS but lacks a matching PM Acceptance Line",
+2406-                    **common,
+2407-                )
+2408-        is_passing = verdict.upper() in {v.upper() for v in ROLE_PASSING_REVIEWS}
+2409-        if is_passing:
+2410-            reviewer = strip_code(entry.get("reviewer", ""))
+2411-            if not reviewer:
+2412-                result.add_error(
+2413-                    "status_missing_reviewer_fails",
+2414-                    f"STATUS.md row ({story}, {role}) is missing reviewer",
+2415-                    **common,
+2416-                )
+2417-            date_value = strip_code(entry.get("date", ""))
+--
+3120-    feature_id = row.feature_id
+3121-    run_id = manifest.get("run_id") if isinstance(manifest.get("run_id"), str) else None
+3122-    common = {"feature": feature_id, "run_id": run_id, "path": str(pm_path)}
+3123-
+3124-    for entry in acceptances:
+3125-        identifier = entry.identifier.strip()
+3126-        identifier_lower = identifier.casefold()
+3127-        if identifier_lower in {"coverage"}:
+3128-            continue
+3129-        if identifier in waiver_keys:
+3130-            continue
+3131-        if identifier in rule_ids:
+3132-            continue
+3133-        # If the identifier looks like a recommendation, it must appear in a role report.
+3134-        if any(identifier_lower in text or text in identifier_lower for text in rec_texts):
+3135-            continue
+3136:        # Story-role acceptances (status_recommendation_without_acceptance_fails) are tolerated.
+3137-        if STORY_REF_RE.fullmatch(identifier) or "-" in identifier and identifier.startswith("F"):
+3138-            continue
+3139-        result.add_error(
+3140-            "recommendation_acceptance_mismatch_fails",
+3141-            f"PM Acceptance Line identifier {identifier!r} does not match any role report recommendation, waiver key, or rule ID",
+3142-            **common,
+3143-        )
+3144-
+3145-
+3146-def validate_omissions_filesystem(
+3147-    row: RegistryRow,
+3148-    manifest: dict[str, Any],
+3149-    run_folder: Path,
+980:def parse_recommendations(content: str) -> list[Recommendation]:
+981-    """Parse recommendation bullets from a role report.
+982-
+983-    Looks inside a `Recommendations` (or `Findings`) section first; falls back
+984-    to scanning the whole document for bullets that carry either a `[severity]`
+985-    tag or an `owner:`/`follow-up:` disposition.
+986-    """
+987-    target_section = _find_recommendations_section(content) or content
+988-    recs: list[Recommendation] = []
+989-    for match in RECOMMENDATION_BULLET_RE.finditer(target_section):
+990-        severity_raw = match.group("severity")
+991-        owner = match.group("owner")
+992-        # Only treat as a recommendation if it has *some* structural marker —
+993-        # severity tag OR explicit owner — so we don't mistake every bullet for
+994-        # a recommendation.
+995-        if not severity_raw and not owner:
+996-            continue
+997-        severity = severity_raw.strip().lower() if severity_raw else None
+998-        recs.append(
+999-            Recommendation(
+1000-                severity=severity,
+1001-                severity_raw=severity_raw.strip() if severity_raw else None,
+1002-                text=match.group("text").strip(),
+1003-                owner=owner.strip() if owner else None,
+1004-                follow_up=match.group("followup").strip() if match.group("followup") else None,
+1005-                raw=match.group(0).strip(),
+1006-            )
+1007-        )
+1008-    return recs
+1009-
+1010-
+1011-VERDICT_LINE_RE = re.compile(r"^\s*\*{0,2}Result\*{0,2}:\s*(?P<verdict>.+?)\s*$", re.IGNORECASE | re.MULTILINE)
+1012-
+1013-
+1014-def extract_verdict(content: str) -> str | None:
+1015-    """Find the first `Result: <verdict>` line in a role report."""
+1016-    match = VERDICT_LINE_RE.search(content)
+1017-    if not match:
+1018-        return None
+1019-    return match.group("verdict").strip()
+1020-
+1021-
+1022-# --------------------------------------------------------------------------- #
+1023-# Secret-pattern scanning
+1024-# --------------------------------------------------------------------------- #
+1025-
+1026-
+1027-def compile_regex_class(entry: dict[str, Any]) -> re.Pattern[str]:
+1028-    flags = 0
+1029-    for name in entry.get("flags", []):
+1030-        flags |= REGEX_FLAG_NAMES.get(name, 0)
+1031-    return re.compile(entry["pattern"], flags)
+1032-
+1033-
+1034-@dataclass
+1035-class SecretScanner:
+1036-    regex_classes: dict[str, re.Pattern[str]]
+1037-    scanners: dict[str, dict[str, Any]]
+1038-    anchor_patterns: dict[str, re.Pattern[str]]
+1039-
+1040-
+1041-def build_secret_scanner(patterns: dict[str, Any]) -> SecretScanner:
+1042-    regex_classes: dict[str, re.Pattern[str]] = {}
+1043-    scanners: dict[str, dict[str, Any]] = {}
+1044-    anchors: dict[str, re.Pattern[str]] = {}
+1045-    for name, entry in patterns.items():
+1046-        if not isinstance(entry, dict):
+1047-            continue
+1048-        if entry.get("type") == "regex":
+1049-            regex_classes[name] = compile_regex_class(entry)
+1050-        elif entry.get("type") == "multi_line_scanner":
+1051-            scanners[name] = entry
+1052-            anchors[name] = re.compile(entry["anchor_regex"], re.MULTILINE)
+1053-    return SecretScanner(regex_classes=regex_classes, scanners=scanners, anchor_patterns=anchors)
+1054-
+1055-
+1056-def record_scanning_surface(record: dict[str, Any]) -> str:
+1057-    """Per §13: command + newline + each artifacts entry on its own line."""
+1058-    parts: list[str] = [str(record.get("command", ""))]
+1059-    artifacts = record.get("artifacts") or []
+1060-    if isinstance(artifacts, list):
+1061-        for artifact in artifacts:
+1062-            parts.append(str(artifact))
+1063-    return "\n".join(parts) + "\n"
+1064-
+1065-
+
+Exit code: 0
+

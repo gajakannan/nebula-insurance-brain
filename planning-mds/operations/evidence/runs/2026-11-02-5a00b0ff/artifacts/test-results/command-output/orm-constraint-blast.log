@@ -1,0 +1,236 @@
+{
+  "query": {
+    "file": "engine/packages/brain-persistence/src/brain_persistence/models.py"
+  },
+  "direct_nodes": [
+    "entity:content-artifact"
+  ],
+  "neighbor_nodes": [
+    "capability:parse-once-content-artifact",
+    "capability:versioned-content-contracts",
+    "entity:content-block",
+    "entity:content-table",
+    "entity:content-table-cell"
+  ],
+  "impacted_by_type": {
+    "capability": [
+      "capability:parse-once-content-artifact",
+      "capability:versioned-content-contracts"
+    ],
+    "entity": [
+      "entity:content-artifact",
+      "entity:content-block",
+      "entity:content-table",
+      "entity:content-table-cell"
+    ]
+  },
+  "features": [
+    {
+      "id": "feature:F0001",
+      "path": "planning-mds/features/archive/F0001-repository-and-engineering-foundation",
+      "status": "archived-done"
+    },
+    {
+      "id": "feature:F0003",
+      "path": "planning-mds/features/archive/F0003-postgresql-persistence",
+      "status": "archived-done"
+    },
+    {
+      "id": "feature:F0004",
+      "path": "planning-mds/features/archive/F0004-content-artifact-model",
+      "status": "archived-done"
+    },
+    {
+      "id": "feature:F0005",
+      "path": "planning-mds/features/archive/F0005-one-time-docling-ingestion",
+      "status": "archived-done"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story:F0001-S0003",
+      "path": "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md"
+    },
+    {
+      "id": "story:F0003-S0004",
+      "path": "planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md"
+    },
+    {
+      "id": "story:F0004-S0001",
+      "path": "planning-mds/features/archive/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md"
+    }
+  ],
+  "indirect_features": [],
+  "indirect_stories": [
+    {
+      "id": "story:F0004-S0002",
+      "path": "planning-mds/features/archive/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md"
+    },
+    {
+      "id": "story:F0004-S0004",
+      "path": "planning-mds/features/archive/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md"
+    },
+    {
+      "id": "story:F0005-S0001",
+      "path": "planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md"
+    },
+    {
+      "id": "story:F0005-S0002",
+      "path": "planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md"
+    },
+    {
+      "id": "story:F0005-S0003",
+      "path": "planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md"
+    },
+    {
+      "id": "story:F0005-S0004",
+      "path": "planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md"
+    },
+    {
+      "id": "story:F0005-S0005",
+      "path": "planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md"
+    }
+  ],
+  "policy_rules": [
+    "policy_rule:content-artifact-read",
+    "policy_rule:fact-slot-commit",
+    "policy_rule:fact-slot-read",
+    "policy_rule:review-task-annotate",
+    "policy_rule:review-task-read"
+  ],
+  "code_bindings": {
+    "entity:content-artifact": {
+      "backend": [
+        "engine/packages/brain-content/src/brain_content/manifest.py",
+        "engine/packages/brain-content/src/brain_content/validation.py",
+        "engine/packages/brain-persistence/src/brain_persistence/content_repository.py",
+        "engine/packages/brain-persistence/src/brain_persistence/models.py"
+      ]
+    }
+  },
+  "resolved_files": [
+    "engine/packages/brain-content/src/brain_content/manifest.py",
+    "engine/packages/brain-content/src/brain_content/validation.py",
+    "engine/packages/brain-persistence/src/brain_persistence/content_repository.py",
+    "engine/packages/brain-persistence/src/brain_persistence/models.py"
+  ],
+  "summary": {
+    "direct_node_count": 1,
+    "neighbor_node_count": 5,
+    "feature_count": 4,
+    "indirect_feature_count": 0,
+    "story_count": 3,
+    "indirect_story_count": 7,
+    "policy_rule_count": 5,
+    "resolved_file_count": 4
+  }
+}
+           WHERE review_batch_id IS NOT NULL GROUP BY review_batch_id
+           HAVING count(DISTINCT (tenant_id, knowledge_base_id)) > 1) mixed""",
+    )
+    check(
+        "fact slots without a tenant entity identity",
+        """SELECT count(*) FROM fact_slot f WHERE NOT EXISTS (
+           SELECT 1 FROM entity_identity e WHERE e.id = f.entity_id AND e.tenant_id = f.tenant_id)""",
+    )
+    check(
+        "outbox rows without a commit ownership record",
+        """SELECT count(*) FROM outbox_event o WHERE NOT EXISTS (
+           SELECT 1 FROM canonical_commit c WHERE c.id = o.commit_id)""",
+    )
+    check(
+        "memberships without a complete grant slice",
+        "SELECT count(*) FROM membership WHERE "
+        + " OR ".join(f"{c} IS NULL" for c in MEMBERSHIP_SLICE),
+    )
+    check(
+        "principals without an authority revision",
+        """SELECT count(*) FROM principal p WHERE NOT EXISTS (
+           SELECT 1 FROM principal_authority a WHERE a.principal_id = p.id)""",
+    )
+    check(
+        "job outbox rows disagreeing with their job's ownership",
+        """SELECT count(*) FROM document_job_outbox o LEFT JOIN document_job j ON j.id = o.job_id
+           WHERE j.id IS NULL OR (j.tenant_id, j.knowledge_base_id)
+                 IS DISTINCT FROM (o.tenant_id, o.knowledge_base_id)""",
+    )
+    check(
+        "job events without a job",
+        """SELECT count(*) FROM document_job_event e WHERE NOT EXISTS (
+           SELECT 1 FROM document_job j WHERE j.id = e.job_id)""",
+    )
+    if problems:
+        raise RuntimeError(
+            "0006 preflight failed; run scripts/dev/reconcile_authx.py --dry-run, repair the "
+            "reviewed mapping and apply it, then retry: " + "; ".join(problems)
+        )
+
+
+def _fk(name: str, table: str, columns: list[str], referent: str, remote: list[str]) -> None:
+    op.create_foreign_key(name, table, referent, columns, remote, postgresql_not_valid=True)
+    op.execute(f"ALTER TABLE {table} VALIDATE CONSTRAINT {name}")
+
+
+def upgrade() -> None:
+    _preflight()
+
+    for table in NEWLY_OWNED:
+        op.alter_column(table, "tenant_id", nullable=False)
+        op.alter_column(table, "knowledge_base_id", nullable=False)
+    for column in MEMBERSHIP_SLICE:
+        op.alter_column("membership", column, nullable=False)
+
+    for table in KB_REGISTRY_REFS:
+        _fk(
+            f"fk_{table}_kb_owner",
+            table,
+            ["knowledge_base_id", "tenant_id"],
+            "knowledge_base",
+    status: Mapped[str] = mapped_column(nullable=False)
+    counters: Mapped[dict] = mapped_column(_JSONVariant, nullable=False)
+    run_configuration: Mapped[dict] = mapped_column(_JSONVariant, nullable=False)
+    # Explicit structural ownership (F0002-S0001, ADR-0061). The composite
+    # foreign keys to the parent's (id, tenant_id, knowledge_base_id) live in
+    # migrations 0005/0006 — the database is the enforcement point.
+    tenant_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
+    knowledge_base_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    artifact: Mapped[ContentArtifact] = relationship(back_populates="runs")
+    assertions: Mapped[list[Assertion]] = relationship(back_populates="run")
+
+
+class Assertion(Base):
+    """One `CandidateAssertion`. Either produced by an interpretation run
+    (`origin=MACHINE_EXTRACTION`, `run_id` set) or by a review correction
+    (`origin=HUMAN_REVIEW`, `run_id` null, `original_assertion_id` set — ADR-0037:
+    corrections append and never rewrite the original, F0001-S0004)."""
+
+    __tablename__ = "assertion"
+
+    semantic_contract_version: Mapped[int] = mapped_column(
+        SmallInteger, nullable=False, default=1, server_default="1"
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True)
+    run_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("semantic_interpretation_run.id"), nullable=True
+    )
+    origin: Mapped[str] = mapped_column(nullable=False, default="MACHINE_EXTRACTION")
+    original_assertion_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("assertion.id"), nullable=True
+    )
+    # Proof-scope version counter for the F0001-S0004 staleness check ("the assertion is
+    # superseded (version N+1) between batch assembly and submission"). F0007/F0008's
+    # bitemporal FactSlot/CanonicalFactVersion model is the real versioning authority;
+    # this column is retired when review items route against FactSlots instead.
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    subject_type: Mapped[str] = mapped_column(nullable=False)
+    slot_type: Mapped[str] = mapped_column(nullable=False)
+    value: Mapped[dict] = mapped_column(_JSONVariant, nullable=False)
+    model_confidence: Mapped[float | None] = mapped_column(nullable=True)
+    interpretation_basis: Mapped[str] = mapped_column(nullable=False)
+    # Explicit structural ownership (F0002-S0001, ADR-0061). The composite
+
+Exit code: 0
+

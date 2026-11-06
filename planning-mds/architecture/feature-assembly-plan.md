@@ -10,4 +10,4 @@ Per-feature plans are authoritative for their approved scope. Planning does not 
 
 | F0004 | [Content artifact model](../features/archive/F0004-content-artifact-model/feature-assembly-plan.md) | All four stories implemented in run 2026-10-17-8a6cc79f; G4 approved 2026-10-21; all required signoffs and G7 passed; activation limits retained |
 
-| F0006 | [Assertion semantics and admission](../features/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md) | Phase A+B approved by operator 2026-11-01; F0001–F0005 delivered prerequisites; v1 defaults preserved; no runtime implementation claimed |
+| F0006 | [Assertion semantics and admission](../features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md) | Bounded implementation in run `2026-11-02-5a00b0ff`: additive migration 0011 and source-bound storage/admission/current-consumer proof (336 unique final-lane cases: 306 engine, 15 importer, ten recovery, five content-worker); v1 defaults retained; trusted local synthetic fixtures only; ADR-0065/0075 remain Proposed; no live producer or production activation |

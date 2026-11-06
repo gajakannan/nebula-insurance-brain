@@ -1,0 +1,115 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_two_sources_retain_five_and_ten_million_claims ______________
+engine/tests/integration/test_assertion_admission.py:46: in test_two_sources_retain_five_and_ten_million_claims
+    second = world_factory(
+engine/tests/fixtures/assertions/harness.py:413: in create
+    world = World(database, tmp_path / str(len(worlds)), **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/fixtures/assertions/harness.py:279: in __init__
+    queue.enqueue(
+engine/packages/brain-jobs/src/brain_jobs/queue.py:326: in enqueue
+    raise ValueError("idempotency key reused for a different request") from None
+E   ValueError: idempotency key reused for a different request
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+________ test_declared_entity_object_and_time_reference_survive_reload _________
+engine/tests/integration/test_assertion_admission.py:89: in test_declared_entity_object_and_time_reference_survive_reload
+    admitted = await world.admit(
+engine/tests/fixtures/assertions/harness.py:393: in admit
+    return await service.admit(
+engine/packages/brain-assertions/src/brain_assertions/service.py:111: in admit
+    return await self._execution.mutate(
+engine/packages/brain-security/src/brain_security/execution.py:449: in mutate
+    result = await operation(decisions)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-assertions/src/brain_assertions/service.py:70: in operation
+    checked = await self._admission.check_items(
+engine/packages/brain-assertions/src/brain_assertions/admission.py:279: in check_items
+    time_ref = await self._sources.time_reference(context, ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-persistence/src/brain_persistence/assertions.py:254: in time_reference
+    resolved = await self.time_resolver(context, ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/integration/test_assertion_admission.py:87: in resolve
+    return TimeReference(time_id, *world.owner, world.bundle.key.artifact_id, "2026-06-01")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: TimeReference.__init__() missing 1 required positional argument: 'words'
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+___________ test_foreign_time_reference_fails_without_claim_effects ____________
+engine/tests/integration/test_assertion_admission.py:108: in test_foreign_time_reference_fails_without_claim_effects
+    await world.admit(
+engine/tests/fixtures/assertions/harness.py:393: in admit
+    return await service.admit(
+engine/packages/brain-assertions/src/brain_assertions/service.py:111: in admit
+    return await self._execution.mutate(
+engine/packages/brain-security/src/brain_security/execution.py:449: in mutate
+    result = await operation(decisions)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-assertions/src/brain_assertions/service.py:70: in operation
+    checked = await self._admission.check_items(
+engine/packages/brain-assertions/src/brain_assertions/admission.py:279: in check_items
+    time_ref = await self._sources.time_reference(context, ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-persistence/src/brain_persistence/assertions.py:254: in time_reference
+    resolved = await self.time_resolver(context, ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/integration/test_assertion_admission.py:104: in foreign_time
+    return TimeReference(ref, uuid4(), uuid4(), context.artifact_id, "2026-06-01")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: TimeReference.__init__() missing 1 required positional argument: 'words'
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+=============================== warnings summary ===============================
+tests/integration/test_assertion_admission.py::test_two_sources_retain_five_and_ten_million_claims
+tests/integration/test_assertion_admission.py::test_declared_entity_object_and_time_reference_survive_reload
+tests/integration/test_assertion_admission.py::test_foreign_time_reference_fails_without_claim_effects
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED engine/tests/integration/test_assertion_admission.py::test_two_sources_retain_five_and_ten_million_claims
+FAILED engine/tests/integration/test_assertion_admission.py::test_declared_entity_object_and_time_reference_survive_reload
+FAILED engine/tests/integration/test_assertion_admission.py::test_foreign_time_reference_fails_without_claim_effects
+3 failed, 22 deselected, 3 warnings in 3.16s
+
+Exit code: 1
+

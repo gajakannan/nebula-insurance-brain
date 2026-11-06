@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from uuid import UUID
 
+from brain_assertions.eligibility import AssertionIneligible
 from brain_domain.authx import (
     Action,
     AuthorizationDecision,
@@ -28,6 +29,7 @@ from brain_api.deps import (
     new_trace_id,
 )
 from brain_api.errors import (
+    AssertionIneligibleApiError,
     ConcurrentCommitApiError,
     InvalidRangeApiError,
     NotFoundError,
@@ -91,7 +93,8 @@ async def commit_fact(
 ) -> CommitResponseOut:
     """The commit independently re-checks current `fact_slot:commit` authority inside
     its own unit of work; a review annotation never implies it (S0006 AC5)."""
-    service = CanonicalCommitService(SqlAlchemyFactCommitRepository(session))
+    repository = SqlAlchemyFactCommitRepository(session)
+    service = CanonicalCommitService(repository)
     proposal = CommitProposal(
         slot_id=fact_slot_id,
         value=proposal_in.value,
@@ -110,12 +113,20 @@ async def commit_fact(
     )
 
     async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResult:
-        (decision,) = decisions
+        decision = next(
+            d for d in decisions if d.resource == _slot(fact_slot_id) and d.action == Action.COMMIT
+        )
         assert decision.scope is not None
         return await service.commit(
             proposal,
             authorized_scope=(decision.scope.tenant_id, decision.scope.knowledge_base_id),
             authorization_decision_id=decision.decision_id,
+            source_access=repository.source_access_proof(decisions),
+        )
+
+    async def source_keys() -> Sequence[ResourceKey]:
+        return await repository.commit_source_keys(
+            proposal.evidence_refs, proposal.review_decision_id
         )
 
     try:
@@ -125,7 +136,10 @@ async def commit_fact(
             Action.COMMIT,
             trace_id=new_trace_id(),
             operation=operation,
+            additional_reads=source_keys,
         )
+    except AssertionIneligible as exc:
+        raise AssertionIneligibleApiError() from exc
     except InvalidRangeError as exc:
         raise InvalidRangeApiError(str(exc)) from exc
     except StaleVersionError as exc:

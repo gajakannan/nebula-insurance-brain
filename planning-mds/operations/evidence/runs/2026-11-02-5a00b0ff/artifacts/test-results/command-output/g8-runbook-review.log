@@ -1,0 +1,334 @@
+Warning: truncated output (original token count: 16716)
+Total output lines: 344
+
+[product-root] /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain (source: --product-root)
+{
+  "action": "feature",
+  "stages": [
+    {
+      "stage": "G0",
+      "role": "architect",
+      "title": "Architect assembly plan authoring and validation",
+      "operations": [
+        {
+          "op": "validate-g0",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-feature-evidence.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}",
+            "--stage",
+            "G0"
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "G1",
+      "role": "devops",
+      "title": "Runtime preflight",
+      "operations": [
+        {
+          "op": "validate-g1",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-feature-evidence.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}",
+            "--stage",
+            "G1"
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "G2",
+      "role": "quality-engineer",
+      "title": "Self-review, QE, and deployability",
+      "operations": [
+        {
+          "op": "validate-g2",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-feature-evidence.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}",
+            "--stage",
+            "G2"
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "G3",
+      "role": "code-reviewer",
+      "title": "Code and security review (parallel)",
+      "operations": [
+        {
+          "op": "validate-g3",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-feature-evidence.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}",
+            "--stage",
+            "G3"
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "G4",
+      "role": "product-manager",
+      "title": "Approval",
+      "operations": [
+        {
+          "op": "validate-g4",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-feature-evidence.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}",
+            "--stage",
+            "G4"
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "G5",
+      "role": "product-manager",
+      "title": "Signoff",
+      "operations": [
+        {
+          "op": "validate-g5",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-feature-evidence.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}",
+            "--stage",
+            "G5"
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "G6",
+      "role": "quality-engineer",
+      "title": "Candidate evidence validation",
+      "operations": [
+        {
+          "op": "validate-g6",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-feature-evidence.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}",
+            "--stage",
+            "G6"
+          ]
+        },
+        {
+          "op": "validate-trackers-g6",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-trackers.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}"
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "G7",
+      "role": "architect",
+      "title": "Architect knowledge-graph reconciliation",
+      "operations": [
+        {
+          "op": "kg-compile",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "{NEBULA_PRODUCT_ROOT}/scripts/kg/compile.py"
+          ]
+        },
+        {
+          "op": "kg-symbols-decisions",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py",
+            "--regenerate-symbols",
+            "--check-symbols",
+            "--regenerate-decisions",
+            "--check-decisions"
+          ]
+        },
+        {
+          "op": "kg-check-drift",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py",
+            "--check-drift"
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "G8",
+      "role": "product-manager",
+      "title": "PM closeout",
+      "operations": [
+        {
+          "op": "checkpoint:archive-move",
+          "kind": "checkpoint (MANUAL)",
+          "description": "VERIFY (do not re-author) the G7 graph, update trackers (STATUS/REGISTRY/ROADMAP/BLUEPRINT + kg-source feature shard), and move the feature folder to its archived path when Done/Completed."
+        },
+        {
+          "op": "kg-compile-closeout",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "{NEBULA_PRODUCT_ROOT}/scripts/kg/compile.py"
+          ]
+        },
+        {
+          "op": "patch-prior-manifest",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/patch-prior-manifest.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--new-run-id",
+            "{RUN_ID}"
+          ]
+        },
+        {
+          "op": "write:latest-run.json",
+          "kind": "write"
+        },
+        {
+          "op": "kg-write-coverage",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py",
+            "--write-coverage-report"
+          ]
+        },
+        {
+          "op": "kg-check-drift-closeout",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py",
+            "--check-drift"
+          ]
+        },
+        {
+          "op": "capture-run-telemetry",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/scripts/capture-run-telemetry.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--run-id",
+            "{RUN_ID}"
+          ]
+        },
+        {
+          "op": "validate-closeout",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-feature-evidence.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--stage",
+            "closeout"
+          ]
+        },
+        {
+          "op": "validate-trackers-closeout",
+          "kind": "run",
+          "argv": [
+            "python3",
+            "agents/product-manager/scripts/validate-trackers.py",
+            "--product-root",
+            "{NEBULA_PRODUCT_ROOT}",
+            "--feature",
+            "{FEATURE_ID}",
+            "--run-id",
+            "{RUN_ID}"
+          ]
+        },
+        {
+          "op": "kg-validate-closeout",
+          "kind": "run",
+  …12716 tokens truncated…ersioned-assertion-semantics-and-admission.md) defines additive typed/open assertion semantics, document-local references/name admission claims, structural quote/name/time checks and eligibility guards at existing review/commit consumers. The legacy strict result contract and source history remain; new schemas are `assertion-record-v2`, `interpretation-result-v2` and `assertion-admission-result-v1`. Case/spacing normalization is deterministic with original-range mapping; repeated text never justifies a fabricated span.\n\nNo new deployable, assertion HTTP route, UI, grants or extraction activation. Current authorization's mutation facade gains optional source READ requirements in the same unit of work; it must not nest a read facade that commits the outer transaction. Existing `direct-baseline` and v1 content writer defaults follow F0005's final approved rejection decision. Full durable drops/run adoption stays F0016; full source-completeness/commit orchestration stays F0018; display stays F0022; open extraction/alignment stays F0066. New restrictions apply to attributable v2 evidence/review/correction lineage; unregistered legacy pilot references remain an explicit compatibility boundary. ADR-0065 and ADR-0075 remain Proposed until their required runtime proofs. Existing C4 topology is unchanged; feature README contains ER/component diagrams. Phase B design is approved; implementation and required runtime proofs remain pending.\n\n---\n\n## 5) Phase C \u2014 Implementation Plan (locked order)\n\nSequence per master blueprint sections 115.3 and 124; original identifiers F0001 to F0063 are preserved. F0065 is the bounded v0.1 assessment addition; F0064 is repository tooling.\n\n1. Archived F0001 supplies the measured foundation contracts. F0005 now supplies the separate pinned Docling-Graph synthetic development proof for conversion, checkpoint/reuse, recovery, and evidence mapping under ADR-0060; production qualification remains pending. F0001 did not validate that package (sections 115.4, 126).\n2. v0.1A \u2014 F0002 to F0017: typed domain contracts, durable ingestion, immutable evidence, assertion extraction\n3. v0.1B \u2014 F0018 to F0023 establish authorized commits, temporal reads, evidence review, and minimal 360 views; F0065 adds bounded on-demand GL guideline assessment; F0024/F0025 prove real interpretation-to-assessment and temporal reassessment end to end\n4. v0.1C \u2014 F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases\n5. v0.2A \u2014 F0033 to F0040 and F0044 to F0047; v0.2B \u2014 F0027 to F0032, F0066 (open-statement alignment, ADR-0063), F0041 to F0043, and F0067 (Graph Observatory, ADR-0071/ADR-0072)\n6. v0.3 and later \u2014 F0048 to F0063: full process, generalized reasoning, automatic derivation propagation, decision replay, and advanced semantics; F0065 is already in v0.1B\n\nBaseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations even though the full Execution Gate and Decision Ledger come later (section 89).\n\n---\n\n## 6) Next Step Guidance\n\nCurrent position (2026-10-25): F0001 to F0004 are done and archived. F0005's synthetic Docling-Graph proof is complete; its unchanged local-qualification requirements/thresholds were approved in plan run `2026-10-23-9a04b327`. Three high plan-review gaps prompted Phase B rework `2026-10-25-50fcf658`, approved by the operator on 2026-10-25 and ready for the feature action (section 4.8); the amendment has its own explicit approval. F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.\n\n1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.\n2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).\n3. For F0012, run the `plan` action as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).\n4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.\n"
+      },
+      {
+        "path": "docs/agent-instructions.md",
+        "sha256": "a7645e80a39f2aca95b31f01b711353754630c1e62fd47812dba0fe5ed9aaae2",
+        "text": "# Working in Nebula Insurance Brain\n\nRead `planning-mds/BLUEPRINT.md` for process, scope, technology, and phase status. Architectural intent comes from `planning-mds/architecture/master-blueprint.md` and its governing ADRs. Feature-specific accepted requirements live in their feature folders. Report conflicts between these sources; do not invent product rules.\n\n## Repository boundaries\n\n- Keep product requirements, insurance terminology, review criteria, and validation scripts here. Generic framework mechanisms belong in the sibling `nebula-agents` repository.\n- Framework sessions start in that sibling repository. Always pass this repository's absolute path as `--product-root`, or set `NEBULA_PRODUCT_ROOT` explicitly. Do not rely on a default product or the shell's current directory.\n- `BOUNDARY-POLICY.md` in the framework describes the separation of framework and product content. It is not an insurance regulatory policy.\n- Runtime directories and proof harnesses named in a plan may not exist yet. Distinguish a proposed implementation path from a required existing planning artifact.\n\n## Planning and knowledge graph\n\n- Keep the blueprint, feature status, and trackers aligned under `planning-mds/features/TRACKER-GOVERNANCE.md`.\n- Edit `planning-mds/kg-source/**` as the authored graph source. Generate projections and tracker tables with `scripts/kg/compile.py`; do not hand-edit generated regions.\n- Use KG lookup for routing. Inspect the source planning artifacts before making readiness judgments.\n- KG coverage means a feature has retrieval mappings, including planning-only stubs. It does not imply a PRD, completed Phase B, approval, or implementation; read status and mapping notes before making readiness claims.\n- Honor `.agentignore` for broad searches. Read exact evidence references when a review requires them.\n- Proposed ADRs stay proposed until their stated proof and acceptance conditions are met. Structural readiness checks do not settle them.\n\n## Local validation\n\nFrom this repository, run:\n\n```bash\npython3 scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0001\npython3 scripts/validation/validate_plan_readiness.py --plan-scope project --target project\npython3 scripts/run-lifecycle-gates.py\n```\n\nThe readiness validator emits JSON and exits 0 for a structurally valid plan, 1 for failed checks, and 2 for invalid invocation. Architectural adequacy remains a reviewer decision. During `plan-review`, also read `docs/plan-review-checklist.md` and cite actual planning evidence for findings.\n\n## Semantic examples\n\nFor each introduced or changed concept, maintain its glossary definition, worked example, boundary case, and owning feature/story/contract links in `planning-mds/examples/README.md`. Reuse the continuing EX-GL-001 case where it fits. Label synthetic/illustrative outputs and future delivery phases explicitly. Validate structured examples; runtime delivery must add actual reproduction evidence and keep development examples outside the frozen holdout.\n"
+      }
+    ],
+    "checks": [],
+    "scope": {
+      "plan_scope": "feature",
+      "target": "F0006"
+    }
+  },
+  "project_checks": []
+}
+
+Exit code: 0
+

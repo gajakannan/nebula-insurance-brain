@@ -20,6 +20,13 @@ class FakeFactCommitRepository:
         self.outbox: list[tuple[UUID, dict]] = []
         self.commits: list[tuple[UUID, tuple[UUID, UUID], UUID | None]] = []
         self.lock_calls = 0
+        self.source_checks: list[dict] = []
+        self.source_error: Exception | None = None
+
+    async def require_commit_sources(self, **kwargs) -> None:
+        self.source_checks.append(kwargs)
+        if self.source_error is not None:
+            raise self.source_error
 
     def seed_slot(self, slot_id: UUID) -> None:
         self.slots.add(slot_id)

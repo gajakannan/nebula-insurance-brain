@@ -1,0 +1,246 @@
+Warning: truncated output (original token count: 5027)
+Total output lines: 343
+
+33:  RUN_ID_PRIOR: "prior approved run_id from {FEATURE_INDEX_ROOT}/latest-run.json (null if absent)"
+34-  RERUN_OF: "null, or {RUN_ID_PRIOR} when this run regenerates evidence only"
+35-
+36-retrieval:
+37-  tier_defaults: {clean: [1, 2], drift-reconcile: [3, 4]}
+38-
+39-context_load:
+40-  - "agents/ROUTER.md"
+41-  - "agents/agent-map.yaml"
+42-  - "agents/docs/AGENT-USE.md"
+43-  - "agents/actions/feature.md"
+44-  - "python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py {FEATURE_ID} --tier {start_tier} --run-id {RUN_ID}"
+45-  - "{FEATURE_PATH}"
+46-
+47-ownership:
+48:  product-manager: [pm-closeout.md, signoff-ledger.md, latest-run.json, "STATUS.md final state", "trackers + archive move", "manifest finalize (status approved)", "prior-manifest supersession"]
+49-  architect: [feature-assembly-plan.md, g0-assembly-plan-validation.md, kg-reconciliation.md, "ADRs", "canonical shared semantics", "API contracts + schemas"]
+50-  quality-engineer: [test-plan.md, test-execution-report.md, coverage-report.md]
+51-  code-reviewer: [code-review-report.md]
+52-  security: [security-review-report.md]
+53-  devops: [g1-runtime-preflight.md, g2-deployability-check.md]
+54-
+55-gates:
+56-  - id: G0
+57-    title: Architect assembly plan authoring and validation
+58-    role: architect
+59-    artifacts: [g0-assembly-plan-validation.md]
+60-    manifest_status_after: in-progress
+61-    operations:
+62-      - run:
+63-          id: validate-g0
+64-          argv: [python3, agents/product-manager/scripts/validate-feature-evidence.py,
+65-                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --run-id, "{RUN_ID}", --stage, G0]
+66-          cwd: framework
+67-          timeout_seconds: 300
+68-    judgment: |
+69-      Step 0 (author): if PRIMARY_SPEC (feature-assembly-plan.md) is absent, author it from the
+70-      template using the feature stories, BLUEPRINT.md, SOLUTION-PATTERNS.md, and API contracts; on
+71-      drift-reconcile/rerun, reconcile the existing plan instead of overwriting. Step 0.5 (validate):
+72-      check scope split, agent dependencies, integration checkpoints, and artifact ownership, and
+73-      initialize the Required Signoff Roles matrix in STATUS.md. Flip manifest status to in-progress
+74-      after G0 passes.
+75-
+76-  - id: G1
+77-    title: Runtime preflight
+78-    role: devops
+79-    artifacts: [g1-runtime-preflight.md]
+80-    operations:
+81-      - run:
+82-          id: validate-g1
+83-          argv: [python3, agents/product-manager/scripts/validate-feature-evidence.py,
+84-                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --run-id, "{RUN_ID}", --stage, G1]
+85-          cwd: framework
+86-          timeout_seconds: 300
+87-    judgment: |
+88-      Write g1-runtime-preflight.md when runtime_bearing=true; otherwise record the manifest omission.
+89-
+90-  - id: G2
+91-    title: Self-review, QE, and deployability
+92-    role: quality-engineer
+93-    artifacts: [g2-self-review.md, test-plan.md, test-execution-report.md, coverage-report.md, g2-deployability-check.md]
+94-    operations:
+95-      - run:
+96-          id: validate-g2
+97-          argv: [python3, agents/product-manager/scripts/validate-feature-evidence.py,
+98-                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --run-id, "{RUN_ID}", --stage, G2]
+99-          cwd: framework
+100-          timeout_seconds: 600
+101-    judgment: |
+102-      Reconcile the manifest conditional booleans against discovered scope FIRST (see
+103-      notes.scope_booleans). Any false->true flip forces the corresponding required role and artifact.
+104-      coverage-report.md must exist even when waived. Booleans that change after G2 force re-running G2.
+105-      Coverage floor is `coverage_min_pct` (owned by _contract.yaml); do not restate the number.
+106-      Keep the STATUS.md Story x Role Progress matrix current (see notes.story_progress): flip each
+107-      story's Backend/Frontend/AI cell as its slice is built and QA/DevOps when its tests/deployability pass.
+108-
+109-  - id: G3
+110-    title: Code and security review (parallel)
+111-    role: code-reviewer
+112-    artifacts: [code-review-report.md, security-review-report.md]
+113-    operations:
+114-      - run:
+115-          id: validate-g3
+116-          argv: [python3, agents/product-manager/scripts/validate-feature-evidence.py,
+117-                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --run-id, "{RUN_ID}", --stage, G3]
+118-          cwd: framework
+119-          timeout_seconds: 300
+120-    judgment: |
+121-      Code Reviewer and Security Reviewer run in parallel. security-review-report.md is required when
+122-      security_sensitive_scope=true or Security is required in STATUS.md. Record each story's Code Review
+123-      and Security cell (PASS/FAIL) in the STATUS.md Story x Role Progress matrix.
+124-
+125-  - id: G4
+126-    title: Approval
+127-    role: product-manager
+128-    artifacts: [gate-decisions.md]
+129-    operations:
+130-      - run:
+131-          id: validate-g4
+132-          argv: [python3, agents/product-manager/scripts/validate-feature-evidence.py,
+133-                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --run-id, "{RUN_ID}", --stage, G4]
+134-          cwd: framework
+135-          timeout_seconds: 300
+136-    judgment: |
+137-      Approval requires critical=0; any high requires an explicit mitigation token recorded in
+138-      gate-decisions.md. Compute the allowed outcome with gate_policy.py (profile `standard`).
+139-
+140-  - id: G5
+141-    title: Signoff
+142-    role: product-manager
+143-    artifacts: [signoff-ledger.md]
+144-    operations:
+145-      - run:
+146-          id: validate-g5
+147-          argv: [python3, agents/product-manager/scripts/validate-feature-evidence.py,
+148-                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --run-id, "{RUN_ID}", --stage, G5]
+149-          cwd: framework
+150-          timeout_seconds: 300
+151-    judgment: |
+152-      Every Required=Yes role records verdict, reviewer, ISO date, and an evidence path under
+153-      RUN_FOLDER. A `WITH RECOMMENDATIONS` verdict must satisfy all five §15 closeout-passing conditions
+154-      in the underlying role report (non-blocking/deferred, severity, owner+follow-up, named PM
+155-      acceptance, no blocking language with a passing verdict).
+156-
+157-  - id: G6
+158-    title: Candidate evidence validation
+159-    role: quality-engineer
+160-    artifacts: [feature-action-execution.md]
+161-    operations:
+162-      - run:
+163-          id: validate-g6
+164-          argv: [python3, agents/product-manager/scripts/validate-feature-evidence.py,
+165-                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --run-id, "{RUN_ID}", --stage, G6]
+166-          cwd: framework
+167-          timeout_seconds: 300
+168-      - run:
+169-          id: validate-trackers-g6
+170-          argv: [python3, agents/product-manager/scripts/validate-trackers.py,
+--
+175:      Pre-closeout candidate: no pm_closeout, no tracker_sync, no latest-run.json yet. Confirm G0–G5
+176-      evidence present and passing; changed_paths[] populated; conditional booleans cross-check against
+177-      the §7 path-class globs; non-required absent artifacts appear in manifest omissions[].
+178-
+179-  - id: G7
+180-    title: Arch…1327 tokens truncated…in validate.py last: it is the product CI's knowledge_graph_sync gate
+284-      and the only check of coverage-report.yaml freshness (--check-drift does not check it). Make every
+285-      tracker/STATUS edit at the archive-move checkpoint; any planning edit after G8 completes needs
+286-      --write-coverage-report and the plain validate.py again before committing.
+287-
+288-severity_gate: standard
+289-
+290-variants: [operator-friendly, automation-safe]
+291-
+292-forbidden:
+293-  - "Generate RUN_ID with uuid4 or any non-contract format."
+294-  - "Write or consume current-run.json."
+295:  - "Write latest-run.json before G8 final validation passes."
+296-  - "Leave a prior approved feature-completion manifest at status approved after writing a new completion approval; planning approvals are independent."
+297-  - "Skip per-gate validate-feature-evidence.py --stage calls."
+298-  - "Write terminal-feature role reports into FEATURE_PATH instead of RUN_FOLDER."
+299-  - "Cite the global frontend evidence lane as a substitute for a feature-level role report."
+300-  - "Hand-enumerate schema/ADR/contract files when lookup output is available."
+301-  - "Treat lookup/KG mappings as authoritative over raw artifacts."
+302-  - "Edit code without prior hint.py, or shared semantics without prior blast.py."
+303-  - "Skip any gate G0 through G8, or declare Done without the PM role switch at G8."
+304-  - "Widen scope outside FEATURE_ID, or pass --evidence-effective-date earlier than the framework default."
+305-
+306-stop_conditions:
+307-  - "Runtime preflight cannot be restored."
+308-  - "A critical code or security finding persists after one review cycle."
+309-  - "Required signoff is missing reviewer, date, or evidence."
+310-  - "A canonical node edit is attempted outside the Architect role."
+311-  - "Scope drifts outside FEATURE_ID."
+312-  - "validate.py or validate.py --check-drift cannot be auto-repaired."
+313-  - "validate-feature-evidence.py at any stage exits non-zero and the cause is not addressable in this run."
+314-  - "Two approved feature-completion manifests are detected for the same feature without supersession (missing run_scope defaults to feature-completion; base-run-only planning approvals are independent)."
+315-  - "INSUFFICIENT_CONTEXT occurs — escalate, open raw artifacts, do not proceed on weak matches."
+316-
+317-conflict_resolution:
+318-  - "raw artifact vs KG mapping -> raw wins; repair KG in the same change set."
+319-  - "feature-assembly-plan vs story text -> plan wins; log via workstate.py decision --topic plan-story-reconcile."
+320-  - "code vs contract/policy/KG -> reconcile to contract; never silently redefine canonical semantics."
+321-  - "shared-semantics change detected -> halt and route to Architect."
+322-  - "STATUS.md story value not in the feature's local breakdown -> fix STATUS.md (STORY-INDEX.md is cross-check only)."
+323-  - "manifest conditional boolean false but changed_paths has a forced path class -> set the boolean true and add the required role/artifact."
+324-
+325-notes:
+326-  concurrent_run_check: |
+327-    Before starting, inspect only evidence-manifest.json files under
+328-    {NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/runs/*/ for any run other than RUN_FOLDER whose
+329-    manifest has feature_id={FEATURE_ID}, run_scope=feature-completion (the default when absent),
+330-    and status draft or in-progress. Ignore base-run-only planning manifests. If one exists, HALT and
+331-    reconcile externally — the contract assumes serial feature actions per feature. Acceptable prior
+332-    states: approved (superseded at G8), superseded, or no prior runs.
+333-  session_setup: |
+334-    Echo the resolved absolute {NEBULA_PRODUCT_ROOT} after root binding, before product discovery or writes. Create
+335-    FEATURE_INDEX_ROOT, RUN_FOLDER, and RUN_FOLDER/artifacts/{coverage,diffs,test-results,security,
+336-    screenshots}. Initialize evidence-manifest.json (status draft, contract version stamped, all
+337-    required keys, skeleton gate_results/role_results/files). Create the base run files and touch empty
+338:    commands.log and lifecycle-gates.log. Capture a prior latest-run.json run_id as RUN_ID_PRIOR.
+339-  telemetry: |
+340-    Append every shell command to RUN_FOLDER/commands.log via append-command-log.py (--log,
+341-    --product-root, --framework-root, --cwd, --command, --exit-code, repeatable --artifact). Artifact
+342-    paths must be durable product-repo paths under artifacts/; scratch paths (/tmp/...) are not
+343-    durable. Do not leak secrets — secret-pattern checks fail the run.
+344-  scope_booleans: |
+345-    At G2 set frontend_in_scope=true when any changed_paths[] entry matches experience/** frontend
+346-    globs; runtime_bearing=true for engine/** runtime/tests/AI-runtime globs; deployment_config_changed
+347-    =true for Dockerfile/compose/.github-workflows/ci/env/config/migration globs; security_sensitive_
+348-    scope=true for auth/identity/permissions/security/secrets globs.
+349-  validator_defect_flow: |
+350-    If a validator defect blocks closeout, prefer to fix the validator and re-run. Mid-stage (G0..G6)
+351-    defects are logged as open follow-ups in README.md (not waivers yet); if unresolved at G8, record a
+352-    waivers.validator_defect entry in the manifest and mirror it in pm-closeout.md. Never bypass with an
+353-    earlier-than-default --evidence-effective-date.
+354-  story_progress: |
+355-    Maintain the `## Story x Role Progress` matrix in {FEATURE_PATH}/STATUS.md live as the run
+356-    progresses (advisory, not validator-enforced). Cells: not-started / in-progress / done / not-in-scope;
+357-    review columns (Code Review, Security) resolve to PASS/FAIL. At G2 flip each story's Backend/Frontend/AI
+358-    cell in-progress->done as its slice is built, and QA/DevOps when that story's tests/deployability pass.
+359-    At G3 resolve the Code Review and Security cells per story. Roll up the Overall column (Done only when
+360-    every required cell is Done/PASS) and keep it consistent with the Story Checklist. Cells marked
+361-    not-in-scope follow the manifest scope booleans (AI = slice AI/LLM scope; DevOps = deployment_config_
+362-    changed/runtime_bearing; Security = security_sensitive_scope). At G8 the PM verifies the matrix is
+363-    complete and consistent before finalizing story status.
+- Manual / operator-initiated runs (`agents/actions/validate.md`, ad-hoc
+  preflight, release rehearsals) use the **base run** profile at
+  `{NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/runs/{RUN_ID}/` — the six base
+  files, no `evidence-manifest.json`. The three validate-action reports
+  (`pm-validation-report.md`, `architect-validation-report.md`,
+  `implementation-validation-report.md`) live here, not in a feature package.
+- Feature completion closeouts (`agents/actions/feature.md`, and
+  `agents/actions/build.md` when it archives a delivered feature) produce the
+  full **feature package** at
+  `{NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/runs/{RUN_ID}/`; the
+  feature index pointer is
+  `{NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/features/F####-{slug}/latest-run.json`.
+- At closeout, the supersession order is mandatory: run
+  `patch-prior-manifest.py` **first**, then write `latest-run.json` — never
+  the reverse (see AGENT-OPS.md → The Gate Timeline).
+
+Exit code: 0
+

@@ -1,0 +1,68 @@
+engine/migrations/versions/0006_tenancy_authx_constrain.py:29:OWNED = (
+engine/migrations/versions/0006_tenancy_authx_constrain.py:44:NEWLY_OWNED = (
+engine/migrations/versions/0006_tenancy_authx_constrain.py:98:    for table in OWNED:
+engine/migrations/versions/0006_tenancy_authx_constrain.py:103:    for table in KB_REGISTRY_REFS:
+engine/migrations/versions/0006_tenancy_authx_constrain.py:169:    for table in NEWLY_OWNED:
+engine/migrations/versions/0006_tenancy_authx_constrain.py:175:    for table in KB_REGISTRY_REFS:
+engine/migrations/versions/0006_tenancy_authx_constrain.py:199:    op.create_unique_constraint(
+engine/migrations/versions/0006_tenancy_authx_constrain.py:200:        "uq_document_job_owner", "document_job", ["id", "tenant_id", "knowledge_base_id"]
+engine/migrations/versions/0006_tenancy_authx_constrain.py:218:    op.drop_constraint("uq_document_job_owner", "document_job", type_="unique")
+engine/migrations/versions/0006_tenancy_authx_constrain.py:223:    for table in reversed(KB_REGISTRY_REFS):
+engine/migrations/versions/0006_tenancy_authx_constrain.py:227:    for table in NEWLY_OWNED:
+engine/migrations/versions/0005_tenancy_authx_expand.py:39:OWNED_CHILDREN = (
+engine/migrations/versions/0005_tenancy_authx_expand.py:75:    for table, columns in JOB_UUID_COLUMNS.items():
+engine/migrations/versions/0005_tenancy_authx_expand.py:104:        sa.UniqueConstraint("id", "tenant_id", name="uq_workspace_owner"),
+engine/migrations/versions/0005_tenancy_authx_expand.py:118:        sa.UniqueConstraint("id", "tenant_id", name="uq_kb_owner"),
+engine/migrations/versions/0005_tenancy_authx_expand.py:257:            "id", "tenant_id", "knowledge_base_id", name="uq_canonical_commit_owner"
+engine/migrations/versions/0005_tenancy_authx_expand.py:261:    for table in OWNED_CHILDREN:
+engine/migrations/versions/0005_tenancy_authx_expand.py:264:    for table in OWNER_KEYED:
+engine/migrations/versions/0005_tenancy_authx_expand.py:265:        op.create_unique_constraint(
+engine/migrations/versions/0005_tenancy_authx_expand.py:266:            f"uq_{table}_owner", table, ["id", "tenant_id", "knowledge_base_id"]
+engine/migrations/versions/0005_tenancy_authx_expand.py:288:    for table, columns in JOB_UUID_COLUMNS.items():
+engine/migrations/versions/0005_tenancy_authx_expand.py:314:    for table, columns in JOB_UUID_COLUMNS.items():
+engine/migrations/versions/0005_tenancy_authx_expand.py:328:    for table in reversed(OWNER_KEYED):
+engine/migrations/versions/0005_tenancy_authx_expand.py:329:        op.drop_constraint(f"uq_{table}_owner", table, type_="unique")
+engine/migrations/versions/0005_tenancy_authx_expand.py:330:    for table in reversed(OWNED_CHILDREN):
+engine/migrations/versions/0005_tenancy_authx_expand.py:333:    for table in (
+25:CREATE TABLE assertion_document_reference (
+34:  CONSTRAINT uq_assertion_reference_owner UNIQUE
+41:CREATE TABLE assertion_name_claim (
+55:CREATE TABLE assertion_semantics (
+75:  CONSTRAINT fk_assertion_semantics_owner FOREIGN KEY (assertion_id,tenant_id,knowledge_base_id)
+        if row is None:
+            raise LookupError("assertion not found")
+        sem = await self.session.get(AssertionSemantics, assertion_id)
+        result = {
+            "id": str(row.id),
+            "semantic_contract_version": row.semantic_contract_version,
+            "run_id": str(row.run_id) if row.run_id else None,
+            "origin": row.origin,
+            "original_assertion_id": str(row.original_assertion_id)
+            if row.original_assertion_id
+            else None,
+            "subject_type": row.subject_type,
+            "slot_type": row.slot_type,
+            "value": copy.deepcopy(row.value),
+            "interpretation_basis": row.interpretation_basis,
+            "model_confidence": row.model_confidence,
+            "tenant_id": str(row.tenant_id),
+            "knowledge_base_id": str(row.knowledge_base_id),
+            "created_at": row.created_at.isoformat(),
+        }
+        if row.semantic_contract_version == 1:
+            if row.origin == "MACHINE_EXTRACTION":
+                result["compatibility_origin"] = "DOCUMENT_INTERPRETATION"
+            return result
+        if sem is None:
+            raise AssertionIneligible()
+        support = [wire_evidence(e) for e in sem.verified_evidence]
+        eligibility = evaluate_eligibility(sem.record, support)
+        result.update(
+            record=copy.deepcopy(sem.record),
+            server_evidence=support,
+            review_required=eligibility.review_required,
+            reasons=list(eligibility.reasons),
+            blocked_operations=list(eligibility.blocked_operations),
+
+Exit code: 0
+

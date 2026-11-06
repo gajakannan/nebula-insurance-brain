@@ -1,0 +1,29 @@
+usage: workstate.py [-h] --state-file STATE_FILE
+                    [--telemetry-file TELEMETRY_FILE]
+                    {init,decision,touch,question,resolve,escalate,dump,digest} ...
+
+Maintain structured working state for long agent sessions.
+
+positional arguments:
+  {init,decision,touch,question,resolve,escalate,dump,digest}
+    init                Initialize a new working-state file.
+    decision            Record a decision.
+    touch               Record a file read or modified.
+    question            Record an open question.
+    resolve             Mark a question as resolved.
+    escalate            Record an explicit insufficient-context escalation.
+    dump                Dump working state.
+    digest              Terse work-narrative for cheap resume
+                        (done/decided/next).
+
+options:
+  -h, --help            show this help message and exit
+  --state-file STATE_FILE
+                        Path to the working-state YAML file. Agent-agnostic —
+                        each tool passes its own scratch location.
+  --telemetry-file TELEMETRY_FILE
+                        Append one JSONL telemetry event for decision and
+                        escalate invocations.
+
+Exit code: 0
+

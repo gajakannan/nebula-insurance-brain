@@ -1,0 +1,49 @@
+usage: gate_policy.py [-h] [--profile {standard,review-family,none}]
+                      [--variant {plan,feature}]
+                      [--code-critical CODE_CRITICAL] [--code-high CODE_HIGH]
+                      [--security-critical SECURITY_CRITICAL]
+                      [--security-high SECURITY_HIGH] [--domain DOMAIN]
+
+Central severity state machine (F0007-S0005). One implementation of the gate-
+severity arithmetic that was duplicated across build / feature / review /
+validate / test / plan-review / feature-review. Agents classify findings; this
+module only computes the allowed outcome from the per-domain critical/high
+counts. It never classifies. Profiles: - standard: BLOCKED (any critical) /
+WARNING (any high) / ACCEPTABLE. - review-family: NOT READY / CONDITIONALLY
+READY / READY (plan variant); NOT DONE / CONDITIONALLY DONE / TRULY DONE
+(feature variant). - none: always PASS (no severity gate). python3 -m
+gate_policy --profile standard --code-critical 0 --code-high 1 --security-
+critical 0 --security-high 0
+
+options:
+  -h, --help            show this help message and exit
+  --profile {standard,review-family,none}
+  --variant {plan,feature}
+  --code-critical CODE_CRITICAL
+  --code-high CODE_HIGH
+  --security-critical SECURITY_CRITICAL
+  --security-high SECURITY_HIGH
+  --domain DOMAIN       Extra domain as name:critical:high. Repeatable.
+538:2. **Present approval checklist:**
+546:   - [ ] No critical issues (approval blocked if any remain)
+547:   - [ ] High-severity issues fixed OR approved with mitigation justification
+553:3. **Enforce approval gate based on combined findings severity:**
+586:     - Capture explicit mitigation justification for remaining high issues
+587:     - Log decision with mitigation plan
+588:     - Proceed to Step 5 (Signoff Gate)
+591:     - Proceed to Step 5 (Signoff Gate)
+605:- [ ] Code + security critical issues = 0 before approval is enabled
+606:- [ ] High issues fixed or approved with explicit mitigation justification
+613:### Step 5: SIGNOFF GATE (Mandatory)
+695:   - `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/STATUS.md` (final status, deferred follow-ups, mitigation notes)
+706:5. Record any orphaned stories, deferred follow-ups, or explicit mitigation carry-overs before final validation
+717:- [ ] Deferred follow-ups and mitigation notes captured
+837:- [ ] User is available for approval
+917:[Step 4: Approval gate]
+931:[Step 4: Approval gate]
+947:[Step 4: Re-approval]
+969:- Each feature should be merged to main after approval
+975:- Critical findings block approval; high findings require explicit mitigation justification if approved
+
+Exit code: 0
+

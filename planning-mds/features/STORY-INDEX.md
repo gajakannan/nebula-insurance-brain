@@ -71,11 +71,11 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0006-S0001](./F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md) | Preserve typed source claims | Critical | MVP | Ingrid the Persistence Engineer |
-| [F0006-S0002](./F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md) | Retain open statements and version contracts | High | MVP | Mateo the Document Intelligence Engineer |
-| [F0006-S0003](./F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md) | Check structural admission and evidence | Critical | MVP | Mateo the Document Intelligence Engineer |
-| [F0006-S0004](./F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md) | Guard mood and described evidence | Critical | MVP | Rosa the Business Reviewer |
-| [F0006-S0005](./F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md) | Preserve existing consumer boundaries | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0006-S0001](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md) | Preserve typed source claims | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0006-S0002](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md) | Retain open statements and version contracts | High | MVP | Mateo the Document Intelligence Engineer |
+| [F0006-S0003](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md) | Check structural admission and evidence | Critical | MVP | Mateo the Document Intelligence Engineer |
+| [F0006-S0004](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md) | Guard mood and described evidence | Critical | MVP | Rosa the Business Reviewer |
+| [F0006-S0005](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md) | Preserve existing consumer boundaries | Critical | MVP | Ingrid the Persistence Engineer |
 
 ---
 

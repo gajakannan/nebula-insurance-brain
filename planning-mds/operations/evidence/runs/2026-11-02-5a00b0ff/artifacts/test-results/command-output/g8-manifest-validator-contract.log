@@ -1,0 +1,171 @@
+  - id: G8
+    title: PM closeout
+    role: product-manager
+    role_switch: agents/product-manager/SKILL.md
+    artifacts: [pm-closeout.md]
+    operations:
+      - checkpoint:
+          id: archive-move
+          description: "VERIFY (do not re-author) the G7 graph, update trackers (STATUS/REGISTRY/ROADMAP/BLUEPRINT + kg-source feature shard), and move the feature folder to its archived path when Done/Completed."
+          requires: [pm-closeout.md, signoff-ledger.md, kg-reconciliation.md]
+          produces: [archived-feature-folder]
+      - run:
+          id: kg-compile-closeout
+          argv: [python3, "{NEBULA_PRODUCT_ROOT}/scripts/kg/compile.py"]
+          cwd: product
+          timeout_seconds: 300
+          mutates: [kg-source, kg-projection, trackers]
+      - run:
+          id: patch-prior-manifest
+          argv: [python3, agents/product-manager/scripts/patch-prior-manifest.py,
+                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --new-run-id, "{RUN_ID}"]
+          cwd: framework
+          timeout_seconds: 120
+          mutates: [prior-manifest]
+      - write:
+          artifact: latest-run.json
+          after: patch-prior-manifest
+          mutates: [latest-run.json]
+      - run:
+          id: kg-write-coverage
+          argv: [python3, "{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py", --write-coverage-report]
+          cwd: product
+          timeout_seconds: 300
+          mutates: [kg-projection]
+      - run:
+          id: kg-check-drift-closeout
+          argv: [python3, "{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py", --check-drift]
+          cwd: product
+          timeout_seconds: 300
+      - run:
+          id: capture-run-telemetry
+          argv: [python3, agents/scripts/capture-run-telemetry.py,
+                 --product-root, "{NEBULA_PRODUCT_ROOT}", --run-id, "{RUN_ID}"]
+          cwd: framework
+          timeout_seconds: 120
+          mutates: [run-folder, evidence-manifest]
+      - run:
+          id: validate-closeout
+          argv: [python3, agents/product-manager/scripts/validate-feature-evidence.py,
+                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --stage, closeout]
+          cwd: framework
+          timeout_seconds: 300
+      - run:
+          id: validate-trackers-closeout
+          argv: [python3, agents/product-manager/scripts/validate-trackers.py,
+                 --product-root, "{NEBULA_PRODUCT_ROOT}", --feature, "{FEATURE_ID}", --run-id, "{RUN_ID}"]
+          cwd: framework
+          timeout_seconds: 300
+      - run:
+          id: kg-validate-closeout
+          argv: [python3, "{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py"]
+          cwd: product
+          timeout_seconds: 300
+    judgment: |
+      MUST switch role (read agents/product-manager/SKILL.md). Manifest status becomes `approved` only
+      here, when latest-run.json is written — and only after patch-prior-manifest.py exits 0. Run
+      --write-coverage-report ONLY after the archive move (path-sensitive). Finalize the manifest
+      (status approved, feature_state Done/Completed/Archived, feature_path_at_closeout resolved).
+      capture-run-telemetry.py records token cost from the agent CLI's session transcript into
+      token-usage.json and mirrors headline totals into manifest.token_usage — advisory evidence
+      only; a missing transcript records nothing and never blocks closeout.
+      kg-validate-closeout runs the plain validate.py last: it is the product CI's knowledge_graph_sync gate
+      and the only check of coverage-report.yaml freshness (--check-drift does not check it). Make every
+      tracker/STATUS edit at the archive-move checkpoint; any planning edit after G8 completes needs
+      --write-coverage-report and the plain validate.py again before committing.
+
+severity_gate: standard
+
+2147:                # Recommendations only require PM acceptance at closeout.
+2174:    """§18 coverage waiver — must be mirrored in pm-closeout.md PM Acceptance Lines at closeout."""
+2181:    if stage not in {"G6", "G8", "closeout"}:
+2183:    pm_closeout_path = run_folder / "pm-closeout.md"
+2184:    acceptances = parse_pm_acceptance_lines(safe_read(pm_closeout_path) or "")
+2188:            "Coverage waiver in manifest lacks a matching PM Acceptance Line (per §15 PM Acceptance Line Format) in pm-closeout.md",
+2191:            path=str(pm_closeout_path),
+2202:    """§11 + §22 — validator_defect waiver shape + pm-closeout.md mirror."""
+2214:    required_fields = ["defect_description", "affected_rule_ids", "approved_by", "approved_on", "follow_up_owner", "follow_up_target_date"]
+2251:    if stage not in {"G6", "G8", "closeout"}:
+2254:    pm_closeout = run_folder / "pm-closeout.md"
+2255:    pm_content = safe_read(pm_closeout) or ""
+2262:                f"validator_defect waiver covers rule {rule_id_str!r} but no matching PM Acceptance Line found in pm-closeout.md",
+2265:                path=str(pm_closeout),
+2373:    pm_acceptances = parse_pm_acceptance_lines(safe_read(run_folder / "pm-closeout.md") or "")
+2395:        if "WITH RECOMMENDATIONS" in verdict.upper() and stage in {"G8", "closeout"}:
+2460:    if stage in {"G5", "G6", "G7", "G8", "closeout"}:
+2505:def validate_role_and_gate_results(
+2515:    Validates manifest.gate_results, manifest.role_results, manifest.required_roles,
+2526:    # gate_results shape + verdicts
+2527:    gate_results = manifest.get("gate_results")
+2528:    if not isinstance(gate_results, dict):
+2529:        result.add_error("manifest_missing_gate_results_fails", "Manifest gate_results must be an object", **common)
+2530:        gate_results = {}
+2536:        entry = gate_results.get(key)
+2539:                "manifest_missing_gate_results_fails",
+2540:                f"Manifest gate_results.{key} is missing or not an object",
+2546:                "manifest_missing_gate_results_fails",
+2547:                f"Manifest gate_results.{key}.required must be true at stage {stage}",
+2554:                f"Manifest gate_results.{key}.result={verdict!r} is not a passing verdict at stage {stage}",
+2564:                f"gate_results.{key}.artifact",
+2566:                missing_message=f"gate_results.{key}.artifact does not resolve: {artifact_value!r}",
+2914:    """§21 — feature_id / run_id / closeout path agreement across sources."""
+2919:    # feature_identity_mismatch_fails — registry, manifest, feature index folder, latest-run
+2939:    latest_path = feature_index_root / "latest-run.json"
+2946:                    f"latest-run.json feature_id {loaded.get('feature_id')!r} disagrees with registry {feature_id!r}",
+2950:    # run_identity_mismatch_fails — run folder name vs manifest.run_id vs latest-run.json.run_id
+2962:            if str(loaded.get("status", "")) == "approved":
+2964:                if manifest_run_id and latest_run_id and manifest_run_id != latest_run_id and manifest.get("status") == "approved":
+2967:                        f"Manifest run_id {manifest_run_id!r} disagrees with latest-run.json {latest_run_id!r}",
+2971:    # closeout_path_mismatch_fails — at G8/closeout the registry folder must match manifest
+2972:    if stage in {"G8", "closeout"} and manifest.get("status") == "approved":
+2974:        closeout_path = manifest.get("feature_path_at_closeout") or ""
+2975:        if registry_folder and closeout_path:
+2977:            if closeout_path.rstrip("/") != expected_suffix:
+2979:                    "closeout_path_mismatch_fails",
+2980:                    f"Manifest feature_path_at_closeout {closeout_path!r} disagrees with registry folder {registry_folder!r}",
+2993:    if stage not in {"G5", "G6", "G8", "closeout"}:
+3059:    approved_on = str(coverage.get("approved_on", "")).strip()
+3067:    if approved_on and approved_on not in content:
+3070:            f"coverage-report.md does not include waiver approved_on {approved_on!r}",
+3094:    if stage not in {"G8", "closeout"}:
+3096:    pm_path = run_folder / "pm-closeout.md"
+3295:    # latest-run.json schema rules (§12). validate_latest_run already enforces
+3297:    latest_path = feature_index_root_for(result.product_root, row) / "latest-run.json"
+3308:                            f"latest-run.json {field}={value!r} is absolute; must be repo-relative",
+3312:            if status_value is not None and status_value != "approved":
+3315:                    f"latest-run.json status={status_value!r}; only 'approved' satisfies completed terminal validation",
+3332:            if not isinstance(prior_doc, dict) or prior_doc.get("status") not in {"approved", "superseded"}:
+3335:                    f"rerun_of={rerun_of!r} run is present but not in an approved/superseded state",
+3363:                f"frontend-quality latest-run at {candidate!r} is unparseable or not an object",
+3367:        if loaded.get("status") != "approved":
+3370:                f"frontend-quality latest-run at {candidate!r} status must be 'approved'",
+3390:    if manifest.get("frontend_in_scope") is True and stage in {"G2", "G3", "G4", "G5", "G6", "G7", "G8", "closeout"}:
+3410:    # stage_g8_requires_tracker_results_fails — at G8/closeout the
+3412:    if stage in {"G8", "closeout"}:
+3418:                "G8/closeout requires tracker-sync results to appear in lifecycle-gates.log before final validation",
+3423:    # committed snapshot. G7 owns the code-path-derived layers; G8/closeout adds
+3433:        if stage in {"G8", "closeout"}:
+3501:    if stage in {"G5", "G6", "G7", "G8", "closeout"} and manifest.get("rerun_of") is None:
+3516:    # without explicit PM mitigation language with a passing closeout.
+3517:    if stage in {"G8", "closeout"}:
+3518:        pm_content = safe_read(run_folder / "pm-closeout.md") or ""
+3573:    required_fields = ["defect_description", "affected_rule_ids", "approved_by", "approved_on", "follow_up_owner", "follow_up_target_date"]
+3588:    # The pm-closeout mirror check is performed by validate_validator_defect_waiver
+3674:    if stage == "closeout" and status_value and status_value != "approved":
+3675:        result.add_error("manifest_bad_status_fails", "Closeout validation requires manifest status approved", **common)
+3701:    # Two-approved supersession check
+3702:    if status_value == "approved":
+3703:        other_approved: list[Path] = []
+3710:            if sibling_doc.get("status") == "approved":
+3711:                other_approved.append(sibling_manifest)
+3712:        if other_approved:
+3714:                "two_approved_runs_without_supersession_fails",
+3715:                f"Feature has multiple approved manifests: {[str(p) for p in other_approved]}",
+3741:            validate_role_and_gate_results(row, manifest, run_folder, stage, result, status_required)
+3753:    stage = args.stage or "closeout"
+3792:            _, shape = extract_closeout_review_date_with_shape(feature_path_for(product_root, row))
+3794:                emit_malformed_closeout_date_rule_if_missing(row, product_root, result)
+3808:    parser.add_argument("--stage", default="closeout", choices=sorted(STAGES))
+
+Exit code: 0
+

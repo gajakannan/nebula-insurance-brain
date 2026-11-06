@@ -356,3 +356,154 @@ async def test_dependencies_are_hydrated_through_the_store(build, policy) -> Non
         await execution.read(user, derived.key, Action.READ, trace_id="t", load=None)  # type: ignore[arg-type]
     assert exc.value.decision.reason_code == ReasonCode.DEPENDENCY_DENIED
     assert f"lock:resource:{evidence.key.id}" in store.log
+
+
+async def test_additional_source_read_commits_with_mutation_once(build, policy) -> None:
+    store, execution, user, resource = _world(
+        build, policy, "ServicePrincipal", ResourceType.FACT_SLOT
+    )
+    source = build.envelope(resource.scope, ResourceType.CONTENT_ARTIFACT)
+    store.resources[source.key] = source
+
+    async def additional_reads():
+        assert not store.committed and not store._pending
+        return [source.key, source.key]
+
+    async def operation(decisions):
+        assert not store.committed
+        assert {d.action for d in decisions} == {Action.COMMIT, Action.READ}
+        assert len(store._pending) == 2
+        return "receipt"
+
+    assert (
+        await execution.mutate(
+            user,
+            [resource.key],
+            Action.COMMIT,
+            trace_id="f0006",
+            operation=operation,
+            additional_reads=additional_reads,
+        )
+        == "receipt"
+    )
+    assert store.log.count("commit") == 1
+    assert len(store.committed) == 2
+    assert all(d.operation_outcome == OperationOutcome.SUCCEEDED for d in store.committed)
+
+
+async def test_denied_primary_never_discovers_sources(build, policy) -> None:
+    store, execution, user, resource = _world(build, policy, "Reviewer", ResourceType.FACT_SLOT)
+
+    async def forbidden():
+        pytest.fail("source discovery must follow primary authorization")
+
+    with pytest.raises(AuthorizationDenied):
+        await execution.mutate(
+            user,
+            [resource.key],
+            Action.COMMIT,
+            trace_id="f0006",
+            operation=forbidden,
+            additional_reads=forbidden,
+        )
+    assert store.committed[0].operation_outcome == OperationOutcome.DENIED
+
+
+@pytest.mark.parametrize("failure", ["foreign", "revoked", "expired"])
+async def test_source_denial_prevents_effect_and_audits_combined_decisions(
+    build, policy, failure
+) -> None:
+    store, _, user, resource = _world(build, policy, "ServicePrincipal", ResourceType.FACT_SLOT)
+    source = build.envelope(build.scope() if failure == "foreign" else resource.scope)
+    store.resources[source.key] = source
+    current = [build.now]
+    execution = AuthorizationExecution(store, policy, policy.release, clock=lambda: current[0])
+    if failure == "expired":
+        store.slices[user.id] = (
+            build.grant(
+                resource.scope, "ServicePrincipal", expires_at=build.now + timedelta(seconds=1)
+            ),
+        )
+
+    async def discover():
+        if failure == "revoked":
+            store.slices[user.id] = ()
+        elif failure == "expired":
+            current[0] = build.now + timedelta(seconds=2)
+        return [source.key]
+
+    async def forbidden(_decisions):
+        pytest.fail("a denied source must prevent all mutation effects")
+
+    with pytest.raises(AuthorizationDenied):
+        await execution.mutate(
+            user,
+            [resource.key],
+            Action.COMMIT,
+            trace_id="f0006",
+            operation=forbidden,
+            additional_reads=discover,
+        )
+    assert len(store.committed) == 2
+    assert {d.operation_outcome for d in store.committed} == {
+        OperationOutcome.FAILED,
+        OperationOutcome.DENIED,
+    }
+
+
+async def test_source_discovery_failure_rolls_back_and_audits_primary_failure(
+    build, policy
+) -> None:
+    store, execution, user, resource = _world(
+        build, policy, "ServicePrincipal", ResourceType.FACT_SLOT
+    )
+
+    async def discover():
+        raise LookupError("source lookup failed")
+
+    async def forbidden(_decisions):
+        pytest.fail("no effect after callback failure")
+
+    with pytest.raises(LookupError):
+        await execution.mutate(
+            user,
+            [resource.key],
+            Action.COMMIT,
+            trace_id="f0006",
+            operation=forbidden,
+            additional_reads=discover,
+        )
+    assert store.log[-2:] == ["rollback", "commit"]
+    assert [d.operation_outcome for d in store.committed] == [OperationOutcome.FAILED]
+
+
+async def test_source_audit_failure_prevents_mutation(build, policy, monkeypatch) -> None:
+    store, execution, user, resource = _world(
+        build, policy, "ServicePrincipal", ResourceType.FACT_SLOT
+    )
+    source = build.envelope(resource.scope)
+    store.resources[source.key] = source
+    append = store.append_decision
+
+    async def fail_read_audit(decision):
+        if decision.action == Action.READ:
+            raise OSError("source audit unavailable")
+        await append(decision)
+
+    async def discover():
+        return [source.key]
+
+    async def forbidden(_decisions):
+        pytest.fail("all source audits must stage before effects")
+
+    monkeypatch.setattr(store, "append_decision", fail_read_audit)
+    with pytest.raises(AuthorizationUnavailable):
+        await execution.mutate(
+            user,
+            [resource.key],
+            Action.COMMIT,
+            trace_id="f0006",
+            operation=forbidden,
+            additional_reads=discover,
+        )
+    assert store._pending == [] and store.committed == []

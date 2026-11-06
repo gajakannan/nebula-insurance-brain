@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="5" failures="0" skipped="0" tests="20" time="26.191" timestamp="2026-11-03T02:49:59.021330+00:00" hostname="abeb34c4d8bc"><testcase classname="tests.integration.test_document_delivery" name="test_bundle_retry_completes_partial_publication_and_verifies_hashes" time="0.177" /><testcase classname="tests.integration.test_document_delivery" name="test_each_property_gets_its_own_native_selector[$1,000,000]" time="0.001" /><testcase classname="tests.integration.test_document_delivery" name="test_each_property_gets_its_own_native_selector[USD]" time="0.001" /><testcase classname="tests.integration.test_document_delivery" name="test_each_property_gets_its_own_native_selector[per occurrence]" time="0.001" /><testcase classname="tests.integration.test_document_delivery" name="test_each_property_gets_its_own_native_selector[2026-01-01]" time="0.001" /><testcase classname="tests.integration.test_document_delivery" name="test_node_anchor_does_not_ground_missing_or_ambiguous_properties" time="0.001" /><testcase classname="tests.integration.test_document_delivery" name="test_worker_restart_after_model_failure_reuses_bundle_and_emits_one_completion" time="2.417" /><testcase classname="tests.integration.test_document_delivery" name="test_run_missing_file_is_corruption_not_a_cache_miss" time="0.259" /><testcase classname="tests.integration.test_document_delivery" name="test_table_geometry_and_ambiguous_unlocated_cells" time="0.001" /><testcase classname="tests.integration.test_document_delivery" name="test_job_authorization_reloads_revocations_and_audits_denials" time="0.819" /><testcase classname="tests.integration.test_document_delivery" name="test_outbox_import_is_atomic_idempotent_and_never_commits_facts[False]" time="1.137" /><testcase classname="tests.integration.test_document_delivery" name="test_outbox_import_is_atomic_idempotent_and_never_commits_facts[True]" time="1.024" /><testcase classname="tests.integration.test_document_delivery" name="test_process_exit_after_publication_recovers_without_conversion_or_model" time="1.633" /><testcase classname="tests.integration.test_document_delivery" name="test_value_crossing_regions_keeps_separate_complete_selectors" time="0.001" /><testcase classname="tests.integration.test_document_delivery" name="test_relationship_object_is_not_grounded_by_a_node_anchor" time="0.001" /><testcase classname="tests.integration.test_content_worker_v2" name="test_publication_import_and_second_profile_reuse[False]" time="3.320"><error message="failed on setup with &quot;PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'&quot;">neuron/tests/integration/test_content_worker_v2.py:55: in native
+    parsed = DoclingAdapter(capture_provenance=True).parse(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:41: in __init__
+    self._converter, self._ocr = self._new_converter()
+                                 ^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:46: in _new_converter
+    converter.initialize_pipeline(InputFormat.PDF)
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:504: in initialize_pipeline
+    pipeline = self._get_pipeline(doc_format=format)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:794: in _get_pipeline
+    self.initialized_pipelines[cache_key] = pipeline_class(
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:595: in __init__
+    self._init_models()
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:616: in _init_models
+    self.ocr_model = self._make_ocr_model(art_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:692: in _make_ocr_model
+    return factory.create_instance(
+/opt/venv/lib/python3.14/site-packages/docling/models/factories/base_factory.py:60: in create_instance
+    return _cls(options=options, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/auto_ocr_model.py:125: in __init__
+    self._engine = RapidOcrModel(
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:455: in __init__
+    self.reader = RapidOCR(
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:46: in __init__
+    self._initialize(cfg)
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:71: in _initialize
+    self.text_det = TextDetector(cfg.Det)
+                    ^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/ch_ppocr_det/main.py:47: in __init__
+    self.session = get_engine(cfg.engine_type)(cfg)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/main.py:22: in __init__
+    self.predictor = ModelLoader(cfg, self.device).predictor
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:20: in __init__
+    model_path = self._init_model_path(cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:41: in _init_model_path
+    DownloadFile.run(
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:41: in run
+    cls._save_response_with_progress(response, save_path, logger)
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:90: in _save_response_with_progress
+    with open(save_path, "wb") as output_file:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'</error></testcase><testcase classname="tests.integration.test_content_worker_v2" name="test_publication_import_and_second_profile_reuse[True]" time="0.001"><error message="failed on setup with &quot;PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'&quot;">neuron/tests/integration/test_content_worker_v2.py:55: in native
+    parsed = DoclingAdapter(capture_provenance=True).parse(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:41: in __init__
+    self._converter, self._ocr = self._new_converter()
+                                 ^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:46: in _new_converter
+    converter.initialize_pipeline(InputFormat.PDF)
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:504: in initialize_pipeline
+    pipeline = self._get_pipeline(doc_format=format)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:794: in _get_pipeline
+    self.initialized_pipelines[cache_key] = pipeline_class(
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:595: in __init__
+    self._init_models()
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:616: in _init_models
+    self.ocr_model = self._make_ocr_model(art_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:692: in _make_ocr_model
+    return factory.create_instance(
+/opt/venv/lib/python3.14/site-packages/docling/models/factories/base_factory.py:60: in create_instance
+    return _cls(options=options, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/auto_ocr_model.py:125: in __init__
+    self._engine = RapidOcrModel(
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:455: in __init__
+    self.reader = RapidOCR(
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:46: in __init__
+    self._initialize(cfg)
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:71: in _initialize
+    self.text_det = TextDetector(cfg.Det)
+                    ^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/ch_ppocr_det/main.py:47: in __init__
+    self.session = get_engine(cfg.engine_type)(cfg)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/main.py:22: in __init__
+    self.predictor = ModelLoader(cfg, self.device).predictor
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:20: in __init__
+    model_path = self._init_model_path(cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:41: in _init_model_path
+    DownloadFile.run(
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:41: in run
+    cls._save_response_with_progress(response, save_path, logger)
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:90: in _save_response_with_progress
+    with open(save_path, "wb") as output_file:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'</error></testcase><testcase classname="tests.integration.test_content_worker_v2" name="test_concurrent_profiles_share_pending_identity_and_preserve_restrictions" time="0.000"><error message="failed on setup with &quot;PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'&quot;">neuron/tests/integration/test_content_worker_v2.py:55: in native
+    parsed = DoclingAdapter(capture_provenance=True).parse(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:41: in __init__
+    self._converter, self._ocr = self._new_converter()
+                                 ^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:46: in _new_converter
+    converter.initialize_pipeline(InputFormat.PDF)
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:504: in initialize_pipeline
+    pipeline = self._get_pipeline(doc_format=format)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:794: in _get_pipeline
+    self.initialized_pipelines[cache_key] = pipeline_class(
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:595: in __init__
+    self._init_models()
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:616: in _init_models
+    self.ocr_model = self._make_ocr_model(art_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:692: in _make_ocr_model
+    return factory.create_instance(
+/opt/venv/lib/python3.14/site-packages/docling/models/factories/base_factory.py:60: in create_instance
+    return _cls(options=options, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/auto_ocr_model.py:125: in __init__
+    self._engine = RapidOcrModel(
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:455: in __init__
+    self.reader = RapidOCR(
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:46: in __init__
+    self._initialize(cfg)
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:71: in _initialize
+    self.text_det = TextDetector(cfg.Det)
+                    ^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/ch_ppocr_det/main.py:47: in __init__
+    self.session = get_engine(cfg.engine_type)(cfg)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/main.py:22: in __init__
+    self.predictor = ModelLoader(cfg, self.device).predictor
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:20: in __init__
+    model_path = self._init_model_path(cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:41: in _init_model_path
+    DownloadFile.run(
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:41: in run
+    cls._save_response_with_progress(response, save_path, logger)
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:90: in _save_response_with_progress
+    with open(save_path, "wb") as output_file:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'</error></testcase><testcase classname="tests.integration.test_content_worker_v2" name="test_missing_producer_is_hard_failure_without_ready_or_fallback" time="0.000"><error message="failed on setup with &quot;PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'&quot;">neuron/tests/integration/test_content_worker_v2.py:55: in native
+    parsed = DoclingAdapter(capture_provenance=True).parse(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:41: in __init__
+    self._converter, self._ocr = self._new_converter()
+                                 ^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:46: in _new_converter
+    converter.initialize_pipeline(InputFormat.PDF)
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:504: in initialize_pipeline
+    pipeline = self._get_pipeline(doc_format=format)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:794: in _get_pipeline
+    self.initialized_pipelines[cache_key] = pipeline_class(
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:595: in __init__
+    self._init_models()
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:616: in _init_models
+    self.ocr_model = self._make_ocr_model(art_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:692: in _make_ocr_model
+    return factory.create_instance(
+/opt/venv/lib/python3.14/site-packages/docling/models/factories/base_factory.py:60: in create_instance
+    return _cls(options=options, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/auto_ocr_model.py:125: in __init__
+    self._engine = RapidOcrModel(
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:455: in __init__
+    self.reader = RapidOCR(
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:46: in __init__
+    self._initialize(cfg)
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:71: in _initialize
+    self.text_det = TextDetector(cfg.Det)
+                    ^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/ch_ppocr_det/main.py:47: in __init__
+    self.session = get_engine(cfg.engine_type)(cfg)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/main.py:22: in __init__
+    self.predictor = ModelLoader(cfg, self.device).predictor
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:20: in __init__
+    model_path = self._init_model_path(cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:41: in _init_model_path
+    DownloadFile.run(
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:41: in run
+    cls._save_response_with_progress(response, save_path, logger)
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:90: in _save_response_with_progress
+    with open(save_path, "wb") as output_file:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'</error></testcase><testcase classname="tests.integration.test_content_worker_v2" name="test_corrupt_accepted_marker_never_becomes_conversion_miss" time="0.000"><error message="failed on setup with &quot;PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'&quot;">neuron/tests/integration/test_content_worker_v2.py:55: in native
+    parsed = DoclingAdapter(capture_provenance=True).parse(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:41: in __init__
+    self._converter, self._ocr = self._new_converter()
+                                 ^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:46: in _new_converter
+    converter.initialize_pipeline(InputFormat.PDF)
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:504: in initialize_pipeline
+    pipeline = self._get_pipeline(doc_format=format)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:794: in _get_pipeline
+    self.initialized_pipelines[cache_key] = pipeline_class(
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:595: in __init__
+    self._init_models()
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:616: in _init_models
+    self.ocr_model = self._make_ocr_model(art_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:692: in _make_ocr_model
+    return factory.create_instance(
+/opt/venv/lib/python3.14/site-packages/docling/models/factories/base_factory.py:60: in create_instance
+    return _cls(options=options, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/auto_ocr_model.py:125: in __init__
+    self._engine = RapidOcrModel(
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:455: in __init__
+    self.reader = RapidOCR(
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:46: in __init__
+    self._initialize(cfg)
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:71: in _initialize
+    self.text_det = TextDetector(cfg.Det)
+                    ^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/ch_ppocr_det/main.py:47: in __init__
+    self.session = get_engine(cfg.engine_type)(cfg)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/main.py:22: in __init__
+    self.predictor = ModelLoader(cfg, self.device).predictor
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:20: in __init__
+    model_path = self._init_model_path(cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:41: in _init_model_path
+    DownloadFile.run(
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:41: in run
+    cls._save_response_with_progress(response, save_path, logger)
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:90: in _save_response_with_progress
+    with open(save_path, "wb") as output_file:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'</error></testcase></testsuite></testsuites>

@@ -1,7 +1,8 @@
 id: entity:assertion-document-reference
 label: Document-local assertion reference
-notes: Proposed document-version-scoped reference declaration with a quoted introducing name; storage supports
-  assertion subjects/objects without creating or resolving canonical Entity identity.
+notes: Implemented document-version-scoped reference declaration with a grounded introducing name and structural
+  tenant/KB keys. Only references used by accepted claims are retained atomically. These local subjects/objects
+  do not create or resolve canonical Entity identity; F0017 owns later identity work.
 source_docs:
 - F0006/feature-assembly-plan.md
 - F0006/worked-examples.md
@@ -9,8 +10,9 @@ source_docs:
 rationale:
 - adr: adr:0075
   section: Decision
-  summary: Proposed F0006 design preserves legacy records and requires scoped structural admission and source
-    eligibility guards; runtime proof pending.
+  summary: F0006 as-built versioned claims, structural admission and guarded current consumers have source-bound
+    synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal Proposed ADR acceptance
+    is implied.
 related_nodes:
 - adr:0075
 - entity:assertion

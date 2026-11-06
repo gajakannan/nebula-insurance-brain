@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="11" time="8.099" timestamp="2026-11-03T02:21:50.066216+00:00" hostname="5f128650028e"><testcase classname="tests.integration.test_assertion_consumers" name="test_qualified_typed_commit_uses_same_uow_source_authority" time="0.711" /><testcase classname="tests.integration.test_assertion_consumers" name="test_independent_restrictions_prevent_canonical_effects[mood]" time="0.640" /><testcase classname="tests.integration.test_assertion_consumers" name="test_independent_restrictions_prevent_canonical_effects[open]" time="0.641" /><testcase classname="tests.integration.test_assertion_consumers" name="test_independent_restrictions_prevent_canonical_effects[described]" time="0.647" /><testcase classname="tests.integration.test_assertion_consumers" name="test_direct_caller_and_mixed_unknown_refs_cannot_bypass_source_guard" time="0.656" /><testcase classname="tests.integration.test_assertion_consumers" name="test_reviewed_described_initial_use_cannot_close_or_supersede" time="0.704" /><testcase classname="tests.integration.test_assertion_consumers" name="test_v2_correction_preserves_basis_and_owns_new_evidence[INFERRED]" time="0.624" /><testcase classname="tests.integration.test_assertion_consumers" name="test_v2_correction_preserves_basis_and_owns_new_evidence[AMBIGUOUS]" time="0.620" /><testcase classname="tests.integration.test_assertion_consumers" name="test_correction_and_mixed_ancestry_cannot_clear_mood" time="0.693" /><testcase classname="tests.integration.test_assertion_consumers" name="test_correction_rederives_a_new_locator_instead_of_trusting_offsets" time="0.652" /><testcase classname="tests.integration.test_assertion_consumers" name="test_http_source_denial_precedes_sanitized_eligibility_error[True]" time="0.626"><failure message="assert 422 == 404&#10; +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code">world = &lt;engine.tests.fixtures.assertions.harness.World object at 0x73b268b395e0&gt;
+database = 'postgresql://brain:brain@postgres:5432/f0006_qe_cee33edf59c8'
+deny_source = True
+
+    @pytest.mark.parametrize("deny_source", [True, False])
+    async def test_http_source_denial_precedes_sanitized_eligibility_error(world, database, deny_source):
+        original = (await world.admit([world.candidate(qualifiers={"mood": "offered subject to inspection"})])).accepted[0]
+        with Session(world.sync_engine) as session, session.begin():
+            slot_id = fixtures.seed_fact_slot(session, *world.owner, classifications=("commit-only",))
+            principal = world.actor
+            if deny_source:
+                principal = fixtures.seed_principal(session, issuer="urn:f0006:limited", subject=str(uuid4()), kind=PrincipalKind.SERVICE)
+                fixtures.seed_grant(session, principal.id, *world.owner, "ServicePrincipal", classifications={"commit-only"})
+        app = create_app()
+    
+        async def session_override():
+            async with AsyncSession(world.engine, expire_on_commit=False) as session:
+                yield session
+    
+        app.dependency_overrides[get_db_session] = session_override
+        app.dependency_overrides[current_principal] = lambda: principal
+        body = wire_value(proposal(slot_id, [original.server_evidence[0].evidence_id]))
+        body.pop("slot_id")
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.post(f"/facts/{slot_id}/commits", json=body)
+&gt;       assert response.status_code == (404 if deny_source else 422)
+E       assert 422 == 404
+E        +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code
+
+engine/tests/integration/test_assertion_consumers.py:217: AssertionError</failure></testcase></testsuite></testsuites>

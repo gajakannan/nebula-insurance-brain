@@ -1,0 +1,171 @@
+from uuid import uuid4
+
+import psycopg
+import pytest
+from alembic import command
+from brain_testing import fixtures
+from engine.tests.fixtures.assertions import harness
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+_clean_fact_tables = harness._clean_fact_tables
+database = harness.database
+world = harness.world
+world_factory = harness.world_factory
+counts = harness.counts
+configuration = harness.configuration
+
+
+def insert_legacy(connection, identity, owner, *, slot="limit", parent=None, version=1):
+    connection.execute(
+        "INSERT INTO assertion(id,run_id,origin,original_assertion_id,version,"
+        "subject_type,slot_type,"
+        "value,model_confidence,interpretation_basis,created_at,tenant_id,knowledge_base_id) "
+        "VALUES(%s,NULL,'MACHINE_EXTRACTION',%s,%s,'Policy',%s,"
+        "'{\"amount\":500000}',0.6,'INFERRED',now(),%s,%s)",
+        (identity, parent, version, slot, *owner),
+    )
+
+
+def test_additive_upgrade_preserves_legacy_identity_and_empty_rollback(database):
+    command.upgrade(configuration(), "0010")
+    owner, identity = (uuid4(), uuid4()), uuid4()
+    engine = create_engine(database.replace("postgresql://", "postgresql+psycopg://"))
+    try:
+        with Session(engine) as session, session.begin():
+            fixtures.seed_scope(session, *owner)
+        with psycopg.connect(database) as connection:
+            insert_legacy(connection, identity, owner)
+            before = connection.execute(
+                "SELECT to_jsonb(a) FROM assertion a WHERE id=%s", (identity,)
+            ).fetchone()[0]
+        command.upgrade(configuration(), "0011")
+        with psycopg.connect(database) as connection:
+            after = connection.execute(
+                "SELECT to_jsonb(a) FROM assertion a WHERE id=%s", (identity,)
+            ).fetchone()[0]
+        assert after.pop("semantic_contract_version") == 1 and after == before
+        command.downgrade(configuration(), "0010")
+        command.upgrade(configuration(), "0011")
+        with psycopg.connect(database) as connection:
+            assert connection.execute(
+                "SELECT value,interpretation_basis FROM assertion WHERE id=%s", (identity,)
+            ).fetchone() == ({"amount": 500000}, "INFERRED")
+    finally:
+        engine.dispose()
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "UPDATE assertion SET value='{}' WHERE id=%s",
+        "DELETE FROM assertion WHERE id=%s",
+        "UPDATE assertion SET version=version+2 WHERE id=%s",
+        "DELETE FROM assertion_evidence WHERE assertion_id=%s",
+        "UPDATE assertion_evidence SET char_start=999 WHERE assertion_id=%s",
+        "UPDATE assertion_semantics SET predicate_id='different' WHERE assertion_id=%s",
+    ],
+)
+async def test_original_assertions_extensions_and_evidence_are_immutable(world, database, mutation):
+    admitted = (await world.admit([world.candidate()])).accepted[0]
+    before = counts(database)
+    with pytest.raises(psycopg.errors.CheckViolation), psycopg.connect(database) as connection:
+        connection.execute(mutation, (admitted.record.id,))
+    assert counts(database) == before
+    with psycopg.connect(database) as connection:
+        connection.execute(
+            "UPDATE assertion SET version=version+1 WHERE id=%s", (admitted.record.id,)
+        )
+        assert (
+            connection.execute(
+                "SELECT version FROM assertion WHERE id=%s", (admitted.record.id,)
+            ).fetchone()[0]
+            == 2
+        )
+
+
+async def test_core_only_v2_and_legacy_sentinel_fail_at_commit(world, database):
+    for discriminator, slot in ((2, "limit"), (1, "__OPEN_STATEMENT_V2__")):
+        with pytest.raises(psycopg.errors.CheckViolation), psycopg.connect(database) as connection:
+            identity = uuid4()
+            insert_legacy(connection, identity, world.owner, slot=slot)
+            if discriminator == 2:
+                # The direct INSERT names v2; updates remain prohibited.
+                connection.rollback()
+                connection.execute(
+                    "INSERT INTO assertion(id,run_id,origin,version,subject_type,slot_type,value,"
+                    "model_confidence,interpretation_basis,created_at,tenant_id,knowledge_base_id,"
+                    "semantic_contract_version) "
+                    "VALUES(%s,NULL,'DOCUMENT_INTERPRETATION',1,'Policy','limit','{}',"
+                    "0.5,'EXPLICIT',now(),%s,%s,2)",
+                    (identity, *world.owner),
+                )
+    assert counts(database)["assertion"] == 0
+
+
+async def test_v1_child_of_v2_parent_is_refused_by_deferred_guard(world, database):
+    parent = (await world.admit([world.candidate()])).accepted[0]
+    with (
+        pytest.raises(psycopg.errors.CheckViolation, match="correction contract mismatch"),
+        psycopg.connect(database) as connection,
+    ):
+        insert_legacy(connection, uuid4(), world.owner, parent=parent.record.id)
+    assert counts(database)["assertion"] == 1
+
+
+async def test_occupied_downgrade_stops_without_erasing_semantics(world, database):
+    await world.admit([world.candidate()])
+    before = counts(database)
+    with pytest.raises(RuntimeError, match="downgrade refused"):
+        command.downgrade(configuration(), "0010")
+    assert counts(database) == before
+    with psycopg.connect(database) as connection:
+        assert connection.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0011"
+"""F0006 additive versioned assertion semantics and immutable evidence.
+
+Revision ID: 0011
+Revises: 0010
+"""
+
+from collections.abc import Sequence
+
+from alembic import op
+from sqlalchemy import text
+
+revision: str = "0011"
+down_revision: str | None = "0010"
+branch_labels: Sequence[str] | str | None = None
+depends_on: Sequence[str] | str | None = None
+
+
+SCHEMA = r"""
+ALTER TABLE assertion ADD COLUMN semantic_contract_version smallint NOT NULL DEFAULT 1;
+ALTER TABLE assertion ADD CONSTRAINT ck_assertion_contract_version
+  CHECK (semantic_contract_version IN (1,2));
+ALTER TABLE assertion ADD CONSTRAINT ck_assertion_confidence
+  CHECK (model_confidence IS NULL OR (model_confidence >= 0 AND model_confidence <= 1));
+
+CREATE TABLE assertion_document_reference (
+  id uuid PRIMARY KEY,
+  document_version_id uuid NOT NULL,
+  tenant_id uuid NOT NULL,
+  knowledge_base_id uuid NOT NULL,
+  entity_type text NOT NULL CHECK (length(entity_type) > 0),
+  label text NOT NULL CHECK (length(label) > 0),
+  created_by uuid NOT NULL REFERENCES principal(id),
+  created_at timestamptz NOT NULL,
+  CONSTRAINT uq_assertion_reference_owner UNIQUE
+    (id,document_version_id,tenant_id,knowledge_base_id),
+  CONSTRAINT fk_assertion_reference_document FOREIGN KEY
+    (document_version_id,tenant_id,knowledge_base_id)
+    REFERENCES document_version(id,tenant_id,knowledge_base_id)
+);
+
+CREATE TABLE assertion_name_claim (
+  document_version_id uuid NOT NULL,
+  tenant_id uuid NOT NULL,
+  knowledge_base_id uuid NOT NULL,
+  normalized_name text NOT NULL CHECK (length(normalized_name) > 0),
+
+Exit code: 0
+

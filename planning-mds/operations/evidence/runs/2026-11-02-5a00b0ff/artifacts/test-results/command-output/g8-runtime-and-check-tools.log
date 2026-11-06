@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+"""
+Story Validation Script
+
+Validates user stories for completeness and quality.
+Checks that stories follow the template and have all required sections.
+
+Stories are colocated in feature folders: {NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/F{NNNN}-S{NNNN}-{slug}.md
+
+Usage:
+    python3 validate-stories.py <file-or-dir> [<file-or-dir> ...]
+    python3 validate-stories.py {NEBULA_PRODUCT_ROOT}/planning-mds/features/
+    python3 validate-stories.py {NEBULA_PRODUCT_ROOT}/planning-mds/features/F0001-dashboard/F0001-S0001-nudge-cards.md
+    python3 validate-stories.py --strict-warnings {NEBULA_PRODUCT_ROOT}/planning-mds/features/
+"""
+
+import sys
+import io
+import os
+import re
+import stat
+import argparse
+from pathlib import Path
+
+# Windows cp1252 stdout can't encode emojis used in report output.
+# Reconfigure to utf-8 unconditionally — safe on all platforms.
+if hasattr(sys.stdout, 'buffer'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+if hasattr(sys.stderr, 'buffer'):
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+from typing import List, Tuple, Iterable
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from _product_root import add_product_root_arg, resolve_product_root  # noqa: E402
+
+
+STRICT_WARNING_PREFIXES = (
+    "Acceptance criteria contain vague terms:",
+    "No edge cases or error scenarios documented",
+    "No permission/authorization checks documented",
+    "Story involves data mutation but has no audit/timeline requirements",
+)
+
+_MAX_STORY_BYTES = 1_048_576
+_MAX_DESCRIPTOR_ENTRIES = 4_096
+_MAX_DESCRIPTOR_DEPTH = 32
+
+
+def _metadata_fingerprint(details):
+    return (
+        details.st_dev,
+        details.st_ino,
+        details.st_mode,
+        details.st_uid,
+        details.st_size,
+        details.st_mtime_ns,
+        details.st_ctime_ns,
+        details.st_nlink,
+    )
+
+
+def _require_safe_metadata(details, *, directory: bool) -> None:
+    expected_kind = stat.S_ISDIR(details.st_mode) if directory else stat.S_ISREG(details.st_mode)
+    if not expected_kind:
+        raise ValueError("descriptor entry has an unsafe filesystem type")
+    if details.st_uid != os.getuid():
+        raise ValueError("descriptor entry is not owned by the current user")
+    if stat.S_IMODE(details.st_mode) & 0o022:
+        raise ValueError("descriptor entry is group- or world-writable")
+    if not directory and details.st_nlink < 1:
+        raise ValueError("descriptor story is no longer linked below the feature root")
+
+
+def _pread_exact(file_descriptor: int, size: int) -> bytes:
+    payload = bytearray()
+    while len(payload) < size:
+        chunk = os.pread(
+            file_descriptor,
+            min(64 * 1024, size - len(payload)),
+            len(payload),
+        )
+        if not chunk:
+            raise ValueError("descriptor story changed during validation")
+        payload.extend(chunk)
+    return bytes(payload)
+
+
+def _read_stable_story(file_descriptor: int) -> str:
+    before = os.fstat(file_descriptor)
+    _require_safe_metadata(before, directory=False)
+    if before.st_size > _MAX_STORY_BYTES:
+        raise ValueError("descriptor story exceeds the one MiB validation limit")
+
+    first = _pread_exact(file_descriptor, before.st_size)
+    middle = os.fstat(file_descriptor)
+    second = _pread_exact(file_descriptor, before.st_size)
+    after = os.fstat(file_descriptor)
+    if (
+        _metadata_fingerprint(before) != _metadata_fingerprint(middle)
+        or _metadata_fingerprint(middle) != _metadata_fingerprint(after)
+        or first != second
+    ):
+        raise ValueError("descriptor story changed during validation")
+    return first.decode("utf-8")
+
+
+class StoryValidator:
+    def __init__(self, file_path: str, content: str | None = None):
+        self.file_path = Path(file_path)
+        self.content = ""
+        self._descriptor_content = content
+        self.errors = []
+        self.warnings = []
+
+    def load_story(self) -> bool:
+        """Load story file content."""
+        if self._descriptor_content is not None:
+            self.content = self._descriptor_content
+            return True
+        try:
+            self.content = self.file_path.read_text(encoding='utf-8')
+            return True
+        except Exception as e:
+            self.errors.append(f"Failed to read file: {e}")
+            return False
+agents/actions/feature.md:43:`agents/templates/prompts/evidence-contract/feature-operator-friendly.md` and
+agents/actions/feature.md:120:   - `{NEBULA_PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/feature-assembly-plan.md` (canonical per-feature execution plan; use `agents/templates/feature-assembly-plan-template.md`)
+agents/actions/feature.md:676:7. Record the outcome in `kg-reconciliation.md` (template: `agents/templates/kg-reconciliation-template.md`): the binding delta applied, new/affirmed canonical nodes, and the green generated-layer + drift validator results.
+agents/actions/feature.md:835:- [ ] Tracker governance contract available (`{NEBULA_PRODUCT_ROOT}/planning-mds/features/TRACKER-GOVERNANCE.md`, seeded from `agents/templates/tracker-governance-template.md` when missing)
+
+Exit code: 0
+

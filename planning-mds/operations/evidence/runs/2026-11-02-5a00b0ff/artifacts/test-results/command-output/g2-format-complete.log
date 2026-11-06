@@ -1,0 +1,15 @@
+unformatted: File would be reformatted
+   --> engine/tests/integration/test_assertion_ownership.py:173:28
+    |
+172 |     with pytest.raises(psycopg.errors.CheckViolation), psycopg.connect(database) as connection:
+    -         connection.execute(
+    -             sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(restricted_sql_role))
+    -         )
+173 +         connection.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(restricted_sql_role)))
+174 |         connection.execute(
+    |
+
+1 file would be reformatted, 30 files already formatted
+
+Exit code: 1
+

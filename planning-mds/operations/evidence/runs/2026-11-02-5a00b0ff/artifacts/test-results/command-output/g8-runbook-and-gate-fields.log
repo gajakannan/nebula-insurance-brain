@@ -1,0 +1,60 @@
+
+[ADR-0063](../../architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md), [ADR-0065](../../architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../examples/statements-time-and-governance.md).
+
+- Persist both assertion kinds: `OPEN_STATEMENT` (subject, source relation phrase, object or literal, role-word qualifiers, time-mention references, mandatory quote, nullable predicate) and `TYPED_ASSERTION` (ontology property and release). v0.1 acceptance runs on the template route; open extraction and alignment ship in F0066 (ADR-0063).
+- Define the admission service contract: quote-in-block, name-in-quote, time-words-in-quote, and name-claimed-by-another checks; server-computed selectors; drop reasons (ADR-0065).
+- Add the `mood` qualifier. Mood-bearing statements are never eligible for canonical facts; an issued policy's operative provisions remain contract facts (ADR-0065, EX-SEM-007).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).
+- **Schema versioning (validate finding A-5):** `schemas/interpretation-result.schema.json` sets `additionalProperties: false`. Assertion kind, source phrase, quote and selector, role-word qualifiers including mood, and time-mention references need a versioned schema addition with compatible readers; existing results stay valid.
+# F0006 — Getting started
+
+**State:** Phase A+B approved; implementation run `2026-11-02-5a00b0ff` is in progress. G0–G3 passed; G4 operator approval with explicit SEC-01 mitigation justification is pending.
+
+Read [PRD.md](PRD.md), [personas.md](personas.md), the five story files, [acceptance-criteria-checklist.md](acceptance-criteria-checklist.md), [STATUS.md](STATUS.md), then the [assembly plan](feature-assembly-plan.md), [ADR-0075](../../architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md) and [worked examples](worked-examples.md). The implementation is additive and awaits independent review and operator approval.
+
+The product root bound for this run is `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`. Framework commands run from `/home/gajap/uSandbox/repos/nebula/nebula-agents` and always receive that absolute root.
+
+To resume this run, first execute from the framework:
+
+```bash
+python3 agents/scripts/resume-brief.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-11-02-5a00b0ff
+python3 agents/scripts/project_context.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --action feature
+```
+
+Do not initialize a new run for this checkpoint. Implementation evidence is under `planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/`. The original planning approval remains recorded independently in the 2026-11-01 planning runs.
+
+## Implementation and local verification
+
+Key code is in `engine/packages/brain-assertions/`, the strict DTO/dispatch/schema
+additions in `brain-contracts`, and the persistence adapter plus migration 0011.
+Existing security mutation, fact commit and review consumers enforce source READ and
+eligibility before effects. There is no assertion HTTP endpoint or automatic v2 producer.
+
+The run's `deployability-check.md` documents locked builds, immutable-image smoke,
+schema packaging and guarded rollback. Run `artifacts/runtime/compose.yaml` from the
+product root after starting the existing PostgreSQL dependency; use the run's
+`artifacts/runtime/prepare_database.py` inside engine-validation for the dedicated
+runtime database. Test commands and results are durable under the run, including
+`artifacts/test-results/g2-full-changed-code.xml` and the QE-owned reports. Do not
+point destructive test cleanup at the historical development database.
+
+New F0006 integration fixtures require explicit BRAIN_MIGRATION_ADMIN_URL and use
+owned temporary databases. They require neither a model nor conversion. Optional
+existing OCR regression modules use separate processes and bounded numerical-library
+thread counts; their model cache must be writable inside the container.
+
+## Compatibility context
+
+F0005 closed by rejecting Graph dense. Its final STATUS/ADR-0060 decision and accepted ADR-0074 govern current execution controls; earlier proof summaries do not establish activation. `direct-baseline` with the v1 writer remains default. F0006 must support legacy result readers and correction chains without fabricated provenance. The existing strict schema is `planning-mds/schemas/interpretation-result.schema.json`; The approved Phase B design supplies a compatible versioned addition.
+
+Existing consumer locations and proposed changes are enumerated in the assembly plan: DocumentResultImporter, additive review correction, CanonicalCommitService and current fact/review routes. The new strict schemas are `assertion-record-v2`, `interpretation-result-v2` and `assertion-admission-result-v1` under `planning-mds/schemas/`. The legacy result schema is preserved. Sixteen synthetic shape/version cases in `contract-examples.json` distinguish expected validity from runtime behaviour.
+
+Do not nest the existing read authorization facade inside a mutation: it commits its own unit of work. The assembly plan specifies an optional trusted source-read callback on the mutation facade, keeping source and commit decisions in one transaction. New v2 writes require guard-capable consumers to be deployed first; rollback retains the extension and guard once v2 rows exist. No new runtime config flag is added.
+
+## Semantic examples
+
+Reuse [EX-GL-001](../../examples/neurosymbolic-gl/README.md) and [EX-SEM-001/005–007](../../examples/statements-time-and-governance.md). They are synthetic teaching fixtures, outside the frozen holdout. A genuine quote with a misread value passes structural admission and still needs review. Keep all illustrative expectations separate from observed implementation evidence.
+sed: can't read agents/product-manager/scripts/validate-feature-evidence.py: No such file or directory
+
+Exit code: 2
+

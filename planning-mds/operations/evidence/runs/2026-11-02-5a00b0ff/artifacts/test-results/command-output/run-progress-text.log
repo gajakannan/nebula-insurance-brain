@@ -1,0 +1,114 @@
+# F0006 Feature Evidence Run
+
+## Run Summary
+
+- Run ID: `2026-11-02-5a00b0ff`
+- Feature: F0006 — Assertion plane + origin + interpretation basis
+- NEBULA_PRODUCT_ROOT: `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain` (recorded environment selection, normalized once)
+- Mode: clean; slice order: assembly-plan; prior completion run: none
+- Contract: 2026-07-11
+- Resumed: 2026-11-03T00:06:32+00:00
+
+## Status
+
+Run resumed after the operator changed Codex permissions. G0 judgment and
+procedural validation now PASS. Manifest is in-progress; G1 is the next gate.
+No feature implementation, runtime test, role implementation signoff or approval
+is claimed. The initial attempt's runtime-blocked README is preserved verbatim
+under `artifacts/test-results/initial-runtime-block-readme.md`.
+
+## Evidence Index
+
+| Evidence | Meaning |
+|---|---|
+| `g0-assembly-plan-validation.md` | Architect assembly judgment and implementation constraints |
+| `artifacts/test-results/g0-migration-lineage.json` | Static source migration head: 0010 |
+| `g1-runtime-preflight.md` | Initial failure evidence until DevOps records recovered preflight |
+| `artifacts/test-results/runtime-*` | Original Docker discovery and WSL transport evidence |
+| `artifacts/runtime/` | Current run's application runtime definitions, owned by DevOps |
+| `commands.log`, `lifecycle-gates.log`, `gate-state.json` | Executed commands, stage results and durable journal |
+| `artifacts/diffs/changed-files.txt` | Current product-repository changed-path inventory |
+
+## Validation Summary
+
+G0 was attempted through `run-gate.py`. Initial failures exposed missing base-run
+headings/diff/G0 decision row from the stopped attempt and premature scan
+completeness checks at G0. The base-run omissions are addressed here. Parent
+orchestration is fixing the validator's security-scan stage boundary; security
+scope stays true, and pending scans are not represented as runs or waivers.
+The repaired stage was rerun successfully with exit 0. Exact failures remain in the journal/logs
+and `artifacts/test-results/g0-validator-diagnostic.json`.
+
+## Open Follow-ups
+
+None at G0. Implementation, runtime proof and later-gate evidence remain required.
+
+## Resolved Validator Repair
+
+VF-G0-001 (owner: framework maintainer / Codex) is resolved without waiver.
+Security scan completeness now waits through G0/G1; G2 through closeout retain
+enforcement. The parent ran seven staging regressions in the application runtime
+container; JUnit: `artifacts/test-results/framework-security-scan-staging.xml`.
+G0 then passed through run-gate.py (validate-g0 exit 0). Scope flags remain true;
+empty scans remain pending QE execution rather than waived or falsely completed.
+
+## Resume
+
+Reuse this run from the framework checkout:
+
+```bash
+python3 agents/scripts/resume-brief.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-11-02-5a00b0ff
+python3 agents/scripts/project_context.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --action feature
+```
+
+The missing journal from the first attempt is now created by actual G0 execution.
+Never initialize another F0006 completion run or publish latest-run.json before G8.
+## Assumptions
+
+The approved plan governs the five stories and 35 ACs. It adds versioned assertion
+storage, structural admission and consumer guards; no UI or live extraction activation.
+Runtime, deployment and security booleans reflect planned scope; G2 must reconcile them
+against actual changed code paths when implementation becomes possible. No implementation
+path is claimed changed by this setup-only run.
+
+## Scope Boundaries
+
+Only the approved F0006 five-story assertion contracts/storage/admission/consumer
+guard slice is authorized. No UI, producer activation, new grants or deferred
+F0016/F0018/F0022/F0066 work is introduced. Required roles remain the five listed
+in STATUS.md. Planned scope booleans stay true; G2 reconciles actual paths.
+
+## Lifecycle Stage
+
+G0 passed through run-gate.py; manifest is in-progress and G1 runtime preflight is
+next. The initial runtime failure remains preserved in raw artifacts. No story
+implementation or final role signoff has occurred. DevOps owns recovered runtime
+validation and its G1 report.
+
+## Resume Update — 2026-11-03T00:06:32+00:00
+
+The operator resumed this same run after changing Codex permissions. Actual G0
+execution created gate-state.json. G0 readiness judgment is recorded; base evidence
+shape and a premature security-scan validator check are being repaired before
+stage completion. The earlier runtime-blocked lifecycle text is historical.
+
+### G0 completed — 2026-11-03T00:07:47+00:00
+
+Assembly judgment and validate-g0 pass. The journal now supports normal resume; no new run was created.
+# F0006 Feature Action Execution
+
+Run: `2026-11-02-5a00b0ff`. Product: `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`. Status: runtime-blocked during setup.
+
+| Stage | Position |
+|---|---|
+| Setup | Root bound; concurrent-run check clear; draft evidence run initialized; approved plan and stories read |
+| Runtime discovery | Docker launcher unavailable; no daemon/socket; Windows CLI WSL transport fails |
+| G0 | Pending; assembly-plan validation has not run |
+| G1 | Pending; prerequisite runtime discovery failed, recorded in g1-runtime-preflight.md |
+| G2–G8 | Pending; no implementation, review, approval, signoff or closeout |
+
+Stop condition: runtime preflight cannot be restored in the available session.
+Resume this same run after restoring Docker access; README.md contains the commands.
+
+Exit code: 0
+

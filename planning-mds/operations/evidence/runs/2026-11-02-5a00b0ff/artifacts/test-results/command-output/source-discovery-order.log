@@ -1,0 +1,92 @@
+from brain_assertions.normalization import locate_quote
+from brain_assertions.ports import NameClaimConflict
+from brain_content.contracts import decode_json
+from brain_content.service import ArtifactMetadata
+from brain_content.store import ContentArtifactStore
+from brain_content.validation import ArtifactIntegrityError, VerifiedBundle
+from brain_contracts.assertions import AdmittedAssertion, AssertionRecordV2
+from brain_domain.assertions import ProducerContext, SourceAccessProof, TimeReference, VerifiedBlock
+from brain_domain.authx import Action, AuthorizationDecision, ResourceKey, ResourceType
+from brain_domain.review import EvidenceLocator
+from sqlalchemy import select, text
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from brain_persistence.assertion_models import (
+    AssertionDocumentReference,
+    AssertionNameClaim,
+    AssertionSemantics,
+)
+from brain_persistence.content_repository import ContentArtifactRepository
+from brain_persistence.models import (
+    Assertion,
+    AssertionEvidence,
+    AuditEventRow,
+    ContentArtifact,
+    DocumentVersion,
+    ReviewDecisionRow,
+    ReviewItemRow,
+    SemanticInterpretationRun,
+)
+from brain_persistence.tenancy import inherit_resource_access
+
+NORMALIZATION_VERSION = "f0006-grounding-v1"
+OPEN_SLOT = "__OPEN_STATEMENT_V2__"
+        )
+
+    async def read(self, principal: Principal, assertion_id: UUID) -> dict:
+        # This discovery loads IDs/owners only, never source text or the projection.
+        keys = await self._repository.source_keys(assertion_id)
+        if not keys:
+            raise LookupError("assertion source unavailable")
+
+        async def load(_decision: AuthorizationDecision) -> dict:
+            return await self._repository.project(assertion_id)
+
+        if len(keys) == 1:
+            return await self._execution.read(
+                principal,
+                keys[0],
+                Action.READ,
+                trace_id="assertion-read",
+                load=load,
+            )
+
+        async def load_all(_decisions: Sequence[AuthorizationDecision]) -> dict:
+            return await self._repository.project(assertion_id)
+
+        return await self._execution.mutate(
+            principal,
+            keys,
+            Action.READ,
+            trace_id="assertion-read",
+            operation=load_all,
+        )
+
+    async def read(
+        self,
+        authenticated: Principal,
+        key: ResourceKey,
+        action: str,
+        *,
+        trace_id: str,
+        load: Callable[[AuthorizationDecision], Awaitable[T]],
+        requested: RequestedScope = NO_FILTER,
+        delegation_id: UUID | None = None,
+    ) -> T:
+        evaluated = await self._guarded_decide(
+            authenticated, [key], action, requested, trace_id, delegation_id
+        )
+        if not evaluated[0].decision.allowed:
+            raise await self._deny(evaluated)
+        evaluated = self._recheck_all(evaluated)
+        if not evaluated[0].decision.allowed:
+            raise await self._deny(evaluated)
+        decision = evaluated[0].decision
+        try:
+            payload = await load(decision)
+        except Exception:
+            await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
+            raise
+
+Exit code: 0
+

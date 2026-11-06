@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="20" time="0.422" timestamp="2026-11-05T01:19:02.471532+00:00" hostname="06e1f449ca96"><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_completed_provenance_accepts_all_contract_passing_verdicts[PASS-Done]" time="0.013" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_completed_provenance_accepts_all_contract_passing_verdicts[PASS-Archived]" time="0.009" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_completed_provenance_accepts_all_contract_passing_verdicts[APPROVED-Done]" time="0.010" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_completed_provenance_accepts_all_contract_passing_verdicts[APPROVED-Archived]" time="0.010" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_completed_provenance_accepts_all_contract_passing_verdicts[PASS WITH RECOMMENDATIONS-Done]" time="0.009"><failure message="AssertionError: [&quot;Required role 'Security Reviewer' is missing PASS/APPROVED provenance for story F0038-S0001&quot;]&#10;assert 1 == 0">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_completed_provenance_acce4')
+terminal_state = 'Done', verdict = 'PASS WITH RECOMMENDATIONS'
+
+    @pytest.mark.parametrize("terminal_state", ["Done", "Archived"])
+    @pytest.mark.parametrize(
+        "verdict",
+        ["PASS", "APPROVED", "PASS WITH RECOMMENDATIONS", "APPROVED WITH RECOMMENDATIONS"],
+    )
+    def test_completed_provenance_accepts_all_contract_passing_verdicts(
+        tmp_path: Path, terminal_state: str, verdict: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, verdict, terminal_state=terminal_state)
+        exit_code, issues = tracker_issues(product)
+&gt;       assert exit_code == 0, [issue.message for issue in issues]
+E       AssertionError: ["Required role 'Security Reviewer' is missing PASS/APPROVED provenance for story F0038-S0001"]
+E       assert 1 == 0
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:117: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_completed_provenance_accepts_all_contract_passing_verdicts[PASS WITH RECOMMENDATIONS-Archived]" time="0.009"><failure message="AssertionError: [&quot;Required role 'Security Reviewer' is missing PASS/APPROVED provenance for story F0038-S0001&quot;]&#10;assert 1 == 0">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_completed_provenance_acce5')
+terminal_state = 'Archived', verdict = 'PASS WITH RECOMMENDATIONS'
+
+    @pytest.mark.parametrize("terminal_state", ["Done", "Archived"])
+    @pytest.mark.parametrize(
+        "verdict",
+        ["PASS", "APPROVED", "PASS WITH RECOMMENDATIONS", "APPROVED WITH RECOMMENDATIONS"],
+    )
+    def test_completed_provenance_accepts_all_contract_passing_verdicts(
+        tmp_path: Path, terminal_state: str, verdict: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, verdict, terminal_state=terminal_state)
+        exit_code, issues = tracker_issues(product)
+&gt;       assert exit_code == 0, [issue.message for issue in issues]
+E       AssertionError: ["Required role 'Security Reviewer' is missing PASS/APPROVED provenance for story F0038-S0001"]
+E       assert 1 == 0
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:117: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_completed_provenance_accepts_all_contract_passing_verdicts[APPROVED WITH RECOMMENDATIONS-Done]" time="0.009"><failure message="AssertionError: [&quot;Required role 'Security Reviewer' is missing PASS/APPROVED provenance for story F0038-S0001&quot;]&#10;assert 1 == 0">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_completed_provenance_acce6')
+terminal_state = 'Done', verdict = 'APPROVED WITH RECOMMENDATIONS'
+
+    @pytest.mark.parametrize("terminal_state", ["Done", "Archived"])
+    @pytest.mark.parametrize(
+        "verdict",
+        ["PASS", "APPROVED", "PASS WITH RECOMMENDATIONS", "APPROVED WITH RECOMMENDATIONS"],
+    )
+    def test_completed_provenance_accepts_all_contract_passing_verdicts(
+        tmp_path: Path, terminal_state: str, verdict: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, verdict, terminal_state=terminal_state)
+        exit_code, issues = tracker_issues(product)
+&gt;       assert exit_code == 0, [issue.message for issue in issues]
+E       AssertionError: ["Required role 'Security Reviewer' is missing PASS/APPROVED provenance for story F0038-S0001"]
+E       assert 1 == 0
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:117: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_completed_provenance_accepts_all_contract_passing_verdicts[APPROVED WITH RECOMMENDATIONS-Archived]" time="0.009"><failure message="AssertionError: [&quot;Required role 'Security Reviewer' is missing PASS/APPROVED provenance for story F0038-S0001&quot;]&#10;assert 1 == 0">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_completed_provenance_acce7')
+terminal_state = 'Archived', verdict = 'APPROVED WITH RECOMMENDATIONS'
+
+    @pytest.mark.parametrize("terminal_state", ["Done", "Archived"])
+    @pytest.mark.parametrize(
+        "verdict",
+        ["PASS", "APPROVED", "PASS WITH RECOMMENDATIONS", "APPROVED WITH RECOMMENDATIONS"],
+    )
+    def test_completed_provenance_accepts_all_contract_passing_verdicts(
+        tmp_path: Path, terminal_state: str, verdict: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, verdict, terminal_state=terminal_state)
+        exit_code, issues = tracker_issues(product)
+&gt;       assert exit_code == 0, [issue.message for issue in issues]
+E       AssertionError: ["Required role 'Security Reviewer' is missing PASS/APPROVED provenance for story F0038-S0001"]
+E       assert 1 == 0
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:117: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_required_role_still_rejects_nonpassing_verdicts[FAIL]" time="0.008" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_required_role_still_rejects_nonpassing_verdicts[REQUEST CHANGES]" time="0.009" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_required_role_still_rejects_nonpassing_verdicts[REJECTED]" time="0.009" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_required_role_still_rejects_nonpassing_verdicts[]" time="0.017" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_required_role_still_rejects_nonpassing_verdicts[NOT_REQUIRED]" time="0.008" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_recommendation_verdict_still_requires_complete_provenance[changes0-missing reviewer]" time="0.008"><failure message="assert False&#10; +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f010fc4d60&gt;)">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_recommendation_verdict_st0')
+changes = {'reviewer': ''}, expected = 'missing reviewer'
+
+    @pytest.mark.parametrize(
+        "changes,expected",
+        [
+            ({"reviewer": ""}, "missing reviewer"),
+            ({"evidence": ""}, "missing evidence"),
+            ({"review_date": ""}, "invalid date"),
+            ({"review_date": "yesterday"}, "invalid date"),
+            ({"evidence": "agents/security/SKILL.md"}, "references agents/ in evidence"),
+        ],
+    )
+    def test_recommendation_verdict_still_requires_complete_provenance(
+        tmp_path: Path, changes: dict[str, str], expected: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, **changes)
+        exit_code, issues = tracker_issues(product)
+        assert exit_code == 1
+&gt;       assert any(expected in issue.message for issue in issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f010fc4d60&gt;)
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:146: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_recommendation_verdict_still_requires_complete_provenance[changes1-missing evidence]" time="0.008"><failure message="assert False&#10; +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f0106443c0&gt;)">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_recommendation_verdict_st1')
+changes = {'evidence': ''}, expected = 'missing evidence'
+
+    @pytest.mark.parametrize(
+        "changes,expected",
+        [
+            ({"reviewer": ""}, "missing reviewer"),
+            ({"evidence": ""}, "missing evidence"),
+            ({"review_date": ""}, "invalid date"),
+            ({"review_date": "yesterday"}, "invalid date"),
+            ({"evidence": "agents/security/SKILL.md"}, "references agents/ in evidence"),
+        ],
+    )
+    def test_recommendation_verdict_still_requires_complete_provenance(
+        tmp_path: Path, changes: dict[str, str], expected: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, **changes)
+        exit_code, issues = tracker_issues(product)
+        assert exit_code == 1
+&gt;       assert any(expected in issue.message for issue in issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f0106443c0&gt;)
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:146: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_recommendation_verdict_still_requires_complete_provenance[changes2-invalid date]" time="0.008"><failure message="assert False&#10; +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f010fc4c80&gt;)">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_recommendation_verdict_st2')
+changes = {'review_date': ''}, expected = 'invalid date'
+
+    @pytest.mark.parametrize(
+        "changes,expected",
+        [
+            ({"reviewer": ""}, "missing reviewer"),
+            ({"evidence": ""}, "missing evidence"),
+            ({"review_date": ""}, "invalid date"),
+            ({"review_date": "yesterday"}, "invalid date"),
+            ({"evidence": "agents/security/SKILL.md"}, "references agents/ in evidence"),
+        ],
+    )
+    def test_recommendation_verdict_still_requires_complete_provenance(
+        tmp_path: Path, changes: dict[str, str], expected: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, **changes)
+        exit_code, issues = tracker_issues(product)
+        assert exit_code == 1
+&gt;       assert any(expected in issue.message for issue in issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f010fc4c80&gt;)
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:146: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_recommendation_verdict_still_requires_complete_provenance[changes3-invalid date]" time="0.008"><failure message="assert False&#10; +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f010fc7d80&gt;)">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_recommendation_verdict_st3')
+changes = {'review_date': 'yesterday'}, expected = 'invalid date'
+
+    @pytest.mark.parametrize(
+        "changes,expected",
+        [
+            ({"reviewer": ""}, "missing reviewer"),
+            ({"evidence": ""}, "missing evidence"),
+            ({"review_date": ""}, "invalid date"),
+            ({"review_date": "yesterday"}, "invalid date"),
+            ({"evidence": "agents/security/SKILL.md"}, "references agents/ in evidence"),
+        ],
+    )
+    def test_recommendation_verdict_still_requires_complete_provenance(
+        tmp_path: Path, changes: dict[str, str], expected: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, **changes)
+        exit_code, issues = tracker_issues(product)
+        assert exit_code == 1
+&gt;       assert any(expected in issue.message for issue in issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f010fc7d80&gt;)
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:146: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_recommendation_verdict_still_requires_complete_provenance[changes4-references agents/ in evidence]" time="0.009"><failure message="assert False&#10; +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f01108ef80&gt;)">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_recommendation_verdict_st4')
+changes = {'evidence': 'agents/security/SKILL.md'}
+expected = 'references agents/ in evidence'
+
+    @pytest.mark.parametrize(
+        "changes,expected",
+        [
+            ({"reviewer": ""}, "missing reviewer"),
+            ({"evidence": ""}, "missing evidence"),
+            ({"review_date": ""}, "invalid date"),
+            ({"review_date": "yesterday"}, "invalid date"),
+            ({"evidence": "agents/security/SKILL.md"}, "references agents/ in evidence"),
+        ],
+    )
+    def test_recommendation_verdict_still_requires_complete_provenance(
+        tmp_path: Path, changes: dict[str, str], expected: str
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product, **changes)
+        exit_code, issues = tracker_issues(product)
+        assert exit_code == 1
+&gt;       assert any(expected in issue.message for issue in issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_recommendation_verdict_still_requires_complete_provenance.&lt;locals&gt;.&lt;genexpr&gt; at 0x76f01108ef80&gt;)
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:146: AssertionError</failure></testcase><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_recommendation_support_does_not_replace_a_missing_required_role" time="0.008" /><testcase classname="framework.agents.product-manager.scripts.tests.test_validate_trackers_recommendations" name="test_recommendation_tracker_pass_still_runs_real_deep_evidence_validation" time="0.187"><failure message="AssertionError: assert 'errors: 0' in '\nERRORS:\n  - [/tmp/pytest-of-unknown/pytest-2/test_recommendation_tracker_pa0/product/planning-mds/features/F0038-s...e_contract_archived=0, skipped_active_done_pre_contract=0, skipped_retired_abandoned=0, skipped_retired_superseded=0\n'">tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-2/test_recommendation_tracker_pa0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x76f0110f9480&gt;
+capfd = &lt;_pytest.capture.CaptureFixture object at 0x76f010650440&gt;
+
+    def test_recommendation_tracker_pass_still_runs_real_deep_evidence_validation(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capfd: pytest.CaptureFixture[str]
+    ):
+        product = tmp_path / "product"
+        write_completed_trackers(product)
+        module = load_validator()
+        # The complete local provenance has no evidence manifest. The actual child
+        # validator must reject it; no mock replaces the feature-evidence invocation.
+        assert run_main(module, monkeypatch, product, "--feature", "F0038", "--run-id", RUN_ID) == 1
+        output = capfd.readouterr().out
+&gt;       assert "errors: 0" in output
+E       AssertionError: assert 'errors: 0' in '\nERRORS:\n  - [/tmp/pytest-of-unknown/pytest-2/test_recommendation_tracker_pa0/product/planning-mds/features/F0038-s...e_contract_archived=0, skipped_active_done_pre_contract=0, skipped_retired_abandoned=0, skipped_retired_superseded=0\n'
+
+../framework/agents/product-manager/scripts/tests/test_validate_trackers_recommendations.py:167: AssertionError</failure></testcase></testsuite></testsuites>

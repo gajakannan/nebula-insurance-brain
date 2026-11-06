@@ -1,8 +1,9 @@
 id: entity:assertion-semantics
 label: Assertion semantic extension
-notes: Proposed immutable one-to-one v2 extension keyed to the existing assertion ID; full source record, typed/open
-  identity, mode/origin, verified grounding and scoped reference snapshots. Not a second assertion identity
-  or a canonical fact.
+notes: Implemented immutable one-to-one v2 extension keyed to the existing assertion ID, retaining the complete
+  source record, independent dimensions, verified evidence/source hashes and scoped reference/time snapshots.
+  PostgreSQL deferred integrity mirrors carrier and evidence coordinates, and v2 corrections own their extension/evidence
+  while inheriting basis. It is not a second assertion identity or canonical fact.
 source_docs:
 - F0006/feature-assembly-plan.md
 - F0006/worked-examples.md
@@ -10,8 +11,9 @@ source_docs:
 rationale:
 - adr: adr:0075
   section: Decision
-  summary: Proposed F0006 design preserves legacy records and requires scoped structural admission and source
-    eligibility guards; runtime proof pending.
+  summary: F0006 as-built versioned claims, structural admission and guarded current consumers have source-bound
+    synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal Proposed ADR acceptance
+    is implied.
 related_nodes:
 - adr:0075
 - entity:assertion

@@ -1,0 +1,213 @@
+id: feature:F0005
+name: One-time document ingestion
+path: planning-mds/features/archive/F0005-one-time-docling-ingestion
+status: archived-done
+registry_section: Archived
+phase: v0.1A
+roadmap_section: Completed
+roadmap_order: 4
+rationale: Closed 2026-10-28 on the S0004-AC7 rejection branch. Graph dense (Docling-Graph 1.9.1, Phi-4-mini)
+  was qualified live on the synthetic corpus and rejected; direct-baseline with the v1 writer stays default.
+  Execution controls ship under the Accepted ADR-0074; ADR-0060 stays Proposed with a reopen deadline.
+validation_gate: Feature G0-G8 passed (G3 after a rework round); operator G4 approval 2026-10-28 for the rejection
+  branch; post-decision check verified direct-baseline/v1. No activation.
+depends_on:
+- feature:F0004
+- feature:F0001
+- feature:F0002
+- feature:F0003
+governed_by:
+- adr:0003
+- adr:0004
+- adr:0040
+- adr:0055
+- adr:0058
+- adr:0059
+- adr:0060
+- adr:0065
+- adr:0073
+- adr:0074
+affects:
+- capability:parse-once-content-artifact
+- capability:semantic-interpretation-run
+- capability:versioned-content-contracts
+- entity:content-artifact
+- entity:semantic-interpretation-run
+- workflow:ingestion-interpretation
+uses_schema:
+- schema:content-artifact-manifest
+- schema:content-artifact-manifest-v2
+- schema:interpretation-result
+notes:
+- Run 2026-10-25-4020923b closed 2026-10-28. Live qualification report SHA-256 55ce3484...aede (void false); Graph dense missed accuracy, abstention, evidence resolution, latency and (like for like) review workload.
+- Shipped for every pipeline (ADR-0074) - supervised conversion with a 300 s parent deadline, host guard with confirmed quiescence, closed failure reasons (migrations 0009/0010), a reconvert-at-most-once launch budget, a bounded queue, and pipeline pinning.
+- ADR-0073 amendment 2026-10-27 adds observed OCR quality to v1/v2 manifests (add-only, deploy together, no rollback).
+- Activation preconditions remain - converter OS isolation (SEC-F5-M1), Docling/pillow requalification, and the provider executable allowlist and minimal restart environment.
+story_mappings:
+- id: story:F0005-S0001
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
+  affects:
+  - capability:parse-once-content-artifact
+  - capability:semantic-interpretation-run
+  governed_by:
+  - adr:0060
+- id: story:F0005-S0002
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md
+  affects:
+  - capability:parse-once-content-artifact
+  - capability:semantic-interpretation-run
+  governed_by:
+  - adr:0060
+- id: story:F0005-S0003
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md
+  affects:
+  - capability:parse-once-content-artifact
+  - capability:semantic-interpretation-run
+  governed_by:
+  - adr:0060
+- id: story:F0005-S0004
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md
+  affects:
+  - capability:parse-once-content-artifact
+  - capability:semantic-interpretation-run
+  governed_by:
+  - adr:0060
+- id: story:F0005-S0005
+  path: planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md
+  affects:
+  - capability:parse-once-content-artifact
+  - capability:versioned-content-contracts
+  governed_by:
+  - adr:0060
+  - adr:0065
+  - adr:0073
+archived_date: '2026-10-28'
+completion_state: All five stories closed in feature run 2026-10-25-4020923b on the S0004-AC7 rejection branch;
+  G3 passed after one rework round, G4 approved by the operator; twenty-five story/role signoffs. Final neuron 260,
+  engine 424 (pre-existing failures only), seven live lanes and the post-decision check pass.
+id: feature:F0006
+name: Assertion plane + origin + interpretation basis
+path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis
+status: planned
+registry_section: Planned
+phase: v0.1A
+roadmap_section: Next
+roadmap_order: 5
+rationale: 'F0006 A+B design approved by operator 2026-11-01 in plan run 2026-11-01-7d6d19ce: typed/open claim
+  storage, structural admission and current-consumer guards. Legacy direct-baseline/v1 defaults remain unchanged;
+  implementation not started.'
+validation_gate: Operator approve-phase-a and approve-phase-b recorded in plan run 2026-11-01-7d6d19ce, and
+  approve-phase-b re-recorded in Phase B rework run 2026-11-01-512e9303, after
+  green preapproval checks; final G5 validation and automated approval publication are enforced by the gate
+  journal.
+depends_on:
+- feature:F0001
+- feature:F0002
+- feature:F0003
+- feature:F0004
+- feature:F0005
+governed_by:
+- adr:0005
+- adr:0010
+- adr:0013
+- adr:0030
+- adr:0035
+- adr:0037
+- adr:0058
+- adr:0061
+- adr:0062
+- adr:0063
+- adr:0065
+- adr:0075
+affects:
+- capability:versioned-assertion-semantics
+- capability:structural-assertion-admission
+- capability:assertion-eligibility-guards
+- entity:assertion
+- entity:assertion-semantics
+- entity:assertion-document-reference
+- entity:assertion-name-claim
+- endpoint:fact-commit
+- endpoint:review-decisions-submit
+- endpoint:review-item-get
+uses_api_contract:
+- api:brain-api
+uses_schema:
+- schema:assertion-record-v2
+- schema:interpretation-result-v2
+- schema:assertion-admission-result-v1
+- schema:interpretation-result
+- schema:problem-details
+notes:
+- Planning bindings only. Five stories and 35 ACs; no runtime paths are bound as implemented. Roadmap stays
+  Next.
+- Automatic result importer remains v1-only; v2 internal storage seam does not enable a live producer. F0016
+  owns durable drop/run adoption, F0018 full commit orchestration, F0022 display and F0066 open extraction/alignment.
+- ADR-0065/0075 stay Proposed; a plan approval is not runtime acceptance. Current pilot unregistered legacy
+  evidence behaviour is explicitly retained; new restrictions follow attributable v2 evidence/review/correction
+  lineage.
+- Phase A+B approved by explicit operator tokens on 2026-11-01, plan run 2026-11-01-7d6d19ce; Phase B rework
+  (v2 corrections inherit basis, v1 legacy EXPLICIT boundary, v2 correction child persistence) re-approved in plan
+  run 2026-11-01-512e9303. All five stories remain Not Started; no feature completion or formal Proposed ADR acceptance is claimed.
+story_mappings:
+- id: story:F0006-S0001
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md
+  affects:
+  - capability:versioned-assertion-semantics
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-record-v2
+  - schema:interpretation-result-v2
+  governed_by:
+  - adr:0075
+  - adr:0065
+- id: story:F0006-S0002
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md
+  affects:
+  - capability:versioned-assertion-semantics
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-record-v2
+  - schema:interpretation-result-v2
+  governed_by:
+  - adr:0075
+  - adr:0065
+- id: story:F0006-S0003
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md
+  affects:
+  - capability:structural-assertion-admission
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-admission-result-v1
+  governed_by:
+  - adr:0075
+  - adr:0065
+- id: story:F0006-S0004
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md
+  affects:
+  - capability:assertion-eligibility-guards
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-admission-result-v1
+  governed_by:
+  - adr:0075
+  - adr:0065
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0006-S0005
+  path: planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md
+  affects:
+  - capability:versioned-assertion-semantics
+  - capability:structural-assertion-admission
+  - capability:assertion-eligibility-guards
+  - entity:assertion
+  uses_schema:
+  - schema:assertion-admission-result-v1
+  governed_by:
+  - adr:0075
+  - adr:0065
+  uses_api_contract:
+  - api:brain-api
+
+Exit code: 0
+

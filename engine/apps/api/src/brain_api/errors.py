@@ -53,6 +53,11 @@ class UnprocessableError(BrainError):
     title = "Unprocessable"
 
 
+class AssertionIneligibleApiError(UnprocessableError):
+    code = "ASSERTION_INELIGIBLE"
+    title = "Assertion Ineligible"
+
+
 class InvalidRangeApiError(BrainError):
     """Empty or null `valid` range on a commit proposal (F0001-S0005)."""
 

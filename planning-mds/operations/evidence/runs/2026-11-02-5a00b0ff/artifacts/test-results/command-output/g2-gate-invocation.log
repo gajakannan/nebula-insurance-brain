@@ -1,0 +1,100 @@
+# Deployability Check — F####-{slug} run {run-id}
+
+> Required per §10 for every completed terminal feature. DevOps or Feature Orchestrator owned.
+
+## Runtime / Deployment Config Changes
+
+Enumerate every changed Dockerfile, compose file, CI job, env-var contract, migration, startup script. If `deployment_config_changed = true`, this section is mandatory.
+
+## Migrations / Rollback
+
+Migration files added/altered, plus the rollback strategy. Cite the migration runner's output path.
+
+## Env / Config Contract
+
+Document every new or changed env var or config key. Note default values, secrets handling, and which environments are affected.
+
+## Manifest Boolean Cross-Check
+
+Confirm the manifest's `runtime_bearing`, `deployment_config_changed`, and `security_sensitive_scope` agree with what this report describes. Discrepancy is `scope_boolean_false_with_changed_paths_fails`.
+
+## Build / Start / Smoke Results
+
+Each artifact path resolves on disk or via cited URL.
+
+```text
+- build: docker compose build → exit 0 (artifacts/build/build.log)
+- start: docker compose up -d → all services healthy
+- smoke: scripts/smoke.sh → exit 0 (artifacts/smoke/smoke.log)
+```
+
+## Runtime Warnings
+
+Non-blocking warnings to surface to the reviewer (deprecated config, expiring cert window, etc.).
+
+## Recommendations (when `WITH RECOMMENDATIONS`)
+
+§15 canonical bullet form. Severity `low`/`medium`/`high`/`critical`.
+
+## Result
+
+One of: `PASS`, `PASS WITH RECOMMENDATIONS`, `FAIL`.
+usage: run-gate.py [-h] [--product-root PRODUCT_ROOT] [--action ACTION]
+                   [--stage STAGE] [--feature FEATURE]
+                   [--feature-slug FEATURE_SLUG]
+                   [--plan-scope {feature,feature-set,project}]
+                   [--target TARGET] [--run-id RUN_ID]
+                   [--run-folder RUN_FOLDER] [--spec-dir SPEC_DIR] [--dry-run]
+                   [--from FROM_OP] [--force] [--list]
+                   [--attest-checkpoint ATTEST |
+                   --reattest-checkpoint REATTEST] [--evidence EVIDENCE]
+                   [--actor ACTOR] [--role ROLE] [--note NOTE]
+
+Durable action-gate driver (F0007-S0005). Resolves an action stage from the
+spec and runs its typed operations in declared order through the shared
+runtime (S0004), stopping at the first failure. A durable gate-state journal
+records completed operations, the pending manual checkpoint, and evidence
+attestations (with sha256 hashes). Manual checkpoints pause the journal and
+resume only after an authorized, hashed evidence attestation — a resume cannot
+skip an unattested checkpoint, and changed checkpoint output is rejected.
+Journal writes are atomic and serialized by a per-run lock. Responsibility
+boundary: the driver owns *procedure integrity* (ordering, checkpoint gating,
+audit). Pass/fail of each invoked validator is the validator's own exit code;
+the driver never re-judges evidence. run-gate.py --action feature --stage G4
+--product-root P --feature F#### --run-id R run-gate.py --action feature
+--stage G8 --attest-checkpoint archive-move --evidence pm-closeout.md
+--evidence signoff-ledger.md --actor NAME --role product-manager run-gate.py
+--action feature --list
+
+options:
+  -h, --help            show this help message and exit
+  --product-root PRODUCT_ROOT
+                        Path to {NEBULA_PRODUCT_ROOT} (the sibling product
+                        repo). Overrides NEBULA_PRODUCT_ROOT. Required if that
+                        variable is unset.
+  --action ACTION
+  --stage STAGE
+  --feature FEATURE
+  --feature-slug FEATURE_SLUG
+  --plan-scope {feature,feature-set,project}
+  --target TARGET       Feature ID(s) or project for product validation scope.
+  --run-id RUN_ID
+  --run-folder RUN_FOLDER
+                        Override the resolved run folder (tests/advanced).
+  --spec-dir SPEC_DIR
+  --dry-run
+  --from FROM_OP        Resume from an operation id (cannot skip an unattested
+                        checkpoint).
+  --force               Re-run a completed stage (non-idempotent replay).
+  --list
+  --attest-checkpoint ATTEST
+  --reattest-checkpoint REATTEST
+                        Append an audited replacement for a stale attestation
+                        on an incomplete stage.
+  --evidence EVIDENCE
+  --actor ACTOR
+  --role ROLE
+  --note NOTE
+
+Exit code: 0
+

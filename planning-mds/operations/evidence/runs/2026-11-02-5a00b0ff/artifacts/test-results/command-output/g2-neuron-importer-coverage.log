@@ -1,0 +1,169 @@
+Warning: truncated output (original token count: 6046)
+Total output lines: 345
+
+...............EEEEE                                                     [100%]
+==================================== ERRORS ====================================
+__ ERROR at setup of test_publication_import_and_second_profile_reuse[False] ___
+neuron/tests/integration/test_content_worker_v2.py:55: in native
+    parsed = DoclingAdapter(capture_provenance=True).parse(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:41: in __init__
+    self._converter, self._ocr = self._new_converter()
+                                 ^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:46: in _new_converter
+    converter.initialize_pipeline(InputFormat.PDF)
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:504: in initialize_pipeline
+    pipeline = self._get_pipeline(doc_format=format)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:794: in _get_pipeline
+    self.initialized_pipelines[cache_key] = pipeline_class(
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:595: in __init__
+    self._init_models()
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:616: in _init_models
+    self.ocr_model = self._make_ocr_model(art_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:692: in _make_ocr_model
+    return factory.create_instance(
+/opt/venv/lib/python3.14/site-packages/docling/models/factories/base_factory.py:60: in create_instance
+    return _cls(options=options, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/auto_ocr_model.py:125: in __init__
+    self._engine = RapidOcrModel(
+/opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:455: in __init__
+    self.reader = RapidOCR(
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:46: in __init__
+    self._initialize(cfg)
+/opt/venv/lib/python3.14/site-packages/rapidocr/main.py:71: in _initialize
+    self.text_det = TextDetector(cfg.Det)
+                    ^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/ch_ppocr_det/main.py:47: in __init__
+    self.session = get_engine(cfg.engine_type)(cfg)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/main.py:22: in __init__
+    self.predictor = ModelLoader(cfg, self.device).predictor
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:20: in __init__
+    model_path = self._init_model_path(cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/rapidocr/inference_engine/pytorch/networks/main.py:41: in _init_model_path
+    DownloadFile.run(
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:41: in run
+    cls._save_response_with_progress(response, save_path, logger)
+/opt/venv/lib/python3.14/site-packages/rapidocr/utils/download_file.py:90: in _save_response_with_progress
+    with open(save_path, "wb") as output_file:
+         ^^^^^^^^^^^^^^^^^^^^^
+E   PermissionError: [Errno 13] Permission denied: '/opt/venv/lib/python3.14/site-packages/rapidocr/models/PP-OCRv6_det_small.pth'
+---------------------------- Captured stderr setup -----------------------------
+[32m[INFO] 2026-11-03 02:50:21,881 [RapidOCR] base.py:23: Using engine_name: torch[0m
+[32m[INFO] 2026-11-03 02:50:21,881 [RapidOCR] device_config.py:57: Using CPU device[0m
+[32m[INFO] 2026-11-03 02:50:21,882 [RapidOCR] download_file.py:68: Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv6/det/PP-OCRv6_det_small.pth[0m
+[32m[INFO] 2026-11-03 02:50:24,924 [RapidOCR] download_file.py:82: Download size: 9.77MB[0m
+------------------------------ Captured log setup ------------------------------
+INFO     RapidOCR:base.py:23 Using engine_name: torch
+INFO     RapidOCR:device_config.py:57 Using CPU device
+INFO     RapidOCR:download_file.py:68 Initiating download: https://www.modelscope.cn/models/RapidAI/RapidOCR/resolve/v3.9.2/torch/PP-OCRv6/det/PP-OCRv6_det_small.pth
+INFO     RapidOCR:download_file.py:82 Download size: 9.77MB
+___ ERROR at setup of test_publication_import_and_second_profile_reuse[True] ___
+neuron/tests/integration/test_content_worker_v2.py:55: in native
+    parsed = DoclingAdapter(capture_provenance=True).parse(path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:41: in __init__
+    self._converter, self._ocr = self._new_converter()
+                                 ^^^^^^^^^^^^^^^^^^^^^
+neuron/packages/brain-ingestion/src/brain_ingestion/docling_adapter.py:46: in _new_converter
+    converter.initialize_pipeline(InputFormat.PDF)
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:504: in initialize_pipeline
+    pipeline = self._get_pipeline(doc_format=format)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/document_converter.py:794: in _get_pipeline
+    self.initialized_pipelines[cache_key] = pipeline_class(
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:595: in __init__
+    self._init_models()
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:616: in _init_models
+    self.ocr_model = self._make_ocr_model(art_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:692: in _make_ocr_model
+    return factory.create_instance(
+/opt/venv/lib/python3.14/site-packages/docling/models/factories/base_factory.py:60: in create_instance
+    return …3046 tokens truncated…tamodel/service/options.py:993: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1008: DeprecationWarning: deprecated
+    self.vlm_pipeline_model,
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+tests/integration/test_document_delivery.py::test_worker_restart_after_model_failure_reuses_bundle_and_emits_one_completion
+  /opt/venv/lib/python3.14/site-packages/docling_graph/core/utils/alias_reconciler.py:95: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    if id(instance) in seen or not hasattr(instance, "model_fields"):
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /opt/venv/lib/python3.14/site-packages/pydantic/main.py:542: DeprecationWarning: `force_full_page_ocr` is deprecated; set `mode=OcrMode.FULL_PAGE` instead.
+    return self.__pydantic_serializer__.to_json(
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /opt/venv/lib/python3.14/site-packages/docling/pipeline/standard_pdf_pipeline.py:606: DeprecationWarning: This field is deprecated. Use `generate_page_images=True` and call `TableItem.get_image()` to extract table images from page images.
+    or self.pipeline_options.generate_table_images
+
+tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+  /opt/venv/lib/python3.14/site-packages/docling/models/stages/ocr/rapid_ocr_model.py:442: DeprecationWarning: deprecated
+    if self.options.rec_font_path is not None:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Coverage JSON written to file /app/brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/coverage/neuron-importer.json
+=========================== short test summary info ============================
+ERROR neuron/tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[False]
+ERROR neuron/tests/integration/test_content_worker_v2.py::test_publication_import_and_second_profile_reuse[True]
+ERROR neuron/tests/integration/test_content_worker_v2.py::test_concurrent_profiles_share_pending_identity_and_preserve_restrictions
+ERROR neuron/tests/integration/test_content_worker_v2.py::test_missing_producer_is_hard_failure_without_ready_or_fallback
+ERROR neuron/tests/integration/test_content_worker_v2.py::test_corrupt_accepted_marker_never_becomes_conversion_miss
+15 passed, 31 warnings, 5 errors in 26.20s
+
+Exit code: 1
+

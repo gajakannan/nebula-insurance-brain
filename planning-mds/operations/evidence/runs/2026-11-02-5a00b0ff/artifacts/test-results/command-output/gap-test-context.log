@@ -1,0 +1,353 @@
+        "source_sha256": sha256(files[source_name]),
+        "artifact_sha256": inventory_hash(files, 2),
+        "docling_document": {
+            "path": "docling-document.json",
+            "schema_version": "synthetic-f0006",
+            "sha256": sha256(files["docling-document.json"]),
+        },
+        "files": [
+            {"path": path, "sha256": sha256(raw), "size_bytes": len(raw)}
+            for path, raw in files.items()
+        ],
+        "execution": {
+            "parser_package_version": "synthetic-retained-snapshot",
+            "model_artifact_digests": [],
+            "configuration_hash": "a" * 64,
+            "environment_digest": "f0006-independent-fixture",
+            "parser_name": "docling",
+            "projection_version": "synthetic-1",
+        },
+        "extraction_quality": {"status": "complete", "failed_pages": [], "warnings": []},
+        "page_count": 1,
+        "coordinate_origin": "top_left",
+        "offset_encoding": "unicode_code_points",
+        "created_at": datetime.now(UTC).isoformat(),
+        "source_file": source_name,
+        "recipe_sha256": "b" * 64,
+        "bundle_hash_algorithm": "sha256-file-inventory-v2",
+        "record_contract_version": 2,
+        "page_number_base": 1,
+        "coordinate_units": "pdf_points",
+        "text_normalization_version": "identity-unicode-v1",
+    }
+    model = parse_manifest(encoded(manifest))
+    key = ArtifactKey(model.artifact_id, tenant, kb, 2)
+    return verify_bundle(key, encoded(manifest), files)
+
+
+class World:
+    def __init__(self, database, root, *, kind="pdf", text=None, origin="STATED", owner=None):
+        self.url = database
+        self.bundle = bundle_fixture(kind=kind, text=text, origin=origin, owner=owner)
+        self.text = self.bundle.blocks[0].text
+        self.owner = (self.bundle.key.tenant_id, self.bundle.key.knowledge_base_id)
+        self.sync_engine = create_engine(database.replace("postgresql://", "postgresql+psycopg://"))
+        self.engine = create_async_engine(
+            database.replace("postgresql://", "postgresql+asyncpg://")
+        )
+        self.policy = CasbinAuthorizationAdapter(POLICIES / "model.conf", POLICIES / "policy.csv")
+        with Session(self.sync_engine) as session, session.begin():
+            fixtures.seed_scope(session, *self.owner)
+            self.actor = fixtures.seed_principal(
+                session,
+                issuer="urn:f0006:independent",
+                subject=str(uuid4()),
+                kind=PrincipalKind.SERVICE,
+            )
+            fixtures.seed_grant(session, self.actor.id, *self.owner, "ServicePrincipal")
+            fixtures.seed_grant(session, self.actor.id, *self.owner, "TenantMember")
+            self.reviewer = fixtures.seed_principal(
+                session, issuer="urn:f0006:independent", subject=str(uuid4())
+            )
+            fixtures.seed_grant(session, self.reviewer.id, *self.owner, "Reviewer")
+            fixtures.seed_grant(session, self.reviewer.id, *self.owner, "TenantMember")
+            fixtures.activate_policy(session, POLICIES / "model.conf", POLICIES / "policy.csv")
+            fixtures.protect(
+                session,
+                ResourceKey(ResourceType.CONTENT_ARTIFACT, self.bundle.key.artifact_id),
+                *self.owner,
+                before_record=True,
+            )
+        self.objects = LocalFilesystemObjectStore(LocalObjectStoreConfig("filesystem", root, True))
+        store = VerifiedBundleStore(self.objects)
+        self.content = LocalContentArtifactStore(self.objects)
+        queue = DocumentJobQueue(self.sync_engine, lease_seconds=30)
+        queue.enqueue(
+            tenant_id=self.owner[0],
+            knowledge_base_id=self.owner[1],
+            artifact_id=self.bundle.key.artifact_id,
+            request_key="f0006-source",
+            payload={
+                "content_contract_version": 2,
+                "actor_id": str(self.actor.id),
+                "correlation_id": str(uuid4()),
+                "document_id": str(self.bundle.manifest.document_id),
+                "version_id": str(self.bundle.manifest.version_id),
+                "source_sha256": self.bundle.manifest.source_sha256,
+                "recipe_sha256": self.bundle.manifest.recipe_sha256,
+            },
+        )
+        publisher = AuthorizedContentPublisher(queue, store, self.policy, objects=self.objects)
+        publisher.publish(
+            queue.claim(), self.bundle.key, self.bundle.manifest_bytes, self.bundle.files
+        )
+        self.run_id = uuid4()
+        with Session(self.sync_engine) as session, session.begin():
+            session.add(
+                SemanticInterpretationRun(
+                    id=self.run_id,
+                    artifact_id=self.bundle.key.artifact_id,
+                    profile_id="f0006-independent",
+                    profile_version="1",
+                    status="complete",
+                    counters={},
+                    run_configuration={},
+                    tenant_id=self.owner[0],
+                    knowledge_base_id=self.owner[1],
+                )
+            )
+        self.context = ProducerContext(
+            tenant_id=self.owner[0],
+            knowledge_base_id=self.owner[1],
+            actor_id=self.actor.id,
+            artifact_id=self.bundle.key.artifact_id,
+            document_version_id=self.bundle.manifest.version_id,
+            run_id=self.run_id,
+            origin="DOCUMENT_INTERPRETATION",
+            model_id="synthetic:no-model-call",
+            prompt_hash="independent-f0006-v1",
+            trace_id="f0006-integration",
+        )
+        self.subject_id = uuid4()
+        self.entity = {
+            "id": str(self.subject_id),
+            "entity_type": "Policy",
+            "label": "Cedar Bridge Roofing",
+            "introducing_evidence": [self.evidence(self.text)],
+        }
+
+    def evidence(self, quote):
+        return {
+            "artifact_id": str(self.bundle.key.artifact_id),
+            "block_id": "#/texts/0",
+            "quote": quote,
+            "model_selector": {"char_start": 99999, "char_end": 100000},
+        }
+
+    def candidate(self, **updates):
+        record = {
+            "id": str(uuid4()),
+            "assertion_kind": "TYPED_ASSERTION",
+            "subject_ref": str(self.subject_id),
+            "object": {"kind": "LITERAL", "value": {"amount": 500000, "currency": "USD"}},
+            "predicate_id": "each_occurrence_limit",
+            "ontology_release": "synthetic-gl-v1",
+            "source_relation": None,
+            "qualifiers": {},
+            "time_mention_refs": [],
+            "valid_time_claim": {"source_words": "Effective 2026-06-01"},
+            "mode": "ASSERTED",
+            "origin": "DOCUMENT_INTERPRETATION",
+            "interpretation_basis": "EXPLICIT",
+            "model_confidence": 0.98,
+            "evidence": [self.evidence(self.text)],
+        }
+        record.update(updates)
+        return record
+
+    @asynccontextmanager
+    async def service(self):
+        from brain_assertions.admission import AssertionAdmissionService
+        from brain_assertions.service import AssertionWriteService
+        from brain_persistence.assertions import (
+            SqlAlchemyAdmissionSources,
+            SqlAlchemyAssertionRepository,
+        )
+
+        async with AsyncSession(self.engine, expire_on_commit=False) as session:
+            repository = SqlAlchemyAssertionRepository(session, content_store=self.content)
+            admission = AssertionAdmissionService(SqlAlchemyAdmissionSources(session, self.content))
+            execution = AuthorizationExecution(
+                SqlAlchemyAuthorityStore(session), self.policy, self.policy.release
+            )
+            yield AssertionWriteService(repository, admission, execution), repository, session
+
+    async def admit(
+        self,
+        records,
+        *,
+        entities=None,
+        principal=None,
+        context=None,
+        delivery_key="independent-delivery",
+        **issues,
+    ):
+        async with self.service() as (service, _, _):
+            return await service.admit(
+                principal or self.actor,
+                context or self.context,
+                entities=entities or [self.entity],
+                items=[encoded(row) if not isinstance(row, bytes) else row for row in records],
+                delivery_key=delivery_key,
+                **issues,
+            )
+
+    async def close(self):
+        await self.engine.dispose()
+        self.sync_engine.dispose()
+
+
+@pytest.fixture
+async def world_factory(database, tmp_path):
+    command.upgrade(configuration(), "head")
+    worlds = []
+
+    def create(**kwargs):
+        world = World(database, tmp_path / str(len(worlds)), **kwargs)
+        worlds.append(world)
+        return world
+
+    try:
+        yield create
+    finally:
+        for world in worlds:
+            await world.close()
+
+
+        for index, entity in enumerate(entities):
+            try:
+                declaration = parse_entity(entity)
+                if declaration.id in declarations:
+                    invalid_entities.add(declaration.id)
+                    raise AssertionContractError()
+                declarations[declaration.id] = (index, declaration)
+            except (AssertionContractError, TypeError):
+                try:
+                    raw = canonical_json(entity)
+                except AssertionContractError:
+                    raw = b"null"
+                outcomes.append(
+                    outcome(
+                        index=index,
+                        path=f"/entities/{index}",
+                        candidate_id=None,
+                        block_id=None,
+                        reason="MALFORMED_ITEM",
+                        raw=raw,
+                    )
+                )
+
+        async def block(block_id: str) -> VerifiedBlock:
+            if block_id not in blocks:
+                stored = await self._sources.block(context, block_id)
+                # Check identities before inspecting protected source text.
+                if stored.artifact_id != context.artifact_id or stored.block_id != block_id:
+                    raise LookupError("source identity mismatch")
+                blocks[block_id] = stored
+            return blocks[block_id]
+
+        for index, raw in enumerate(items):
+            path = f"/assertions/{index}"
+            try:
+                candidate = parse_assertion(raw)
+            except (AssertionContractError, TypeError):
+                candidate_id = None
+                block_id = None
+                try:
+                    partial = decode_json(raw)
+                    candidate_id = UUID(partial["id"])
+                    supplied = partial.get("evidence", [])
+                    if supplied and isinstance(supplied[0].get("block_id"), str):
+                        block_id = supplied[0]["block_id"] or None
+                except (ValueError, TypeError, KeyError, AttributeError, IndexError):
+                    pass
+                outcomes.append(
+                    outcome(
+                        index=index,
+                        path=path,
+                        candidate_id=candidate_id,
+                        block_id=block_id,
+                        reason="MALFORMED_ITEM",
+                        raw=raw,
+                    )
+                )
+                continue
+
+            item_outcomes: list[AdmissionOutcome] = []
+            evidence: list[ServerEvidence] = []
+            source_hashes: dict[str, str] = {}
+            time_snapshots: list[dict[str, Any]] = []
+            selected: dict[UUID, EntityReferenceV2] = {}
+
+            def fail(
+                reason: str,
+                *,
+                block_id: str | None = None,
+                item_path: str = path,
+                item_index: int = index,
+                identifier: UUID = candidate.id,
+                item_raw: bytes = raw,
+                failures: list[AdmissionOutcome] = item_outcomes,
+            ) -> None:
+                entry = outcome(
+                    index=item_index,
+                    path=item_path,
+                    candidate_id=identifier,
+                    block_id=block_id,
+                    reason=reason,
+                    raw=item_raw,
+                    excerpt=item_raw.decode("utf-8", errors="replace")[:256],
+                )
+                if not any(
+                    (e.reason, e.item_path, e.block_id)
+                    == (entry.reason, entry.item_path, entry.block_id)
+                    for e in failures
+                ):
+                    failures.append(entry)
+
+            if candidate.origin != context.origin:
+                fail("MALFORMED_ITEM")
+            required_refs = [candidate.subject_ref]
+            if (
+                isinstance(candidate.object, EntityObjectV2)
+                and candidate.object.ref in declarations
+            ):
+                required_refs.append(candidate.object.ref)
+            for ref in dict.fromkeys(required_refs):
+                if ref not in declarations or ref in invalid_entities:
+                    fail("UNKNOWN_REFERENCE")
+                    continue
+                entity_index, entity = declarations[ref]
+                selected[ref] = entity
+                entity_path = f"/entities/{entity_index}"
+        return VerifiedBlock(
+            context.artifact_id,
+            block_id,
+            block["text"],
+            selector,
+            None,
+            "legacy_unqualified",
+            None,
+            None,
+        )
+
+    async def time_reference(self, context: ProducerContext, ref: UUID) -> TimeReference:
+        if self.time_resolver is None:
+            raise LookupError("time reference not registered")
+        resolved = await self.time_resolver(context, ref)
+        if (resolved.id, resolved.tenant_id, resolved.knowledge_base_id, resolved.artifact_id) != (
+            ref,
+            context.tenant_id,
+            context.knowledge_base_id,
+            context.artifact_id,
+        ):
+            raise PermissionError("time reference scope mismatch")
+        return resolved
+
+
+class SqlAlchemyAssertionRepository:
+    def __init__(
+        self, session: AsyncSession, *, content_store: ContentArtifactStore | None = None
+
+Exit code: 0
+

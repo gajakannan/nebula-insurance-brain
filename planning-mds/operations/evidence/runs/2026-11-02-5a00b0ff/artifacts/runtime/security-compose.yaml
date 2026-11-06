@@ -1,0 +1,34 @@
+services:
+  secrets-scan:
+    image: zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    user: "1000:1000"
+    entrypoint: [sh, /app/framework/agents/security/scripts/check-secrets.sh]
+    command: [--path, /scan, --mode, filesystem, --report-dir, /out/secrets, --, --no-git]
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/security/source-snapshot:/scan:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/security:/out
+    network_mode: none
+  sast-scan:
+    image: semgrep/semgrep@sha256:2b33f46ba66cf8cc2ad59ccfa7d22951fd00c632c38f1339e84ec8e6e641a942
+    user: "1000:1000"
+    environment:
+      HOME: /tmp
+    entrypoint: [sh, /app/framework/agents/security/scripts/run-sast-scan.sh]
+    command: [--path, /scan, --config, p/python, --report-dir, /out/sast, --, --metrics=off]
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/security/source-snapshot:/scan:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/security:/out
+  dast-scan:
+    image: ghcr.io/zaproxy/zaproxy@sha256:8d387b1a63e3425beef4846e39719f5af2a787753af2d8b6558c6257d7a577a2
+    user: "1000:1000"
+    working_dir: /zap/wrk
+    environment:
+      DAST_SCAN_CMD: /zap/wrk/run-api-scan.sh
+    entrypoint: [sh, /app/framework/agents/security/scripts/run-dast-scan.sh]
+    command: [--target, "http://engine-validation:8000", --max-minutes, "1", --report-dir, /zap/wrk, --, -J, dast.json]
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/security/dast:/zap/wrk
+    networks: [dependencies]

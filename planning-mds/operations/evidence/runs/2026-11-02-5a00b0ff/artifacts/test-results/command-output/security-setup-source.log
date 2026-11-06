@@ -1,0 +1,38 @@
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
+p = argparse.ArgumentParser()
+p.add_argument('--product-root', type=Path, required=True)
+a = p.parse_args()
+root = a.product_root.resolve()
+run = root / 'planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff'
+security = run / 'artifacts/security'
+for name in ('source-snapshot', 'secrets', 'sast', 'dast'):
+    (security / name).mkdir(exist_ok=True)
+tracked = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD'], cwd=root, text=True).splitlines()
+untracked = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard', 'engine', 'neuron'], cwd=root, text=True).splitlines()
+inventory = []
+for relative in sorted(set(tracked + untracked)):
+    source = root / relative
+    if not source.is_file() or relative.split('/')[0] not in ('engine', 'neuron'):
+        continue
+    if any(part in ('.venv', '__pycache__', '.pytest_cache', '.ruff_cache') for part in source.parts):
+        continue
+    target = security / 'source-snapshot' / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, target)
+    inventory.append({'path':relative, 'sha256':hashlib.sha256(source.read_bytes()).hexdigest()})
+(security / 'source-snapshot-manifest.json').write_text(json.dumps(inventory, indent=2)+'\n')
+for workspace in ('engine', 'neuron'):
+    target = security / f'pip-audit-{workspace}.sh'
+    target.write_text('#!/bin/sh\nexec uv tool run --from pip-audit pip-audit --path /opt/venv/lib/python3.14/site-packages --format json --output /app/brain/'+str((security/f'dependency-{workspace}.json').relative_to(root))+'\n')
+    target.chmod(0o755)
+print(f'Prepared {len(inventory)} changed source paths and digest-pinned scanner jobs')
+
+Exit code: 0
+

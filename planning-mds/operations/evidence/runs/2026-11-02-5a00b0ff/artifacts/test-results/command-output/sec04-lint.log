@@ -1,0 +1,48 @@
+E501 Line too long (101 > 100)
+   --> engine/packages/brain-persistence/src/brain_persistence/assertions.py:494:101
+    |
+492 |     async def source_keys(self, assertion_id: UUID) -> tuple[ResourceKey, ...]:
+493 |         try:
+494 |             discovery = await discover_sources(self.session, (), None, assertion_ids=(assertion_id,))
+    |                                                                                                     ^
+495 |         except AssertionIneligible:
+496 |             raise LookupError("assertion source unavailable") from None
+    |
+
+E501 Line too long (101 > 100)
+   --> engine/packages/brain-persistence/src/brain_persistence/assertions.py:607:101
+    |
+605 |         if decision is not None:
+606 |             assertion_id = await session.scalar(
+607 |                 select(ReviewItemRow.assertion_id).where(ReviewItemRow.id == decision.review_item_id)
+    |                                                                                                     ^
+608 |             )
+609 |             if assertion_id is None:
+    |
+
+E501 Line too long (102 > 100)
+   --> engine/packages/brain-persistence/src/brain_persistence/assertions.py:638:101
+    |
+636 |     )).scalars() if parents else ()
+637 |     return SourceDiscovery(
+638 |         tuple(sorted(ResourceKey(ResourceType.CONTENT_ARTIFACT, identity) for identity in artifacts)),
+    |                                                                                                     ^^
+639 |         has_v2,
+640 |     )
+    |
+
+E501 Line too long (103 > 100)
+   --> engine/tests/integration/test_assertion_authority_projection.py:113:101
+    |
+111 |                             id=identity, run_id=None, origin="HUMAN_REVIEW", version=1,
+112 |                             original_assertion_id=parent, subject_type="Policy", slot_type="limit",
+113 |                             value={"amount":1}, model_confidence=None, interpretation_basis="EXPLICIT",
+    |                                                                                                     ^^^
+114 |                             tenant_id=world.owner[0], knowledge_base_id=world.owner[1],
+115 |                         ))
+    |
+
+Found 4 errors.
+
+Exit code: 1
+

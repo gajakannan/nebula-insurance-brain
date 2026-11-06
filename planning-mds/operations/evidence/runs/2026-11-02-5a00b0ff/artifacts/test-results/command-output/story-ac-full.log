@@ -1,0 +1,58 @@
+## Acceptance Criteria
+
+- [ ] **AC1:** Given an authorized producer, when a typed claim is persisted and reloaded, its identity, subject candidate, ontology property/release, value or object, qualifiers, claimed time, run/source/evidence references and actor/time equal the submitted validated record.
+- [ ] **AC2:** Two sources claiming $5M and $10M for the same subject/property retain two distinct assertion identities and both evidence sets; no canonical fact is created by either write.
+- [ ] **AC3:** Mode accepts only `ASSERTED`, `OBSERVED`, `DERIVED`; origin accepts the six PRD §Data Requirements values; basis accepts `EXPLICIT`, `INFERRED`, `AMBIGUOUS`. They round-trip independently. Unknown values are rejected with no assertion write.
+- [ ] **AC4:** Supplied confidence is preserved independently from basis; `INFERRED`/`AMBIGUOUS` claims are not silently converted to `EXPLICIT` or automatically accepted. Confidence, where provided, is in [0,1]; invalid values are rejected.
+- [ ] **AC5:** Cross-tenant/KB run, subject, correction or evidence references and unauthorized writers are denied with zero new authoritative rows; existing authorization audit records the decision.
+- [ ] **AC6:** Corrections append a new assertion referencing the original; reload preserves the original claim and correction lineage. An attempt to overwrite source evidence or the original claim fails.
+- [ ] **AC7:** PostgreSQL evidence proves round trips, competing claims, ownership rejection and additive corrections. Assertion processing performs zero conversion/OCR calls.
+
+## Interaction Contract
+## Acceptance Criteria
+
+- [ ] **AC1:** An authorized fixture/service caller can persist and reload `OPEN_STATEMENT` with subject, source relation phrase, object reference or literal, role-word qualifiers, time-mention references, mandatory quote and source/evidence identity unchanged.
+- [ ] **AC2:** An open statement has a null predicate and `EXPLICIT` basis; a non-null predicate, missing quote, invalid subject or incompatible basis is rejected with no assertion write.
+- [ ] **AC3:** A typed assertion requires an ontology property and release; an open statement requires neither an invented property nor a release. Both kinds retain mode, origin and evidence independently.
+- [ ] **AC4:** The versioned schema addition represents assertion kind, source phrase, quote/server selector, role qualifiers including mood and time-mention references. Existing valid result fixtures still validate against the unchanged legacy version and remain readable.
+- [ ] **AC5:** New-version payloads cannot silently lose semantics through old readers; unsupported versions/kinds produce an explicit compatibility error before mutation. No fabricated quote or ontology release is backfilled into legacy results.
+- [ ] **AC6:** New open statements remain ineligible for entity resolution, FactSlot selection and canonical commit. A fixture can store one without invoking a model, alignment or conversion.
+- [ ] **AC7:** Unauthorized or cross-tenant/KB source, object or time-mention references are denied without content disclosure; existing authorization audit is retained. Dangling local references are rejected; document-local descriptive entities remain local rather than being silently merged. Accepted writes retain actor and source/run identity for audit.
+
+## Interaction Contract
+## Acceptance Criteria
+
+- [ ] **AC1:** Given the claimed immutable block, admission locates its quote using a documented deterministic normalization. A missing quote yields `QUOTE_NOT_IN_SOURCE` and no admitted assertion. Unicode, whitespace and hyphenation fixtures test the mapping back to original text.
+- [ ] **AC2:** A name outside its introducing quote yields `NAME_NOT_IN_QUOTE`; a name already claimed by another entity in the same document yields `NAME_CLAIMED_BY_ANOTHER`. No vocabulary word list decides names or silently merges entities.
+- [ ] **AC3:** Time words outside their assertion quote yield `TIME_NOT_IN_QUOTE`; an unlisted subject yields `UNKNOWN_REFERENCE`. An undeclared object is retained as a literal with `OBJECT_UNDECLARED` signal, not silently dropped.
+- [ ] **AC4:** Malformed items yield `MALFORMED_ITEM`; truncated output yields `TRUNCATED_OUTPUT` while complete independently valid items remain available; a block with no parsable output yields `BLOCK_UNINTERPRETED`.
+- [ ] **AC5:** Every reject/signal outcome exposes run/block, reason, model/prompt identity, raw-item hash and an access-controlled excerpt contract for F0016. No outcome is silently lost. Truncation/uninterpreted outcomes explicitly require F0016 PARTIAL/NOT_PROCESSED handling, not COMPLETE/NOT_FOUND.
+- [ ] **AC6:** Model-provided selectors/offsets confer no authority. The server derives locations against stored content for PDF, DOCX, XLSX and CSV fixtures; repeated text, normalized text and multi-region evidence never invent a unique span. Coarser/unresolved precision remains explicit under ADR-0058.
+- [ ] **AC7:** A genuine $500,000 quote paired with a misread $5,000,000 value passes grounding, retains the value and reaches the existing semantic review boundary; structural admission does not claim to verify business meaning (EX-SEM-005b).
+- [ ] **AC8:** Unauthorized block access and cross-tenant/KB references are denied before source inspection/disclosure, preserving existing access-decision audit. Rejected candidates produce no assertion/evidence write; processing performs zero conversion/OCR calls and never creates a canonical fact.
+
+## Interaction Contract
+## Acceptance Criteria
+
+- [ ] **AC1:** Source-word mood qualifiers round-trip unchanged on both assertion kinds. A supplied mood-bearing claim is ineligible for canonical facts regardless of confidence or fact mode; omitting a future routing engine cannot remove this guard.
+- [ ] **AC2:** Synthetic subjectivity, offered/quoted limit, warranty and conditional-coverage cases retain the quoted qualifier and cannot assert that the required event happened or the offered coverage is bound. No automatic vocabulary-based mood classifier is introduced.
+- [ ] **AC3:** An issued policy's operative provision can remain a typed fact about the policy's contractual terms; it does not assert the embedded condition is true about the insured or premises (EX-SEM-007).
+- [ ] **AC4:** Evidence inherits block text origin and producer provenance from F0004. Described-only support requires `DESCRIBED_EVIDENCE` review and cannot auto-accept, close or supersede a canonical fact; an attempted bypass is rejected without a canonical write (EX-SEM-006).
+- [ ] **AC5:** `OCR`/`TRANSCRIBED` support is admissible at its actual precision, retaining producer confidence when present. Missing or legacy/unqualified origin is not silently promoted to qualified `STATED`; unresolved provenance retains the existing review requirement.
+- [ ] **AC6:** Authorized review/consumer hooks retain mood, basis, assertion origin, evidence origin and eligibility reasons on reload, preserving existing review and authorization audit. Unauthorized readers receive no source or excerpt. Open/mood/described guards remain independent: satisfying one does not clear another.
+
+## Interaction Contract
+## Acceptance Criteria
+
+- [ ] **AC1:** A pre-change legacy result imports through the existing authorized path and remains readable with the same run/assertion/evidence identities and values. Replay retains its existing idempotence; no duplicate assertions or reviews are produced.
+- [ ] **AC2:** Legacy `MACHINE_EXTRACTION` and human-correction records retain source provenance and correction links across the compatible origin transition. Unknown legacy details stay unknown; no fabricated quote, predicate release, mood or qualified text origin is inserted.
+- [ ] **AC3:** Existing Review Panel correction entry and authenticated service preserve additive correction, stale-task refusal, evidence locator and audit behaviour. Authorized review of a legacy fixture still works; no new screen is required.
+- [ ] **AC4:** Existing pilot commit consumers retain their typed-legacy behaviour but reject unsupported new kinds, mood-bearing assertions and disallowed described-only use before canonical mutation. No new semantics are stripped to fit an old payload.
+- [ ] **AC5:** Cross-tenant/KB, revoked/unauthorized and malformed-input cases have zero unauthorized claim, correction or canonical effects; existing decision audit and protected-error behaviour remain intact.
+- [ ] **AC6:** Failure during a claim/evidence/review transaction leaves no partial rows; retry produces one logical import under the existing delivery identity. Migration and rollback instructions preserve already-recorded new semantics or explicitly stop incompatible readers/writers.
+- [ ] **AC7:** Independently authored synthetic expectations cover typed/open storage, admission reasons, mood, described evidence and operative-policy boundaries, using EX-GL-001 and EX-SEM-001/005–007. Observed runtime outputs, PostgreSQL cases and existing-consumer regression commands are recorded separately from illustrative examples; changed-code coverage is at least 80%. Defaults remain `direct-baseline`/v1 and no physical reparse is introduced.
+
+## Interaction Contract
+
+Exit code: 0
+

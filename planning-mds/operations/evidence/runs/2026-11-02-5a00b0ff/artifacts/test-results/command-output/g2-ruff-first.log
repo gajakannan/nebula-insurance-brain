@@ -1,0 +1,319 @@
+Warning: truncated output (original token count: 38599)
+Total output lines: 3056
+
+E501 Line too long (103 > 100)
+   --> engine/apps/api/src/brain_api/routes/facts.py:129:101
+    |
+128 |     async def source_keys() -> Sequence[ResourceKey]:
+129 |         return await repository.commit_source_keys(proposal.evidence_refs, proposal.review_decision_id)
+    |                                                                                                     ^^^
+130 |
+131 |     try:
+    |
+
+E501 Line too long (102 > 100)
+  --> engine/migrations/versions/0011_f0006_assertion_semantics.py:34:101
+   |
+32 |   created_by uuid NOT NULL REFERENCES principal(id),
+33 |   created_at timestamptz NOT NULL,
+34 |   CONSTRAINT uq_assertion_reference_owner UNIQUE (id,document_version_id,tenant_id,knowledge_base_id),
+   |                                                                                                     ^^
+35 |   CONSTRAINT fk_assertion_reference_document FOREIGN KEY (document_version_id,tenant_id,knowledge_base_id)
+36 |     REFERENCES document_version(id,tenant_id,knowledge_base_id)
+   |
+
+E501 Line too long (106 > 100)
+  --> engine/migrations/versions/0011_f0006_assertion_semantics.py:35:101
+   |
+33 |   created_at timestamptz NOT NULL,
+34 |   CONSTRAINT uq_assertion_reference_owner UNIQUE (id,document_version_id,tenant_id,knowledge_base_id),
+35 |   CONSTRAINT fk_assertion_reference_document FOREIGN KEY (document_version_id,tenant_id,knowledge_base_id)
+   |                                                                                                     ^^^^^^
+36 |     REFERENCES document_version(id,tenant_id,knowledge_base_id)
+37 | );
+   |
+
+E501 Line too long (113 > 100)
+  --> engine/migrations/versions/0011_f0006_assertion_semantics.py:48:101
+   |
+46 |   created_at timestamptz NOT NULL,
+47 |   PRIMARY KEY (document_version_id,tenant_id,knowledge_base_id,normalized_name),
+48 |   CONSTRAINT fk_assertion_name_reference FOREIGN KEY (entity_ref,document_version_id,tenant_id,knowledge_base_id)
+   |                                                                                                     ^^^^^^^^^^^^^
+49 |     REFERENCES assertion_document_reference(id,document_version_id,tenant_id,knowledge_base_id)
+50 | );
+   |
+
+E501 Line too long (106 > 100)
+  --> engine/migrations/versions/0011_f0006_assertion_semantics.py:74:101
+   |
+72 |   CONSTRAINT fk_assertion_semantics_owner FOREIGN KEY (assertion_id,tenant_id,knowledge_base_id)
+73 |     REFERENCES assertion(id,tenant_id,knowledge_base_id),
+74 |   CONSTRAINT fk_assertion_semantics_document FOREIGN KEY (document_version_id,tenant_id,knowledge_base_id)
+   |                                                                                                     ^^^^^^
+75 |     REFERENCES document_version(id,tenant_id,knowledge_base_id),
+76 |   CONSTRAINT fk_assertion_semantics_subject FOREIGN KEY (subject_ref,document_version_id,tenant_id,knowledge_base_id)
+   |
+
+E501 Line too long (117 > 100)
+  --> engine/migrations/versions/0011_f0006_assertion_semantics.py:76:101
+   |
+74 |   CONSTRAINT fk_assertion_semantics_document FOREIGN KEY (document_version_id,tenant_id,knowledge_base_id)
+75 |     REFERENCES document_version(id,tenant_id,knowledge_base_id),
+76 |   CONSTRAINT fk_assertion_semantics_subject FOREIGN KEY (subject_ref,document_version_id,tenant_id,knowledge_base_id)
+   |                                                                                                     ^^^^^^^^^^^^^^^^^
+77 |     REFERENCES assertion_document_reference(id,document_version_id,tenant_id,knowledge_base_id),
+78 |   CONSTRAINT fk_assertion_semantics_object FOREIGN KEY (object_ref,document_version_id,tenant_id,knowledge_base_id)
+   |
+
+E501 Line too long (115 > 100)
+  --> engine/migrations/versions/0011_f0006_assertion_semantics.py:78:101
+   |
+76 |   CONSTRAINT fk_assertion_semantics_subject FOREIGN KEY (subject_ref,document_version_id,tenant_id,knowledge_base_id)
+77 |     REFERENCES assertion_document_reference(id,document_version_id,tenant_id,knowledge_base_id),
+78 |   CONSTRAINT fk_assertion_semantics_object FOREIGN KEY (object_ref,document_version_id,tenant_id,knowledge_base_id)
+   |                                                                                                     ^^^^^^^^^^^^^^^
+79 |     REFERENCES assertion_document_reference(id,document_version_id,tenant_id,knowledge_base_id),
+80 |   CONSTRAINT ck_assertion_kind CHECK (assertion_kind IN ('OPEN_STATEMENT','TYPED_ASSERTION')),
+   |
+
+E501 Line too long (108 > 100)
+  --> engine/migrations/versions/0011_f0006_assertion_semantics.py:82:101
+   |
+80 |   CONSTRAINT ck_assertion_kind CHECK (assertion_kind IN ('OPEN_STATEMENT','TYPED_ASSERTION')),
+81 |   CONSTRAINT ck_assertion_mode CHECK (fact_mode IN ('ASSERTED','OBSERVED','DERIVED')),
+82 |   CONSTRAINT ck_assertion_origin CHECK (assertion_origin IN ('DOCUMENT_INTERPRETATION','SYSTEM_OBSERVATION',
+   |                                                                                                     ^^^^^^^^
+83 |     'HUMAN_REVIEW','CONVERSATION_DISCOVERY','RULE_DERIVATION','AGENT_ANALYSIS')),
+84 |   CONSTRAINT ck_assertion_kind_contract CHECK (coalesce(
+   |
+
+E501 Line too long (103 > 100)
+  --> engine/migrations/versions/0011_f0006_assertion_semantics.py:90:101
+   |
+88 |       AND ontology_release IS NOT NULL AND length(ontology_release) > 0), false)),
+89 |   CONSTRAINT ck_assertion_record_shape CHECK (coalesce(jsonb_typeof(record) = 'object'
+90 |     AND record ?& ARRAY['id','assertion_kind','subject_ref','object','predicate_id','ontology_release',
+   |                                                                                                     ^^^
+91 |       'source_relation','qualifiers','time_mention_refs','valid_time_claim','mode','origin',
+92 |       'interpretation_basis','model_confidence','evidence']
+   |
+
+E501 Line too long (114 > 100)
+   --> engine/migrations/versions/0011_f0006_assertion_semantics.py:107:101
+    |
+105 |     AND ((record->'object'->>'kind' = 'ENTITY' AND object_ref IS NOT NULL
+106 |        AND record->'object'->>'ref' = object_ref::text AND length(record->'object'->>'name') > 0)
+107 |       OR (record->'object'->>'kind' = 'LITERAL' AND object_ref IS NULL AND (record->'object' ? 'value'))),false)),
+    |                                                                                                     ^^^^^^^^^^^^^^
+108 |   CONSTRAINT ck_assertion_hashes CHECK (raw_item_sha256 ~ '^[0-9a-f]{64}$'
+109 |     AND admission_sha256 ~ '^[0-9a-f]{64}$')
+    |
+
+E501 Line too long (108 > 100)
+   --> engine/migrations/versions/0011_f0006_assertion_semantics.py:111:101
+    |
+109 |     AND admission_sha256 ~ '^[0-9a-f]{64}$')
+110 | );
+111 | CREATE INDEX ix_assertion_semantics_subject ON assertion_semantics(tenant_id,knowledge_base_id,subject_ref);
+    |                                                                                                     ^^^^^^^^
+112 | CREATE INDEX ix_assertion_semantics_document ON assertion_semantics(tenant_id,knowledge_base_id,document_version_id);
+    |
+
+E501 Line too long (117 > 100)
+   --> engine/migrations/versions/0011_f0006_assertion_semantics.py:112:101
+    |
+110 | );
+111 | CREATE INDEX ix_assertion_semantics_subject ON assertion_semantics(tenant_id,knowledge_base_id,subject_ref);
+112 | CREATE INDEX ix_assertion_semantics_document ON assertion_semantics(tenant_id,knowledge_base_id,document_version_id);
+    |                                                                                                     ^^^^^^^^^^^^^^^^^
+113 |
+114 | CREATE FUNCTION brain_assertion_immutable() RETURNS trigger LANGUAGE plpgsql AS $$
+    |
+
+E501 Line too long (106 > 100)
+   --> engine/migrations/versions/0011_f0006_assertion_semantics.py:127:101
+    |
+125 | CREATE TRIGGER trg_assertion_evidence_append_only BEFORE UPDATE OR DELETE ON assertion_evidence
+126 |   FOR EACH ROW EXECUTE FUNCTION brain_append_only();
+127 | CREATE TRIGGER trg_assertion_reference_append_only BEFORE UPDATE OR DELETE ON assertion_document_reference
+    |                          …34599 tokens truncated…version+1 WHERE id=%s", (admitted.record.id,))
+   |                                                                                                     ^^^
+66 |         assert connection.execute("SELECT version FROM assertion WHERE id=%s", (admitted.record.id,)).fetchone()[0] == 2
+   |
+
+E501 Line too long (120 > 100)
+  --> engine/tests/integration/test_assertion_migration.py:66:101
+   |
+64 |     with psycopg.connect(database) as connection:
+65 |         connection.execute("UPDATE assertion SET version=version+1 WHERE id=%s", (admitted.record.id,))
+66 |         assert connection.execute("SELECT version FROM assertion WHERE id=%s", (admitted.record.id,)).fetchone()[0] == 2
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^
+
+F811 Redefinition of unused `world` from line 12
+  --> engine/tests/integration/test_assertion_migration.py:69:64
+   |
+69 | async def test_core_only_v2_and_legacy_sentinel_fail_at_commit(world, database):
+   |                                                                ^^^^^ `world` redefined here
+70 |     for discriminator, slot in ((2, "limit"), (1, "__OPEN_STATEMENT_V2__")):
+71 |         with pytest.raises(psycopg.errors.CheckViolation):
+   |
+  ::: engine/tests/integration/test_assertion_migration.py:12:5
+   |
+10 |     counts,
+11 |     database,
+12 |     world,
+   |     ----- previous definition of `world` here
+13 |     world_factory,
+14 | )
+   |
+help: Remove definition: `world`
+
+F811 Redefinition of unused `database` from line 11
+  --> engine/tests/integration/test_assertion_migration.py:69:71
+   |
+69 | async def test_core_only_v2_and_legacy_sentinel_fail_at_commit(world, database):
+   |                                                                       ^^^^^^^^ `database` redefined here
+70 |     for discriminator, slot in ((2, "limit"), (1, "__OPEN_STATEMENT_V2__")):
+71 |         with pytest.raises(psycopg.errors.CheckViolation):
+   |
+  ::: engine/tests/integration/test_assertion_migration.py:11:5
+   |
+ 9 |     configuration,
+10 |     counts,
+11 |     database,
+   |     -------- previous definition of `database` here
+12 |     world,
+13 |     world_factory,
+   |
+help: Remove definition: `database`
+
+SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+  --> engine/tests/integration/test_assertion_migration.py:71:9
+   |
+69 |   async def test_core_only_v2_and_legacy_sentinel_fail_at_commit(world, database):
+70 |       for discriminator, slot in ((2, "limit"), (1, "__OPEN_STATEMENT_V2__")):
+71 | /         with pytest.raises(psycopg.errors.CheckViolation):
+72 | |             with psycopg.connect(database) as connection:
+   | |_________________________________________________________^
+73 |                   identity = uuid4()
+74 |                   insert_legacy(connection, identity, world.owner, slot=slot)
+   |
+help: Combine `with` statements
+
+E501 Line too long (102 > 100)
+  --> engine/tests/integration/test_assertion_migration.py:79:101
+   |
+77 |                     connection.rollback()
+78 |                     connection.execute(
+79 |                         "INSERT INTO assertion(id,run_id,origin,version,subject_type,slot_type,value,"
+   |                                                                                                     ^^
+80 |                         "model_confidence,interpretation_basis,created_at,tenant_id,knowledge_base_id,semantic_contract_version) "
+81 |                         "VALUES(%s,NULL,'DOCUMENT_INTERPRETATION',1,'Policy','limit','{}',0.5,'EXPLICIT',now(),%s,%s,2)",
+   |
+
+E501 Line too long (130 > 100)
+  --> engine/tests/integration/test_assertion_migration.py:80:101
+   |
+78 |                     connection.execute(
+79 |                         "INSERT INTO assertion(id,run_id,origin,version,subject_type,slot_type,value,"
+80 |                         "model_confidence,interpretation_basis,created_at,tenant_id,knowledge_base_id,semantic_contract_version) "
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+81 |                         "VALUES(%s,NULL,'DOCUMENT_INTERPRETATION',1,'Policy','limit','{}',0.5,'EXPLICIT',now(),%s,%s,2)",
+82 |                         (identity, *world.owner),
+   |
+
+F811 Redefinition of unused `world` from line 12
+  --> engine/tests/integration/test_assertion_migration.py:87:67
+   |
+87 | async def test_v1_child_of_v2_parent_is_refused_by_deferred_guard(world, database):
+   |                                                                   ^^^^^ `world` redefined here
+88 |     parent = (await world.admit([world.candidate()])).accepted[0]
+89 |     with pytest.raises(psycopg.errors.CheckViolation, match="correction contract mismatch"):
+   |
+  ::: engine/tests/integration/test_assertion_migration.py:12:5
+   |
+10 |     counts,
+11 |     database,
+12 |     world,
+   |     ----- previous definition of `world` here
+13 |     world_factory,
+14 | )
+   |
+help: Remove definition: `world`
+
+F811 Redefinition of unused `database` from line 11
+  --> engine/tests/integration/test_assertion_migration.py:87:74
+   |
+87 | async def test_v1_child_of_v2_parent_is_refused_by_deferred_guard(world, database):
+   |                                                                          ^^^^^^^^ `database` redefined here
+88 |     parent = (await world.admit([world.candidate()])).accepted[0]
+89 |     with pytest.raises(psycopg.errors.CheckViolation, match="correction contract mismatch"):
+   |
+  ::: engine/tests/integration/test_assertion_migration.py:11:5
+   |
+ 9 |     configuration,
+10 |     counts,
+11 |     database,
+   |     -------- previous definition of `database` here
+12 |     world,
+13 |     world_factory,
+   |
+help: Remove definition: `database`
+
+SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+  --> engine/tests/integration/test_assertion_migration.py:89:5
+   |
+87 |   async def test_v1_child_of_v2_parent_is_refused_by_deferred_guard(world, database):
+88 |       parent = (await world.admit([world.candidate()])).accepted[0]
+89 | /     with pytest.raises(psycopg.errors.CheckViolation, match="correction contract mismatch"):
+90 | |         with psycopg.connect(database) as connection:
+   | |_____________________________________________________^
+91 |               insert_legacy(connection, uuid4(), world.owner, parent=parent.record.id)
+92 |       assert counts(database)["assertion"] == 1
+   |
+help: Combine `with` statements
+
+F811 Redefinition of unused `world` from line 12
+  --> engine/tests/integration/test_assertion_migration.py:95:67
+   |
+95 | async def test_occupied_downgrade_stops_without_erasing_semantics(world, database):
+   |                                                                   ^^^^^ `world` redefined here
+96 |     await world.admit([world.candidate()])
+97 |     before = counts(database)
+   |
+  ::: engine/tests/integration/test_assertion_migration.py:12:5
+   |
+10 |     counts,
+11 |     database,
+12 |     world,
+   |     ----- previous definition of `world` here
+13 |     world_factory,
+14 | )
+   |
+help: Remove definition: `world`
+
+F811 Redefinition of unused `database` from line 11
+  --> engine/tests/integration/test_assertion_migration.py:95:74
+   |
+95 | async def test_occupied_downgrade_stops_without_erasing_semantics(world, database):
+   |                                                                          ^^^^^^^^ `database` redefined here
+96 |     await world.admit([world.candidate()])
+97 |     before = counts(database)
+   |
+  ::: engine/tests/integration/test_assertion_migration.py:11:5
+   |
+ 9 |     configuration,
+10 |     counts,
+11 |     database,
+   |     -------- previous definition of `database` here
+12 |     world,
+13 |     world_factory,
+   |
+help: Remove definition: `database`
+
+Found 273 errors (27 fixed, 246 remaining).
+No fixes available (5 hidden fixes can be enabled with the `--unsafe-fixes` option).
+
+Exit code: 1
+

@@ -1,0 +1,18 @@
+[KG] engine/packages/brain-persistence/src/brain_persistence/models.py -> entity:content-artifact
+  Features: feature:F0001, feature:F0003, feature:F0004, feature:F0005
+  Stories: story:F0001-S0003, story:F0003-S0004, story:F0004-S0001
+  Symbols: Assertion:L144, AssertionEvidence:L181, AuditEventRow:L245, AuthenticationEventRow:L607, CanonicalCommitRow:L620, CanonicalFactChangeRow:L394, CanonicalFactVersionRow:L357, ContentArtifact:L75, DelegationRow:L555, DocumentVersion:L54 (+19 more)
+  Risk: entity:content-artifact: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+Unknown node: document-version
+engine/packages/brain-persistence/src/brain_persistence/models.py:17:    UniqueConstraint,
+engine/packages/brain-persistence/src/brain_persistence/models.py:40:        UniqueConstraint(
+engine/packages/brain-persistence/src/brain_persistence/models.py:54:class DocumentVersion(Base):
+engine/packages/brain-persistence/src/brain_persistence/models.py:81:        UniqueConstraint("id", "tenant_id", "knowledge_base_id", name="uq_content_artifact_owner"),
+engine/packages/brain-persistence/src/brain_persistence/models.py:82:        UniqueConstraint(
+engine/packages/brain-persistence/src/brain_persistence/models.py:217:    __table_args__ = (UniqueConstraint("issuer", "subject", name="uq_principal_issuer_subject"),)
+engine/packages/brain-persistence/src/brain_persistence/models.py:318:        UniqueConstraint("review_item_id", "event_sha256", name="uq_review_decision_item_event"),
+engine/packages/brain-persistence/src/brain_persistence/models.py:480:        UniqueConstraint(
+
+Exit code: 0
+

@@ -1,0 +1,96 @@
+    text_origin: Literal["STATED", "OCR", "TRANSCRIBED", "DESCRIBED"] | None
+    origin_qualification: Literal["qualified", "legacy_unqualified"]
+    producer: Mapping[str, Json] | None
+    producer_confidence: float | None
+
+
+@dataclass(frozen=True)
+class TimeReference:
+    id: UUID
+    tenant_id: UUID
+    knowledge_base_id: UUID
+    artifact_id: UUID
+    block_id: str
+    words: str
+
+
+@dataclass(frozen=True)
+class SourceAccessProof:
+    id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
+    knowledge_base_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
+    source_sha256: Mapped[str] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    versions: Mapped[list[DocumentVersion]] = relationship(back_populates="source_document")
+
+
+class DocumentVersion(Base):
+    """A parse of `SourceDocument` at a point in time. F0001-S0003 creates exactly one
+    version per source; later features (F0009/F0010) add re-upload/replacement versions."""
+
+    __tablename__ = "document_version"
+
+    id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True, default=uuid.uuid4)
+    source_document_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("source_document.id"), nullable=False
+    )
+    # Explicit structural ownership (F0002-S0001, ADR-0061). The composite
+    # foreign keys to the parent's (id, tenant_id, knowledge_base_id) live in
+    # migrations 0005/0006 — the database is the enforcement point.
+    tenant_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
+    knowledge_base_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    source_document: Mapped[SourceDocument] = relationship(back_populates="versions")
+    artifacts: Mapped[list[ContentArtifact]] = relationship(back_populates="document_version")
+
+
+class ContentArtifact(Base):
+    """Metadata row for a bundle persisted through `ContentArtifactStore`
+    (`brain_content`); the bundle bytes themselves live in the object store, not here."""
+
+    __tablename__ = "content_artifact"
+engine/migrations/versions/0008_f0004_content_contract.sql:33:CREATE UNIQUE INDEX uq_f0004_v2_recipe ON content_artifact(document_version_id,recipe_sha256)
+engine/migrations/versions/0006_tenancy_authx_constrain.py:200:        "uq_document_job_owner", "document_job", ["id", "tenant_id", "knowledge_base_id"]
+engine/migrations/versions/0006_tenancy_authx_constrain.py:218:    op.drop_constraint("uq_document_job_owner", "document_job", type_="unique")
+engine/migrations/versions/0008_f0004_content_contract.py:67:    if not any(c["column_names"] == ["document_version_id"] for c in unique):
+                        producer=dict(original.producer) if original.producer is not None else None,
+                        producer_confidence=original.producer_confidence,
+                    )
+                )
+                source_hashes[claim.block_id] = sha256(original.text.encode("utf-8")).hexdigest()
+
+            for ordinal, ref in enumerate(candidate.time_mention_refs):
+                ref_path = f"{path}/time_mention_refs/{ordinal}"
+                try:
+                    time_ref = await self._sources.time_reference(context, ref)
+                    if (
+                        time_ref.id != ref
+                        or time_ref.tenant_id != context.tenant_id
+                        or time_ref.knowledge_base_id != context.knowledge_base_id
+                        or time_ref.artifact_id != context.artifact_id
+                    ):
+                        raise LookupError("time reference identity mismatch")
+                except LookupError:
+                    fail("UNKNOWN_REFERENCE", item_path=ref_path)
+                    continue
+                if not normalize(time_ref.words) or not any(
+                    claim.block_id == time_ref.block_id
+                    and normalize(time_ref.words) in normalize(claim.quote)
+                    for claim in candidate.evidence
+                ):
+                    fail("TIME_NOT_IN_QUOTE", block_id=time_ref.block_id, item_path=ref_path)
+                time_snapshots.append(wire_value(asdict(time_ref)))
+
+            outcomes.extend(item_outcomes)
+            if any(e.disposition == "REJECTED" for e in item_outcomes):
+                continue
+            eligibility = evaluate_eligibility(candidate, evidence)
+            accepted.append(
+                AdmittedAssertion(
+                    record=candidate,
+                    server_evidence=tuple(evidence),
+
+Exit code: 0
+

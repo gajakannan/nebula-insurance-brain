@@ -1,0 +1,163 @@
+Warning: truncated output (original token count: 14377)
+Total output lines: 536
+
+[product-root] /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain (source: --product-root)
+Product instructions for /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain (feature)
+
+--- planning-mds/BLUEPRINT.md (sha256:aa6f3657d5821e8edab0c4d28e2278357a81d9e6ec527e3e7a826fb908e2ecbf) ---
+# Nebula Insurance Brain — Single Source of Truth Master Build Spec (Blueprint Prompt)
+
+You are an AI development partner helping build Nebula Insurance Brain, a continuously evolving enterprise semantic system for commercial Property & Casualty insurance.
+This document is the framework entry point and the ONLY source of truth for process, scope, and platform baselines. The full architecture baseline lives in [`architecture/master-blueprint.md`](architecture/master-blueprint.md) and is referenced by section number from here. Where the two disagree, this document wins for process and scope and the master blueprint wins for architectural intent until an ADR settles the difference.
+If information is missing, ask questions or mark open decisions — do NOT invent business rules.
+
+## 0) How we will work (Process + Roles)
+
+We proceed in three explicit phases driven by the `nebula-agents` framework. Sessions are rooted in the sibling `nebula-agents/` checkout with `{PRODUCT_ROOT}` resolved to this repository. Stay within the current phase.
+
+### Phase A — Product Manager Mode (PM/BA)
+Goal: define product requirements per feature (personas, stories, acceptance criteria, screens) against the epic inventory in section 3.
+Output: feature folders under `features/F####-{slug}/` with PRD, stories, STATUS, and GETTING-STARTED.
+
+### Phase B — Architect/Tech Lead Mode (Dev/Arch)
+Goal: confirm or refine the architecture baseline (section 4 and the master blueprint) per feature: assembly plan, ADR confirmations, API and schema contracts, kg-source bindings.
+Output: `feature-assembly-plan.md`, ADRs under `architecture/decisions/`, contracts under `api/` and `schemas/`, kg-source shards.
+
+### Phase C — Implementation Mode
+Goal: implement vertical slices in `engine/`, `experience/`, and `neuron/` with tests, migrations, contracts, and evidence packages.
+Output: production-quality code + tests + run instructions + a feature evidence package per run.
+
+IMPORTANT RULES:
+
+- Single source of truth for process and scope is THIS document; architectural intent is the master blueprint until superseded by an ADR.
+- If a requirement is not written here or in an approved feature folder, do not implement it.
+- If there is ambiguity, list questions and propose minimal default assumptions labeled clearly.
+- No scope creep. Build only what is specified for the current phase and feature.
+- Proposed decisions in the master blueprint (sections 106 to 122, ADR-0038 to ADR-0053) are not accepted until their stated tests, owners, and release gates are satisfied.
+
+### Framework binding
+
+- Framework: `nebula-agents` pinned at commit `308c81d2233c045481f23d6d7da3764a4191c40f` (2026-10-20). Advance the pin deliberately, in step with `.github/workflows/ci-gates.yml`, and record the new commit here.
+- Session setup: export `NEBULA_PRODUCT_ROOT=<absolute path to this repo>` before running any framework script. The framework default points at the CRM repo, not this one.
+- Layout convention: `engine/`, `experience/`, `neuron/` runtime roots (section 2.3). Path-class extensions for the additional roots are declared in section 2.4 and registered in `operations/evidence/README.md` at init.
+- Local guidance: [agent instructions](../docs/agent-instructions.md) and [plan review checklist](../docs/plan-review-checklist.md), declared in `../.nebula-project.yaml`, supplement this blueprint without changing its authority.
+- Extension rollout: complete. The pinned revision carries `agents/scripts/project_checks.py` and `agents/scripts/project_context.py`, so the checks declared in `../.nebula-project.yaml` execute at the framework's `plan-review` extension point; see [adoption status](../docs/framework-adoption.md).
+
+### Tracker Governance (Mandatory)
+
+Planning trackers must stay in sync at all times. Treat stale tracker state as a process defect.
+
+- Governance contract: `features/TRACKER-GOVERNANCE.md`
+- `features/REGISTRY.md`, `features/ROADMAP.md`, and the `knowledge-graph/` projections are compiled from `kg-source/**` shards by `scripts/kg/compile.py`; never hand-edit generated regions.
+- Run the framework tracker and story validators against this repo before declaring any planning or feature gate complete.
+
+---
+
+## 1) Product Context
+
+### 1.1 What we're building
+
+Name: Nebula Insurance Brain
+
+Domain: Commercial Property & Casualty insurance enterprise knowledge (policies, endorsements, loss runs, claims, submissions, broker and account relationships).
+
+Purpose: Ingest enterprise information once at the content level, preserve evidence, represent what sources claim, resolve claims into a governed bitemporal canonical world model with versioned ontology and mandatory provenance, and expose that knowledge through 360 views, search, graph traversal, APIs, agents, and conversation while learning from every interaction under governance (master blueprint sections 0 to 2).
+
+What it is not: a document archive, a vector database, a chat-with-PDF system, or a static knowledge graph (section 2).
+
+### 1.2 Target users
+
+Baseline derived from the master blueprint surfaces (sections 64 to 75); Phase A refines these into personas per feature.
+
+- Insurance knowledge workers (underwriters, account and claims analysts) using Entity 360, Document 360, search, and contextual chat (sections 70 to 72)
+- Human reviewers adjudicating low-confidence or corrected extractions in the Nebula Review Panel (sections 75, 111, 125)
+- Ontology, profile, and knowledge-governance stewards approving promotions and releases (sections 42, 112; the workbenches are v0.2)
+- Agents and integrations consuming the semantic API and MCP under verified principals and bounded delegation (sections 64, 68, 69)
+- Platform operators and security administrators managing tenancy, principals, policy releases, and retention (sections 65, 66, 110)
+
+External users (brokers or MGAs) are not in v0.1 scope unless a feature explicitly states otherwise.
+
+### 1.3 Core entities (baseline)
+
+Semantic kernel (sections 12 to 18, 78):
+
+- Tenant, Workspace, KnowledgeBase (structural tenancy)
+- Principal, Membership, Role, Permission, ResourceScope
+- SourceDocument, DocumentVersion, ContentArtifact, ContentBlock, ContentTable
+- DocumentProfile, ExtractionProfile, SemanticInterpretationRun, InterpretationBasis
+- Assertion, AssertionValue, AssertionRelationship, AssertionEvidence
+- Entity, EntityType, EntityAlias
+- FactSlot, FactSlotQualifier, CanonicalFactVersion, CanonicalRelationshipVersion, CanonicalFactChange
+- Derivation, DerivationInput
+- GuidelineRuleVersion, AssessmentRecord (F0065 bounded v0.1B assessment; proposed contract in its feature folder)
+- ReviewItem, ReviewBatch, ReviewDecision, Evid…10877 tokens truncated… commits the outer transaction. Existing `direct-baseline` and v1 content writer defaults follow F0005's final approved rejection decision. Full durable drops/run adoption stays F0016; full source-completeness/commit orchestration stays F0018; display stays F0022; open extraction/alignment stays F0066. New restrictions apply to attributable v2 evidence/review/correction lineage; unregistered legacy pilot references remain an explicit compatibility boundary. ADR-0065 and ADR-0075 remain Proposed until their required runtime proofs. Existing C4 topology is unchanged; feature README contains ER/component diagrams. Phase B design is approved; implementation and required runtime proofs remain pending.
+
+---
+
+## 5) Phase C — Implementation Plan (locked order)
+
+Sequence per master blueprint sections 115.3 and 124; original identifiers F0001 to F0063 are preserved. F0065 is the bounded v0.1 assessment addition; F0064 is repository tooling.
+
+1. Archived F0001 supplies the measured foundation contracts. F0005 now supplies the separate pinned Docling-Graph synthetic development proof for conversion, checkpoint/reuse, recovery, and evidence mapping under ADR-0060; production qualification remains pending. F0001 did not validate that package (sections 115.4, 126).
+2. v0.1A — F0002 to F0017: typed domain contracts, durable ingestion, immutable evidence, assertion extraction
+3. v0.1B — F0018 to F0023 establish authorized commits, temporal reads, evidence review, and minimal 360 views; F0065 adds bounded on-demand GL guideline assessment; F0024/F0025 prove real interpretation-to-assessment and temporal reassessment end to end
+4. v0.1C — F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases
+5. v0.2A — F0033 to F0040 and F0044 to F0047; v0.2B — F0027 to F0032, F0066 (open-statement alignment, ADR-0063), F0041 to F0043, and F0067 (Graph Observatory, ADR-0071/ADR-0072)
+6. v0.3 and later — F0048 to F0063: full process, generalized reasoning, automatic derivation propagation, decision replay, and advanced semantics; F0065 is already in v0.1B
+
+Baseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations even though the full Execution Gate and Decision Ledger come later (section 89).
+
+---
+
+## 6) Next Step Guidance
+
+Current position (2026-10-25): F0001 to F0004 are done and archived. F0005's synthetic Docling-Graph proof is complete; its unchanged local-qualification requirements/thresholds were approved in plan run `2026-10-23-9a04b327`. Three high plan-review gaps prompted Phase B rework `2026-10-25-50fcf658`, approved by the operator on 2026-10-25 and ready for the feature action (section 4.8); the amendment has its own explicit approval. F0012, F0013 and F0015 carry planning prerequisites and teaching examples but no PRD or approved plan; F0065's stories and draft contracts await review. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
+
+1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
+2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
+3. For F0012, run the `plan` action as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
+4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.
+
+
+--- docs/agent-instructions.md (sha256:a7645e80a39f2aca95b31f01b711353754630c1e62fd47812dba0fe5ed9aaae2) ---
+# Working in Nebula Insurance Brain
+
+Read `planning-mds/BLUEPRINT.md` for process, scope, technology, and phase status. Architectural intent comes from `planning-mds/architecture/master-blueprint.md` and its governing ADRs. Feature-specific accepted requirements live in their feature folders. Report conflicts between these sources; do not invent product rules.
+
+## Repository boundaries
+
+- Keep product requirements, insurance terminology, review criteria, and validation scripts here. Generic framework mechanisms belong in the sibling `nebula-agents` repository.
+- Framework sessions start in that sibling repository. Always pass this repository's absolute path as `--product-root`, or set `NEBULA_PRODUCT_ROOT` explicitly. Do not rely on a default product or the shell's current directory.
+- `BOUNDARY-POLICY.md` in the framework describes the separation of framework and product content. It is not an insurance regulatory policy.
+- Runtime directories and proof harnesses named in a plan may not exist yet. Distinguish a proposed implementation path from a required existing planning artifact.
+
+## Planning and knowledge graph
+
+- Keep the blueprint, feature status, and trackers aligned under `planning-mds/features/TRACKER-GOVERNANCE.md`.
+- Edit `planning-mds/kg-source/**` as the authored graph source. Generate projections and tracker tables with `scripts/kg/compile.py`; do not hand-edit generated regions.
+- Use KG lookup for routing. Inspect the source planning artifacts before making readiness judgments.
+- KG coverage means a feature has retrieval mappings, including planning-only stubs. It does not imply a PRD, completed Phase B, approval, or implementation; read status and mapping notes before making readiness claims.
+- Honor `.agentignore` for broad searches. Read exact evidence references when a review requires them.
+- Proposed ADRs stay proposed until their stated proof and acceptance conditions are met. Structural readiness checks do not settle them.
+
+## Local validation
+
+From this repository, run:
+
+```bash
+python3 scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0001
+python3 scripts/validation/validate_plan_readiness.py --plan-scope project --target project
+python3 scripts/run-lifecycle-gates.py
+```
+
+The readiness validator emits JSON and exits 0 for a structurally valid plan, 1 for failed checks, and 2 for invalid invocation. Architectural adequacy remains a reviewer decision. During `plan-review`, also read `docs/plan-review-checklist.md` and cite actual planning evidence for findings.
+
+## Semantic examples
+
+For each introduced or changed concept, maintain its glossary definition, worked example, boundary case, and owning feature/story/contract links in `planning-mds/examples/README.md`. Reuse the continuing EX-GL-001 case where it fits. Label synthetic/illustrative outputs and future delivery phases explicitly. Validate structured examples; runtime delivery must add actual reproduction evidence and keep development examples outside the frozen holdout.
+
+
+Required project checks: 
+
+Exit code: 0
+

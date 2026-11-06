@@ -1,0 +1,214 @@
+        )
+
+
+async def correct_assertion_v2(
+    session: AsyncSession,
+    original: Assertion,
+    *,
+    value: dict,
+    evidence: EvidenceLocator | None,
+    actor_id: UUID | None,
+    item: ReviewItemRow | None,
+    content_store: ContentArtifactStore | None,
+) -> UUID:
+    sem = await session.get(AssertionSemantics, original.id)
+    if sem is None or actor_id is None or item is None:
+        raise UnsupportedAssertionCorrection("v2 correction context required")
+    owner = (original.tenant_id, original.knowledge_base_id)
+    lineage = await resolve_lineage(session, (), None, assertion_ids=(original.id,))
+    if lineage.invalid or not lineage.keys:
+        raise UnsupportedAssertionCorrection("v2 source unavailable")
+    await _current_audits(
+        session, keys=lineage.keys, action=Action.READ, actor_id=actor_id, owner=owner
+    )
+    await _current_audits(
+        session,
+        keys=[ResourceKey(ResourceType.REVIEW_TASK, item.id)],
+        action=Action.ANNOTATE,
+        actor_id=actor_id,
+        owner=owner,
+    )
+    record = copy.deepcopy(sem.record)
+    if record["assertion_kind"] == "OPEN_STATEMENT" or record["object"]["kind"] == "ENTITY":
+        if value != carrier_value(record):
+            raise UnsupportedAssertionCorrection("semantic editing requires a new contract")
+    else:
+        record["object"] = {
+            "kind": "LITERAL",
+            "value": value["literal"] if set(value) == {"literal"} else value,
+        }
+    verified = copy.deepcopy(sem.verified_evidence)
+    if evidence is not None and asdict(evidence) != item.evidence:
+        if content_store is None or len(verified) == 0 or evidence.part is None:
+            raise UnsupportedAssertionCorrection("new evidence requires source admission")
+        try:
+            artifact_id = UUID(evidence.source)
+        except ValueError:
+            raise UnsupportedAssertionCorrection("source identity required") from None
+        if artifact_id not in {key.id for key in lineage.keys}:
+            raise UnsupportedAssertionCorrection("correction source changed")
+        context = ProducerContext(
+            original.tenant_id,
+            original.knowledge_base_id,
+            actor_id,
+            artifact_id,
+            sem.document_version_id,
+            original.run_id or original.id,
+            "HUMAN_REVIEW",
+            "human-review",
+            "human-review",
+            str(item.id),
+        )
+        source = await SqlAlchemyAdmissionSources(session, content_store, action=Action.READ).block(
+            context, evidence.part
+        )
+        quote = verified[0]["quote"]
+        location = locate_quote(source.text, quote, source.native_selector)
+        if location is None:
+            raise UnsupportedAssertionCorrection("quote is absent from new locator")
+        artifact = await session.get(ContentArtifact, artifact_id)
+        verified = [
+            {
+                "artifact_id": str(artifact_id),
+                "block_id": source.block_id,
+                "quote": quote,
+                "normalization_version": NORMALIZATION_VERSION,
+                "precision": location.precision,
+                "selector": location.selector,
+                "text_origin": source.text_origin,
+                "origin_qualification": source.origin_qualification,
+                "producer": dict(source.producer) if source.producer else None,
+                "producer_confidence": source.producer_confidence,
+                "_source_hashes": {
+                    "block": hashlib.sha256(source.text.encode()).hexdigest(),
+                    "artifact": artifact.artifact_sha256,
+                    "manifest": artifact.manifest_sha256,
+                },
+            }
+        ]
+        record["evidence"] = [
+            {
+                "artifact_id": str(artifact_id),
+                "block_id": source.block_id,
+                "quote": quote,
+                "model_selector": None,
+            }
+        ]
+    child_id = uuid4()
+    record.update(id=str(child_id), origin="HUMAN_REVIEW", model_confidence=None)
+    # JSON validation is strict, offline, and refuses unsupported semantic edits.
+    AssertionRecordV2.model_validate_json(canonical_json(record))
+    for ordinal, entry in enumerate(verified):
+        entry["evidence_id"] = str(uuid5(child_id, str(ordinal)))
+    now = datetime.now(UTC)
+    raw_hash = hash_json(
+        {
+            "review_item_id": str(item.id),
+            "assertion_version": item.assertion_version,
+            "corrected_value": value,
+            "evidence_seen": asdict(evidence) if evidence else None,
+        }
+    )
+    digest = hash_json(
+        {
+            "record": record,
+            "original_assertion_id": str(original.id),
+            "verified_evidence": verified,
+            "normalization_version": NORMALIZATION_VERSION,
+            "reviewer_principal_id": str(actor_id),
+            "review_item_id": str(item.id),
+        }
+    )
+    session.add(
+        Assertion(
+            id=child_id,
+            run_id=None,
+            semantic_contract_version=2,
+            origin="HUMAN_REVIEW",
+            original_assertion_id=original.id,
+            subject_type=original.subject_type,
+            slot_type=original.slot_type,
+            value=carrier_value(record),
+            model_confidence=None,
+            interpretation_basis=original.interpretation_basis,
+            tenant_id=original.tenant_id,
+            knowledge_base_id=original.knowledge_base_id,
+            created_at=now.replace(tzinfo=None),
+        )
+    )
+    await session.flush()
+    session.add(
+        AssertionSemantics(
+            assertion_id=child_id,
+            document_version_id=sem.document_version_id,
+            tenant_id=sem.tenant_id,
+            knowledge_base_id=sem.knowledge_base_id,
+            subject_ref=sem.subject_ref,
+            object_ref=sem.object_ref,
+            assertion_kind=sem.assertion_kind,
+            fact_mode=sem.fact_mode,
+            assertion_origin="HUMAN_REVIEW",
+            predicate_id=sem.predicate_id,
+            ontology_release=sem.ontology_release,
+            record=record,
+            entity_snapshots=copy.deepcopy(sem.entity_snapshots),
+            verified_evidence=verified,
+            time_reference_snapshot=copy.deepcopy(sem.time_reference_snapshot),
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:10:## User Story
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:16:## Context & Background
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:20:## Acceptance Criteria
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:29:## Interaction Contract
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:37:## Data Requirements
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:41:## Role-Based Visibility
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:45:## Non-Functional Expectations
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:49:## Dependencies
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:53:## Out of Scope
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:57:## Questions & Assumptions
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md:61:## Definition of Done
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:10:## User Story
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:16:## Context & Background
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:20:## Acceptance Criteria
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:31:## Interaction Contract
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:39:## Data Requirements
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:43:## Role-Based Visibility
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:47:## Non-Functional Expectations
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:51:## Dependencies
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:55:## Out of Scope
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:59:## Questions & Assumptions
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md:63:## Definition of Done
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:10:## User Story
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:16:## Context & Background
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:20:## Acceptance Criteria
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:30:## Interaction Contract
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:39:## Data Requirements
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:43:## Role-Based Visibility
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:47:## Non-Functional Expectations
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:51:## Dependencies
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:55:## Out of Scope
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:59:## Questions & Assumptions
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md:63:## Definition of Done
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:10:## User Story
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:16:## Context & Background
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:20:## Acceptance Criteria
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:30:## Interaction Contract
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:38:## Data Requirements
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:42:## Role-Based Visibility
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:46:## Non-Functional Expectations
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:50:## Dependencies
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:54:## Out of Scope
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:58:## Questions & Assumptions
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md:62:## Definition of Done
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:10:## User Story
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:16:## Context & Background
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:20:## Acceptance Criteria
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:30:## Interaction Contract
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:39:## Data Requirements
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:43:## Role-Based Visibility
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:47:## Non-Functional Expectations
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:51:## Dependencies
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:55:## Out of Scope
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:59:## Questions & Assumptions
+planning-mds/features/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md:63:## Definition of Done
+
+Exit code: 0
+

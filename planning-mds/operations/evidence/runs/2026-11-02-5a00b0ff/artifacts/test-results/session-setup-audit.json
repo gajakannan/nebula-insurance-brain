@@ -1,0 +1,111 @@
+{
+  "recorded_on": "2026-11-02T20:49:04.283619+00:00",
+  "note": "Backfilled startup commands and one capture-path rejection; command timestamps are backfill times, original invocation order is retained here.",
+  "commands": [
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula",
+      "command": "python3 agents/scripts/_product_root.py",
+      "exit_code": 2
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula",
+      "command": "printenv NEBULA_PRODUCT_ROOT",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula",
+      "command": "rg --files --hidden -g '_product_root.py' -g 'project_context.py' -g 'AGENTS.md' -g '!node_modules' -g '!.git'",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "python3 agents/scripts/_product_root.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "python3 agents/scripts/project_context.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --action feature",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+      "command": "cat planning-mds/BLUEPRINT.md docs/agent-instructions.md .agentignore",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "cat agents/ROUTER.md agents/agent-map.yaml agents/docs/AGENT-USE.md agents/docs/PROJECT-EXTENSIONS.md agents/actions/feature.md",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "python3 - <<'PY'\nimport json\nfrom pathlib import Path\nroot=Path('/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain')\nfor p in sorted((root/'planning-mds/operations/evidence/runs').glob('*/evidence-manifest.json')):\n    data=json.loads(p.read_text())\n    if data.get('feature_id')=='F0006' and data.get('run_scope','feature-completion')=='feature-completion':\n        print(json.dumps({'path':str(p),'run_id':data.get('run_id'),'status':data.get('status'),'scope':data.get('run_scope','feature-completion')}))\nPY",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "cat agents/ROUTER.md agents/agent-map.yaml",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "wc -l agents/docs/AGENT-USE.md agents/docs/PROJECT-EXTENSIONS.md agents/actions/feature.md agents/docs/AGENT-OPS.md agents/architect/SKILL.md agents/scripts/init-run.py agents/scripts/run-gate.py",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "sed -n '60,205p' agents/agent-map.yaml",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "sed -n '1,235p' agents/docs/AGENT-USE.md",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "sed -n '236,469p' agents/docs/AGENT-USE.md\ncat agents/docs/PROJECT-EXTENSIONS.md",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "sed -n '1,310p' agents/actions/feature.md",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "sed -n '311,570p' agents/actions/feature.md",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "sed -n '1,220p' agents/scripts/init-run.py\nsed -n '1,100p' agents/scripts/append-command-log.py",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+      "command": "cat .agentignore\nsed -n '255,415p' planning-mds/BLUEPRINT.md",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "python3 agents/scripts/exec-and-log.py --help\nsed -n '220,437p' agents/scripts/init-run.py",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+      "command": "git status --short\nsed -n '225,255p' planning-mds/BLUEPRINT.md",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "python3 agents/scripts/init-run.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --action feature --feature F0006 --json",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-agents",
+      "command": "python3 /home/gajap/uSandbox/repos/nebula/nebula-agents/agents/scripts/exec-and-log.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --log planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/commands.log --cwd product --stdout planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/runtime-discovery.stdout.txt --stderr planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/test-results/runtime-discovery.stderr.txt -- docker compose ps --format json",
+      "exit_code": 2
+    }
+  ]
+}

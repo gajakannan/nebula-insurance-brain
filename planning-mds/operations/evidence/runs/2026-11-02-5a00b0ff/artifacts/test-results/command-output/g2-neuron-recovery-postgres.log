@@ -1,0 +1,161 @@
+.....Warning: truncated output (original token count: 16913)
+Total output lines: 1454
+
+EEEEE                                                               [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_process_recovery_delivers_one_reviewed_assertion[postgresql-bundle] _
+
+self = <sqlalchemy.engine.base.Connection object at 0x732e9cf2a210>
+dialect = <sqlalchemy.dialects.postgresql.psycopg.PGDialect_psycopg object at 0x732e9dbd7110>
+context = <sqlalchemy.dialects.postgresql.psycopg.PGExecutionContext_psycopg object at 0x732e9d3bd590>
+statement = <sqlalchemy.dialects.postgresql.base.PGDDLCompiler object at 0x732e9d3eb570>
+parameters = [immutabledict({})]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+            …14913 tokens truncated…service/options.py:1009: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_local,
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1010: DeprecationWarning: deprecated
+    self.vlm_pipeline_model_api,
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1031: DeprecationWarning: deprecated
+    self.vlm_pipeline_model is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1032: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_local is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1033: DeprecationWarning: deprecated
+    or self.vlm_pipeline_model_api is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1062: DeprecationWarning: deprecated
+    self.picture_description_local is not None
+
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+../../opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063
+  /opt/venv/lib/python3.14/site-packages/docling/datamodel/service/options.py:1063: DeprecationWarning: deprecated
+    or self.picture_description_api is not None
+
+tests/integration/test_document_process_recovery.py::test_process_recovery_delivers_one_reviewed_assertion[sqlite-bundle]
+  /opt/venv/lib/python3.14/site-packages/docling_graph/core/utils/alias_reconciler.py:95: PydanticDeprecatedSince211: Accessing the 'model_fields' attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+    if id(instance) in seen or not hasattr(instance, "model_fields"):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR neuron/tests/integration/test_document_process_recovery.py::test_process_recovery_delivers_one_reviewed_assertion[postgresql-bundle]
+ERROR neuron/tests/integration/test_document_process_recovery.py::test_process_recovery_delivers_one_reviewed_assertion[postgresql-run]
+ERROR neuron/tests/integration/test_document_process_recovery.py::test_process_recovery_delivers_one_reviewed_assertion[postgresql-completion]
+ERROR neuron/tests/integration/test_document_process_recovery.py::test_process_recovery_delivers_one_reviewed_assertion[postgresql-import]
+ERROR neuron/tests/integration/test_document_process_recovery.py::test_process_recovery_delivers_one_reviewed_assertion[postgresql-imported]
+5 passed, 28 warnings, 5 errors in 96.97s (0:01:36)
+
+Exit code: 1
+

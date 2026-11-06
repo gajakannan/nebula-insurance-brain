@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="3.158" timestamp="2026-11-03T02:43:08.937278+00:00" hostname="c5465b3c266c"><testcase classname="tests.integration.test_assertion_admission" name="test_two_sources_retain_five_and_ten_million_claims" time="1.215"><failure message="ValueError: idempotency key reused for a different request">engine/tests/integration/test_assertion_admission.py:46: in test_two_sources_retain_five_and_ten_million_claims
+    second = world_factory(
+engine/tests/fixtures/assertions/harness.py:413: in create
+    world = World(database, tmp_path / str(len(worlds)), **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/fixtures/assertions/harness.py:279: in __init__
+    queue.enqueue(
+engine/packages/brain-jobs/src/brain_jobs/queue.py:326: in enqueue
+    raise ValueError("idempotency key reused for a different request") from None
+E   ValueError: idempotency key reused for a different request</failure></testcase><testcase classname="tests.integration.test_assertion_admission" name="test_declared_entity_object_and_time_reference_survive_reload" time="0.672"><failure message="TypeError: TimeReference.__init__() missing 1 required positional argument: 'words'">engine/tests/integration/test_assertion_admission.py:89: in test_declared_entity_object_and_time_reference_survive_reload
+    admitted = await world.admit(
+engine/tests/fixtures/assertions/harness.py:393: in admit
+    return await service.admit(
+engine/packages/brain-assertions/src/brain_assertions/service.py:111: in admit
+    return await self._execution.mutate(
+engine/packages/brain-security/src/brain_security/execution.py:449: in mutate
+    result = await operation(decisions)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-assertions/src/brain_assertions/service.py:70: in operation
+    checked = await self._admission.check_items(
+engine/packages/brain-assertions/src/brain_assertions/admission.py:279: in check_items
+    time_ref = await self._sources.time_reference(context, ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-persistence/src/brain_persistence/assertions.py:254: in time_reference
+    resolved = await self.time_resolver(context, ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/integration/test_assertion_admission.py:87: in resolve
+    return TimeReference(time_id, *world.owner, world.bundle.key.artifact_id, "2026-06-01")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: TimeReference.__init__() missing 1 required positional argument: 'words'</failure></testcase><testcase classname="tests.integration.test_assertion_admission" name="test_foreign_time_reference_fails_without_claim_effects" time="0.578"><failure message="TypeError: TimeReference.__init__() missing 1 required positional argument: 'words'">engine/tests/integration/test_assertion_admission.py:108: in test_foreign_time_reference_fails_without_claim_effects
+    await world.admit(
+engine/tests/fixtures/assertions/harness.py:393: in admit
+    return await service.admit(
+engine/packages/brain-assertions/src/brain_assertions/service.py:111: in admit
+    return await self._execution.mutate(
+engine/packages/brain-security/src/brain_security/execution.py:449: in mutate
+    result = await operation(decisions)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-assertions/src/brain_assertions/service.py:70: in operation
+    checked = await self._admission.check_items(
+engine/packages/brain-assertions/src/brain_assertions/admission.py:279: in check_items
+    time_ref = await self._sources.time_reference(context, ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/packages/brain-persistence/src/brain_persistence/assertions.py:254: in time_reference
+    resolved = await self.time_resolver(context, ref)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/tests/integration/test_assertion_admission.py:104: in foreign_time
+    return TimeReference(ref, uuid4(), uuid4(), context.artifact_id, "2026-06-01")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: TimeReference.__init__() missing 1 required positional argument: 'words'</failure></testcase></testsuite></testsuites>

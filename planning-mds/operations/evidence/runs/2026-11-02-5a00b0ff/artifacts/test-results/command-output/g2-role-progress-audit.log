@@ -1,0 +1,100 @@
+{
+  "status": "in-progress",
+  "required_roles": [
+    "Quality Engineer",
+    "Code Reviewer",
+    "Security Reviewer",
+    "DevOps",
+    "Architect"
+  ],
+  "gate_results": {
+    "assembly_plan_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g0-assembly-plan-validation.md"
+    },
+    "runtime_preflight": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g1-runtime-preflight.md"
+    },
+    "self_review": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g2-self-review.md"
+    },
+    "deployability": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "deployability-check.md"
+    }
+  },
+  "role_results": {
+    "Architect": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g0-assembly-plan-validation.md"
+      ],
+      "verdict_artifact": "g0-assembly-plan-validation.md"
+    },
+    "Quality Engineer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "test-plan.md",
+        "test-execution-report.md",
+        "coverage-report.md"
+      ],
+      "verdict_artifact": "test-execution-report.md"
+    },
+    "DevOps": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g1-runtime-preflight.md",
+        "deployability-check.md"
+      ],
+      "verdict_artifact": "deployability-check.md"
+    }
+  },
+  "security_scans": {
+    "dependency": {
+      "ran": true,
+      "result": "findings",
+      "artifact": "artifacts/security/dependency-summary.json",
+      "waiver": null
+    },
+    "secrets": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/secrets/secrets-gitleaks-20261103-025419.sarif",
+      "waiver": null
+    },
+    "sast": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/sast/sast-semgrep-20261103-025419.sarif",
+      "waiver": null
+    },
+    "dast": {
+      "ran": true,
+      "result": "findings",
+      "artifact": "artifacts/security/dast/api-scan.json",
+      "waiver": null
+    }
+  }
+}
+| F0006-S0001 | Preserve typed source claims | In Progress |
+| F0006-S0002 | Retain open statements and version contracts | In Progress |
+| F0006-S0003 | Check structural admission and evidence | In Progress |
+| F0006-S0004 | Guard mood and described evidence | In Progress |
+| F0006-S0005 | Preserve existing consumer boundaries | In Progress |
+| F0006-S0001 | done | not-in-scope | not-in-scope | done | not-started | not-started | done | in-progress |
+| F0006-S0002 | done | not-in-scope | done | done | not-started | not-started | done | in-progress |
+| F0006-S0003 | done | not-in-scope | done | done | not-started | not-started | done | in-progress |
+| F0006-S0004 | done | not-in-scope | not-in-scope | done | not-started | not-started | done | in-progress |
+| F0006-S0005 | done | not-in-scope | done | done | not-started | not-started | done | in-progress |
+
+Exit code: 0
+

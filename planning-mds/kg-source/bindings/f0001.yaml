@@ -73,17 +73,24 @@ bindings:
     - neuron/tests/integration/test_live_reinterpretation_qualification.py
     - neuron/tests/integration/test_pipeline_selection.py
     - neuron/benchmarks/f0005_qualification.py
+    - engine/packages/brain-assertions/tests/test_contracts.py
 - id: capability:evidence-review-round-trip
   paths:
     backend:
     - engine/packages/brain-review/src/**
     frontend:
     - experience/src/review-panel/**
+    tests:
+    - engine/packages/brain-review/tests/**
+    - engine/apps/api/tests/test_reviews.py
 - id: capability:bitemporal-canonical-commit
   paths:
     backend:
     - engine/packages/brain-temporal/src/**
     - engine/migrations/versions/0003_fact_slots_and_commits.py
+    tests:
+    - engine/packages/brain-temporal/tests/**
+    - engine/apps/api/tests/test_facts.py
 - id: capability:credential-verification-and-principal-resolution
   paths:
     backend:

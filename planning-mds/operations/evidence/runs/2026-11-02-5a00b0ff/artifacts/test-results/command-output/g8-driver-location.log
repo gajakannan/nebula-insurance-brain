@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+"""Shared shell-free typed-operation runtime (F0007-S0004).
+
+One execution path for both the lifecycle runner and (later) the action gate
+driver. Commands are argv arrays passed directly to ``subprocess`` — there is no
+``shell=True`` and no string is ever handed to a shell. ``execute_argv`` is the
+low-level shell-free exec (process-group isolation + timeout kill so no child is
+orphaned; a ``capture`` toggle so callers that want console streaming, like the
+lifecycle runner, keep it). ``run_operation`` layers typed-operation semantics
+(placeholder expansion, cwd label mapping, declared-mutation enforcement,
+timeout) and appends normalized telemetry through ``append-command-log.py`` — the
+single command-log normalization path.
+
+No spec content reaches a shell interpreter.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import os
+import re
+import shlex
+import signal
+import subprocess
+import sys
+from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+FRAMEWORK_ROOT = SCRIPT_DIR.parents[1]
+FRAMEWORK_TELEMETRY_LABEL = "nebula-agents"
+PRODUCT_TELEMETRY_LABEL = "{NEBULA_PRODUCT_ROOT}"
+PLACEHOLDER_RE = re.compile(r"\{([^{}]+)\}")
+
+sys.path.insert(0, str(SCRIPT_DIR))
+import validate_action_specs as vas  # noqa: E402  (mutation-class allowlist)
+
+
+def _load_hyphenated(name: str, filename: str):
+    spec = importlib.util.spec_from_file_location(name, SCRIPT_DIR / filename)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_acl = None
+
+
+def _append_command_log():
+    global _acl
+    if _acl is None:
+        _acl = _load_hyphenated("append_command_log", "append-command-log.py")
+    return _acl
+
+
+class GateRuntimeError(Exception):
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
+@dataclass
+class ExecResult:
+    argv: list[str]
+    cwd: str
+    exit_code: int
+    timed_out: bool
+    signal: int | None
+    started_at: str
+    ended_at: str
+    stdout: str | None = None
+    stderr: str | None = None
+
+
+def _kill_process_group(proc: subprocess.Popen) -> None:
+    try:
+        if os.name == "posix":
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        else:  # pragma: no cover - non-posix fallback
+            proc.kill()
+    except (ProcessLookupError, PermissionError):
+        pass
+
+
+def execute_argv(argv: list[str], *, cwd: Path, timeout: float | None = None,
+                 capture: bool = True, env: dict[str, str] | None = None) -> ExecResult:
+    """Run *argv* shell-free in *cwd*. Never invokes a shell.
+
+    On timeout the whole process group is killed so no grandchild is orphaned.
+    With ``capture=False`` stdout/stderr are inherited (console streaming).
+    """
+    if not argv:
+        raise GateRuntimeError("empty_argv", "argv must be non-empty")
+    popen_kwargs: dict[str, Any] = {"cwd": str(cwd)}
+    if env is not None:
+        popen_kwargs["env"] = {**os.environ, **env}
+    if capture:
+6:gate-state journal records completed operations, the pending manual checkpoint,
+10:rejected. Journal writes are atomic and serialized by a per-run lock.
+65:            os.write(fd, f"{os.getpid()} {datetime.now().isoformat()}\n".encode())
+81:def _atomic_write_json(path: Path, obj: Any) -> None:
+83:    tmp.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+121:    if kind == "write":
+122:        return f"write:{body.get('artifact')}"
+220:        handle.write(block)
+288:        _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+355:                                  "current checkpoint evidence matches the latest attestation")
+371:        _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+425:            _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+429:            _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+484:                    _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+489:                _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+496:                        _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+505:                    _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+511:            elif kind == "write":
+513:                if artifact == "latest-run.json" and "FEATURE_INDEX_ROOT" not in variables:
+516:                        f"{stage} writes latest-run.json under the feature index, but the "
+521:                    if artifact == "latest-run.json"
+526:                    _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+529:                    "id": oid, "description": f"write {artifact} after {body.get('after')}",
+533:                    _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+534:                return {"stage": stage, "status": "paused", "pending_write": artifact,
+535:                        "message": f"MANUAL: write {artifact}", "log_refs": log_refs}
+544:                _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+547:                _atomic_write_json(run_folder / JOURNAL_NAME, journal)
+552:                latest_context, latest_checks = pc.prepare(product_root.resolve(), action, plan_scope=plan_scope,
+554:                pc.bind_context(journal, latest_context)
+agents/scripts/run-gate.py
+agents/scripts/run-lifecycle-gates.py
+agents/scripts/gate_runtime.py
+agents/scripts/gate_policy.py
+agents/scripts/validate_action_specs.py
+agents/scripts/tests/test_validate_action_specs.py
+agents/scripts/tests/test_gate_policy.py
+agents/scripts/tests/test_gate_runtime.py
+agents/scripts/tests/test_run_gate.py
+agents/scripts/tests/fixtures/action-specs/driver/drive.yaml
+agents/scripts/tests/fixtures/action-specs/driver/_contract.yaml
+agents/scripts/tests/fixtures/action-specs/valid/_contract.yaml
+agents/scripts/tests/fixtures/action-specs/valid/sample.yaml
+agents/scripts/tests/fixtures/action-specs/valid/history/2025-01-01.yaml
+agents/scripts/tests/fixtures/action-specs/valid/history/2025-02-01.yaml
+
+Exit code: 0
+

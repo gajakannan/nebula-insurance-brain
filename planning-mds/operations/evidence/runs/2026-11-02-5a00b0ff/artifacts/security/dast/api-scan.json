@@ -1,0 +1,539 @@
+{
+	"@programName": "ZAP",
+	"@version": "2.17.0",
+	"@generated": "Tue, 3 Nov 2026 02:52:30",
+	"created": "2026-11-03T02:52:30.375796347Z",
+	"site":[ 
+		{
+			"@name": "http://engine-validation:8000",
+			"@host": "engine-validation",
+			"@port": "8000",
+			"@ssl": "false",
+			"alerts": [ 
+				{
+					"pluginid": "10021",
+					"alertRef": "10021",
+					"alert": "X-Content-Type-Options Header Missing",
+					"name": "X-Content-Type-Options Header Missing",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+					"instances":[ 
+						{
+							"id": "233",
+							"uri": "http://engine-validation:8000/health",
+							"nodeName": "http:\/\/engine-validation:8000\/health",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "253",
+							"uri": "http://engine-validation:8000/openapi.json",
+							"nodeName": "http:\/\/engine-validation:8000\/openapi.json",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>",
+					"otherinfo": "<p>This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.</p><p>At \"High\" threshold this scan rule will not alert on client or server error responses.</p>",
+					"reference": "<p>https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)</p><p>https://owasp.org/www-community/Security_Headers</p>",
+					"cweid": "693",
+					"wascid": "15",
+					"sourceid": "3"
+				},
+				{
+					"pluginid": "100000",
+					"alertRef": "100000-1",
+					"alert": "A Client Error response code was returned by the server",
+					"name": "A Client Error response code was returned by the server",
+					"riskcode": "0",
+					"confidence": "3",
+					"riskdesc": "Informational (High)",
+					"desc": "<p>A response code of 404 was returned by the server.</p><p>This may indicate that the application is failing to handle unexpected input correctly.</p><p>Raised by the 'Alert on HTTP Response Code Error' script</p>",
+					"instances":[ 
+						{
+							"id": "15",
+							"uri": "http://engine-validation:8000",
+							"nodeName": "http:\/\/engine-validation:8000",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2227",
+							"uri": "http://engine-validation:8000/",
+							"nodeName": "http:\/\/engine-validation:8000\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "6",
+							"uri": "http://engine-validation:8000/3555749684855510768",
+							"nodeName": "http:\/\/engine-validation:8000\/3555749684855510768",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "16",
+							"uri": "http://engine-validation:8000/content",
+							"nodeName": "http:\/\/engine-validation:8000\/content",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2228",
+							"uri": "http://engine-validation:8000/content/",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "7",
+							"uri": "http://engine-validation:8000/content/1429145813247332849",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/1429145813247332849",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2",
+							"uri": "http://engine-validation:8000/content/artifact_id",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/artifact_id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2239",
+							"uri": "http://engine-validation:8000/content/artifact_id/",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/artifact_id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "8",
+							"uri": "http://engine-validation:8000/content/artifact_id/1912501507059676525",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/artifact_id\/1912501507059676525",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2238",
+							"uri": "http://engine-validation:8000/content/artifact_id/files/",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/artifact_id\/files\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "9",
+							"uri": "http://engine-validation:8000/content/artifact_id/files/3572340488895709588",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/artifact_id\/files\/3572340488895709588",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "3",
+							"uri": "http://engine-validation:8000/content/artifact_id/files/path",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/artifact_id\/files\/path",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2235",
+							"uri": "http://engine-validation:8000/content/artifact_id/files/path/",
+							"nodeName": "http:\/\/engine-validation:8000\/content\/artifact_id\/files\/path\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "17",
+							"uri": "http://engine-validation:8000/facts",
+							"nodeName": "http:\/\/engine-validation:8000\/facts",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2230",
+							"uri": "http://engine-validation:8000/facts/",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "10",
+							"uri": "http://engine-validation:8000/facts/8330393491954734089",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/8330393491954734089",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "18",
+							"uri": "http://engine-validation:8000/facts/fact_slot_id",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/fact_slot_id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "4",
+							"uri": "http://engine-validation:8000/facts/fact_slot_id?validAsOf=&knownAsOf=",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/fact_slot_id (knownAsOf,validAsOf)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2247",
+							"uri": "http://engine-validation:8000/facts/fact_slot_id/",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/fact_slot_id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "11",
+							"uri": "http://engine-validation:8000/facts/fact_slot_id/3733961102919951951",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/fact_slot_id\/3733961102919951951",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2533",
+							"uri": "http://engine-validation:8000/facts/fact_slot_id/actuator/health",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/fact_slot_id\/actuator\/health",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "21",
+							"uri": "http://engine-validation:8000/reviews",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2241",
+							"uri": "http://engine-validation:8000/reviews/",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "12",
+							"uri": "http://engine-validation:8000/reviews/8522520991618485787",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/8522520991618485787",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "26",
+							"uri": "http://engine-validation:8000/reviews/batches",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/batches",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2250",
+							"uri": "http://engine-validation:8000/reviews/batches/",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/batches\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "13",
+							"uri": "http://engine-validation:8000/reviews/batches/7446878956971613935",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/batches\/7446878956971613935",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "28",
+							"uri": "http://engine-validation:8000/reviews/batches/review_batch_id",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/batches\/review_batch_id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "2246",
+							"uri": "http://engine-validation:8000/reviews/batches/review_batch_id/",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/batches\/review_batch_id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "14",
+							"uri": "http://engine-validation:8000/reviews/batches/review_batch_id/2261167755289115316",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/batches\/review_batch_id\/2261167755289115316",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "0",
+							"uri": "http://engine-validation:8000/reviews/review_item_id",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/review_item_id",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2252",
+							"uri": "http://engine-validation:8000/reviews/review_item_id/",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/review_item_id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1656",
+							"uri": "http://engine-validation:8000/computeMetadata/v1/",
+							"nodeName": "http:\/\/engine-validation:8000\/computeMetadata\/v1\/ ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "5",
+							"uri": "http://engine-validation:8000/facts/fact_slot_id/commits",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/fact_slot_id\/commits ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2232",
+							"uri": "http://engine-validation:8000/facts/fact_slot_id/commits/",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/fact_slot_id\/commits\/ ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "1653",
+							"uri": "http://engine-validation:8000/latest/meta-data/",
+							"nodeName": "http:\/\/engine-validation:8000\/latest\/meta-data\/ ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1667",
+							"uri": "http://engine-validation:8000/metadata/instance",
+							"nodeName": "http:\/\/engine-validation:8000\/metadata\/instance ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1668",
+							"uri": "http://engine-validation:8000/metadata/v1",
+							"nodeName": "http:\/\/engine-validation:8000\/metadata\/v1 ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1658",
+							"uri": "http://engine-validation:8000/opc/v1/instance/",
+							"nodeName": "http:\/\/engine-validation:8000\/opc\/v1\/instance\/ ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1661",
+							"uri": "http://engine-validation:8000/opc/v2/instance/",
+							"nodeName": "http:\/\/engine-validation:8000\/opc\/v2\/instance\/ ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1670",
+							"uri": "http://engine-validation:8000/openstack/latest/meta_data.json",
+							"nodeName": "http:\/\/engine-validation:8000\/openstack\/latest\/meta_data.json ()({value:{},valid_from,valid_to,change_reason,evidence_refs:[],review_decision_id,source_received_at,artifact_created_at,assertion_created_at,expected_current_version_id,idempotency_key})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "404",
+							"otherinfo": ""
+						},
+						{
+							"id": "1",
+							"uri": "http://engine-validation:8000/reviews/batches/review_batch_id/decisions",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/batches\/review_batch_id\/decisions ()({decisions:[{review_item_id,action,assertion_version,reason_code,corrected_value:{},evidence:{source,precision,part,unresolved_reason,selector:[{}]},reviewer_comment}]})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						},
+						{
+							"id": "2234",
+							"uri": "http://engine-validation:8000/reviews/batches/review_batch_id/decisions/",
+							"nodeName": "http:\/\/engine-validation:8000\/reviews\/batches\/review_batch_id\/decisions\/ ()({decisions:[{review_item_id,action,assertion_version,reason_code,corrected_value:{},evidence:{source,precision,part,unresolved_reason,selector:[{}]},reviewer_comment}]})",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "401",
+							"otherinfo": ""
+						}
+					],
+					"count": "43",
+					"systemic": false,
+					"solution": "",
+					"otherinfo": "",
+					"reference": "",
+					"cweid": "388",
+					"wascid": "20",
+					"sourceid": "36"
+				},
+				{
+					"pluginid": "10112",
+					"alertRef": "10112",
+					"alert": "Session Management Response Identified",
+					"name": "Session Management Response Identified",
+					"riskcode": "0",
+					"confidence": "3",
+					"riskdesc": "Informational (High)",
+					"desc": "<p>The given response has been identified as containing a session management token. The 'Other Info' field contains a set of header tokens that can be used in the Header Based Session Management Method. If the request is in a context which has a Session Management Method set to \"Auto-Detect\" then this rule will change the session management to use the tokens identified.</p>",
+					"instances":[ 
+						{
+							"id": "272",
+							"uri": "http://engine-validation:8000/facts/fact_slot_id?validAsOf=&knownAsOf=www.google.com%3A80%2Fsearch%3Fq%3DZAP",
+							"nodeName": "http:\/\/engine-validation:8000\/facts\/fact_slot_id (knownAsOf,validAsOf)",
+							"method": "GET",
+							"param": "validAsOf",
+							"attack": "",
+							"evidence": "validAsOf",
+							"otherinfo": "url:validAsOf"
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+					"otherinfo": "<p>url:validAsOf</p>",
+					"reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/session-mgmt-id/</p>",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "106"
+				}
+			]
+		}
+	],
+	"sequences":[
+	]
+
+}

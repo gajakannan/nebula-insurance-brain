@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import json;from pathlib import Path;p=Path("planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/security/dependency-neuron.json");d=json.loads(p.read_text());print("\n".join(f"{x["name"]} {x["version"]}: "+", ".join(v["id"] for v in x["vulns"]) for x in d["dependencies"] if x["vulns"]))
+                                                                                                                                                                                         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 1, in <genexpr>
+    import json;from pathlib import Path;p=Path("planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/security/dependency-neuron.json");d=json.loads(p.read_text());print("\n".join(f"{x["name"]} {x["version"]}: "+", ".join(v["id"] for v in x["vulns"]) for x in d["dependencies"] if x["vulns"]))
+                                                                                                                                                                                                                                                                                                        ~^^^^^^^^^
+KeyError: 'vulns'
+
+Exit code: 1
+
