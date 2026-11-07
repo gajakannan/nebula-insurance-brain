@@ -630,3 +630,9 @@ This creates the critical product proof: the visualizer is beautiful, but every 
 ## Appendix B. Vocabulary
 
 **Answer basis:** explicit, verifiable references linking an answer statement/conclusion to evidence or derivation. **Trace:** ordered observable facts from one execution. **Projection:** an authorized view of graph entities/relationships for a trace and temporal context. **Source statement:** evidence-backed claim in source language. **Typed assertion:** source claim aligned to an ontology predicate. **Canonical fact:** governed accepted semantic state. **Learning candidate:** new proposed knowledge not yet accepted. **Replay:** rebuilding visual state from stored operations rather than replaying the model computation. **Bitemporal context:** effective/valid time plus the time knowledge was recorded. **Read-only:** no mutation of semantic knowledge or governance state from the Observatory.
+
+## Governed retrieval diagnostics carry-in (2026-11-06)
+
+The [retrieval design](governed-evidence-retrieval-design.md) and Proposed [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) add F0035/F0036 producers: actual authorized candidate paths, context selection/revalidation, effective mode/fallback and projection basis. F0067 reads only recorded, sanitized diagnostics under RET-67-01. It must not infer paths, canonical meaning or answer use from rank, spectral coordinates or visual proximity. Selection remains distinct from `ANSWER_BASIS_LINKED` attribution.
+
+Recording is non-blocking and ships with retrieval. Existing renderer, accessible event-list, partial-trace and current-access replay contracts apply. F0068's conditional v0.4+ experiment may supply additional diagnostics only after its own approval and implementation; no F0068 dependency, new renderer or new UI control is introduced into F0067 by this amendment.

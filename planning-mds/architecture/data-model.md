@@ -6,6 +6,17 @@ PostgreSQL is the authoritative runtime store (ADR-0002). Graph and vector store
 
 The baseline sections below are reproduced from the master blueprint so implementers have one file to read; when they diverge, the master blueprint plus accepted ADRs win until this document is promoted by a Phase B decision. The ontology release and F0065 additions below are explicitly proposed contracts rather than existing runtime schema.
 
+## Derived retrieval contracts (planning amendment, 2026-11-06)
+
+Proposed [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) and the [retrieval design](governed-evidence-retrieval-design.md#4-contract-design-to-bind-during-phase-b) add contract requirements for F0033–F0036 and conditional F0068, with no new authoritative entity or table introduced here:
+
+- Evidence-block references pin artifact/content versions, block identity, locator precision and zero-or-many source/canonical bindings. Business validity and acceptance are resolved per binding; they are not single attributes of an immutable block.
+- Typed evidence edges retain original direction, relationship type, input versions and dependency lineage. Raw retrieval signals and numerical weights remain derivatives; symmetrization cannot change domain semantics.
+- Execution bases and evidence contexts record one snapshot, both time coordinates, root/mode/current-authority references, actual projection/profile/model/tokenizer versions, selected evidence and gaps. Selection alone does not establish answer use.
+- F0068 numerical manifests pin the complete authorized influence domain, node map, adjacency/eigenpair checksums and atomic publication state. They are rebuildable, access-controlled artifacts, not a canonical graph or an authorization grant.
+
+Reuse existing identity, scope, temporal, content and evidence types. Schema naming, storage placement, retention and projection checkpoints are assigned Phase B decisions in the design's D5–D9 map; the handoff's illustrative objects are not new deployed tables. Worked/boundary examples: [EX-RET-001–006](../examples/governed-evidence-retrieval.md).
+
 ## Core PostgreSQL Tables (master blueprint section 78)
 
 ```text

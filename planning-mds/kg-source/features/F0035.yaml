@@ -9,8 +9,9 @@ coverage_excluded:
 phase: v0.2A
 roadmap_section: Later
 roadmap_order: 12
-rationale: Search fusion across full-text, vector, graph, ontology, temporal, and metadata signals with authorization
-  applied before rows, counts, facets, and graph paths (sections 51, 120.3).
+rationale: Governed hybrid seeding and bounded typed expansion with one execution basis, authorized rows/counts/facets/paths
+  and safe fallback; PPR is optional (RET-35-01–09). Settle F0033/F0034 contracts before Phase B approval; measure
+  baseline before F0068.
 depends_on:
 - feature:F0001
 - id: feature:F0033
@@ -22,3 +23,16 @@ depends_on:
 governed_by:
 - adr:0024
 - adr:0053
+- adr:0046
+- adr:0071
+- adr:0064
+- adr:0075
+- adr:0076
+notes:
+- Phase A may clarify the user problem first; F0033/F0034 projection and checkpoint contracts must be settled before
+  this feature's Phase B approval. Their runtime adapters must be delivered before production integration. QE and
+  PM plan the corpus/runner before baseline measurement (D4). Architect owns package placement and schemas (D6),
+  AI Engineer and domain steward own profile hypotheses (D7), and Security owns cache/replay rules (D9). Read-path
+  traces start here and do not depend on F0067 rendering. Spectral work belongs to F0068 at v0.4+.
+- 2026-11-06 planning incorporation only; RET requirements in README, proposed ADR-0076 and governed-evidence-retrieval-design.md
+  do not constitute a PRD, Phase B approval or runtime delivery.

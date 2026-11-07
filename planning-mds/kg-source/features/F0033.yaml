@@ -9,8 +9,8 @@ coverage_excluded:
 phase: v0.2A
 roadmap_section: Later
 roadmap_order: 10
-rationale: pgvector adds exact and approximate vector retrieval as a tenant-scoped projection; vectors locate evidence
-  and never define truth (section 50).
+rationale: Versioned pgvector retrieval over persisted content with eligibility inside the vector query, stable
+  projection identity and independent rebuild/checkpoint contracts (RET-33-01–03; master blueprint section 127).
 depends_on:
 - feature:F0001
 - id: feature:F0003
@@ -18,3 +18,10 @@ depends_on:
   confidence: 0.7
 governed_by:
 - adr:0023
+- adr:0040
+- adr:0073
+- adr:0076
+notes:
+- Settle independent projection checkpoints, coherent read/version identity and rebuild/cutover semantics with F0034
+  (D8) before F0035 Phase B approval. Synthetic adapters are contract proofs only. RET-33-01–03 cover the vector
+  hooks; no spectral index is needed.
