@@ -205,7 +205,7 @@ first user-facing features, F0021 to F0023.
 
 ### 3.3 Epics & Features
 
-The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065 and F0066), sequenced per sections 115.3 and 124. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. F0066 adds open-statement extraction and signature alignment in v0.2B under ADR-0063, accepted as direction on 2026-09-25. F0067 adds the read-only Graph Observatory in v0.2B under proposed ADR-0071 and ADR-0072 (2026-10-13); its trace contract is carried into F0016, F0021, F0034, F0036 to F0038, F0040 to F0042, F0045 and F0058 first. Story links are appended by the plan action as each feature is planned.
+The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065–F0068), sequenced per sections 115.3, 124 and 127. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. F0066 adds open-statement extraction and signature alignment in v0.2B under ADR-0063, accepted as direction on 2026-09-25. F0067 adds the read-only Graph Observatory in v0.2B under proposed ADR-0071 and ADR-0072 (2026-10-13); its trace contract is carried into F0016, F0021, F0034, F0036 to F0038, F0040 to F0042, F0045 and F0058 first. F0068 reserves conditional spectral/heat retrieval experiments at v0.4+ after the measured F0035/F0036 baseline (2026-11-06); it adds no baseline dependency or runtime activation. Story links are appended by the plan action as each feature is planned.
 
 **Completed**
 
@@ -326,6 +326,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0061 — Advanced retrieval](features/F0061-advanced-retrieval/README.md) - Planned
 - [F0062 — Advanced reasoners](features/F0062-advanced-reasoners/README.md) - Planned
 - [F0063 — Future DSL](features/F0063-future-dsl/README.md) - Planned
+- [F0068 — Spectral graph retrieval experiments](features/F0068-spectral-graph-retrieval-experiments/README.md) - Planned; conditional v0.4+, after baseline measurement
 
 ### 3.4 MVP User Stories
 
@@ -466,6 +467,19 @@ No new deployable, assertion HTTP route, UI, grants or extraction activation. Cu
 
 ---
 
+### 4.13 Governed retrieval and spectral planning amendment (2026-11-06)
+
+The operator requested incorporation of the [handoff](architecture/nebula-spectral-graph-intelligence-handoff.md) across planning. [Master blueprint section 127](architecture/master-blueprint.md#127-governed-evidence-retrieval-and-spectral-graph-inspiration) names SpectRAG as an inspiration and distinguishes its official implementation from the independent SpectraFuse reference. [Integrated design](architecture/governed-evidence-retrieval-design.md) and [ADR-0076](architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) (Proposed) define the derived retrieval boundary.
+
+- F0033/F0034 carry versioned persisted-content and typed projection/checkpoint requirements; settle their contracts before F0035 Phase B approval.
+- F0035/F0036 carry authorized hybrid seeds, bounded expansion, optional PPR, exact model-budgeted evidence sets, locator/current-authority revalidation, gaps and answer-basis traces at v0.2A. Source/canonical modes, bitemporality and current grants remain controlling contracts.
+- F0067 consumes recorded diagnostics later at v0.2B; baseline trace recording has no rendering dependency.
+- Reserve F0068 for conditional spectral/heat experiments at v0.4+ (D3 recommended separate home). F0061 retains its advanced retrieval scope. Baseline measurement and a separate experiment scope/scheduling/cost decision precede spectral implementation or activation.
+
+PM owns requirements and sequencing; Architect owns design, ADR and structural KG relationships; Security owns authorization/cache/replay review; AI Engineer and QE own model/numerical proposals and evaluation with PM. Numbered RET inputs are in the feature READMEs, with [worked examples](examples/governed-evidence-retrieval.md), [evaluation](testing/evaluation-strategy.md#governed-retrieval-and-spectral-experiment-evaluation) and [security](security/authorization-review.md#governed-retrieval-carry-in-2026-11-06) coverage. D4–D9 remain scoped Phase A/B decisions. This is a roadmap/design incorporation, not a completed per-feature plan, approval or implementation; all affected features remain Planned.
+
+---
+
 ## 5) Phase C — Implementation Plan (locked order)
 
 Sequence per master blueprint sections 115.3 and 124; original identifiers F0001 to F0063 are preserved. F0065 is the bounded v0.1 assessment addition; F0064 is repository tooling.
@@ -476,6 +490,7 @@ Sequence per master blueprint sections 115.3 and 124; original identifiers F0001
 4. v0.1C — F0026 plus narrow acceptance coverage from F0036 to F0039: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases
 5. v0.2A — F0033 to F0040 and F0044 to F0047; v0.2B — F0027 to F0032, F0066 (open-statement alignment, ADR-0063), F0041 to F0043, and F0067 (Graph Observatory, ADR-0071/ADR-0072)
 6. v0.3 and later — F0048 to F0063: full process, generalized reasoning, automatic derivation propagation, decision replay, and advanced semantics; F0065 is already in v0.1B
+7. v0.4+ conditional — F0068 spectral graph retrieval experiments, only after the F0035/F0036 baseline is measured and its own experiment scope/scheduling/cost decision is recorded. Baseline delivery does not depend on this branch.
 
 Baseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations even though the full Execution Gate and Decision Ledger come later (section 89).
 

@@ -2,6 +2,8 @@
 
 **Status:** Baseline index (extracted from the master blueprint on 2026-09-05); the quality-engineer role expands this into per-feature test plans.
 
+**Retrieval amendment:** 2026-11-06; the protocol below is a planning input, with thresholds and feature approvals still pending.
+
 This document points at the authoritative sections of `../architecture/master-blueprint.md` and records the rules that every test plan inherits.
 
 ## Golden Corpus (section 96)
@@ -79,4 +81,39 @@ Additional ADR-0060 acceptance cases: limit amount, currency, basis, effective d
 - **Admission (ADR-0065):** drop rates by reason, `BLOCK_UNINTERPRETED` and truncation counts, and described-evidence review items. Fabricated-quote fixtures are refused and misread-value fixtures reach review (EX-SEM-005b).
 - **Names and identity (ADR-0066, ADR-0067):** pairwise precision and recall of same-entity decisions in both arrival orders, with the difference reported; wrong merges and missed merges separately. Before enabling any automation: agreement with human decisions, share decided automatically, revert rate.
 - **Regression cases (section 98):** fiscal and 52/53-week periods; time-zone and time-of-day conventions; "as of inception"; subjectivities and quote-versus-bound; chart-description contradictions; named-insured change by endorsement; basis changes through the class hierarchy; external-action crash windows.
+
+## Governed retrieval and spectral experiment evaluation
+
+Owners: Quality Engineer and PM for corpus/acceptance planning (D4), AI Engineer for ranking/model/numerical comparisons, Security for non-influence review. [Design](../architecture/governed-evidence-retrieval-design.md), [handoff §9](../architecture/nebula-spectral-graph-intelligence-handoff.md#9-test-plan-and-benchmark-specification), Proposed [ADR-0076](../architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) and [EX-RET-001–006](../examples/governed-evidence-retrieval.md) are the inputs. These are future feature acceptance criteria, not results of this documentation change.
+
+### Corpus and timing
+
+Build an executable runner and versioned synthetic fixtures before baseline implementation measurements; spectral work must not precede them. F0035 Phase A confirms the proposed 120-question distribution: 30 single-evidence, 30 cross-document coverage/endorsement/exclusion, 20 temporal/conflicting-amendment, 20 authorized claim/location/exposure traversal, 10 missing-evidence and 10 adversarial access cases. These are fixture categories, not additional persona or insurance-rule commitments. Use independent adjudicated gold evidence sets, bindings, answer/citation spans, admissibility and temporal truth; include paired source/canonical and broader-grant/narrower-root questions.
+
+Split tuning, validation and frozen holdout by account/document families, keeping related versions and paraphrases together. Documentation examples stay outside the holdout. Version corpus, split, adapter, model/tokenizer, input snapshots, profiles and implementation revisions. Synthetic adapter runs prove interfaces; only actual adapter measurements support quality claims. Pin immutable upstream references when evaluating a research technique; quoted upstream results are not a Nebula reproduction.
+
+### Baseline and conditional ablations
+
+| Comparison | Retrieval / selection | When required |
+|---|---|---|
+| A | Hybrid, no expansion, top-k under the same token cap | F0035/F0036 baseline |
+| B | Hybrid, no expansion, budget-aware selection | F0035/F0036 baseline |
+| C | Hybrid plus bounded expansion, budget-aware selection | F0035/F0036 baseline |
+| D | C plus stochastic PPR | Only if the optional comparator is implemented |
+| E | C plus spectral proximity | F0068, if pursued |
+| F | C plus spectral coordinates and heat | F0068, if pursued |
+| G | C plus PPR/spectral ensemble, optional heat | F0068, if pursued and PPR exists |
+| Additional | Heat-only and spectral-without-expansion | F0068, if those modes are pursued; no-expansion is benchmark-only |
+
+For component ablations hold the eligible corpus, split, tokenizer/budget, seed ranking/count and selector settings fixed as appropriate; scoring-only comparisons also fix the candidate graph. Separately run a strong end-to-end hybrid comparator with the same candidate cap and enough retrieval depth to fill the evidence budget. Do not limit hybrid to 20 seeds while expansion considers 200 candidates. Report candidate counts, selected tokens and budget utilization; give alternatives comparable tuning effort and include an available F0061 reranker without making it a prerequisite. Mark absent modes unavailable. Expansion/selector gains cannot be credited to spectral computation.
+
+### Measurements and proposed gates
+
+Report Recall@5/10, complete-gold-evidence-set and bridge recall, precision, MRR/nDCG, redundancy/diversity and budget-weighted recall; grounded correctness, citation faithfulness, abstention, conflict/supersession handling and locator precision; p50/p95/p99 latency, build time, memory/index size, fallback rates and per-tenant costs. Counts/financial answers must use the typed authorized query path. Provide sample sizes, paired bootstrap confidence intervals and breakdowns by query type.
+
+Map handoff RG0–RG5 into feature acceptance criteria; these labels are not new framework gates. RG0 requires reviewed contracts/threat model; RG1 baseline primitives and applicable numerical/PPR proofs; RG2 held-out quality with single-hop regression protection; RG3 all permission/time/evidence/answer-basis invariants; RG4 documented latency/index budgets and safe fallback; RG5 separate baseline versus experimental promotion decisions. After baseline measurement and before held-out scoring, pre-register exact no-regression tolerances, minimum worthwhile gains and operating-cost limits with the feature owner. No numeric gain target is approved here.
+
+Required governance cases cover unauthorized intermediaries and dependencies, cross-tenant identity collisions, root narrowing, current revocation with historical queries, source/canonical differences, future-state topology influence, counts/facets, trace/cache/timing channels, incompatible projections, final reauthorization, exact serialized budgets (including a 4,096-token profile), unresolved evidence and selected-versus-used attribution. RET-35-03 requires identical visible IDs, paths, score components, counts and context when unauthorized inputs change but admissible inputs do not. Governance invariants are hard requirements.
+
+F0068 adds line/star/clique/bridge, empty/small/isolated/disconnected graphs, repeated eigenvalues and sign/rotation-invariant subspace tests; sparse scale/memory, residual/orthogonality and deterministic node mapping; correct zero-subspace heat versus exact small-matrix exponentials; no cross-component diffusion; atomic publication/recovery and rollback compatibility. PPR, if present, proves stochastic mass, restart, sink handling and convergence. Spectral promotion requires incremental benefit over strong hybrid/C and available D/reranker baselines, permission-safe shadow evidence, opt-in approval and rollback. Default activation is separate. Baseline can close while F0068 is deferred.
 

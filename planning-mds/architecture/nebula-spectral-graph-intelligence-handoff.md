@@ -1,10 +1,10 @@
 # Nebula Insurance Brain — Governed Evidence Retrieval & Spectral Graph Experiments
 
 **Engineering design and coding-agent implementation handoff**  
-**Version:** 1.3 (planning order, role ownership and optional-mode corrections; proposed, not an approved architecture decision)  
+**Version:** 1.4 (planning incorporation recorded; architecture proposal and feature approvals remain separate)\
 **Prepared:** 2026-11-05  
 **Revised:** 2026-11-06  
-**Status:** Planning input only. It establishes no feature plan, PRD, phase approval, roadmap change, ADR acceptance or runtime behavior; the target retrieval features remain Planned. The plan action consumes it through §16.  
+**Status:** Incorporated planning input (2026-11-06). The operator requested roadmap, feature, architecture and design incorporation; see [integrated design](governed-evidence-retrieval-design.md). F0068 now reserves the conditional spectral experiment and ADR-0076 is drafted as Proposed. No PRD, phase approval, ADR acceptance or runtime behavior is established; target retrieval features remain Planned. Subsequent feature plan actions consume §16.\
 **Target repository:** https://github.com/gajakannan/nebula-insurance-brain  
 **Research baseline:** SpectRAG, arXiv:2610.36991v3 (October 30, 2026)  
 **Reference implementations:** https://github.com/SightAndCite/SpectRAG (official); https://github.com/aion7891/SpectraFuse (independent)
@@ -15,26 +15,28 @@
 
 **2026-11-06:** The operator requested incorporation of the review corrections: align planning with prerequisite contracts, keep architectural KG edits with the architect, retain optional PPR, and stop using F0061 as an alias for an undecided experiment home. The operator also confirmed F0006 is merged. This records the handoff revision; D1–D9 remain decisions for their assigned planning phases, and no feature-plan or implementation approval is recorded here.
 
+**Planning incorporation, 2026-11-06:** Under the operator's request, the Product Manager/Architect role pass carried RET requirements into feature READMEs, reserved F0068 (D3 recommended separate home) at v0.4+, drafted Proposed [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md), and updated blueprint/roadmap/KG, design, examples, evaluation and security inputs. Local planning baseline: `85384db`, containing archived F0006. D1 is incorporated and D2 drafted; D4–D9 and per-feature approvals remain pending. Experiment reservation is not its implementation, cost or activation decision. The earlier review outcome above describes the prior handoff revision.
+
 ---
 
 ## 0. Executive decision
 
-**Decision requested:** Incorporate governed graph-assisted evidence retrieval into the existing F0035/F0036 planning, and propose an explicitly scoped spectral experiment (owning feature TBD under D3) to test whether spectral structure adds enough value to justify its cost. The baseline combines authorized hybrid retrieval, bounded typed expansion and token-budgeted context selection. The optional branch evaluates versioned spectral coordinates and heat diffusion against that baseline and a PageRank comparator. Treat every branch as an enhancement to *retrieval and analysis*, never as a truth, adjudication, access-control, or policy-evaluation engine.
+**Planning direction incorporated:** Carry governed graph-assisted evidence retrieval into F0035/F0036, and reserve a separately scoped spectral experiment (F0068 under D3) to test whether spectral structure adds enough value to justify its cost. The baseline combines authorized hybrid retrieval, bounded typed expansion and token-budgeted context selection. The optional branch evaluates versioned spectral coordinates and heat diffusion against that baseline and an optional PageRank comparator when implemented. Treat every branch as an enhancement to *retrieval and analysis*, never as a truth, adjudication, access-control, or policy-evaluation engine.
 
-**Scope:** Baseline: (1) versioned, typed evidence-retrieval graph; (2) bounded candidate expansion; (3) optional PageRank comparator; (4) token-budgeted set selection; (5) provenance-preserving traces, tests and early evaluation. Conditional spectral experiment scope (owning feature TBD): weighted numerical adjacency, Laplacian eigenpairs/coordinates, spectral closeness and heat diffusion. F0067 may later consume recorded diagnostics within its approved scope. Out of scope: changing canonical assertions; inferring accepted facts from embeddings; autonomous ontology mutation; replacing AGE, pgvector, Docling, or evidence selectors; training a new embedding model; running global spectral decomposition during every query; bringing the spectral experiment forward from its proposed v0.4+ horizon without a roadmap decision.
+**Scope:** Baseline: (1) versioned, typed evidence-retrieval graph; (2) bounded candidate expansion; (3) optional PageRank comparator; (4) token-budgeted set selection; (5) provenance-preserving traces, tests and early evaluation. Conditional spectral experiment scope (F0068): weighted numerical adjacency, Laplacian eigenpairs/coordinates, spectral closeness and heat diffusion. F0067 may later consume recorded diagnostics within its approved scope. Out of scope: changing canonical assertions; inferring accepted facts from embeddings; autonomous ontology mutation; replacing AGE, pgvector, Docling, or evidence selectors; training a new embedding model; running global spectral decomposition during every query; bringing the spectral experiment forward from its proposed v0.4+ horizon without a roadmap decision.
 
 **Key engineering position:** Stable evidence, scope, temporal and projection contracts are the architectural commitment proposed here. Spectral scoring is an optional implementation strategy whose incremental benefit must be established on held-out insurance cases. Delivering the baseline without a spectral index is a valid outcome.
 
-**Delivery posture:** No broad refactor and no all-in-one PR. First settle contracts and the threat model; next build the benchmark runner and synthetic fixtures; then implement and measure the baseline. Begin spectral work only after a recorded experiment decision. Where F0033–F0036 do not exist, prove contract adapters with synthetic fixtures and defer production integration until their contracts are ready. This revision changes only the handoff; feature mappings, examples, ADRs and roadmap amendments remain PR-01 deliverables.
+**Delivery posture:** No broad refactor and no all-in-one PR. First settle contracts and the threat model; next build the benchmark runner and synthetic fixtures; then implement and measure the baseline. Begin spectral work only after a recorded experiment decision. Where F0033–F0036 do not exist, prove contract adapters with synthetic fixtures and defer production integration until their contracts are ready. The 2026-11-06 incorporation carries planning requirements, examples, a Proposed ADR and roadmap/KG reservations into their owning documents. Full feature plans, schemas, executable contracts and proof approvals remain PR-01 deliverables.
 
 | Existing feature | Proposed incorporation | Delivery boundary |
 |---|---|---|
 | F0035 | Authorized hybrid seeding, bounded typed expansion, projection compatibility and PPR comparison | Baseline retrieval; no spectral dependency |
 | F0036 | Budgeted evidence context, locator revalidation, gaps and grounded answer-basis linkage | Baseline generation contract |
-| Spectral experiment — owning feature TBD (decision D3) | Spectral/heat experiments, numerical artifacts and incremental cost/quality evaluation | Explicit scope amendment or new reserved feature; remains v0.4+ unless rescheduled |
+| F0068 — spectral experiment (D3 reservation) | Spectral/heat experiments, numerical artifacts and incremental cost/quality evaluation | Reserved at v0.4+; separate experiment scope/scheduling/cost decision still required |
 | F0067 | Read recorded retrieval events and any approved diagnostics | Later consumer; no prerequisite for recording traces |
 
-**Where the spectral experiment lives (decision D3).** F0061's current scope is dense+sparse retrieval, multivectors, reranking and optional Qdrant (ADR-0033). Adding spectral/heat scoring changes what that feature is. Options: **(a) reserve a new v0.4+ feature ID for the experiment (recommended)**, keeping F0061 coherent; (b) amend F0061 scope; (c) keep the experiment as research in this document only, with no roadmap entry until baseline results exist. Whichever is chosen is applied through `planning-mds/kg-source/` shards, REGISTRY and ROADMAP during a plan action, not by this handoff. F0061 always identifies the existing Advanced Retrieval feature. Until D3 is resolved, optional work is named "spectral experiment — owning feature TBD"; do not create feature/KG bindings for it under F0061 by inference. Allocating its home does not block baseline planning. Once D3 is decided, update experiment references and bindings to the actual owning feature.
+**Where the spectral experiment lives (decision D3).** The 2026-11-06 planning incorporation reserves **F0068 — Spectral graph retrieval experiments**, following the recommended separate-feature option. F0061 retains dense+sparse retrieval, multivectors, reranking and optional Qdrant (ADR-0033). The alternatives considered were amending F0061 or leaving research unallocated; neither is used in this amendment. F0068 remains Planned at v0.4+ and does not block baseline planning. Its own scope/scheduling and experiment-cost decision after baseline measurement is still required before PR-07/PR-08; reservation is not activation approval. See the [feature](../features/F0068-spectral-graph-retrieval-experiments/README.md) and [decision map](governed-evidence-retrieval-design.md#6-decisions-and-remaining-feature-planning).
 
 ### 0.1 Users and problem
 
@@ -70,7 +72,7 @@ The revision was checked against local commit `de8813b` on `feat/f0006-assertion
 | ADR-0072 Observatory is a read-only projection | **Proposed** | F0067 reads retrieval traces; no write path. |
 | F0033 pgvector; F0034 AGE | **Planned, v0.2A** | Verify contracts and use isolated adapters for fixtures; production retrieval integration depends on their delivery. |
 | F0035 hybrid search; F0036 evidence-aware generation | **Planned, v0.2A** | Primary integration targets for the online pipeline. |
-| F0061 advanced retrieval | **Planned, v0.4+** | Existing dense+sparse, multivector, reranking and optional Qdrant scope. Spectral work belongs here only if D3 explicitly amends this feature. |
+| F0061 advanced retrieval | **Planned, v0.4+** | Existing dense+sparse, multivector, reranking and optional Qdrant scope. Historical scope boundary; the incorporation reserves spectral work separately as F0068. |
 | F0067 Graph Observatory | **Planned, v0.2B** | Later visualization consumer, not a prerequisite to correct trace emission. |
 
 The README reports F0001 proofs implemented and F0005 synthetic Docling-Graph candidate development complete, **not** production-ready activation. The broader retrieval stack should be assumed planned unless code-level verification in the agent’s checkout proves otherwise. **Do not mark an ADR Accepted or a feature Implemented by editing prose alone.**
@@ -410,7 +412,7 @@ Profile must be selected based on typed query intention or explicit user scope a
 
 ## 6. Spectral mathematics and implementation requirements
 
-These requirements apply to the conditional spectral experiment (owning feature TBD; PR-07/PR-08). The PPR comparator in §6.5 can be evaluated with the baseline without an eigenbasis. Baseline retrieval must not import spectral solver dependencies merely to satisfy this section.
+These requirements apply to the conditional spectral experiment (F0068; PR-07/PR-08). The PPR comparator in §6.5 can be evaluated with the baseline without an eigenbasis. Baseline retrieval must not import spectral solver dependencies merely to satisfy this section.
 
 ### 6.1 Normalized Laplacian
 
@@ -691,7 +693,7 @@ These retrieval gates are named RG0–RG5 so they are not confused with the nebu
 - **RG2 retrieval:** No single-hop regression beyond pre-agreed tolerance; demonstrable multi-hop evidence-set gain on held-out synthetic corpus; configurable modes and fallback.
 - **RG3 governance:** 100% pass of permission, bitemporal, evidence-locator and answer-basis invariants, including adversarial tests.
 - **RG4 operations:** p95 latency/index cost within documented budget and fail-open only to **safe simpler retrieval**, never to unfiltered retrieval.
-- **RG5 promotion:** Review baseline and spectral paths independently. Spectral experiments require D3 to identify the owning feature, plus explicit scope/scheduling and cost approval; activation requires shadow evidence, incremental quality/cost benefit against the strongest eligible baseline, limited opt-in and feature-owner approval. Production default is a separate decision. Baseline delivery does not wait for spectral approval.
+- **RG5 promotion:** Review baseline and spectral paths independently. Spectral experiments use the D3-reserved F0068 home and require explicit scope/scheduling and cost approval; activation requires shadow evidence, incremental quality/cost benefit against the strongest eligible baseline, limited opt-in and feature-owner approval. Production default is a separate decision. Baseline delivery does not wait for spectral approval.
 
 **Target-setting:** Pre-register tolerances, minimum worthwhile gains and latency/index-cost limits after baseline measurement and before held-out evaluation. No numeric gain target is set in advance. Governance invariants remain hard requirements. Report spectral benefit separately; if it is absent or outweighed by cost, retain the baseline and defer the spectral branch.
 
@@ -706,7 +708,7 @@ Agent roles are aligned to Nebula's agent workflow; actual assignments/paralleli
 ### PR-01 — Architecture decision, contracts and dependency map
 
 **Owner:** architect + product-manager; **review:** security, backend, AI, QA.  
-**Tasks:** Read relevant accepted/proposed ADRs; draft `ADR-0076-governed-graph-assisted-evidence-retrieval.md` (0076 is the next free ID as of 2026-11-05; recheck at authoring) from the §16.3 draft decisions, using the normal lifecycle. Map baseline responsibilities to F0035/F0036, record the spectral experiment as owning-feature TBD until D3 selects its home, and identify F0067's later read-only consumption. Update authored KG relationships and required glossary/example coverage. Bind existing ownership, requested-scope, knowledge-mode, content-version, temporal and evidence contracts; add one retrieval-mode enum, DTO schemas and reject/fallback reasons. Settle the conservative compatibility policy in §8, revision/cache semantics, projection checkpoints and the model-window budget contract.  
+**Tasks:** Read relevant accepted/proposed ADRs; refine `ADR-0076-governed-graph-assisted-evidence-retrieval.md` (drafted by the 2026-11-06 incorporation) from the §16.3 draft decisions, using the normal lifecycle. Map baseline responsibilities to F0035/F0036, use the reserved F0068 home while retaining its separate experiment decision, and identify F0067's later read-only consumption. Update authored KG relationships and required glossary/example coverage. Bind existing ownership, requested-scope, knowledge-mode, content-version, temporal and evidence contracts; add one retrieval-mode enum, DTO schemas and reject/fallback reasons. Settle the conservative compatibility policy in §8, revision/cache semantics, projection checkpoints and the model-window budget contract.\
 **Acceptance:** validators/compilers pass; no hand-edit of compiled KG; feature phases/statuses remain accurate; source/canonical and narrowed-root examples are executable; the threat model and initial fallback strategy are reviewed. Remaining implementation decisions have owners. Baseline contracts do not require an eigenbasis.  
 **Do not:** mark Proposed ADRs as Accepted without proof/review.
 
@@ -747,10 +749,10 @@ Agent roles are aligned to Nebula's agent workflow; actual assignments/paralleli
 **Acceptance:** recording failures do not fail answers; considered/used attribution is exact; no excerpts/private payloads in traces; approved baseline invariants and applicable A–D comparisons pass (§9.4). Reuse this instrumentation if spectral modes are later added.  
 **Dependency:** ADR-0071 schema and existing read-path trace ownership; no dependency on F0067 rendering.
 
-### PR-07 — Conditional spectral computation experiment (owning feature TBD)
+### PR-07 — Conditional spectral computation experiment (F0068)
 
 **Owner:** AI engineer; **review:** architect + QA + security.  
-**Entry gate:** D3 identifies the owning feature, followed by an explicit scope/scheduling and experiment-cost decision after baseline results. This handoff does not authorize bringing v0.4+ work forward.  
+**Entry gate:** F0068 is reserved under D3; an explicit scope/scheduling and experiment-cost decision after baseline results is still required. This handoff does not authorize bringing v0.4+ work forward.\
 **Tasks:** Optional weighted numerical adjacency, normalized Laplacian, component-aware sparse eigenpairs, zero-mode handling, spectral coordinates, solver diagnostics and checksummed versioned artifacts. Apply §8 compatibility before any production-path use.  
 **Acceptance:** applicable §9.1 math tests, sparse scale/memory budgets and subspace/scoring reproducibility pass. Register numerical artifacts as derived and access-controlled.  
 **Do not:** make the baseline import the solver or introduce per-request global eigendecomposition.
@@ -776,7 +778,7 @@ PR-01
   -> PR-02 (fixtures + runner; measure each subsequent delivery)
   -> PR-03 -> PR-04 -> PR-05 -> PR-06 (baseline)
                                   |-> PR-09 (baseline rollout)
-                                  |-> explicit spectral experiment decision (D3 selects owner)
+                                  |-> explicit spectral experiment decision (F0068 reserved under D3)
                                       -> PR-07 -> PR-08 -> PR-09 (spectral decision)
 
 F0033/F0034/F0035/F0036 delivery remains a separate dependency.
@@ -857,7 +859,7 @@ Resource sizing: benchmark 1k/10k/100k+ evidence blocks with representative spar
 
 **When using nebula-agents:** prefer invoking the `plan` action as described in §16.6 over pasting this prompt; the action supplies its own role sequence, gates and evidence package. Add ADR-0003/0007/0010/0064/0075 to the reading list below.
 
-> **Task:** Plan *Nebula Governed Evidence Retrieval & Spectral Graph Experiments* following `NEBULA_SPECTRAL_GRAPH_INTELLIGENCE_HANDOFF.md`. This proposal requires normal planning, ADR and execution gates; it does not authorize implementation or changes to accepted contracts. The target repo is `gajakannan/nebula-insurance-brain`; use the installed sibling `nebula-agents` framework and repository `.nebula-project.yaml`/contribution gates for subsequent authorized work. Identify the current branch/commit and its relationship to `main`; read README, blueprint, ADRs 0022/0023/0024/0040/0046/0053/0058/0071/0073, relevant feature artifacts and source schemas. Produce a verified dependency/discrepancy report. Start with **PR-01 only when assigned**: ADR draft, scope/mode/snapshot and versioned content/evidence contracts, conservative compatibility/fallback policy, threat model, feature/KG/example mappings and executable acceptance plan. Preserve `nebula:BoxSelector` and v1/v2 dispatch. Do not mark planned work implemented, create a truth store, import reference runtime libraries or expose private trace payloads. After approval, follow the baseline PR-02–PR-06 path with early evaluation and PR-09 rollout evidence. PR-07/PR-08 require D3 to identify the owning feature and an explicit experiment/scheduling decision after baseline measurement; they are not automatic follow-ons. Optional mathematics must prove disconnected-graph, eigenspace and heat/PPR correctness. Every delivered path must prove current-grant/root isolation, mode-aware bitemporality, evidence anchoring, model-window token limits, non-blocking traces and pinned replay. Report spectral incremental benefit and cost separately; defer it when the evidence does not justify delivery. Keep changes small and aligned with authored KG compilation.
+> **Task:** Plan *Nebula Governed Evidence Retrieval & Spectral Graph Experiments* following `nebula-spectral-graph-intelligence-handoff.md`. This proposal requires normal planning, ADR and execution gates; it does not authorize implementation or changes to accepted contracts. The target repo is `gajakannan/nebula-insurance-brain`; use the installed sibling `nebula-agents` framework and repository `.nebula-project.yaml`/contribution gates for subsequent authorized work. Identify the current branch/commit and its relationship to `main`; read README, blueprint, ADRs 0022/0023/0024/0040/0046/0053/0058/0071/0073, relevant feature artifacts and source schemas. Produce a verified dependency/discrepancy report. Start with **PR-01 only when assigned**: ADR draft, scope/mode/snapshot and versioned content/evidence contracts, conservative compatibility/fallback policy, threat model, feature/KG/example mappings and executable acceptance plan. Preserve `nebula:BoxSelector` and v1/v2 dispatch. Do not mark planned work implemented, create a truth store, import reference runtime libraries or expose private trace payloads. After approval, follow the baseline PR-02–PR-06 path with early evaluation and PR-09 rollout evidence. PR-07/PR-08 belong to F0068 under D3 and require an explicit experiment/scheduling/cost decision after baseline measurement; they are not automatic follow-ons. Optional mathematics must prove disconnected-graph, eigenspace and heat/PPR correctness. Every delivered path must prove current-grant/root isolation, mode-aware bitemporality, evidence anchoring, model-window token limits, non-blocking traces and pinned replay. Report spectral incremental benefit and cost separately; defer it when the evidence does not justify delivery. Keep changes small and aligned with authored KG compilation.
 
 **Expected outputs from agent at each PR:**
 
@@ -903,6 +905,9 @@ Resource sizing: benchmark 1k/10k/100k+ evidence blocks with representative spar
 - F0036: [README.md](../features/F0036-evidence-aware-retrieval-and-grounded-generation/README.md)
 - F0061: [README.md](../features/F0061-advanced-retrieval/README.md)
 - F0067: [README.md](../features/F0067-graph-observatory/README.md)
+- F0068: [README.md](../features/F0068-spectral-graph-retrieval-experiments/README.md)
+- Integrated design: [governed-evidence-retrieval-design.md](governed-evidence-retrieval-design.md)
+- ADR-0076: [Proposed retrieval contract](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md)
 
 ---
 
@@ -910,7 +915,7 @@ Resource sizing: benchmark 1k/10k/100k+ evidence blocks with representative spar
 
 **Baseline:** Ready for normal production consideration only when the owning feature requirements/ADR contracts are approved; requested root/scope, current grants, knowledge mode, source availability and canonical bitemporality are proven; content/evidence versions and locator precision survive context assembly; the complete serialized input fits the target model window with output reserved; selected/considered/used attribution is correct; trace recording is sanitized and non-blocking; replay pins actual execution versions; strong hybrid and graph/PPR comparisons meet pre-registered quality/cost criteria; and fallback, monitoring and rollback are tested. No spectral artifact is required to meet this definition.
 
-**Conditional spectral branch:** Additionally requires D3 to identify the owning feature and explicit scope/scheduling approval, numerical/component/eigenspace and heat tests, exact authorized/temporal projection compatibility, held-out ablations showing worthwhile incremental benefit over the strongest eligible baseline, measured build/latency/retention costs and approved staged activation. Record a defer decision when these conditions are not met. **No acceptance of source assertions or ontology edits may result solely from retrieval or spectral ranking.**
+**Conditional spectral branch:** Belongs to F0068 under D3 and additionally requires explicit scope/scheduling/cost approval, numerical/component/eigenspace and heat tests, exact authorized/temporal projection compatibility, held-out ablations showing worthwhile incremental benefit over the strongest eligible baseline, measured build/latency/retention costs and approved staged activation. Record a defer decision when these conditions are not met. **No acceptance of source assertions or ontology edits may result solely from retrieval or spectral ranking.**
 
 **Recommended immediate next step:** review this revised handoff, then assign PR-01 through normal planning when authorized. Bind the scope/mode/snapshot and compatibility contracts before implementation, establish fixtures and the benchmark runner in PR-02, and measure the baseline before deciding whether to schedule spectral work. Do not start by installing either SpectRAG implementation.
 
@@ -935,7 +940,7 @@ This section adds what the `plan` action's product-manager (Phase A) and archite
 
 ### 16.2 Carry-in requirements (Phase A inputs)
 
-Proposed "must" requirements, numbered for traceability into PRDs and stories. Feature status does not change. Spectral requirements (§6, §8.1 compatibility for spectral artifacts) stay with decision D3 and are not carried into v0.2A.
+Proposed "must" requirements, numbered for traceability into PRDs and stories. Feature status does not change. Spectral requirements (§6, §8.1 compatibility for spectral artifacts) belong to F0068 under D3 and are not carried into v0.2A.
 
 **F0033 — pgvector retrieval (v0.2A)**
 
@@ -977,9 +982,9 @@ Proposed "must" requirements, numbered for traceability into PRDs and stories. F
 
 - **RET-67-01** The Observatory may read recorded retrieval events; retrieval delivery does not depend on F0067 (ADR-0072).
 
-### 16.3 Draft decisions for ADR-0076 (architect, F0035 Phase B)
+### 16.3 Proposed ADR-0076 (draft incorporated; architect refines in F0035 Phase B)
 
-Proposed title: **Retrieval graph structure is a governed, derived ranking signal.**
+Drafted as [ADR-0076 — Retrieval graph structure is a governed, derived ranking signal](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md), still Proposed. The decisions below are its carry-in direction:
 
 - The retrieval plane is a rebuildable derivative of content, assertions and canonical relationships; it owns no truth and writes nothing to the authoritative plane.
 - Authorization, root narrowing, `knowledge_mode` and temporal eligibility apply inside every search and traversal operation, before scoring, counting, logging or tracing.
@@ -1001,15 +1006,15 @@ The ADR stays Proposed until RET-35-03, temporal isolation and answer-basis link
 | Selected vs used | EX-RET-005: five items selected, two cited | Uncited items are "considered, not used" | F0036, ADR-0071 |
 | Projection fallback | EX-RET-006: incompatible projection triggers recorded lexical fallback | No silent replay against the current graph | F0035 |
 
-Reuse [EX-FUTURE-001](../examples/future-semantics.md#retrieval-projection). Glossary candidates: evidence block, evidence context, retrieval execution basis, retrieval mode, projection compatibility, bridge evidence. Each needs a coverage-map row in the [examples README](../examples/README.md).
+Reuse [EX-FUTURE-001](../examples/future-semantics.md#retrieval-projection). The incorporation adds evidence block, evidence context, retrieval execution basis, retrieval mode, projection compatibility and bridge evidence to the [glossary](../domain/glossary.md#governed-evidence-retrieval), with EX-RET-001–006 in the [examples coverage map](../examples/README.md#governed-retrieval-coverage). They remain illustrative; feature plans must bind stories and executable proofs.
 
 ### 16.5 Open decisions
 
 | ID | Decision | Recommendation / owner | When |
 |---|---|---|---|
-| D1 | Carry §16.2 into F0035/F0036 (and F0033/F0034/F0067 hooks) as PRD inputs | Approve; operator | Before F0035 Phase A |
-| D2 | Draft ADR-0076 from §16.3 | Approve; operator, then architect | F0035 Phase B |
-| D3 | Home for the spectral experiment (§0) | New v0.4+ feature ID; operator | Before any PR-07 work |
+| D1 | Carry §16.2 into F0035/F0036 (and F0033/F0034/F0067 hooks) as PRD inputs | Incorporated 2026-11-06 under the operator request; PM owns later PRDs/stories | Per-feature Phase A remains pending |
+| D2 | Draft ADR-0076 from §16.3 | Drafted as Proposed in the incorporation; Architect refines and records proofs | F0035 Phase B approval remains pending |
+| D3 | Home for the spectral experiment (§0) | F0068 reserved at v0.4+ following the recommended separate-feature option | Experiment scope/scheduling/cost decision still required before PR-07 |
 | D4 | Owner and timing of the §9.2 corpus and runner | Quality engineer + product manager | F0035 Phase A |
 | D5 | Answer-generation model profile (window, tokenizer, reserved output) | AI engineer + architect | F0036 Phase B |
 | D6 | Package placement (§3.2) | Architect | F0035 Phase B |
@@ -1019,12 +1024,12 @@ Reuse [EX-FUTURE-001](../examples/future-semantics.md#retrieval-projection). Glo
 
 ### 16.6 Framework path
 
-This handoff is not itself a plan run and records no approval.
+This handoff is not itself a plan run. The incorporation record above changes planning scope/reservations but grants no per-feature phase, experiment-implementation or activation approval.
 
 1. Record the planning checkout/revision containing the merged F0006 contracts and the applicable operator decisions in "Review outcome". Start framework sessions in the sibling `nebula-agents` repository with `NEBULA_PRODUCT_ROOT` explicitly pointing to this Brain checkout.
-2. F0035 Phase A may start first to clarify the downstream user requirements. Run the plan action (`agents/actions/spec/plan.yaml`) with `FEATURE_ID=F0035`, `PHASE=A`, `FEATURE_MODE=existing`, using §0.1, §16.2 (F0035 block), §9.2 and §16.4. The product manager authors PRD, stories and STATUS, resolves D4, and identifies needed dependency/ADR relationships. The architect owns edits to architectural KG shards, including `governed_by`; the PM does not author those bindings. Complete the action's G1–G3 requirements and approval steps.
+2. F0035 Phase A may start first to clarify the downstream user requirements. Run the plan action (`agents/actions/spec/plan.yaml`) with `FEATURE_ID=F0035`, `PHASE=A`, `FEATURE_MODE=existing`, using §0.1, §16.2 (F0035 block), §9.2 and §16.4. The product manager authors PRD, stories and STATUS, resolves D4, and confirms needed dependency/ADR relationships against the incorporation. The architect owns edits to architectural KG shards, including `governed_by`; the PM does not author those bindings. Complete the action's G1–G3 requirements and approval steps.
 3. Plan F0033 and F0034 with their RET hooks through their own Phase A/B actions, subject to their prerequisites. Settle projection identities, eligibility/temporal interfaces and D8 consumer checkpoint/rebuild semantics before approving F0035 Phase B. This is a contract-planning dependency; upstream runtime implementation need not precede downstream planning.
-4. After F0035 G3 approval and the prerequisite contracts are settled, run its Phase B. The architect drafts ADR-0076 (recheck the next free ID), binds the retrieval schemas from §4 under `planning-mds/schemas/`, and resolves D2/D6/D7 with the named owners; Security resolves D9. The architect updates F0035's authored KG shard, including applicable `governed_by` references to `adr:0046`, `adr:0071` and the new ADR once its node exists, and removes `coverage_excluded` only with substantive mappings. Execute the plan action's G4 compile and `validate.py --check-drift` operations, followed by its full G5 exit-validation and Phase B approval sequence; a standalone `validate.py` pass does not replace those gates.
+4. After F0035 G3 approval and the prerequisite contracts are settled, run its Phase B. The architect refines the existing Proposed ADR-0076, binds the retrieval schemas from §4 under `planning-mds/schemas/`, and resolves D2/D6/D7 with the named owners; Security resolves D9. The architect updates F0035's authored KG shard, including applicable `governed_by` references to `adr:0046`, `adr:0071` and `adr:0076` (now a registered Proposed ADR), and removes `coverage_excluded` only with substantive mappings. Execute the plan action's G4 compile and `validate.py --check-drift` operations, followed by its full G5 exit-validation and Phase B approval sequence; a standalone `validate.py` pass does not replace those gates.
 5. Plan F0036 through its own Phase A/B actions using the settled F0035 retrieval interface and its RET requirements. Resolve D5 (answer-generation model profile) in F0036 Phase B. Carry RET-67-01 into F0067's own planning; its rendering remains a later consumer. Each feature retains its own phase approvals and dependency evidence.
 6. Plan-review checks each feature with `scripts/validation/validate_plan_readiness.py`, the framework review action and the §16.1 rule map. Implementation follows the approved feature dependencies: F0033/F0034 before production F0035 integration, then F0036.
-7. Spectral work (§6, PR-07/PR-08) starts only after baseline measurement, D3 identifies the owning feature, and its scope/scheduling and experiment-cost decision is recorded. That allocation does not block baseline planning.
+7. Spectral work (§6, PR-07/PR-08) starts only after baseline measurement, F0068 has its own approved plan, and its scope/scheduling and experiment-cost decision is recorded. That allocation does not block baseline planning.

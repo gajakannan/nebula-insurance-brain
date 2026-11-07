@@ -20,3 +20,7 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Spectral experiment boundary (2026-11-06)
+
+[F0068](../F0068-spectral-graph-retrieval-experiments/README.md) reserves spectral coordinates and heat diffusion separately. This feature keeps its dense+sparse, multivector, reranking and optional Qdrant scope under ADR-0033. Its reranker can serve as a comparator when available; neither baseline F0035/F0036 nor F0068 requires F0061 delivery to begin evaluation. See the [integrated design](../../architecture/governed-evidence-retrieval-design.md).
