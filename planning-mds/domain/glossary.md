@@ -389,3 +389,31 @@ These terms refine representation and admission under [ADR-0075](../architecture
 | Admission name claim | A document-scoped normalized-name ownership registry used solely to reject a name already claimed by another local reference | EX-ASSERT-002: no silent merge; not a canonical name FactSlot | F0006 S0003; NAME_CLAIMED_BY_ANOTHER outcome |
 | Structural grounding | Server location of a claim's quote in its claimed immutable source, with a deterministic map back to original text/native selectors | EX-ASSERT-004/005: a real quote with a misread value passes grounding; repeated text does not yield invented offsets | F0006 S0003; assertion-admission-result-v1 |
 | Assertion eligibility guard | Conjunctive source restrictions from kind, mood, verified origin and review/correction lineage before resolution/canonical effects; satisfying structural preconditions is not automatic acceptance | EX-ASSERT-007/008/009: mood remains blocked and described-only support cannot auto-accept/close/supersede | F0006 S0004/S0005; blocked_operations/review hook and existing commit contract |
+
+## Governed evidence retrieval
+
+These are proposed retrieval design terms for v0.2A F0033–F0036, with optional numerical derivatives in v0.4+ F0068. Definitions follow [ADR-0076](../architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md); examples and boundary cases are [EX-RET-001–006](../examples/governed-evidence-retrieval.md). They do not alter canonical fact, assertion or permission semantics.
+
+### Evidence block
+
+An immutable content block within a pinned source artifact version, addressed with the original locator and declared precision. It may have zero or many source/canonical binding references. The block itself has no single canonical acceptance status or business-validity interval; resolve each binding at the query's mode and time. Indexing it does not re-parse the document (EX-RET-001/003; F0033/F0036).
+
+### Evidence context
+
+The selected evidence set and its execution basis, locators, reasons, paths, complete serialized token count, payload identity and explicit gaps. Selection is preparation for an answer, not proof of use or truth; only answer-basis linkage establishes use (EX-RET-001/005; F0036).
+
+### Retrieval execution basis
+
+The pinned semantic snapshot, both temporal coordinates/precision, ontology, root/requested scope, knowledge mode, current-authorization decision reference, actual projection versions, retrieval profile/effective mode and model/tokenizer profile for one retrieval. Recorded authority is not a reusable access grant (EX-RET-003/004/006; F0035/F0036).
+
+### Retrieval mode
+
+The selected algorithm path: baseline hybrid or bounded expansion, optional PageRank, or a separately approved spectral/heat experiment. This differs from knowledge mode (`canonical`/`source`/`scenario`), Fact Mode (`ASSERTED`/`OBSERVED`/`DERIVED`) and assertion mood. Unsupported or disabled modes reject explicitly (EX-RET-006; F0035/F0068).
+
+### Projection compatibility
+
+Evidence that a projection's complete influence domain and input revisions match the requested scope, current authority, mode and pinned temporal/snapshot contract. A matching tenant, fresh build date or post-filtered output alone is insufficient. An incompatible artifact requires a compatible authorized fallback or gap (EX-RET-002/006; F0033–F0035/F0068).
+
+### Bridge evidence
+
+Admissible source support that connects otherwise separate pieces needed to answer a question, such as an endorsement and its effective clause connecting original wording to the applicable amendment. Graph closeness alone does not establish that connection's meaning or acceptance. Missing bridge support yields a gap rather than fabricated completeness (EX-RET-001/002; F0035/F0036).

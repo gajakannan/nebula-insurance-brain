@@ -1,13 +1,13 @@
 # Feature Registry
 
-**Next Available Feature Number:** F0068
+**Next Available Feature Number:** F0069
 
 **Planning Views:**
 - Roadmap sequencing (`Now / Next / Later`): `planning-mds/features/ROADMAP.md`
 - Story rollup index: `planning-mds/features/STORY-INDEX.md`
 - Governance contract: `planning-mds/features/TRACKER-GOVERNANCE.md`
 
-The feature tables below are generated fenced regions compiled from `planning-mds/kg-source/features/**` by `scripts/kg/compile.py` (via `tracker_gen.py`). Edit the feature shards, never the tables. The epic inventory for this product is master blueprint sections 95 and 124 (original F0001 to F0063 plus F0065; F0064 tracks repository tooling); features enter this registry as their shards are seeded and planned.
+The feature tables below are generated fenced regions compiled from `planning-mds/kg-source/features/**` by `scripts/kg/compile.py` (via `tracker_gen.py`). Edit the feature shards, never the tables. The epic inventory for this product is master blueprint sections 95, 124 and 127 (original F0001 to F0063 plus F0065–F0068; F0064 tracks repository tooling); features enter this registry as their shards are seeded and planned.
 
 ## Active Features
 
@@ -91,6 +91,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | F0065 | Grounded GL guideline assessment | Planned | v0.1B | `F0065-grounded-gl-guideline-assessment/` |
 | F0066 | Open-statement extraction + signature alignment | Planned | v0.2B | `F0066-open-statement-extraction-and-signature-alignment/` |
 | F0067 | Graph Observatory | Planned | v0.2B | `F0067-graph-observatory/` |
+| F0068 | Spectral graph retrieval experiments | Planned | v0.4+ | `F0068-spectral-graph-retrieval-experiments/` |
 <!-- generated:end registry:planned -->
 
 ## Archived Features

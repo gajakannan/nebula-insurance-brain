@@ -387,6 +387,19 @@ adrs:
       - capability:structural-assertion-admission
       - capability:versioned-assertion-semantics
       - entity:assertion
+  - id: adr:0076
+    label: Retrieval graph structure is a governed, derived ranking signal (Proposed)
+    path: planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+    related_nodes:
+      - adr:0022
+      - adr:0023
+      - adr:0046
+      - adr:0053
+      - adr:0071
+      - adr:0075
+      - capability:budgeted-evidence-context
+      - capability:governed-evidence-retrieval
+      - capability:spectral-retrieval-experiments
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -487,6 +500,28 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:budgeted-evidence-context
+    label: Budgeted evidence context and answer linkage
+    notes: Planning direction only. Exact final-payload tokenizer/model budget, precision-preserving locator
+      resolution, current reauthorization, gaps and grounded answer-basis linkage. Selection never establishes
+      use or truth; recording is non-blocking and does not depend on F0067.
+    rationale:
+      - adr: adr:0076
+        section: Decision (proposed)
+        summary: Derived retrieval ranks authorized evidence under existing temporal/evidence contracts;
+          baseline and optional numerical experiments have separate delivery gates.
+    related_nodes:
+      - adr:0046
+      - adr:0071
+      - adr:0076
+      - capability:governed-evidence-retrieval
+      - glossary_term:bridge-evidence
+      - glossary_term:evidence-block
+      - glossary_term:evidence-context
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/features/F0036-evidence-aware-retrieval-and-grounded-generation/README.md
   - id: capability:credential-verification-and-principal-resolution
     label: Credential verification and principal resolution
     notes: OIDC token verification (issuer, audience, signature, expiry) before any storage read; verified
@@ -569,6 +604,30 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:governed-evidence-retrieval
+    label: Governed evidence retrieval
+    notes: Planning direction only. F0035 owns authorized hybrid seeds, bounded typed expansion and one
+      compatible execution basis. F0033/F0034 projection/checkpoint contracts precede its Phase B approval;
+      runtime adapters precede production integration. PPR is optional; no spectral prerequisite.
+    rationale:
+      - adr: adr:0076
+        section: Decision (proposed)
+        summary: Derived retrieval ranks authorized evidence under existing temporal/evidence contracts;
+          baseline and optional numerical experiments have separate delivery gates.
+    related_nodes:
+      - adr:0076
+      - capability:assertion-eligibility-guards
+      - capability:authorization-enforcement
+      - capability:versioned-content-contracts
+      - glossary_term:projection-compatibility
+      - glossary_term:retrieval-execution-basis
+      - glossary_term:retrieval-mode
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/features/F0033-pgvector-retrieval/README.md
+      - planning-mds/features/F0034-age-graph-projection/README.md
+      - planning-mds/features/F0035-hybrid-search-and-authorized-scope/README.md
   - id: capability:grounded-gl-guideline-assessment
     label: Grounded GL guideline assessment
     notes: Proposed v0.1B bounded on-demand comparison; planned, not implemented. Exact canonical input/rule
@@ -742,6 +801,26 @@ capabilities:
       - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:spectral-retrieval-experiments
+    label: Conditional spectral graph retrieval experiments
+    notes: Future conditional v0.4+ experiment only. Versioned sparse adjacency/eigenpairs, spectral/heat
+      scoring and incremental evaluation under exact authorized temporal compatibility. Separate experiment/cost
+      decision after measured baseline; reservation does not enable a runtime path. F0061 retains Advanced
+      Retrieval.
+    rationale:
+      - adr: adr:0076
+        section: Decision (proposed)
+        summary: Derived retrieval ranks authorized evidence under existing temporal/evidence contracts;
+          baseline and optional numerical experiments have separate delivery gates.
+    related_nodes:
+      - adr:0076
+      - capability:budgeted-evidence-context
+      - capability:governed-evidence-retrieval
+      - glossary_term:projection-compatibility
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/features/F0068-spectral-graph-retrieval-experiments/README.md
   - id: capability:structural-assertion-admission
     label: Structural assertion admission
     notes: 'Implemented for F0006 run 2026-11-02-5a00b0ff: authorized deterministic quote/name/time/reference
@@ -1568,6 +1647,14 @@ entities:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
 glossary_terms:
+  - id: glossary_term:bridge-evidence
+    label: Bridge evidence
+    related_nodes:
+      - adr:0076
+      - capability:budgeted-evidence-context
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
   - id: glossary_term:constraint-execution-context
     label: Constraint execution context
     notes: Proposed authoring metadata names lifecycle stage, consumer, applicability, severity/action
@@ -1588,6 +1675,22 @@ glossary_terms:
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: glossary_term:evidence-block
+    label: Evidence block
+    related_nodes:
+      - adr:0076
+      - capability:budgeted-evidence-context
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:evidence-context
+    label: Evidence context
+    related_nodes:
+      - adr:0076
+      - capability:budgeted-evidence-context
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
   - id: glossary_term:insurance-product-composition
     label: Insurance product composition
     notes: Proposed example distinction between policy product/package type and coverage line. A BOP contains
@@ -1630,6 +1733,30 @@ glossary_terms:
       - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0015-extraction-profile-compiler/README.md
+  - id: glossary_term:projection-compatibility
+    label: Projection compatibility
+    related_nodes:
+      - adr:0076
+      - capability:governed-evidence-retrieval
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:retrieval-execution-basis
+    label: Retrieval execution basis
+    related_nodes:
+      - adr:0076
+      - capability:governed-evidence-retrieval
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:retrieval-mode
+    label: Retrieval mode
+    related_nodes:
+      - adr:0076
+      - capability:governed-evidence-retrieval
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
   - id: glossary_term:stable-term-iri
     label: Stable term IRI
     notes: Proposed stable identity with deterministic namespace mapping. Labels may change and an IRI
