@@ -156,3 +156,37 @@ schemas:
   - capability:structural-assertion-admission
   - entity:assertion
   - adr:0075
+- id: schema:fact-slot-key-v1
+  label: FactSlot Key V1
+  path: planning-mds/schemas/fact-slot-key-v1.schema.json
+  notes: F0007 internal slot-resolution request design contract; Phase B approved by operator 2026-11-09. Not an HTTP
+    payload; runtime implementation not claimed.
+  rationale: &f0007rat
+  - adr: adr:0077
+    section: Decision
+    summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier
+      with scoped absence, qualified money and scoped identifiers; runtime proof pending.'
+  related_nodes:
+  - capability:factslot-identity-resolution
+  - entity:fact-slot
+  - adr:0077
+- id: schema:fact-answer-v1
+  label: Fact Answer V1
+  path: planning-mds/schemas/fact-answer-v1.schema.json
+  notes: F0007 answer envelope stored in canonical_fact_version.value for identity-v1 slots; Phase B approved by operator
+    2026-11-09; runtime implementation not claimed.
+  rationale: *f0007rat
+  related_nodes:
+  - capability:typed-fact-answer
+  - entity:canonical-fact-version
+  - adr:0077
+- id: schema:fact-slot-resolution-result-v1
+  label: FactSlot Resolution Result V1
+  path: planning-mds/schemas/fact-slot-resolution-result-v1.schema.json
+  notes: F0007 server-computed resolution outcome design contract; Phase B approved by operator 2026-11-09; runtime
+    implementation not claimed.
+  rationale: *f0007rat
+  related_nodes:
+  - capability:factslot-identity-resolution
+  - entity:fact-slot
+  - adr:0077

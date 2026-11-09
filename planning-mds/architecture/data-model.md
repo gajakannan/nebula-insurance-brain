@@ -334,6 +334,44 @@ The [close/reopen boundary](../examples/commercial-pc-account/boundaries/account
 Preserve existing source/version/artifact IDs and tenant/KB constraints. Replace only the one-artifact-per-version uniqueness after reconciliation, permitting explicitly governed replacements. Full text remains in immutable files; index rows retain line ordinal/hash and provenance. Dates belong to the document version, never the manifest. Explicit append-only selections retain a previous selection, sequence and optimistic concurrency token; no selection means undated. The semantic authorization decision UUID is separate from the authorization audit row primary key.
 
 
+## F0007 FactSlot identity and answer carriers (Phase B design approved 2026-11-09; implementation pending)
+
+Plan run `2026-11-09-60865e32`. [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (Proposed) and the [assembly plan](../features/F0007-factslot-model/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, constraints and migration `0012`.
+
+- **`fact_slot`:** gains nullable identity columns. A NULL `identity_version` marks a legacy pilot slot. Identity-v1 rows carry the predicate key, release reference, cardinality, slot role, optional relationship object, optional parent and member key, and a versioned fingerprint under a partial unique index per tenant/KB.
+- **Members:** MULTI members are child `fact_slot` rows, so `canonical_fact_version` and its ADR-0008 exclusion are unchanged.
+- **`fact_slot_qualifier`:** holds authoritative normalized qualifier rows with composite ownership keys. It is append-only.
+- **Answers:** live in `canonical_fact_version.value` as `fact-answer/v1` for identity-v1 slots only. F0008 owns the version row.
+- **Row-level security:** both tables are handed to F0018 for RLS.
+
+```mermaid
+erDiagram
+    ENTITY_KNOWLEDGE_BASE ||--o{ FACT_SLOT : subject_in_kb
+    ENTITY_KNOWLEDGE_BASE ||--o{ FACT_SLOT : relationship_object
+    FACT_SLOT ||--o{ FACT_SLOT : multi_member
+    FACT_SLOT ||--o{ FACT_SLOT_QUALIFIER : identity_part
+    FACT_SLOT ||--o{ CANONICAL_FACT_VERSION : versions
+    FACT_SLOT {
+        uuid id PK
+        uuid entity_id FK
+        string slot_type
+        int identity_version
+        string predicate_key
+        string cardinality
+        string slot_role
+        uuid parent_slot_id FK
+        string member_key
+        uuid object_entity_id FK
+        string identity_fingerprint
+    }
+    FACT_SLOT_QUALIFIER {
+        uuid slot_id PK,FK
+        string qualifier_name PK
+        string value_type
+        string canonical_value
+    }
+```
+
 ## F0006 assertion semantics (bounded implementation)
 
 Phase B design was approved by operator on 2026-11-01 in plan run `2026-11-01-7d6d19ce`. Feature run `2026-11-02-5a00b0ff` implemented additive migration `0011` from `0010` and the bounded versioned-storage, structural-admission and current-consumer guards; the source-bound runtime proof records 336 unique passing final-lane cases (306 engine, 15 importer, ten recovery, five existing content-worker). Use remains limited to trusted local synthetic fixtures; no live producer or production activation is granted. ADR-0065 and ADR-0075 remain Proposed. [ADR-0075](decisions/ADR-0075-versioned-assertion-semantics-and-admission.md) and the [assembly plan](../features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, constraints and migration steps. Existing assertion/evidence identities remain. The only legacy-row addition is a version discriminator defaulting to 1; missing historical quote/mode/release is not reconstructed. New version-2 assertions require one immutable semantic extension, document-scoped reference FKs and server-verified evidence; deferred trigger integrity prevents a core-only v2 record. A review correction of a v2 assertion is a v2 child. It has its own extension, child-owned evidence rows and deterministic correction hashes, and it inherits the original basis. Corrections of v1 rows keep the legacy EXPLICIT basis and stay version 1 (plan run `2026-11-01-512e9303`).

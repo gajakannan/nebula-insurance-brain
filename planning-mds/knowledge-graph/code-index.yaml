@@ -108,6 +108,17 @@ node_bindings:
       tests:
         - engine/apps/api/tests/test_reviews.py
         - engine/packages/brain-review/tests/**
+  - id: capability:factslot-identity-resolution
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md
+        - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
+      examples:
+        - planning-mds/features/F0007-factslot-model/contract-examples.json
+        - planning-mds/features/F0007-factslot-model/worked-examples.md
+      schemas:
+        - planning-mds/schemas/fact-slot-key-v1.schema.json
+        - planning-mds/schemas/fact-slot-resolution-result-v1.schema.json
   - id: capability:governed-evidence-retrieval
     paths:
       architecture:
@@ -257,6 +268,16 @@ node_bindings:
         - engine/packages/brain-persistence/src/brain_persistence/tenancy.py
       infra:
         - scripts/dev/reconcile_authx.py
+  - id: capability:typed-fact-answer
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md
+        - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
+      examples:
+        - planning-mds/features/F0007-factslot-model/contract-examples.json
+        - planning-mds/features/F0007-factslot-model/worked-examples.md
+      schemas:
+        - planning-mds/schemas/fact-answer-v1.schema.json
   - id: capability:versioned-assertion-semantics
     paths:
       architecture:
@@ -409,6 +430,11 @@ node_bindings:
         - engine/packages/brain-content/src/brain_content/dates.py
         - engine/packages/brain-persistence/src/brain_persistence/content_models.py
         - engine/packages/brain-persistence/src/brain_persistence/document_dates.py
+  - id: entity:fact-slot-qualifier
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+        - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
   - id: entity:ontology-release
     paths:
       architecture:

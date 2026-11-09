@@ -245,6 +245,9 @@ paths:
         evidence-origin restrictions. Current source READ and fact-slot COMMIT decisions share
         one unit of work. No new grants or required request fields; legacy pilot compatibility
         remains as documented in ADR-0075. Phase B design approved by operator 2026-11-01; runtime not claimed.
+        F0007 Phase B design (ADR-0077; approved by operator 2026-11-09; runtime not claimed): for identity-v1 slots the value must be a
+        fact-answer/v1 envelope, validated and canonicalized before any effect; absence-scope artifacts and
+        name-evidence sources join the same-UoW source READ checks. Legacy pilot slots are unchanged.
       operationId: commitFact
       tags:
       - Facts
@@ -285,7 +288,10 @@ paths:
           $ref: '#/components/responses/Conflict'
         '422':
           description: Authorized request references an ineligible or inconsistent assertion source;
-            code ASSERTION_INELIGIBLE. No canonical mutation and no protected source excerpt.
+            code ASSERTION_INELIGIBLE. No canonical mutation and no protected source excerpt. F0007 design
+            (identity-v1 slots only) adds the lowercase answer-rejection codes listed in ADR-0077 D5 (for example
+            state_value_mismatch, absence_scope_required, money_float_rejected, name_evidence_required) with no
+            detail text.
           content:
             application/problem+json:
               schema:

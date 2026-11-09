@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 37
+**Total Stories:** 43
 
 ---
 
@@ -79,6 +79,19 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0007 — FactSlot model
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0007-S0001](./F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md) | Resolve stable FactSlot identity | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0007-S0002](./F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md) | Distinguish single, multi-valued and relationship slots | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0007-S0003](./F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md) | Carry information state separately from value | Critical | MVP | Rosa the Business Reviewer |
+| [F0007-S0004](./F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) | Type money and identifiers | Critical | MVP | Priya the GL Underwriter |
+| [F0007-S0005](./F0007-factslot-model/F0007-S0005-define-name-factslots.md) | Define name FactSlots | High | MVP | Rosa the Business Reviewer |
+| [F0007-S0006](./F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) | Preserve pilot slots and ownership | Critical | MVP | Ingrid the Persistence Engineer |
+
+---
+
 ## F0065 — Grounded GL guideline assessment
 
 | Story ID | Title | Priority | Phase | Persona |
@@ -97,7 +110,7 @@ Auto-generated index of all user stories across feature folders.
 | Phase | Count |
 |-------|-------|
 | Infrastructure | 7 |
-| MVP | 11 |
+| MVP | 17 |
 | MVP — v0.1A | 9 |
 | v0.1A | 4 |
 | v0.1B | 6 |
@@ -108,8 +121,8 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
-| Critical | 19 |
-| High | 18 |
+| Critical | 24 |
+| High | 19 |
 
 ---
 

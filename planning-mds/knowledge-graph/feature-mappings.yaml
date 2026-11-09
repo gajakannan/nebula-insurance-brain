@@ -4,10 +4,6 @@ coverage_note: Feature mappings are compiled from planning-mds/kg-source/feature
   explicit coverage exclusions until implementation exists.
 coverage:
   excluded_features:
-    - id: feature:F0007
-      path: planning-mds/features/F0007-factslot-model
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0008
       path: planning-mds/features/F0008-bitemporal-canonical-facts
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -540,6 +536,54 @@ features:
       - schema:assertion-record-v2
       - schema:interpretation-result
       - schema:interpretation-result-v2
+      - schema:problem-details
+  - status: planned
+    id: feature:F0007
+    path: planning-mds/features/F0007-factslot-model
+    affects:
+      - capability:bitemporal-canonical-commit
+      - capability:factslot-identity-resolution
+      - capability:typed-fact-answer
+      - endpoint:fact-commit
+      - entity:canonical-fact-version
+      - entity:fact-slot
+      - entity:fact-slot-qualifier
+    depends_on:
+      - feature:F0002
+      - feature:F0003
+      - feature:F0006
+    governed_by:
+      - adr:0006
+      - adr:0038
+      - adr:0039
+      - adr:0042
+      - adr:0061
+      - adr:0066
+      - adr:0077
+    notes:
+      - 'Phase B (Proposed ADR-0077): MULTI members are child fact_slot rows so the ADR-0008 exclusion
+        applies per member with no DDL on the F0008-owned canonical_fact_version; answers use the fact-answer/v1
+        envelope in its value for identity-v1 slots only. Pilot slots stay legacy and the pilot GET contract
+        is unchanged.'
+      - 'Plan run 2026-11-09-60865e32 G1 decisions: F0007 binds ownership only and hands the RLS inventory
+        (fact_slot, fact_slot_qualifier) to F0018; predicate keys are opaque and versioned with a minimal
+        sys namespace; display-name precedence is deferred to F0017/F0023.'
+      - 'Requirement-ownership amendment 2026-11-08 - Carry 109.1: define FactSlot identity beyond the
+        first scalar example (multi-valued, qualified and relationship slots). FactSlot keys are the predicate
+        key referenced by the ADR-0038 SourceAuthorityPolicy owned by F0018.'
+      - 'Requirement-ownership amendment 2026-11-08 - Carry master blueprint 107.4 and ADR-0039 into the
+        PRD: information state (eight states) is separate from the value, NOT_FOUND/NOT_STATED carry the
+        exact scope searched, and access denial is never an information state. Values use qualified money
+        (exact decimal, ISO 4217 currency, basis) and scoped identifiers (scheme, type, value).'
+      - Requirement-ownership amendment 2026-11-08 - New tenant-owned tables bind child rows and foreign
+        keys to tenant ownership and follow the ADR-0042 row-security pattern settled in F0018 Phase B.
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:canonical-commit-request
+      - schema:fact-answer-v1
+      - schema:fact-slot-key-v1
+      - schema:fact-slot-resolution-result-v1
       - schema:problem-details
   - status: planned
     id: feature:F0012
@@ -1181,6 +1225,91 @@ stories:
       - api:brain-api
     uses_schema:
       - schema:assertion-admission-result-v1
+  - id: story:F0007-S0001
+    feature: feature:F0007
+    path: planning-mds/features/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md
+    affects:
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
+      - entity:fact-slot-qualifier
+    governed_by:
+      - adr:0006
+      - adr:0077
+    uses_schema:
+      - schema:fact-slot-key-v1
+      - schema:fact-slot-resolution-result-v1
+  - id: story:F0007-S0002
+    feature: feature:F0007
+    path: planning-mds/features/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md
+    affects:
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
+    governed_by:
+      - adr:0006
+      - adr:0077
+    uses_schema:
+      - schema:fact-slot-key-v1
+      - schema:fact-slot-resolution-result-v1
+  - id: story:F0007-S0003
+    feature: feature:F0007
+    path: planning-mds/features/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md
+    affects:
+      - capability:typed-fact-answer
+      - entity:canonical-fact-version
+    governed_by:
+      - adr:0006
+      - adr:0039
+      - adr:0077
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:fact-answer-v1
+  - id: story:F0007-S0004
+    feature: feature:F0007
+    path: planning-mds/features/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md
+    affects:
+      - capability:factslot-identity-resolution
+      - capability:typed-fact-answer
+    governed_by:
+      - adr:0006
+      - adr:0039
+      - adr:0077
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:fact-answer-v1
+      - schema:fact-slot-key-v1
+  - id: story:F0007-S0005
+    feature: feature:F0007
+    path: planning-mds/features/F0007-factslot-model/F0007-S0005-define-name-factslots.md
+    affects:
+      - capability:factslot-identity-resolution
+      - capability:typed-fact-answer
+      - entity:fact-slot
+    governed_by:
+      - adr:0006
+      - adr:0066
+      - adr:0077
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:fact-answer-v1
+      - schema:fact-slot-key-v1
+  - id: story:F0007-S0006
+    feature: feature:F0007
+    path: planning-mds/features/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md
+    affects:
+      - capability:bitemporal-canonical-commit
+      - entity:fact-slot
+      - entity:fact-slot-qualifier
+    governed_by:
+      - adr:0006
+      - adr:0061
+      - adr:0077
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:canonical-commit-request
   - id: story:F0065-S0001
     feature: feature:F0065
     path: planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
