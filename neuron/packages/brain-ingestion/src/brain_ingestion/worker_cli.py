@@ -100,10 +100,11 @@ def reject_guard_override() -> None:
 
 
 def conversion_limits() -> ConversionLimits:
-    """Committed SEC-01 ceilings; cgroup isolation fails closed when unavailable."""
+    """Committed SEC-01/SEC-F5-M1 isolation; each required layer fails closed."""
     config = load_conversion_config()
     return ConversionLimits(
         isolation="cgroup" if config.isolation == "cgroup" else "watchdog",
+        network="isolated" if config.network == "isolated" else "host",
         memory_bytes=config.memory_max_mib * MIB,
         max_tasks=config.max_tasks,
         cpu_seconds=config.cpu_seconds,

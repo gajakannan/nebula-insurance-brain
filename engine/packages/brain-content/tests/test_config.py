@@ -190,6 +190,17 @@ def test_conversion_isolation_defaults_to_cgroup_when_unset(
 
     assert load_conversion_config() == ConversionConfig()
     assert ConversionConfig().isolation == "cgroup"
+    assert ConversionConfig().network == "isolated"
+
+
+@pytest.mark.parametrize("value", ["none", "true", "ISOLATED"])
+def test_conversion_network_rejects_unknown_modes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    _write_local(tmp_path, monkeypatch, f"conversion:\n  network: {value}\n")
+
+    with pytest.raises(ConfigError, match="isolated or host"):
+        load_conversion_config()
 
 
 def test_conversion_config_loads_explicit_values(
@@ -202,7 +213,7 @@ def test_conversion_config_loads_explicit_values(
         "  max_tasks: 64\n  cpu_seconds: 60\n",
     )
 
-    assert load_conversion_config() == ConversionConfig("watchdog", 2048, 64, 60)
+    assert load_conversion_config() == ConversionConfig("watchdog", "isolated", 2048, 64, 60)
 
 
 @pytest.mark.parametrize("value", ["none", "''", "true", "CGROUP"])
@@ -232,4 +243,4 @@ def test_committed_config_requires_cgroup_conversion_isolation(
     config = Path(__file__).resolve().parents[4] / "config" / "local.yaml"
     monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(config))
 
-    assert load_conversion_config() == ConversionConfig("cgroup", 6144, 512, 1200)
+    assert load_conversion_config() == ConversionConfig("cgroup", "isolated", 6144, 512, 1200)
