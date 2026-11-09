@@ -6,9 +6,15 @@
 
 ## Overview
 
-Temporal owns durable execution and proposes state changes only through canonical commit services (section 62). Docling-Graph coordinates internal document stages; activities invoke the shared bounded document service (ADR-0060).
+Temporal owns durable execution and proposes state changes only through canonical commit services (section 62). Activities invoke the shared bounded document service under the ADR-0074 controls.
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0028](../../architecture/decisions/ADR-0028-temporal-owns-execution-brain-owns-semantic-state.md). Likely predecessors (inferred, confirm at Phase B): F0049.
+
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- Own the master blueprint 114.1 connector contract (source-system identity, object/version ID, timestamps, observed permissions, change cursor, withdrawal events, freshness). v0.1 intake is local files only.
 
 ## Documents
 
@@ -21,9 +27,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 **Total Stories:** 0
 
-## Docling-Graph scope amendment (2026-09-15)
+## Docling-Graph scope amendment (2026-09-15) — withdrawn 2026-11-08
 
-[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+> **Withdrawn 2026-11-08.** The operator Rejected [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Requirements below that are specific to Docling-Graph (templates, compiled Graph configuration, run-owned extraction graphs, upstream chunk/item provenance, Graph quality gates) no longer apply. Pipeline-neutral requirements (checkpoint before model, zero-reconversion reuse, honest evidence precision, idempotent authorized commit, isolation from canonical tables) still apply to the direct-baseline pipeline. The text is kept as history.
+
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governed this planned work until the operator Rejected it on 2026-11-08; see the withdrawal note above.
 
 - Remain in v0.3 for human waits, timers, external activities, and durable business execution. v0.1 PostgreSQL jobs retain document-job recovery until then.
 - Invoke the same authorized document service from Temporal activities. Pass artifact/run references and idempotency keys; keep document bytes and large graph outputs outside workflow history.

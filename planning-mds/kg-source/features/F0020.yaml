@@ -12,6 +12,13 @@ roadmap_order: 3
 rationale: A minimal graph and temporal query API answers the v0.1 acceptance questions as of valid time and recorded
   time (sections 20, 68, 87).
 depends_on:
-- feature:F0001
+- feature:F0008
+- feature:F0018
 governed_by:
 - adr:0022
+- adr:0039
+- adr:0053
+notes:
+- Requirement-ownership amendment 2026-11-08 - Responses return the ADR-0039 information state, never
+  a bare null. Historical (valid/recorded time) queries are authorized against current grants and cannot
+  reinstate revoked access (ADR-0053).

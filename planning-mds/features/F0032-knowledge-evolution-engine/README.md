@@ -21,9 +21,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 **Total Stories:** 0
 
-## Docling-Graph scope amendment (2026-09-15)
+## Docling-Graph scope amendment (2026-09-15) — withdrawn 2026-11-08
 
-Proposed [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) adds these implementation acceptance requirements:
+> **Withdrawn 2026-11-08.** The operator Rejected [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Requirements below that are specific to Docling-Graph (templates, compiled Graph configuration, run-owned extraction graphs, upstream chunk/item provenance, Graph quality gates) no longer apply. Pipeline-neutral requirements (checkpoint before model, zero-reconversion reuse, honest evidence precision, idempotent authorized commit, isolation from canonical tables) still apply to the direct-baseline pipeline. The text is kept as history.
+
+Rejected (2026-11-08) [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) added these implementation acceptance requirements:
 
 - Determine the affected profiles and native block/item scope from the ontology/profile delta, then invoke F0016 with that scope and the saved native JSON.
 - Prove excluded blocks do not enter model context; any necessary context expansion is declared, authorized, and budgeted before execution. Preserve references to the original immutable artifact when selecting or reconstructing input views.

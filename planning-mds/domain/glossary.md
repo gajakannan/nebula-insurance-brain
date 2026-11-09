@@ -40,7 +40,7 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 
 ### Content Artifact
 **Type:** Entity
-**Definition:** The immutable parse-once output for a document version, produced by Docling underneath the planned Docling-Graph pipeline (ADR-0060): normalized text, blocks, tables, coordinates, and a manifest with parser identity and hashes (5, 80, 81)
+**Definition:** The immutable parse-once output for a document version, produced by Docling conversion (ADR-0040; the Docling-Graph pipeline proposed by ADR-0060 was Rejected on 2026-11-08): normalized text, blocks, tables, coordinates, and a manifest with parser identity and hashes (5, 80, 81)
 **In the Brain:** Reinterpretation always reads the persisted artifact and never re-parses the source
 
 ### Content Block
@@ -417,3 +417,39 @@ Evidence that a projection's complete influence domain and input revisions match
 ### Bridge evidence
 
 Admissible source support that connects otherwise separate pieces needed to answer a question, such as an endorsement and its effective clause connecting original wording to the applicable amendment. Graph closeness alone does not establish that connection's meaning or acceptance. Missing bridge support yields a gap rather than fabricated completeness (EX-RET-001/002; F0035/F0036).
+
+## Requirement-ownership decisions (2026-11-08, proposed)
+
+These terms follow the operator decisions recorded on 2026-11-08 in proposed ADR-0038, ADR-0039, ADR-0042, ADR-0043 and ADR-0053 (master blueprint section 106.3). Worked and boundary examples are [EX-OWN-001–006](../examples/source-authority-and-information-state.md). The records stay Proposed until their owning features prove them.
+
+### Information state
+
+The state of a FactSlot answer, kept separate from its value: `NOT_PROCESSED`, `NOT_FOUND`, `NOT_STATED`, `ILLEGIBLE`, `AMBIGUOUS`, `CONFLICTING`, `EXPLICIT_NEGATIVE`, `NOT_APPLICABLE`, or a present value. Absence states carry the exact scope searched. Access denial is never an information state (EX-OWN-002/003; ADR-0039; F0007/F0011/F0016/F0020/F0023).
+
+### Package completeness
+
+The comparison between the forms, pages and attachments a document profile expects and those actually received. A missing expected component makes the package `INCOMPLETE`; it never creates a negative fact (EX-OWN-002; ADR-0039; F0013/F0014/F0023).
+
+### Qualified money
+
+An exact decimal amount with an ISO 4217 currency and, where the predicate needs it, a basis such as per occurrence or aggregate. Floating-point storage is not allowed (ADR-0039; F0007/F0011/F0013).
+
+### Scoped identifier
+
+An identifier expressed as (issuer or scheme, identifier type, value). Equal strings from different schemes are different identifiers (ADR-0039; F0007/F0013/F0017).
+
+### Source authority policy
+
+A versioned rule set keyed by tenant, domain, FactSlot predicate, business context and effective interval that classifies each source family as authoritative, advisory or requested terms. It decides which assertion may become canonical; it never discards the others (EX-OWN-001; ADR-0038; F0018/F0024).
+
+### Requested terms
+
+What a submission or broker correspondence asks for, kept as an assertion and shown beside the issued terms. Higher extraction confidence never promotes requested terms (EX-OWN-001; ADR-0038).
+
+### Deletion tombstone
+
+The record left when an authorized deletion removes content: it keeps identity and audit but not the content, and a restore re-applies it before restored data becomes readable (EX-OWN-004; ADR-0043; F0018/F0026).
+
+### Constrained policy question
+
+The v0.1C "chat with this policy" surface: a conversation rooted on one entitled policy that answers through typed fact queries with scope, time basis, information state, citations and abstention. It has no broad retrieval or learning (EX-OWN-005; F0069; ADR-0046 v0.1 subset).

@@ -9,21 +9,36 @@ coverage_excluded:
 phase: v0.1A
 roadmap_section: Next
 roadmap_order: 15
-rationale: Semantic interpretation runs version every extraction over persisted content and are the unit of incremental reinterpretation (sections 28, 29). ADR-0060 adds pipeline/template identity, scoped provenance, and run-owned graph outputs.
-validation_gate: F0001 accepted; plan action Phase A and Phase B approved for this feature.
+rationale: Semantic interpretation runs version every extraction over persisted content and are the unit
+  of incremental reinterpretation (sections 28, 29). Each run records pipeline, profile and model identity
+  and the exact scope it interpreted.
+validation_gate: F0004, F0005, F0006 and F0015 complete; plan action Phase A and Phase B approved for this feature.
 depends_on:
-- feature:F0015
-- feature:F0005
 - feature:F0004
-- feature:F0001
+- feature:F0005
+- feature:F0006
+- feature:F0015
 governed_by:
-- adr:0060
 - adr:0016
 - adr:0035
 - adr:0064
 - adr:0065
 - adr:0068
 - adr:0072
+- adr:0042
+- adr:0055
+- adr:0074
 notes:
-- F0005 outcome 2026-10-28 - Graph dense rejected; direct-baseline/v1 stay default; ADR-0074 accepted. ADR-0060 stays Proposed with a reopen deadline: at F0014/F0015 Phase A the operator decides between re-planning a Graph candidate (with full re-qualification) and marking ADR-0060 Rejected. Plan against the direct baseline until then.
 - Learning traces are projected from run records (proposed ADR-0072). Keep run outcomes queryable by run with a terminal status. No new v0.1 scope.
+- Requirement-ownership amendment 2026-11-08 - ADR-0060 was Rejected on 2026-11-08; runs use the direct-baseline
+  pipeline and record pipeline identity for any future backend.
+- Requirement-ownership amendment 2026-11-08 - Carry master blueprint 110.4 (untrusted inputs) - extracted
+  text is evidence, never instruction. Acceptance - a PDF instructing a limit change or another account
+  disclosure produces no tool action, cross-account retrieval or canonical mutation. Extraction workers
+  hold no business-write credentials; run metadata stores secret references only.
+- Requirement-ownership amendment 2026-11-08 - Carry 110.4 model routing - v0.1 inference is local only
+  (ADR-0055); a timeout never falls back to another provider. Carry 114.2 - record stage latency, pages/blocks,
+  tokens, retries and cost per run without sensitive text.
+- Requirement-ownership amendment 2026-11-08 - Carry 107.4 - each run records the scope it interpreted
+  so NOT_PROCESSED and NOT_FOUND are scoped. Carry the 88 embedding-abstraction hook as a port with no
+  adapter (F0033 implements it).

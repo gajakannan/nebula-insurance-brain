@@ -124,7 +124,7 @@ GET /facts/8b2c…?validAsOf=2026-07-01T00:00:00Z&knownAsOf=2026-06-05T00:00:00Z
 ### Decision
 - Layer boundaries: `brain_domain` (frozen dataclasses, enums, invariants, no I/O) → application packages (`brain_security`, `brain_temporal`, `brain_review`, `brain_content` ports) → infrastructure adapters (`brain_persistence`, local filesystem content adapter) → `brain_api` and `brain_worker`.
 - Dependency direction: inward only; adapters implement `Protocol` ports declared in application packages; `brain_api` wires them in `create_app()`.
-- `neuron/` mirrors the split: `brain_interpretation` (models, ports) → `brain_ingestion` (bundle writer and durable publication callback) and `brain_extraction` (the upstream Graph pipeline adapter, compiled templates, and result/evidence translation). This is the ADR-0060 target; F0001 currently uses Docling plus a direct-vLLM adapter. Keep upstream graph IDs and output directories outside domain contracts.
+- `neuron/` mirrors the split: `brain_interpretation` (models, ports) → `brain_ingestion` (bundle writer and durable publication callback) and `brain_extraction` (the pipeline-neutral extraction port, the direct-baseline adapter, and result/evidence mapping). ADR-0060's Docling-Graph target was Rejected on 2026-11-08. Keep any pipeline-specific IDs and output directories outside domain contracts.
 
 ### Rationale
 - Master blueprint section 114.3 (package list as code boundaries); BLUEPRINT 2.3 boundary rules.

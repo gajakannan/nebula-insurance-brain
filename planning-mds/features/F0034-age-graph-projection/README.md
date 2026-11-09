@@ -21,9 +21,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 **Total Stories:** 0
 
-## Docling-Graph scope amendment (2026-09-15)
+## Docling-Graph scope amendment (2026-09-15) — withdrawn 2026-11-08
 
-[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+> **Withdrawn 2026-11-08.** The operator Rejected [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Requirements below that are specific to Docling-Graph (templates, compiled Graph configuration, run-owned extraction graphs, upstream chunk/item provenance, Graph quality gates) no longer apply. Pipeline-neutral requirements (checkpoint before model, zero-reconversion reuse, honest evidence precision, idempotent authorized commit, isolation from canonical tables) still apply to the direct-baseline pipeline. The text is kept as history.
+
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governed this planned work until the operator Rejected it on 2026-11-08; see the withdrawal note above.
 
 - Build AGE from accepted canonical records and the existing outbox/rebuild path. Do not load upstream graph exports directly; local extraction IDs and deduplication have no canonical authority.
 

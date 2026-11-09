@@ -264,7 +264,9 @@ Illustrative layout; the accepted wire shape is `planning-mds/schemas/content-ar
 }
 ```
 
-## Planned pipeline and run metadata (ADR-0060)
+## Pipeline and run metadata proposed by ADR-0060 (Rejected 2026-11-08)
+
+> **Rejected 2026-11-08.** The operator rejected [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) after Graph dense failed F0005 live qualification. The v0.1 pipeline is Docling conversion plus the direct-baseline extraction client (ADR-0055) under the ADR-0074 controls. The text below is kept as history; master blueprint section 126 lists what survives.
 
 Docling-Graph does not change source, content, and interpretation identity. F0004/F0016 must settle the following contract additions before implementation:
 

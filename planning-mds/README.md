@@ -20,8 +20,9 @@ All solution-specific planning for Nebula Insurance Brain lives here. Generic ro
 | 95 roadmap, 115.3 sequencing | `BLUEPRINT.md` section 5; `kg-source/features/**` (seeded after init) |
 | 85 to 89 v0.1 slices | Story sources for F0001, F0024, F0025 |
 | 127 governed retrieval and spectral graph inspiration | ADR-0076 (Proposed); F0033–F0036/F0067 carry-ins; F0068 conditional experiment; `architecture/governed-evidence-retrieval-design.md`; `examples/governed-evidence-retrieval.md` |
-| 126 document pipeline orchestration | ADR-0060; F0004/F0005/F0015/F0016 and dependent feature scope amendments |
+| 126 document pipeline orchestration | ADR-0060 (Rejected 2026-11-08); ADR-0074 execution controls; F0005 archive; withdrawn Docling-Graph amendments in dependent features |
 | 106 to 117 pre-build requirements and open decisions | `BLUEPRINT.md` section 4.8; ADR-0038 to ADR-0048 |
+| 106.3 requirement ownership (2026-11-08) | ADR-0038/0039/0042/0043/0051/0052/0053 decisions recorded; F0069; requirement-ownership amendments in F0007–F0026, F0050 |
 | Statements, time, and governance amendments (2026-09-25) to sections 3, 11, 14, 17, 29, 53, 56, 62, 64, 75, 76, 78, 95, 99 | ADR-0063 to ADR-0069; `BLUEPRINT.md` section 4.11; F0066; feature scope amendments; `examples/statements-time-and-governance.md` |
 | Account, party and role model (2026-10-10) to sections 66, 70, 86, 118, 120 | ADR-0070; `BLUEPRINT.md` section 4.8; F0012/F0017/F0023 amendments; `examples/commercial-pc-account/`; `architecture/account-model-cross-repo-plan.md` |
 | Graph Observatory and semantic execution traces (2026-10-13) to sections 44, 63, 113 | ADR-0071, ADR-0072; F0067; carry-in sections in F0016/F0021/F0034/F0036/F0037/F0038/F0040/F0041/F0042/F0045/F0058; `architecture/graph-observatory-design.md`; `schemas/semantic-execution-trace.schema.json`; `examples/graph-observatory-2d-options.html` |

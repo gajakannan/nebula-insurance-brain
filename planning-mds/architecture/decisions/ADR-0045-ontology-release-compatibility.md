@@ -10,6 +10,7 @@
 **Date:** 2026-09-05 (record created from the master blueprint baseline)
 **Deciders:** Pending; becomes Accepted only when the stated tests, owners, and release gates are satisfied (master blueprint section 106 decision posture)
 **Source:** `planning-mds/architecture/master-blueprint.md` section 116
+**Decision recorded:** 2026-11-08 by the operator (blueprint requirement-ownership amendment): the contract below is the direction F0012, F0013 and F0015 plan against. Owner: Architect; proving feature: F0012, with F0015 for the compiler boundary. Formal acceptance still requires the evidence listed below.
 
 ## Context
 

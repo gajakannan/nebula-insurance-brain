@@ -21,6 +21,13 @@ This feature depends on [F0012](../F0012-foundation-ontology/README.md), in addi
 
 Contracts and examples: [release records](../../architecture/data-model.md#proposed-ontology-release-records-f0012f0013-adr-0045), [assessment contract](../F0065-grounded-gl-guideline-assessment/assessment-contract.md), and [ontology release cases](../../examples/ontology-release-contracts.md). The PRD must assign the owning stories; this amendment does not change feature status or delivery phase.
 
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0007, F0012 (previously F0001, F0012).
+- Apply ADR-0039 to GL limits (amount, currency, per-occurrence/aggregate basis) and scoped identifiers, and list the GL forms a package is expected to contain so F0014 can report INCOMPLETE packages.
+
 ## Documents
 
 ### Commercial P&C teaching expansion (2026-10-08)

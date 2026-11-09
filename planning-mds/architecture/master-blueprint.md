@@ -9,7 +9,9 @@
 
 **AuthX reference:** [Architecture patterns](#118-authx-reference-architecture), [implementation gaps](#119-crm-gaps-that-must-not-be-copied-unchanged), [Brain contracts](#120-concrete-authx-contract-for-insurance-brain), and [validation evidence](#121-validation-evidence-and-required-tests).
 
-**Document pipeline update (2026-09-22):** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph for document pipeline coordination. F0005's pinned 1.9.1 candidate has completed its synthetic development scope: native/scanned conversion, saved-JSON reuse, PostgreSQL recovery, recorded-response dense extraction, and multi-region review mapping. The candidate remains opt-in; live-model and deployment qualification and reviewer acceptance remain future work under section 126. F0001 remains the measured Docling + direct-vLLM baseline. See [F0005 compatibility evidence](../features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md).
+**Document pipeline update (2026-11-08):** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) (Docling-Graph) is **Rejected**. F0005 qualified Graph dense live on 2026-10-27 and it failed accuracy, abstention, evidence-resolution and latency gates; the operator rejected the ADR at its reopen decision instead of re-planning a candidate. The v0.1 pipeline is Docling conversion, the persisted native bundle, and the bounded direct-baseline extraction client (ADR-0055) under the accepted ADR-0074 execution controls. Section 126 records what survives. See [F0005 compatibility evidence](../features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md).
+
+**Requirement ownership update (2026-11-08):** Section 106.3 assigns every blueprint requirement that lacked an owning feature, adds F0069 (constrained policy question, v0.1C), and records operator decisions for ADR-0038, ADR-0039, ADR-0042, ADR-0043, ADR-0051, ADR-0052 and ADR-0053 (all still Proposed until their proofs pass). Section 117.1 shows the current state of the open decisions.
 
 **Statements, time, and governance update (2026-09-25):** Seven records incorporate what Utopia learned after this repository started (2026-09-05). [ADR-0063](decisions/ADR-0063-open-statements-and-signature-alignment.md) is accepted as direction: the assertion plane holds open statements in the source's own words beside typed assertions, and signature alignment joins template extraction as a route to typed assertions. [ADR-0064](decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) to [ADR-0069](decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md) are Proposed. They cover:
 
@@ -28,8 +30,8 @@ Sections 3, 11, 14, 17, 29, 53, 56, 62, 64, 75, 76, 78, 95, and 99 are revised i
 
 ```text
 USE DIRECTLY
-    Docling-Graph — document pipeline coordination
-    Docling — underlying conversion engine and native representation
+    Docling — conversion engine and native representation
+    vLLM-served local model — direct-baseline extraction (ADR-0055)
 
 REINCORPORATE SELECTED CAPABILITIES / CONCEPTS
     Utopia
@@ -230,11 +232,7 @@ or filesystem paths.
 ## Direct specialist dependencies
 
 ```text
-Docling-Graph
-    coordinates conversion, chunking, template-driven extraction, validation, and graph output
-    reuses the persisted native document for subsequent interpretation
-
-Docling (under Docling-Graph)
+Docling
     physical/content extraction: layout, blocks, tables, coordinates, native document representation
 ```
 
@@ -424,16 +422,16 @@ YAML/JSONL are authoring and interchange formats, not runtime truth stores.
 
 This is a foundational rule.
 
-For a specific document version, preserve one accepted physical/content parse for reuse. Docling-Graph coordinates conversion through Docling; Nebula publishes the immutable bundle before semantic extraction proceeds. After publication, interpretation and recovery perform zero conversion/OCR calls. A failed attempt before publication may need a conversion retry (ADR-0060, section 126).
+For a specific document version, preserve one accepted physical/content parse for reuse. Docling converts the document; Nebula publishes the immutable bundle before semantic extraction proceeds. After publication, interpretation and recovery perform zero conversion/OCR calls. A failed attempt before publication may need a conversion retry (ADR-0074, section 126).
 
 ```text
 Original File
     ↓
-Docling-Graph conversion (Docling underneath)
+Docling conversion
     ↓
 Durable Content Artifact checkpoint
     ↓
-Docling-Graph extraction from saved native JSON
+Direct-baseline extraction from saved native content
 ```
 
 Persist:
@@ -1136,7 +1134,7 @@ evidence precision
 Review happens inside Nebula, so the decision needs no external system, task, or annotation identity. The reviewer is the authenticated session principal:
 
 ```text
-Docling-Graph extraction output
+Extraction output
         │
         ▼
 Assertion + Evidence
@@ -1536,7 +1534,7 @@ BUSINESS_RULE_CHANGE
 TARGETED_REINTERPRETATION
 ```
 
-An interpretation can target a subset of stored blocks. The Docling-Graph adapter must preserve the selected scope and a mapping to original item/block references; it must not silently expand a targeted run to the full document (ADR-0060). Pipeline revision/configuration and template hashes belong to the run. Graph output and provenance are retained separately from the immutable parse bundle.
+An interpretation can target a subset of stored blocks. The extraction pipeline must preserve the selected scope and a mapping to original item/block references; it must not silently expand a targeted run to the full document. Pipeline identity, configuration and profile hashes belong to the run. Run outputs and provenance are retained separately from the immutable parse bundle.
 
 ---
 
@@ -1575,7 +1573,7 @@ New assertions
 Canonical reconciliation
 ```
 
-Docling-Graph runs again over saved native content; Docling conversion does not.
+Extraction runs again over saved native content; Docling conversion does not.
 No full-document reparse.
 No mandatory full-corpus semantic extraction.
 
@@ -2528,7 +2526,7 @@ TransitionCommitService
 
 # 62. Temporal.io
 
-Temporal remains planned for v0.3 durable business workflows, human waits, timers, and external-system activities. Docling-Graph owns document processing stages inside a bounded activity/job; it does not replace durable execution. v0.1 uses PostgreSQL-backed jobs/outbox for recovery (section 114.1). Both scheduling paths invoke the same authorized document operation and reuse persisted artifacts (ADR-0060).
+Temporal remains planned for v0.3 durable business workflows, human waits, timers, and external-system activities. The bounded document job (ADR-0074) owns document processing stages; it does not replace durable execution. v0.1 uses PostgreSQL-backed jobs/outbox for recovery (section 114.1). Both scheduling paths invoke the same authorized document operation and reuse persisted artifacts.
 
 ```text
 Workflow
@@ -2943,10 +2941,10 @@ Nebula opens the review item in its own panel, renders the source from the immut
 Source Document
       │
       ▼
-Docling-Graph conversion → saved Docling content + coordinates
+Docling conversion → saved Docling content + coordinates
       │
       ▼
-Docling-Graph / semantic interpretation
+Semantic interpretation (direct-baseline pipeline)
       │
       ▼
 Assertion / Relationship Candidate
@@ -3436,7 +3434,7 @@ engine/                           # Python backend: API, worker, semantic kernel
 neuron/                           # Python AI and semantic runtime (ai-engineer)
     packages/
         brain-ingestion/          # bundle writer + durable conversion checkpoint callback
-        brain-extraction/         # Docling-Graph pipeline adapter + templates/result/evidence mapping
+        brain-extraction/         # extraction pipeline port, direct-baseline adapter, result/evidence mapping
         brain-interpretation/     # semantic interpretation runs
         brain-reasoning/
         brain-conversation/
@@ -3687,7 +3685,7 @@ Azure Blob, GCS, or other object-store namespace without changing artifact consu
 
 # 81. Example Manifest
 
-Illustrative layout; the accepted wire shape is `planning-mds/schemas/content-artifact-manifest.schema.json`. The parser remains Docling under ADR-0060. F0004/F0016 must version any new pipeline/run metadata contract rather than add undeclared fields to the current strict schemas.
+Illustrative layout; the accepted wire shape is `planning-mds/schemas/content-artifact-manifest.schema.json`. The parser remains Docling (ADR-0060, which proposed Docling-Graph coordination, was Rejected on 2026-11-08). F0004/F0016 must version any new pipeline/run metadata contract rather than add undeclared fields to the current strict schemas.
 
 ```json
 {
@@ -3801,7 +3799,7 @@ Two semantic vertical slices plus shared review/evaluation and the bounded F0065
 The v0.1 human-review objective is intentionally narrow:
 
 ```text
-Docling-Graph extraction output
+Extraction output
         ↓
 Assertion + provenance
         ↓
@@ -3936,6 +3934,8 @@ Derivation dependency tables
 AGE projection IDs
 Embedding abstraction
 ```
+
+Owners (2026-11-08, section 106.3): `ConversationContext` F0069; `LearningCandidate` F0009; derivation dependency tables F0018 with F0065 lineage; AGE projection IDs F0018 (F0034 implements); embedding abstraction F0016 (F0033 implements). `ReviewItem`, `ReviewDecision`, `ReviewBatch` and `EvidenceLocator` exist from F0001/F0006 and are extended by F0022.
 
 Generalized features need not ship in v0.1. The v0.1B scope includes F0065 bounded on-demand guideline assessment with exact input/rule lineage (section 124); automatic dependency propagation remains F0056.
 
@@ -4099,6 +4099,7 @@ F0023 Minimal Entity 360
 F0065 Grounded GL guideline assessment (bounded neurosymbolic workflow)
 F0024 GL vertical slice
 F0025 Endorsement bitemporal slice
+F0069 Constrained policy question (chat with this policy; v0.1C)
 F0026 v0.1 hardening + Golden Corpus workflow + AuthX negative tests and policy parity
 ```
 
@@ -4397,14 +4398,14 @@ ASSERTION PLANE          ONTOLOGY / SCHEMA                  PROVENANCE
        └────────────────────────┼───────────────────────────────┘
                                 │
                        SEMANTIC INTERPRETATION
-                    native model + Docling-Graph
+                    native model, direct-baseline
                                 ▲
                                 │
                     CANONICAL CONTENT ARTIFACTS
                                 ▲
                                 │
-                     DOCLING-GRAPH CONVERSION
-                       (Docling underneath)
+                       DOCLING CONVERSION
+                    (persisted native bundle)
                                 ▲
                                 │
                          SOURCE DOCUMENTS
@@ -4413,11 +4414,8 @@ ASSERTION PLANE          ONTOLOGY / SCHEMA                  PROVENANCE
 Technology roles are intentionally asymmetric:
 
 ```text
-Docling-Graph
-    document pipeline coordinator (conversion, extraction, graph output)
-
 Docling
-    conversion engine used by Docling-Graph
+    conversion engine and native document representation
 
 Graphify
     selected semantic capabilities reincorporated into Nebula
@@ -4439,13 +4437,13 @@ The Brain owns semantics. Direct dependencies execute specialized capabilities a
 New Document
     │
     ▼
-Docling-Graph Conversion (Docling)
+Docling Conversion
     │
     ▼
 Persisted Content + Coordinates
     │
     ▼
-Docling-Graph / Semantic Interpretation
+Semantic Interpretation
     │
     ▼
 Assertions + Relationship Candidates
@@ -4626,7 +4624,7 @@ It should preserve the evidence once, continuously reinterpret that evidence as 
   - https://github.com/pgvector/pgvector
 
 - Direct specialist dependencies selected for this blueprint:
-  - Docling-Graph: https://github.com/docling-project/docling-graph — proposed pipeline; exact tested pin is F0005/ADR-0060
+  - Docling-Graph: https://github.com/docling-project/docling-graph — evaluated in F0005 and rejected (ADR-0060, 2026-11-08)
   - Docling: https://github.com/docling-project/docling — underlying converter; lock the compatible transitive version
 
 - Nebula Review Panel rendering libraries (frontend dependencies, not specialist engines; section 125):
@@ -4703,6 +4701,39 @@ The requirements below are designed to be validated against representative insur
 | P1 | Learning evidence independence and change budgets | Candidate lifecycle present | Prevent self-reinforcement and uncontrolled work |
 | P1 | Measurable release gates and operations | Metrics without targets | Frozen evaluation set, agreed SLOs, restore drill |
 | P2 | Broad LOB packs and external vocabulary mapping | Modules reserved | Add one validated domain pack at a time |
+
+## 106.3 Requirement ownership (2026-11-08)
+
+A review of this blueprint against the feature portfolio on 2026-11-08 found requirements with no owning feature. Each is now carried into the owning feature's shard notes and README; the feature plan turns it into PRD requirements and stories. Owners are listed for v0.1 unless marked.
+
+| Requirement | Section | Owner | Governing record |
+| --- | --- | --- | --- |
+| Source authority policy and requested-versus-issued resolution | 107.1 | F0018 (policy, commit); F0024 (acceptance example); F0022 (shows rule applied) | ADR-0038 |
+| FactSlot identity beyond the first scalar | 109.1 | F0007 | ADR-0006 |
+| Information state separate from value; scoped absence | 107.4 | F0007 (carrier), F0011 (schemas), F0016 (scope searched), F0020/F0023 (return and display) | ADR-0039 |
+| Qualified money and scoped identifiers | 107.3 | F0007, F0011, F0013, F0017 | ADR-0039 |
+| Package completeness (expected versus received) | 107.4 | F0014 (profile), F0013 (GL forms), F0023 (display) | ADR-0039 |
+| Authorization envelope, tenant ownership binding, row security as defense in depth | 110.1 | F0018 (design), F0007 onward (new tables), F0026 (isolation proof) | ADR-0042 |
+| Derived results inherit evidence restrictions | 110.2 | F0018, F0065, F0069; F0026 proves | ADR-0042 |
+| Four distinct lifecycle events; deletion and restore minimum | 110.3 | F0010 (events), F0018 (tombstones), F0026 (drill) | ADR-0043 |
+| Untrusted inputs and prompt-injection acceptance; worker credential separation | 110.4 | F0016; F0026 (challenge suite) | ADR-0042 |
+| Model/provider routing (local only, no external fallback) | 110.4 | F0016 | ADR-0055 |
+| Current grants on historical and projected reads | 110.1, 120.3 | F0020, F0023, F0069; F0026 proves | ADR-0053 |
+| Browser session transport | 119.3, 120.5 | F0021 | ADR-0051 |
+| Reviewer authority; no agent delegation in v0.1 | 120.4 | F0022, F0018; delegation in F0047 (v0.2) | ADR-0052 |
+| Constrained "chat with this policy"; read-only knowledge gaps | 113.1, 113.3 | F0069 (new, v0.1C); gap assignment in F0043 (v0.2) | ADR-0046 (v0.1 subset) |
+| Foundation hook: ConversationContext | 88 | F0069 | — |
+| Foundation hook: LearningCandidate | 88 | F0009 (reserved reference only) | ADR-0020 |
+| Foundation hook: derivation dependency tables | 88 | F0018 (commit records dependencies); F0065 (assessment input lineage) | ADR-0026 |
+| Foundation hook: AGE projection IDs | 88 | F0018 (reserved in outbox events); F0034 implements | ADR-0022 |
+| Foundation hook: embedding abstraction | 88 | F0016 (port, no adapter); F0033 implements | ADR-0023 |
+| Multilingual labels as metadata | 67 | F0012 | ADR-0011 |
+| Per-run operational telemetry | 114.2 | F0016; budgets and SLOs in F0026 | ADR-0048 |
+| Evaluation metrics and regression testing | 97, 98 | F0026 | ADR-0048 |
+| Connector contract (source-system identity, change cursor, withdrawal) | 114.1 | F0050 (v0.3); v0.1 intake is local files only | ADR-0028 |
+| F0006 security follow-ups SEC-01/02/03 | 110.4, 114.3 | F0026 release preconditions if not closed earlier | ADR-0074 |
+
+The v0.1 dependency graph in the feature shards was also corrected so each feature depends on the features it builds on, not only F0001. The dependencies are recorded in each shard's `depends_on` and appear in its README amendment.
 
 # 107. Insurance Meaning and Source Authority
 
@@ -4786,7 +4817,7 @@ Track expected versus received forms/pages/attachments, processing completeness,
 
 **Pinned reuse proof completed in F0005:** Docling-Graph 1.9.1 accepts saved DoclingDocument JSON without conversion, verified with conversion forbidden on reuse. Raw text and Markdown take different paths. The upstream guide describes the native-JSON path [R1]; the [observed compatibility evidence](../features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md) establishes it for the locked candidate. F0001's unsuccessful invocation remains historical evidence; the exact difference in its invocation/environment has not been reconstructed. Production acceptance remains pending under ADR-0060.
 
-**Accepted content contract:** `docling-document.json` is already persisted by F0001 (ADR-0040), alongside normalized projections. ADR-0060 makes it the required reuse input to the opt-in Docling-Graph adapter. Preserve its schema version and required assets, publish the bundle before extraction, and store subsequent graph/provenance outputs under their interpretation run.
+**Accepted content contract:** `docling-document.json` is already persisted by F0001 (ADR-0040), alongside normalized projections. It is the required reuse input for every extraction pipeline. Preserve its schema version and required assets, publish the bundle before extraction, and store subsequent outputs and provenance under their interpretation run.
 
 Suggested additions to the artifact manifest:
 
@@ -4827,7 +4858,7 @@ Store separate evidence for amount, currency, limit basis, effective date, and r
 
 Define a provider-neutral `InterpretationResult` containing candidate entities, assertions, relationships, evidence bindings, quality signals, warnings, and the exact run configuration.
 
-Docling-Graph output becomes input to Nebula's assertion pipeline. Its local deduplication, graph identifiers, and validation do not replace Nebula entity resolution or canonical commits. Keep external-to-Nebula identifier mappings versioned.
+Extraction output becomes input to Nebula's assertion pipeline. Pipeline-local deduplication, identifiers, and validation do not replace Nebula entity resolution or canonical commits. Keep external-to-Nebula identifier mappings versioned.
 
 Distinguish extraction confidence, evidence quality, source authority, entity-match confidence, and canonical resolution status. Model self-reported confidence is a signal to evaluate, not a calibrated probability or authorization to commit.
 
@@ -5073,11 +5104,13 @@ The existing v0.1 acceptance question already requires a trustworthy answer. Con
 
 Add first-class knowledge-gap objects that can become assigned evidence requests or review work items. Any external message or business action still requires the corresponding authorized action workflow.
 
+**Owner (2026-11-08):** F0069 delivers the constrained policy question and read-only knowledge-gap display in v0.1C; F0043 owns assigning gaps as work.
+
 # 114. Ingestion, Operations, and Cost
 
 ## 114.1 Make ingestion durable before adopting full workflow orchestration
 
-Temporal is deferred to v0.3. v0.1 uses PostgreSQL-backed durable jobs/outbox around Docling-Graph processing attempts (ADR-0060). Persist the parse checkpoint before semantic extraction, then reuse it on retry. Docling-Graph internal stage control and model retries do not replace job leases, cancellation, crash recovery, or idempotent publication. F0005 proves the checkpoint seam before activation; a pipeline export produced only after successful extraction is insufficient.
+Temporal is deferred to v0.3. v0.1 uses PostgreSQL-backed durable jobs/outbox around document processing attempts (ADR-0074). Persist the parse checkpoint before semantic extraction, then reuse it on retry. Pipeline-internal stage control and model retries do not replace job leases, cancellation, crash recovery, or idempotent publication. F0005 proved the checkpoint seam; a pipeline export produced only after successful extraction is insufficient.
 
 Define states such as discovered, acquired, quarantined, parsed, partially parsed, interpreted, awaiting review, committed, failed, and cancelled. Persist job attempts, failure stage, lease/heartbeat, retry policy, idempotency key, content hashes, and correlation IDs.
 
@@ -5104,7 +5137,7 @@ port. The v0.1 local profile implements that port with a filesystem directory; t
 boundaries, not 25 independently deployed services. Keep parser/model workers separately resource-controlled where
 required.
 
-Specify a tested dependency matrix: exact Python/runtime build, Docling and Docling-Graph commits/releases, model weights, PostgreSQL major/minor, AGE build, pgvector, and the pinned `pdf.js` and `fflate` versions the Review Panel renders with. PostgreSQL 18 is not inherently ruled out by AGE: the official download page lists a PG18 release. Select and test an exact combination instead of relying on generic compatibility claims. [R4]
+Specify a tested dependency matrix: exact Python/runtime build, Docling commit/release, model weights, PostgreSQL major/minor, AGE build, pgvector, and the pinned `pdf.js` and `fflate` versions the Review Panel renders with. PostgreSQL 18 is not inherently ruled out by AGE: the official download page lists a PG18 release. Select and test an exact combination instead of relying on generic compatibility claims. [R4]
 
 Validate availability on the intended hosting environment, extension upgrade path, backup/restore, and operational ownership before deployment assumptions harden. No new graph or vector platform is justified solely by this blueprint.
 
@@ -5147,14 +5180,14 @@ Passing a finite security test suite is a release gate, not proof that every pos
 
 ## 115.3 Revised sequencing proposal
 
-Preserve the existing F0001–F0063 identifiers. F0064 separately tracks repository tooling. Add F0065 for the user-authorized bounded v0.1B assessment (section 124), with integration criteria in F0024/F0025/F0026; do not renumber the backlog.
+Preserve the existing F0001–F0063 identifiers. F0064 separately tracks repository tooling. F0069 (2026-11-08) owns the v0.1C constrained policy question. Add F0065 for the user-authorized bounded v0.1B assessment (section 124), with integration criteria in F0024/F0025/F0026; do not renumber the backlog.
 
 | Stage | Scope | Existing roadmap mapping |
 | --- | --- | --- |
 | Pre-build contract proofs | Docling reuse, native review round trip and evidence anchoring, temporal mutation, authorization/deployment compatibility | F0001–F0005, F0008, F0009, F0022 |
 | v0.1A | Typed domain contracts, durable ingestion, immutable evidence, assertion extraction | F0002–F0017 |
 | v0.1B | Authorized canonical commits, source resolution minimum, GL limits, temporal endorsement, human review, bounded neurosymbolic guideline assessment | F0018–F0023 → F0065 → F0024/F0025 integration |
-| v0.1C | Recovery, deletion/revocation minimum, audit, independent frozen evaluation, constrained policy question, assessment challenge suite | F0026 including F0065 cases, and narrow acceptance coverage from F0036–F0039 |
+| v0.1C | Recovery, deletion/revocation minimum, audit, independent frozen evaluation, constrained policy question, assessment challenge suite | F0069 constrained policy question → F0026 including F0065 cases |
 | v0.2A | Governed hybrid seeding, bounded typed expansion, budget-aware evidence sets, chat with document/entity/data, projection operations | F0033–F0040, F0044–F0047 |
 | v0.2B | Broader resolution, ontology/profile release workflows, candidate learning, targeted enrichment and read-only trace replay | F0027–F0032, F0041–F0043, F0066/F0067 |
 | v0.3+ | Full process execution, decision replay product, generalized reasoning and skills | F0048–F0063; bounded assessment already ships as F0065 |
@@ -5192,6 +5225,8 @@ The following ADR IDs are reserved suggestions, all with **status: Proposed**. T
 | ADR-0048 — Pilot Evidence and Operational Readiness | Frozen evaluation slice and recovery/access/review gates | Demonstrated GL end-to-end proof; section 115 |
 | ADR-0058 — Evidence Anchoring and Selector Contract | W3C selectors per format, code-point offsets, declared precision, unresolved blocks the decision | Quote recovery after coordinate drift; section 125 |
 
+**Decision status (2026-11-08):** the operator recorded decisions for ADR-0038, ADR-0039, ADR-0042 and ADR-0043 (and confirmed the ADR-0045 direction). Each record names its owner, proving feature and acceptance proof, and stays Proposed until that proof passes. ADR-0040, ADR-0041, ADR-0044 and ADR-0058 are already Accepted. ADR-0046, ADR-0047 and ADR-0048 remain open for their v0.1C/v0.2 owners.
+
 ## 116.1 Original statements that need reconciliation
 
 | Existing section | Issue | Proposed correction |
@@ -5209,7 +5244,7 @@ The following ADR IDs are reserved suggestions, all with **status: Proposed**. T
 | 89, 92 | Full governance delayed while initial writes already occur | Baseline authorization and audit in v0.1 |
 | 90 | v0.2 combines too many large capabilities | Split retrieval/chat delivery from ontology/learning workbenches |
 | 96–97 | Broad small corpus and metrics without release targets | Narrow frozen slice, representative challenge set, measured thresholds |
-| 104 | Docling-Graph dependency and orchestration | **Synthetic development proof complete (2026-09-22):** the locked 1.9.1 candidate proves native JSON reuse, pre-extraction publication, PostgreSQL recovery, and bounded scalar/table/multi-region evidence mapping. ADR-0060 remains Proposed pending production qualification and reviewer acceptance. F0001's rejected invocation and direct-vLLM measurements remain historical records in `docker/DEPENDENCY-MATRIX.md`. |
+| 104 | Docling-Graph dependency and orchestration | **Rejected (2026-11-08):** the locked 1.9.1 candidate proved native JSON reuse, pre-extraction publication, PostgreSQL recovery, and bounded evidence mapping, but Graph dense failed F0005 live qualification (2026-10-27) and the operator rejected ADR-0060. The direct-baseline pipeline and ADR-0074 controls stand. F0001's rejected invocation and direct-vLLM measurements remain historical records in `docker/DEPENDENCY-MATRIX.md`. |
 
 # 117. Sources and Remaining Decisions
 
@@ -5226,13 +5261,15 @@ These primary references support the technology findings and implementation cons
 
 ## 117.1 Decisions the implementation team still needs
 
-1. Named owner and approved policy for source authority and canonical promotion in the first GL slice.
-2. Tenant/entity/knowledge-base identity scope and pilot access model.
-3. Target host, PostgreSQL/extension build, and model/provider data policy.
-4. F0005: complete production qualification and reviewer acceptance under ADR-0060. The locked Docling-Graph 1.9.1 / Docling 2.126.0 candidate already has synthetic development proof for native JSON reuse, publication before extraction, PostgreSQL recovery, and recorded-response extraction/evidence mapping. Live comparative extraction, deployment/storage failures, operational controls, and unsupported relationship semantics remain open; see [F0005 STATUS](../features/archive/F0005-one-time-docling-ingestion/STATUS.md).
-5. Licensed/authorized representative policy packages and reviewers for the initial corpus.
-6. Critical-field acceptance thresholds, review capacity, latency/cost budget, and recovery objectives.
-7. Applicable retention schedules, holds, conversation-sharing policy, and deletion/revocation behavior.
+Status as of 2026-11-08:
+
+1. **Source authority owner and policy — decided.** The operator owns and approves source-authority policy releases; ADR-0038 records the v0.1 GL policy (issued package authoritative; submissions and broker correspondence are requested terms). F0018 implements it and F0024 proves it.
+2. **Tenant/entity/knowledge-base identity scope — resolved for v0.1** by F0002 (ADR-0061/ADR-0062 accepted for the bounded scope). The pilot access model is proven in F0026.
+3. **Host, build and model/provider data policy — local profile resolved; production open.** The local topology (ADR-0054) and dependency matrix are fixed. v0.1 inference is local only with no fallback to an external provider (ADR-0055; F0016). The production host and extension build remain a pre-pilot decision.
+4. **F0005 — closed.** F0005 closed on 2026-10-28 on its rejection branch: Graph dense failed live qualification and ADR-0074's execution controls were accepted. The operator rejected ADR-0060 on 2026-11-08. The direct-baseline pipeline is the v0.1 path; SEC-01 dependency remediation and converter resource isolation remain required before untrusted or production PDFs (F0026).
+5. **Licensed policy packages and reviewers — open.** v0.1 development uses synthetic fixtures; a licensed or authorized corpus and named reviewers are an F0026 prerequisite (also required for real guideline authority under F0065).
+6. **Thresholds, review capacity, budgets and recovery objectives — partially decided.** Extraction thresholds were approved for F0005. Release thresholds, SLOs, budgets and RPO/RTO are set in F0026 under ADR-0048.
+7. **Retention, holds, sharing and deletion — v0.1 minimum decided.** ADR-0043 records operator-initiated deletion with tombstones and restore-time re-application for v0.1 (F0026). Legal retention schedules, holds and conversation-sharing policy remain open before a production pilot.
 
 Recommended first build objective: a single GL policy package and retroactive endorsement that can be ingested once, interpreted, corrected visually in the Review Panel, committed with the right authority and time semantics, and queried with trustworthy evidence. Use that proof to stabilize the kernel before expanding the ontology and learning surfaces.
 
@@ -5477,9 +5514,9 @@ The .NET integration suite, browser session flow, actual IdP, PostgreSQL deploym
 | --- | --- | --- |
 | ADR-0049 — Shared Identity and Verified Principal Boundary | Accepted (F0001-S0006/S0007, 2026-09-10; scoped — see the ADR's Scope note) | authentik default; verified `(iss, sub)` maps to stable internal principal for all Brain/companion storage access |
 | ADR-0050 — Native Policy Evaluation and Resource Scope | Accepted (F0001-S0006/S0007, 2026-09-10; scoped — see the ADR's Scope note) | Casbin adapter plus typed scopes and parent/classification constraints; policy parity across runtimes |
-| ADR-0051 — Browser Session and Revocation Contract | Proposed | Prefer same-origin BFF with server-held tokens; resolve SPA/cookie design drift before implementation |
-| ADR-0052 — Delegated Agents and Review Authority | Proposed | Bounded acting-user/service grants; reviewer identity verification; all canonical writes through authorized commits |
-| ADR-0053 — Permission-Safe Retrieval and Historical Access | Proposed | Current grants across all projections/derivatives; historical business queries cannot reinstate access |
+| ADR-0051 — Browser Session and Revocation Contract | Proposed; decision recorded 2026-11-08 (BFF chosen), proof in F0021 | Prefer same-origin BFF with server-held tokens; resolve SPA/cookie design drift before implementation |
+| ADR-0052 — Delegated Agents and Review Authority | Proposed; decision recorded 2026-11-08, review proof in F0022, delegation proof in F0047 | Bounded acting-user/service grants; reviewer identity verification; all canonical writes through authorized commits |
+| ADR-0053 — Permission-Safe Retrieval and Historical Access | Proposed; decision recorded 2026-11-08, v0.1 proof in F0026 | Current grants across all projections/derivatives; historical business queries cannot reinstate access |
 
 Keep authentik, Casbin, scope resolution, and session handling behind explicit interfaces. The .NET CRM code establishes the reference contracts; it does not require changing the Brain's chosen Python backend. Use shared behavior fixtures and schema contracts to prevent semantic drift.
 
@@ -5594,22 +5631,24 @@ F0022 delivers the panel with Document 360 in v0.1B and owns the renderer set, t
 
 # 126. Docling-Graph Document Pipeline Orchestration
 
-**Proposed direction, pinned synthetic development proof complete — 2026-09-22.** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this change. Docling-Graph 1.9.1 / Docling 2.126.0 have bounded conversion/reuse, PostgreSQL recovery, recorded-response dense extraction, and multi-region review evidence. Production qualification and reviewer acceptance remain pending; the candidate is opt-in.
+**Rejected — 2026-11-08.** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposed Docling-Graph as the specialist document coordinator, with Docling converting underneath it. F0005 delivered a pinned synthetic proof (Docling-Graph 1.9.1 / Docling 2.126.0) and then qualified Graph dense live on the synthetic corpus on 2026-10-27. It failed the accuracy, abstention, evidence-resolution and latency gates; the root cause was model adequacy in the first-stage skeleton call, not the orchestration seam. At the reopen decision the operator rejected the ADR rather than re-plan a candidate.
 
-Docling-Graph becomes the specialist document coordinator. Docling still converts the source underneath it. Nebula supplies the durable artifact checkpoint, released profile, scope, and budget; maps the result to assertions and evidence; and retains canonical authority. The extraction graph is a run artifact, not the AGE projection or an accepted enterprise graph.
+The v0.1 document pipeline is:
 
 ```text
 Authorized job (PostgreSQL now; Temporal activity where needed in v0.3)
-    → Docling-Graph conversion through Docling
+    → Docling conversion in a supervised child (ADR-0074)
     → Nebula publishes native JSON + normalized artifact bundle
-    → Docling-Graph extraction from saved JSON + compiled profile
-    → Nebula translates provenance into evidence-bound assertions
+    → direct-baseline extraction from saved content + compiled profile (ADR-0055)
+    → Nebula maps output to evidence-bound assertions
     → Review / entity resolution / authorized canonical commit
 ```
 
-The candidate publishes a durable conversion checkpoint before semantic extraction, using a version-pinned stage integration. F0005 has bounded proof for this seam and worker/importer restart reuse. It persists candidate run outputs; F0015's production profile compiler, F0016's full scoped-run lifecycle, and F0032's affected-content-only evolution scheduling remain planned. Upstream stage ordering is not itself durable orchestration. The PostgreSQL job mechanism and later Temporal workflows remain necessary for their respective responsibilities.
+**Survives the rejection:** checkpoint-before-model ordering, zero-reconversion reuse, bounded concurrency, isolation from canonical tables, the ADR-0074 execution controls, the ADR-0073 content contracts, and the accepted evidence and artifact contracts (ADR-0003, ADR-0004, ADR-0040, ADR-0058, ADR-0059).
 
-F0001's direct-vLLM proof remains the historical baseline. Its accepted evidence, inference, and artifact contracts survive the switch. The ADR's delivery table assigns the remaining production work. The candidate and synthetic proof are delivered; this does not reopen the archive or declare production activation.
+**Withdrawn:** Docling-Graph templates and compiled Graph configuration, run-owned extraction graphs, translation of upstream chunk/item provenance, and the Graph-specific gates previously carried by F0015, F0016, F0022, F0024, F0026, F0031, F0032 and F0050.
+
+**Seam kept for the future:** F0015 compiles profiles behind a pipeline-neutral extraction port and F0016 records pipeline identity on every run. A Graph or other candidate can return only as a new ADR with a new plan and full re-qualification; the F0005 report is its baseline evidence.
 
 # 127. Governed Evidence Retrieval and Spectral Graph Inspiration
 

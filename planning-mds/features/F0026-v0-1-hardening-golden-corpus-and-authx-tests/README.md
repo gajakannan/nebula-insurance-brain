@@ -6,11 +6,21 @@
 
 ## Overview
 
-v0.1 hardening closes Golden Corpus, AuthX, recovery, revocation, and independent frozen evaluation gates, including F0065 assessment correctness, lineage, temporal freshness, and complete derived-result access (sections 96, 115, 121, 124). ADR-0060 adds real Docling-Graph reuse, grounding, recovery, isolation, and quality gates.
+v0.1 hardening closes Golden Corpus, AuthX, recovery, deletion/revocation, and independent frozen evaluation gates, including F0065 assessment correctness, lineage, temporal freshness, and complete derived-result access (sections 96 to 98, 110, 115, 121, 124).
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0048](../../architecture/decisions/ADR-0048-pilot-evidence-and-operational-readiness.md), [ADR-0053](../../architecture/decisions/ADR-0053-permission-safe-retrieval-and-historical-access.md), [ADR-0057](../../architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md).
 
 The Golden Corpus is exported from Nebula review decisions, not from an external labeling project: ground-truth creation and production correction are the same surface producing the same records (section 96, ADR-0057).
+
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0024, F0025, F0065, F0069 (previously F0001, F0065).
+- Carry ADR-0043 v0.1 minimum - operator-initiated deletion with a dependency inventory, tombstones, and a restore drill showing deletion re-applied before restored data is readable. Retention schedules stay a pre-pilot policy input.
+- Prove ADR-0042 isolation (row security under real roles, 121.2 items 4 and 5) and ADR-0053 v0.1 negative tests (items 6 and 12); include the 110.4 prompt-injection case in the frozen challenge suite.
+- Own master blueprint 97 and 98 - evaluation metrics with agreed targets and the regression suite; set 114.2 operational budgets with ADR-0048. v0.1 ingestion is local file intake only; the 114.1 connector contract is deferred to F0050.
+- Carry the F0006 closeout security follow-ups - SEC-01 dependency remediation and verified converter resource isolation, SEC-02 security-planning baseline and strict audit rerun, SEC-03 nosniff headers - as v0.1 release preconditions if not closed earlier.
 
 ## Documents
 
@@ -33,9 +43,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../../examples/neurosymbolic-gl/cases.md), and [F0065](../F0065-grounded-gl-guideline-assessment/README.md). These requirements must be carried into this feature's PRD/stories when planned; runtime and feature status remain Planned.
 
-## Docling-Graph scope amendment (2026-09-15)
+## Docling-Graph scope amendment (2026-09-15) — withdrawn 2026-11-08
 
-[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+> **Withdrawn 2026-11-08.** The operator Rejected [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Requirements below that are specific to Docling-Graph (templates, compiled Graph configuration, run-owned extraction graphs, upstream chunk/item provenance, Graph quality gates) no longer apply. Pipeline-neutral requirements (checkpoint before model, zero-reconversion reuse, honest evidence precision, idempotent authorized commit, isolation from canonical tables) still apply to the direct-baseline pipeline. The text is kept as history.
+
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governed this planned work until the operator Rejected it on 2026-11-08; see the withdrawal note above.
 
 - Repeat native/scanned reuse and post-publication crash/model-failure cases against the selected pinned build. Tests must assert actual converter/OCR entry points are not invoked during reuse, rather than trust self-reported counters alone.
 - Compare the new path with the F0001 baseline on extraction and property/relationship evidence precision, unresolved rate, review burden, context failures, latency, and cost. Keep development cases outside the frozen holdout.

@@ -12,7 +12,7 @@ roadmap_order: 4
 rationale: The native React semantic shell with the OIDC session contract and safe re-auth behavior is the first
   user-facing surface (section 3, 120.5).
 depends_on:
-- feature:F0001
+- feature:F0002
 governed_by:
 - adr:0036
 - adr:0049
@@ -20,3 +20,7 @@ governed_by:
 - adr:0072
 notes:
 - Provide the route, feature-flag and lazy-load seam that F0067 uses; app-wide state, caching and styling choices are made here, not in F0067.
+- Requirement-ownership amendment 2026-11-08 - ADR-0051 decision recorded 2026-11-08 - same-origin BFF
+  with an opaque HttpOnly session cookie, server-held tokens and renewal, CSRF and origin checks, and
+  upstream revocation on logout. No browser token storage. Formal acceptance needs section 121.2 items
+  8 and 9.

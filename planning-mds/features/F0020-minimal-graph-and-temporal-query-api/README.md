@@ -10,6 +10,13 @@ A minimal graph and temporal query API answers the v0.1 acceptance questions as 
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0022](../../architecture/decisions/ADR-0022-apache-age-is-the-graph-projection.md).
 
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0008, F0018 (previously F0001).
+- Responses return the ADR-0039 information state, never a bare null. Historical (valid/recorded time) queries are authorized against current grants and cannot reinstate revoked access (ADR-0053).
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0020.yaml`.

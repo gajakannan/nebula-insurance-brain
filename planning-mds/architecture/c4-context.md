@@ -10,7 +10,7 @@ C4Context
     Person(engineer, "Platform / document intelligence / persistence engineers", "Build and operate the Brain (F0001)")
     System(brain, "Nebula Insurance Brain", "Owns semantics: evidence, assertions, canonical bitemporal truth, ontology, provenance, audit")
     System_Ext(authentik, "authentik", "OIDC identity provider")
-    System_Ext(docling, "Docling-Graph (planned)", "In-process document pipeline; Docling converts underneath; F0005 integration gate")
+    System_Ext(docling, "Docling", "In-process conversion library; persisted native bundle (ADR-0040)")
     System_Ext(vllm, "vLLM inference service", "microsoft/Phi-4-mini-instruct, OpenAI-compatible, host GPU")
     System_Ext(sources, "Enterprise sources", "Policy documents, endorsements, loss runs, systems of record")
     Rel(worker, brain, "Explores, converses, investigates", "HTTPS")
@@ -24,4 +24,4 @@ C4Context
 
 Boundaries: the Brain owns semantics (ADR-0001); every external system is an engine around it. Human evidence adjudication is not external: the Review Panel is part of the Brain, so evidence never leaves the trust boundary to be reviewed (ADR-0057). Denied paths terminate before protected data enters model context or a canonical mutation occurs (section 118.2).
 
-Docling-Graph is a proposed in-process library, shown here to explain the target dependency boundary. F0001 uses Docling plus a direct vLLM adapter; ADR-0060 does not add an external service. Temporal remains a later durable business-workflow dependency, separate from document-stage coordination.
+Docling is an in-process library. Extraction uses the direct-baseline vLLM client (ADR-0055); ADR-0060, which proposed Docling-Graph coordination, was Rejected on 2026-11-08. Temporal remains a later durable business-workflow dependency, separate from document-stage coordination.

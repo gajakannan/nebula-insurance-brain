@@ -10,6 +10,13 @@ The GL vertical slice proves actual model interpretation through evidence review
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0005](../../architecture/decisions/ADR-0005-three-plane-knowledge-model.md), [ADR-0006](../../architecture/decisions/ADR-0006-factslot-defines-canonical-semantic-identity.md), [ADR-0010](../../architecture/decisions/ADR-0010-provenance-is-mandatory.md).
 
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0013, F0065 (previously F0001, F0013, F0065).
+- Prove the ADR-0038 acceptance example - a broker requests a $5M limit, the issued policy records $2M; both assertions stay, the answer shows requested versus issued terms, and the request is not promoted.
+
 ## Documents
 
 The integrated slice depends directly on F0013's GL vocabulary, alongside the existing F0001 and F0065 dependencies. Its interpretation and assessment must identify the ontology release used, preserve missing inputs as `UNKNOWN` where required by F0065, and retain exact fact/rule/evidence lineage from the first stored assessment.
@@ -32,9 +39,11 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 Reference: [EX-GL-001](../../examples/neurosymbolic-gl/README.md), [cases](../../examples/neurosymbolic-gl/cases.md), and [F0065](../F0065-grounded-gl-guideline-assessment/README.md). These requirements must be carried into this feature's PRD/stories when planned; runtime and feature status remain Planned.
 
-## Docling-Graph scope amendment (2026-09-15)
+## Docling-Graph scope amendment (2026-09-15) — withdrawn 2026-11-08
 
-[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+> **Withdrawn 2026-11-08.** The operator Rejected [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Requirements below that are specific to Docling-Graph (templates, compiled Graph configuration, run-owned extraction graphs, upstream chunk/item provenance, Graph quality gates) no longer apply. Pipeline-neutral requirements (checkpoint before model, zero-reconversion reuse, honest evidence precision, idempotent authorized commit, isolation from canonical tables) still apply to the direct-baseline pipeline. The text is kept as history.
+
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governed this planned work until the operator Rejected it on 2026-11-08; see the withdrawal note above.
 
 - Run the real F0005/F0015/F0016 pipeline from source conversion through reviewed/accepted facts and the F0065 assessment. A direct-vLLM baseline run or mocked graph adapter does not establish migration acceptance.
 - Keep the parse artifact and run outputs traceable through evidence, canonical facts, and the assessment. Report extraction failures separately from deterministic rule failures.
