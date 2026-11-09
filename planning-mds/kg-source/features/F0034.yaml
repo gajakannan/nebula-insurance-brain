@@ -9,7 +9,9 @@ coverage_excluded:
 phase: v0.2A
 roadmap_section: Later
 roadmap_order: 11
-rationale: Apache AGE provides openCypher traversal over canonical entities and relationships as a rebuildable projection with commit-consistent delivery (sections 47 to 49, 109.3). Docling-Graph extraction output remains separate from the canonical AGE projection (ADR-0060).
+rationale: Rebuildable AGE projection with directed typed lineage, per-hop eligibility, compatible temporal views
+  and consumer-specific checkpoints (RET-34-01–04). Docling-Graph extraction output remains separate; no spectral
+  baseline dependency.
 depends_on:
 - feature:F0001
 - id: feature:F0003
@@ -23,5 +25,10 @@ governed_by:
 - adr:0022
 - adr:0041
 - adr:0071
+- adr:0053
+- adr:0076
 notes:
 - Give every projection build a stable, queryable version identifier that traces cite (proposed ADR-0071).
+- Settle consumer-specific checkpoint, replay/rebuild, temporal-view and atomic cutover contracts with F0033 (D8)
+  before F0035 Phase B approval. Preserve original domain direction/type; optional F0068 numerical adjacency is
+  a separate derivative.

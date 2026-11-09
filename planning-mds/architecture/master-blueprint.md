@@ -22,6 +22,8 @@
 
 Sections 3, 11, 14, 17, 29, 53, 56, 62, 64, 75, 76, 78, 95, and 99 are revised in place. Examples: [statements, time, and governance](../examples/statements-time-and-governance.md).
 
+**Governed retrieval update (2026-11-06):** The [handoff](nebula-spectral-graph-intelligence-handoff.md) is incorporated through [section 127](#127-governed-evidence-retrieval-and-spectral-graph-inspiration), the [integrated design](governed-evidence-retrieval-design.md) and Proposed [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md). F0035/F0036 carry baseline graph-assisted evidence retrieval; F0068 reserves the conditional v0.4+ spectral experiment. Features remain Planned.
+
 **Technology direction:**
 
 ```text
@@ -35,6 +37,7 @@ REINCORPORATE SELECTED CAPABILITIES / CONCEPTS
 
 STUDY AS REFERENCE / INSPIRATION
     Onyx Chat / conversation UX
+    SpectRAG — graph-assisted evidence retrieval and spectral experiments
 
 NOT ADOPTED INTO THE BRAIN ARCHITECTURE
     RAGFlow
@@ -2245,22 +2248,22 @@ pgvector is a retrieval projection, not truth.
 # 51. Search Fusion
 
 ```text
-Question
-   │
-   ├── FTS
-   ├── pgvector
-   ├── AGE neighborhood
-   ├── ontology expansion
-   ├── entity scope
-   ├── temporal scope
-   └── authorization
-          │
-          ▼
-       Fusion
-          │
-          ▼
- Evidence-aware semantic context
+Verified principal + requested root/scope + knowledge mode + both time coordinates
+          ↓
+One pinned execution basis; eligibility constrains every adapter before influence
+          ↓
+Authorized FTS + pgvector seeds → rank fusion with per-retriever ranks
+          ↓
+Bounded typed AGE expansion (optional PPR comparator)
+          ↓
+Budget-aware evidence set → locator/current-authority revalidation → exact token count
+          ↓
+Grounded answer basis or explicit evidence gap; sanitized non-blocking trace
 ```
+
+F0033/F0034 supply versioned, compatible projection contracts. F0035 owns seeding, bounded paths, scope/count/facet isolation and safe fallback; F0036 owns the context/model-window contract and grounded answer linkage. Ontology and metadata signals remain part of fusion under versioned profiles and the same eligibility boundary. Original content, source assertions and canonical facts keep their respective authority. A selected passage is not automatically used in an answer.
+
+F0068 may later add compatible scoped spectral/heat ranking after baseline measurement and an experiment decision. No spectral index or solver is needed to deliver this baseline. Incompatible projections fall back only to authorized, temporally compatible retrieval, otherwise an explicit gap. See [section 127](#127-governed-evidence-retrieval-and-spectral-graph-inspiration) and [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) (Proposed).
 
 ---
 
@@ -4124,6 +4127,7 @@ F0045 Cytoscape Graph Explorer
 F0046 Semantic API
 F0047 Read-only MCP + verified principal, bounded delegation, and evidence access
 F0066 Open-statement extraction + signature alignment (ADR-0063)
+F0067 Graph Observatory (read-only recorded traces; v0.2B)
 ```
 
 ## v0.3
@@ -4150,6 +4154,7 @@ F0060 Reasoning-pattern governance
 F0061 Advanced retrieval
 F0062 Advanced reasoners
 F0063 Future DSL
+F0068 Spectral graph retrieval experiments (conditional; after baseline measurement)
 ```
 
 ---
@@ -4636,6 +4641,12 @@ It should preserve the evidence once, continuously reinterpret that evidence as 
 - Reference / reincorporated-capability projects from the user's fork collection:
   - Graphify: https://github.com/gajakannan/graphify
   - Onyx: https://github.com/gajakannan/onyx
+
+- SpectRAG retrieval inspiration (native implementation only):
+  - SpectRAG research: https://arxiv.org/abs/2610.36991
+  - Official SpectRAG implementation: https://github.com/SightAndCite/SpectRAG
+  - Independent SpectraFuse implementation: https://github.com/aion7891/SpectraFuse
+  - Provenance and experimental caveats: [handoff section 2](nebula-spectral-graph-intelligence-handoff.md#2-research-provenance-and-adoption-rationale). Upstream measurements are not Nebula results.
 
 - Evaluated but not adopted into the architecture:
   - RAGFlow
@@ -5144,9 +5155,10 @@ Preserve the existing F0001–F0063 identifiers. F0064 separately tracks reposit
 | v0.1A | Typed domain contracts, durable ingestion, immutable evidence, assertion extraction | F0002–F0017 |
 | v0.1B | Authorized canonical commits, source resolution minimum, GL limits, temporal endorsement, human review, bounded neurosymbolic guideline assessment | F0018–F0023 → F0065 → F0024/F0025 integration |
 | v0.1C | Recovery, deletion/revocation minimum, audit, independent frozen evaluation, constrained policy question, assessment challenge suite | F0026 including F0065 cases, and narrow acceptance coverage from F0036–F0039 |
-| v0.2A | Governed hybrid retrieval, chat with document/entity/data, projection operations | F0033–F0040, F0044–F0047 |
-| v0.2B | Broader resolution, ontology/profile release workflows, candidate learning and targeted enrichment | F0027–F0032, F0041–F0043 |
+| v0.2A | Governed hybrid seeding, bounded typed expansion, budget-aware evidence sets, chat with document/entity/data, projection operations | F0033–F0040, F0044–F0047 |
+| v0.2B | Broader resolution, ontology/profile release workflows, candidate learning, targeted enrichment and read-only trace replay | F0027–F0032, F0041–F0043, F0066/F0067 |
 | v0.3+ | Full process execution, decision replay product, generalized reasoning and skills | F0048–F0063; bounded assessment already ships as F0065 |
+| v0.4+ conditional | Spectral/heat retrieval experiments after measured baseline and separate scope/cost decision | F0068; independent of F0061 and not a baseline prerequisite |
 
 Baseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations. The later full Execution Gate and Decision Ledger can remain separate capabilities. Deferring them must not defer ordinary application security or the audit chain needed by the first review loop.
 
@@ -5598,3 +5610,23 @@ Authorized job (PostgreSQL now; Temporal activity where needed in v0.3)
 The candidate publishes a durable conversion checkpoint before semantic extraction, using a version-pinned stage integration. F0005 has bounded proof for this seam and worker/importer restart reuse. It persists candidate run outputs; F0015's production profile compiler, F0016's full scoped-run lifecycle, and F0032's affected-content-only evolution scheduling remain planned. Upstream stage ordering is not itself durable orchestration. The PostgreSQL job mechanism and later Temporal workflows remain necessary for their respective responsibilities.
 
 F0001's direct-vLLM proof remains the historical baseline. Its accepted evidence, inference, and artifact contracts survive the switch. The ADR's delivery table assigns the remaining production work. The candidate and synthetic proof are delivered; this does not reopen the archive or declare production activation.
+
+# 127. Governed Evidence Retrieval and Spectral Graph Inspiration
+
+## 127.1 Inspiration and native adoption
+
+**SpectRAG** is an inspiration for graph-assisted evidence retrieval and spectral experiments. The supplied [handoff](nebula-spectral-graph-intelligence-handoff.md) distinguishes its official implementation from the independent **SpectraFuse** implementation. Study their set-oriented retrieval, structural expansion, context-budget optimization and experimental spectral/heat ideas. Implement approved scope natively in Nebula; do not adopt their runtime libraries or introduce Neo4j/FAISS to reproduce their stack.
+
+## 127.2 Baseline and experimental boundaries
+
+F0033/F0034 define stable, permission-safe projection versions and consumer checkpoints. F0035 combines hybrid seeds with bounded typed paths; F0036 assembles complementary evidence under the exact answer-model budget and links the actual answer basis. These v0.2A contracts reuse persisted content and locators, source/canonical admission rules, current grants and both temporal axes. A graph-derived score ranks evidence; it grants no authority, permission or accepted truth.
+
+Every operation pins one compatible execution basis and constrains its complete influence domain before ranking/counting/tracing. Reauthorize and resolve bindings before use. Preserve locator precision and source/canonical distinctions; recompute coverage and budget after removals. Missing support becomes a gap or abstention. F0067 reads sanitized recorded traces later; only `ANSWER_BASIS_LINKED` identifies used evidence.
+
+F0068 reserves spectral coordinates, heat diffusion, numerical artifacts and controlled ablations at v0.4+. Stored numerical bases require exact scope, authorization-revision, mode, temporal and input-version compatibility; post-filtering a global basis is insufficient. The baseline requires no eigensolver. F0061 retains dense+sparse, multivectors, reranking and optional Qdrant scope.
+
+## 127.3 Delivery and proof
+
+The [integrated design](governed-evidence-retrieval-design.md) maps RET requirements, roles and D1–D9 decisions. F0035 Phase A may clarify the problem first, but F0033/F0034 contracts precede its Phase B approval, and F0036 binds the settled retrieval interface. Draft [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) remains Proposed pending authorization non-influence, temporal, evidence and answer-basis proofs. This amendment adds no feature phase approval or runtime behavior.
+
+Build evaluation fixtures/runner early and compare strong hybrid, selection, expansion and optional PPR independently. Only then consider F0068 with a separate experiment scope/scheduling/cost decision. Require held-out incremental quality, numerical correctness, no unauthorized influence, operational cost and safe fallback evidence before opt-in promotion; default activation remains separate. Retaining the baseline when spectral gain is absent is a valid result. See the [evaluation strategy](../testing/evaluation-strategy.md#governed-retrieval-and-spectral-experiment-evaluation), [security carry-in](../security/authorization-review.md#governed-retrieval-carry-in-2026-11-06), [glossary](../domain/glossary.md#governed-evidence-retrieval) and [EX-RET-001–006](../examples/governed-evidence-retrieval.md).

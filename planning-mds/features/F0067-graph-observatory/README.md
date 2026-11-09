@@ -50,3 +50,13 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 |----|-------|--------|
 
 **Total Stories:** 0
+
+## Governed retrieval carry-in (2026-11-06)
+
+The operator requested incorporation of the [spectral graph handoff](../../architecture/nebula-spectral-graph-intelligence-handoff.md). These are Phase A requirements inputs; this feature remains Planned and has no new phase approval. [Integrated design](../../architecture/governed-evidence-retrieval-design.md); [ADR-0076](../../architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) is Proposed. The baseline is v0.2A, later trace visualization is v0.2B, and the separate [F0068 experiment](../F0068-spectral-graph-retrieval-experiments/README.md) remains conditional at v0.4+.
+
+- **RET-67-01** The Observatory may read recorded retrieval events; retrieval delivery does not depend on F0067 (ADR-0072).
+
+Render only recorded, sanitized retrieval paths, selection reasons, effective mode/fallback, projection basis and trace completeness within the approved scope. Spectral diagnostics appear only when F0068 actually records them; proximity is never truth or used-in-answer attribution. Replay rechecks current access. No dependency on F0068 is added to this feature.
+
+Use [EX-RET-001–006](../../examples/governed-evidence-retrieval.md), the [evaluation protocol](../../testing/evaluation-strategy.md#governed-retrieval-and-spectral-experiment-evaluation) and the [authorization carry-in](../../security/authorization-review.md#governed-retrieval-carry-in-2026-11-06) when writing stories and proof plans. RET IDs must remain traceable into the PRD and acceptance criteria.

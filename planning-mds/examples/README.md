@@ -53,6 +53,19 @@ Documentation/development examples remain outside the frozen evaluation holdout.
 | Obligations versus observed facts | [EX-FUTURE-003](future-semantics.md#normative-obligation) | F0052, v0.3 |
 | Hypothetical assumptions versus canonical state | [EX-FUTURE-004](future-semantics.md#hypothetical-scenario) | F0053, v0.3 |
 
+## Governed retrieval coverage
+
+Definitions: [retrieval glossary](../domain/glossary.md#governed-evidence-retrieval). All EX-RET cases are synthetic, illustrative development examples; no runtime or measured quality claim. Owning features remain Planned and bind story IDs/reproduction evidence during their own plan actions.
+
+| Concept / boundary | Worked and boundary example | Owner / contract / release |
+|---|---|---|
+| Evidence block; bridge evidence; exact budget and missing support | [EX-RET-001](governed-evidence-retrieval.md#ex-ret-001--bridge-evidence-under-a-budget) | F0033/F0036 RET-33-01/02, RET-36-01–06; ADR-0046/0058/0076; v0.2A |
+| Typed expansion; unauthorized topology non-influence | [EX-RET-002](governed-evidence-retrieval.md#ex-ret-002--authorized-expansion-and-hidden-influence) | F0034/F0035 RET-34-01/03, RET-35-01/03/06; F0068 RET-68-02; ADR-0053/0076; v0.2A and conditional v0.4+ |
+| Execution basis; source versus canonical evidence | [EX-RET-003](governed-evidence-retrieval.md#ex-ret-003--source-wording-and-canonical-state) | F0035/F0036 RET-35-04, RET-36-03/04; ADR-0064/0073/0075/0076; v0.2A |
+| Requested root versus broader grants | [EX-RET-004](governed-evidence-retrieval.md#ex-ret-004--requested-root-narrows-broader-grants) | F0035 RET-35-02/03; ADR-0062/0076; v0.2A |
+| Evidence context; selected versus used; partial trace | [EX-RET-005](governed-evidence-retrieval.md#ex-ret-005--selected-does-not-mean-used) | F0036 RET-36-07/08, F0067 RET-67-01; ADR-0046/0071/0072; v0.2A/B |
+| Retrieval mode; projection compatibility and fallback | [EX-RET-006](governed-evidence-retrieval.md#ex-ret-006--projection-compatibility-and-fallback) | F0033–F0035 RET-33-03, RET-34-02/04, RET-35-04/05/08; F0068 RET-68-01/02/04; ADR-0076; v0.2A and conditional v0.4+ |
+
 ## Review Panel prototype
 
 [`nebula-review-panel-live-files.html`](nebula-review-panel-live-files.html) is a self-contained page that embeds four real files — a declarations PDF, an endorsement DOCX, an SOV XLSX, and a loss-run CSV — and parses them in the browser at load: pdf.js reads the PDF, fflate unzips the OOXML, `TextDecoder` handles the CSV. Every coordinate, paragraph path, cell reference, and character offset it displays is derived from the bytes at runtime, including the anchoring failures. It also accepts a dropped file of your own, and its anchor probe shows the locator any piece of text in that file resolves to.

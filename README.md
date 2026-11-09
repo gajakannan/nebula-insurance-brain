@@ -6,6 +6,8 @@ Nebula Insurance Brain — a continuously evolving enterprise semantic system fo
 
 F0001 runtime proofs are implemented. F0005's synthetic development scope is complete: its opt-in Docling-Graph candidate has durable jobs, engine integration, PostgreSQL recovery proof, and a recorded-response dense comparison with multi-region review evidence. Production qualification and activation are future work. The architecture baseline is `planning-mds/architecture/master-blueprint.md`; the framework entry point is `planning-mds/BLUEPRINT.md`.
 
+The [governed retrieval design](planning-mds/architecture/governed-evidence-retrieval-design.md) incorporates the spectral graph handoff into F0033–F0036 baseline planning and reserves [F0068](planning-mds/features/F0068-spectral-graph-retrieval-experiments/README.md) for conditional v0.4+ spectral/heat experiments. The master blueprint names SpectRAG as an inspiration. These features remain Planned; baseline delivery does not depend on the experiment.
+
 ## How this repo is built
 
 This product is driven by the sibling [`nebula-agents`](https://github.com/gajakannan/nebula-agents) framework. Sessions run inside `nebula-agents/` with this repository as `{PRODUCT_ROOT}`:
