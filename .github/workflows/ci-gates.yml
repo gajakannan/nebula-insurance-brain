@@ -196,6 +196,19 @@ jobs:
         run: >
           neuron/.venv/bin/python -m pytest
           neuron/tests/integration/test_document_process_recovery.py -k postgresql -q
+      # These PostgreSQL suites skipped silently before: without the URL they never ran in
+      # CI, which hid a fixture-dependent failure in test_content_worker_v2 from F0005 on.
+      # The v2 worker test parses a real fixture, so layout weights must be downloadable.
+      - name: Prove v2 content publication and CLI enqueue against PostgreSQL
+        timeout-minutes: 15
+        env:
+          BRAIN_TEST_POSTGRES_URL: postgresql+psycopg://brain:brain@localhost:5432/brain
+          LITELLM_LOCAL_MODEL_COST_MAP: "True"
+          OMP_NUM_THREADS: "2"
+        run: >
+          neuron/.venv/bin/python -m pytest
+          neuron/tests/integration/test_content_worker_v2.py
+          neuron/tests/integration/test_worker_cli_enqueue.py -q -rs
       # Server liveness does not imply that the worker has applied the custom blueprint.
       - name: Wait for OIDC application readiness (up to 180s)
         timeout-minutes: 4
