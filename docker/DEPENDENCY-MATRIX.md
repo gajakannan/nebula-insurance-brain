@@ -83,7 +83,7 @@ Locked-environment changes in F0005: pypdf 6.19.0 → 6.21.2 and litellm 1.100.0
 
 The provenance hooks were revalidated on Docling 2.142.0. Converter memory, CPU and task ceilings are in ADR-0074 section 1a.
 
-**Activation preconditions:** the remainder of SEC-F5-M1 (a separate OS user or container and no network for the converter; ADR-0074).
+**Activation preconditions:** the remainder of SEC-F5-M1 (a separate OS user or container for the converter; ADR-0074). Converter network isolation is in place (2026-11-09).
 
 The table and F0001 finding above record the installed proof baseline. [ADR-0060](../planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph as the future document pipeline coordinator; Docling remains its converter. The 1.9.1 candidate is installed and has limited contract evidence; production activation and the complete proof gates remain pending.
 

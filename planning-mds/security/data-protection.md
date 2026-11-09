@@ -27,7 +27,7 @@ Every submission must declare at least one classification; missing metadata deni
 - **In transit:** local loopback only in v0.1. TLS is required for any non-local deployment, including the BFF session cookie (`Secure`, ADR-0051).
 - **Access:** current grants apply to every read, including historical queries and every projection (ADR-0053). Authorization is evaluated before content reaches a model, an answer, an export or a cache.
 - **Model boundary:** v0.1 inference is local only (ADR-0055). A timeout never falls back to an external provider. Prompts are not persisted by the inference path.
-- **Converter boundary:** the conversion child receives no credentials and runs under memory, task, CPU and file-size ceilings (ADR-0074 §1a).
+- **Converter boundary:** the conversion child receives no credentials, has no network, and runs under memory, task, CPU and file-size ceilings (ADR-0074 §1a). It still shares the worker's OS user until a separate user or container is provided.
 - **Error and telemetry hygiene:** converter errors cross IPC as stable codes only; logs never carry source text.
 
 ## Retention And Deletion
