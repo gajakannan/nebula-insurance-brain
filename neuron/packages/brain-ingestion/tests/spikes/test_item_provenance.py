@@ -213,7 +213,7 @@ def run_spike(output: Path) -> dict[str, Any]:
     }
     report_path = output / "item-provenance.json"
     try:
-        assert metadata.version("docling") == "2.126.0"
+        assert metadata.version("docling") == "2.142.0"
         fixtures = create_fixtures(output / "fixtures")
         converter = DocumentConverter()
         converter.initialize_pipeline(InputFormat.PDF)

@@ -1,4 +1,7 @@
-"""Instance-local hooks proven by F0004 Step 1a on Docling 2.126.0."""
+"""Instance-local hooks proven by F0004 Step 1a on Docling 2.126.0.
+
+Revalidated on Docling 2.142.0 for the SEC-01 dependency remediation.
+"""
 
 from __future__ import annotations
 
@@ -141,7 +144,7 @@ class OcrObserver:
 
 class ItemProvenance:
     def __init__(self, converter: DocumentConverter) -> None:
-        if version("docling") != "2.126.0":
+        if version("docling") != "2.142.0":
             raise ValueError("unsupported provenance hook version")
         self.native: dict[tuple[int, str], ProducerIdentity] = {}
         self.ocr: dict[tuple[int, str], ProducerIdentity] = {}

@@ -12,6 +12,17 @@ Protocol: the child blocks until the parent has durably written a launch receipt
 acknowledgement; parent IPC closure before that makes the child exit without
 converting. The child's environment carries no database, inference or
 application credentials, it has no model transport, and it cannot publish.
+
+Resource containment (SEC-01, ADR-0074 amendment 2026-11-08): a wall-clock
+deadline does not bound memory. Each child runs under `ConversionLimits`:
+- `cgroup` isolation launches it in a transient systemd user scope with hard
+  MemoryMax/MemorySwapMax/TasksMax ceilings that the kernel enforces;
+- in every mode the child sets CPU-time, file-size, open-file and core-dump
+  rlimits on itself before Docling loads, and the parent samples the process
+  group's resident memory and ends the attempt above the same memory ceiling.
+Docling/torch reserve ~64 GB of virtual address space, so RLIMIT_AS/RLIMIT_DATA
+cannot serve as the memory ceiling. A breach is reported as the closed
+`conversion_failed` reason with the limit named in diagnostics.
 """
 
 from __future__ import annotations
@@ -20,6 +31,7 @@ import argparse
 import hashlib
 import json
 import os
+import resource
 import select
 import shutil
 import subprocess
@@ -27,7 +39,7 @@ import sys
 import threading
 import time
 from collections.abc import Callable
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from threading import Event
 from typing import Any, Literal
@@ -69,6 +81,117 @@ _CHILD_ENV = (
 )
 
 Outcome = Literal["accepted", "conversion_timeout", "cancelled", "conversion_failed"]
+Isolation = Literal["cgroup", "watchdog"]
+MIB = 1024 * 1024
+MEMORY_SAMPLE_SECONDS = 0.1
+
+
+@dataclass(frozen=True, slots=True)
+class ConversionLimits:
+    """Per-attempt ceilings for the conversion-only child (SEC-01).
+
+    Defaults are sized from measured conversions of the GL fixtures on Docling
+    2.142.0 (peak RSS 2.4-2.8 GiB, ~10 CPU-seconds, 70 threads) with headroom.
+    """
+
+    isolation: Isolation = "watchdog"
+    memory_bytes: int = 6144 * MIB
+    max_tasks: int = 512
+    cpu_seconds: int = 1200
+    file_size_bytes: int = 1024 * MIB
+    open_files: int = 1024
+
+    def __post_init__(self) -> None:
+        if self.isolation not in ("cgroup", "watchdog"):
+            raise ValueError("conversion isolation must be cgroup or watchdog")
+        for name in ("memory_bytes", "max_tasks", "cpu_seconds", "file_size_bytes", "open_files"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise ValueError(f"conversion limit {name} must be a positive integer")
+
+
+class IsolationUnavailable(RuntimeError):
+    """cgroup isolation was required but this host cannot create a limited scope."""
+
+    code = "conversion_isolation_unavailable"
+
+
+# systemd-run --user reaches the user manager through these session paths. They are
+# not credentials; they are passed only in cgroup mode.
+_SCOPE_ENV = ("XDG_RUNTIME_DIR", "DBUS_SESSION_BUS_ADDRESS")
+
+
+def _launch_environment(limits: ConversionLimits) -> dict[str, str]:
+    environment = _child_environment()
+    if limits.isolation == "cgroup":
+        environment.update({name: os.environ[name] for name in _SCOPE_ENV if name in os.environ})
+    return environment
+
+
+def _scope_command(limits: ConversionLimits) -> list[str]:
+    return [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "--collect",
+        "-p",
+        f"MemoryMax={limits.memory_bytes}",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        f"TasksMax={limits.max_tasks}",
+        "--",
+    ]
+
+
+def probe_cgroup_isolation(limits: ConversionLimits) -> None:
+    """Fail closed unless a transient scope with these ceilings can actually start."""
+    if shutil.which("systemd-run") is None:
+        raise IsolationUnavailable("systemd-run not found")
+    try:
+        # Same environment as a real launch, so the probe cannot pass where launches fail.
+        result = subprocess.run(
+            [*_scope_command(limits), "true"],
+            env=_launch_environment(replace(limits, isolation="cgroup")),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=30,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise IsolationUnavailable("systemd user scope did not start") from exc
+    if result.returncode != 0:
+        raise IsolationUnavailable("systemd user scope did not start")
+
+
+def apply_child_limits(limits: ConversionLimits) -> None:
+    """Self-imposed rlimits; set before any parser or model code is imported."""
+    for which, value in (
+        (resource.RLIMIT_CPU, limits.cpu_seconds),
+        (resource.RLIMIT_FSIZE, limits.file_size_bytes),
+        (resource.RLIMIT_NOFILE, limits.open_files),
+        (resource.RLIMIT_CORE, 0),
+    ):
+        _soft, hard = resource.getrlimit(which)
+        ceiling = value if hard == resource.RLIM_INFINITY else min(value, hard)
+        resource.setrlimit(which, (ceiling, ceiling))
+
+
+def group_rss_bytes(pgid: int) -> int:
+    """Resident memory of every live member of the converter's process group."""
+    total = 0
+    for pid in group_members(pgid):
+        try:
+            with open(f"/proc/{pid}/status", encoding="ascii") as status:
+                for line in status:
+                    if line.startswith("VmRSS:"):
+                        total += int(line.split()[1]) * 1024
+                        break
+        except (OSError, ValueError):
+            continue  # exited between listing and reading
+    return total
 
 
 class ConversionError(RuntimeError):
@@ -218,6 +341,13 @@ def _child(args: argparse.Namespace) -> int:
     if start != f"start {args.nonce}\n".encode():
         # The parent closed IPC before durably recording this child.
         return 3
+    apply_child_limits(
+        ConversionLimits(
+            cpu_seconds=args.cpu_seconds,
+            file_size_bytes=args.file_size_bytes,
+            open_files=args.open_files,
+        )
+    )
     staging, source = Path(args.staging), Path(args.source)
     if args.converter == "fixture":
         # Test-only negative controls: no Docling, real process behavior.
@@ -313,6 +443,30 @@ def _fixture_converter(args: argparse.Namespace, staging: Path) -> int:
         inherited.sort()
         _write_frame(args.frame_fd, {"type": "probe", "fds": inherited})
         return 0
+    if behavior == "allocate":
+        # Grow resident memory in steps until a containment layer ends the child.
+        held = []
+        for _ in range(args.fixture_mib // 64):
+            held.append(bytearray(64 * MIB))
+            time.sleep(0.05)
+        time.sleep(600)
+        return 0
+    if behavior == "report_limits":
+        names = ("RLIMIT_CPU", "RLIMIT_FSIZE", "RLIMIT_NOFILE", "RLIMIT_CORE")
+        limits = {name: list(resource.getrlimit(getattr(resource, name))) for name in names}
+        cgroup = Path("/proc/self/cgroup").read_text().strip()
+        controls: dict[str, str | None] = {}
+        directory = Path("/sys/fs/cgroup") / cgroup.split("::", 1)[-1].lstrip("/")
+        for control in ("memory.max", "memory.swap.max", "pids.max"):
+            try:
+                controls[control] = (directory / control).read_text().strip()
+            except OSError:
+                controls[control] = None
+        _write_frame(
+            args.frame_fd,
+            {"type": "probe", "limits": limits, "cgroup": cgroup, "controls": controls},
+        )
+        return 0
     if behavior == "fail":
         _write_frame(
             args.frame_fd, {"type": "error", "nonce": args.nonce, "code": "conversion_failed"}
@@ -387,9 +541,13 @@ class SupervisedConverter:
         load_document: Callable[[bytes], Any] | None = None,
         term_grace: float = TERM_GRACE_SECONDS,
         kill_grace: float = KILL_GRACE_SECONDS,
+        limits: ConversionLimits | None = None,
     ) -> None:
         if deadline_seconds <= 0:
             raise ValueError("conversion deadline must be positive")
+        self.limits = limits or ConversionLimits()
+        if self.limits.isolation == "cgroup":
+            probe_cgroup_isolation(self.limits)
         self.staging_root = staging_root
         self.deadline_seconds = deadline_seconds
         self.clock = clock
@@ -432,10 +590,16 @@ class SupervisedConverter:
         control_read, control_write = os.pipe()
         frame_read, frame_write = os.pipe()
         child = None
-        diagnostics: dict[str, Any] = {"deadline_seconds": self.deadline_seconds}
+        diagnostics: dict[str, Any] = {
+            "deadline_seconds": self.deadline_seconds,
+            "isolation": self.limits.isolation,
+            "memory_limit_bytes": self.limits.memory_bytes,
+        }
+        prefix = _scope_command(self.limits) if self.limits.isolation == "cgroup" else []
         try:
             child = subprocess.Popen(
                 [
+                    *prefix,
                     self.python,
                     "-m",
                     "brain_ingestion.conversion_process",
@@ -450,6 +614,12 @@ class SupervisedConverter:
                     str(staging),
                     "--nonce",
                     nonce,
+                    "--cpu-seconds",
+                    str(self.limits.cpu_seconds),
+                    "--file-size-bytes",
+                    str(self.limits.file_size_bytes),
+                    "--open-files",
+                    str(self.limits.open_files),
                     *(["--provenance"] if capture_provenance else []),
                     *self.child_args,
                 ],
@@ -459,7 +629,7 @@ class SupervisedConverter:
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                env=_child_environment(),
+                env=_launch_environment(self.limits),
                 cwd=staging,
             )
         finally:
@@ -492,9 +662,12 @@ class SupervisedConverter:
 
         watchdog_stop = Event()
 
+        pgid = child.pid
+
         def watchdog() -> None:
             # Independent of converter, IPC and staging I/O; never holds the latch
             # while waiting on anything else.
+            next_sample = 0.0
             while not watchdog_stop.is_set() and latch.outcome is None:
                 if self.clock() >= latch.deadline:
                     latch.decide("conversion_timeout")
@@ -502,6 +675,14 @@ class SupervisedConverter:
                 if cancelled.is_set():
                     latch.decide("cancelled")
                     break
+                now = time.monotonic()
+                if now >= next_sample:
+                    next_sample = now + MEMORY_SAMPLE_SECONDS
+                    rss = group_rss_bytes(pgid)
+                    diagnostics["peak_rss_bytes"] = max(diagnostics.get("peak_rss_bytes", 0), rss)
+                    if rss > self.limits.memory_bytes and latch.decide("conversion_failed"):
+                        diagnostics["resource_limit"] = "memory"
+                        break
                 watchdog_stop.wait(0.01)
 
         thread = threading.Thread(target=watchdog, name="conversion-deadline", daemon=True)
@@ -537,6 +718,9 @@ class SupervisedConverter:
             thread.join(timeout=1)
             os.close(frame_read)
         diagnostics["decision"] = latch.outcome
+        if child.returncode is not None and child.returncode < 0:
+            # A kernel ceiling (cgroup OOM kill, SIGXCPU, SIGXFSZ) ends the child by signal.
+            diagnostics["child_signal"] = -child.returncode
         diagnostics["decision_seconds"] = (latch.decided_at or self.clock()) - started
         cleanup_started = time.monotonic()
         self._cleanup(child, staging, attempt_id, diagnostics)
@@ -693,6 +877,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--converter", choices=("docling", "fixture"), default="docling")
     parser.add_argument("--fixture-behavior", default="complete")
     parser.add_argument("--fixture-delay", type=float, default=0.0)
+    parser.add_argument("--fixture-mib", type=int, default=4096)
+    defaults = ConversionLimits()
+    parser.add_argument("--cpu-seconds", type=int, default=defaults.cpu_seconds)
+    parser.add_argument("--file-size-bytes", type=int, default=defaults.file_size_bytes)
+    parser.add_argument("--open-files", type=int, default=defaults.open_files)
     return _child(parser.parse_args(argv))
 
 

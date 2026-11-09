@@ -22,6 +22,7 @@ from brain_content.config import (
     ConfigError,
     _find_config_file,
     load_content_writer_config,
+    load_conversion_config,
     load_extraction_config,
     load_job_queue_config,
     load_local_object_store_config,
@@ -44,7 +45,12 @@ from brain_worker.document_delivery import (
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 
-from brain_ingestion.conversion_process import SupervisedConverter
+from brain_ingestion.conversion_process import (
+    MIB,
+    ConversionLimits,
+    IsolationUnavailable,
+    SupervisedConverter,
+)
 from brain_ingestion.document_worker import DocumentWorker, WorkerStopped
 from brain_ingestion.submission import enqueue_document
 from brain_ingestion.worker_guard import GuardError, HostInferenceGuard, load_provider
@@ -93,6 +99,17 @@ def reject_guard_override() -> None:
         raise ConfigError("the inference guard directory cannot be configured")
 
 
+def conversion_limits() -> ConversionLimits:
+    """Committed SEC-01 ceilings; cgroup isolation fails closed when unavailable."""
+    config = load_conversion_config()
+    return ConversionLimits(
+        isolation="cgroup" if config.isolation == "cgroup" else "watchdog",
+        memory_bytes=config.memory_max_mib * MIB,
+        max_tasks=config.max_tasks,
+        cpu_seconds=config.cpu_seconds,
+    )
+
+
 def processing_worker(
     parts: Composition,
     *,
@@ -115,7 +132,7 @@ def processing_worker(
         raise GuardError("inference_guard_not_held")
     guard.require_quiescent()
     load_provider(guard)  # allowlist: only the preflight-recorded dedicated provider
-    supervisor = supervisor or SupervisedConverter(guard.staging_root)
+    supervisor = supervisor or SupervisedConverter(guard.staging_root, limits=conversion_limits())
     supervisor.reap_orphans()
     counter = cached_model_token_counter(model, revision)
     slots = BoundedSemaphore(1)
@@ -217,7 +234,7 @@ def main() -> int:
                     revision=os.environ["BRAIN_INFERENCE_MODEL_REVISION"],
                     guard=guard,
                 )
-            except GuardError as exc:
+            except (GuardError, IsolationUnavailable) as exc:
                 print(exc.code)
                 return 2
         # One host worker / one document / one model request at a time.

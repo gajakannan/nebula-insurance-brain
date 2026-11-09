@@ -74,7 +74,7 @@ def test_every_corpus_document_publishes_before_the_first_model_request(tmp_path
                 assert manifest.source_sha256 == hashlib.sha256(raw).hexdigest()
                 quality = manifest.extraction_quality
                 execution = manifest.execution
-                assert execution.parser_package_version == "docling==2.126.0"
+                assert execution.parser_package_version == "docling==2.142.0"
                 assert manifest.page_count == document["pages"]
                 # AC2: OCR page count and engine, on both contracts (ADR-0073 amendment).
                 ocr = quality.ocr

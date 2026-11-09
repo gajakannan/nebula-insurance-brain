@@ -6,7 +6,9 @@ import pytest
 from brain_content.config import (
     DEFAULT_MAX_QUEUE_DEPTH,
     ConfigError,
+    ConversionConfig,
     load_content_writer_config,
+    load_conversion_config,
     load_extraction_config,
     load_job_queue_config,
     load_local_object_store_config,
@@ -178,3 +180,56 @@ def test_committed_config_selects_the_baseline_and_default_depth(
 
     assert load_extraction_config().pipeline == "direct-baseline"
     assert load_job_queue_config().max_queue_depth == 100
+
+
+def test_conversion_isolation_defaults_to_cgroup_when_unset(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # SEC-01: the fail-closed kernel ceiling is the default, not an opt-in.
+    _write_local(tmp_path, monkeypatch, "extraction:\n  pipeline: direct-baseline\n")
+
+    assert load_conversion_config() == ConversionConfig()
+    assert ConversionConfig().isolation == "cgroup"
+
+
+def test_conversion_config_loads_explicit_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_local(
+        tmp_path,
+        monkeypatch,
+        "conversion:\n  isolation: watchdog\n  memory_max_mib: 2048\n"
+        "  max_tasks: 64\n  cpu_seconds: 60\n",
+    )
+
+    assert load_conversion_config() == ConversionConfig("watchdog", 2048, 64, 60)
+
+
+@pytest.mark.parametrize("value", ["none", "''", "true", "CGROUP"])
+def test_conversion_isolation_rejects_unknown_modes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    _write_local(tmp_path, monkeypatch, f"conversion:\n  isolation: {value}\n")
+
+    with pytest.raises(ConfigError, match="cgroup or watchdog"):
+        load_conversion_config()
+
+
+@pytest.mark.parametrize("key", ["memory_max_mib", "max_tasks", "cpu_seconds"])
+@pytest.mark.parametrize("value", ["0", "-1", "true", "'5'", "2.5"])
+def test_conversion_limits_reject_non_positive_or_non_integer_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, key: str, value: str
+) -> None:
+    _write_local(tmp_path, monkeypatch, f"conversion:\n  {key}: {value}\n")
+
+    with pytest.raises(ConfigError, match="positive integer"):
+        load_conversion_config()
+
+
+def test_committed_config_requires_cgroup_conversion_isolation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    config = Path(__file__).resolve().parents[4] / "config" / "local.yaml"
+    monkeypatch.setenv("BRAIN_LOCAL_CONFIG_PATH", str(config))
+
+    assert load_conversion_config() == ConversionConfig("cgroup", 6144, 512, 1200)

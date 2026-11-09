@@ -17,7 +17,7 @@ Docling row) was corrected in the process rather than left standing.
 | Apache AGE | PG18/v1.8.0-rc0 | Built from source in `docker/postgres/Dockerfile`, image built clean on this host 2026-09-08; `CREATE EXTENSION age` in `docker/postgres/init/02-extensions.sql`; the plan's originally-cited `PG18/v1.6.0-rc0` tag does not exist upstream (AGE's PG18 release branch starts at v1.7.0-rc0) | Apache AGE GitHub releases (PG18 branch) |
 | btree_gist | ships with PostgreSQL contrib | `CREATE EXTENSION btree_gist` in `docker/postgres/init/02-extensions.sql` | PostgreSQL 18 contrib |
 | authentik | 2026.2.0 | `docker-compose.yml`; matches `nebula-insurance-crm`'s validated pin (ADR-006) | nebula-insurance-crm docker-compose.yml |
-| Docling | 2.126.0 | `engine/apps/api/src/brain_api/versions.py` (`DOCLING_PINNED_VERSION`); installed as a `neuron/brain-ingestion` dependency, exercised live against the native fixture by the automated F0001-S0003 test, and against the scanned/OCR fixture by a manual check at F0001-S0007 (2026-09-10: RapidOCR recovers identical content, 4 blocks/542 chars, from both variants) — the OCR path itself is not yet covered by an automated assertion (see ADR-0040 Limitations) | F0001-S0001 (declared); F0001-S0003 (live, native); F0001-S0007 (live, scanned/OCR, manual) |
+| Docling | 2.142.0 (from 2.126.0, 2026-11-08, SEC-01) | `engine/apps/api/src/brain_api/versions.py` (`DOCLING_PINNED_VERSION`); floors in `neuron/packages/brain-ingestion/pyproject.toml` and `neuron/pyproject.toml` `constraint-dependencies`. 2.142.0 is the lowest release that allows Pillow 13. Revalidated: the item-provenance spike (native and OCR), the full neuron suite and the PostgreSQL recovery/enqueue suites, plus real native and OCR fixture conversions under the ADR-0074 section 1a ceilings | F0001-S0001 (declared); F0001-S0003/S0007 (live); SEC-01 remediation 2026-11-08 |
 | Docling-Graph | **1.9.1, qualified and rejected (F0005, 2026-10-28)**; locked in `neuron/uv.lock`; not activated | Installed from cache; real Graph stage tests cover native/scanned conversion, saved JSON reuse, and publication ordering with recorded model responses. Live model and operational gates remain open. | [F0005 evidence](../planning-mds/features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md) |
 | vLLM | 0.25.1 | `docker/local-inference-runbook.md`; matches the CRM's validated ADR-035 profile; served `microsoft/Phi-4-mini-instruct` live on this host's RTX 5070 for F0001-S0003's proof harness on 2026-09-09 | F0001 G1 clarification (2026-09-06); F0001-S0003 (live) |
 | Inference model | `microsoft/Phi-4-mini-instruct` | Hugging Face revision pinned in `docker/local-inference-runbook.md`; `--max-model-len 4096` | F0001 G1 clarification (2026-09-06); ADR-0055 |
@@ -66,9 +66,24 @@ defect — recorded here for ADR-0040 and F0001-S0007's settlement of context ad
 
 Locked-environment changes in F0005: pypdf 6.19.0 → 6.21.2 and litellm 1.100.0 → 1.100.4 (advisories).
 
-**Upgrade revalidation required:** the RapidOCR asset-capture hook (`item_provenance.install_ocr_asset_capture`) and the Docling 2.126 OCR observer and provenance hooks. An upstream layout change degrades to "OCR engine unidentified".
+**Upgrade revalidation required:** the RapidOCR asset-capture hook (`item_provenance.install_ocr_asset_capture`) and the Docling OCR observer and provenance hooks. They are gated to the exact proven Docling version. An upstream layout change degrades to "OCR engine unidentified".
 
-**Activation preconditions:** the Docling ≥ 2.132 / pillow ≥ 13 requalification, and converter OS isolation (ADR-0074).
+**SEC-01 remediation (2026-11-08).** The locked environment moved to clear all 85 advisories found by the F0006 security review (pip-audit after the change: no known vulnerabilities):
+
+| Package | Before | After |
+| --- | --- | --- |
+| docling, docling-slim | 2.126.0 | 2.142.0 |
+| docling-core / docling-parse / docling-ibm-models | 2.95.0 / 7.18.0 / 4.0.2 | 2.106.0 / 7.24.2 / 4.0.4 |
+| pypdf | 6.21.2 | 6.21.4 |
+| pillow | 12.3.0 | 13.0.0 |
+| aiohttp | 3.14.3 | 3.14.4 |
+| certifi | 2026.7.22 | 2026.10.18 |
+| filelock | 3.32.6 | 4.2.1 |
+| setuptools | 84.0.0 | 84.1.0 |
+
+The provenance hooks were revalidated on Docling 2.142.0. Converter memory, CPU and task ceilings are in ADR-0074 section 1a.
+
+**Activation preconditions:** the remainder of SEC-F5-M1 (a separate OS user or container and no network for the converter; ADR-0074).
 
 The table and F0001 finding above record the installed proof baseline. [ADR-0060](../planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) proposes Docling-Graph as the future document pipeline coordinator; Docling remains its converter. The 1.9.1 candidate is installed and has limited contract evidence; production activation and the complete proof gates remain pending.
 

@@ -8,7 +8,7 @@ from importlib.metadata import version
 # runtime dependency per SOLUTION-PATTERNS.md's Clean Architecture Pattern) and is not
 # installed here; its pin is declared below and must equal neuron/uv.lock's resolved
 # version once S0002 lands the matrix.
-DOCLING_PINNED_VERSION = "2.126.0"
+DOCLING_PINNED_VERSION = "2.142.0"
 
 
 def collect_versions() -> dict[str, str]:

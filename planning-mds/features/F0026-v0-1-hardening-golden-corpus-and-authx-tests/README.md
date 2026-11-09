@@ -20,7 +20,7 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - Carry ADR-0043 v0.1 minimum - operator-initiated deletion with a dependency inventory, tombstones, and a restore drill showing deletion re-applied before restored data is readable. Retention schedules stay a pre-pilot policy input.
 - Prove ADR-0042 isolation (row security under real roles, 121.2 items 4 and 5) and ADR-0053 v0.1 negative tests (items 6 and 12); include the 110.4 prompt-injection case in the frozen challenge suite.
 - Own master blueprint 97 and 98 - evaluation metrics with agreed targets and the regression suite; set 114.2 operational budgets with ADR-0048. v0.1 ingestion is local file intake only; the 114.1 connector contract is deferred to F0050.
-- Carry the F0006 closeout security follow-ups - SEC-01 dependency remediation and verified converter resource isolation, SEC-02 security-planning baseline and strict audit rerun, SEC-03 nosniff headers - as v0.1 release preconditions if not closed earlier.
+- F0006 security follow-ups - SEC-01 (dependency remediation and converter memory/CPU/process ceilings) and SEC-02 (security-planning baseline, strict audit passing) were remediated on 2026-11-08 (planning-mds/security/reviews/security-review-2026-11-08.md). Still carried as v0.1 release preconditions - SEC-03 nosniff headers and the SEC-F5-M1 remainder (separate OS user or container and no network for the converter).
 
 ## Documents
 
