@@ -23,6 +23,11 @@ deadline does not bound memory. Each child runs under `ConversionLimits`:
 Docling/torch reserve ~64 GB of virtual address space, so RLIMIT_AS/RLIMIT_DATA
 cannot serve as the memory ceiling. A breach is reported as the closed
 `conversion_failed` reason with the limit named in diagnostics.
+
+Network isolation (SEC-F5-M1, 2026-11-09): with `network="isolated"` the child
+runs in its own unprivileged user and network namespace (`unshare --user
+--map-current-user --net`), which has only a downed loopback. Conversion then
+relies on locally cached model weights; anything that needs the network fails.
 """
 
 from __future__ import annotations
@@ -82,6 +87,7 @@ _CHILD_ENV = (
 
 Outcome = Literal["accepted", "conversion_timeout", "cancelled", "conversion_failed"]
 Isolation = Literal["cgroup", "watchdog"]
+Network = Literal["isolated", "host"]
 MIB = 1024 * 1024
 MEMORY_SAMPLE_SECONDS = 0.1
 
@@ -95,6 +101,7 @@ class ConversionLimits:
     """
 
     isolation: Isolation = "watchdog"
+    network: Network = "host"
     memory_bytes: int = 6144 * MIB
     max_tasks: int = 512
     cpu_seconds: int = 1200
@@ -104,6 +111,8 @@ class ConversionLimits:
     def __post_init__(self) -> None:
         if self.isolation not in ("cgroup", "watchdog"):
             raise ValueError("conversion isolation must be cgroup or watchdog")
+        if self.network not in ("isolated", "host"):
+            raise ValueError("conversion network must be isolated or host")
         for name in ("memory_bytes", "max_tasks", "cpu_seconds", "file_size_bytes", "open_files"):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
@@ -111,7 +120,7 @@ class ConversionLimits:
 
 
 class IsolationUnavailable(RuntimeError):
-    """cgroup isolation was required but this host cannot create a limited scope."""
+    """Required cgroup or network isolation cannot be created on this host."""
 
     code = "conversion_isolation_unavailable"
 
@@ -143,6 +152,40 @@ def _scope_command(limits: ConversionLimits) -> list[str]:
         f"TasksMax={limits.max_tasks}",
         "--",
     ]
+
+
+_NETNS_COMMAND = ["unshare", "--user", "--map-current-user", "--net", "--"]
+
+
+def _launch_prefix(limits: ConversionLimits) -> list[str]:
+    """Scope first (it applies to the whole child), then the namespaces, then Python."""
+    prefix = _scope_command(limits) if limits.isolation == "cgroup" else []
+    if limits.network == "isolated":
+        prefix += _NETNS_COMMAND
+    return prefix
+
+
+def probe_isolation(limits: ConversionLimits) -> None:
+    """Fail closed unless every required isolation layer actually starts here."""
+    if limits.isolation == "cgroup":
+        probe_cgroup_isolation(limits)
+    if limits.network == "isolated":
+        if shutil.which("unshare") is None:
+            raise IsolationUnavailable("unshare not found")
+        try:
+            result = subprocess.run(
+                [*_launch_prefix(limits), "true"],
+                env=_launch_environment(limits),
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=30,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise IsolationUnavailable("network namespace did not start") from exc
+        if result.returncode != 0:
+            raise IsolationUnavailable("network namespace did not start")
 
 
 def probe_cgroup_isolation(limits: ConversionLimits) -> None:
@@ -462,9 +505,18 @@ def _fixture_converter(args: argparse.Namespace, staging: Path) -> int:
                 controls[control] = (directory / control).read_text().strip()
             except OSError:
                 controls[control] = None
+        # /proc/self/net is per network namespace; /sys/class/net is not.
+        dev = Path("/proc/self/net/dev").read_text().splitlines()[2:]
+        interfaces = sorted(line.split(":", 1)[0].strip() for line in dev)
         _write_frame(
             args.frame_fd,
-            {"type": "probe", "limits": limits, "cgroup": cgroup, "controls": controls},
+            {
+                "type": "probe",
+                "limits": limits,
+                "cgroup": cgroup,
+                "controls": controls,
+                "interfaces": interfaces,
+            },
         )
         return 0
     if behavior == "fail":
@@ -546,8 +598,7 @@ class SupervisedConverter:
         if deadline_seconds <= 0:
             raise ValueError("conversion deadline must be positive")
         self.limits = limits or ConversionLimits()
-        if self.limits.isolation == "cgroup":
-            probe_cgroup_isolation(self.limits)
+        probe_isolation(self.limits)
         self.staging_root = staging_root
         self.deadline_seconds = deadline_seconds
         self.clock = clock
@@ -593,9 +644,10 @@ class SupervisedConverter:
         diagnostics: dict[str, Any] = {
             "deadline_seconds": self.deadline_seconds,
             "isolation": self.limits.isolation,
+            "network": self.limits.network,
             "memory_limit_bytes": self.limits.memory_bytes,
         }
-        prefix = _scope_command(self.limits) if self.limits.isolation == "cgroup" else []
+        prefix = _launch_prefix(self.limits)
         try:
             child = subprocess.Popen(
                 [

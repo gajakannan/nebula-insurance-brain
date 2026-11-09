@@ -1,7 +1,7 @@
 # OWASP Top 10 Results — Nebula Insurance Brain
 
 Status: Baseline (v0.1 local scope)
-Last Updated: 2026-11-08
+Last Updated: 2026-11-09
 Owner: Security
 
 ## Scope
@@ -22,7 +22,7 @@ Project-level roll-up of the OWASP Top 10 (2021) assessments recorded by feature
 | A02 Cryptographic Failures | OK locally | certifi updated to 2026.10.18; TLS and encryption at rest are production-host decisions |
 | A03 Injection | OK in reviewed scope | Parameterized SQL; documents treated as untrusted evidence (section 110.4) |
 | A04 Insecure Design | OK with planning items | Threat model baseline; open items listed there |
-| A05 Security Misconfiguration | Issue (Low) | SEC-03 / F0004 SEC-L2: `nosniff` missing on public and error responses; target 2026-11-17 |
+| A05 Security Misconfiguration | **Resolved 2026-11-09** | SEC-03 / F0004 SEC-L2: `nosniff` and `Cross-Origin-Resource-Policy` on every response, including errors and unhandled 500s |
 | A06 Vulnerable and Outdated Components | **Resolved 2026-11-08** | SEC-01: 85 neuron advisories cleared (Docling 2.142.0, pypdf 6.21.4, Pillow 13.0.0, aiohttp, certifi, filelock, setuptools) |
 | A07 Identification and Authentication Failures | OK in reviewed scope | Verified principals (ADR-0049); browser session contract planned (ADR-0051, F0021) |
 | A08 Software and Data Integrity Failures | OK | Locked dependencies (`uv sync --locked` in CI), immutable artifacts, append-only history |
@@ -31,8 +31,7 @@ Project-level roll-up of the OWASP Top 10 (2021) assessments recorded by feature
 
 ## Required Actions
 
-- SEC-03 response headers by 2026-11-17.
-- SEC-F5-M1 remainder (separate OS user/container and no network for the converter) before untrusted or production PDFs.
+- SEC-F5-M1 remainder (a separate OS user or container for the converter) before untrusted or production PDFs.
 - Rerun this roll-up with each security-bearing feature review.
 
 ## Sign-Off

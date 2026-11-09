@@ -41,6 +41,19 @@ needs_cgroup = pytest.mark.skipif(
 )
 
 
+def _netns_available() -> bool:
+    try:
+        cp.probe_isolation(ConversionLimits(network="isolated"))
+    except IsolationUnavailable:
+        return False
+    return True
+
+
+needs_netns = pytest.mark.skipif(
+    not _netns_available(), reason="unprivileged user and network namespaces unavailable"
+)
+
+
 def allocating(tmp_path: Path, limits: ConversionLimits, mib: int) -> SupervisedConverter:
     return SupervisedConverter(
         tmp_path / "staging",
@@ -109,6 +122,8 @@ def test_limits_reject_invalid_values():
         ConversionLimits(memory_bytes=0)
     with pytest.raises(ValueError):
         ConversionLimits(isolation="none")  # type: ignore[arg-type]
+    with pytest.raises(ValueError):
+        ConversionLimits(network="none")  # type: ignore[arg-type]
 
 
 def test_child_sets_cpu_file_descriptor_and_core_limits_before_parsing(tmp_path):
@@ -199,3 +214,64 @@ def test_cgroup_ceiling_kills_an_over_allocating_child_even_without_sampling(tmp
     assert "resource_limit" not in diagnostics
     assert diagnostics["group_confirmed_gone"] is True
     assert list(supervisor.staging_root.iterdir()) == []
+
+
+@needs_netns
+def test_network_isolated_child_sees_only_loopback(tmp_path):
+    limits = ConversionLimits(network="isolated")
+    probe = probe_child(tmp_path, limits, prefix=cp._launch_prefix(limits))
+    assert probe["interfaces"] == ["lo"]
+
+
+@needs_netns
+def test_network_isolated_conversion_completes_with_ipc_receipt_and_cleanup(tmp_path):
+    # unshare execs in place, so the recorded PID, process group and pipes stay valid.
+    supervisor = SupervisedConverter(
+        tmp_path / "staging",
+        deadline_seconds=30,
+        child_args=("--converter", "fixture", "--fixture-behavior", "complete"),
+        load_document=json.loads,
+        limits=ConversionLimits(network="isolated"),
+    )
+    handoff = supervisor.convert(PDF, attempt_id="n1", capture_provenance=False)
+    assert handoff.diagnostics["decision"] == "accepted"
+    assert handoff.diagnostics["network"] == "isolated"
+    assert handoff.diagnostics["group_confirmed_gone"] is True
+    assert list(supervisor.staging_root.iterdir()) == []
+
+
+@needs_netns
+def test_network_isolated_timeout_still_cleans_up_the_group(tmp_path):
+    supervisor = SupervisedConverter(
+        tmp_path / "staging",
+        deadline_seconds=1.0,
+        child_args=("--converter", "fixture", "--fixture-behavior", "hang"),
+        load_document=json.loads,
+        limits=ConversionLimits(network="isolated"),
+    )
+    with pytest.raises(ConversionError) as raised:
+        supervisor.convert(PDF, attempt_id="n2", capture_provenance=False)
+    assert raised.value.code == "conversion_timeout"
+    assert raised.value.diagnostics["group_confirmed_gone"] is True
+
+
+@needs_cgroup
+@needs_netns
+def test_cgroup_and_network_isolation_compose(tmp_path):
+    limits = ConversionLimits(isolation="cgroup", network="isolated", memory_bytes=512 * MIB)
+    probe = probe_child(tmp_path, limits, prefix=cp._launch_prefix(limits))
+    assert probe["interfaces"] == ["lo"]
+    assert probe["controls"]["memory.max"] == str(512 * MIB)
+
+
+def test_network_isolation_fails_closed_without_unshare(tmp_path, monkeypatch):
+    monkeypatch.setattr(cp.shutil, "which", lambda name: None if name == "unshare" else name)
+    with pytest.raises(IsolationUnavailable):
+        SupervisedConverter(tmp_path / "staging", limits=ConversionLimits(network="isolated"))
+
+
+def test_network_isolation_fails_closed_when_the_namespace_cannot_start(tmp_path, monkeypatch):
+    monkeypatch.setattr(cp.shutil, "which", lambda name: f"/usr/bin/{name}")
+    monkeypatch.setattr(cp.subprocess, "run", lambda *_a, **_k: subprocess.CompletedProcess([], 1))
+    with pytest.raises(IsolationUnavailable):
+        SupervisedConverter(tmp_path / "staging", limits=ConversionLimits(network="isolated"))

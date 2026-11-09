@@ -17,6 +17,9 @@ conversion:
   # watchdog = self-imposed rlimits + parent memory sampling only; trusted local fixtures.
   # Sized from measured GL fixture conversions on Docling 2.142.0 (peak RSS 2.4-2.8 GiB).
   isolation: cgroup
+  # isolated = own unprivileged user + network namespace (loopback only); model weights
+  #            must already be cached locally. host = trusted local fixtures only.
+  network: isolated
   memory_max_mib: 6144
   max_tasks: 512
   cpu_seconds: 1200

@@ -1,7 +1,7 @@
 # Threat Model — Nebula Insurance Brain
 
 Status: Baseline (v0.1 local scope)
-Last Updated: 2026-11-08
+Last Updated: 2026-11-09
 Owner: Security + Architect
 Review cadence: refreshed by each security-bearing feature run (F0018, F0021, F0022, F0026 next) and before any production pilot
 
@@ -43,9 +43,9 @@ Sources: master blueprint sections 65, 66, 110, 118–121; ADR-0042, ADR-0043, A
 | T-09 | Denial of service | Crafted PDF exhausts converter memory/CPU | Supervised child with 300 s deadline (ADR-0074); kernel memory/task ceilings, child rlimits and memory sampler (ADR-0074 §1a); patched parser dependencies | **Mitigated 2026-11-08 (SEC-01)** |
 | T-10 | Denial of service | Queue flooding | Bounded unfinished-job queue with explicit rejection (ADR-0074) | Mitigated |
 | T-11 | Elevation of privilege | Instructions inside a document drive tools or commits | Extracted text is evidence only; worker has no business-write credentials; commits go through the authorized commit path (section 110.4, EX-OWN-006) | Partially mitigated; acceptance test owned by F0016/F0026 |
-| T-12 | Elevation of privilege | Converter escapes to the worker's user or network | Child gets no credentials and an allowlisted environment; shares the worker's OS user and network | **Open** (SEC-F5-M1 remainder) |
+| T-12 | Elevation of privilege | Converter escapes to the worker's user or network | No credentials, allowlisted environment, no network (own user and network namespace, ADR-0074 §1a); still the worker's OS user and filesystem permissions | Partially mitigated (2026-11-09); separate OS user open (SEC-F5-M1 remainder) |
 | T-13 | Information disclosure | Browser token theft or incomplete logout | Same-origin BFF with server-held tokens and upstream revocation (ADR-0051) | Planned (F0021) |
-| T-14 | Information disclosure | MIME sniffing of served content or errors | `nosniff` on content routes; not yet on public/error responses | Open (SEC-03, F0004 SEC-L2) |
+| T-14 | Information disclosure | MIME sniffing or cross-origin embedding of responses | `nosniff` and `Cross-Origin-Resource-Policy: same-origin` on every response, including errors and unhandled 500s | **Mitigated 2026-11-09 (SEC-03, F0004 SEC-L2)** |
 
 ## Risk Scoring And Acceptance
 
@@ -63,9 +63,8 @@ Severity uses the feature security reviews' scale (Critical, High, Medium, Low) 
 
 | Risk | Severity | Owner | Before |
 | --- | --- | --- | --- |
-| T-12 converter shares OS user and network (SEC-F5-M1 remainder) | Medium | DevOps + AI Engineer | Any untrusted or production PDF |
+| T-12 converter shares the worker's OS user and filesystem permissions (SEC-F5-M1 remainder) | Medium | DevOps + AI Engineer | Any untrusted or production PDF |
 | SEC-F5-L4 provider restart allowlist and minimal restart environment | Low | DevOps | Activation |
-| T-14 / SEC-03 / F0004 SEC-L2 response headers | Low | Backend + DevOps | 2026-11-17 |
 | Production host, TLS and secret store not chosen (blueprint 117.1 item 3) | Medium | DevOps + Security | Production pilot |
 | Retention schedules and legal holds not supplied (ADR-0043) | Medium | Records/legal owners | Production pilot |
 

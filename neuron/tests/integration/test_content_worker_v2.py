@@ -161,8 +161,15 @@ def test_publication_import_and_second_profile_reuse(
 ) -> None:
     engine, queue, store, authorization, access, publisher, enqueue = components(database, tmp_path)
     path, parsed = native
+    # How many items the layout model makes from the two fixture lines is the
+    # model's choice (Docling's layout weights merged them into one heading in
+    # later environments), so expectations follow the actual parse: one v2 block
+    # per recorded origin of each text item.
+    text_refs = tuple(ref for ref in parsed.provenance if ref.startswith("#/texts/"))
+    expected_blocks = sum(len(parsed.provenance[ref]) for ref in text_refs)
+    assert expected_blocks >= 1
     if fallback:
-        parsed = replace(parsed, provenance={}, origin_unavailable=("#/texts/0", "#/texts/1"))
+        parsed = replace(parsed, provenance={}, origin_unavailable=text_refs)
     job = enqueue(path)
     lease = queue.claim()
     assert lease is not None and lease.job_id == job
@@ -193,9 +200,9 @@ def test_publication_import_and_second_profile_reuse(
             select(AuditEventRow).where(AuditEventRow.event_type == "content_artifact_published")
         ).one()
         assert published.payload is not None
-        assert published.payload["unattributed_item_count"] == (2 if fallback else 0)
+        assert published.payload["unattributed_item_count"] == (len(text_refs) if fallback else 0)
         assert session.scalar(select(func.count()).select_from(content_block)) == (
-            0 if fallback else 2
+            0 if fallback else expected_blocks
         )
         key = ArtifactKey(row.id, row.tenant_id, row.knowledge_base_id, 1 if fallback else 2)
         if fallback:

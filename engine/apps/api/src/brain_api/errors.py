@@ -10,6 +10,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from brain_api.security_headers import SECURITY_HEADERS
+
 
 class ProblemDetails(BaseModel):
     """RFC 9457 problem details. `traceId` is the sole camelCase member,
@@ -170,6 +172,21 @@ def install_problem_details_handlers(app: FastAPI) -> None:
             detail=None,
             instance=str(request.url.path),
         )
+
+    @app.exception_handler(Exception)
+    async def _handle_unexpected(request: Request, exc: Exception) -> JSONResponse:
+        # Starlette answers unhandled exceptions outside user middleware, so this
+        # response carries the baseline security headers itself (SEC-03). No
+        # exception text crosses to the client.
+        response = _problem_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            title="Internal Server Error",
+            code="internal_error",
+            detail=None,
+            instance=None,
+        )
+        response.headers.update(SECURITY_HEADERS)
+        return response
 
     @app.exception_handler(RequestValidationError)
     async def _handle_validation_error(

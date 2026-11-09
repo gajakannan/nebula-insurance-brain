@@ -7,6 +7,7 @@ from brain_api.health import router as health_router
 from brain_api.routes.content import router as content_router
 from brain_api.routes.facts import router as facts_router
 from brain_api.routes.reviews import router as reviews_router
+from brain_api.security_headers import SecurityHeadersMiddleware
 
 
 def create_app() -> FastAPI:
@@ -16,6 +17,7 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json",
     )
     install_problem_details_handlers(app)
+    app.add_middleware(SecurityHeadersMiddleware)
     app.include_router(health_router)
     app.include_router(reviews_router)
     app.include_router(content_router)

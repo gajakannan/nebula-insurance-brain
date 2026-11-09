@@ -87,6 +87,7 @@ def load_job_queue_config() -> JobQueueConfig:
 
 
 CONVERSION_ISOLATION_MODES = ("cgroup", "watchdog")
+CONVERSION_NETWORK_MODES = ("isolated", "host")
 
 
 @dataclass(frozen=True)
@@ -96,9 +97,12 @@ class ConversionConfig:
     `cgroup` (the default) requires a kernel-enforced systemd user scope and the
     worker refuses to start without one. `watchdog` keeps only the self-imposed
     rlimits and the parent memory sampler; it is for trusted local fixtures.
+    `network: isolated` (the default) runs the child in its own user and network
+    namespace with no network; `host` is for trusted local fixtures only.
     """
 
     isolation: str = "cgroup"
+    network: str = "isolated"
     memory_max_mib: int = 6144
     max_tasks: int = 512
     cpu_seconds: int = 1200
@@ -117,13 +121,16 @@ def load_conversion_config() -> ConversionConfig:
     isolation = section.get("isolation", defaults.isolation)
     if isolation not in CONVERSION_ISOLATION_MODES:
         raise ConfigError("conversion.isolation must be cgroup or watchdog")
+    network = section.get("network", defaults.network)
+    if network not in CONVERSION_NETWORK_MODES:
+        raise ConfigError("conversion.network must be isolated or host")
     values = {}
     for key in ("memory_max_mib", "max_tasks", "cpu_seconds"):
         value = section.get(key, getattr(defaults, key))
         if type(value) is not int or value <= 0:
             raise ConfigError(f"conversion.{key} must be a positive integer")
         values[key] = value
-    return ConversionConfig(isolation=isolation, **values)
+    return ConversionConfig(isolation=isolation, network=network, **values)
 
 
 def _find_config_file(start: Path) -> Path:
