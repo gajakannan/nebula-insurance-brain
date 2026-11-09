@@ -9,14 +9,21 @@ coverage_excluded:
 phase: v0.1A
 roadmap_section: Next
 roadmap_order: 13
-rationale: Document profiles select which ontology modules and extraction profiles apply to a document type and business context (section 7). Nebula selects the released profile before the Docling-Graph pipeline executes.
-validation_gate: F0001 accepted; plan action Phase A and Phase B approved for this feature; Phase A records the operator's
-  ADR-0060 reopen decision (re-plan a Graph candidate, or mark ADR-0060 Rejected).
+rationale: Document profiles select which ontology modules and extraction profiles apply to a document
+  type and business context (section 7). Nebula selects the released profile before the direct-baseline
+  extraction pipeline executes.
+validation_gate: F0012 complete; plan action Phase A and Phase B approved for this feature.
 depends_on:
-- feature:F0001
+- feature:F0004
+- feature:F0012
 governed_by:
-- adr:0060
 - adr:0014
 - adr:0063
+- adr:0039
 notes:
-- F0005 outcome 2026-10-28 - Graph dense rejected; direct-baseline/v1 stay default; ADR-0074 accepted. ADR-0060 stays Proposed with a reopen deadline: at F0014/F0015 Phase A the operator decides between re-planning a Graph candidate (with full re-qualification) and marking ADR-0060 Rejected. Plan against the direct baseline until then.
+- Requirement-ownership amendment 2026-11-08 - ADR-0060 was Rejected by the operator on 2026-11-08 (the
+  reopen decision this feature previously recorded). Plan against the direct-baseline pipeline (ADR-0055)
+  and the ADR-0074 execution controls.
+- 'Requirement-ownership amendment 2026-11-08 - Carry master blueprint 107.4 and ADR-0039 rule 6: a profile
+  declares expected forms, pages and attachments; each package records expected versus received and is
+  INCOMPLETE when a component is missing.'

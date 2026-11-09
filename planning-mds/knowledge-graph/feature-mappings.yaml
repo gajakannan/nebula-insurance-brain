@@ -225,6 +225,11 @@ coverage:
       reason: Reserved by the 2026-11-06 spectral retrieval planning amendment; requirements and proposed
         design only. No PRD, stories, approved Phase B or implementation; remove exclusion with substantive
         Phase B mappings.
+    - id: feature:F0069
+      path: planning-mds/features/F0069-constrained-policy-question
+      reason: Reserved by the 2026-11-08 blueprint requirement-ownership amendment; requirements only.
+        No PRD, stories, approved Phase B or implementation; the plan action removes this exclusion at
+        Phase B.
 features:
   - status: archived-done
     id: feature:F0001
@@ -554,7 +559,7 @@ features:
       - glossary_term:stable-term-iri
       - schema:commercial-pc-example
     depends_on:
-      - feature:F0001
+      - feature:F0011
     governed_by:
       - adr:0011
       - adr:0012
@@ -575,6 +580,9 @@ features:
         in Phase B.
       - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
         verification.
+      - 'Requirement-ownership amendment 2026-11-08 - Carry master blueprint 67: concept labels are language-tagged
+        label metadata on one canonical concept ID; translation never duplicates knowledge. ADR-0045 decision
+        direction recorded 2026-11-08; F0012 is its proving feature.'
       - Resolve blueprint sections 20/82 parents versus parent before authoring. The synthetic interchange
         examples illustrate proposed predicate-to-projection mappings, not a frozen schema or implemented
         compiler.
@@ -597,7 +605,7 @@ features:
       - glossary_term:stable-term-iri
       - schema:commercial-pc-example
     depends_on:
-      - feature:F0001
+      - feature:F0007
       - feature:F0012
     governed_by:
       - adr:0011
@@ -617,6 +625,9 @@ features:
         core plus GL; additional lines are illustrative future breadth.
       - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
         verification.
+      - Requirement-ownership amendment 2026-11-08 - Apply ADR-0039 to GL limits (amount, currency, per-occurrence/aggregate
+        basis) and scoped identifiers, and list the GL forms a package is expected to contain so F0014
+        can report INCOMPLETE packages.
       - Version GL predicate-to-projection mappings with the release; proposed HAS_LIMIT/HAS_FORM/HAS_TRIGGER
         labels in data-model.md and the teaching examples do not establish runtime projections.
   - status: planned
@@ -639,25 +650,25 @@ features:
       - adr:0015
       - adr:0016
       - adr:0045
-      - adr:0060
+      - adr:0055
       - adr:0063
       - adr:0065
+      - adr:0074
     notes:
-      - ? F0005 outcome 2026-10-28 - Graph dense rejected; direct-baseline/v1 stay default; ADR-0074 accepted.
-          ADR-0060 stays Proposed with a reopen deadline
-        : at F0014/F0015 Phase A the operator decides between re-planning a Graph candidate (with full
-          re-qualification) and marking ADR-0060 Rejected. Plan against the direct baseline until then.
-      - The commercial P&C example shows module composition and separate GL/property consumer completeness.
-        It does not introduce ontology into OPEN prompts or commit additional LOB runtime delivery.
       - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
         stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
         at formal plan.
-      - TEMPLATE compilation consumes F0011 contracts and F0012/F0013 vocabulary releases. Preserve constraint
-        context and evidence requirements; OPEN prompts exclude ontology under F0066.
       - Preserve the release reference to projection mappings in packaged artifacts; graph writing remains
         the projection consumer's responsibility.
       - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
         verification.
+      - Requirement-ownership amendment 2026-11-08 - ADR-0060 was Rejected by the operator on 2026-11-08.
+        Compile profiles for the direct-baseline pipeline behind a pipeline-neutral port so a future pipeline
+        ADR can add a backend without changing source, content or interpretation identity.
+      - TEMPLATE compilation consumes F0011 contracts and F0012/F0013 vocabulary releases. Preserve constraint
+        context and evidence requirements; OPEN prompts exclude ontology under F0066.
+      - The commercial P&C example shows module composition and separate GL/property consumer completeness.
+        It does not introduce ontology into OPEN prompts or commit additional LOB runtime delivery.
   - status: planned
     id: feature:F0024
     path: planning-mds/features/F0024-gl-vertical-slice
@@ -666,25 +677,25 @@ features:
       - entity:guideline-rule-version
       - entity:ontology-release
     depends_on:
-      - feature:F0001
       - feature:F0013
-      - id: feature:F0065
-        confidence: 1.0
-        provenance: extracted
+      - feature:F0065
     governed_by:
       - adr:0005
       - adr:0006
       - adr:0010
       - adr:0026
+      - adr:0038
       - adr:0045
       - adr:0056
-      - adr:0060
     notes:
       - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
         stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
         at formal plan.
       - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval
         verification.
+      - Requirement-ownership amendment 2026-11-08 - Prove the ADR-0038 acceptance example - a broker
+        requests a $5M limit, the issued policy records $2M; both assertions stay, the answer shows requested
+        versus issued terms, and the request is not promoted.
       - The GL slice consumes F0013 and F0065. The first stored assessment needs exact release, rule,
         fact-version and evidence lineage; propagation tooling is separately phased.
   - status: planned

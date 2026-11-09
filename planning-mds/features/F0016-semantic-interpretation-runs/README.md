@@ -6,9 +6,19 @@
 
 ## Overview
 
-Semantic interpretation runs version every extraction over persisted content and are the unit of incremental reinterpretation (sections 28, 29). ADR-0060 adds pipeline/template identity, scoped provenance, and run-owned graph outputs.
+Semantic interpretation runs version every extraction over persisted content and are the unit of incremental reinterpretation (sections 28, 29). Each run records pipeline, profile and model identity and the exact scope it interpreted.
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0016](../../architecture/decisions/ADR-0016-semantic-reinterpretation-is-incremental.md), [ADR-0035](../../architecture/decisions/ADR-0035-interpretation-basis-is-first-class.md).
+
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0004, F0005, F0006, F0015 (previously F0015, F0005, F0004, F0001).
+- ADR-0060 was Rejected on 2026-11-08; runs use the direct-baseline pipeline and record pipeline identity for any future backend.
+- Carry master blueprint 110.4 (untrusted inputs) - extracted text is evidence, never instruction. Acceptance - a PDF instructing a limit change or another account disclosure produces no tool action, cross-account retrieval or canonical mutation. Extraction workers hold no business-write credentials; run metadata stores secret references only.
+- Carry 110.4 model routing - v0.1 inference is local only (ADR-0055); a timeout never falls back to another provider. Carry 114.2 - record stage latency, pages/blocks, tokens, retries and cost per run without sensitive text.
+- Carry 107.4 - each run records the scope it interpreted so NOT_PROCESSED and NOT_FOUND are scoped. Carry the 88 embedding-abstraction hook as a port with no adapter (F0033 implements it).
 
 ## Documents
 
@@ -21,14 +31,16 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 **Total Stories:** 0
 
-## Docling-Graph scope amendment (2026-09-15)
+## Docling-Graph scope amendment (2026-09-15) — withdrawn 2026-11-08
+
+> **Withdrawn 2026-11-08.** The operator Rejected [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Requirements below that are specific to Docling-Graph (templates, compiled Graph configuration, run-owned extraction graphs, upstream chunk/item provenance, Graph quality gates) no longer apply. Pipeline-neutral requirements (checkpoint before model, zero-reconversion reuse, honest evidence precision, idempotent authorized commit, isolation from canonical tables) still apply to the direct-baseline pipeline. The text is kept as history.
 
 > **F0005 outcome (2026-10-28) supersedes the scope amendment below.** Graph dense was qualified live and rejected (F0005 run `2026-10-25-4020923b`, PR #30).
 > - **Defaults:** `direct-baseline` and the v1 writer stay the defaults.
-> - **ADR-0060 status:** stays **Proposed**, with a reopen deadline. **At F0014/F0015 Phase A planning the operator decides** whether to re-plan a Graph candidate (a larger output reservation, another serving model, or Graph direct, each with full re-qualification) or to mark ADR-0060 **Rejected**.
-> - **Until then:** plan against the direct baseline and the accepted execution controls in [ADR-0074](../../architecture/decisions/ADR-0074-local-document-job-execution-controls.md). Read the Docling-Graph requirements below as conditional on a re-plan.
+> - **ADR-0060 status:** **Rejected** by the operator on 2026-11-08 (the reopen decision).
+> - **Plan** against the direct baseline and the accepted execution controls in [ADR-0074](../../architecture/decisions/ADR-0074-local-document-job-execution-controls.md). The Docling-Graph-specific requirements below are withdrawn.
 
-[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governed this planned work until the operator Rejected it on 2026-11-08; see the withdrawal note above.
 
 - Load only the published native artifact for initial interpretation and later reruns. Record artifact hash, selected blocks, profile/template/schema/config hashes, explicit chunking/extraction settings, upstream revision, model/prompt identity, attempt, counters, costs, and complete/partial/failed outcome.
 - Persist graph/provenance/effective configuration separately from the parse bundle. Record upstream chunk/item-to-Nebula evidence mappings; preserve unresolved and coarse grounding.

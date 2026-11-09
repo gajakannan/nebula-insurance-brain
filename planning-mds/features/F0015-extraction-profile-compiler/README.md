@@ -6,9 +6,15 @@
 
 ## Overview
 
-Composable extraction profiles compile a shared base with line-of-business extensions; reinterpretation without reparse depends on them (section 8). ADR-0060 targets trusted Docling-Graph templates and explicit pipeline configuration.
+Composable extraction profiles compile a shared base with line-of-business extensions; reinterpretation without reparse depends on them (section 8). Profiles compile behind a pipeline-neutral extraction port; the direct-baseline pipeline is the v0.1 backend.
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0015](../../architecture/decisions/ADR-0015-extraction-profiles-are-composable.md), [ADR-0016](../../architecture/decisions/ADR-0016-semantic-reinterpretation-is-incremental.md).
+
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- ADR-0060 was Rejected by the operator on 2026-11-08. Compile profiles for the direct-baseline pipeline behind a pipeline-neutral port so a future pipeline ADR can add a backend without changing source, content or interpretation identity.
 
 ## Documents
 
@@ -27,15 +33,17 @@ The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` act
 
 **Total Stories:** 0
 
-## Docling-Graph scope amendment (2026-09-15)
+## Docling-Graph scope amendment (2026-09-15) — withdrawn 2026-11-08
+
+> **Withdrawn 2026-11-08.** The operator Rejected [ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md). Requirements below that are specific to Docling-Graph (templates, compiled Graph configuration, run-owned extraction graphs, upstream chunk/item provenance, Graph quality gates) no longer apply. Pipeline-neutral requirements (checkpoint before model, zero-reconversion reuse, honest evidence precision, idempotent authorized commit, isolation from canonical tables) still apply to the direct-baseline pipeline. The text is kept as history.
 
 > **F0005 outcome (2026-10-28) supersedes the scope amendment below.** Graph dense was qualified live and rejected (F0005 run `2026-10-25-4020923b`, PR #30).
 > - **Defaults:** `direct-baseline` and the v1 writer stay the defaults.
-> - **ADR-0060 status:** stays **Proposed**, with a reopen deadline. **At F0014/F0015 Phase A planning the operator decides** whether to re-plan a Graph candidate (a larger output reservation, another serving model, or Graph direct, each with full re-qualification) or to mark ADR-0060 **Rejected**.
-> - **Until then:** plan against the direct baseline and the accepted execution controls in [ADR-0074](../../architecture/decisions/ADR-0074-local-document-job-execution-controls.md). Read the Docling-Graph requirements below as conditional on a re-plan.
+> - **ADR-0060 status:** **Rejected** by the operator on 2026-11-08 (the reopen decision).
+> - **Plan** against the direct baseline and the accepted execution controls in [ADR-0074](../../architecture/decisions/ADR-0074-local-document-job-execution-controls.md). The Docling-Graph-specific requirements below are withdrawn.
 > - **A Graph re-plan must also carry** F0005's activation preconditions (SEC-F5-M1 converter isolation, Docling ≥ 2.132 / pillow ≥ 13 requalification, the SEC-F5-L4 residual) and its qualification process fixes: commit the corpus with its generation command, write `commands.log` at execution time, retain predicted values, add a table-aware baseline, and define OCR-count semantics in the AC. Source: the [F0005 PM closeout](../../operations/evidence/runs/2026-10-25-4020923b/pm-closeout.md).
 
-[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governs this planned work. Carry these requirements into the feature PRD/stories; status remains Planned.
+[ADR-0060](../../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) governed this planned work until the operator Rejected it on 2026-11-08; see the withdrawal note above.
 
 - Compile composed base/LOB profiles into trusted Pydantic templates and explicit pipeline settings while preserving units, qualifiers, ontology mappings, and evidence requirements. Reject unsupported mappings; profile authors cannot select arbitrary Python imports.
 - Version and hash the schema, template, prompt, and pipeline configuration. Exercise both fixed F0005 proof templates and compiler-produced templates against the accepted adapter.

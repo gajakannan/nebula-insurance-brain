@@ -1,6 +1,6 @@
 # Feature Registry
 
-**Next Available Feature Number:** F0069
+**Next Available Feature Number:** F0070
 
 **Planning Views:**
 - Roadmap sequencing (`Now / Next / Later`): `planning-mds/features/ROADMAP.md`
@@ -92,6 +92,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | F0066 | Open-statement extraction + signature alignment | Planned | v0.2B | `F0066-open-statement-extraction-and-signature-alignment/` |
 | F0067 | Graph Observatory | Planned | v0.2B | `F0067-graph-observatory/` |
 | F0068 | Spectral graph retrieval experiments | Planned | v0.4+ | `F0068-spectral-graph-retrieval-experiments/` |
+| F0069 | Constrained policy question (chat with this policy) | Planned | v0.1C | `F0069-constrained-policy-question/` |
 <!-- generated:end registry:planned -->
 
 ## Archived Features

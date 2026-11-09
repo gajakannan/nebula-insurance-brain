@@ -10,6 +10,12 @@ The endorsement slice proves both fact and F0065 assessment answers at distinct 
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0007](../../architecture/decisions/ADR-0007-full-bitemporality.md), [ADR-0009](../../architecture/decisions/ADR-0009-explicit-change-semantics.md).
 
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0019, F0065 (previously F0001, F0065).
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0025.yaml`.

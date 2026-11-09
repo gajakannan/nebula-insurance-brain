@@ -24,6 +24,13 @@ Carry these requirements into the F0012 PRD before authoring the foundation voca
 
 Worked and boundary cases: [ontology release contracts](../../examples/ontology-release-contracts.md). This amendment defines planning inputs; feature status and the existing v0.1 scope guard are unchanged.
 
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0011 (previously F0001).
+- Carry master blueprint 67: concept labels are language-tagged label metadata on one canonical concept ID; translation never duplicates knowledge. ADR-0045 decision direction recorded 2026-11-08; F0012 is its proving feature.
+
 ## Documents
 
 ### Commercial P&C teaching expansion (2026-10-08)

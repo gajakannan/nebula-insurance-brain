@@ -30,7 +30,9 @@ C4Container
 
 The API, worker, and `neuron/` packages form one modular monolith (section 114.3); the package list is a code boundary, not a deployment topology. The inference service is a host prerequisite documented in `docker/local-inference-runbook.md`.
 
-## Planned document pipeline change (ADR-0060)
+## Document pipeline change proposed by ADR-0060 (Rejected 2026-11-08)
+
+> **Rejected 2026-11-08.** The operator rejected [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) after Graph dense failed F0005 live qualification. The v0.1 pipeline is Docling conversion plus the direct-baseline extraction client (ADR-0055) under the ADR-0074 controls. The text below is kept as history; master blueprint section 126 lists what survives.
 
 F0005 replaces the specialist coordination inside `neuron/` with Docling-Graph, which still uses Docling for conversion. No new service/container is introduced. The worker retains PostgreSQL job leases, retry/cancel state, and artifact publication; the interpretation adapter maps upstream output to Nebula assertions and evidence. The diagram above remains the measured F0001 topology until the complete checkpoint, reuse, and live-model proof passes. The pinned candidate and six contract tests are present in `neuron/`; they are not activated in the application.
 

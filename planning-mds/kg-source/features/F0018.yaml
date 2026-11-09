@@ -9,12 +9,32 @@ coverage_excluded:
 phase: v0.1B
 roadmap_section: Later
 roadmap_order: 1
-rationale: The canonical commit service is the only write path to truth, with action authorization, policy-version audit, transactional outbox, and projection delivery (sections 66, 109). Docling-Graph candidates follow the same authorized commit path (ADR-0060).
+rationale: The canonical commit service is the only write path to truth, with action authorization, source-authority
+  evaluation, policy-version audit, transactional outbox, and projection delivery (sections 66, 107.1,
+  109).
 depends_on:
-- feature:F0001
+- feature:F0002
+- feature:F0007
+- feature:F0008
+- feature:F0009
+- feature:F0010
+- feature:F0011
 governed_by:
-- adr:0060
 - adr:0002
 - adr:0028
 - adr:0041
 - adr:0050
+- adr:0038
+- adr:0042
+- adr:0043
+- adr:0052
+notes:
+- Requirement-ownership amendment 2026-11-08 - Own the ADR-0038 SourceAuthorityPolicy - versioned rules
+  keyed by tenant, domain, FactSlot predicate, business context and effective interval; evaluated at commit
+  and recorded in the audit. No applicable rule routes to review. The initial GL policy is operator-approved.
+- Requirement-ownership amendment 2026-11-08 - Phase B settles the ADR-0042 authorization envelope and
+  the PostgreSQL row-security pattern for tenant-owned tables, tested under the real application and worker
+  roles (F0026 proves isolation).
+- Requirement-ownership amendment 2026-11-08 - Carry master blueprint 88 hooks - outbox events reserve
+  AGE projection IDs (F0034 implements) and the commit records derivation dependencies for derived results.
+  Record ADR-0043 deletion and revocation events with tombstones.

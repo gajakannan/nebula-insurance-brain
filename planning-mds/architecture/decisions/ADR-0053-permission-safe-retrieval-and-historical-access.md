@@ -8,22 +8,28 @@
 - [ ] Rejected
 
 **Date:** 2026-09-05 (record created from the master blueprint baseline)
-**Deciders:** Pending; Architecture and Security roles confirm during Phase B of the first AuthX-bearing feature
-**Source:** `planning-mds/architecture/master-blueprint.md` section 122
+**Decision recorded:** 2026-11-08 by the operator (blueprint requirement-ownership amendment). Features plan against the decision below. The status stays Proposed until the carryover tests below pass.
+**Owner:** Architect + Security Reviewer
+**Proving features:** F0020/F0023/F0069 (v0.1 query, display and constrained answers), F0026 (v0.1 negative tests), F0033 to F0036 and F0046/F0047 (projections, v0.2)
+**Formal acceptance:** section 121.2 items 5 (projection leakage), 6 (conversation access) and 12 (temporal separation) pass for the v0.1 surfaces in F0026; projection cases are added as each v0.2 projection ships.
+**Source:** `planning-mds/architecture/master-blueprint.md` sections 110.1, 120.3 and 122
 
 ## Context
 
-Proposed AuthX decision carried from the CRM reference architecture into the Brain (master blueprint sections 118 to 122). The CRM code establishes the reference contracts; the Brain implements the same contracts in its Python backend behind explicit adapters.
+Bitemporal queries can ask what was known in the past. They must not bring back access that has since been revoked, and every projection (search, vector, graph, cache) must apply the same grants as the canonical store.
 
 ## Decision
 
-Proposed: Current grants across all projections/derivatives; historical business queries cannot reinstate access.
+1. **Current grants always apply.** Every read — including a query as of a past valid or recorded time — is authorized against the principal's current grants and policy revision.
+2. **History is not an access path.** A historical query reconstructs past knowledge, never past permissions. Privileged audit can reconstruct prior authorization decisions without executing them.
+3. **Authorization before shaping.** Rows, counts, facets, snippets, titles, graph paths, embeddings and aggregates are filtered before they are computed or returned. Unfiltered candidates never reach a model.
+4. **Revocation mid-conversation.** After a user loses access, later turns, history rendering, cached answers, evidence links and review tasks follow the new policy. Revoked content cannot re-enter through a summary or learned artifact.
 
 ## Consequences
 
-- Shared behavior fixtures and schema contracts guard against semantic drift between the CRM reference and the Brain implementation.
-- Acceptance requires the carryover tests in master blueprint section 121.2 to pass for the affected boundary.
+- F0020 and F0023 apply rules 1 to 3 to the v0.1 query API and Entity 360; F0069 applies rule 4 to the constrained policy question.
+- F0026 runs the v0.1 negative tests; F0033 to F0036 extend them to projections.
 
 ## References
 
-- `planning-mds/architecture/master-blueprint.md` sections 118 to 123
+- `planning-mds/architecture/master-blueprint.md` sections 110.1, 118 to 123

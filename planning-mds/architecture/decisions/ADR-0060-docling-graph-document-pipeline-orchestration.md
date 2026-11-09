@@ -2,16 +2,28 @@
 
 ## Status
 
-- [x] Proposed
+- [ ] Proposed
 - [ ] Accepted
 - [ ] Superseded
-- [ ] Rejected
+- [x] Rejected
+
+**Rejected:** 2026-11-08 by the operator, exercising the reopen decision recorded under "F0005 qualification outcome" before F0014/F0015 planning. See "Rejection (2026-11-08)" below. The rest of this record is kept as history.
 
 **Date:** 2026-09-15
 **Direction authorized by:** Operator; formal ADR acceptance awaits the proof gates below.
 **Implementation:** Synthetic development proof complete for the current scope. Docling-Graph 1.9.1 is locked; conversion/reuse, PostgreSQL recovery, dense extraction with recorded responses, and multi-region review mapping have bounded proof. Production acceptance and activation remain future work; see [compatibility evidence](../../features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md). Plan run `2026-10-23-9a04b327` (2026-10-23) defines the acceptance procedure: local live qualification on a synthetic corpus against operator-approved thresholds, independent QA/Architect/Security verdicts and operator acceptance, then activation through committed configuration with a direct-baseline rollback. See the F0005 [PRD](../../features/archive/F0005-one-time-docling-ingestion/PRD.md) and [assembly plan](../../features/archive/F0005-one-time-docling-ingestion/feature-assembly-plan.md).
 **Approved Phase B design rework (2026-10-25):** plan run `2026-10-25-50fcf658`, Phase B existing feature, addresses PM-1/ARCH-1/BLD-1 from [plan review `2026-10-24-0fbc1de1`](../../operations/evidence/runs/2026-10-24-0fbc1de1/plan-review-report.md). The requirements and thresholds above remain approved; the operator approved these control-design amendments on 2026-10-25 with the response `approve`. They were implemented and qualified live in F0005 run `2026-10-25-4020923b`. They now ship for every pipeline under [ADR-0074](ADR-0074-local-document-job-execution-controls.md). They do not make this ADR accepted (see "F0005 qualification outcome" below).
 **Would refine:** ADR-0003, ADR-0004, ADR-0028, ADR-0040, ADR-0055, ADR-0058, ADR-0059. Reconsiders the exclusion recorded after F0001; the current runtime decision, accepted content/evidence contracts, and F0001 measurements remain in force pending proof.
+
+## Rejection (2026-11-08)
+
+The operator rejected this ADR rather than re-plan a Graph candidate.
+
+- **Runtime path.** The direct-baseline pipeline (Docling conversion, the persisted native bundle, and the bounded direct client under ADR-0055) is the v0.1 extraction path. F0014, F0015, F0016, F0022, F0024 and F0026 plan against it.
+- **What survives.** The execution controls (ADR-0074, Accepted), the versioned content contracts and OCR metadata (ADR-0073), checkpoint-before-model ordering, zero-reconversion reuse, and the accepted content and evidence contracts (ADR-0003, ADR-0004, ADR-0040, ADR-0058, ADR-0059) are unaffected.
+- **What is withdrawn.** Docling-Graph templates, compiled Graph pipeline configuration, run-owned extraction graphs, translation of upstream chunk/item provenance, and the Graph-specific gates in F0026 and the evaluation strategy.
+- **Seam kept.** F0015 compiles profiles behind a pipeline-neutral extraction port and F0016 records pipeline identity on each run, so a future pipeline proposal can add a backend without changing source, content or interpretation identity.
+- **Coming back.** A Graph or other pipeline candidate returns only as a new ADR with a new plan and full re-qualification against the F0005 corpus and thresholds. The F0005 measurements below are its baseline evidence.
 
 ## Context
 

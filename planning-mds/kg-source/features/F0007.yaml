@@ -11,9 +11,24 @@ roadmap_section: Next
 roadmap_order: 6
 rationale: FactSlot defines canonical semantic identity for every fact; the GL limits in the v0.1 acceptance question
   are distinct FactSlots (section 13).
-validation_gate: F0001 accepted; plan action Phase A and Phase B approved for this feature.
+validation_gate: F0006 complete; ADR-0039 decision recorded; plan action Phase A and Phase B approved
+  for this feature.
 depends_on:
-- feature:F0001
+- feature:F0002
+- feature:F0003
+- feature:F0006
 governed_by:
 - adr:0006
 - adr:0066
+- adr:0039
+- adr:0038
+notes:
+- 'Requirement-ownership amendment 2026-11-08 - Carry master blueprint 107.4 and ADR-0039 into the PRD:
+  information state (eight states) is separate from the value, NOT_FOUND/NOT_STATED carry the exact scope
+  searched, and access denial is never an information state. Values use qualified money (exact decimal,
+  ISO 4217 currency, basis) and scoped identifiers (scheme, type, value).'
+- 'Requirement-ownership amendment 2026-11-08 - Carry 109.1: define FactSlot identity beyond the first
+  scalar example (multi-valued, qualified and relationship slots). FactSlot keys are the predicate key
+  referenced by the ADR-0038 SourceAuthorityPolicy owned by F0018.'
+- Requirement-ownership amendment 2026-11-08 - New tenant-owned tables bind child rows and foreign keys
+  to tenant ownership and follow the ADR-0042 row-security pattern settled in F0018 Phase B.

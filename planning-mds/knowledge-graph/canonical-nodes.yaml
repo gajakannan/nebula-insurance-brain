@@ -229,8 +229,8 @@ adrs:
       - capability:local-dependency-stack
       - capability:parse-once-content-artifact
   - id: adr:0060
-    label: Docling-Graph Document Pipeline Orchestration (Proposed; Graph dense rejected in F0005 2026-10-28,
-      reopen deadline F0014/F0015 planning)
+    label: Docling-Graph Document Pipeline Orchestration (Rejected 2026-11-08; Graph dense failed F0005
+      qualification 2026-10-28)
     path: planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
     related_nodes:
       - adr:0003
@@ -710,7 +710,7 @@ capabilities:
     notes: 'As built (F0005, 2026-10-28): Docling converts in a supervised conversion-only child with
       a 300 s parent deadline; Nebula publishes the immutable native bundle (with observed OCR quality)
       before extraction and reuses it on restart. The direct-baseline client stays the default; Graph
-      dense was rejected (ADR-0060 Proposed). Execution controls: ADR-0074.'
+      dense was rejected and ADR-0060 was Rejected on 2026-11-08. Execution controls: ADR-0074.'
     related_nodes:
       - adr:0003
       - adr:0004
@@ -786,9 +786,10 @@ capabilities:
       - planning-mds/architecture/ontology-planning-handoff.md
   - id: capability:semantic-interpretation-run
     label: Semantic interpretation run
-    notes: 'Target: Docling-Graph extracts from saved native content, producing run-owned graph/provenance
-      and a provider-neutral InterpretationResult with honest evidence precision. F0001 used direct vLLM;
-      the ADR-0060 integration is planned.'
+    notes: 'Target: interpretation runs extract from saved native content through the direct-baseline
+      pipeline (ADR-0055) behind a pipeline-neutral port, producing a provider-neutral InterpretationResult
+      with honest evidence precision and recorded pipeline identity. ADR-0060 (Docling-Graph) was Rejected
+      on 2026-11-08.'
     related_nodes:
       - adr:0016
       - adr:0035

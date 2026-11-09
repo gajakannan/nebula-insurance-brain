@@ -9,14 +9,15 @@ coverage_excluded:
 phase: v0.1C
 roadmap_section: Later
 roadmap_order: 9
-rationale: v0.1 hardening closes Golden Corpus, AuthX, recovery, revocation, and independent frozen evaluation gates, including F0065 assessment correctness, lineage, temporal freshness, and complete derived-result access (sections 96, 115, 121, 124). ADR-0060 adds real Docling-Graph reuse, grounding, recovery, isolation, and quality gates.
+rationale: v0.1 hardening closes Golden Corpus, AuthX, recovery, deletion/revocation, and independent
+  frozen evaluation gates, including F0065 assessment correctness, lineage, temporal freshness, and complete
+  derived-result access (sections 96 to 98, 110, 115, 121, 124).
 depends_on:
-- feature:F0001
-- id: feature:F0065
-  provenance: extracted
-  confidence: 1.0
+- feature:F0024
+- feature:F0025
+- feature:F0065
+- feature:F0069
 governed_by:
-- adr:0060
 - adr:0048
 - adr:0053
 - adr:0056
@@ -25,5 +26,19 @@ governed_by:
 - adr:0064
 - adr:0065
 - adr:0066
+- adr:0042
+- adr:0043
 notes:
 - F0005 closeout carry-in (2026-10-29) - queue-race orphan-source sweep (Backend), F0004 SEC-L2 headers (Security), the ADR-0073 OCR-bearing restore drill (QE/DevOps), and verification of the activation preconditions (SEC-F5-M1, Docling/pillow requalification, the SEC-F5-L4 residual) before v0.1 release. See the README.
+- Requirement-ownership amendment 2026-11-08 - Carry ADR-0043 v0.1 minimum - operator-initiated deletion
+  with a dependency inventory, tombstones, and a restore drill showing deletion re-applied before restored
+  data is readable. Retention schedules stay a pre-pilot policy input.
+- Requirement-ownership amendment 2026-11-08 - Prove ADR-0042 isolation (row security under real roles,
+  121.2 items 4 and 5) and ADR-0053 v0.1 negative tests (items 6 and 12); include the 110.4 prompt-injection
+  case in the frozen challenge suite.
+- Requirement-ownership amendment 2026-11-08 - Own master blueprint 97 and 98 - evaluation metrics with
+  agreed targets and the regression suite; set 114.2 operational budgets with ADR-0048. v0.1 ingestion
+  is local file intake only; the 114.1 connector contract is deferred to F0050.
+- Requirement-ownership amendment 2026-11-08 - Carry the F0006 closeout security follow-ups - SEC-01 dependency
+  remediation and verified converter resource isolation, SEC-02 security-planning baseline and strict
+  audit rerun, SEC-03 nosniff headers - as v0.1 release preconditions if not closed earlier.

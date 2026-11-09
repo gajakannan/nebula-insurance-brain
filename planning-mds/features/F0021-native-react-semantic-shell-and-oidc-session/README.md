@@ -10,6 +10,13 @@ The native React semantic shell with the OIDC session contract and safe re-auth 
 
 Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0036](../../architecture/decisions/ADR-0036-nebula-keeps-a-native-semantic-ux-onyx-is-a-reference-implementation.md), [ADR-0049](../../architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md), [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md).
 
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0002 (previously F0001).
+- ADR-0051 decision recorded 2026-11-08 - same-origin BFF with an opaque HttpOnly session cookie, server-held tokens and renewal, CSRF and origin checks, and upstream revocation on logout. No browser token storage. Formal acceptance needs section 121.2 items 8 and 9.
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0021.yaml`.

@@ -57,7 +57,9 @@ Report model extraction correctness and severe errors separately from determinis
 
 Worked examples are development/documentation fixtures and remain outside the frozen holdout. Require definition/example/boundary/contract/story links for new concepts, local schema/reference validation for structured examples, and actual runnable reproduction instructions when the corresponding runtime ships. A structural example check supplies no measured model performance or runtime proof.
 
-## Docling-Graph integration gate (ADR-0060)
+## Docling-Graph integration gate (ADR-0060, Rejected 2026-11-08)
+
+> **Rejected 2026-11-08.** The operator rejected [ADR-0060](../architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) after Graph dense failed F0005 live qualification. The v0.1 pipeline is Docling conversion plus the direct-baseline extraction client (ADR-0055) under the ADR-0074 controls. The text below is kept as history; master blueprint section 126 lists what survives.
 
 F0005 must exercise the real pinned upstream package and local model. F0001's direct-client proof is the historical comparison, not evidence that the new pipeline passes. F0026 carries these checks into release qualification:
 
