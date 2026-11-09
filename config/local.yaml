@@ -10,6 +10,17 @@ extraction:
   # F0005: Graph dense is selected here only after recorded qualification acceptance.
   pipeline: direct-baseline
 
+conversion:
+  # SEC-01 (ADR-0074 amendment 2026-11-08): ceilings for the conversion-only child.
+  # cgroup = kernel-enforced systemd user scope (MemoryMax, MemorySwapMax=0, TasksMax);
+  #          the worker refuses to start if the scope cannot be created.
+  # watchdog = self-imposed rlimits + parent memory sampling only; trusted local fixtures.
+  # Sized from measured GL fixture conversions on Docling 2.142.0 (peak RSS 2.4-2.8 GiB).
+  isolation: cgroup
+  memory_max_mib: 6144
+  max_tasks: 512
+  cpu_seconds: 1200
+
 jobs:
   # F0005-S0002: unfinished document jobs (queued, retry, running) allowed at once;
   # a new submission beyond this is rejected explicitly with queue_depth_exceeded.

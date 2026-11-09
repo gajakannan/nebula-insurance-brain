@@ -1,12 +1,12 @@
 # Authorization Review — Nebula Insurance Brain
 
-**Status:** Draft
-**Date:** 2026-09-05
+Status: Baseline (F0002 bounded scope implemented; F0018, F0021, F0022 and F0026 extend it)
+**Date:** 2026-09-05; status normalized 2026-11-08 for the strict security audit (SEC-02)
 **Owner:** Security role (completes during Phase B of F0002 and F0018)
 
 ## Scope
 
-This review seeds the Brain's authorization model from the master blueprint (sections 65, 66, 110, and 118 to 122). It is a draft until the permission catalog, Casbin model and policy files, and the carryover tests in section 121.2 exist in this repository.
+This review seeds the Brain's authorization model from the master blueprint (sections 65, 66, 110, and 118 to 122). F0002 delivered the Casbin model and policy files under `policies/`, the verified principal and scope kernel, and its AuthX cases (EX-AUTHX-001–018). The remaining section 121.2 carryover cases are owned by F0018, F0021, F0022 and F0026; this review is updated as each lands.
 
 ## Identity and principals
 

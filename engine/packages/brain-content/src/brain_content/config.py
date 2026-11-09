@@ -86,6 +86,46 @@ def load_job_queue_config() -> JobQueueConfig:
     return JobQueueConfig(max_queue_depth=depth)
 
 
+CONVERSION_ISOLATION_MODES = ("cgroup", "watchdog")
+
+
+@dataclass(frozen=True)
+class ConversionConfig:
+    """Resource ceilings for the conversion-only child (SEC-01, ADR-0074 amendment).
+
+    `cgroup` (the default) requires a kernel-enforced systemd user scope and the
+    worker refuses to start without one. `watchdog` keeps only the self-imposed
+    rlimits and the parent memory sampler; it is for trusted local fixtures.
+    """
+
+    isolation: str = "cgroup"
+    memory_max_mib: int = 6144
+    max_tasks: int = 512
+    cpu_seconds: int = 1200
+
+
+def load_conversion_config() -> ConversionConfig:
+    override = os.environ.get("BRAIN_LOCAL_CONFIG_PATH")
+    path = Path(override) if override else _find_config_file(Path.cwd())
+    if not path.is_file():
+        raise ConfigError("conversion configuration is missing")
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    section = data.get("conversion") or {}
+    if not isinstance(section, dict):
+        raise ConfigError("conversion must be a mapping")
+    defaults = ConversionConfig()
+    isolation = section.get("isolation", defaults.isolation)
+    if isolation not in CONVERSION_ISOLATION_MODES:
+        raise ConfigError("conversion.isolation must be cgroup or watchdog")
+    values = {}
+    for key in ("memory_max_mib", "max_tasks", "cpu_seconds"):
+        value = section.get(key, getattr(defaults, key))
+        if type(value) is not int or value <= 0:
+            raise ConfigError(f"conversion.{key} must be a positive integer")
+        values[key] = value
+    return ConversionConfig(isolation=isolation, **values)
+
+
 def _find_config_file(start: Path) -> Path:
     """Walk upward from `start` looking for `config/local.yaml` (a fresh checkout may
     run the app from the repo root or from within `engine/`)."""

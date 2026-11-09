@@ -12,6 +12,7 @@
 **Accepted:** 2026-10-28. At G4 round 2 of feature run `2026-10-25-4020923b`, the operator approved acceptance once Code Review N1 and Security SEC-F5-L5 were fixed and verified. Both were verified by the independent delta review (`delta-review-report.md`) and by the final live fault, timeout and kill lanes.
 **Refines:** [ADR-0003](ADR-0003-one-time-content-extraction.md) (one-time extraction: how a conversion attempt is bounded and owned), [ADR-0004](ADR-0004-source-content-artifact-and-interpretation-are-separately-versioned.md) (job recovery around the artifact checkpoint) and [ADR-0055](ADR-0055-local-inference-profile-phi-4-mini-on-vllm.md) (how the dedicated local provider is shared and recovered). It applies to every extraction pipeline (`direct-baseline`, `graph-dense`, `graph-direct`).
 **Scope:** The local Docker Compose runtime on one host, matching ADR-0060's acceptance scope. It is not a distributed quota or a production topology. F0026 may reopen it for production qualification.
+**Amended:** 2026-11-08 — conversion resource containment for SEC-01 (section 1a). The amendment adds controls; it does not change the accepted decisions above it.
 **Source:** F0005 assembly plan Steps 0a, 2, 4 and 6 (Phase B, approved 2026-10-25), first written as ADR-0060 amendments, plus the F0005 G3 review findings.
 
 ## Context
@@ -29,7 +30,19 @@ The controls themselves are not Graph-specific. They now run for the default `di
 - On failure the parent sends SIGTERM to the group, waits 2 s, sends SIGKILL, and reaps with a bound. If cleanup cannot be confirmed, the worker stops claiming (`converter_cleanup_unconfirmed`).
 - Orphaned children are reaped at startup. A reused PID fails closed. Receipts carry the kernel boot id, so a receipt from a known earlier boot never signals anyone; only its staging is removed. An unreadable boot id is not proof of staleness: the reaper then fails closed.
 - The child has no inference or publication capability, and does not inherit the host-guard lock. Only the parent publishes, through the existing fenced readiness commit (ADR-0004/0059).
-- **Known limit (Security SEC-F5-M1):** the child shares the worker's OS user and has no memory cap. OS-level isolation (a separate user or container, a memory limit, no network) is required before any activation or non-synthetic document.
+- **Known limit (Security SEC-F5-M1):** the child shares the worker's OS user. The memory cap is now in place (section 1a). A separate user or container and no network remain required before any activation or non-synthetic document.
+
+### 1a. Conversion runs under resource ceilings (amendment 2026-11-08, SEC-01)
+
+The F0006 security review (run `2026-11-02-5a00b0ff`, SEC-01) found that the 300-second deadline bounds time but not memory: a crafted PDF can exhaust host memory before the deadline. Measured on the GL fixtures with Docling 2.142.0, conversion peaks at 2.4–3.0 GiB resident memory, ~10 CPU-seconds and 70 threads, while reserving ~64 GB of virtual address space. `RLIMIT_AS`/`RLIMIT_DATA` therefore cannot serve as the memory ceiling.
+
+- **Kernel ceiling (`conversion.isolation: cgroup`, the default).** Each child is launched in a transient systemd user scope with `MemoryMax`, `MemorySwapMax=0` and `TasksMax`. The kernel kills the scope when the ceiling is crossed. The worker probes the scope at startup with the same environment as a real launch and refuses to start (`conversion_isolation_unavailable`) if it cannot be created. Only `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS` (session paths, not credentials) are added to the child's allowlisted environment in this mode.
+- **Self-imposed limits (every mode).** Before Docling loads, the child sets `RLIMIT_CPU`, `RLIMIT_FSIZE`, `RLIMIT_NOFILE` and `RLIMIT_CORE=0`, never above an inherited hard limit.
+- **Parent memory sampler (every mode).** The watchdog samples the process group's resident memory every 100 ms and ends the attempt above the same ceiling. It is defense in depth under cgroup isolation, and the only memory bound under `conversion.isolation: watchdog`, which is for trusted local fixtures.
+- **Closed reason vocabulary unchanged.** A breach is reported as `conversion_failed`; diagnostics name `resource_limit` (sampler) or `child_signal` (kernel kill or `SIGXCPU`/`SIGXFSZ`). No migration is needed.
+- **Committed ceilings** (`config/local.yaml`): 6144 MiB memory, no swap, 512 tasks, 1200 CPU-seconds, 1 GiB per written file, 1024 open files.
+
+The same change upgrades the conversion dependencies to clear SEC-01's advisories (Docling 2.142.0, pypdf 6.21.4, Pillow 13.0.0 and others; see `docker/DEPENDENCY-MATRIX.md`). The provenance hooks were revalidated on Docling 2.142.0.
 
 ### 2. One host worker per canonical inference endpoint
 
@@ -94,7 +107,9 @@ These live-host results come from F0005 run `2026-10-25-4020923b`:
 
 The reruns after the G3 rework (H1, M1–M5, SEC-F5-L1/L2) and after G4 round 2 (N1, SEC-F5-L4/L5, Code Review Lows) are recorded in that run's `test-execution-report.md`. At G4 (2026-10-28) the operator approved accepting this ADR once N1 and L5 were fixed and verified.
 
-**Open before any activation or non-synthetic document:** SEC-F5-M1 (converter OS isolation) and the restart environment. The supervisor restarts vLLM with the inherited environment, which the recording environment needs for CUDA and the model cache.
+**Amendment proof (2026-11-08, section 1a):** `neuron/packages/brain-ingestion/tests/test_conversion_limits.py` shows the child's rlimits, the scope's `memory.max`/`memory.swap.max`/`pids.max`, a kernel kill of an over-allocating child with the sampler disabled, a sampler stop in watchdog mode, and fail-closed startup without a usable scope. Real native and OCR fixture conversions complete under the committed ceilings (peak 2.6 and 3.0 GiB). The record is `planning-mds/security/reviews/security-review-2026-11-08.md`.
+
+**Open before any activation or non-synthetic document:** the remainder of SEC-F5-M1 (a separate OS user or container and no network for the converter) and the restart environment. The supervisor restarts vLLM with the inherited environment, which the recording environment needs for CUDA and the model cache.
 
 ## References
 

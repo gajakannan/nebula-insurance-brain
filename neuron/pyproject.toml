@@ -7,6 +7,16 @@ dependencies = ["brain-ingestion", "brain-interpretation", "brain-extraction"]
 
 [tool.uv]
 package = false
+# SEC-01 (F0006 security review, run 2026-11-02-5a00b0ff): floors for transitive packages
+# with published advisories. Raise, never lower; rerun pip-audit after any lock change.
+constraint-dependencies = [
+  "aiohttp>=3.14.4",
+  "certifi>=2026.10.18",
+  "docling-slim>=2.142.0",
+  "filelock>=4.2.1",
+  "pillow>=13.0.0",
+  "setuptools>=84.1.0",
+]
 
 [tool.uv.sources]
 brain-ingestion = { workspace = true }

@@ -4731,7 +4731,7 @@ A review of this blueprint against the feature portfolio on 2026-11-08 found req
 | Per-run operational telemetry | 114.2 | F0016; budgets and SLOs in F0026 | ADR-0048 |
 | Evaluation metrics and regression testing | 97, 98 | F0026 | ADR-0048 |
 | Connector contract (source-system identity, change cursor, withdrawal) | 114.1 | F0050 (v0.3); v0.1 intake is local files only | ADR-0028 |
-| F0006 security follow-ups SEC-01/02/03 | 110.4, 114.3 | F0026 release preconditions if not closed earlier | ADR-0074 |
+| F0006 security follow-ups: SEC-01/02 remediated 2026-11-08; SEC-03 and the SEC-F5-M1 remainder open | 110.4, 114.3 | F0026 release preconditions | ADR-0074 |
 
 The v0.1 dependency graph in the feature shards was also corrected so each feature depends on the features it builds on, not only F0001. The dependencies are recorded in each shard's `depends_on` and appear in its README amendment.
 
@@ -5266,7 +5266,7 @@ Status as of 2026-11-08:
 1. **Source authority owner and policy — decided.** The operator owns and approves source-authority policy releases; ADR-0038 records the v0.1 GL policy (issued package authoritative; submissions and broker correspondence are requested terms). F0018 implements it and F0024 proves it.
 2. **Tenant/entity/knowledge-base identity scope — resolved for v0.1** by F0002 (ADR-0061/ADR-0062 accepted for the bounded scope). The pilot access model is proven in F0026.
 3. **Host, build and model/provider data policy — local profile resolved; production open.** The local topology (ADR-0054) and dependency matrix are fixed. v0.1 inference is local only with no fallback to an external provider (ADR-0055; F0016). The production host and extension build remain a pre-pilot decision.
-4. **F0005 — closed.** F0005 closed on 2026-10-28 on its rejection branch: Graph dense failed live qualification and ADR-0074's execution controls were accepted. The operator rejected ADR-0060 on 2026-11-08. The direct-baseline pipeline is the v0.1 path; SEC-01 dependency remediation and converter resource isolation remain required before untrusted or production PDFs (F0026).
+4. **F0005 — closed.** F0005 closed on 2026-10-28 on its rejection branch: Graph dense failed live qualification and ADR-0074's execution controls were accepted. The operator rejected ADR-0060 on 2026-11-08. The direct-baseline pipeline is the v0.1 path; SEC-01 dependency remediation and converter memory/CPU/process ceilings were delivered on 2026-11-08 (ADR-0074 §1a); a separate OS user or container and no network for the converter (SEC-F5-M1 remainder) remain required before untrusted or production PDFs (F0026).
 5. **Licensed policy packages and reviewers — open.** v0.1 development uses synthetic fixtures; a licensed or authorized corpus and named reviewers are an F0026 prerequisite (also required for real guideline authority under F0065).
 6. **Thresholds, review capacity, budgets and recovery objectives — partially decided.** Extraction thresholds were approved for F0005. Release thresholds, SLOs, budgets and RPO/RTO are set in F0026 under ADR-0048.
 7. **Retention, holds, sharing and deletion — v0.1 minimum decided.** ADR-0043 records operator-initiated deletion with tombstones and restore-time re-application for v0.1 (F0026). Legal retention schedules, holds and conversation-sharing policy remain open before a production pilot.
