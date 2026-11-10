@@ -11,6 +11,7 @@
 **Owner:** Architect
 **Design review:** F0007 Phase B approved by operator token `approve-phase-b` on 2026-11-09, plan run `2026-11-09-60865e32`. Formal ADR acceptance remains pending the runtime proofs below.
 **Formal acceptance:** requires the PostgreSQL migration, concurrent-resolution, ownership, carrier-validation and pilot-regression proofs listed in the F0007 assembly plan. Plan approval alone is not runtime acceptance.
+**Proof evidence:** all five proof gates below have runtime evidence from F0007 feature run `2026-11-09-b94cfa12` (2026-11-09; see that run's `architect-implementation-review.md`). The status stays Proposed until the operator records formal acceptance.
 **Refines:** [ADR-0006](ADR-0006-factslot-defines-canonical-semantic-identity.md) (Accepted) beyond its first scalar example. Implements the F0007 share of [ADR-0039](ADR-0039-typed-insurance-values-and-completeness.md) decisions 1–5 and [ADR-0066](ADR-0066-names-are-time-bounded-claims.md) §1/§1a/§2. Does not accept those Proposed ADRs and does not implement ADR-0039 decision 6 (package completeness, F0014).
 
 ## Context
@@ -178,6 +179,6 @@ fact_slot_qualifier (slot, name, type, canonical value)  ×N per slot
 ## References
 
 - Master blueprint §§13, 15, 106.3, 107.3, 107.4, 109.1
-- [F0007 assembly plan](../../features/F0007-factslot-model/feature-assembly-plan.md)
+- [F0007 assembly plan](../../features/archive/F0007-factslot-model/feature-assembly-plan.md)
 - Schemas: `planning-mds/schemas/fact-slot-key-v1.schema.json`, `fact-answer-v1.schema.json`, `fact-slot-resolution-result-v1.schema.json`
 - Examples: EX-OWN-003, EX-SEM-008

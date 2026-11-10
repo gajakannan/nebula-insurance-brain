@@ -18,4 +18,4 @@ The [design amendment](governed-evidence-retrieval-design.md) is a cross-feature
 
 F0067 reads the resulting trace events later; it does not gate emission. F0068 at v0.4+ owns conditional spectral/heat work after baseline measurement and a separate experiment decision. F0061 retains its existing scope. See Proposed [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) and handoff PR-01–09 for role ownership and proof conditions.
 
-| F0007 | [FactSlot model](../features/F0007-factslot-model/feature-assembly-plan.md) | Phase A+B approved by operator 2026-11-09 (plan run `2026-11-09-60865e32`); F0002/F0003/F0006 delivered prerequisites; additive migration 0012; no runtime implementation claimed |
+| F0007 | [FactSlot model](../features/archive/F0007-factslot-model/feature-assembly-plan.md) | Done / Archived 2026-11-09 (feature run `2026-11-09-b94cfa12`; plan run `2026-11-09-60865e32`); additive migration 0012; 39 ACs and ADR-0077 proof gates evidenced; ADR-0077 still Proposed |

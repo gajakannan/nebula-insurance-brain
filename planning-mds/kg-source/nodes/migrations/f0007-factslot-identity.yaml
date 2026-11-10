@@ -1,0 +1,13 @@
+id: migration:f0007-factslot-identity
+label: F0007 FactSlot identity (revision 0012, additive)
+path: engine/migrations/versions/0012_f0007_factslot_identity.py
+notes: Adds nullable identity columns to fact_slot (NULL marks a legacy pilot slot), a generated
+  subject_kb_entity_id, the partial unique fingerprint index, owner-bound parent/subject/object keys,
+  and the append-only fact_slot_qualifier table. Triggers make identity immutable (including NULL to
+  value) and a deferred trigger checks member and qualifier parents. No DDL on canonical_fact_version,
+  no RLS, BYPASSRLS or SECURITY DEFINER. Downgrade refuses while identity-v1 or qualifier rows exist.
+related_nodes:
+- capability:factslot-identity-resolution
+- entity:fact-slot
+- entity:fact-slot-qualifier
+- adr:0077

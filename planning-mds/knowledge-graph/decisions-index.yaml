@@ -1,14 +1,14 @@
 version: 0
-generated_at: '2026-11-05T01:03:53+00:00'
+generated_at: '2026-11-10T02:45:35+00:00'
 summary:
-  total_decisions: 14
+  total_decisions: 16
   by_kind:
     DECISION: 0
     SUPERSEDES: 0
     TRADEOFF: 0
-    WHY: 14
-  resolved_node_count: 7
-  resolved_symbol_count: 11
+    WHY: 16
+  resolved_node_count: 9
+  resolved_symbol_count: 13
   ambiguous_count: 0
 decisions:
 - id: decision:engine-migrations-versions-0011-f0006-assertion-semantics-l269-why
@@ -18,23 +18,30 @@ decisions:
   text: old binaries cannot represent v2 rows; rollback must retain evidence.
   resolved_node: capability:versioned-assertion-semantics
   resolved_symbol: symbol:capability-versioned-assertion-semantics:0011-f0006-assertion-semantics.downgrade
-- id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l162-why
+- id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l126-why
   file: engine/packages/brain-contracts/src/brain_contracts/assertions.py
-  line: 162
+  line: 126
+  kind: WHY
+  text: referencing builds these with its own attrs wrapper, which mypy's
+  resolved_node: capability:semantic-interpretation-run
+  resolved_symbol: symbol:capability-semantic-interpretation-run:assertions.no-remote-reference
+- id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l164-why
+  file: engine/packages/brain-contracts/src/brain_contracts/assertions.py
+  line: 164
   kind: WHY
   text: the offline JSON Schema checks impose exact wire types before decoding.
-  resolved_node: capability:versioned-assertion-semantics
-  resolved_symbol: symbol:capability-versioned-assertion-semantics:assertions.strict-model
-- id: decision:engine-packages-brain-persistence-src-brain-persistence-assertions-l86-why
+  resolved_node: capability:semantic-interpretation-run
+  resolved_symbol: symbol:capability-semantic-interpretation-run:assertions.strict-model
+- id: decision:engine-packages-brain-persistence-src-brain-persistence-assertions-l87-why
   file: engine/packages/brain-persistence/src/brain_persistence/assertions.py
-  line: 86
+  line: 87
   kind: WHY
   text: name identity deliberately omits quote-specific currency/hyphen rules.
   resolved_node: capability:assertion-eligibility-guards
   resolved_symbol: symbol:capability-assertion-eligibility-guards:assertions.normalized-name
-- id: decision:engine-packages-brain-persistence-src-brain-persistence-assertions-l397-why
+- id: decision:engine-packages-brain-persistence-src-brain-persistence-assertions-l398-why
   file: engine/packages/brain-persistence/src/brain_persistence/assertions.py
-  line: 397
+  line: 398
   kind: WHY
   text: failed name ownership must roll back its references without losing
   resolved_node: capability:assertion-eligibility-guards
@@ -74,9 +81,9 @@ decisions:
   text: a refused connection proves the request never reached the
   resolved_node: capability:local-inference-service
   resolved_symbol: symbol:capability-local-inference-service:vllm-graph-client.request
-- id: decision:neuron-packages-brain-ingestion-src-brain-ingestion-conversion-process-l110-why
+- id: decision:neuron-packages-brain-ingestion-src-brain-ingestion-conversion-process-l276-why
   file: neuron/packages/brain-ingestion/src/brain_ingestion/conversion_process.py
-  line: 110
+  line: 276
   kind: WHY
   text: 're-check the deadline at acceptance, under the lock: a handoff that'
   resolved_node: capability:parse-once-content-artifact
@@ -106,3 +113,10 @@ decisions:
   kind: WHY
   text: jobs submitted before pipeline selection were processed by Graph's direct
   resolved_node: capability:parse-once-content-artifact
+- id: decision:scripts-ops-verify-content-l197-why
+  file: scripts/ops/verify_content.py
+  line: 197
+  kind: WHY
+  text: hash the columns this revision actually has. Mapped
+  resolved_node: capability:backup-and-restore
+  resolved_symbol: symbol:capability-backup-and-restore:verify-content.snapshot

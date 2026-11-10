@@ -1,0 +1,81 @@
+=== engine/packages/brain-temporal/src/brain_temporal/commit.py
+[KG] engine/packages/brain-temporal/src/brain_temporal/commit.py -> capability:bitemporal-canonical-commit
+  Features: feature:F0001, feature:F0003, feature:F0007
+  Stories: story:F0001-S0005, story:F0003-S0003, story:F0007-S0006
+  Casbin: policy_rule:fact-slot-commit
+  Symbols: CanonicalCommitService.commit:L111, CanonicalCommitService.__init__:L102, CanonicalCommitService:L91, FactCommitRepository:L23, FactSlotNotFound:L14, StaleVersionError:L18, FactCommitRepository.close_recorded:L46, FactCommitRepository.current_versions:L42, FactCommitRepository.insert_change:L68, FactCommitRepository.insert_version:L48 (+4 more)
+  Risk: capability:bitemporal-canonical-commit: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+=== engine/packages/brain-persistence/src/brain_persistence/repositories.py
+[KG] engine/packages/brain-persistence/src/brain_persistence/repositories.py -> capability:assertion-eligibility-guards
+  Features: feature:F0006
+  Stories: story:F0006-S0004, story:F0006-S0005
+  Symbols: _decision_from_row:L154, _evidence_from_json:L115, _evidence_to_json:L127, _fact_version_from_row:L358, _from_pg_range:L353, ReviewDecisionAuditSink:L42, _review_item_from_row:L139, SqlAlchemyAuditEventRepository:L85, SqlAlchemyFactCommitRepository:L376, SqlAlchemyOutboxReader:L552 (+33 more)
+  Risk: capability:assertion-eligibility-guards: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+=== engine/packages/brain-persistence/src/brain_persistence/models.py
+[KG] engine/packages/brain-persistence/src/brain_persistence/models.py -> capability:versioned-assertion-semantics, entity:assertion, entity:content-artifact
+  Features: feature:F0001, feature:F0003, feature:F0004, feature:F0005, feature:F0006
+  Stories: story:F0001-S0003, story:F0003-S0004, story:F0004-S0001, story:F0006-S0001, story:F0006-S0002, story:F0006-S0003, story:F0006-S0004, story:F0006-S0005
+  Symbols: Assertion:L149, AssertionEvidence:L193, AuditEventRow:L257, AuthenticationEventRow:L619, CanonicalCommitRow:L632, CanonicalFactChangeRow:L406, CanonicalFactVersionRow:L369, ContentArtifact:L80, DelegationRow:L567, DocumentVersion:L54 (+19 more)
+  Risk: capability:versioned-assertion-semantics: hotspot ▲ rank 5, bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion: bus-factor ⚠ gajapathi.kannan@live.com; entity:content-artifact: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+=== engine/apps/api/src/brain_api/routes/facts.py
+[KG] engine/apps/api/src/brain_api/routes/facts.py -> capability:durable-authorization-decisions
+  Features: feature:F0002
+  Stories: story:F0002-S0006
+  Symbols: commit_fact:L87, get_fact:L48, _slot:L43
+  Risk: capability:durable-authorization-decisions: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+=== engine/apps/api/src/brain_api/errors.py
+[KG] engine/apps/api/src/brain_api/errors.py -> capability:runtime-roots-and-toolchain
+  Features: feature:F0001
+  Stories: story:F0001-S0001
+  Symbols: BrainError.__init__:L34, AssertionIneligibleApiError:L56, BrainError:L27, ConcurrentCommitApiError:L78, ContentUnavailableError:L96, install_problem_details_handlers:L124, InvalidRangeApiError:L61, NotFoundError:L39, ProblemDetails:L14, _problem_response:L100 (+3 more)
+  Risk: capability:runtime-roots-and-toolchain: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+=== engine/packages/brain-testing/src/brain_testing/fixtures.py
+=== engine/pyproject.toml
+=== engine/packages/brain-domain
+[KG] engine/packages/brain-domain -> capability:authorization-enforcement, capability:durable-authorization-decisions, capability:structural-tenancy-and-entity-identity, capability:versioned-assertion-semantics, entity:assertion
+  Features: feature:F0001, feature:F0002, feature:F0003, feature:F0006
+  Stories: story:F0001-S0003, story:F0001-S0006, story:F0002-S0001, story:F0002-S0004, story:F0002-S0006, story:F0003-S0002, story:F0004-S0004, story:F0006-S0001 (+4 more)
+  Casbin: policy_rule:content-artifact-ingest, policy_rule:content-artifact-interpret, policy_rule:content-artifact-read, policy_rule:fact-slot-read, policy_rule:review-task-read
+  Risk: capability:authorization-enforcement: bus-factor ⚠ gajapathi.kannan@live.com; capability:durable-authorization-decisions: bus-factor ⚠ gajapathi.kannan@live.com; capability:structural-tenancy-and-entity-identity: bus-factor ⚠ gajapathi.kannan@live.com; capability:versioned-assertion-semantics: hotspot ▲ rank 5, bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+=== engine/migrations/versions
+[KG] engine/migrations/versions -> capability:bitemporal-canonical-commit, capability:parse-once-content-artifact, capability:structural-tenancy-and-entity-identity, capability:versioned-assertion-semantics, capability:versioned-content-contracts, entity:assertion-document-reference, entity:assertion-name-claim, entity:assertion-semantics, migration:f0004-content-contract, migration:f0005-job-event-reason
+  Features: feature:F0001, feature:F0002, feature:F0003, feature:F0004, feature:F0005, feature:F0006
+  Stories: story:F0001-S0003, story:F0001-S0005, story:F0002-S0001, story:F0003-S0002, story:F0003-S0003, story:F0004-S0001, story:F0004-S0002, story:F0004-S0004 (+9 more)
+  Casbin: policy_rule:content-artifact-ingest, policy_rule:content-artifact-interpret, policy_rule:fact-slot-commit
+  Risk: capability:bitemporal-canonical-commit: bus-factor ⚠ gajapathi.kannan@live.com; capability:parse-once-content-artifact: hotspot ▲ rank 1, bus-factor ⚠ gajapathi.kannan@live.com; capability:structural-tenancy-and-entity-identity: bus-factor ⚠ gajapathi.kannan@live.com; capability:versioned-assertion-semantics: hotspot ▲ rank 5, bus-factor ⚠ gajapathi.kannan@live.com; capability:versioned-content-contracts: hotspot ▲ rank 2, bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion-document-reference: bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion-name-claim: bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion-semantics: bus-factor ⚠ gajapathi.kannan@live.com; migration:f0004-content-contract: bus-factor ⚠ gajapathi.kannan@live.com; migration:f0005-job-event-reason: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+=== .github/workflows/ci-gates.yml
+=== --symbol CanonicalCommitService
+[KG] symbol 'CanonicalCommitService' -> 1 match(es)
+  capability:bitemporal-canonical-commit :: CanonicalCommitService  engine/packages/brain-temporal/src/brain_temporal/commit.py:91
+  Tip: `python3 scripts/kg/lookup.py --symbol <name>` for callers/callees
+=== --symbol SqlAlchemyFactCommitRepository
+[KG] symbol 'SqlAlchemyFactCommitRepository' -> 1 match(es)
+  capability:assertion-eligibility-guards :: SqlAlchemyFactCommitRepository  engine/packages/brain-persistence/src/brain_persistence/repositories.py:376
+  Tip: `python3 scripts/kg/lookup.py --symbol <name>` for callers/callees
+=== --symbol commit_fact
+[KG] symbol 'commit_fact' -> 1 match(es)
+  capability:durable-authorization-decisions :: commit_fact  engine/apps/api/src/brain_api/routes/facts.py:87
+  Tip: `python3 scripts/kg/lookup.py --symbol <name>` for callers/callees
+=== --symbol FactSlotRow
+[KG] symbol 'FactSlotRow' -> 1 match(es)
+  capability:versioned-assertion-semantics :: FactSlotRow  engine/packages/brain-persistence/src/brain_persistence/models.py:356
+  Tip: `python3 scripts/kg/lookup.py --symbol <name>` for callers/callees
+[KG] scripts/ops/verify_content.py -> capability:backup-and-restore
+  Features: feature:F0001
+  Stories: story:F0001-S0006
+  Symbols: canonical:L32, digest:L38, main:L251, owner:L42, snapshot:L46
+  Risk: capability:backup-and-restore: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius
+[KG] engine/tests/integration/test_assertion_migration.py -> capability:assertion-eligibility-guards, capability:versioned-assertion-semantics, entity:assertion, entity:assertion-document-reference, entity:assertion-name-claim, entity:assertion-semantics
+  Features: feature:F0001, feature:F0003, feature:F0006
+  Stories: story:F0001-S0003, story:F0006-S0001, story:F0006-S0002, story:F0006-S0003, story:F0006-S0004, story:F0006-S0005
+  Symbols: clone_claim:L22, insert_legacy:L89, test_additive_upgrade_preserves_legacy_identity_and_empty_rollback:L100, test_core_only_v2_and_legacy_sentinel_fail_at_commit:L157, test_inserted_evidence_page_and_bbox_must_match_server_snapshot:L59, test_matching_evidence_carriers_accept_honest_and_absent_regions:L75, test_occupied_downgrade_stops_without_erasing_semantics:L186, test_original_assertions_extensions_and_evidence_are_immutable:L139, test_v1_child_of_v2_parent_is_refused_by_deferred_guard:L176
+  Risk: capability:assertion-eligibility-guards: bus-factor ⚠ gajapathi.kannan@live.com; capability:versioned-assertion-semantics: hotspot ▲ rank 5, bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion: bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion-document-reference: bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion-name-claim: bus-factor ⚠ gajapathi.kannan@live.com; entity:assertion-semantics: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius

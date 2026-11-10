@@ -336,7 +336,7 @@ Preserve existing source/version/artifact IDs and tenant/KB constraints. Replace
 
 ## F0007 FactSlot identity and answer carriers (Phase B design approved 2026-11-09; implementation pending)
 
-Plan run `2026-11-09-60865e32`. [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (Proposed) and the [assembly plan](../features/F0007-factslot-model/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, constraints and migration `0012`.
+Plan run `2026-11-09-60865e32`. [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (Proposed) and the [assembly plan](../features/archive/F0007-factslot-model/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, constraints and migration `0012`.
 
 - **`fact_slot`:** gains nullable identity columns. A NULL `identity_version` marks a legacy pilot slot. Identity-v1 rows carry the predicate key, release reference, cardinality, slot role, optional relationship object, optional parent and member key, and a versioned fingerprint under a partial unique index per tenant/KB.
 - **Members:** MULTI members are child `fact_slot` rows, so `canonical_fact_version` and its ADR-0008 exclusion are unchanged.

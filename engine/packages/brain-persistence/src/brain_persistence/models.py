@@ -7,6 +7,7 @@ from sqlalchemy import (
     JSON,
     Boolean,
     CheckConstraint,
+    Computed,
     DateTime,
     ForeignKey,
     Integer,
@@ -364,6 +365,24 @@ class FactSlotRow(Base):
     tenant_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
     knowledge_base_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    # F0007 identity columns (migration 0012). All NULL on a legacy pilot slot, so
+    # the pilot `FactSlotRow(...)` constructor stays valid. Identity is immutable by
+    # trigger; `subject_kb_entity_id` is generated and never written.
+    identity_version: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    slot_role: Mapped[str | None] = mapped_column(Text, nullable=True)
+    predicate_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    predicate_release_ref: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cardinality: Mapped[str | None] = mapped_column(Text, nullable=True)
+    object_entity_id: Mapped[uuid.UUID | None] = mapped_column(_UUIDVariant, nullable=True)
+    parent_slot_id: Mapped[uuid.UUID | None] = mapped_column(_UUIDVariant, nullable=True)
+    member_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    fingerprint_version: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    identity_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(_UUIDVariant, nullable=True)
+    subject_kb_entity_id: Mapped[uuid.UUID | None] = mapped_column(
+        _UUIDVariant,
+        Computed("CASE WHEN identity_version IS NOT NULL THEN entity_id END", persisted=True),
+    )
 
 
 class CanonicalFactVersionRow(Base):
@@ -645,3 +664,4 @@ class CanonicalCommitRow(Base):
 # Register the additive F0004 Core tables after their parent models exist.
 from brain_persistence import assertion_models as _assertion_models  # noqa: E402, F401
 from brain_persistence import content_models as _content_models  # noqa: E402, F401
+from brain_persistence import fact_slot_models as _fact_slot_models  # noqa: E402, F401

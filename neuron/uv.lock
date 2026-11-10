@@ -488,6 +488,25 @@ requires-dist = [
 provides-extras = ["test"]
 
 [[package]]
+name = "brain-factslots"
+version = "0.1.0"
+source = { editable = "../engine/packages/brain-factslots" }
+dependencies = [
+    { name = "brain-domain" },
+    { name = "brain-security" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "brain-domain", editable = "../engine/packages/brain-domain" },
+    { name = "brain-security", editable = "../engine/packages/brain-security" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.24" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5.0" },
+]
+provides-extras = ["test"]
+
+[[package]]
 name = "brain-ingestion"
 version = "0.1.0"
 source = { editable = "packages/brain-ingestion" }
@@ -612,6 +631,7 @@ dependencies = [
     { name = "brain-assertions" },
     { name = "brain-content" },
     { name = "brain-domain" },
+    { name = "brain-factslots" },
     { name = "brain-review" },
     { name = "brain-security" },
     { name = "brain-temporal" },
@@ -625,6 +645,7 @@ requires-dist = [
     { name = "brain-assertions", editable = "../engine/packages/brain-assertions" },
     { name = "brain-content", editable = "../engine/packages/brain-content" },
     { name = "brain-domain", editable = "../engine/packages/brain-domain" },
+    { name = "brain-factslots", editable = "../engine/packages/brain-factslots" },
     { name = "brain-review", editable = "../engine/packages/brain-review" },
     { name = "brain-security", editable = "../engine/packages/brain-security" },
     { name = "brain-temporal", editable = "../engine/packages/brain-temporal" },
@@ -698,6 +719,7 @@ version = "0.1.0"
 source = { editable = "../engine/packages/brain-testing" }
 dependencies = [
     { name = "brain-domain" },
+    { name = "brain-factslots" },
     { name = "brain-persistence" },
     { name = "brain-security" },
 ]
@@ -705,6 +727,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "brain-domain", editable = "../engine/packages/brain-domain" },
+    { name = "brain-factslots", editable = "../engine/packages/brain-factslots" },
     { name = "brain-persistence", editable = "../engine/packages/brain-persistence" },
     { name = "brain-security", editable = "../engine/packages/brain-security" },
 ]
