@@ -1,0 +1,108 @@
+owned regression database: f0007_regr_71d81dd3 (alembic head applied)
+........................................................................ [  8%]
+........................................................................ [ 17%]
+........................................................................ [ 26%]
+........................................................................ [ 35%]
+........................................................................ [ 44%]
+........................................................................ [ 52%]
+........................................................................ [ 61%]
+........................................................................ [ 70%]
+........................................................................ [ 79%]
+........................................................................ [ 88%]
+........................................................................ [ 97%]
+........................                                                 [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/starlette/testclient.py:53
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+packages/brain-security/tests/test_verification.py::test_symmetric_algorithm_confusion_is_rejected
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 19 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/integration/test_assertion_admission.py: 25 warnings
+tests/integration/test_assertion_authority_projection.py: 9 warnings
+tests/integration/test_assertion_consumers.py: 16 warnings
+tests/integration/test_assertion_migration.py: 21 warnings
+tests/integration/test_assertion_ownership.py: 15 warnings
+tests/integration/test_authx_migration.py: 13 warnings
+tests/integration/test_content_migration_states.py: 37 warnings
+tests/integration/test_content_restore_v2.py: 3 warnings
+tests/integration/test_factslot_answers.py: 34 warnings
+tests/integration/test_factslot_migration.py: 8 warnings
+tests/integration/test_factslot_names.py: 5 warnings
+tests/integration/test_factslot_ownership.py: 5 warnings
+tests/integration/test_factslot_resolution.py: 19 warnings
+tests/integration/test_job_event_reason_migration.py: 22 warnings
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                                     Stmts   Miss  Cover
+--------------------------------------------------------------------------------------------
+apps/api/src/brain_api/__init__.py                                           0      0   100%
+apps/api/src/brain_api/app.py                                               18      0   100%
+apps/api/src/brain_api/config.py                                            25      1    96%
+apps/api/src/brain_api/deps.py                                              99      4    96%
+apps/api/src/brain_api/errors.py                                            86      0   100%
+apps/api/src/brain_api/health.py                                            29      2    93%
+apps/api/src/brain_api/routes/__init__.py                                    0      0   100%
+apps/api/src/brain_api/routes/content.py                                    50      2    96%
+apps/api/src/brain_api/routes/facts.py                                      68      2    97%
+apps/api/src/brain_api/routes/reviews.py                                    69      5    93%
+apps/api/src/brain_api/schemas/__init__.py                                   0      0   100%
+apps/api/src/brain_api/schemas/facts.py                                     44      0   100%
+apps/api/src/brain_api/schemas/review.py                                    75      0   100%
+apps/api/src/brain_api/security_headers.py                                  23      0   100%
+apps/api/src/brain_api/versions.py                                           5      0   100%
+packages/brain-domain/src/brain_domain/__init__.py                           0      0   100%
+packages/brain-domain/src/brain_domain/assertions.py                        85      0   100%
+packages/brain-domain/src/brain_domain/audit.py                             22      0   100%
+packages/brain-domain/src/brain_domain/authx.py                            338      0   100%
+packages/brain-domain/src/brain_domain/fact_answers.py                     135      1    99%
+packages/brain-domain/src/brain_domain/fact_slots.py                       153      0   100%
+packages/brain-domain/src/brain_domain/fact_values.py                      301      3    99%
+packages/brain-domain/src/brain_domain/facts.py                             54      0   100%
+packages/brain-domain/src/brain_domain/principal.py                         27      0   100%
+packages/brain-domain/src/brain_domain/review.py                            71      0   100%
+packages/brain-domain/src/brain_domain/tenancy.py                           63      0   100%
+packages/brain-factslots/src/brain_factslots/__init__.py                     6      0   100%
+packages/brain-factslots/src/brain_factslots/answers.py                     81      2    98%
+packages/brain-factslots/src/brain_factslots/names.py                       41      0   100%
+packages/brain-factslots/src/brain_factslots/ports.py                       43      0   100%
+packages/brain-factslots/src/brain_factslots/predicates.py                  29      0   100%
+packages/brain-factslots/src/brain_factslots/resolution.py                 143      1    99%
+packages/brain-factslots/src/brain_factslots/service.py                     57      4    93%
+packages/brain-persistence/src/brain_persistence/__init__.py                 0      0   100%
+packages/brain-persistence/src/brain_persistence/assertion_models.py        50      0   100%
+packages/brain-persistence/src/brain_persistence/assertions.py             408     59    86%
+packages/brain-persistence/src/brain_persistence/authx.py                  120      5    96%
+packages/brain-persistence/src/brain_persistence/base.py                     8      0   100%
+packages/brain-persistence/src/brain_persistence/content_models.py          22      0   100%
+packages/brain-persistence/src/brain_persistence/content_operations.py     190     20    89%
+packages/brain-persistence/src/brain_persistence/content_repository.py     170     22    87%
+packages/brain-persistence/src/brain_persistence/document_dates.py         163     15    91%
+packages/brain-persistence/src/brain_persistence/fact_slot_models.py        17      0   100%
+packages/brain-persistence/src/brain_persistence/fact_slots.py              98      1    99%
+packages/brain-persistence/src/brain_persistence/grants.py                  99      1    99%
+packages/brain-persistence/src/brain_persistence/identity.py                95      3    97%
+packages/brain-persistence/src/brain_persistence/models.py                 344      0   100%
+packages/brain-persistence/src/brain_persistence/repositories.py           169      5    97%
+packages/brain-persistence/src/brain_persistence/session.py                 17      0   100%
+packages/brain-persistence/src/brain_persistence/tenancy.py                145      6    96%
+packages/brain-temporal/src/brain_temporal/__init__.py                       0      0   100%
+packages/brain-temporal/src/brain_temporal/commit.py                        63      0   100%
+packages/brain-temporal/src/brain_temporal/outbox.py                        21      0   100%
+packages/brain-temporal/src/brain_temporal/ranges.py                        27      1    96%
+packages/brain-testing/src/brain_testing/__init__.py                         0      0   100%
+packages/brain-testing/src/brain_testing/factslots.py                       38      1    97%
+packages/brain-testing/src/brain_testing/fixtures.py                        73      0   100%
+--------------------------------------------------------------------------------------------
+TOTAL                                                                     4577    166    96%
+Coverage XML written to file ../planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/artifacts/coverage/g2-engine-full.xml
+Coverage JSON written to file ../planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/artifacts/coverage/g2-engine-full.json
+816 passed, 234 warnings in 164.80s (0:02:44)
+dropped f0007_regr_71d81dd3; exit=0

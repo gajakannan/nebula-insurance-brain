@@ -1,0 +1,311 @@
+{
+  "schema_version": 1,
+  "feature_id": "F0007",
+  "feature_slug": "factslot-model",
+  "run_id": "2026-11-09-b94cfa12",
+  "status": "approved",
+  "recorded_on": "2026-11-09",
+  "contract_version": "2026-07-11",
+  "contract_effective_date": "2026-07-11",
+  "feature_path_at_run_start": "planning-mds/features/F0007-factslot-model",
+  "feature_path_at_closeout": "planning-mds/features/archive/F0007-factslot-model",
+  "feature_state": "Archived",
+  "rerun_of": null,
+  "changed_paths": [
+    ".github/workflows/ci-gates.yml",
+    "engine/apps/api/pyproject.toml",
+    "engine/apps/api/src/brain_api/deps.py",
+    "engine/apps/api/src/brain_api/errors.py",
+    "engine/apps/api/src/brain_api/routes/facts.py",
+    "engine/migrations/versions/0012_f0007_factslot_identity.py",
+    "engine/packages/brain-domain/pyproject.toml",
+    "engine/packages/brain-domain/src/brain_domain/data/iso4217-2026-01.txt",
+    "engine/packages/brain-domain/src/brain_domain/fact_answers.py",
+    "engine/packages/brain-domain/src/brain_domain/fact_slots.py",
+    "engine/packages/brain-domain/src/brain_domain/fact_values.py",
+    "engine/packages/brain-domain/tests/test_fact_slots.py",
+    "engine/packages/brain-factslots/pyproject.toml",
+    "engine/packages/brain-factslots/src/brain_factslots/__init__.py",
+    "engine/packages/brain-factslots/src/brain_factslots/answers.py",
+    "engine/packages/brain-factslots/src/brain_factslots/names.py",
+    "engine/packages/brain-factslots/src/brain_factslots/ports.py",
+    "engine/packages/brain-factslots/src/brain_factslots/predicates.py",
+    "engine/packages/brain-factslots/src/brain_factslots/py.typed",
+    "engine/packages/brain-factslots/src/brain_factslots/resolution.py",
+    "engine/packages/brain-factslots/src/brain_factslots/service.py",
+    "engine/packages/brain-factslots/tests/conftest.py",
+    "engine/packages/brain-factslots/tests/test_contract_examples.py",
+    "engine/packages/brain-factslots/tests/test_factslots_unit.py",
+    "engine/packages/brain-persistence/pyproject.toml",
+    "engine/packages/brain-persistence/src/brain_persistence/fact_slot_models.py",
+    "engine/packages/brain-persistence/src/brain_persistence/fact_slots.py",
+    "engine/packages/brain-persistence/src/brain_persistence/models.py",
+    "engine/packages/brain-temporal/src/brain_temporal/commit.py",
+    "engine/packages/brain-testing/pyproject.toml",
+    "engine/packages/brain-testing/src/brain_testing/factslots.py",
+    "engine/pyproject.toml",
+    "engine/tests/fixtures/factslots/harness.py",
+    "engine/tests/fixtures/factslots/pilot-before.json",
+    "engine/tests/fixtures/factslots/pilot-seed.sql",
+    "engine/tests/integration/test_assertion_migration.py",
+    "engine/tests/integration/test_factslot_answers.py",
+    "engine/tests/integration/test_factslot_migration.py",
+    "engine/tests/integration/test_factslot_names.py",
+    "engine/tests/integration/test_factslot_ownership.py",
+    "engine/tests/integration/test_factslot_resolution.py",
+    "engine/uv.lock",
+    "neuron/uv.lock",
+    "planning-mds/BLUEPRINT.md",
+    "planning-mds/architecture/data-model.md",
+    "planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md",
+    "planning-mds/architecture/feature-assembly-plan.md",
+    "planning-mds/examples/source-authority-and-information-state.md",
+    "planning-mds/features/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md",
+    "planning-mds/features/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md",
+    "planning-mds/features/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md",
+    "planning-mds/features/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md",
+    "planning-mds/features/F0007-factslot-model/F0007-S0005-define-name-factslots.md",
+    "planning-mds/features/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md",
+    "planning-mds/features/F0007-factslot-model/GETTING-STARTED.md",
+    "planning-mds/features/F0007-factslot-model/PRD.md",
+    "planning-mds/features/F0007-factslot-model/README.md",
+    "planning-mds/features/F0007-factslot-model/STATUS.md",
+    "planning-mds/features/F0007-factslot-model/acceptance-criteria-checklist.md",
+    "planning-mds/features/F0007-factslot-model/contract-examples.json",
+    "planning-mds/features/F0007-factslot-model/feature-assembly-plan.md",
+    "planning-mds/features/F0007-factslot-model/personas.md",
+    "planning-mds/features/F0007-factslot-model/worked-examples.md",
+    "planning-mds/features/REGISTRY.md",
+    "planning-mds/features/ROADMAP.md",
+    "planning-mds/features/STORY-INDEX.md",
+    "planning-mds/features/archive/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md",
+    "planning-mds/features/archive/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md",
+    "planning-mds/features/archive/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md",
+    "planning-mds/features/archive/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md",
+    "planning-mds/features/archive/F0007-factslot-model/F0007-S0005-define-name-factslots.md",
+    "planning-mds/features/archive/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md",
+    "planning-mds/features/archive/F0007-factslot-model/GETTING-STARTED.md",
+    "planning-mds/features/archive/F0007-factslot-model/PRD.md",
+    "planning-mds/features/archive/F0007-factslot-model/README.md",
+    "planning-mds/features/archive/F0007-factslot-model/STATUS.md",
+    "planning-mds/features/archive/F0007-factslot-model/acceptance-criteria-checklist.md",
+    "planning-mds/features/archive/F0007-factslot-model/contract-examples.json",
+    "planning-mds/features/archive/F0007-factslot-model/feature-assembly-plan.md",
+    "planning-mds/features/archive/F0007-factslot-model/personas.md",
+    "planning-mds/features/archive/F0007-factslot-model/worked-examples.md",
+    "planning-mds/kg-source/bindings/f0007-planning.yaml",
+    "planning-mds/kg-source/features/F0007.yaml",
+    "planning-mds/kg-source/nodes/capabilities/factslot-identity-resolution.yaml",
+    "planning-mds/kg-source/nodes/capabilities/typed-fact-answer.yaml",
+    "planning-mds/kg-source/nodes/entities/fact-slot-qualifier.yaml",
+    "planning-mds/kg-source/nodes/entities/fact-slot.yaml",
+    "planning-mds/kg-source/nodes/migrations/f0007-factslot-identity.yaml",
+    "planning-mds/kg-source/nodes/schemas/schemas.yaml",
+    "planning-mds/knowledge-graph/canonical-nodes.yaml",
+    "planning-mds/knowledge-graph/code-index.yaml",
+    "planning-mds/knowledge-graph/decisions-index.yaml",
+    "planning-mds/knowledge-graph/feature-mappings.yaml",
+    "planning-mds/knowledge-graph/symbol-index.yaml",
+    "planning-mds/knowledge-graph/unbound-but-referenced.yaml",
+    "scripts/ops/verify_content.py"
+  ],
+  "scm": {
+    "base_ref": "main",
+    "head_ref": "roadmap/F0007-now",
+    "diff_artifact": "artifacts/diffs/changed-files.txt",
+    "head_commit_at_run_start": "ff0a619a4dbf458e4a529870cd0458bd832b9ba2",
+    "framework_validation_head": "d90bbb6fc70dffcfa6d70379d42015e895a49fa0"
+  },
+  "runtime_bearing": true,
+  "deployment_config_changed": true,
+  "frontend_in_scope": false,
+  "security_sensitive_scope": true,
+  "required_roles": [
+    "Quality Engineer",
+    "Code Reviewer",
+    "Security Reviewer",
+    "DevOps",
+    "Architect"
+  ],
+  "gate_results": {
+    "assembly_plan_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g0-assembly-plan-validation.md"
+    },
+    "runtime_preflight": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g1-runtime-preflight.md"
+    },
+    "self_review": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g2-self-review.md"
+    },
+    "deployability": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "deployability-check.md"
+    },
+    "approval": {
+      "required": true,
+      "result": "APPROVED",
+      "artifact": "gate-decisions.md",
+      "mitigation_tokens": []
+    },
+    "signoff": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "signoff-ledger.md"
+    },
+    "candidate_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "feature-action-execution.md"
+    },
+    "kg_reconciliation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "kg-reconciliation.md"
+    },
+    "pm_closeout": {
+      "required": true,
+      "result": "APPROVED",
+      "artifact": "pm-closeout.md"
+    },
+    "tracker_sync": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "lifecycle-gates.log"
+    }
+  },
+  "files": {
+    "readme": "README.md",
+    "action_context": "action-context.md",
+    "artifact_trace": "artifact-trace.md",
+    "gate_decisions": "gate-decisions.md",
+    "commands_log": "commands.log",
+    "lifecycle_gates_log": "lifecycle-gates.log",
+    "assembly_plan_validation": "g0-assembly-plan-validation.md",
+    "runtime_preflight": "g1-runtime-preflight.md",
+    "self_review": "g2-self-review.md",
+    "deployability": "deployability-check.md",
+    "g2_deployability": "g2-deployability-check.md",
+    "test_plan": "test-plan.md",
+    "test_execution_report": "test-execution-report.md",
+    "coverage_report": "coverage-report.md",
+    "code_review_report": "code-review-report.md",
+    "security_review_report": "security-review-report.md",
+    "signoff_ledger": "signoff-ledger.md",
+    "architect_implementation_review": "architect-implementation-review.md",
+    "feature_action_execution": "feature-action-execution.md",
+    "kg_reconciliation": "kg-reconciliation.md",
+    "pm_closeout": "pm-closeout.md",
+    "token_usage": "token-usage.json"
+  },
+  "role_results": {
+    "Architect": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g0-assembly-plan-validation.md",
+        "architect-implementation-review.md"
+      ],
+      "verdict_artifact": "architect-implementation-review.md"
+    },
+    "Quality Engineer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "test-plan.md",
+        "test-execution-report.md",
+        "coverage-report.md"
+      ],
+      "verdict_artifact": "test-execution-report.md"
+    },
+    "DevOps": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g1-runtime-preflight.md",
+        "deployability-check.md"
+      ],
+      "verdict_artifact": "deployability-check.md"
+    },
+    "Code Reviewer": {
+      "required": true,
+      "result": "APPROVED",
+      "required_artifacts": [
+        "code-review-report.md"
+      ],
+      "verdict_artifact": "code-review-report.md"
+    },
+    "Security Reviewer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "security-review-report.md"
+      ],
+      "verdict_artifact": "security-review-report.md"
+    }
+  },
+  "token_usage": {
+    "artifact": "token-usage.json",
+    "agent_tool": "claude-code",
+    "turns": 254,
+    "context_tokens": 101023985,
+    "uncached_input_tokens": 508,
+    "cached_input_tokens": 100414785,
+    "cache_creation_input_tokens": 608692,
+    "cache_creation_1h_input_tokens": 608692,
+    "cache_creation_5m_input_tokens": 0,
+    "output_tokens": 309199,
+    "cache_hit_ratio": 0.994,
+    "compactions": 0
+  },
+  "security_scans": {
+    "dependency": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/dependency-engine.json",
+      "waiver": null
+    },
+    "secrets": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/secrets/secrets-gitleaks-20261110-022610.sarif",
+      "waiver": null
+    },
+    "sast": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/sast/sast-semgrep-20261110-022610.sarif",
+      "waiver": null
+    },
+    "dast": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/dast/api-scan.json",
+      "waiver": null
+    }
+  },
+  "omissions": [
+    {
+      "artifact": "frontend-developer-report.md",
+      "reason": "frontend_in_scope=false; F0007 adds no experience/ path or UI"
+    },
+    {
+      "artifact": "ux-audit-report.md",
+      "reason": "frontend_in_scope=false; no UI scope"
+    },
+    {
+      "artifact": "ai-engineer-report.md",
+      "reason": "no neuron/ path, model, prompt or MCP change; AI not in scope"
+    }
+  ],
+  "waivers": {},
+  "global_evidence_refs": {},
+  "action": "feature",
+  "run_scope": "feature-completion"
+}

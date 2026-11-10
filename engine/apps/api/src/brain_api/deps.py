@@ -10,6 +10,8 @@ from brain_content.object_store import LocalFilesystemObjectStore
 from brain_content.store import ContentArtifactStore, LocalContentArtifactStore
 from brain_domain.authx import AuthenticationEvent, AuthenticationReason
 from brain_domain.principal import Principal
+from brain_factslots.ports import PredicateContractRegistry
+from brain_factslots.predicates import production_registry
 from brain_persistence.authx import SqlAlchemyAuthorityStore
 from brain_persistence.identity import (
     SqlAlchemyAuthenticationEventSink,
@@ -110,6 +112,15 @@ def get_identity_profile() -> IdentityProfile:
 
 def get_casbin_adapter() -> CasbinAuthorizationAdapter:
     return _casbin_adapter
+
+
+# F0007: production composition registers only the `sys` system predicates. The
+# `test` namespace is wired only by test composition (dependency override).
+_predicate_registry = production_registry()
+
+
+def get_predicate_registry() -> PredicateContractRegistry:
+    return _predicate_registry
 
 
 def get_authentication_event_sink(

@@ -242,13 +242,13 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0006-S0003](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md) — Done
   - [F0006-S0004](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md) — Done
   - [F0006-S0005](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md) — Done
-- [F0007 — FactSlot model](features/F0007-factslot-model/README.md) - Planned (Phase A+B approved by operator 2026-11-09, plan run `2026-11-09-60865e32`; implementation not started)
-  - [F0007-S0001](features/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md) - Not Started
-  - [F0007-S0002](features/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md) - Not Started
-  - [F0007-S0003](features/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md) - Not Started
-  - [F0007-S0004](features/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) - Not Started
-  - [F0007-S0005](features/F0007-factslot-model/F0007-S0005-define-name-factslots.md) - Not Started
-  - [F0007-S0006](features/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) - Not Started
+- [F0007 — FactSlot model](features/archive/F0007-factslot-model/README.md) - Done / Archived (2026-11-09; feature run `2026-11-09-b94cfa12`; operator approval at G4)
+  - [F0007-S0001](features/archive/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md) — Done
+  - [F0007-S0002](features/archive/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md) — Done
+  - [F0007-S0003](features/archive/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md) — Done
+  - [F0007-S0004](features/archive/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) — Done
+  - [F0007-S0005](features/archive/F0007-factslot-model/F0007-S0005-define-name-factslots.md) — Done
+  - [F0007-S0006](features/archive/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) — Done
 - [F0008 — Bitemporal canonical facts](features/F0008-bitemporal-canonical-facts/README.md) - Planned
 - [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
@@ -486,9 +486,9 @@ PM owns requirements and sequencing; Architect owns design, ADR and structural K
 
 ---
 
-### 4.14 F0007 FactSlot identity and answer carriers (Phase B design approved 2026-11-09; implementation pending)
+### 4.14 F0007 FactSlot identity and answer carriers (Phase B approved 2026-11-09; implemented and archived 2026-11-09)
 
-Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 with operator tokens `approve-phase-a` and `approve-phase-b`. The [assembly plan](features/F0007-factslot-model/feature-assembly-plan.md) and Proposed [ADR-0077](architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) define the design.
+Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 with operator tokens `approve-phase-a` and `approve-phase-b`. The [assembly plan](features/archive/F0007-factslot-model/feature-assembly-plan.md) and Proposed [ADR-0077](architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) define the design.
 
 - **Slot identity:** tenant, KB, subject, an opaque major-versioned predicate key and normalized qualifier rows, with a versioned SHA-256/JCS fingerprint used only for lookup. Concurrent resolvers converge on one slot. A collision is rejected, never merged.
 - **Members:** MULTI members are child slot rows, so the ADR-0008 exclusion applies per member without changing the F0008-owned version table.
@@ -498,7 +498,15 @@ Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 
 - **Legacy pilot slots:** they stay legacy, with no fabricated identity.
 - **Row-level security:** the inventory (`fact_slot`, `fact_slot_qualifier`) is handed to F0018.
 
-The design schemas are `fact-slot-key-v1`, `fact-answer-v1` and `fact-slot-resolution-result-v1`. The C4 topology is unchanged, and the feature README carries the ER and component views. Implementation and the ADR-0077 proof gates are pending.
+The design schemas are `fact-slot-key-v1`, `fact-answer-v1` and `fact-slot-resolution-result-v1`. The C4 topology is unchanged, and the feature README carries the ER and component views.
+
+Feature run `2026-11-09-b94cfa12` implemented the design: domain modules in `brain_domain`, the `brain-factslots` package, migration 0012 and the commit/read hooks. The run proved all 39 ACs and the five ADR-0077 proof gates against PostgreSQL. The G3 security review fixed three access-control gaps:
+
+- name evidence is READ-checked before any reason;
+- T-08 now holds on the answer read path;
+- a foreign evidence assertion is indistinguishable from a missing one.
+
+ADR-0077 stays Proposed. Formal acceptance is an operator decision.
 
 ---
 
@@ -520,7 +528,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Current position (2026-11-08): F0001 to F0006 are done and archived. ADR-0060 is Rejected; the direct-baseline pipeline is the v0.1 path. The 2026-11-08 requirement-ownership amendment (master blueprint section 106.3) assigned every unowned blueprint requirement to a feature, added F0069, corrected the v0.1 dependency graph, and recorded operator decisions for ADR-0038, ADR-0039, ADR-0042, ADR-0043, ADR-0051, ADR-0052 and ADR-0053. F0007 (FactSlot model) is first in Next and its dependencies are complete. The roadmap's Now lane is empty: choosing the next feature is an operator decision.
+Current position (2026-11-09): F0001 to F0007 are done and archived. ADR-0060 is Rejected; the direct-baseline pipeline is the v0.1 path. The 2026-11-08 requirement-ownership amendment (master blueprint section 106.3) assigned every unowned blueprint requirement to a feature, added F0069, corrected the v0.1 dependency graph, and recorded operator decisions for ADR-0038, ADR-0039, ADR-0042, ADR-0043, ADR-0051, ADR-0052 and ADR-0053. F0007 (FactSlot model) was completed on 2026-11-09 (feature run `2026-11-09-b94cfa12`), which unblocks F0008, F0013 and F0017. The roadmap's Now lane is empty again: choosing the next feature is an operator decision. Whether to mark ADR-0077 Accepted, now that all five of its proof gates have evidence, is also an operator decision.
 
 1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).

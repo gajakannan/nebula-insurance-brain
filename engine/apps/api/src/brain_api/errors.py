@@ -60,6 +60,17 @@ class AssertionIneligibleApiError(UnprocessableError):
     title = "Assertion Ineligible"
 
 
+class FactAnswerRejectedApiError(UnprocessableError):
+    """F0007 (ADR-0077 D5): an identity-v1 slot refused the answer carrier. `code` is
+    the lowercase reason; the response carries no detail text."""
+
+    title = "Fact Answer Rejected"
+
+    def __init__(self, code: str) -> None:
+        super().__init__(None)
+        self.code = code
+
+
 class InvalidRangeApiError(BrainError):
     """Empty or null `valid` range on a commit proposal (F0001-S0005)."""
 

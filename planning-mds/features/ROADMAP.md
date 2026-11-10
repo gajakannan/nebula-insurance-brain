@@ -1,6 +1,6 @@
 # Feature Roadmap (Now / Next / Later)
 
-**Last Reviewed:** 2026-11-06 (governed retrieval carry-ins for F0033–F0036/F0067; F0068 reserved as a conditional v0.4+ spectral experiment).
+**Last Reviewed:** 2026-11-09 (F0007 moved to Now after its plan was approved, then completed and archived the same day in feature run `2026-11-09-b94cfa12`; earlier 2026-11-06: governed retrieval carry-ins for F0033–F0036/F0067; F0068 reserved as a conditional v0.4+ spectral experiment).
 
 This document is the working prioritization view for feature sequencing. The tables are generated fenced regions compiled from `planning-mds/kg-source/features/**` (`roadmap_section`, `roadmap_order`, `rationale`, `validation_gate`, `completion_state`); edit the shards, never the tables. The delivery sequence is master blueprint sections 115.3 and 124: canonical foundations and 360 base views → F0065 bounded assessment → F0024/F0025 integration → F0026 release qualification. Generalized reasoning remains later.
 
@@ -34,7 +34,6 @@ F0035 Phase A can clarify the downstream problem first. F0033/F0034 projection/c
 <!-- generated:begin roadmap:next -->
 | Feature | Status | Why Next | Entry Criteria |
 |---------|--------|----------|----------------|
-| [F0007 — FactSlot model](./F0007-factslot-model/README.md) | Planned | FactSlot defines canonical semantic identity for every fact; the GL limits in the v0.1 acceptance question are distinct FactSlots (section 13). | F0006 complete; ADR-0039 decision recorded; plan action Phase A approved 2026-11-09 and Phase B approved for this feature. |
 | [F0008 — Bitemporal canonical facts](./F0008-bitemporal-canonical-facts/README.md) | Planned | Full bitemporality with database-level overlap integrity is required before the endorsement slice can be proven (sections 14, 15, 109.2). | F0003 and F0007 complete; plan action Phase A and Phase B approved for this feature. |
 | [F0009 — Provenance + human-correction lineage](./F0009-provenance-and-human-correction-lineage/README.md) | Planned | No authoritative fact exists without evidence, and human corrections append with lineage that feeds the Golden Corpus (sections 17, 75). | F0006 and F0008 complete; plan action Phase A and Phase B approved for this feature. |
 | [F0010 — Change/retraction semantics](./F0010-change-and-retraction-semantics/README.md) | Planned | Explicit change semantics distinguish a legitimate endorsement from a bad extraction correction (section 16). | F0008 and F0009 complete; plan action Phase A and Phase B approved for this feature. |
@@ -124,4 +123,5 @@ F0035 Phase A can clarify the downstream problem first. F0033/F0034 projection/c
 | [F0004 — Content artifact model](./archive/F0004-content-artifact-model/README.md) | 2026-10-21 | All four stories and 25 ACs verified in feature run 2026-10-17-8a6cc79f; G4 explicitly approved; twenty required story/role signoffs. Engine 229, neuron 93 and restore four pass; four optional inference/tokenizer skips; changed runtime 90.60%. G7 as-built bindings and generated layers pass. V2 remains disabled; security and activation follow-ups retained. |
 | [F0005 — One-time document ingestion](./archive/F0005-one-time-docling-ingestion/README.md) | 2026-10-28 | All five stories closed in feature run 2026-10-25-4020923b on the S0004-AC7 rejection branch; G3 passed after one rework round, G4 approved by the operator; twenty-five story/role signoffs. Final neuron 260, engine 424 (pre-existing failures only), seven live lanes and the post-decision check pass. |
 | [F0006 — Assertion plane + origin + interpretation basis](./archive/F0006-assertion-plane-origin-and-interpretation-basis/README.md) | 2026-11-05 | Five Done stories, 35 observed ACs, 336 unique passing final product cases; changed-code coverage 1170/1266 (92.4171%). Both implementation review findings repaired. SEC-01 dependency/resource-isolation remediation is required before untrusted or production PDF ingestion. |
+| [F0007 — FactSlot model](./archive/F0007-factslot-model/README.md) | 2026-11-09 | Six Done stories, 39 observed ACs; 819/819 engine tests on an owned PostgreSQL database; changed-code coverage 1211/1223 (99.0%); three G3 access-control findings fixed in cycle; no open findings. |
 <!-- generated:end roadmap:completed -->

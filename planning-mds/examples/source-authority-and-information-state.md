@@ -33,7 +33,7 @@ Each state is versioned in recorded time, so a query as of an earlier recorded t
 
 **Boundary:** `NOT_FOUND` on pages 1–3 never answers "the policy has no aggregate limit". A later run over page 4 that finds the limit supersedes the state without deleting it.
 
-**Owners:** [F0007](../features/F0007-factslot-model/README.md), [F0016](../features/F0016-semantic-interpretation-runs/README.md), [F0020](../features/F0020-minimal-graph-and-temporal-query-api/README.md); ADR-0039.
+**Owners:** [F0007](../features/archive/F0007-factslot-model/README.md), [F0016](../features/F0016-semantic-interpretation-runs/README.md), [F0020](../features/F0020-minimal-graph-and-temporal-query-api/README.md); ADR-0039.
 
 ## EX-OWN-004 — Deletion survives a restore
 

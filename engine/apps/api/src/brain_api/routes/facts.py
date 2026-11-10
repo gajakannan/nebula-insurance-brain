@@ -12,8 +12,12 @@ from brain_domain.authx import (
     ResourceKey,
     ResourceType,
 )
+from brain_domain.fact_answers import FactAnswerRejected
 from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
 from brain_domain.principal import Principal
+from brain_factslots.answers import FactAnswerPolicy, FactAnswerReader
+from brain_factslots.ports import PredicateContractRegistry
+from brain_persistence.fact_slots import SqlAlchemyFactSlotStore
 from brain_persistence.repositories import SqlAlchemyFactCommitRepository
 from brain_security.execution import AuthorizationExecution
 from brain_temporal.commit import CanonicalCommitService, FactSlotNotFound, StaleVersionError
@@ -26,11 +30,13 @@ from brain_api.deps import (
     current_principal,
     get_authorization_execution,
     get_db_session,
+    get_predicate_registry,
     new_trace_id,
 )
 from brain_api.errors import (
     AssertionIneligibleApiError,
     ConcurrentCommitApiError,
+    FactAnswerRejectedApiError,
     InvalidRangeApiError,
     NotFoundError,
     StaleVersionApiError,
@@ -42,6 +48,10 @@ router = APIRouter(prefix="/facts", tags=["Facts"])
 
 def _slot(fact_slot_id: UUID) -> ResourceKey:
     return ResourceKey(ResourceType.FACT_SLOT, fact_slot_id)
+
+
+async def _nothing(_decision: AuthorizationDecision) -> None:
+    return None
 
 
 @router.get("/{fact_slot_id}", response_model=FactVersionOut)
@@ -56,6 +66,7 @@ async def get_fact(
     """Business valid/known coordinates select history only; authorization always
     uses current enforcement time and current grants (S0003 AC4)."""
     repository = SqlAlchemyFactCommitRepository(session)
+    answers = FactAnswerReader(SqlAlchemyFactSlotStore(session))
     now = datetime.now(UTC)
     requested = RequestedScope(
         knowledge_base_ids=None,
@@ -72,11 +83,20 @@ async def get_fact(
             raise NotFoundError()
         return version
 
+    # F0007 (S0003 AC6, T-08): an identity-v1 answer's absence scope names pages and
+    # blocks of an artifact. The reader must be able to read that artifact, or the
+    # read is denied like a missing slot. Legacy pilot slots need no extra check.
+    trace_id = new_trace_id()
+    for scope_key in await answers.scope_read_keys(
+        fact_slot_id, valid_at=valid_as_of or now, known_at=known_as_of or now
+    ):
+        await execution.read(principal, scope_key, Action.READ, trace_id=trace_id, load=_nothing)
+
     version = await execution.read(
         principal,
         _slot(fact_slot_id),
         Action.READ,
-        trace_id=new_trace_id(),
+        trace_id=trace_id,
         load=load,
         requested=requested,
     )
@@ -90,11 +110,17 @@ async def commit_fact(
     principal: Principal = Depends(current_principal),
     execution: AuthorizationExecution = Depends(get_authorization_execution),
     session: AsyncSession = Depends(get_db_session),
+    registry: PredicateContractRegistry = Depends(get_predicate_registry),
 ) -> CommitResponseOut:
     """The commit independently re-checks current `fact_slot:commit` authority inside
-    its own unit of work; a review annotation never implies it (S0006 AC5)."""
+    its own unit of work; a review annotation never implies it (S0006 AC5).
+
+    F0007: an identity-v1 slot validates the `fact-answer/v1` carrier after the
+    slot lock. The answer's scope artifact and name-evidence artifacts join the
+    READ checks, so an unreadable scope is denied before any reason (T-08)."""
     repository = SqlAlchemyFactCommitRepository(session)
-    service = CanonicalCommitService(repository)
+    answer_policy = FactAnswerPolicy(registry, SqlAlchemyFactSlotStore(session))
+    service = CanonicalCommitService(repository, answer_policy=answer_policy)
     proposal = CommitProposal(
         slot_id=fact_slot_id,
         value=proposal_in.value,
@@ -112,22 +138,34 @@ async def commit_fact(
         idempotency_key=proposal_in.idempotency_key,
     )
 
+    evidence_keys: set[ResourceKey] = set()
+
     async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResult:
         decision = next(
             d for d in decisions if d.resource == _slot(fact_slot_id) and d.action == Action.COMMIT
         )
         assert decision.scope is not None
+        # The F0006 source proof covers exactly the evidence-derived reads; reads
+        # added for the answer's scope or name evidence are authorized but excluded.
+        evidence_reads = [
+            d
+            for d in decisions
+            if d.resource in evidence_keys
+            or not (d.action == Action.READ and d.resource.type == ResourceType.CONTENT_ARTIFACT)
+        ]
         return await service.commit(
             proposal,
             authorized_scope=(decision.scope.tenant_id, decision.scope.knowledge_base_id),
             authorization_decision_id=decision.decision_id,
-            source_access=repository.source_access_proof(decisions),
+            source_access=repository.source_access_proof(evidence_reads),
         )
 
     async def source_keys() -> Sequence[ResourceKey]:
-        return await repository.commit_source_keys(
-            proposal.evidence_refs, proposal.review_decision_id
+        evidence_keys.update(
+            await repository.commit_source_keys(proposal.evidence_refs, proposal.review_decision_id)
         )
+        answer_keys = await answer_policy.source_keys(fact_slot_id, proposal.value)
+        return sorted(evidence_keys | set(answer_keys))
 
     try:
         result = await execution.mutate(
@@ -140,6 +178,8 @@ async def commit_fact(
         )
     except AssertionIneligible as exc:
         raise AssertionIneligibleApiError() from exc
+    except FactAnswerRejected as exc:
+        raise FactAnswerRejectedApiError(exc.code) from exc
     except InvalidRangeError as exc:
         raise InvalidRangeApiError(str(exc)) from exc
     except StaleVersionError as exc:

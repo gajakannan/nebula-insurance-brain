@@ -18,6 +18,7 @@ members = [
     "brain-contracts",
     "brain-domain",
     "brain-engine-workspace",
+    "brain-factslots",
     "brain-jobs",
     "brain-persistence",
     "brain-review",
@@ -194,6 +195,7 @@ dependencies = [
     { name = "brain-assertions" },
     { name = "brain-content" },
     { name = "brain-domain" },
+    { name = "brain-factslots" },
     { name = "brain-persistence" },
     { name = "brain-review" },
     { name = "brain-security" },
@@ -209,6 +211,7 @@ requires-dist = [
     { name = "brain-assertions", editable = "packages/brain-assertions" },
     { name = "brain-content", editable = "packages/brain-content" },
     { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "brain-factslots", editable = "packages/brain-factslots" },
     { name = "brain-persistence", editable = "packages/brain-persistence" },
     { name = "brain-review", editable = "packages/brain-review" },
     { name = "brain-security", editable = "packages/brain-security" },
@@ -308,6 +311,7 @@ dependencies = [
     { name = "brain-assertions" },
     { name = "brain-content" },
     { name = "brain-domain" },
+    { name = "brain-factslots" },
     { name = "brain-persistence" },
     { name = "brain-review" },
     { name = "brain-security" },
@@ -337,6 +341,7 @@ requires-dist = [
     { name = "brain-assertions", editable = "packages/brain-assertions" },
     { name = "brain-content", editable = "packages/brain-content" },
     { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "brain-factslots", editable = "packages/brain-factslots" },
     { name = "brain-persistence", editable = "packages/brain-persistence" },
     { name = "brain-review", editable = "packages/brain-review" },
     { name = "brain-security", editable = "packages/brain-security" },
@@ -359,6 +364,32 @@ dev = [
     { name = "ruff", specifier = ">=0.8" },
     { name = "types-pyyaml", specifier = ">=6.0" },
 ]
+
+[[package]]
+name = "brain-factslots"
+version = "0.1.0"
+source = { editable = "packages/brain-factslots" }
+dependencies = [
+    { name = "brain-domain" },
+    { name = "brain-security" },
+]
+
+[package.optional-dependencies]
+test = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "brain-security", editable = "packages/brain-security" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.24" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5.0" },
+]
+provides-extras = ["test"]
 
 [[package]]
 name = "brain-jobs"
@@ -384,6 +415,7 @@ dependencies = [
     { name = "brain-assertions" },
     { name = "brain-content" },
     { name = "brain-domain" },
+    { name = "brain-factslots" },
     { name = "brain-review" },
     { name = "brain-security" },
     { name = "brain-temporal" },
@@ -405,6 +437,7 @@ requires-dist = [
     { name = "brain-assertions", editable = "packages/brain-assertions" },
     { name = "brain-content", editable = "packages/brain-content" },
     { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "brain-factslots", editable = "packages/brain-factslots" },
     { name = "brain-review", editable = "packages/brain-review" },
     { name = "brain-security", editable = "packages/brain-security" },
     { name = "brain-temporal", editable = "packages/brain-temporal" },
@@ -499,6 +532,7 @@ version = "0.1.0"
 source = { editable = "packages/brain-testing" }
 dependencies = [
     { name = "brain-domain" },
+    { name = "brain-factslots" },
     { name = "brain-persistence" },
     { name = "brain-security" },
 ]
@@ -506,6 +540,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "brain-factslots", editable = "packages/brain-factslots" },
     { name = "brain-persistence", editable = "packages/brain-persistence" },
     { name = "brain-security", editable = "packages/brain-security" },
 ]

@@ -186,8 +186,12 @@ async def test_v1_child_of_v2_parent_is_refused_by_deferred_guard(world, databas
 async def test_occupied_downgrade_stops_without_erasing_semantics(world, database):
     await world.admit([world.candidate()])
     before = counts(database)
+    with psycopg.connect(database) as connection:
+        head = connection.execute("SELECT version_num FROM alembic_version").fetchone()[0]
     with pytest.raises(RuntimeError, match="downgrade refused"):
         command.downgrade(configuration(), "0010")
     assert counts(database) == before
+    # The refused downgrade leaves the database at the head it started from
+    # (0011 when F0006 shipped; later additive heads such as F0007's 0012 too).
     with psycopg.connect(database) as connection:
-        assert connection.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0011"
+        assert connection.execute("SELECT version_num FROM alembic_version").fetchone()[0] == head

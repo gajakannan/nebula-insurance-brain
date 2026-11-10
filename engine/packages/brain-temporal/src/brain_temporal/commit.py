@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import Any, Protocol
 from uuid import UUID, uuid4
 
 from brain_domain.assertions import SourceAccessProof
@@ -18,6 +18,21 @@ class FactSlotNotFound(Exception):
 class StaleVersionError(Exception):
     """`expected_current_version_id` no longer matches the slot's current
     version(s) — the optimistic half of F0001-S0005's concurrency proof."""
+
+
+class CommitAnswerPolicy(Protocol):
+    """F0007 hook (ADR-0077 D5). Returns the canonical value to store for an
+    identity-v1 slot, or `None` for a legacy pilot slot, whose value is used
+    unchanged. Raises `brain_domain.fact_answers.FactAnswerRejected` to refuse the
+    commit before any effect."""
+
+    async def canonical_value(
+        self,
+        slot_id: UUID,
+        value: Mapping[str, Any],
+        *,
+        authorized_scope: tuple[UUID, UUID],
+    ) -> Mapping[str, Any] | None: ...
 
 
 class FactCommitRepository(Protocol):
@@ -104,9 +119,11 @@ class CanonicalCommitService:
         repository: FactCommitRepository,
         *,
         clock: Callable[[], datetime] | None = None,
+        answer_policy: CommitAnswerPolicy | None = None,
     ) -> None:
         self._repository = repository
         self._clock = clock or (lambda: datetime.now(UTC))
+        self._answer_policy = answer_policy
 
     async def commit(
         self,
@@ -123,6 +140,17 @@ class CanonicalCommitService:
 
         # TimeRange.__post_init__ rejects an empty/inverted range (F0001-S0005 AC).
         new_valid = TimeRange(proposal.valid_from, proposal.valid_to)
+
+        # F0007: identity-v1 slots store the canonical fact-answer/v1 envelope. The
+        # policy runs after the lock and before any source check or effect, so a
+        # rejected carrier writes no version (S0003 AC7, S0004 AC7).
+        value: Mapping[str, Any] = proposal.value
+        if self._answer_policy is not None:
+            canonical = await self._answer_policy.canonical_value(
+                proposal.slot_id, proposal.value, authorized_scope=authorized_scope
+            )
+            if canonical is not None:
+                value = canonical
 
         current = await self._repository.current_versions(proposal.slot_id)
         if proposal.expected_current_version_id is not None:
@@ -187,7 +215,7 @@ class CanonicalCommitService:
             slot_id=proposal.slot_id,
             tenant_id=tenant_id,
             knowledge_base_id=knowledge_base_id,
-            value=dict(proposal.value),
+            value=dict(value),
             valid=new_valid,
             recorded=TimeRange(now, None),
             change_reason=proposal.change_reason,

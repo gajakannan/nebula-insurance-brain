@@ -30,9 +30,7 @@ from sqlalchemy.orm import Session
 
 
 def canonical(value):
-    return json.dumps(
-        value, sort_keys=True, separators=(",", ":"), default=str
-    ).encode()
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode()
 
 
 def digest(raw):
@@ -49,20 +47,14 @@ def snapshot(database_url: str, content_root: Path) -> dict:
     This is an operator check, not application authorization or a permission
     grant. It makes no repairs and neither reparses nor promotes orphan bytes.
     """
-    engine = create_engine(
-        database_url.replace("postgresql://", "postgresql+psycopg://")
-    )
-    objects = LocalFilesystemObjectStore(
-        LocalObjectStoreConfig("filesystem", content_root, True)
-    )
+    engine = create_engine(database_url.replace("postgresql://", "postgresql+psycopg://"))
+    objects = LocalFilesystemObjectStore(LocalObjectStoreConfig("filesystem", content_root, True))
     store = CheckpointStore(objects)
     referenced = set()
     try:
         with Session(engine) as session:
             repository = ContentArtifactRepository(session)
-            artifacts = {
-                row.id: row for row in session.scalars(select(ContentArtifact))
-            }
+            artifacts = {row.id: row for row in session.scalars(select(ContentArtifact))}
             versions = {row.id: row for row in session.scalars(select(DocumentVersion))}
             sources = {row.id: row for row in session.scalars(select(SourceDocument))}
             bundles = {}
@@ -71,9 +63,7 @@ def snapshot(database_url: str, content_root: Path) -> dict:
                 source = sources[version.source_document_id]
                 if owner(artifact) != owner(version) or owner(version) != owner(source):
                     raise ValueError("artifact/version/source owner mismatch")
-                security = session.get(
-                    ResourceAccessRow, ("content_artifact", artifact.id)
-                )
+                security = session.get(ResourceAccessRow, ("content_artifact", artifact.id))
                 if security is None or owner(security) != owner(artifact):
                     raise ValueError("artifact security owner mismatch")
                 metadata = repository.get_metadata(artifact.id)
@@ -83,22 +73,16 @@ def snapshot(database_url: str, content_root: Path) -> dict:
                 metadata.verify_identity(bundle)
                 repository.verify_indexes(bundle)
                 bundles[artifact.id] = bundle
-                referenced.update(
-                    f"{bundle.key.prefix}/{name}" for name in bundle.files
-                )
+                referenced.update(f"{bundle.key.prefix}/{name}" for name in bundle.files)
                 referenced.add(f"{bundle.key.prefix}/manifest.json")
 
             candidates = {
                 row["id"]: candidate_record(row)
-                for row in session.execute(
-                    select(tables.document_date_candidate)
-                ).mappings()
+                for row in session.execute(select(tables.document_date_candidate)).mappings()
             }
             selections = {
                 row["id"]: selection_record(row)
-                for row in session.execute(
-                    select(tables.document_date_selection)
-                ).mappings()
+                for row in session.execute(select(tables.document_date_selection)).mappings()
             }
 
             def same_version(record, other):
@@ -179,10 +163,7 @@ def snapshot(database_url: str, content_root: Path) -> dict:
                     run_id=marker.run_id,
                     artifact_key=bundle.key,
                 )
-                if (
-                    isinstance(marker, RunManifestV2)
-                    and marker.document_date_selection_id
-                ):
+                if isinstance(marker, RunManifestV2) and marker.document_date_selection_id:
                     pinned = selections[marker.document_date_selection_id]
                     if (
                         pinned.document_version_id,
@@ -208,21 +189,25 @@ def snapshot(database_url: str, content_root: Path) -> dict:
             # Hash every application table, including date/audit/repair history.
             # Source and restored inventories must match byte-for-byte after
             # canonical ordering, rather than merely comparing row counts.
-            existing = set(inspect(session.connection()).get_table_names())
+            inspector = inspect(session.connection())
+            existing = set(inspector.get_table_names())
             database = {}
             for table in Base.metadata.sorted_tables:
                 if table.name in existing:
+                    # WHY: hash the columns this revision actually has. Mapped
+                    # columns added by a later additive migration (for example
+                    # 0011 assertion versions, 0012 FactSlot identity) do not
+                    # exist yet when an older database is backed up or restored.
+                    present = {c["name"] for c in inspector.get_columns(table.name)}
+                    columns = [c for c in table.columns if c.name in present]
                     rows = sorted(
-                        canonical(dict(row))
-                        for row in session.execute(select(table)).mappings()
+                        canonical(dict(row)) for row in session.execute(select(*columns)).mappings()
                     )
                     database[table.name] = {
                         "rows": len(rows),
                         "sha256": digest(b"\n".join(rows)),
                     }
-            revision = session.execute(
-                text("SELECT version_num FROM alembic_version")
-            ).scalar_one()
+            revision = session.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
         inventory = []
         for path in sorted(content_root.rglob("*")):
             if path.is_symlink():
@@ -230,9 +215,7 @@ def snapshot(database_url: str, content_root: Path) -> dict:
             if path.is_file():
                 relative = path.relative_to(content_root).as_posix()
                 raw = path.read_bytes()
-                inventory.append(
-                    {"path": relative, "size_bytes": len(raw), "sha256": digest(raw)}
-                )
+                inventory.append({"path": relative, "size_bytes": len(raw), "sha256": digest(raw)})
         return {
             "inventory_version": 2,
             "database_revision": revision,
@@ -257,13 +240,9 @@ def main():
     args = parser.parse_args()
     result = snapshot(args.database_url, args.content_root)
     if args.expect and json.loads(args.expect.read_bytes()) != result:
-        raise ValueError(
-            "restored database/content inventory differs from quiesced snapshot"
-        )
+        raise ValueError("restored database/content inventory differs from quiesced snapshot")
     if args.write:
-        args.write.write_bytes(
-            json.dumps(result, indent=2, sort_keys=True).encode() + b"\n"
-        )
+        args.write.write_bytes(json.dumps(result, indent=2, sort_keys=True).encode() + b"\n")
     print(
         json.dumps(
             {

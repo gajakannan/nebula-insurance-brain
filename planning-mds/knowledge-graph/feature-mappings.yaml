@@ -537,9 +537,9 @@ features:
       - schema:interpretation-result
       - schema:interpretation-result-v2
       - schema:problem-details
-  - status: planned
+  - status: archived-done
     id: feature:F0007
-    path: planning-mds/features/F0007-factslot-model
+    path: planning-mds/features/archive/F0007-factslot-model
     affects:
       - capability:bitemporal-canonical-commit
       - capability:factslot-identity-resolution
@@ -561,6 +561,12 @@ features:
       - adr:0066
       - adr:0077
     notes:
+      - As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/kg-reconciliation.md;
+        archive path/status and generated trackers are PM G8 ownership.
+      - 'G3 security review fixed SEC-F7-01 (name evidence READ before reason), SEC-F7-02 (T-08 on the
+        answer read path) and SEC-F7-03 (cross-KB evidence oracle). Residual: slot restrictions fixed
+        at creation (F0018 re-derivation); envelope DB backstop (F0008); name-hook per-slot authorization
+        cost is a design note for F0017/F0023.'
       - 'Phase B (Proposed ADR-0077): MULTI members are child fact_slot rows so the ADR-0008 exclusion
         applies per member with no DDL on the F0008-owned canonical_fact_version; answers use the fact-answer/v1
         envelope in its value for identity-v1 slots only. Pilot slots stay legacy and the pilot GET contract
@@ -1227,7 +1233,7 @@ stories:
       - schema:assertion-admission-result-v1
   - id: story:F0007-S0001
     feature: feature:F0007
-    path: planning-mds/features/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md
+    path: planning-mds/features/archive/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md
     affects:
       - capability:factslot-identity-resolution
       - entity:fact-slot
@@ -1240,7 +1246,7 @@ stories:
       - schema:fact-slot-resolution-result-v1
   - id: story:F0007-S0002
     feature: feature:F0007
-    path: planning-mds/features/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md
+    path: planning-mds/features/archive/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md
     affects:
       - capability:factslot-identity-resolution
       - entity:fact-slot
@@ -1252,7 +1258,7 @@ stories:
       - schema:fact-slot-resolution-result-v1
   - id: story:F0007-S0003
     feature: feature:F0007
-    path: planning-mds/features/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md
+    path: planning-mds/features/archive/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md
     affects:
       - capability:typed-fact-answer
       - entity:canonical-fact-version
@@ -1266,7 +1272,7 @@ stories:
       - schema:fact-answer-v1
   - id: story:F0007-S0004
     feature: feature:F0007
-    path: planning-mds/features/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md
+    path: planning-mds/features/archive/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md
     affects:
       - capability:factslot-identity-resolution
       - capability:typed-fact-answer
@@ -1281,7 +1287,7 @@ stories:
       - schema:fact-slot-key-v1
   - id: story:F0007-S0005
     feature: feature:F0007
-    path: planning-mds/features/F0007-factslot-model/F0007-S0005-define-name-factslots.md
+    path: planning-mds/features/archive/F0007-factslot-model/F0007-S0005-define-name-factslots.md
     affects:
       - capability:factslot-identity-resolution
       - capability:typed-fact-answer
@@ -1297,7 +1303,7 @@ stories:
       - schema:fact-slot-key-v1
   - id: story:F0007-S0006
     feature: feature:F0007
-    path: planning-mds/features/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md
+    path: planning-mds/features/archive/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md
     affects:
       - capability:bitemporal-canonical-commit
       - entity:fact-slot
