@@ -358,6 +358,11 @@ class FactSlotRow(Base):
     """Persistence row for `brain_domain.facts.FactSlot` (F0001-S0005)."""
 
     __tablename__ = "fact_slot"
+    # Mirrors migration 0005. F0007's fact_slot_qualifier and member keys reference it,
+    # so schemas built from this metadata (tests, sqlite fixtures) need it declared.
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "knowledge_base_id", name="uq_fact_slot_owner"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True, default=uuid.uuid4)
     entity_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)

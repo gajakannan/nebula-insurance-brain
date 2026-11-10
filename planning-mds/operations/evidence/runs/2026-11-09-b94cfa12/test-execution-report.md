@@ -79,3 +79,13 @@ Changed-line coverage on the final code is 99.0% (1211/1223; `artifacts/coverage
 ## Result
 
 PASS
+
+## Post-Closeout CI Fix (PR #43)
+
+The PR's CI `runtime-stack` job failed in `neuron/tests/integration/test_document_process_recovery.py` (PostgreSQL lanes). Those neuron lanes need `BRAIN_TEST_POSTGRES_URL`, so they were among the 41 neuron tests skipped in this run.
+
+- **Cause:** schemas built from the ORM metadata could not create `fact_slot_qualifier`. Two tests excluded `fact_slot`, and the `FactSlotRow` model did not declare `uq_fact_slot_owner`, the key migration 0005 created, which the qualifier's composite foreign key references.
+- **Fix:** declare `uq_fact_slot_owner` on `FactSlotRow` to mirror the database; no DDL change. Exclude `fact_slot_qualifier` together with `fact_slot` in the two neuron tests.
+- **Re-run on owned PostgreSQL databases:**
+  - neuron `test_worker_cli_enqueue`, `test_document_process_recovery` and `test_document_delivery`: 27/27, 0 skipped (`artifacts/test-results/command-output/pr43-neuron-postgres.txt` for the first two-file run);
+  - full engine suite: 819/819. One intermediate run had a single transient failure that did not reproduce in two re-runs.

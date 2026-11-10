@@ -89,7 +89,13 @@ def recovery_database(
     try:
         metadata.create_all(engine)
         # Canonical promotion is outside this importer and has PG-only range types.
-        excluded = {"fact_slot", "canonical_fact_version", "canonical_fact_change", "outbox_event"}
+        excluded = {
+            "fact_slot",
+            "fact_slot_qualifier",
+            "canonical_fact_version",
+            "canonical_fact_change",
+            "outbox_event",
+        }
         Base.metadata.create_all(
             engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in excluded]
         )
