@@ -400,6 +400,18 @@ adrs:
       - capability:budgeted-evidence-context
       - capability:governed-evidence-retrieval
       - capability:spectral-retrieval-experiments
+  - id: adr:0077
+    label: FactSlot Identity and Typed Answer Carriers (Proposed; F0007 Phase B design approved 2026-11-09,
+      runtime proofs pending)
+    path: planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md
+    related_nodes:
+      - adr:0006
+      - adr:0039
+      - adr:0066
+      - capability:factslot-identity-resolution
+      - capability:typed-fact-answer
+      - entity:fact-slot
+      - entity:fact-slot-qualifier
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -604,6 +616,32 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:factslot-identity-resolution
+    label: FactSlot identity resolution
+    notes: Planned deterministic resolve-or-create of KB-owned FactSlots from subject, opaque versioned
+      predicate key and normalized typed qualifiers; MULTI members are child slots and RELATIONSHIP slots
+      include the object. Authorized from source artifacts with derived restrictions; no grants, routes
+      or producer activation.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; runtime proof pending.'
+      - adr: adr:0006
+        section: Decision
+        summary: FactSlot is first-class canonical semantic identity.
+    related_nodes:
+      - adr:0006
+      - adr:0077
+      - capability:authorization-enforcement
+      - entity:fact-slot
+      - entity:fact-slot-qualifier
+      - schema:fact-slot-key-v1
+      - schema:fact-slot-resolution-result-v1
+    source_docs:
+      - planning-mds/features/F0007-factslot-model/PRD.md
+      - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
+      - planning-mds/features/F0007-factslot-model/worked-examples.md
   - id: capability:governed-evidence-retrieval
     label: Governed evidence retrieval
     notes: Planning direction only. F0035 owns authorized hybrid seeds, bounded typed expansion and one
@@ -865,6 +903,32 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:typed-fact-answer
+    label: Typed fact answer carrier
+    notes: 'Planned fact-answer/v1 envelope for identity-v1 slots: PRESENT plus eight ADR-0039 states,
+      mandatory absence scope for NOT_FOUND/NOT_STATED, no access-denied state, exact original-currency
+      money and scheme-scoped identifiers. Validated at the existing commit; unread slots read NOT_PROCESSED
+      internally. HTTP return of states is F0020.'
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; runtime proof pending.'
+      - adr: adr:0039
+        section: Decision
+        summary: Information state is separate from value; money is qualified and identifiers are scoped.
+    related_nodes:
+      - adr:0039
+      - adr:0077
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+      - entity:canonical-fact-version
+      - entity:fact-slot
+      - schema:fact-answer-v1
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
+      - planning-mds/features/F0007-factslot-model/worked-examples.md
   - id: capability:versioned-assertion-semantics
     label: Versioned assertion semantics
     notes: 'Implemented for F0006 run 2026-11-02-5a00b0ff: strict typed/open contracts, explicit version
@@ -1288,15 +1352,45 @@ entities:
       - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
   - id: entity:fact-slot
     label: Fact slot
-    notes: Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit
-      of a coverage); the parent of bitemporal fact versions.
+    notes: 'Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit
+      of a coverage); the parent of bitemporal fact versions. F0007 planned refinement (ADR-0077): identity-v1
+      rows add an opaque versioned predicate key, cardinality, optional relationship object and MULTI
+      member children; pilot rows stay legacy with NULL identity and no fabricated predicate.'
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; runtime proof pending.'
     related_entities:
       - entity:canonical-fact-version
+      - entity:fact-slot-qualifier
     related_nodes:
+      - adr:0077
       - capability:bitemporal-canonical-commit
+      - capability:factslot-identity-resolution
+      - capability:typed-fact-answer
     source_docs:
       - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:fact-slot-qualifier
+    label: FactSlot qualifier
+    notes: Planned authoritative, append-only normalized identity part of an identity-v1 FactSlot (name,
+      declared type, canonical value) with composite tenant/KB ownership to its slot. Omitted qualifiers
+      contribute nothing; explicit null is rejected. Listed in the RLS inventory handed to F0018.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; runtime proof pending.'
+    related_entities:
+      - entity:fact-slot
+    related_nodes:
+      - adr:0077
+      - capability:factslot-identity-resolution
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
   - id: entity:guideline-rule-version
     label: Guideline rule version
     notes: Immutable reviewed release of one bounded guideline. Carries rule identity, version, ontology
@@ -2013,6 +2107,48 @@ schemas:
       - capability:document-date-provenance
       - entity:document-date-candidate
       - entity:document-date-selection
+  - id: schema:fact-answer-v1
+    label: Fact Answer V1
+    path: planning-mds/schemas/fact-answer-v1.schema.json
+    notes: F0007 answer envelope stored in canonical_fact_version.value for identity-v1 slots; Phase B
+      approved by operator 2026-11-09; runtime implementation not claimed.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; runtime proof pending.'
+    related_nodes:
+      - adr:0077
+      - capability:typed-fact-answer
+      - entity:canonical-fact-version
+  - id: schema:fact-slot-key-v1
+    label: FactSlot Key V1
+    path: planning-mds/schemas/fact-slot-key-v1.schema.json
+    notes: F0007 internal slot-resolution request design contract; Phase B approved by operator 2026-11-09.
+      Not an HTTP payload; runtime implementation not claimed.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; runtime proof pending.'
+    related_nodes:
+      - adr:0077
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
+  - id: schema:fact-slot-resolution-result-v1
+    label: FactSlot Resolution Result V1
+    path: planning-mds/schemas/fact-slot-resolution-result-v1.schema.json
+    notes: F0007 server-computed resolution outcome design contract; Phase B approved by operator 2026-11-09;
+      runtime implementation not claimed.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; runtime proof pending.'
+    related_nodes:
+      - adr:0077
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
   - id: schema:interpretation-output-manifest
     label: Interpretation Output Manifest
     path: planning-mds/schemas/interpretation-output-manifest.schema.json

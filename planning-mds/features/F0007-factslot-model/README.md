@@ -1,6 +1,6 @@
 # F0007 — FactSlot model
 
-**Status:** Planned
+**Status:** Planned (Phase A+B approved 2026-11-09; implementation not started)
 **Phase:** v0.1A
 **Roadmap:** Next
 
@@ -21,14 +21,75 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 
 ## Documents
 
-The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0007.yaml`.
+- [PRD](PRD.md): scope, data requirements, access rules, and the G1 clarifications from 2026-11-09
+- [Personas](personas.md) and [acceptance checklist](acceptance-criteria-checklist.md) (39 ACs)
+- [STATUS](STATUS.md): plan run `2026-11-09-60865e32` (A+B, new)
+- [Feature assembly plan](feature-assembly-plan.md) and Proposed [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md): Phase B design approved by operator 2026-11-09
+- [Worked examples](worked-examples.md), [contract examples](contract-examples.json) and [GETTING-STARTED](GETTING-STARTED.md)
+- Design schemas: [fact-slot-key-v1](../../schemas/fact-slot-key-v1.schema.json), [fact-answer-v1](../../schemas/fact-answer-v1.schema.json), [fact-slot-resolution-result-v1](../../schemas/fact-slot-resolution-result-v1.schema.json)
+
+The feature shard is `planning-mds/kg-source/features/F0007.yaml`.
+
+## Feature ERD
+
+```mermaid
+erDiagram
+    ENTITY_KNOWLEDGE_BASE ||--o{ FACT_SLOT : subject_in_kb
+    FACT_SLOT ||--o{ FACT_SLOT : multi_member
+    FACT_SLOT ||--o{ FACT_SLOT_QUALIFIER : identity_part
+    FACT_SLOT ||--o{ CANONICAL_FACT_VERSION : versions
+    FACT_SLOT {
+        uuid id PK
+        uuid entity_id FK
+        string predicate_key
+        string cardinality
+        uuid parent_slot_id FK
+        string member_key
+        uuid object_entity_id FK
+    }
+    FACT_SLOT_QUALIFIER {
+        uuid slot_id PK,FK
+        string qualifier_name PK
+        string canonical_value
+    }
+```
+
+```text
+entity_knowledge_base (entity, tenant, KB)
+   │ subject / object (identity-v1 only)
+   ▼
+fact_slot ──1:N── fact_slot_qualifier      (authoritative identity parts)
+   │  └─1:N── fact_slot (MULTI member, parent_slot_id + member_key)
+   └─1:N── canonical_fact_version          (F0008-owned; value = fact-answer/v1 for v1 slots)
+legacy pilot fact_slot: identity columns NULL, slot_type kept, no qualifiers
+```
+
+## Component View
+
+```mermaid
+flowchart LR
+    Caller["Trusted engine caller<br/>(fixtures now; F0016/F0018 later)"] -->|mutate INTERPRET on source artifacts| Facade[AuthorizationExecution]
+    Facade --> Resolver[FactSlotResolver]
+    Resolver --> Registry[PredicateContractRegistry<br/>sys + test namespaces]
+    Resolver --> Store[(fact_slot / fact_slot_qualifier<br/>resource_access, audit)]
+    API["POST /facts/{id}/commits"] --> Commit[CanonicalCommitService]
+    Commit --> Policy[FactAnswerPolicy]
+    Commit --> Versions[(canonical_fact_version)]
+    Reader[FactAnswerReader / NameFactReader] --> Versions
+```
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
+| [F0007-S0001](F0007-S0001-resolve-stable-factslot-identity.md) | Resolve stable FactSlot identity | Not Started |
+| [F0007-S0002](F0007-S0002-distinguish-single-multi-and-relationship-slots.md) | Distinguish single, multi-valued and relationship slots | Not Started |
+| [F0007-S0003](F0007-S0003-carry-information-state-separately-from-value.md) | Carry information state separately from value | Not Started |
+| [F0007-S0004](F0007-S0004-type-money-and-identifiers.md) | Type money and identifiers | Not Started |
+| [F0007-S0005](F0007-S0005-define-name-factslots.md) | Define name FactSlots | Not Started |
+| [F0007-S0006](F0007-S0006-preserve-pilot-slots-and-ownership.md) | Preserve pilot slots and ownership | Not Started |
 
-**Total Stories:** 0
+**Total Stories:** 6
 
 ## Statements, time, and governance scope amendment (2026-09-25)
 

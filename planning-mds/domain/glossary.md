@@ -74,6 +74,23 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 ### FactSlot
 **Type:** Entity
 **Definition:** The canonical semantic identity of one fact about an entity, for example the EachOccurrence limit of a coverage; the unit that fact versions attach to (13, ADR-0006)
+**Refinement (F0007 design, Proposed ADR-0077):** Identity is tenant + knowledge base + subject entity + predicate key + normalized qualifiers. Relationship slots add the object entity. Slots are KB-owned. Pilot slots without a predicate key are labelled legacy and never acquire a fabricated identity.
+
+### Predicate Key
+**Type:** Value Object
+**Definition:** An opaque, namespaced, major-versioned FactSlot predicate reference such as `sys:hasLegalName@v1`. A pinned release reference is recorded beside it but is not identity. It is the key the ADR-0038 SourceAuthorityPolicy references (ADR-0077; F0012/F0013 register real predicates)
+
+### FactSlot Qualifier
+**Type:** Entity
+**Definition:** A typed, normalized part of a FactSlot's identity (for example basis or currency), stored as an authoritative row. An omitted qualifier contributes nothing; an explicit null is rejected (ADR-0077)
+
+### FactSlot Member
+**Type:** Entity
+**Definition:** One element of a multi-valued FactSlot, such as one additional insured or one trade name. It is a child slot keyed by the canonical member value or entity, so its versions are temporally independent of other members (109.1, ADR-0077)
+
+### Fact Answer
+**Type:** Value Object
+**Definition:** The `fact-answer/v1` carrier of a FactSlot version: an information state, a typed value only when `PRESENT`, and an absence scope for `NOT_FOUND`/`NOT_STATED` (ADR-0039, ADR-0077)
 
 ### Canonical Fact Version
 **Type:** Entity

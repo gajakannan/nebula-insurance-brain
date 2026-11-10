@@ -242,7 +242,13 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0006-S0003](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md) — Done
   - [F0006-S0004](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md) — Done
   - [F0006-S0005](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md) — Done
-- [F0007 — FactSlot model](features/F0007-factslot-model/README.md) - Planned
+- [F0007 — FactSlot model](features/F0007-factslot-model/README.md) - Planned (Phase A+B approved by operator 2026-11-09, plan run `2026-11-09-60865e32`; implementation not started)
+  - [F0007-S0001](features/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md) - Not Started
+  - [F0007-S0002](features/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md) - Not Started
+  - [F0007-S0003](features/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md) - Not Started
+  - [F0007-S0004](features/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) - Not Started
+  - [F0007-S0005](features/F0007-factslot-model/F0007-S0005-define-name-factslots.md) - Not Started
+  - [F0007-S0006](features/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) - Not Started
 - [F0008 — Bitemporal canonical facts](features/F0008-bitemporal-canonical-facts/README.md) - Planned
 - [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
@@ -477,6 +483,22 @@ The operator requested incorporation of the [handoff](architecture/nebula-spectr
 - Reserve F0068 for conditional spectral/heat experiments at v0.4+ (D3 recommended separate home). F0061 retains its advanced retrieval scope. Baseline measurement and a separate experiment scope/scheduling/cost decision precede spectral implementation or activation.
 
 PM owns requirements and sequencing; Architect owns design, ADR and structural KG relationships; Security owns authorization/cache/replay review; AI Engineer and QE own model/numerical proposals and evaluation with PM. Numbered RET inputs are in the feature READMEs, with [worked examples](examples/governed-evidence-retrieval.md), [evaluation](testing/evaluation-strategy.md#governed-retrieval-and-spectral-experiment-evaluation) and [security](security/authorization-review.md#governed-retrieval-carry-in-2026-11-06) coverage. D4–D9 remain scoped Phase A/B decisions. This is a roadmap/design incorporation, not a completed per-feature plan, approval or implementation; all affected features remain Planned.
+
+---
+
+### 4.14 F0007 FactSlot identity and answer carriers (Phase B design approved 2026-11-09; implementation pending)
+
+Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 with operator tokens `approve-phase-a` and `approve-phase-b`. The [assembly plan](features/F0007-factslot-model/feature-assembly-plan.md) and Proposed [ADR-0077](architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) define the design.
+
+- **Slot identity:** tenant, KB, subject, an opaque major-versioned predicate key and normalized qualifier rows, with a versioned SHA-256/JCS fingerprint used only for lookup. Concurrent resolvers converge on one slot. A collision is rejected, never merged.
+- **Members:** MULTI members are child slot rows, so the ADR-0008 exclusion applies per member without changing the F0008-owned version table.
+- **Answers:** the `fact-answer/v1` envelope carries the nine information states, scoped absence, exact money in its original currency, and scheme-scoped identifiers. It is validated at the existing commit for identity-v1 slots only.
+- **Names:** the four ADR-0066 name predicates are F0007 system predicates. The display hook applies no precedence.
+- **Authorization:** slot creation derives restrictions from its source artifacts under the existing `content_artifact:interpret` authority. F0007 adds no grants, routes or UI.
+- **Legacy pilot slots:** they stay legacy, with no fabricated identity.
+- **Row-level security:** the inventory (`fact_slot`, `fact_slot_qualifier`) is handed to F0018.
+
+The design schemas are `fact-slot-key-v1`, `fact-answer-v1` and `fact-slot-resolution-result-v1`. The C4 topology is unchanged, and the feature README carries the ER and component views. Implementation and the ADR-0077 proof gates are pending.
 
 ---
 

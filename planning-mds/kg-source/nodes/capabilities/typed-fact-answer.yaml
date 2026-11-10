@@ -1,0 +1,25 @@
+id: capability:typed-fact-answer
+label: Typed fact answer carrier
+notes: 'Planned fact-answer/v1 envelope for identity-v1 slots: PRESENT plus eight ADR-0039 states, mandatory absence
+  scope for NOT_FOUND/NOT_STATED, no access-denied state, exact original-currency money and scheme-scoped identifiers.
+  Validated at the existing commit; unread slots read NOT_PROCESSED internally. HTTP return of states is F0020.'
+source_docs:
+- F0007/feature-assembly-plan.md
+- F0007/worked-examples.md
+- planning-mds/domain/glossary.md
+rationale:
+- adr: adr:0077
+  section: Decision
+  summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with
+    scoped absence, qualified money and scoped identifiers; runtime proof pending.'
+- adr: adr:0039
+  section: Decision
+  summary: Information state is separate from value; money is qualified and identifiers are scoped.
+related_nodes:
+- adr:0077
+- adr:0039
+- entity:fact-slot
+- entity:canonical-fact-version
+- schema:fact-answer-v1
+- endpoint:fact-commit
+- capability:bitemporal-canonical-commit
