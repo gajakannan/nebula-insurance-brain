@@ -21,7 +21,7 @@ from brain_domain.fact_answers import (
     parse_answer,
     stored_answer,
 )
-from brain_domain.fact_slots import PredicateKey, SlotRejected
+from brain_domain.fact_slots import PredicateKey, SlotRejected, SlotRole, member_key
 from brain_domain.fact_values import ValueType
 
 from brain_factslots.ports import FactSlotStore, PredicateContractRegistry, StoredSlot
@@ -101,6 +101,13 @@ class FactAnswerPolicy:
                 raise FactAnswerRejected(AnswerReason.ABSENCE_SCOPE_OUT_OF_SCOPE)
         if answer.value is not None:
             await self._check_value_detail(slot, answer)
+            # WHY: a member's immutable identity is derived from its value; a
+            # different canonical value must resolve its own member slot.
+            if (
+                slot.slot_role == SlotRole.MEMBER
+                and member_key(answer.value, contract) != slot.member_key
+            ):
+                raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
         return answer.to_json()
 
     async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
@@ -124,16 +131,12 @@ class FactAnswerReader:
     def __init__(self, store: FactSlotStore) -> None:
         self._store = store
 
-    async def scope_read_keys(
-        self, slot_id: UUID, *, valid_at: datetime, known_at: datetime
-    ) -> tuple[ResourceKey, ...]:
-        """READ keys a reader must hold before an identity-v1 answer is returned:
-        the absence scope's artifact (S0003 AC6, threat T-08). Legacy slots and
-        answers without a scope need none, so pilot reads are unchanged."""
+    async def scope_keys_for_value(self, slot_id: UUID, stored: object) -> tuple[ResourceKey, ...]:
+        """Derive keys from the exact privately loaded version, without selecting
+        the answer again. Legacy JSON keeps its existing unwrapped semantics."""
         slot = await self._store.slot(slot_id)
         if slot is None or slot.legacy:
             return ()
-        stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
         scope = stored.get("scope") if isinstance(stored, Mapping) else None
         artifact = _uuid(scope.get("content_artifact_id")) if isinstance(scope, Mapping) else None
         return (ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),) if artifact else ()

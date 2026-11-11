@@ -1,16 +1,16 @@
 version: 0
-generated_at: '2026-11-10T03:37:57+00:00'
+generated_at: '2026-11-11T02:44:36+00:00'
 summary:
-  total_symbols: 2116
+  total_symbols: 2161
   by_language:
     python:
-      files: 203
-      parsed: 3
-      cached: 200
+      files: 207
+      parsed: 207
+      cached: 0
     typescript:
       files: 8
-      parsed: 0
-      cached: 8
+      parsed: 8
+      cached: 0
   disambiguated_ids: 6
   compilation_roots_by_language:
     python:
@@ -8494,6 +8494,12 @@ symbols:
   - symbol:capability-durable-authorization-decisions:test-execution.test-load-failure-is-audited-as-failed-in-a-fresh-transaction
   - symbol:capability-durable-authorization-decisions:test-execution.test-nonexistent-resource-is-the-same-denial-with-null-scope
   - symbol:capability-durable-authorization-decisions:test-execution.test-stale-policy-or-unreadable-authority-fails-closed
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-primary-does-not-load-or-discover-scope
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-scope-returns-no-payload-and-audits-both-decisions
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-exact-payload-dependencies-share-one-successful-commit
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-expiry-during-private-load-is-rechecked-before-release
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-group-audit-failure-never-returns-the-private-payload
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-scope-discovery-failure-audits-failed-primary
   callees:
   - symbol:capability-durable-authorization-decisions:assertion-repository.project
   - symbol:capability-durable-authorization-decisions:assertion-repository.source-keys
@@ -8521,6 +8527,8 @@ symbols:
   - symbol:capability-durable-authorization-decisions:fake-store.lock-delegation
   - symbol:capability-durable-authorization-decisions:fake-store.rollback
   - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.append
+  - symbol:capability-durable-authorization-decisions:read-store.append-decision
+  - symbol:capability-durable-authorization-decisions:read-store.hydrate
   - symbol:capability-durable-authorization-decisions:reviews.submit-review-decisions
   - symbol:capability-durable-authorization-decisions:test-execution.test-allowed-read-loads-after-the-decision-and-commits-audit-first
   - symbol:capability-durable-authorization-decisions:test-execution.test-batch-is-all-authorized-before-any-effect
@@ -8530,6 +8538,7 @@ symbols:
   - symbol:capability-durable-authorization-decisions:test-execution.test-mutation-commits-effect-and-decision-together
   - symbol:capability-durable-authorization-decisions:test-execution.test-mutation-expiry-while-staging-audit-rolls-back-success
   - symbol:capability-durable-authorization-decisions:test-execution.test-source-audit-failure-prevents-mutation
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-exact-payload-dependencies-share-one-successful-commit
   callees: []
 - id: symbol:capability-durable-authorization-decisions:audit.audit-event
   node: capability:durable-authorization-decisions
@@ -8768,6 +8777,7 @@ symbols:
   - symbol:capability-durable-authorization-decisions:authorization-execution.init
   - symbol:capability-durable-authorization-decisions:fake-store.init
   - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.init
+  - symbol:capability-durable-authorization-decisions:read-store.init
 - id: symbol:capability-durable-authorization-decisions:authorization-execution.decide
   node: capability:durable-authorization-decisions
   kind: method
@@ -8786,6 +8796,7 @@ symbols:
   - symbol:capability-durable-authorization-decisions:authority-store.run-sync
   - symbol:capability-durable-authorization-decisions:execution.decide
   - symbol:capability-durable-authorization-decisions:fake-store.run-sync
+  - symbol:capability-durable-authorization-decisions:read-store.run-sync
 - id: symbol:capability-durable-authorization-decisions:authorization-execution.deny
   node: capability:durable-authorization-decisions
   kind: method
@@ -8843,7 +8854,7 @@ symbols:
   kind: method
   name: mutate
   file: engine/packages/brain-security/src/brain_security/execution.py
-  line: 389
+  line: 421
   signature: 'async def mutate(self, authenticated: Principal, keys: Sequence[ResourceKey],
     action: str, *, trace_id: str, operation: Callable[[Sequence[AuthorizationDecision]],
     Awaitable[T]], requested: RequestedScope=NO_FILTER, delegation_id: UUID | None=None,
@@ -8851,7 +8862,7 @@ symbols:
   visibility: public
   language: python
   container: AuthorizationExecution
-  end_line: 458
+  end_line: 490
   callers:
   - symbol:capability-durable-authorization-decisions:assertion-write-service.admit
   - symbol:capability-durable-authorization-decisions:assertion-write-service.read
@@ -8879,6 +8890,8 @@ symbols:
   - symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
   - symbol:capability-durable-authorization-decisions:fake-store.append-decision
   - symbol:capability-durable-authorization-decisions:fake-store.commit
+  - symbol:capability-durable-authorization-decisions:read-store.append-decision
+  - symbol:capability-durable-authorization-decisions:read-store.commit
 - id: symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
   node: capability:durable-authorization-decisions
   kind: method
@@ -8901,6 +8914,8 @@ symbols:
   - symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
   - symbol:capability-durable-authorization-decisions:fake-store.append-decision
   - symbol:capability-durable-authorization-decisions:fake-store.commit
+  - symbol:capability-durable-authorization-decisions:read-store.append-decision
+  - symbol:capability-durable-authorization-decisions:read-store.commit
 - id: symbol:capability-durable-authorization-decisions:authorization-execution.read
   node: capability:durable-authorization-decisions
   kind: method
@@ -8909,11 +8924,12 @@ symbols:
   line: 356
   signature: 'async def read(self, authenticated: Principal, key: ResourceKey, action:
     str, *, trace_id: str, load: Callable[[AuthorizationDecision], Awaitable[T]],
-    requested: RequestedScope=NO_FILTER, delegation_id: UUID | None=None)'
+    requested: RequestedScope=NO_FILTER, delegation_id: UUID | None=None, additional_reads:
+    Callable[[T], Awaitable[Sequence[ResourceKey]]] | None=None)'
   visibility: public
   language: python
   container: AuthorizationExecution
-  end_line: 387
+  end_line: 419
   callers:
   - symbol:capability-durable-authorization-decisions:assertion-write-service.read
   - symbol:capability-durable-authorization-decisions:facts.get-fact
@@ -8927,6 +8943,12 @@ symbols:
   - symbol:capability-durable-authorization-decisions:test-execution.test-load-failure-is-audited-as-failed-in-a-fresh-transaction
   - symbol:capability-durable-authorization-decisions:test-execution.test-nonexistent-resource-is-the-same-denial-with-null-scope
   - symbol:capability-durable-authorization-decisions:test-execution.test-stale-policy-or-unreadable-authority-fails-closed
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-primary-does-not-load-or-discover-scope
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-scope-returns-no-payload-and-audits-both-decisions
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-exact-payload-dependencies-share-one-successful-commit
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-expiry-during-private-load-is-rechecked-before-release
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-group-audit-failure-never-returns-the-private-payload
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-scope-discovery-failure-audits-failed-primary
   callees:
   - symbol:capability-durable-authorization-decisions:authority-store.append-decision
   - symbol:capability-durable-authorization-decisions:authority-store.commit
@@ -8938,6 +8960,8 @@ symbols:
   - symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
   - symbol:capability-durable-authorization-decisions:fake-store.append-decision
   - symbol:capability-durable-authorization-decisions:fake-store.commit
+  - symbol:capability-durable-authorization-decisions:read-store.append-decision
+  - symbol:capability-durable-authorization-decisions:read-store.commit
 - id: symbol:capability-durable-authorization-decisions:authorization-execution.recheck-all
   node: capability:durable-authorization-decisions
   kind: method
@@ -8973,6 +8997,7 @@ symbols:
   callees:
   - symbol:capability-durable-authorization-decisions:authority-store.rollback
   - symbol:capability-durable-authorization-decisions:fake-store.rollback
+  - symbol:capability-durable-authorization-decisions:read-store.rollback
 - id: symbol:capability-durable-authorization-decisions:execution.assemble-context
   node: capability:durable-authorization-decisions
   kind: function
@@ -9034,12 +9059,18 @@ symbols:
   signature: class AuthorizationExecution
   visibility: public
   language: python
-  end_line: 458
+  end_line: 490
   callers:
   - symbol:capability-durable-authorization-decisions:test-execution.test-expiry-between-decision-and-effect-denies
   - symbol:capability-durable-authorization-decisions:test-execution.test-mutation-expiry-while-staging-audit-rolls-back-success
   - symbol:capability-durable-authorization-decisions:test-execution.test-source-denial-prevents-effect-and-audits-combined-decisions
   - symbol:capability-durable-authorization-decisions:test-execution.world
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-primary-does-not-load-or-discover-scope
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-scope-returns-no-payload-and-audits-both-decisions
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-exact-payload-dependencies-share-one-successful-commit
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-expiry-during-private-load-is-rechecked-before-release
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-group-audit-failure-never-returns-the-private-payload
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-scope-discovery-failure-audits-failed-primary
   callees: []
 - id: symbol:capability-durable-authorization-decisions:execution.authorization-unavailable
   node: capability:durable-authorization-decisions
@@ -9091,6 +9122,12 @@ symbols:
   - symbol:capability-durable-authorization-decisions:fake-store.peek-delegation
   - symbol:capability-durable-authorization-decisions:fake-store.scope-slices
   - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.append
+  - symbol:capability-durable-authorization-decisions:read-store.current-policy-release
+  - symbol:capability-durable-authorization-decisions:read-store.hydrate
+  - symbol:capability-durable-authorization-decisions:read-store.lock-authority
+  - symbol:capability-durable-authorization-decisions:read-store.lock-delegation
+  - symbol:capability-durable-authorization-decisions:read-store.peek-delegation
+  - symbol:capability-durable-authorization-decisions:read-store.scope-slices
 - id: symbol:capability-durable-authorization-decisions:execution.evaluated
   node: capability:durable-authorization-decisions
   kind: class
@@ -9115,8 +9152,10 @@ symbols:
   language: python
   end_line: 74
   callers:
+  - symbol:capability-durable-authorization-decisions:read-store.init
   - symbol:capability-durable-authorization-decisions:test-execution.test-delegated-read-binds-executor-and-acting-user
   - symbol:capability-durable-authorization-decisions:test-execution.world
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-exact-payload-dependencies-share-one-successful-commit
   callees: []
 - id: symbol:capability-durable-authorization-decisions:execution.recheck
   node: capability:durable-authorization-decisions
@@ -9148,13 +9187,13 @@ symbols:
   kind: function
   name: commit_fact
   file: engine/apps/api/src/brain_api/routes/facts.py
-  line: 107
+  line: 101
   signature: 'async def commit_fact(fact_slot_id: UUID, proposal_in: CommitProposalIn,
     principal: Principal=Depends(current_principal), execution: AuthorizationExecution=Depends(get_authorization_execution),
     session: AsyncSession=Depends(get_db_session), registry: PredicateContractRegistry=Depends(get_predicate_registry))'
   visibility: public
   language: python
-  end_line: 193
+  end_line: 187
   callers: []
   callees:
   - symbol:capability-durable-authorization-decisions:assertion-repository.source-keys
@@ -9162,36 +9201,25 @@ symbols:
   - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
   - symbol:capability-durable-authorization-decisions:facts.slot
   - symbol:capability-durable-authorization-decisions:fake-store.commit
+  - symbol:capability-durable-authorization-decisions:read-store.commit
 - id: symbol:capability-durable-authorization-decisions:facts.get-fact
   node: capability:durable-authorization-decisions
   kind: function
   name: get_fact
   file: engine/apps/api/src/brain_api/routes/facts.py
-  line: 58
+  line: 54
   signature: 'async def get_fact(fact_slot_id: UUID, valid_as_of: datetime | None=Query(default=None,
     alias=''validAsOf''), known_as_of: datetime | None=Query(default=None, alias=''knownAsOf''),
     principal: Principal=Depends(current_principal), execution: AuthorizationExecution=Depends(get_authorization_execution),
     session: AsyncSession=Depends(get_db_session))'
   visibility: public
   language: python
-  end_line: 103
+  end_line: 97
   callers: []
   callees:
   - symbol:capability-durable-authorization-decisions:assertion-write-service.read
   - symbol:capability-durable-authorization-decisions:authorization-execution.read
   - symbol:capability-durable-authorization-decisions:facts.slot
-- id: symbol:capability-durable-authorization-decisions:facts.nothing
-  node: capability:durable-authorization-decisions
-  kind: function
-  name: _nothing
-  file: engine/apps/api/src/brain_api/routes/facts.py
-  line: 53
-  signature: 'async def _nothing(_decision: AuthorizationDecision)'
-  visibility: private
-  language: python
-  end_line: 54
-  callers: []
-  callees: []
 - id: symbol:capability-durable-authorization-decisions:facts.slot
   node: capability:durable-authorization-decisions
   kind: function
@@ -9411,6 +9439,8 @@ symbols:
   - symbol:capability-durable-authorization-decisions:fake-store.lock-authority
   - symbol:capability-durable-authorization-decisions:fake-store.lock-delegation
   - symbol:capability-durable-authorization-decisions:fake-store.rollback
+  - symbol:capability-durable-authorization-decisions:read-store.append-decision
+  - symbol:capability-durable-authorization-decisions:read-store.hydrate
   - symbol:capability-durable-authorization-decisions:reviews.submit-review-decisions
   - symbol:capability-durable-authorization-decisions:test-execution.test-allowed-read-loads-after-the-decision-and-commits-audit-first
   - symbol:capability-durable-authorization-decisions:test-execution.test-batch-is-all-authorized-before-any-effect
@@ -9420,6 +9450,7 @@ symbols:
   - symbol:capability-durable-authorization-decisions:test-execution.test-mutation-commits-effect-and-decision-together
   - symbol:capability-durable-authorization-decisions:test-execution.test-mutation-expiry-while-staging-audit-rolls-back-success
   - symbol:capability-durable-authorization-decisions:test-execution.test-source-audit-failure-prevents-mutation
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-exact-payload-dependencies-share-one-successful-commit
   callees:
   - symbol:capability-durable-authorization-decisions:audit-event-repository.append
 - id: symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.init
@@ -9435,6 +9466,181 @@ symbols:
   end_line: 56
   callers:
   - symbol:capability-durable-authorization-decisions:authorization-denied.init
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:read-store.append-decision
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: append_decision
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 58
+  signature: async def append_decision(self, decision)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 59
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  callees:
+  - symbol:capability-durable-authorization-decisions:audit-event-repository.append
+  - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.append
+- id: symbol:capability-durable-authorization-decisions:read-store.commit
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: commit
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 61
+  signature: async def commit(self)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 68
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:authorization-execution.persist-fresh
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  - symbol:capability-durable-authorization-decisions:facts.commit-fact
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:read-store.current-policy-release
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: current_policy_release
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 36
+  signature: def current_policy_release(self)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 37
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:read-store.hydrate
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: hydrate
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 51
+  signature: def hydrate(self, key, *, require_record=True)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 53
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees:
+  - symbol:capability-durable-authorization-decisions:audit-event-repository.append
+  - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.append
+- id: symbol:capability-durable-authorization-decisions:read-store.init
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: __init__
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 20
+  signature: def __init__(self, build, policy)
+  visibility: private
+  language: python
+  container: ReadStore
+  end_line: 34
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-denied.init
+  callees:
+  - symbol:capability-durable-authorization-decisions:execution.principal-authority
+- id: symbol:capability-durable-authorization-decisions:read-store.lock-authority
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: lock_authority
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 42
+  signature: def lock_authority(self, principal_ids)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 43
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:read-store.lock-delegation
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: lock_delegation
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 45
+  signature: def lock_delegation(self, delegation_id)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 46
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:read-store.peek-delegation
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: peek_delegation
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 39
+  signature: def peek_delegation(self, delegation_id)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 40
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:read-store.rollback
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: rollback
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 70
+  signature: async def rollback(self)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 71
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.safe-rollback
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:read-store.run-sync
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: run_sync
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 55
+  signature: async def run_sync(self, callback)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 56
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:authorization-execution.decide
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:read-store.scope-slices
+  node: capability:durable-authorization-decisions
+  kind: method
+  name: scope_slices
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 48
+  signature: def scope_slices(self, principal_id)
+  visibility: public
+  language: python
+  container: ReadStore
+  end_line: 49
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:execution.decide
   callees: []
 - id: symbol:capability-durable-authorization-decisions:reviews.get-review-item
   node: capability:durable-authorization-decisions
@@ -9930,6 +10136,135 @@ symbols:
   - symbol:capability-durable-authorization-decisions:execution.authorization-execution
   - symbol:capability-durable-authorization-decisions:execution.principal-authority
   - symbol:capability-durable-authorization-decisions:test-execution.fake-store
+- id: symbol:capability-durable-authorization-decisions:test-payload-reads.read-store
+  node: capability:durable-authorization-decisions
+  kind: class
+  name: ReadStore
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 17
+  signature: class ReadStore
+  visibility: public
+  language: python
+  end_line: 71
+  is_test: true
+  callers:
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-primary-does-not-load-or-discover-scope
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-scope-returns-no-payload-and-audits-both-decisions
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-exact-payload-dependencies-share-one-successful-commit
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-expiry-during-private-load-is-rechecked-before-release
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-group-audit-failure-never-returns-the-private-payload
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.test-scope-discovery-failure-audits-failed-primary
+  callees: []
+- id: symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-primary-does-not-load-or-discover-scope
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: test_denied_primary_does_not_load_or_discover_scope
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 139
+  signature: async def test_denied_primary_does_not_load_or_discover_scope(build,
+    policy)
+  visibility: public
+  language: python
+  end_line: 157
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:assertion-write-service.read
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  - symbol:capability-durable-authorization-decisions:execution.authorization-execution
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.read-store
+- id: symbol:capability-durable-authorization-decisions:test-payload-reads.test-denied-scope-returns-no-payload-and-audits-both-decisions
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: test_denied_scope_returns_no_payload_and_audits_both_decisions
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 111
+  signature: async def test_denied_scope_returns_no_payload_and_audits_both_decisions(build,
+    policy)
+  visibility: public
+  language: python
+  end_line: 136
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:assertion-write-service.read
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  - symbol:capability-durable-authorization-decisions:execution.authorization-execution
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.read-store
+- id: symbol:capability-durable-authorization-decisions:test-payload-reads.test-exact-payload-dependencies-share-one-successful-commit
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: test_exact_payload_dependencies_share_one_successful_commit
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 74
+  signature: async def test_exact_payload_dependencies_share_one_successful_commit(build,
+    policy)
+  visibility: public
+  language: python
+  end_line: 108
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:assertion-write-service.read
+  - symbol:capability-durable-authorization-decisions:audit-event-repository.append
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  - symbol:capability-durable-authorization-decisions:execution.authorization-execution
+  - symbol:capability-durable-authorization-decisions:execution.principal-authority
+  - symbol:capability-durable-authorization-decisions:in-memory-audit-event-repository.append
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.read-store
+- id: symbol:capability-durable-authorization-decisions:test-payload-reads.test-expiry-during-private-load-is-rechecked-before-release
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: test_expiry_during_private_load_is_rechecked_before_release
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 182
+  signature: async def test_expiry_during_private_load_is_rechecked_before_release(build,
+    policy)
+  visibility: public
+  language: python
+  end_line: 206
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:assertion-write-service.read
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  - symbol:capability-durable-authorization-decisions:execution.authorization-execution
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.read-store
+- id: symbol:capability-durable-authorization-decisions:test-payload-reads.test-group-audit-failure-never-returns-the-private-payload
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: test_group_audit_failure_never_returns_the_private_payload
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 209
+  signature: async def test_group_audit_failure_never_returns_the_private_payload(build,
+    policy)
+  visibility: public
+  language: python
+  end_line: 229
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:assertion-write-service.read
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  - symbol:capability-durable-authorization-decisions:execution.authorization-execution
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.read-store
+- id: symbol:capability-durable-authorization-decisions:test-payload-reads.test-scope-discovery-failure-audits-failed-primary
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: test_scope_discovery_failure_audits_failed_primary
+  file: engine/packages/brain-security/tests/test_payload_reads.py
+  line: 160
+  signature: async def test_scope_discovery_failure_audits_failed_primary(build, policy)
+  visibility: public
+  language: python
+  end_line: 179
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-durable-authorization-decisions:assertion-write-service.read
+  - symbol:capability-durable-authorization-decisions:authorization-execution.read
+  - symbol:capability-durable-authorization-decisions:execution.authorization-execution
+  - symbol:capability-durable-authorization-decisions:test-payload-reads.read-store
 - id: symbol:capability-evidence-review-round-trip:audit-recorder.record-decision
   node: capability:evidence-review-round-trip
   kind: method
@@ -11229,33 +11564,18 @@ symbols:
   callees:
   - symbol:capability-evidence-review-round-trip:test-reviews.make-token
   - symbol:capability-evidence-review-round-trip:test-reviews.seed-review-item
-- id: symbol:capability-factslot-identity-resolution:authorized-fact-slots.authorize-scope-reads
-  node: capability:factslot-identity-resolution
-  kind: method
-  name: authorize_scope_reads
-  file: engine/packages/brain-factslots/src/brain_factslots/service.py
-  line: 131
-  signature: 'async def authorize_scope_reads(self, principal: Principal, slot_id:
-    UUID, *, valid_at: datetime, known_at: datetime, trace_id: str)'
-  visibility: public
-  language: python
-  container: AuthorizedFactSlots
-  end_line: 149
-  callers:
-  - symbol:capability-factslot-identity-resolution:authorized-fact-slots.read-answer
-  callees: []
 - id: symbol:capability-factslot-identity-resolution:authorized-fact-slots.current-names
   node: capability:factslot-identity-resolution
   kind: method
   name: current_names
   file: engine/packages/brain-factslots/src/brain_factslots/service.py
-  line: 151
+  line: 138
   signature: 'async def current_names(self, principal: Principal, *, knowledge_base_id:
     UUID, entity_id: UUID, valid_at: datetime, known_at: datetime, trace_id: str)'
   visibility: public
   language: python
   container: AuthorizedFactSlots
-  end_line: 179
+  end_line: 166
   callers:
   - symbol:capability-factslot-identity-resolution:names.names
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-reader-and-name-hook
@@ -11290,10 +11610,9 @@ symbols:
   visibility: public
   language: python
   container: AuthorizedFactSlots
-  end_line: 129
+  end_line: 136
   callers: []
   callees:
-  - symbol:capability-factslot-identity-resolution:authorized-fact-slots.authorize-scope-reads
   - symbol:capability-factslot-identity-resolution:service.slot-key
   - symbol:capability-factslot-identity-resolution:service.slot-not-found
 - id: symbol:capability-factslot-identity-resolution:authorized-fact-slots.resolve
@@ -11318,6 +11637,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac3-name-without-admitted-evidence-is-rejected
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac4-kb-a-trade-name-is-invisible-in-kb-b
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac5-display-hook-is-precedence-free-and-creates-no-alias
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-relationship-and-cross-kb-reads-are-not-disclosed
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac2-single-slot-overlap-still-hits-the-exclusion
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac3-ac5-members-carry-independent-versions
@@ -11439,7 +11759,7 @@ symbols:
   end_line: 206
   callers:
   - symbol:capability-factslot-identity-resolution:authorized-fact-slots.resolve
-  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-scope-read-keys
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-payload-scope-keys
   callees:
   - symbol:capability-factslot-identity-resolution:fact-slot-store.name-evidence-artifacts
   - symbol:capability-factslot-identity-resolution:fact-slot-world.get
@@ -11534,6 +11854,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac3-name-without-admitted-evidence-is-rejected
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac4-kb-a-trade-name-is-invisible-in-kb-b
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac5-display-hook-is-precedence-free-and-creates-no-alias
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-relationship-and-cross-kb-reads-are-not-disclosed
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac2-single-slot-overlap-still-hits-the-exclusion
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac3-ac5-members-carry-independent-versions
@@ -11847,6 +12168,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac3-name-without-admitted-evidence-is-rejected
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac4-kb-a-trade-name-is-invisible-in-kb-b
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac5-display-hook-is-precedence-free-and-creates-no-alias
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac2-single-slot-overlap-still-hits-the-exclusion
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac3-ac5-members-carry-independent-versions
   callees:
@@ -11866,6 +12188,7 @@ symbols:
   callers:
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-g3-name-member-evidence-is-read-authorized-before-any-reason
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac3-name-without-admitted-evidence-is-rejected
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   - symbol:capability-factslot-identity-resolution:test-factslot-resolution.test-s0001-ac3-forced-collision-is-rejected-never-merged
   - symbol:capability-factslot-identity-resolution:test-factslot-resolution.test-s0001-ac4-omitted-and-explicit-null-are-distinct
   - symbol:capability-factslot-identity-resolution:test-factslot-resolution.test-s0001-ac6-malformed-or-unpinned-key-writes-no-row
@@ -11900,6 +12223,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-collision-and-cardinality-conflict-roll-back
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-member-result-and-inheritance
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-non-mapping-key-and-bad-object
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-present-entity-answer-must-match-the-immutable-member-key
   callees:
   - symbol:capability-factslot-identity-resolution:factslots.seed-subject
 - id: symbol:capability-factslot-identity-resolution:fact-slot-world.get
@@ -11930,6 +12254,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:static-predicate-registry.init
   - symbol:capability-factslot-identity-resolution:test-contract-examples.test-runtime-answer-parser-agrees-with-the-schema
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac4-kb-a-trade-name-is-invisible-in-kb-b
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-relationship-and-cross-kb-reads-are-not-disclosed
   - symbol:capability-factslot-identity-resolution:test-factslot-resolution.test-s0001-ac5-two-kbs-two-slots-and-kb-b-principal-sees-not-found
   callees:
@@ -12027,6 +12352,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac3-name-without-admitted-evidence-is-rejected
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac4-kb-a-trade-name-is-invisible-in-kb-b
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac5-display-hook-is-precedence-free-and-creates-no-alias
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-relationship-and-cross-kb-reads-are-not-disclosed
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac2-single-slot-overlap-still-hits-the-exclusion
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac3-ac5-members-carry-independent-versions
@@ -12392,7 +12718,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.policy-slot
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-collision-and-cardinality-conflict-roll-back
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-create-then-resolve-and-result-shape
-  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-scope-read-keys
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-payload-scope-keys
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-identifier-and-money-members
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-key-and-scope-rejections
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-member-result-and-inheritance
@@ -12452,6 +12778,9 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-answer-policy-names-and-entity-refs
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-answer-policy-paths
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-collision-and-cardinality-conflict-roll-back
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-identifier-member-uses-normalized-value-and-keeps-issuer-identity
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-name-member-accepts-equivalent-spelling-and-rejects-a-different-name
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-present-entity-answer-must-match-the-immutable-member-key
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-reader-and-name-hook
   callees:
   - symbol:capability-factslot-identity-resolution:predicates.static-predicate-registry
@@ -12808,6 +13137,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac3-name-without-admitted-evidence-is-rejected
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac4-kb-a-trade-name-is-invisible-in-kb-b
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac5-display-hook-is-precedence-free-and-creates-no-alias
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   callees: []
 - id: symbol:capability-factslot-identity-resolution:names.init
   node: capability:factslot-identity-resolution
@@ -12846,6 +13176,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac3-name-without-admitted-evidence-is-rejected
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac4-kb-a-trade-name-is-invisible-in-kb-b
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac5-display-hook-is-precedence-free-and-creates-no-alias
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-reader-and-name-hook
   callees: []
 - id: symbol:capability-factslot-identity-resolution:names.name-fact
@@ -12933,6 +13264,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac3-name-without-admitted-evidence-is-rejected
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac4-kb-a-trade-name-is-invisible-in-kb-b
   - symbol:capability-factslot-identity-resolution:test-factslot-names.test-s0005-ac5-display-hook-is-precedence-free-and-creates-no-alias
+  - symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-relationship-and-cross-kb-reads-are-not-disclosed
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac2-single-slot-overlap-still-hits-the-exclusion
   - symbol:capability-factslot-identity-resolution:test-factslot-ownership.test-s0002-ac3-ac5-members-carry-independent-versions
@@ -13283,6 +13615,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-collision-and-cardinality-conflict-roll-back
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-member-result-and-inheritance
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-non-mapping-key-and-bad-object
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-present-entity-answer-must-match-the-immutable-member-key
   callees: []
 - id: symbol:capability-factslot-identity-resolution:service.authorized-fact-slots
   node: capability:factslot-identity-resolution
@@ -13293,7 +13626,7 @@ symbols:
   signature: class AuthorizedFactSlots
   visibility: public
   language: python
-  end_line: 179
+  end_line: 166
   callers:
   - symbol:capability-factslot-identity-resolution:fact-slot-world.slots
   - symbol:capability-factslot-identity-resolution:names.service
@@ -13753,11 +14086,11 @@ symbols:
   kind: function
   name: test_g3_name_member_evidence_is_read_authorized_before_any_reason
   file: engine/tests/integration/test_factslot_names.py
-  line: 319
+  line: 350
   signature: async def test_g3_name_member_evidence_is_read_authorized_before_any_reason(names)
   visibility: public
   language: python
-  end_line: 361
+  end_line: 392
   is_test: true
   callers: []
   callees:
@@ -13856,11 +14189,11 @@ symbols:
   kind: function
   name: test_s0005_ac4_kb_a_trade_name_is_invisible_in_kb_b
   file: engine/tests/integration/test_factslot_names.py
-  line: 241
+  line: 272
   signature: async def test_s0005_ac4_kb_a_trade_name_is_invisible_in_kb_b(names)
   visibility: public
   language: python
-  end_line: 276
+  end_line: 307
   is_test: true
   callers: []
   callees:
@@ -13879,11 +14212,11 @@ symbols:
   kind: function
   name: test_s0005_ac5_display_hook_is_precedence_free_and_creates_no_alias
   file: engine/tests/integration/test_factslot_names.py
-  line: 279
+  line: 310
   signature: async def test_s0005_ac5_display_hook_is_precedence_free_and_creates_no_alias(names)
   visibility: public
   language: python
-  end_line: 316
+  end_line: 347
   is_test: true
   callers: []
   callees:
@@ -13898,6 +14231,28 @@ symbols:
   - symbol:capability-factslot-identity-resolution:names.names
   - symbol:capability-factslot-identity-resolution:names.resolve
   - symbol:capability-factslot-identity-resolution:test-factslot-names.names-2
+- id: symbol:capability-factslot-identity-resolution:test-factslot-names.test-trade-name-member-commit-keeps-its-normalized-identity
+  node: capability:factslot-identity-resolution
+  kind: function
+  name: test_trade_name_member_commit_keeps_its_normalized_identity
+  file: engine/tests/integration/test_factslot_names.py
+  line: 241
+  signature: async def test_trade_name_member_commit_keeps_its_normalized_identity(names)
+  visibility: public
+  language: python
+  end_line: 269
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-factslot-identity-resolution:authorized-fact-slots.resolve
+  - symbol:capability-factslot-identity-resolution:fact-slot-resolver.resolve
+  - symbol:capability-factslot-identity-resolution:fact-slot-world.commit
+  - symbol:capability-factslot-identity-resolution:fact-slot-world.counts
+  - symbol:capability-factslot-identity-resolution:fact-slot-world.get
+  - symbol:capability-factslot-identity-resolution:fact-slot-world.resolve
+  - symbol:capability-factslot-identity-resolution:names.admitted
+  - symbol:capability-factslot-identity-resolution:names.name
+  - symbol:capability-factslot-identity-resolution:names.resolve
 - id: symbol:capability-factslot-identity-resolution:test-factslot-ownership.copy-version
   node: capability:factslot-identity-resolution
   kind: function
@@ -14353,7 +14708,7 @@ symbols:
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.policy-slot
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-collision-and-cardinality-conflict-roll-back
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-create-then-resolve-and-result-shape
-  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-scope-read-keys
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-payload-scope-keys
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-identifier-and-money-members
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-key-and-scope-rejections
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-member-result-and-inheritance
@@ -14375,7 +14730,10 @@ symbols:
   callers:
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-answer-policy-names-and-entity-refs
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-answer-policy-paths
-  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-scope-read-keys
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-payload-scope-keys
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-identifier-member-uses-normalized-value-and-keeps-issuer-identity
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-name-member-accepts-equivalent-spelling-and-rejects-a-different-name
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-present-entity-answer-must-match-the-immutable-member-key
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-reader-and-name-hook
   callees:
   - symbol:capability-factslot-identity-resolution:factslots.key
@@ -14420,7 +14778,7 @@ symbols:
   is_test: true
   callers:
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.resolve
-  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-scope-read-keys
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-payload-scope-keys
   callees:
   - symbol:capability-factslot-identity-resolution:factslots.test-registry
   - symbol:capability-factslot-identity-resolution:resolution.fact-slot-resolver
@@ -14499,16 +14857,16 @@ symbols:
   - symbol:capability-factslot-identity-resolution:resolution-result.to-json
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.key
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.resolve
-- id: symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-scope-read-keys
+- id: symbol:capability-factslot-identity-resolution:test-factslots-unit.test-g3-evidence-and-payload-scope-keys
   node: capability:factslot-identity-resolution
   kind: function
-  name: test_g3_evidence_and_scope_read_keys
+  name: test_g3_evidence_and_payload_scope_keys
   file: engine/packages/brain-factslots/tests/test_factslots_unit.py
-  line: 392
-  signature: async def test_g3_evidence_and_scope_read_keys(scene)
+  line: 464
+  signature: async def test_g3_evidence_and_payload_scope_keys(scene)
   visibility: public
   language: python
-  end_line: 425
+  end_line: 500
   is_test: true
   callers: []
   callees:
@@ -14533,6 +14891,21 @@ symbols:
   - symbol:capability-factslot-identity-resolution:factslots.key
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.key
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.resolve
+- id: symbol:capability-factslot-identity-resolution:test-factslots-unit.test-identifier-member-uses-normalized-value-and-keeps-issuer-identity
+  node: capability:factslot-identity-resolution
+  kind: function
+  name: test_identifier_member_uses_normalized_value_and_keeps_issuer_identity
+  file: engine/packages/brain-factslots/tests/test_factslots_unit.py
+  line: 359
+  signature: async def test_identifier_member_uses_normalized_value_and_keeps_issuer_identity(scene)
+  visibility: public
+  language: python
+  end_line: 379
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-factslot-identity-resolution:factslots.test-registry
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.policy-slot
 - id: symbol:capability-factslot-identity-resolution:test-factslots-unit.test-key-and-scope-rejections
   node: capability:factslot-identity-resolution
   kind: function
@@ -14568,6 +14941,21 @@ symbols:
   - symbol:capability-factslot-identity-resolution:scene.entity
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.key
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.resolve
+- id: symbol:capability-factslot-identity-resolution:test-factslots-unit.test-name-member-accepts-equivalent-spelling-and-rejects-a-different-name
+  node: capability:factslot-identity-resolution
+  kind: function
+  name: test_name_member_accepts_equivalent_spelling_and_rejects_a_different_name
+  file: engine/packages/brain-factslots/tests/test_factslots_unit.py
+  line: 335
+  signature: async def test_name_member_accepts_equivalent_spelling_and_rejects_a_different_name(scene)
+  visibility: public
+  language: python
+  end_line: 356
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-factslot-identity-resolution:factslots.test-registry
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.policy-slot
 - id: symbol:capability-factslot-identity-resolution:test-factslots-unit.test-name-members-require-evidence
   node: capability:factslot-identity-resolution
   kind: function
@@ -14602,16 +14990,33 @@ symbols:
   - symbol:capability-factslot-identity-resolution:scene.entity
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.key
   - symbol:capability-factslot-identity-resolution:test-factslots-unit.resolve
+- id: symbol:capability-factslot-identity-resolution:test-factslots-unit.test-present-entity-answer-must-match-the-immutable-member-key
+  node: capability:factslot-identity-resolution
+  kind: function
+  name: test_present_entity_answer_must_match_the_immutable_member_key
+  file: engine/packages/brain-factslots/tests/test_factslots_unit.py
+  line: 310
+  signature: async def test_present_entity_answer_must_match_the_immutable_member_key(scene)
+  visibility: public
+  language: python
+  end_line: 332
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-factslot-identity-resolution:fact-slot-world.entity
+  - symbol:capability-factslot-identity-resolution:factslots.test-registry
+  - symbol:capability-factslot-identity-resolution:scene.entity
+  - symbol:capability-factslot-identity-resolution:test-factslots-unit.policy-slot
 - id: symbol:capability-factslot-identity-resolution:test-factslots-unit.test-reader-and-name-hook
   node: capability:factslot-identity-resolution
   kind: function
   name: test_reader_and_name_hook
   file: engine/packages/brain-factslots/tests/test_factslots_unit.py
-  line: 310
+  line: 382
   signature: async def test_reader_and_name_hook(scene)
   visibility: public
   language: python
-  end_line: 389
+  end_line: 461
   is_test: true
   callers: []
   callees:
@@ -27193,6 +27598,8 @@ symbols:
   - symbol:capability-semantic-interpretation-run:assertions.parse-entity
   - symbol:capability-semantic-interpretation-run:assertions.unique-object
   - symbol:capability-semantic-interpretation-run:assertions.validate-contract
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-interpretation-result
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
   callees: []
 - id: symbol:capability-semantic-interpretation-run:assertions.assertion-contract-unsupported
   node: capability:semantic-interpretation-run
@@ -27204,7 +27611,9 @@ symbols:
   visibility: public
   language: python
   end_line: 50
-  callers: []
+  callers:
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-interpretation-result
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
   callees: []
 - id: symbol:capability-semantic-interpretation-run:assertions.assertion-record-v2
   node: capability:semantic-interpretation-run
@@ -27231,6 +27640,7 @@ symbols:
   callers:
   - symbol:capability-semantic-interpretation-run:assertions.parse-assertion
   - symbol:capability-semantic-interpretation-run:assertions.parse-entity
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
   - symbol:capability-semantic-interpretation-run:test-contracts.test-authored-contract-shape-expectations-and-packaged-schema-equality
   - symbol:capability-semantic-interpretation-run:test-contracts.test-unknown-python-values-cannot-enter-json-contract
   - symbol:capability-semantic-interpretation-run:test-contracts.test-v2-result-dispatch-and-legacy-behavior
@@ -27293,6 +27703,8 @@ symbols:
   callers:
   - symbol:capability-semantic-interpretation-run:assertions.contracts
   - symbol:capability-semantic-interpretation-run:assertions.parse-assertion
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-interpretation-result
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
   - symbol:capability-semantic-interpretation-run:test-contracts.test-strict-json-rejects-invalid-nested-values-without-echoing-input
   callees:
   - symbol:capability-semantic-interpretation-run:assertions.assertion-contract-error
@@ -27453,6 +27865,7 @@ symbols:
   - symbol:capability-semantic-interpretation-run:assertions.parse-assertion
   - symbol:capability-semantic-interpretation-run:contract-model.input-contract
   - symbol:capability-semantic-interpretation-run:contract-model.output-contract
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
   - symbol:capability-semantic-interpretation-run:test-contracts.test-authored-contract-shape-expectations-and-packaged-schema-equality
   callees:
   - symbol:capability-semantic-interpretation-run:assertions.assertion-contract-error
@@ -27760,6 +28173,73 @@ symbols:
   callers:
   - symbol:capability-semantic-interpretation-run:counters.assert-no-reparse
   callees: []
+- id: symbol:capability-semantic-interpretation-run:dispatch.interpretation-result-v2
+  node: capability:semantic-interpretation-run
+  kind: class
+  name: InterpretationResultV2
+  file: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+  line: 24
+  signature: class InterpretationResultV2
+  visibility: public
+  language: python
+  end_line: 39
+  callers: []
+  callees: []
+- id: symbol:capability-semantic-interpretation-run:dispatch.parse-interpretation-result
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: parse_interpretation_result
+  file: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+  line: 71
+  signature: 'def parse_interpretation_result(raw: bytes | str, *, supported_versions:
+    frozenset[int]=frozenset({1, 2}))'
+  visibility: public
+  language: python
+  end_line: 82
+  callers:
+  - symbol:capability-semantic-interpretation-run:test-contracts.test-explicit-v2-is-refused-by-legacy-reader-before-shape-validation
+  callees:
+  - symbol:capability-semantic-interpretation-run:assertions.assertion-contract-error
+  - symbol:capability-semantic-interpretation-run:assertions.assertion-contract-unsupported
+  - symbol:capability-semantic-interpretation-run:assertions.decode-json
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
+- id: symbol:capability-semantic-interpretation-run:dispatch.parse-legacy-result
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: parse_legacy_result
+  file: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+  line: 62
+  signature: 'def parse_legacy_result(raw: bytes | str)'
+  visibility: public
+  language: python
+  end_line: 65
+  callers:
+  - symbol:capability-semantic-interpretation-run:test-contracts.test-explicit-v2-is-refused-by-legacy-reader-before-shape-validation
+  - symbol:capability-semantic-interpretation-run:test-contracts.test-v2-result-dispatch-and-legacy-behavior
+  callees:
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
+- id: symbol:capability-semantic-interpretation-run:dispatch.parse-result
+  node: capability:semantic-interpretation-run
+  kind: function
+  name: parse_result
+  file: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+  line: 42
+  signature: 'def parse_result(raw: bytes | str, *, allow_v2: bool=True)'
+  visibility: public
+  language: python
+  end_line: 59
+  callers:
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-interpretation-result
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-legacy-result
+  - symbol:capability-semantic-interpretation-run:test-contracts.test-every-other-explicit-version-is-unsupported
+  - symbol:capability-semantic-interpretation-run:test-contracts.test-explicit-v2-is-refused-by-legacy-reader-before-shape-validation
+  - symbol:capability-semantic-interpretation-run:test-contracts.test-v2-result-dispatch-and-legacy-behavior
+  callees:
+  - symbol:capability-semantic-interpretation-run:assertions.assertion-contract-error
+  - symbol:capability-semantic-interpretation-run:assertions.assertion-contract-unsupported
+  - symbol:capability-semantic-interpretation-run:assertions.canonical-json
+  - symbol:capability-semantic-interpretation-run:assertions.decode-json
+  - symbol:capability-semantic-interpretation-run:assertions.validate-contract
 - id: symbol:capability-semantic-interpretation-run:docling-graph-comparison.bundle-reader
   node: capability:semantic-interpretation-run
   kind: class
@@ -28515,7 +28995,8 @@ symbols:
   end_line: 84
   is_test: true
   callers: []
-  callees: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
 - id: symbol:capability-semantic-interpretation-run:test-contracts.test-explicit-v2-is-refused-by-legacy-reader-before-shape-validation
   node: capability:semantic-interpretation-run
   kind: function
@@ -28528,7 +29009,10 @@ symbols:
   end_line: 93
   is_test: true
   callers: []
-  callees: []
+  callees:
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-interpretation-result
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-legacy-result
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
 - id: symbol:capability-semantic-interpretation-run:test-contracts.test-strict-json-rejects-invalid-nested-values-without-echoing-input
   node: capability:semantic-interpretation-run
   kind: function
@@ -28571,6 +29055,8 @@ symbols:
   callers: []
   callees:
   - symbol:capability-semantic-interpretation-run:assertions.canonical-json
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-legacy-result
+  - symbol:capability-semantic-interpretation-run:dispatch.parse-result
 - id: symbol:capability-semantic-interpretation-run:test-interpretation-rejections.client
   node: capability:semantic-interpretation-run
   kind: function
@@ -30791,21 +31277,24 @@ symbols:
   kind: method
   name: to_json
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 90
+  line: 91
   signature: def to_json(self)
   visibility: public
   language: python
   container: AbsenceScope
-  end_line: 99
+  end_line: 100
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-answer.to-json
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:money.identity
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-multi-header-and-round-trip
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
   - symbol:capability-typed-fact-answer:test-fact-slots.test-identifiers-are-scheme-scoped-and-normalized-per-type
   - symbol:capability-typed-fact-answer:test-fact-slots.test-names-normalize-and-require-evidence
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-numeric-answer-canonical-bound-round-trips-or-rejects-without-writes
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac4-unread-slot-reads-not-processed-never-null
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
   callees: []
 - id: symbol:capability-typed-fact-answer:answers.fact-answer-policy
   node: capability:typed-fact-answer
@@ -30816,7 +31305,7 @@ symbols:
   signature: class FactAnswerPolicy
   visibility: public
   language: python
-  end_line: 116
+  end_line: 123
   callers: []
   callees: []
 - id: symbol:capability-typed-fact-answer:answers.fact-answer-reader
@@ -30824,12 +31313,13 @@ symbols:
   kind: class
   name: FactAnswerReader
   file: engine/packages/brain-factslots/src/brain_factslots/answers.py
-  line: 119
+  line: 126
   signature: class FactAnswerReader
   visibility: public
   language: python
-  end_line: 152
-  callers: []
+  end_line: 155
+  callers:
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
   callees: []
 - id: symbol:capability-typed-fact-answer:answers.uuid
   node: capability:typed-fact-answer
@@ -30843,7 +31333,7 @@ symbols:
   end_line: 36
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.source-keys
-  - symbol:capability-typed-fact-answer:fact-answer-reader.scope-read-keys
+  - symbol:capability-typed-fact-answer:fact-answer-reader.scope-keys-for-value
   - symbol:capability-typed-fact-answer:fact-values.canonical-name
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   callees: []
@@ -30858,7 +31348,7 @@ symbols:
   visibility: public
   language: python
   container: FactAnswerPolicy
-  end_line: 104
+  end_line: 111
   callers:
   - symbol:capability-typed-fact-answer:fact-answers.parse-answer
   - symbol:capability-typed-fact-answer:fact-answers.stored-answer
@@ -30879,12 +31369,12 @@ symbols:
   kind: method
   name: _check_value_detail
   file: engine/packages/brain-factslots/src/brain_factslots/answers.py
-  line: 106
+  line: 113
   signature: 'async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer)'
   visibility: private
   language: python
   container: FactAnswerPolicy
-  end_line: 116
+  end_line: 123
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   callees:
@@ -30924,12 +31414,12 @@ symbols:
   kind: method
   name: __init__
   file: engine/packages/brain-factslots/src/brain_factslots/answers.py
-  line: 124
+  line: 131
   signature: 'def __init__(self, store: FactSlotStore)'
   visibility: private
   language: python
   container: FactAnswerReader
-  end_line: 125
+  end_line: 132
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-rejected.init
   - symbol:capability-typed-fact-answer:value-rejected.init
@@ -30939,29 +31429,29 @@ symbols:
   kind: method
   name: read
   file: engine/packages/brain-factslots/src/brain_factslots/answers.py
-  line: 141
+  line: 144
   signature: 'async def read(self, slot_id: UUID, *, valid_at: datetime, known_at:
     datetime)'
   visibility: public
   language: python
   container: FactAnswerReader
-  end_line: 152
-  callers: []
+  end_line: 155
+  callers:
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
   callees:
   - symbol:capability-typed-fact-answer:fact-answers.fact-answer
   - symbol:capability-typed-fact-answer:fact-answers.stored-answer
-- id: symbol:capability-typed-fact-answer:fact-answer-reader.scope-read-keys
+- id: symbol:capability-typed-fact-answer:fact-answer-reader.scope-keys-for-value
   node: capability:typed-fact-answer
   kind: method
-  name: scope_read_keys
+  name: scope_keys_for_value
   file: engine/packages/brain-factslots/src/brain_factslots/answers.py
-  line: 127
-  signature: 'async def scope_read_keys(self, slot_id: UUID, *, valid_at: datetime,
-    known_at: datetime)'
+  line: 134
+  signature: 'async def scope_keys_for_value(self, slot_id: UUID, stored: object)'
   visibility: public
   language: python
   container: FactAnswerReader
-  end_line: 139
+  end_line: 142
   callers: []
   callees:
   - symbol:capability-typed-fact-answer:answers.uuid
@@ -30971,12 +31461,12 @@ symbols:
   kind: method
   name: code
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 78
+  line: 79
   signature: def code(self)
   visibility: public
   language: python
   container: FactAnswerRejected
-  end_line: 80
+  end_line: 81
   callers: []
   callees: []
 - id: symbol:capability-typed-fact-answer:fact-answer-rejected.init
@@ -30984,12 +31474,12 @@ symbols:
   kind: method
   name: __init__
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 73
+  line: 74
   signature: 'def __init__(self, reason: AnswerReason)'
   visibility: private
   language: python
   container: FactAnswerRejected
-  end_line: 75
+  end_line: 76
   callers:
   - symbol:capability-typed-fact-answer:value-rejected.init
   callees:
@@ -31001,12 +31491,12 @@ symbols:
   kind: method
   name: name
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 119
+  line: 120
   signature: def name(self)
   visibility: public
   language: python
   container: FactAnswer
-  end_line: 122
+  end_line: 123
   callers: []
   callees:
   - symbol:capability-typed-fact-answer:fact-values.canonical-name
@@ -31015,20 +31505,23 @@ symbols:
   kind: method
   name: to_json
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 109
+  line: 110
   signature: def to_json(self)
   visibility: public
   language: python
   container: FactAnswer
-  end_line: 116
+  end_line: 117
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:money.identity
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-multi-header-and-round-trip
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
   - symbol:capability-typed-fact-answer:test-fact-slots.test-identifiers-are-scheme-scoped-and-normalized-per-type
   - symbol:capability-typed-fact-answer:test-fact-slots.test-names-normalize-and-require-evidence
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-numeric-answer-canonical-bound-round-trips-or-rejects-without-writes
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac4-unread-slot-reads-not-processed-never-null
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
   callees:
   - symbol:capability-typed-fact-answer:absence-scope.to-json
   - symbol:capability-typed-fact-answer:money.to-json
@@ -31039,11 +31532,11 @@ symbols:
   kind: class
   name: AbsenceScope
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 84
+  line: 85
   signature: class AbsenceScope
   visibility: public
   language: python
-  end_line: 99
+  end_line: 100
   callers:
   - symbol:capability-typed-fact-answer:fact-answers.scope
   callees: []
@@ -31056,7 +31549,7 @@ symbols:
   signature: class AnswerReason
   visibility: public
   language: python
-  end_line: 69
+  end_line: 70
   callers:
   - symbol:capability-typed-fact-answer:fact-answers.parse-answer
   callees: []
@@ -31065,11 +31558,11 @@ symbols:
   kind: class
   name: FactAnswer
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 103
+  line: 104
   signature: class FactAnswer
   visibility: public
   language: python
-  end_line: 122
+  end_line: 123
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-reader.read
   - symbol:capability-typed-fact-answer:fact-answers.parse-answer
@@ -31080,11 +31573,11 @@ symbols:
   kind: class
   name: FactAnswerRejected
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 72
+  line: 73
   signature: class FactAnswerRejected
   visibility: public
   language: python
-  end_line: 80
+  end_line: 81
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-answer-policy.check-value-detail
@@ -31111,16 +31604,18 @@ symbols:
   kind: function
   name: parse_answer
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 172
+  line: 173
   signature: 'def parse_answer(raw: object, *, value_type: ValueType, basis_required:
     bool=False, multi_header: bool=False)'
   visibility: public
   language: python
-  end_line: 215
+  end_line: 216
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-multi-header-and-round-trip
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-reasons-follow-precedence
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-expanded-decimal-answer-over-64-characters-is-rejected
   callees:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-answers.answer-reason
@@ -31135,11 +31630,11 @@ symbols:
   kind: function
   name: _scope
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 125
+  line: 126
   signature: 'def _scope(raw: object)'
   visibility: private
   language: python
-  end_line: 169
+  end_line: 170
   callers:
   - symbol:capability-typed-fact-answer:fact-answers.parse-answer
   - symbol:capability-typed-fact-answer:fact-answers.stored-answer
@@ -31156,14 +31651,15 @@ symbols:
   kind: function
   name: stored_answer
   file: engine/packages/brain-domain/src/brain_domain/fact_answers.py
-  line: 218
+  line: 219
   signature: 'def stored_answer(raw: Mapping[str, Json])'
   visibility: public
   language: python
-  end_line: 226
+  end_line: 227
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-reader.read
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-multi-header-and-round-trip
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
   callees:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-answers.fact-answer
@@ -31180,12 +31676,13 @@ symbols:
   signature: 'def canonical_decimal(raw: object)'
   visibility: public
   language: python
-  end_line: 167
+  end_line: 177
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-money
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:test-fact-slots.test-canonical-decimal-is-exact
   - symbol:capability-typed-fact-answer:test-fact-slots.test-canonical-decimal-rejects
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
   callees:
   - symbol:capability-typed-fact-answer:fact-values.value-rejected
 - id: symbol:capability-typed-fact-answer:fact-values.canonical-identifier
@@ -31193,11 +31690,11 @@ symbols:
   kind: function
   name: canonical_identifier
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 285
+  line: 295
   signature: 'def canonical_identifier(raw: Mapping[str, object])'
   visibility: public
   language: python
-  end_line: 322
+  end_line: 332
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:test-fact-slots.test-identifiers-are-scheme-scoped-and-normalized-per-type
@@ -31212,11 +31709,11 @@ symbols:
   kind: function
   name: canonical_money
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 199
+  line: 209
   signature: 'def canonical_money(raw: Mapping[str, object], *, basis_required: bool)'
   visibility: public
   language: python
-  end_line: 224
+  end_line: 234
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:test-fact-slots.test-money-rules-in-order
@@ -31230,11 +31727,11 @@ symbols:
   kind: function
   name: canonical_name
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 365
+  line: 375
   signature: 'def canonical_name(raw: Mapping[str, object])'
   visibility: public
   language: python
-  end_line: 390
+  end_line: 400
   callers:
   - symbol:capability-typed-fact-answer:fact-answer.name
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
@@ -31252,12 +31749,12 @@ symbols:
   kind: function
   name: canonical_value
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 406
+  line: 416
   signature: 'def canonical_value(raw: object, *, expected: ValueType | None=None,
     basis_required: bool=False)'
   visibility: public
   language: python
-  end_line: 459
+  end_line: 469
   callers:
   - symbol:capability-typed-fact-answer:fact-answers.parse-answer
   - symbol:capability-typed-fact-answer:fact-answers.stored-answer
@@ -31301,11 +31798,11 @@ symbols:
   kind: function
   name: _iso_date
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 278
+  line: 288
   signature: 'def _iso_date(raw: object)'
   visibility: private
   language: python
-  end_line: 282
+  end_line: 292
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-identifier
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
@@ -31315,11 +31812,11 @@ symbols:
   kind: function
   name: iso4217_codes
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 171
+  line: 181
   signature: def iso4217_codes()
   visibility: public
   language: python
-  end_line: 180
+  end_line: 190
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-money
   - symbol:capability-typed-fact-answer:test-fact-slots.test-money-rules-in-order
@@ -31345,11 +31842,11 @@ symbols:
   kind: class
   name: Money
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 184
+  line: 194
   signature: class Money
   visibility: public
   language: python
-  end_line: 196
+  end_line: 206
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-money
   callees: []
@@ -31358,11 +31855,11 @@ symbols:
   kind: class
   name: NameEvidence
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 332
+  line: 342
   signature: class NameEvidence
   visibility: public
   language: python
-  end_line: 334
+  end_line: 344
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-name
   callees: []
@@ -31371,11 +31868,11 @@ symbols:
   kind: class
   name: NameValue
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 338
+  line: 348
   signature: class NameValue
   visibility: public
   language: python
-  end_line: 356
+  end_line: 366
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-name
   callees: []
@@ -31400,11 +31897,11 @@ symbols:
   kind: function
   name: _normalize_fein
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 261
+  line: 271
   signature: 'def _normalize_fein(value: str)'
   visibility: private
   language: python
-  end_line: 265
+  end_line: 275
   callers: []
   callees:
   - symbol:capability-typed-fact-answer:fact-values.value-rejected
@@ -31413,11 +31910,11 @@ symbols:
   kind: function
   name: normalize_identifier
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 273
+  line: 283
   signature: 'def normalize_identifier(identifier_type: str, value: str)'
   visibility: public
   language: python
-  end_line: 275
+  end_line: 285
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-identifier
   callees: []
@@ -31426,11 +31923,11 @@ symbols:
   kind: function
   name: normalize_name
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 325
+  line: 335
   signature: 'def normalize_name(verbatim: str)'
   visibility: public
   language: python
-  end_line: 328
+  end_line: 338
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-name
   - symbol:capability-typed-fact-answer:test-fact-slots.test-names-normalize-and-require-evidence
@@ -31440,11 +31937,11 @@ symbols:
   kind: class
   name: ScopedIdentifier
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 228
+  line: 238
   signature: class ScopedIdentifier
   visibility: public
   language: python
-  end_line: 258
+  end_line: 268
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-identifier
   callees: []
@@ -31453,11 +31950,11 @@ symbols:
   kind: class
   name: TypedValue
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 394
+  line: 404
   signature: class TypedValue
   visibility: public
   language: python
-  end_line: 403
+  end_line: 413
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   callees: []
@@ -31466,14 +31963,14 @@ symbols:
   kind: function
   name: _uuid
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 359
+  line: 369
   signature: 'def _uuid(raw: object)'
   visibility: private
   language: python
-  end_line: 362
+  end_line: 372
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.source-keys
-  - symbol:capability-typed-fact-answer:fact-answer-reader.scope-read-keys
+  - symbol:capability-typed-fact-answer:fact-answer-reader.scope-keys-for-value
   - symbol:capability-typed-fact-answer:fact-values.canonical-name
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   callees: []
@@ -31526,12 +32023,12 @@ symbols:
   kind: method
   name: identity
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 195
+  line: 205
   signature: def identity(self)
   visibility: public
   language: python
   container: Money
-  end_line: 196
+  end_line: 206
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:test-fact-slots.test-identifiers-are-scheme-scoped-and-normalized-per-type
@@ -31547,54 +32044,60 @@ symbols:
   kind: method
   name: to_json
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 189
+  line: 199
   signature: def to_json(self)
   visibility: public
   language: python
   container: Money
-  end_line: 193
+  end_line: 203
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-answer.to-json
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:money.identity
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-multi-header-and-round-trip
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
   - symbol:capability-typed-fact-answer:test-fact-slots.test-identifiers-are-scheme-scoped-and-normalized-per-type
   - symbol:capability-typed-fact-answer:test-fact-slots.test-names-normalize-and-require-evidence
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-numeric-answer-canonical-bound-round-trips-or-rejects-without-writes
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac4-unread-slot-reads-not-processed-never-null
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
   callees: []
 - id: symbol:capability-typed-fact-answer:name-value.to-json
   node: capability:typed-fact-answer
   kind: method
   name: to_json
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 344
+  line: 354
   signature: def to_json(self)
   visibility: public
   language: python
   container: NameValue
-  end_line: 356
+  end_line: 366
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-answer.to-json
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:money.identity
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-multi-header-and-round-trip
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
   - symbol:capability-typed-fact-answer:test-fact-slots.test-identifiers-are-scheme-scoped-and-normalized-per-type
   - symbol:capability-typed-fact-answer:test-fact-slots.test-names-normalize-and-require-evidence
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-numeric-answer-canonical-bound-round-trips-or-rejects-without-writes
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac4-unread-slot-reads-not-processed-never-null
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
   callees: []
 - id: symbol:capability-typed-fact-answer:scoped-identifier.identity
   node: capability:typed-fact-answer
   kind: method
   name: identity
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 251
+  line: 261
   signature: def identity(self)
   visibility: public
   language: python
   container: ScopedIdentifier
-  end_line: 258
+  end_line: 268
   callers:
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:test-fact-slots.test-identifiers-are-scheme-scoped-and-normalized-per-type
@@ -31605,32 +32108,35 @@ symbols:
   kind: method
   name: to_json
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 236
+  line: 246
   signature: def to_json(self)
   visibility: public
   language: python
   container: ScopedIdentifier
-  end_line: 249
+  end_line: 259
   callers:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-answer.to-json
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
   - symbol:capability-typed-fact-answer:money.identity
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-multi-header-and-round-trip
+  - symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
   - symbol:capability-typed-fact-answer:test-fact-slots.test-identifiers-are-scheme-scoped-and-normalized-per-type
   - symbol:capability-typed-fact-answer:test-fact-slots.test-names-normalize-and-require-evidence
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-numeric-answer-canonical-bound-round-trips-or-rejects-without-writes
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac4-unread-slot-reads-not-processed-never-null
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
   callees: []
 - id: symbol:capability-typed-fact-answer:test-fact-slots.answer
   node: capability:typed-fact-answer
   kind: function
   name: _answer
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 433
+  line: 501
   signature: def _answer(**fields)
   visibility: private
   language: python
-  end_line: 434
+  end_line: 502
   is_test: true
   callers:
   - symbol:capability-typed-fact-answer:test-fact-slots.test-answer-multi-header-and-round-trip
@@ -31641,11 +32147,11 @@ symbols:
   kind: function
   name: test_answer_multi_header_and_round_trip
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 501
+  line: 569
   signature: def test_answer_multi_header_and_round_trip()
   visibility: public
   language: python
-  end_line: 534
+  end_line: 602
   is_test: true
   callers: []
   callees:
@@ -31663,11 +32169,11 @@ symbols:
   kind: function
   name: test_answer_reasons_follow_precedence
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 494
+  line: 562
   signature: def test_answer_reasons_follow_precedence(raw, reason)
   visibility: public
   language: python
-  end_line: 498
+  end_line: 566
   is_test: true
   callers: []
   callees:
@@ -31678,11 +32184,11 @@ symbols:
   kind: function
   name: test_canonical_decimal_is_exact
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 85
+  line: 87
   signature: def test_canonical_decimal_is_exact(raw, canonical)
   visibility: public
   language: python
-  end_line: 86
+  end_line: 88
   is_test: true
   callers: []
   callees:
@@ -31692,11 +32198,11 @@ symbols:
   kind: function
   name: test_canonical_decimal_rejects
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 92
+  line: 94
   signature: def test_canonical_decimal_rejects(raw)
   visibility: public
   language: python
-  end_line: 95
+  end_line: 97
   is_test: true
   callers: []
   callees:
@@ -31706,11 +32212,11 @@ symbols:
   kind: function
   name: test_canonical_value_accepts_each_scalar
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 266
+  line: 334
   signature: def test_canonical_value_accepts_each_scalar()
   visibility: public
   language: python
-  end_line: 275
+  end_line: 343
   is_test: true
   callers: []
   callees:
@@ -31721,26 +32227,76 @@ symbols:
   kind: function
   name: test_canonical_value_rejections
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 260
+  line: 328
   signature: def test_canonical_value_rejections(raw, reason)
   visibility: public
   language: python
-  end_line: 263
+  end_line: 331
   is_test: true
   callers: []
   callees:
   - symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
   - symbol:capability-typed-fact-answer:fact-values.canonical-value
+- id: symbol:capability-typed-fact-answer:test-fact-slots.test-decimal-boundary-answers-are-closed-under-canonical-round-trip
+  node: capability:typed-fact-answer
+  kind: function
+  name: test_decimal_boundary_answers_are_closed_under_canonical_round_trip
+  file: engine/packages/brain-domain/tests/test_fact_slots.py
+  line: 110
+  signature: def test_decimal_boundary_answers_are_closed_under_canonical_round_trip(raw,
+    expected, kind)
+  visibility: public
+  language: python
+  end_line: 124
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-typed-fact-answer:absence-scope.to-json
+  - symbol:capability-typed-fact-answer:fact-answer.to-json
+  - symbol:capability-typed-fact-answer:fact-answers.parse-answer
+  - symbol:capability-typed-fact-answer:fact-answers.stored-answer
+  - symbol:capability-typed-fact-answer:fact-values.canonical-decimal
+  - symbol:capability-typed-fact-answer:money.to-json
+  - symbol:capability-typed-fact-answer:name-value.to-json
+  - symbol:capability-typed-fact-answer:scoped-identifier.to-json
+- id: symbol:capability-typed-fact-answer:test-fact-slots.test-expanded-decimal-answer-over-64-characters-is-rejected
+  node: capability:typed-fact-answer
+  kind: function
+  name: test_expanded_decimal_answer_over_64_characters_is_rejected
+  file: engine/packages/brain-domain/tests/test_fact_slots.py
+  line: 129
+  signature: def test_expanded_decimal_answer_over_64_characters_is_rejected(raw,
+    kind)
+  visibility: public
+  language: python
+  end_line: 140
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-typed-fact-answer:fact-answers.parse-answer
+- id: symbol:capability-typed-fact-answer:test-fact-slots.test-extreme-decimal-exponents-are-rejected-before-expansion
+  node: capability:typed-fact-answer
+  kind: function
+  name: test_extreme_decimal_exponents_are_rejected_before_expansion
+  file: engine/packages/brain-domain/tests/test_fact_slots.py
+  line: 143
+  signature: def test_extreme_decimal_exponents_are_rejected_before_expansion()
+  visibility: public
+  language: python
+  end_line: 163
+  is_test: true
+  callers: []
+  callees: []
 - id: symbol:capability-typed-fact-answer:test-fact-slots.test-fingerprint-document-excludes-release-and-cardinality
   node: capability:typed-fact-answer
   kind: function
   name: test_fingerprint_document_excludes_release_and_cardinality
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 358
+  line: 426
   signature: def test_fingerprint_document_excludes_release_and_cardinality()
   visibility: public
   language: python
-  end_line: 398
+  end_line: 466
   is_test: true
   callers: []
   callees:
@@ -31750,11 +32306,11 @@ symbols:
   kind: function
   name: test_identifiers_are_scheme_scoped_and_normalized_per_type
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 140
+  line: 208
   signature: def test_identifiers_are_scheme_scoped_and_normalized_per_type()
   visibility: public
   language: python
-  end_line: 216
+  end_line: 284
   is_test: true
   callers: []
   callees:
@@ -31771,11 +32327,11 @@ symbols:
   kind: function
   name: test_jcs_matches_rfc8785_for_the_f0007_subset
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 98
+  line: 166
   signature: def test_jcs_matches_rfc8785_for_the_f0007_subset()
   visibility: public
   language: python
-  end_line: 107
+  end_line: 175
   is_test: true
   callers: []
   callees:
@@ -31785,11 +32341,11 @@ symbols:
   kind: function
   name: test_member_keys
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 401
+  line: 469
   signature: def test_member_keys()
   visibility: public
   language: python
-  end_line: 423
+  end_line: 491
   is_test: true
   callers: []
   callees:
@@ -31800,11 +32356,11 @@ symbols:
   kind: function
   name: test_money_rules_in_order
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 110
+  line: 178
   signature: def test_money_rules_in_order()
   visibility: public
   language: python
-  end_line: 137
+  end_line: 205
   is_test: true
   callers: []
   callees:
@@ -31817,11 +32373,11 @@ symbols:
   kind: function
   name: test_names_normalize_and_require_evidence
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 219
+  line: 287
   signature: def test_names_normalize_and_require_evidence()
   visibility: public
   language: python
-  end_line: 243
+  end_line: 311
   is_test: true
   callers: []
   callees:
@@ -31837,11 +32393,11 @@ symbols:
   kind: function
   name: test_predicate_key_grammar_and_release
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 278
+  line: 346
   signature: def test_predicate_key_grammar_and_release()
   visibility: public
   language: python
-  end_line: 292
+  end_line: 360
   is_test: true
   callers: []
   callees: []
@@ -31850,11 +32406,11 @@ symbols:
   kind: function
   name: test_qualifiers_canonical_rows_omitted_null_and_types
   file: engine/packages/brain-domain/tests/test_fact_slots.py
-  line: 295
+  line: 363
   signature: def test_qualifiers_canonical_rows_omitted_null_and_types()
   visibility: public
   language: python
-  end_line: 355
+  end_line: 423
   is_test: true
   callers: []
   callees: []
@@ -31863,13 +32419,16 @@ symbols:
   kind: function
   name: _read
   file: engine/tests/integration/test_factslot_answers.py
-  line: 44
+  line: 51
   signature: async def _read(w, slot_id, principal=None)
   visibility: private
   language: python
-  end_line: 49
+  end_line: 56
   is_test: true
   callers:
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-identifier-member-commit-accepts-equivalence-but-rejects-issuer-change
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-member-commit-rejects-another-entity-before-writing
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-numeric-answer-canonical-bound-round-trips-or-rejects-without-writes
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac1-all-nine-states-are-accepted
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac4-unread-slot-reads-not-processed-never-null
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac5-ex-own-003-three-kinds-of-no-value
@@ -31882,11 +32441,11 @@ symbols:
   kind: function
   name: _scope
   file: engine/tests/integration/test_factslot_answers.py
-  line: 36
+  line: 43
   signature: def _scope(artifact, **extra)
   visibility: private
   language: python
-  end_line: 41
+  end_line: 48
   is_test: true
   callers:
   - symbol:capability-typed-fact-answer:fact-answers.parse-answer
@@ -31902,13 +32461,14 @@ symbols:
   kind: function
   name: _slot
   file: engine/tests/integration/test_factslot_answers.py
-  line: 30
+  line: 37
   signature: async def _slot(w, predicate=AGGREGATE_LIMIT, **kwargs)
   visibility: private
   language: python
-  end_line: 33
+  end_line: 40
   is_test: true
   callers:
+  - symbol:capability-typed-fact-answer:test-factslot-answers.test-numeric-answer-canonical-bound-round-trips-or-rejects-without-writes
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac1-all-nine-states-are-accepted
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac1-any-other-state-is-rejected
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac2-state-value-mismatch-writes-no-version
@@ -31924,29 +32484,78 @@ symbols:
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0004-ac4-ac5-identifier-values
   - symbol:capability-typed-fact-answer:test-factslot-answers.test-s0004-ac7-unauthorized-caller-gets-denial-before-value-detail
   callees: []
+- id: symbol:capability-typed-fact-answer:test-factslot-answers.test-identifier-member-commit-accepts-equivalence-but-rejects-issuer-change
+  node: capability:typed-fact-answer
+  kind: function
+  name: test_identifier_member_commit_accepts_equivalence_but_rejects_issuer_change
+  file: engine/tests/integration/test_factslot_answers.py
+  line: 490
+  signature: async def test_identifier_member_commit_accepts_equivalence_but_rejects_issuer_change(slot_world)
+  visibility: public
+  language: python
+  end_line: 511
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-typed-fact-answer:test-factslot-answers.read
+- id: symbol:capability-typed-fact-answer:test-factslot-answers.test-member-commit-rejects-another-entity-before-writing
+  node: capability:typed-fact-answer
+  kind: function
+  name: test_member_commit_rejects_another_entity_before_writing
+  file: engine/tests/integration/test_factslot_answers.py
+  line: 464
+  signature: async def test_member_commit_rejects_another_entity_before_writing(slot_world)
+  visibility: public
+  language: python
+  end_line: 487
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-typed-fact-answer:test-factslot-answers.read
 - id: symbol:capability-typed-fact-answer:test-factslot-answers.test-multi-header-and-unregistered-contract-are-rejected
   node: capability:typed-fact-answer
   kind: function
   name: test_multi_header_and_unregistered_contract_are_rejected
   file: engine/tests/integration/test_factslot_answers.py
-  line: 378
+  line: 424
   signature: async def test_multi_header_and_unregistered_contract_are_rejected(slot_world)
   visibility: public
   language: python
-  end_line: 418
+  end_line: 461
   is_test: true
   callers: []
   callees: []
+- id: symbol:capability-typed-fact-answer:test-factslot-answers.test-numeric-answer-canonical-bound-round-trips-or-rejects-without-writes
+  node: capability:typed-fact-answer
+  kind: function
+  name: test_numeric_answer_canonical_bound_round_trips_or_rejects_without_writes
+  file: engine/tests/integration/test_factslot_answers.py
+  line: 325
+  signature: async def test_numeric_answer_canonical_bound_round_trips_or_rejects_without_writes(slot_world,
+    kind)
+  visibility: public
+  language: python
+  end_line: 360
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-typed-fact-answer:absence-scope.to-json
+  - symbol:capability-typed-fact-answer:fact-answer.to-json
+  - symbol:capability-typed-fact-answer:money.to-json
+  - symbol:capability-typed-fact-answer:name-value.to-json
+  - symbol:capability-typed-fact-answer:scoped-identifier.to-json
+  - symbol:capability-typed-fact-answer:test-factslot-answers.read
+  - symbol:capability-typed-fact-answer:test-factslot-answers.slot
 - id: symbol:capability-typed-fact-answer:test-factslot-answers.test-s0003-ac1-all-nine-states-are-accepted
   node: capability:typed-fact-answer
   kind: function
   name: test_s0003_ac1_all_nine_states_are_accepted
   file: engine/tests/integration/test_factslot_answers.py
-  line: 53
+  line: 60
   signature: async def test_s0003_ac1_all_nine_states_are_accepted(slot_world, state)
   visibility: public
   language: python
-  end_line: 64
+  end_line: 71
   is_test: true
   callers: []
   callees:
@@ -31959,11 +32568,11 @@ symbols:
   kind: function
   name: test_s0003_ac1_any_other_state_is_rejected
   file: engine/tests/integration/test_factslot_answers.py
-  line: 68
+  line: 75
   signature: async def test_s0003_ac1_any_other_state_is_rejected(slot_world, state)
   visibility: public
   language: python
-  end_line: 76
+  end_line: 83
   is_test: true
   callers: []
   callees:
@@ -31973,12 +32582,12 @@ symbols:
   kind: function
   name: test_s0003_ac2_state_value_mismatch_writes_no_version
   file: engine/tests/integration/test_factslot_answers.py
-  line: 91
+  line: 98
   signature: async def test_s0003_ac2_state_value_mismatch_writes_no_version(slot_world,
     envelope)
   visibility: public
   language: python
-  end_line: 98
+  end_line: 105
   is_test: true
   callers: []
   callees:
@@ -31988,11 +32597,11 @@ symbols:
   kind: function
   name: test_s0003_ac3_absence_scope_required_and_owned
   file: engine/tests/integration/test_factslot_answers.py
-  line: 101
+  line: 108
   signature: async def test_s0003_ac3_absence_scope_required_and_owned(slot_world)
   visibility: public
   language: python
-  end_line: 132
+  end_line: 139
   is_test: true
   callers: []
   callees:
@@ -32004,11 +32613,11 @@ symbols:
   kind: function
   name: test_s0003_ac4_unread_slot_reads_not_processed_never_null
   file: engine/tests/integration/test_factslot_answers.py
-  line: 135
+  line: 142
   signature: async def test_s0003_ac4_unread_slot_reads_not_processed_never_null(slot_world)
   visibility: public
   language: python
-  end_line: 142
+  end_line: 149
   is_test: true
   callers: []
   callees:
@@ -32024,11 +32633,11 @@ symbols:
   kind: function
   name: test_s0003_ac5_ex_own_003_three_kinds_of_no_value
   file: engine/tests/integration/test_factslot_answers.py
-  line: 145
+  line: 152
   signature: async def test_s0003_ac5_ex_own_003_three_kinds_of_no_value(slot_world)
   visibility: public
   language: python
-  end_line: 171
+  end_line: 178
   is_test: true
   callers: []
   callees:
@@ -32041,11 +32650,11 @@ symbols:
   kind: function
   name: test_s0003_ac6_reads_never_expose_a_scope_the_reader_cannot_read
   file: engine/tests/integration/test_factslot_answers.py
-  line: 421
+  line: 514
   signature: async def test_s0003_ac6_reads_never_expose_a_scope_the_reader_cannot_read(slot_world)
   visibility: public
   language: python
-  end_line: 454
+  end_line: 547
   is_test: true
   callers: []
   callees:
@@ -32058,11 +32667,11 @@ symbols:
   kind: function
   name: test_s0003_ac6_unreadable_scope_is_denied_before_any_explanation
   file: engine/tests/integration/test_factslot_answers.py
-  line: 174
+  line: 181
   signature: async def test_s0003_ac6_unreadable_scope_is_denied_before_any_explanation(slot_world)
   visibility: public
   language: python
-  end_line: 203
+  end_line: 210
   is_test: true
   callers: []
   callees:
@@ -32074,11 +32683,11 @@ symbols:
   kind: function
   name: test_s0003_ac7_accepted_answer_is_audited_and_rejection_writes_nothing
   file: engine/tests/integration/test_factslot_answers.py
-  line: 206
+  line: 213
   signature: async def test_s0003_ac7_accepted_answer_is_audited_and_rejection_writes_nothing(slot_world)
   visibility: public
   language: python
-  end_line: 223
+  end_line: 230
   is_test: true
   callers: []
   callees:
@@ -32088,11 +32697,11 @@ symbols:
   kind: function
   name: test_s0004_ac1_ac3_money_rejections
   file: engine/tests/integration/test_factslot_answers.py
-  line: 246
+  line: 253
   signature: async def test_s0004_ac1_ac3_money_rejections(slot_world, value, code)
   visibility: public
   language: python
-  end_line: 254
+  end_line: 261
   is_test: true
   callers: []
   callees:
@@ -32102,11 +32711,11 @@ symbols:
   kind: function
   name: test_s0004_ac1_basis_required_where_the_predicate_requires_it
   file: engine/tests/integration/test_factslot_answers.py
-  line: 257
+  line: 264
   signature: async def test_s0004_ac1_basis_required_where_the_predicate_requires_it(slot_world)
   visibility: public
   language: python
-  end_line: 282
+  end_line: 289
   is_test: true
   callers: []
   callees:
@@ -32116,11 +32725,11 @@ symbols:
   kind: function
   name: test_s0004_ac2_exact_decimal_canonical_form_and_round_trip
   file: engine/tests/integration/test_factslot_answers.py
-  line: 285
+  line: 292
   signature: async def test_s0004_ac2_exact_decimal_canonical_form_and_round_trip(slot_world)
   visibility: public
   language: python
-  end_line: 314
+  end_line: 321
   is_test: true
   callers: []
   callees:
@@ -32131,11 +32740,11 @@ symbols:
   kind: function
   name: test_s0004_ac4_ac5_identifier_values
   file: engine/tests/integration/test_factslot_answers.py
-  line: 317
+  line: 363
   signature: async def test_s0004_ac4_ac5_identifier_values(slot_world)
   visibility: public
   language: python
-  end_line: 358
+  end_line: 404
   is_test: true
   callers: []
   callees:
@@ -32146,26 +32755,94 @@ symbols:
   kind: function
   name: test_s0004_ac7_unauthorized_caller_gets_denial_before_value_detail
   file: engine/tests/integration/test_factslot_answers.py
-  line: 361
+  line: 407
   signature: async def test_s0004_ac7_unauthorized_caller_gets_denial_before_value_detail(slot_world)
   visibility: public
   language: python
-  end_line: 375
+  end_line: 421
   is_test: true
   callers: []
   callees:
   - symbol:capability-typed-fact-answer:test-factslot-answers.slot
+- id: symbol:capability-typed-fact-answer:test-factslot-authorized-reads.reader
+  node: capability:typed-fact-answer
+  kind: function
+  name: _reader
+  file: engine/tests/integration/test_factslot_authorized_reads.py
+  line: 52
+  signature: 'def _reader(w, *, broad: bool)'
+  visibility: private
+  language: python
+  end_line: 63
+  is_test: true
+  callers:
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-http-authorizes-the-scope-of-the-exact-selected-payload
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
+  callees: []
+- id: symbol:capability-typed-fact-answer:test-factslot-authorized-reads.scoped-answer
+  node: capability:typed-fact-answer
+  kind: function
+  name: _scoped_answer
+  file: engine/tests/integration/test_factslot_authorized_reads.py
+  line: 35
+  signature: async def _scoped_answer(w)
+  visibility: private
+  language: python
+  end_line: 49
+  is_test: true
+  callers:
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-http-authorizes-the-scope-of-the-exact-selected-payload
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
+  callees: []
+- id: symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-http-authorizes-the-scope-of-the-exact-selected-payload
+  node: capability:typed-fact-answer
+  kind: function
+  name: test_http_authorizes_the_scope_of_the_exact_selected_payload
+  file: engine/tests/integration/test_factslot_authorized_reads.py
+  line: 66
+  signature: async def test_http_authorizes_the_scope_of_the_exact_selected_payload(slot_world,
+    monkeypatch)
+  visibility: public
+  language: python
+  end_line: 93
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.reader
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.scoped-answer
+- id: symbol:capability-typed-fact-answer:test-factslot-authorized-reads.test-revocation-waits-for-slot-scope-and-payload-read-to-commit
+  node: capability:typed-fact-answer
+  kind: function
+  name: test_revocation_waits_for_slot_scope_and_payload_read_to_commit
+  file: engine/tests/integration/test_factslot_authorized_reads.py
+  line: 96
+  signature: async def test_revocation_waits_for_slot_scope_and_payload_read_to_commit(slot_world)
+  visibility: public
+  language: python
+  end_line: 178
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-typed-fact-answer:absence-scope.to-json
+  - symbol:capability-typed-fact-answer:answers.fact-answer-reader
+  - symbol:capability-typed-fact-answer:fact-answer-reader.read
+  - symbol:capability-typed-fact-answer:fact-answer.to-json
+  - symbol:capability-typed-fact-answer:money.to-json
+  - symbol:capability-typed-fact-answer:name-value.to-json
+  - symbol:capability-typed-fact-answer:scoped-identifier.to-json
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.reader
+  - symbol:capability-typed-fact-answer:test-factslot-authorized-reads.scoped-answer
 - id: symbol:capability-typed-fact-answer:typed-value.identity-text
   node: capability:typed-fact-answer
   kind: method
   name: identity_text
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
-  line: 402
+  line: 412
   signature: def identity_text(self)
   visibility: public
   language: python
   container: TypedValue
-  end_line: 403
+  end_line: 413
   callers: []
   callees:
   - symbol:capability-typed-fact-answer:fact-values.jcs
@@ -32256,8 +32933,7 @@ symbols:
   visibility: public
   language: python
   end_line: 69
-  callers:
-  - symbol:capability-versioned-assertion-semantics:assertion-record-v2.to-domain
+  callers: []
   callees: []
 - id: symbol:capability-versioned-assertion-semantics:assertions.entity-object
   node: capability:versioned-assertion-semantics
@@ -32269,8 +32945,7 @@ symbols:
   visibility: public
   language: python
   end_line: 44
-  callers:
-  - symbol:capability-versioned-assertion-semantics:assertion-record-v2.to-domain
+  callers: []
   callees: []
 - id: symbol:capability-versioned-assertion-semantics:assertions.entity-reference
   node: capability:versioned-assertion-semantics
@@ -32282,8 +32957,7 @@ symbols:
   visibility: public
   language: python
   end_line: 37
-  callers:
-  - symbol:capability-versioned-assertion-semantics:entity-reference-v2.to-domain
+  callers: []
   callees: []
 - id: symbol:capability-versioned-assertion-semantics:assertions.evidence-claim
   node: capability:versioned-assertion-semantics
@@ -32295,8 +32969,7 @@ symbols:
   visibility: public
   language: python
   end_line: 29
-  callers:
-  - symbol:capability-versioned-assertion-semantics:evidence-claim-v2.to-domain
+  callers: []
   callees: []
 - id: symbol:capability-versioned-assertion-semantics:assertions.literal-object
   node: capability:versioned-assertion-semantics
@@ -32308,8 +32981,7 @@ symbols:
   visibility: public
   language: python
   end_line: 50
-  callers:
-  - symbol:capability-versioned-assertion-semantics:assertion-record-v2.to-domain
+  callers: []
   callees: []
 - id: symbol:capability-versioned-assertion-semantics:assertions.producer-context
   node: capability:versioned-assertion-semantics
@@ -32359,67 +33031,6 @@ symbols:
   end_line: 95
   callers: []
   callees: []
-- id: symbol:capability-versioned-assertion-semantics:dispatch.interpretation-result-v2
-  node: capability:versioned-assertion-semantics
-  kind: class
-  name: InterpretationResultV2
-  file: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
-  line: 24
-  signature: class InterpretationResultV2
-  visibility: public
-  language: python
-  end_line: 39
-  callers: []
-  callees: []
-- id: symbol:capability-versioned-assertion-semantics:dispatch.parse-interpretation-result
-  node: capability:versioned-assertion-semantics
-  kind: function
-  name: parse_interpretation_result
-  file: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
-  line: 71
-  signature: 'def parse_interpretation_result(raw: bytes | str, *, supported_versions:
-    frozenset[int]=frozenset({1, 2}))'
-  visibility: public
-  language: python
-  end_line: 82
-  callers: []
-  callees:
-  - symbol:capability-versioned-assertion-semantics:assertions.assertion-contract-error
-  - symbol:capability-versioned-assertion-semantics:assertions.assertion-contract-unsupported
-  - symbol:capability-versioned-assertion-semantics:assertions.decode-json
-  - symbol:capability-versioned-assertion-semantics:dispatch.parse-result
-- id: symbol:capability-versioned-assertion-semantics:dispatch.parse-legacy-result
-  node: capability:versioned-assertion-semantics
-  kind: function
-  name: parse_legacy_result
-  file: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
-  line: 62
-  signature: 'def parse_legacy_result(raw: bytes | str)'
-  visibility: public
-  language: python
-  end_line: 65
-  callers: []
-  callees:
-  - symbol:capability-versioned-assertion-semantics:dispatch.parse-result
-- id: symbol:capability-versioned-assertion-semantics:dispatch.parse-result
-  node: capability:versioned-assertion-semantics
-  kind: function
-  name: parse_result
-  file: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
-  line: 42
-  signature: 'def parse_result(raw: bytes | str, *, allow_v2: bool=True)'
-  visibility: public
-  language: python
-  end_line: 59
-  callers:
-  - symbol:capability-versioned-assertion-semantics:dispatch.parse-interpretation-result
-  - symbol:capability-versioned-assertion-semantics:dispatch.parse-legacy-result
-  callees:
-  - symbol:capability-versioned-assertion-semantics:assertions.assertion-contract-error
-  - symbol:capability-versioned-assertion-semantics:assertions.assertion-contract-unsupported
-  - symbol:capability-versioned-assertion-semantics:assertions.canonical-json
-  - symbol:capability-versioned-assertion-semantics:assertions.decode-json
-  - symbol:capability-versioned-assertion-semantics:assertions.validate-contract
 - id: symbol:capability-versioned-assertion-semantics:models.assertion
   node: capability:versioned-assertion-semantics
   kind: class
@@ -34848,7 +35459,7 @@ symbols:
   signature: async def test_s0006_ac6_downgrade_refuses_while_identity_rows_exist(database)
   visibility: public
   language: python
-  end_line: 212
+  end_line: 213
   is_test: true
   callers: []
   callees:
@@ -34871,3 +35482,267 @@ symbols:
   - symbol:migration-f0007-factslot-identity:test-factslot-migration.test-s0006-ac6-downgrade-refuses-while-identity-rows-exist
   callees:
   - symbol:migration-f0007-factslot-identity:0012-f0007-factslot-identity.upgrade
+- id: symbol:migration-f0007-identity-guard:0013-f0007-identity-guard.downgrade
+  node: migration:f0007-identity-guard
+  kind: function
+  name: downgrade
+  file: engine/migrations/versions/0013_f0007_identity_guard.py
+  line: 88
+  signature: def downgrade()
+  visibility: public
+  language: python
+  end_line: 92
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.downgrade
+  callees: []
+- id: symbol:migration-f0007-identity-guard:0013-f0007-identity-guard.upgrade
+  node: migration:f0007-identity-guard
+  kind: function
+  name: upgrade
+  file: engine/migrations/versions/0013_f0007_identity_guard.py
+  line: 64
+  signature: def upgrade()
+  visibility: public
+  language: python
+  end_line: 85
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.upgrade
+  callees: []
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.downgrade
+  node: migration:f0007-identity-guard
+  kind: function
+  name: _downgrade
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 30
+  signature: 'def _downgrade(revision: str)'
+  visibility: private
+  language: python
+  end_line: 31
+  is_test: true
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-up-down-up-preserves-pilot-and-all-valid-identity-shapes
+  callees:
+  - symbol:migration-f0007-identity-guard:0013-f0007-identity-guard.downgrade
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.insert
+  node: migration:f0007-identity-guard
+  kind: function
+  name: _insert
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 73
+  signature: 'def _insert(url: str, row: dict[str, object])'
+  visibility: private
+  language: python
+  end_line: 81
+  is_test: true
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-preserves-fingerprint-uniqueness
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-refuses-existing-malformed-0012-rows-without-changing-data
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-each-missing-mandatory-v1-field
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-null-member-key-and-relationship-without-object
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-partially-populated-legacy-rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-up-down-up-preserves-pilot-and-all-valid-identity-shapes
+  callees: []
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.owner
+  node: migration:f0007-identity-guard
+  kind: function
+  name: _owner
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 34
+  signature: 'def _owner(url: str)'
+  visibility: private
+  language: python
+  end_line: 46
+  is_test: true
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-preserves-fingerprint-uniqueness
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-refuses-existing-malformed-0012-rows-without-changing-data
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-each-missing-mandatory-v1-field
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-null-member-key-and-relationship-without-object
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-partially-populated-legacy-rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-up-down-up-preserves-pilot-and-all-valid-identity-shapes
+  callees: []
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.revision-and-guard
+  node: migration:f0007-identity-guard
+  kind: function
+  name: _revision_and_guard
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 106
+  signature: 'def _revision_and_guard(url: str)'
+  visibility: private
+  language: python
+  end_line: 113
+  is_test: true
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-refuses-existing-malformed-0012-rows-without-changing-data
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-up-down-up-preserves-pilot-and-all-valid-identity-shapes
+  callees: []
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.rows
+  node: migration:f0007-identity-guard
+  kind: function
+  name: _rows
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 84
+  signature: 'def _rows(url: str)'
+  visibility: private
+  language: python
+  end_line: 103
+  is_test: true
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-preserves-fingerprint-uniqueness
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-refuses-existing-malformed-0012-rows-without-changing-data
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-each-missing-mandatory-v1-field
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-null-member-key-and-relationship-without-object
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-partially-populated-legacy-rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-up-down-up-preserves-pilot-and-all-valid-identity-shapes
+  callees: []
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.slot
+  node: migration:f0007-identity-guard
+  kind: function
+  name: _slot
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 49
+  signature: 'def _slot(owner: tuple[UUID, UUID, UUID, UUID], **changes: object)'
+  visibility: private
+  language: python
+  end_line: 70
+  is_test: true
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-preserves-fingerprint-uniqueness
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-refuses-existing-malformed-0012-rows-without-changing-data
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-each-missing-mandatory-v1-field
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-null-member-key-and-relationship-without-object
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-partially-populated-legacy-rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-up-down-up-preserves-pilot-and-all-valid-identity-shapes
+  callees: []
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-preserves-fingerprint-uniqueness
+  node: migration:f0007-identity-guard
+  kind: function
+  name: test_0013_preserves_fingerprint_uniqueness
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 221
+  signature: def test_0013_preserves_fingerprint_uniqueness(database)
+  visibility: public
+  language: python
+  end_line: 229
+  is_test: true
+  callers: []
+  callees:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.insert
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.owner
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.slot
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.upgrade
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-refuses-existing-malformed-0012-rows-without-changing-data
+  node: migration:f0007-identity-guard
+  kind: function
+  name: test_0013_refuses_existing_malformed_0012_rows_without_changing_data
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 233
+  signature: def test_0013_refuses_existing_malformed_0012_rows_without_changing_data(database,
+    missing_field)
+  visibility: public
+  language: python
+  end_line: 248
+  is_test: true
+  callers: []
+  callees:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.insert
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.owner
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.revision-and-guard
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.slot
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.upgrade
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-each-missing-mandatory-v1-field
+  node: migration:f0007-identity-guard
+  kind: function
+  name: test_0013_rejects_each_missing_mandatory_v1_field
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 169
+  signature: def test_0013_rejects_each_missing_mandatory_v1_field(database, field)
+  visibility: public
+  language: python
+  end_line: 175
+  is_test: true
+  callers: []
+  callees:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.insert
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.owner
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.slot
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.upgrade
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-null-member-key-and-relationship-without-object
+  node: migration:f0007-identity-guard
+  kind: function
+  name: test_0013_rejects_null_member_key_and_relationship_without_object
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 178
+  signature: def test_0013_rejects_null_member_key_and_relationship_without_object(database)
+  visibility: public
+  language: python
+  end_line: 191
+  is_test: true
+  callers: []
+  callees:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.insert
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.owner
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.slot
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.upgrade
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-partially-populated-legacy-rows
+  node: migration:f0007-identity-guard
+  kind: function
+  name: test_0013_rejects_partially_populated_legacy_rows
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 195
+  signature: def test_0013_rejects_partially_populated_legacy_rows(database, populated_field)
+  visibility: public
+  language: python
+  end_line: 218
+  is_test: true
+  callers: []
+  callees:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.insert
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.owner
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.slot
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.upgrade
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-up-down-up-preserves-pilot-and-all-valid-identity-shapes
+  node: migration:f0007-identity-guard
+  kind: function
+  name: test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 116
+  signature: def test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes(database)
+  visibility: public
+  language: python
+  end_line: 153
+  is_test: true
+  callers: []
+  callees:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.downgrade
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.insert
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.owner
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.revision-and-guard
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.slot
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.upgrade
+- id: symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.upgrade
+  node: migration:f0007-identity-guard
+  kind: function
+  name: _upgrade
+  file: engine/tests/integration/test_factslot_identity_guard_migration.py
+  line: 26
+  signature: 'def _upgrade(revision: str)'
+  visibility: private
+  language: python
+  end_line: 27
+  is_test: true
+  callers:
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-preserves-fingerprint-uniqueness
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-refuses-existing-malformed-0012-rows-without-changing-data
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-each-missing-mandatory-v1-field
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-null-member-key-and-relationship-without-object
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-rejects-partially-populated-legacy-rows
+  - symbol:migration-f0007-identity-guard:test-factslot-identity-guard-migration.test-0013-up-down-up-preserves-pilot-and-all-valid-identity-shapes
+  callees:
+  - symbol:migration-f0007-identity-guard:0013-f0007-identity-guard.upgrade

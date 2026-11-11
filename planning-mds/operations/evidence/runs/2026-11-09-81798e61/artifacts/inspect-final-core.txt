@@ -1,0 +1,241 @@
+diff --git a/engine/packages/brain-domain/src/brain_domain/fact_values.py b/engine/packages/brain-domain/src/brain_domain/fact_values.py
+index be793f3..dbe1e66 100644
+--- a/engine/packages/brain-domain/src/brain_domain/fact_values.py
++++ b/engine/packages/brain-domain/src/brain_domain/fact_values.py
+@@ -24,7 +24,7 @@ from uuid import UUID
+ ISO4217_LIST_VERSION = "2026-01"
+ IDENTIFIER_NORMALIZATION_VERSION = 1
+ DECIMAL_MAX_INPUT = 64
+-DECIMAL_MAX_CANONICAL = 128
++DECIMAL_MAX_CANONICAL = DECIMAL_MAX_INPUT
+ TEXT_MAX = 4000
+ NAME_MAX = 1000
+ IDENTIFIER_MAX = 256
+@@ -138,8 +138,10 @@ def canonical_decimal(raw: object) -> str:
+     """One canonical decimal text: no exponent, no trailing fractional zeros, `-0`
+     becomes `0`. `1E+6`, `1000000.00` and `1000000` all become `1000000`.
+ 
+-    The input must be a string. Digits are handled exactly, never through a
+-    float or a precision-limited Decimal context."""
++    Input and canonical output are limited to 64 total characters, including
++    sign and decimal point, so every emitted form can be read back. Digits are
++    handled exactly, never through a float or a precision-limited Decimal context.
++    """
+     if not isinstance(raw, str) or len(raw) > DECIMAL_MAX_INPUT or not _DECIMAL.match(raw):
+         raise ValueRejected(ValueReason.DECIMAL_INVALID)
+     try:
+@@ -156,14 +158,22 @@ def canonical_decimal(raw: object) -> str:
+         digits.pop()
+         exponent += 1
+     text = "".join(str(d) for d in digits)
++    # WHY: exponent text is short even when its expanded value is enormous.
++    # Bound the total canonical size before allocating any exponent-sized string.
++    if exponent >= 0:
++        body_length = len(text) + exponent
++    elif -exponent >= len(text):
++        body_length = 2 - exponent
++    else:
++        body_length = len(text) + 1
++    if body_length + sign > DECIMAL_MAX_CANONICAL:
++        raise ValueRejected(ValueReason.DECIMAL_INVALID)
+     if exponent >= 0:
+         body = text + "0" * exponent
+     elif -exponent >= len(text):
+         body = "0." + "0" * (-exponent - len(text)) + text
+     else:
+         body = text[:exponent] + "." + text[exponent:]
+-    if len(body) > DECIMAL_MAX_CANONICAL:
+-        raise ValueRejected(ValueReason.DECIMAL_INVALID)
+     return ("-" if sign else "") + body
+ 
+ 
+diff --git a/engine/packages/brain-factslots/src/brain_factslots/answers.py b/engine/packages/brain-factslots/src/brain_factslots/answers.py
+index bcfe4f5..8d1a14d 100644
+--- a/engine/packages/brain-factslots/src/brain_factslots/answers.py
++++ b/engine/packages/brain-factslots/src/brain_factslots/answers.py
+@@ -21,7 +21,7 @@ from brain_domain.fact_answers import (
+     parse_answer,
+     stored_answer,
+ )
+-from brain_domain.fact_slots import PredicateKey, SlotRejected
++from brain_domain.fact_slots import PredicateKey, SlotRejected, SlotRole, member_key
+ from brain_domain.fact_values import ValueType
+ 
+ from brain_factslots.ports import FactSlotStore, PredicateContractRegistry, StoredSlot
+@@ -101,6 +101,13 @@ class FactAnswerPolicy:
+                 raise FactAnswerRejected(AnswerReason.ABSENCE_SCOPE_OUT_OF_SCOPE)
+         if answer.value is not None:
+             await self._check_value_detail(slot, answer)
++            # WHY: a member's immutable identity is derived from its value; a
++            # different canonical value must resolve its own member slot.
++            if (
++                slot.slot_role == SlotRole.MEMBER
++                and member_key(answer.value, contract) != slot.member_key
++            ):
++                raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
+         return answer.to_json()
+ 
+     async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
+@@ -134,6 +141,16 @@ class FactAnswerReader:
+         if slot is None or slot.legacy:
+             return ()
+         stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
++        return await self.scope_keys_for_value(slot_id, stored)
++
++    async def scope_keys_for_value(
++        self, slot_id: UUID, stored: object
++    ) -> tuple[ResourceKey, ...]:
++        """Derive keys from the exact privately loaded version, without selecting
++        the answer again. Legacy JSON keeps its existing unwrapped semantics."""
++        slot = await self._store.slot(slot_id)
++        if slot is None or slot.legacy:
++            return ()
+         scope = stored.get("scope") if isinstance(stored, Mapping) else None
+         artifact = _uuid(scope.get("content_artifact_id")) if isinstance(scope, Mapping) else None
+         return (ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),) if artifact else ()
+diff --git a/engine/packages/brain-security/src/brain_security/execution.py b/engine/packages/brain-security/src/brain_security/execution.py
+index dd6593c..3ce2f79 100644
+--- a/engine/packages/brain-security/src/brain_security/execution.py
++++ b/engine/packages/brain-security/src/brain_security/execution.py
+@@ -363,7 +363,11 @@ class AuthorizationExecution:
+         load: Callable[[AuthorizationDecision], Awaitable[T]],
+         requested: RequestedScope = NO_FILTER,
+         delegation_id: UUID | None = None,
++        additional_reads: Callable[[T], Awaitable[Sequence[ResourceKey]]] | None = None,
+     ) -> T:
++        """Load once under the primary lock, then authorize dependencies derived
++        from that exact private payload before auditing and returning it. All
++        authority/resource locks remain held until the single final commit."""
+         evaluated = await self._guarded_decide(
+             authenticated, [key], action, requested, trace_id, delegation_id
+         )
+@@ -378,8 +382,36 @@ class AuthorizationExecution:
+         except Exception:
+             await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
+             raise
++        if additional_reads is not None:
++            # WHY: a separate scope read would commit and release the current
++            # authority locks before returning the answer. Deriving keys from
++            # this exact payload also prevents authorizing one version's scope
++            # and then returning a freshly selected, different version.
++            try:
++                source_keys = sorted(set(await additional_reads(payload)) - {key})
++                source_evaluated = (
++                    await self._guarded_decide(
++                        authenticated, source_keys, Action.READ, requested, trace_id, delegation_id
++                    )
++                    if source_keys
++                    else []
++                )
++            except Exception:
++                await self._persist_fresh(
++                    [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
++                )
++                raise
++            evaluated.extend(source_evaluated)
++            if not all(e.decision.allowed for e in evaluated):
++                raise await self._deny(evaluated)
++            evaluated = self._recheck_all(evaluated)
++            if not all(e.decision.allowed for e in evaluated):
++                raise await self._deny(evaluated)
+         try:
+-            await self._store.append_decision(decision.with_outcome(OperationOutcome.SUCCEEDED))
++            for item in evaluated:
++                await self._store.append_decision(
++                    item.decision.with_outcome(OperationOutcome.SUCCEEDED)
++                )
+             await self._store.commit()
+         except Exception as exc:  # noqa: BLE001 - no payload leaves without durable audit
+             await self._safe_rollback()
+"""Require a complete legacy/v1 FactSlot identity shape (F0007 review FR-H2).
+
+Revision 0012 is already shipped and stays unchanged. Its CHECK allowed SQL
+UNKNOWN for incomplete v1 rows. This follow-up admits only TRUE, refuses any
+existing malformed rows without repairing them, and preserves all data on both
+upgrade and downgrade. No RLS, grants, ownership keys or version rows change.
+
+Revision ID: 0013
+Revises: 0012
+"""
+
+import logging
+from collections.abc import Sequence
+
+from alembic import op
+from sqlalchemy import text
+
+revision: str = "0013"
+down_revision: str | None = "0012"
+branch_labels: Sequence[str] | str | None = None
+depends_on: Sequence[str] | str | None = None
+
+log = logging.getLogger("alembic.runtime.migration")
+
+# WHY: migration history is immutable. The old expression is frozen here so a
+# downgrade restores exactly 0012's semantics without importing mutable code.
+PREVIOUS_CHECK = r"""
+  (identity_version IS NULL AND slot_role IS NULL AND predicate_key IS NULL
+     AND predicate_release_ref IS NULL AND cardinality IS NULL AND object_entity_id IS NULL
+     AND parent_slot_id IS NULL AND member_key IS NULL AND fingerprint_version IS NULL
+     AND identity_fingerprint IS NULL AND created_by IS NULL)
+  OR (identity_version = 1 AND fingerprint_version = 1 AND created_by IS NOT NULL
+     AND identity_fingerprint ~ '^[0-9a-f]{64}$'
+     AND predicate_key ~ '^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+     AND length(predicate_release_ref) > 0 AND slot_type = predicate_key
+     AND cardinality IN ('SINGLE','MULTI','RELATIONSHIP')
+     AND ((slot_role = 'SLOT' AND parent_slot_id IS NULL AND member_key IS NULL
+            AND ((cardinality = 'RELATIONSHIP') = (object_entity_id IS NOT NULL)))
+       OR (slot_role = 'MEMBER' AND cardinality = 'MULTI' AND parent_slot_id IS NOT NULL
+            AND length(member_key) > 0 AND object_entity_id IS NULL)))
+"""
+
+IDENTITY_SHAPE = r"""
+  (identity_version IS NULL AND slot_role IS NULL AND predicate_key IS NULL
+     AND predicate_release_ref IS NULL AND cardinality IS NULL AND object_entity_id IS NULL
+     AND parent_slot_id IS NULL AND member_key IS NULL AND fingerprint_version IS NULL
+     AND identity_fingerprint IS NULL AND created_by IS NULL)
+  OR (identity_version IS NOT NULL AND identity_version = 1
+     AND fingerprint_version IS NOT NULL AND fingerprint_version = 1
+     AND created_by IS NOT NULL AND slot_role IS NOT NULL
+     AND identity_fingerprint IS NOT NULL AND identity_fingerprint ~ '^[0-9a-f]{64}$'
+     AND predicate_key IS NOT NULL
+     AND predicate_key ~ '^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+     AND predicate_release_ref IS NOT NULL AND length(predicate_release_ref) > 0
+     AND slot_type = predicate_key AND cardinality IS NOT NULL
+     AND cardinality IN ('SINGLE','MULTI','RELATIONSHIP')
+     AND ((slot_role = 'SLOT' AND parent_slot_id IS NULL AND member_key IS NULL
+            AND ((cardinality = 'RELATIONSHIP') = (object_entity_id IS NOT NULL)))
+       OR (slot_role = 'MEMBER' AND cardinality = 'MULTI' AND parent_slot_id IS NOT NULL
+            AND member_key IS NOT NULL AND length(member_key) > 0 AND object_entity_id IS NULL)))
+"""
+
+
+def upgrade() -> None:
+    bind = op.get_bind()
+    # WHY: hold the same lock through validation and replacement so another
+    # writer cannot insert an invalid shape between the scan and the new CHECK.
+    bind.execute(text("LOCK TABLE fact_slot IN ACCESS EXCLUSIVE MODE"))
+    invalid = f"({IDENTITY_SHAPE}) IS NOT TRUE"
+    malformed = bind.execute(text(f"SELECT count(*) FROM fact_slot WHERE {invalid}")).scalar_one()
+    if malformed:
+        identifiers = bind.execute(
+            text(f"SELECT id FROM fact_slot WHERE {invalid} ORDER BY id LIMIT 10")
+        ).scalars()
+        samples = ", ".join(str(slot_id) for slot_id in identifiers)
+        raise RuntimeError(
+            f"0013 upgrade refused: {malformed} malformed fact_slot identity rows; "
+            f"sample slot IDs: {samples}. No rows modified; explicit governed repair required."
+        )
+    op.execute("ALTER TABLE fact_slot DROP CONSTRAINT ck_fact_slot_identity")
+    op.execute(
+        f"ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity "
+        f"CHECK (({IDENTITY_SHAPE}) IS TRUE)"
+    )
+    log.info("0013 identity guard installed; existing FactSlot rows preserved")
+
+
+def downgrade() -> None:
+    op.execute("ALTER TABLE fact_slot DROP CONSTRAINT ck_fact_slot_identity")
+    op.execute(
+        f"ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity CHECK ({PREVIOUS_CHECK})"
+    )

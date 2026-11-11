@@ -19,13 +19,13 @@ ADR-0039 decisions 4–5 and master blueprint §107.3. F0011 publishes the JSON 
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** A money value is an exact decimal amount, an ISO 4217 alphabetic currency code and, where the predicate requires one, a basis qualifier. A binary floating-point amount is rejected with `MONEY_FLOAT_REJECTED`. An unknown currency code is rejected with `CURRENCY_INVALID`. A missing required basis is rejected with `BASIS_REQUIRED`.
-- [ ] **AC2:** `1000000`, `1000000.00` and `1E+6` in USD compare equal and serialize to one canonical form. Round trips through PostgreSQL lose no precision for `0.01`, `999999999999999.99` and an amount above 2^53.
-- [ ] **AC3:** F0007 accepts original-currency money only. A value marked as converted is rejected with `CONVERTED_MONEY_UNSUPPORTED` until a feature owns exchange-rate provenance.
-- [ ] **AC4:** A scoped identifier is (scheme or issuer, identifier type, value, optional effective interval). Policy number `GL-1001` from carrier A and `GL-1001` from carrier B are two different identifiers. An identifier with no scheme is rejected with `IDENTIFIER_SCHEME_REQUIRED`.
-- [ ] **AC5:** Value normalization is declared per identifier type. FEIN `12-3456789` and `123456789` compare equal. No normalization ever makes identifiers from different schemes equal.
-- [ ] **AC6:** Money and identifiers used as qualifiers or member keys contribute their canonical encoding to slot identity, so equal values resolve one slot or member (S0001/S0002).
-- [ ] **AC7:** An unauthorized caller is denied before any value-validation detail is returned. A rejected value produces no slot, member or fact version. Accepted values are recorded under the existing commit or slot-creation audit.
+- [x] **AC1:** A money value is an exact decimal amount, an ISO 4217 alphabetic currency code and, where the predicate requires one, a basis qualifier. A binary floating-point amount is rejected with `MONEY_FLOAT_REJECTED`. An unknown currency code is rejected with `CURRENCY_INVALID`. A missing required basis is rejected with `BASIS_REQUIRED`.
+- [x] **AC2:** `1000000`, `1000000.00` and `1E+6` in USD compare equal and serialize to one canonical form. Round trips through PostgreSQL lose no precision for `0.01`, `999999999999999.99` and an amount above 2^53.
+- [x] **AC3:** F0007 accepts original-currency money only. A value marked as converted is rejected with `CONVERTED_MONEY_UNSUPPORTED` until a feature owns exchange-rate provenance.
+- [x] **AC4:** A scoped identifier is (scheme or issuer, identifier type, value, optional effective interval). Policy number `GL-1001` from carrier A and `GL-1001` from carrier B are two different identifiers. An identifier with no scheme is rejected with `IDENTIFIER_SCHEME_REQUIRED`.
+- [x] **AC5:** Value normalization is declared per identifier type. FEIN `12-3456789` and `123456789` compare equal. No normalization ever makes identifiers from different schemes equal.
+- [x] **AC6:** Money and identifiers used as qualifiers or member keys contribute their canonical encoding to slot identity, so equal values resolve one slot or member (S0001/S0002).
+- [x] **AC7:** An unauthorized caller is denied before any value-validation detail is returned. A rejected value produces no slot, member or fact version. Accepted values are recorded under the existing commit or slot-creation audit.
 
 ## Interaction Contract
 
@@ -61,5 +61,5 @@ Assumption (PRD): F0007 accepts original-currency money only. The Architect owns
 
 ## Definition of Done
 
-- [ ] Seven ACs pass with positive, boundary and rejection fixtures.
-- [ ] Feature action records tests, coverage and required signoffs.
+- [x] Seven ACs pass with positive, boundary and rejection fixtures.
+- [x] Feature action records tests, coverage and required signoffs.

@@ -1,0 +1,236 @@
+   106	    async def read_answer(
+   107	        self,
+   108	        principal: Principal,
+   109	        slot_id: UUID,
+   110	        *,
+   111	        valid_at: datetime,
+   112	        known_at: datetime,
+   113	        trace_id: str,
+   114	    ) -> FactAnswer:
+   115	        async def load(decision: AuthorizationDecision) -> FactAnswer:
+   116	            try:
+   117	                return await self._answers.read(slot_id, valid_at=valid_at, known_at=known_at)
+   118	            except LookupError as exc:
+   119	                raise SlotNotFound(str(slot_id)) from exc
+   120	
+   121	        async def scope_reads(answer: FactAnswer) -> Sequence[ResourceKey]:
+   122	            if answer.scope is None:
+   123	                return ()
+   124	            return (ResourceKey(ResourceType.CONTENT_ARTIFACT, answer.scope.content_artifact_id),)
+   125	
+   126	        try:
+   127	            return await self._execution.read(
+   128	                principal,
+   129	                _slot_key(slot_id),
+   130	                Action.READ,
+   131	                trace_id=trace_id,
+   132	                load=load,
+   133	                additional_reads=scope_reads,
+   134	            )
+   135	        except AuthorizationDenied as exc:
+   136	            raise SlotNotFound(str(slot_id)) from exc
+   137	
+   138	    async def current_names(
+   139	        self,
+   140	        principal: Principal,
+   141	        *,
+   142	        knowledge_base_id: UUID,
+   143	        entity_id: UUID,
+   144	        valid_at: datetime,
+   145	        known_at: datetime,
+   146	        trace_id: str,
+   147	    ) -> list[NameFact]:
+   148	        """The display-name hook. Each candidate slot is authorized for READ; a slot
+   149	        the principal cannot read is silently absent, exactly like a missing one."""
+   150	        facts: list[NameFact] = []
+   151	        for slot_id in await self._names.candidate_slots(knowledge_base_id, entity_id):
+   152	
+   153	            async def load(
+   154	                _decision: AuthorizationDecision, slot_id: UUID = slot_id
+   155	            ) -> NameFact | None:
+   156	                return await self._names.name_fact(slot_id, valid_at=valid_at, known_at=known_at)
+   157	
+   158	            try:
+   159	                fact = await self._execution.read(
+   160	                    principal, _slot_key(slot_id), Action.READ, trace_id=trace_id, load=load
+   161	                )
+   162	            except AuthorizationDenied:
+   163	                continue
+   164	            if fact is not None:
+   165	                facts.append(fact)
+   166	        return order_names(facts)
+"""Name facts and the precedence-free display hook (F0007-S0005, ADR-0066).
+
+The hook returns the reader KB's current accepted name facts. The order
+(predicate key, normalized form, slot ID) is stable but is NOT a display
+precedence: choosing a display name is an open decision owned by F0017/F0023.
+It never creates `entity_alias` rows.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import datetime
+from uuid import UUID
+
+from brain_domain.fact_answers import InformationState
+
+from brain_factslots.answers import FactAnswerReader
+from brain_factslots.ports import FactSlotStore
+from brain_factslots.predicates import NAME_PREDICATE_KEYS
+
+
+@dataclass(frozen=True, slots=True)
+class NameFact:
+    predicate_key: str
+    slot_id: UUID
+    verbatim: str
+    normalized: str
+    name_kind: str | None
+
+
+class NameFactReader:
+    def __init__(self, store: FactSlotStore) -> None:
+        self._store = store
+        self._answers = FactAnswerReader(store)
+
+    async def candidate_slots(self, knowledge_base_id: UUID, entity_id: UUID) -> tuple[UUID, ...]:
+        slots = await self._store.name_slots(knowledge_base_id, entity_id, NAME_PREDICATE_KEYS)
+        return tuple(s.id for s in slots)
+
+    async def name_fact(
+        self, slot_id: UUID, *, valid_at: datetime, known_at: datetime
+    ) -> NameFact | None:
+        slot = await self._store.slot(slot_id)
+        if slot is None or slot.legacy or slot.predicate_key not in NAME_PREDICATE_KEYS:
+            return None
+        answer = await self._answers.read(slot_id, valid_at=valid_at, known_at=known_at)
+        name = answer.name
+        if answer.state != InformationState.PRESENT or name is None:
+            return None
+        return NameFact(slot.predicate_key, slot.id, name.verbatim, name.normalized, name.name_kind)
+
+    async def current_names(
+        self,
+        *,
+        authorized_scope: tuple[UUID, UUID],
+        entity_id: UUID,
+        valid_at: datetime,
+        known_at: datetime,
+    ) -> list[NameFact]:
+        """Trusted form: every name fact of the entity in the authorized KB."""
+        _tenant_id, knowledge_base_id = authorized_scope
+        facts = []
+        for slot_id in await self.candidate_slots(knowledge_base_id, entity_id):
+            fact = await self.name_fact(slot_id, valid_at=valid_at, known_at=known_at)
+            if fact is not None:
+                facts.append(fact)
+        return order_names(facts)
+
+
+def order_names(facts: list[NameFact]) -> list[NameFact]:
+    return sorted(facts, key=lambda f: (f.predicate_key, f.normalized, str(f.slot_id)))
+    65	                        await self._store.name_evidence_artifacts(assertion, slot.knowledge_base_id)
+    66	                    )
+    67	        return tuple(sorted(ResourceKey(ResourceType.CONTENT_ARTIFACT, a) for a in artifacts))
+    68	
+    69	    async def canonical_value(
+    70	        self,
+    71	        slot_id: UUID,
+    72	        value: Mapping[str, Any],
+    73	        *,
+    74	        authorized_scope: tuple[UUID, UUID],
+    75	    ) -> Mapping[str, Any] | None:
+    76	        """The canonical envelope to store, or `None` for a legacy slot."""
+    77	        slot = await self._store.slot(slot_id)
+    78	        if slot is None or slot.legacy:
+    79	            return None
+    80	        if slot.owner != authorized_scope:  # pragma: no cover - the commit lock checks it first
+    81	            raise FactAnswerRejected(AnswerReason.ANSWER_CONTRACT_UNSUPPORTED)
+    82	        contract = None
+    83	        try:
+    84	            if slot.predicate_key and slot.predicate_release_ref:
+    85	                contract = self._registry.find(
+    86	                    PredicateKey.parse(slot.predicate_key), slot.predicate_release_ref
+    87	                )
+    88	        except SlotRejected:
+    89	            contract = None
+    90	        if contract is None:
+    91	            raise FactAnswerRejected(AnswerReason.ANSWER_CONTRACT_UNSUPPORTED)
+    92	        answer = parse_answer(
+    93	            value,
+    94	            value_type=contract.value_type,
+    95	            basis_required=contract.basis_required,
+    96	            multi_header=slot.multi_header,
+    97	        )
+    98	        if answer.scope is not None:
+    99	            owner = await self._store.artifact_owner(answer.scope.content_artifact_id)
+   100	            if owner != slot.owner:
+   101	                raise FactAnswerRejected(AnswerReason.ABSENCE_SCOPE_OUT_OF_SCOPE)
+   102	        if answer.value is not None:
+   103	            await self._check_value_detail(slot, answer)
+   104	            # WHY: a member's immutable identity is derived from its value; a
+   105	            # different canonical value must resolve its own member slot.
+   106	            if (
+   107	                slot.slot_role == SlotRole.MEMBER
+   108	                and member_key(answer.value, contract) != slot.member_key
+   109	            ):
+   110	                raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
+   111	        return answer.to_json()
+   112	
+   113	    async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
+   114	        assert answer.value is not None
+   115	        name = answer.name
+   116	        if name is not None and not await self._store.name_evidence_eligible(
+   117	            name.evidence, slot.owner
+   118	        ):
+   119	            raise FactAnswerRejected(AnswerReason.NAME_EVIDENCE_REQUIRED)
+   120	        if answer.value.value_type == ValueType.ENTITY_REF and not await self._store.entity_in_kb(
+   121	            slot.tenant_id, slot.knowledge_base_id, UUID(str(answer.value.identity))
+   122	        ):
+   123	            raise FactAnswerRejected(AnswerReason.RELATIONSHIP_OBJECT_OUT_OF_SCOPE)
+   124	
+   125	
+   126	class FactAnswerReader:
+   127	    """Internal reader: an identity-v1 slot with no version at the coordinates
+   128	    answers `NOT_PROCESSED`, never null. Read authorization is the caller's
+   129	    (`fact_slot:read` through `AuthorizationExecution.read`)."""
+   130	
+   131	    def __init__(self, store: FactSlotStore) -> None:
+   132	        self._store = store
+   133	
+   134	    async def scope_read_keys(
+   135	        self, slot_id: UUID, *, valid_at: datetime, known_at: datetime
+   136	    ) -> tuple[ResourceKey, ...]:
+   137	        """READ keys a reader must hold before an identity-v1 answer is returned:
+   138	        the absence scope's artifact (S0003 AC6, threat T-08). Legacy slots and
+   139	        answers without a scope need none, so pilot reads are unchanged."""
+   140	        slot = await self._store.slot(slot_id)
+   141	        if slot is None or slot.legacy:
+   142	            return ()
+   143	        stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
+   144	        return await self.scope_keys_for_value(slot_id, stored)
+   145	
+   146	    async def scope_keys_for_value(
+   147	        self, slot_id: UUID, stored: object
+   148	    ) -> tuple[ResourceKey, ...]:
+   149	        """Derive keys from the exact privately loaded version, without selecting
+   150	        the answer again. Legacy JSON keeps its existing unwrapped semantics."""
+   151	        slot = await self._store.slot(slot_id)
+   152	        if slot is None or slot.legacy:
+   153	            return ()
+   154	        scope = stored.get("scope") if isinstance(stored, Mapping) else None
+   155	        artifact = _uuid(scope.get("content_artifact_id")) if isinstance(scope, Mapping) else None
+   156	        return (ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),) if artifact else ()
+   157	
+   158	    async def read(self, slot_id: UUID, *, valid_at: datetime, known_at: datetime) -> FactAnswer:
+   159	        slot = await self._store.slot(slot_id)
+   160	        if slot is None:
+   161	            raise LookupError(str(slot_id))
+   162	        stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
+   163	        if slot.legacy:
+   164	            if stored is None:
+engine/packages/brain-domain/tests/test_fact_slots.py:156:        raise AssertionError('an oversized decimal was accepted')
+engine/tests/integration/test_factslot_names.py:254:    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"
+engine/tests/integration/test_factslot_answers.py:479:    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"
+engine/tests/integration/test_factslot_answers.py:504:    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"

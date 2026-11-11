@@ -1,0 +1,26 @@
+engine/migrations/versions/0013_f0007_identity_guard.py:19:down_revision: str | None = "0012"
+engine/migrations/versions/0013_f0007_identity_guard.py:68:    bind.execute(text("LOCK TABLE fact_slot IN ACCESS EXCLUSIVE MODE"))
+engine/migrations/versions/0013_f0007_identity_guard.py:69:    invalid = f"({IDENTITY_SHAPE}) IS NOT TRUE"
+engine/migrations/versions/0013_f0007_identity_guard.py:83:        f"CHECK (({IDENTITY_SHAPE}) IS TRUE)"
+engine/migrations/versions/0013_f0007_identity_guard.py:88:def downgrade() -> None:
+engine/apps/api/src/brain_api/routes/facts.py:86:        return await answers.scope_keys_for_value(fact_slot_id, version.value)
+engine/apps/api/src/brain_api/routes/facts.py:95:        additional_reads=scope_reads,
+engine/apps/api/src/brain_api/routes/facts.py:171:            additional_reads=source_keys,
+engine/packages/brain-factslots/src/brain_factslots/service.py:99:                additional_reads=evidence_reads,
+engine/packages/brain-factslots/src/brain_factslots/service.py:133:                additional_reads=scope_reads,
+engine/packages/brain-domain/src/brain_domain/fact_values.py:26:DECIMAL_MAX_INPUT = 64
+engine/packages/brain-domain/src/brain_domain/fact_values.py:27:DECIMAL_MAX_CANONICAL = DECIMAL_MAX_INPUT
+engine/packages/brain-domain/src/brain_domain/fact_values.py:145:    if not isinstance(raw, str) or len(raw) > DECIMAL_MAX_INPUT or not _DECIMAL.match(raw):
+engine/packages/brain-domain/src/brain_domain/fact_values.py:164:        body_length = len(text) + exponent
+engine/packages/brain-domain/src/brain_domain/fact_values.py:166:        body_length = 2 - exponent
+engine/packages/brain-domain/src/brain_domain/fact_values.py:168:        body_length = len(text) + 1
+engine/packages/brain-domain/src/brain_domain/fact_values.py:169:    if body_length + sign > DECIMAL_MAX_CANONICAL:
+engine/packages/brain-factslots/src/brain_factslots/answers.py:108:                and member_key(answer.value, contract) != slot.member_key
+engine/packages/brain-factslots/src/brain_factslots/answers.py:110:                raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
+engine/packages/brain-factslots/src/brain_factslots/answers.py:144:        return await self.scope_keys_for_value(slot_id, stored)
+engine/packages/brain-factslots/src/brain_factslots/answers.py:146:    async def scope_keys_for_value(self, slot_id: UUID, stored: object) -> tuple[ResourceKey, ...]:
+296:            member_value_mismatch, decimal_invalid) with no
+95:      "description": "Input and canonical value have at most 64 total characters including sign/point. Server semantic validation rejects exponent forms whose canonical expansion exceeds that bound before allocating it; every emitted canonical form is a valid reload input.",
+109:          "maxLength": 64
+171:      "description": "ADR-0039 D4. Amount is an exact decimal string; a JSON number is rejected (MONEY_FLOAT_REJECTED). Input and canonical amount are bounded to 64 total characters including sign/point; oversized canonical expansions reject DECIMAL_INVALID before allocation. Original currency only in F0007: any conversion marker is rejected (CONVERTED_MONEY_UNSUPPORTED) at the domain validator, so the schema does not admit one.",
+179:          "maxLength": 64

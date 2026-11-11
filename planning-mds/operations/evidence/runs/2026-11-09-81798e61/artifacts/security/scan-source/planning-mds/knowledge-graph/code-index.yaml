@@ -1,0 +1,551 @@
+version: 1
+status: generated
+coverage_note: Stable solution node IDs are bound to engine/, neuron/, and experience/ paths as features
+  ship so agents can route into implementation without broad repository scans. Bindings are retrieval
+  hints; source files remain authoritative.
+node_bindings:
+  - id: capability:assertion-eligibility-guards
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
+      backend:
+        - engine/packages/brain-assertions/src/brain_assertions/eligibility.py
+        - engine/packages/brain-assertions/src/brain_assertions/ports.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/repositories.py
+      schemas:
+        - planning-mds/schemas/assertion-admission-result-v1.schema.json
+        - planning-mds/schemas/assertion-record-v2.schema.json
+        - planning-mds/schemas/interpretation-result-v2.schema.json
+      tests:
+        - engine/packages/brain-assertions/tests/test_eligibility.py
+        - engine/tests/integration/test_assertion_authority_projection.py
+        - engine/tests/integration/test_assertion_consumers.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
+        - neuron/tests/integration/test_document_delivery.py
+        - neuron/tests/integration/test_document_process_recovery.py
+  - id: capability:authorization-enforcement
+    paths:
+      backend:
+        - engine/packages/brain-domain/src/brain_domain/authx.py
+        - engine/packages/brain-security/src/brain_security/casbin_adapter.py
+        - engine/packages/brain-security/src/brain_security/evaluation.py
+      infra:
+        - planning-mds/security/policies/**
+  - id: capability:backup-and-restore
+    paths:
+      infra:
+        - docker/content-integrity-runbook.md
+        - scripts/ops/**
+      tests:
+        - engine/tests/integration/test_content_restore_v2.py
+  - id: capability:bitemporal-canonical-commit
+    paths:
+      backend:
+        - engine/migrations/versions/0003_fact_slots_and_commits.py
+        - engine/packages/brain-temporal/src/**
+      tests:
+        - engine/apps/api/tests/test_facts.py
+        - engine/packages/brain-temporal/tests/**
+  - id: capability:bounded-delegation
+    paths:
+      backend:
+        - engine/packages/brain-security/src/brain_security/delegation.py
+      infra:
+        - scripts/dev/provision_delegation.py
+  - id: capability:budgeted-evidence-context
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+        - planning-mds/architecture/governed-evidence-retrieval-design.md
+      examples:
+        - planning-mds/examples/governed-evidence-retrieval.md
+  - id: capability:credential-verification-and-principal-resolution
+    paths:
+      backend:
+        - engine/packages/brain-persistence/src/brain_persistence/identity.py
+        - engine/packages/brain-security/src/brain_security/identity_profile.py
+        - engine/packages/brain-security/src/brain_security/principals.py
+        - engine/packages/brain-security/src/brain_security/verification.py
+      infra:
+        - config/authx-identity-profile.yaml
+  - id: capability:current-resource-scope
+    paths:
+      backend:
+        - engine/packages/brain-persistence/src/brain_persistence/authx.py
+        - engine/packages/brain-persistence/src/brain_persistence/grants.py
+      infra:
+        - scripts/dev/revoke_membership.py
+  - id: capability:document-date-provenance
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/dates.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/document_dates.py
+      tests:
+        - engine/packages/brain-content/tests/test_document_dates.py
+        - engine/packages/brain-content/tests/test_run_outputs.py
+        - engine/tests/integration/test_content_migration_states.py
+        - engine/tests/integration/test_content_restore_v2.py
+  - id: capability:durable-authorization-decisions
+    paths:
+      backend:
+        - engine/apps/api/src/brain_api/routes/facts.py
+        - engine/apps/api/src/brain_api/routes/reviews.py
+        - engine/packages/brain-assertions/src/brain_assertions/service.py
+        - engine/packages/brain-domain/src/brain_domain/audit.py
+        - engine/packages/brain-security/src/brain_security/audit.py
+        - engine/packages/brain-security/src/brain_security/execution.py
+      tests:
+        - engine/packages/brain-security/tests/test_execution.py
+  - id: capability:evidence-review-round-trip
+    paths:
+      backend:
+        - engine/packages/brain-review/src/**
+      frontend:
+        - experience/src/review-panel/**
+      tests:
+        - engine/apps/api/tests/test_reviews.py
+        - engine/packages/brain-review/tests/**
+  - id: capability:factslot-identity-resolution
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md
+      backend:
+        - engine/packages/brain-domain/src/brain_domain/fact_slots.py
+        - engine/packages/brain-factslots/pyproject.toml
+        - engine/packages/brain-factslots/src/brain_factslots/__init__.py
+        - engine/packages/brain-factslots/src/brain_factslots/names.py
+        - engine/packages/brain-factslots/src/brain_factslots/ports.py
+        - engine/packages/brain-factslots/src/brain_factslots/predicates.py
+        - engine/packages/brain-factslots/src/brain_factslots/resolution.py
+        - engine/packages/brain-factslots/src/brain_factslots/service.py
+        - engine/packages/brain-persistence/src/brain_persistence/fact_slots.py
+        - engine/packages/brain-testing/src/brain_testing/factslots.py
+      schemas:
+        - planning-mds/schemas/fact-slot-key-v1.schema.json
+        - planning-mds/schemas/fact-slot-resolution-result-v1.schema.json
+      tests:
+        - engine/packages/brain-factslots/tests/conftest.py
+        - engine/packages/brain-factslots/tests/test_contract_examples.py
+        - engine/packages/brain-factslots/tests/test_factslots_unit.py
+        - engine/tests/fixtures/factslots/harness.py
+        - engine/tests/integration/test_factslot_names.py
+        - engine/tests/integration/test_factslot_ownership.py
+        - engine/tests/integration/test_factslot_resolution.py
+  - id: capability:governed-evidence-retrieval
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+        - planning-mds/architecture/governed-evidence-retrieval-design.md
+      examples:
+        - planning-mds/examples/governed-evidence-retrieval.md
+  - id: capability:local-dependency-stack
+    paths:
+      infra:
+        - docker-compose.yml
+        - docker/DEPENDENCY-MATRIX.md
+        - docker/postgres/**
+  - id: capability:local-inference-service
+    paths:
+      ai:
+        - neuron/packages/brain-extraction/src/brain_extraction/docling_graph_adapter.py
+        - neuron/packages/brain-extraction/src/brain_extraction/openai_compatible_adapter.py
+        - neuron/packages/brain-extraction/src/brain_extraction/vllm_graph_client.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/provider_supervisor.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/worker_guard.py
+      infra:
+        - docker/local-inference-runbook.md
+      tests:
+        - neuron/packages/brain-ingestion/tests/test_worker_guard.py
+        - neuron/tests/support/fault_proxy.py
+  - id: capability:ontology-release-compatibility
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
+        - planning-mds/architecture/ontology-planning-handoff.md
+      examples:
+        - planning-mds/examples/ontology-interchange/README.md
+        - planning-mds/examples/ontology-interchange/assessment-shapes.ttl
+        - planning-mds/examples/ontology-interchange/expected-inferences.ttl
+        - planning-mds/examples/ontology-interchange/expected-results.yaml
+        - planning-mds/examples/ontology-interchange/facts.jsonld
+        - planning-mds/examples/ontology-interchange/facts.ttl
+        - planning-mds/examples/ontology-interchange/malformed-amount.ttl
+        - planning-mds/examples/ontology-interchange/missing-limit.ttl
+        - planning-mds/examples/ontology-interchange/ontology.ttl
+        - planning-mds/examples/ontology-interchange/ontology.yaml
+        - planning-mds/examples/ontology-interchange/shapes.ttl
+        - planning-mds/examples/ontology-release-contracts.md
+  - id: capability:parse-once-content-artifact
+    paths:
+      ai:
+        - neuron/packages/brain-ingestion/src/**
+      backend:
+        - engine/apps/worker/src/brain_worker/document_delivery.py
+        - engine/migrations/versions/0009_f0005_job_event_reason.py
+        - engine/migrations/versions/0010_f0005_job_event_reason_expand.py
+        - engine/packages/brain-content/src/**
+        - engine/packages/brain-jobs/src/**
+      infra:
+        - config/local.yaml
+        - docker/local-inference-runbook.md
+      tests:
+        - engine/tests/integration/test_job_event_reason_migration.py
+        - neuron/benchmarks/f0005_qualification.py
+        - neuron/fixtures/qualification/CORPUS-HASHES.txt
+        - neuron/fixtures/qualification/README.md
+        - neuron/fixtures/qualification/build_corpus.py
+        - neuron/fixtures/qualification/corpus.yaml
+        - neuron/fixtures/qualification/documents
+        - neuron/fixtures/qualification/expectations
+        - neuron/packages/brain-ingestion/tests/**
+        - neuron/tests/integration/f0005_live_support.py
+        - neuron/tests/integration/test_content_*.py
+        - neuron/tests/integration/test_document_*.py
+        - neuron/tests/integration/test_fault_injection_qualification.py
+        - neuron/tests/integration/test_live_conversion_qualification.py
+        - neuron/tests/support/fault_proxy.py
+        - neuron/tests/support/relationship_probe.py
+  - id: capability:postgresql-persistence-contract
+    paths:
+      backend:
+        - engine/tests/integration/test_persistence_contract.py
+  - id: capability:runtime-roots-and-toolchain
+    paths:
+      backend:
+        - engine/apps/api/src/brain_api/app.py
+        - engine/apps/api/src/brain_api/deps.py
+        - engine/apps/api/src/brain_api/errors.py
+        - engine/apps/api/src/brain_api/health.py
+        - engine/pyproject.toml
+        - neuron/pyproject.toml
+  - id: capability:semantic-example-validation
+    paths:
+      tests:
+        - scripts/validation/tests/test_semantic_examples.py
+      validation:
+        - scripts/validation/build_commercial_pc_snapshot.py
+        - scripts/validation/validate_semantic_examples.py
+        - scripts/validation/validate_semantic_rdf.py
+  - id: capability:semantic-interpretation-run
+    paths:
+      ai:
+        - neuron/benchmarks/docling_graph_comparison.py
+        - neuron/packages/brain-extraction/src/**
+        - neuron/packages/brain-interpretation/src/**
+      backend:
+        - engine/packages/brain-contracts/src/**
+      tests:
+        - engine/packages/brain-assertions/tests/test_contracts.py
+        - neuron/benchmarks/f0005_qualification.py
+        - neuron/tests/integration/test_interpretation_rejections.py
+        - neuron/tests/integration/test_live_reinterpretation_qualification.py
+        - neuron/tests/integration/test_pipeline_selection.py
+  - id: capability:spectral-retrieval-experiments
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+        - planning-mds/architecture/governed-evidence-retrieval-design.md
+      examples:
+        - planning-mds/examples/governed-evidence-retrieval.md
+  - id: capability:structural-assertion-admission
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
+      backend:
+        - engine/packages/brain-assertions/src/brain_assertions/__init__.py
+        - engine/packages/brain-assertions/src/brain_assertions/admission.py
+        - engine/packages/brain-assertions/src/brain_assertions/eligibility.py
+        - engine/packages/brain-assertions/src/brain_assertions/normalization.py
+        - engine/packages/brain-assertions/src/brain_assertions/ports.py
+        - engine/packages/brain-assertions/src/brain_assertions/py.typed
+        - engine/packages/brain-assertions/src/brain_assertions/service.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+      schemas:
+        - planning-mds/schemas/assertion-admission-result-v1.schema.json
+        - planning-mds/schemas/assertion-record-v2.schema.json
+        - planning-mds/schemas/interpretation-result-v2.schema.json
+      tests:
+        - engine/packages/brain-assertions/tests/test_admission.py
+        - engine/packages/brain-assertions/tests/test_normalization.py
+        - engine/tests/fixtures/assertions/harness.py
+        - engine/tests/fixtures/assertions/native-sources.json
+        - engine/tests/integration/test_assertion_admission.py
+  - id: capability:structural-tenancy-and-entity-identity
+    paths:
+      backend:
+        - engine/migrations/versions/0005_tenancy_authx_expand.py
+        - engine/migrations/versions/0006_tenancy_authx_constrain.py
+        - engine/migrations/versions/0007_tenancy_authx_safeguards.py
+        - engine/packages/brain-domain/src/brain_domain/tenancy.py
+        - engine/packages/brain-persistence/src/brain_persistence/tenancy.py
+      infra:
+        - scripts/dev/reconcile_authx.py
+  - id: capability:typed-fact-answer
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md
+      backend:
+        - engine/packages/brain-domain/src/brain_domain/data/iso4217-2026-01.txt
+        - engine/packages/brain-domain/src/brain_domain/fact_answers.py
+        - engine/packages/brain-domain/src/brain_domain/fact_values.py
+        - engine/packages/brain-factslots/src/brain_factslots/answers.py
+      schemas:
+        - planning-mds/schemas/fact-answer-v1.schema.json
+      tests:
+        - engine/packages/brain-domain/tests/test_fact_slots.py
+        - engine/tests/integration/test_factslot_answers.py
+  - id: capability:versioned-assertion-semantics
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
+      backend:
+        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+        - engine/packages/brain-contracts/src/brain_contracts/assertions.py
+        - engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+        - engine/packages/brain-domain/src/brain_domain/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/models.py
+      resources:
+        - engine/apps/api/pyproject.toml
+        - engine/packages/brain-assertions/pyproject.toml
+        - engine/packages/brain-contracts/pyproject.toml
+        - engine/packages/brain-persistence/pyproject.toml
+        - engine/pyproject.toml
+        - engine/uv.lock
+        - neuron/uv.lock
+      schemas:
+        - engine/packages/brain-contracts/src/brain_contracts/schemas/assertion-admission-result-v1.schema.json
+        - engine/packages/brain-contracts/src/brain_contracts/schemas/assertion-record-v2.schema.json
+        - engine/packages/brain-contracts/src/brain_contracts/schemas/interpretation-result-v2.schema.json
+        - engine/packages/brain-contracts/src/brain_contracts/schemas/interpretation-result.schema.json
+        - planning-mds/schemas/assertion-admission-result-v1.schema.json
+        - planning-mds/schemas/assertion-record-v2.schema.json
+        - planning-mds/schemas/interpretation-result-v2.schema.json
+      tests:
+        - engine/packages/brain-assertions/tests/test_contracts.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
+  - id: capability:versioned-content-contracts
+    paths:
+      ai:
+        - neuron/packages/brain-ingestion/src/brain_ingestion/content_*.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/conversion_recipe.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/integrity_sweep.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/item_provenance.py
+        - neuron/packages/brain-ingestion/src/brain_ingestion/submission.py
+      backend:
+        - engine/apps/worker/src/brain_worker/content_*.py
+        - engine/apps/worker/src/brain_worker/publication_intent.py
+        - engine/migrations/versions/0008_f0004_content_contract.*
+        - engine/packages/brain-content/src/brain_content/**
+        - engine/packages/brain-persistence/src/brain_persistence/content_*.py
+      infra:
+        - config/local.yaml
+        - docker/content-integrity-runbook.md
+      tests:
+        - engine/apps/api/tests/test_content.py
+        - engine/packages/brain-content/tests/**
+        - engine/tests/integration/test_content_migration_states.py
+        - neuron/packages/brain-ingestion/tests/spikes/**
+        - neuron/packages/brain-ingestion/tests/test_content_projection_v2.py
+        - neuron/packages/brain-ingestion/tests/test_ocr_quality.py
+        - neuron/tests/integration/test_content_*.py
+  - id: endpoint:content-artifact-file-get
+    paths:
+      backend:
+        - engine/apps/api/src/brain_api/routes/content.py
+      tests:
+        - engine/apps/api/tests/test_content.py
+  - id: endpoint:content-artifact-get
+    paths:
+      backend:
+        - engine/apps/api/src/brain_api/routes/content.py
+      tests:
+        - engine/apps/api/tests/test_content.py
+  - id: entity:assertion
+    paths:
+      backend:
+        - engine/packages/brain-domain/src/brain_domain/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+        - engine/packages/brain-persistence/src/brain_persistence/models.py
+      tests:
+        - engine/tests/integration/test_assertion_admission.py
+        - engine/tests/integration/test_assertion_consumers.py
+        - engine/tests/integration/test_assertion_migration.py
+  - id: entity:assertion-document-reference
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+      backend:
+        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+      tests:
+        - engine/tests/integration/test_assertion_admission.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
+  - id: entity:assertion-name-claim
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+      backend:
+        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+      tests:
+        - engine/tests/integration/test_assertion_admission.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
+  - id: entity:assertion-semantics
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+      backend:
+        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertion_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/assertions.py
+      tests:
+        - engine/tests/integration/test_assertion_admission.py
+        - engine/tests/integration/test_assertion_migration.py
+        - engine/tests/integration/test_assertion_ownership.py
+  - id: entity:content-artifact
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/manifest.py
+        - engine/packages/brain-content/src/brain_content/validation.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_repository.py
+        - engine/packages/brain-persistence/src/brain_persistence/models.py
+  - id: entity:content-block
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/records.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_repository.py
+  - id: entity:content-table
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/records.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_repository.py
+  - id: entity:content-table-cell
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/records.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_repository.py
+  - id: entity:document-date-candidate
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/dates.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/document_dates.py
+  - id: entity:document-date-selection
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/dates.py
+        - engine/packages/brain-persistence/src/brain_persistence/content_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/document_dates.py
+  - id: entity:fact-slot-qualifier
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+      backend:
+        - engine/packages/brain-persistence/src/brain_persistence/fact_slot_models.py
+  - id: entity:ontology-release
+    paths:
+      architecture:
+        - planning-mds/architecture/data-model.md
+  - id: migration:f0004-content-contract
+    paths:
+      backend:
+        - engine/migrations/versions/0008_f0004_content_contract.*
+      tests:
+        - engine/tests/integration/test_content_migration_states.py
+  - id: migration:f0005-job-event-reason
+    paths:
+      backend:
+        - engine/migrations/versions/0009_f0005_job_event_reason.py
+        - engine/migrations/versions/0010_f0005_job_event_reason_expand.py
+  - id: migration:f0007-factslot-identity
+    paths:
+      backend:
+        - engine/migrations/versions/0012_f0007_factslot_identity.py
+      tests:
+        - engine/tests/fixtures/factslots/pilot-before.json
+        - engine/tests/fixtures/factslots/pilot-seed.sql
+        - engine/tests/integration/test_factslot_migration.py
+  - id: schema:commercial-pc-example
+    paths:
+      architecture:
+        - planning-mds/architecture/commercial-pc-example-handoff.md
+      examples:
+        - planning-mds/examples/commercial-pc-account/README.md
+        - planning-mds/examples/commercial-pc-account/boundaries/account-close-reopen.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/coverage-outside-scope.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/duplicate-organization-account.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/jv-designated-parent.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/malformed-amount.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/missing-location.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/missing-occurrence.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/ownership-over-100.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/parent-cycle.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/policy-two-accounts.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/self-parent.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/two-parent-accounts.ttl
+        - planning-mds/examples/commercial-pc-account/boundaries/two-programs.ttl
+        - planning-mds/examples/commercial-pc-account/cases.md
+        - planning-mds/examples/commercial-pc-account/expected-inferences.ttl
+        - planning-mds/examples/commercial-pc-account/expected-results.yaml
+        - planning-mds/examples/commercial-pc-account/foundation.ttl
+        - planning-mds/examples/commercial-pc-account/general-liability.ttl
+        - planning-mds/examples/commercial-pc-account/gl-completeness.ttl
+        - planning-mds/examples/commercial-pc-account/insurance-core.ttl
+        - planning-mds/examples/commercial-pc-account/ontology.yaml
+        - planning-mds/examples/commercial-pc-account/program-extensions.ttl
+        - planning-mds/examples/commercial-pc-account/projection-mapping.yaml
+        - planning-mds/examples/commercial-pc-account/property-completeness.ttl
+        - planning-mds/examples/commercial-pc-account/property.ttl
+        - planning-mds/examples/commercial-pc-account/queries/account-360-contracting.rq
+        - planning-mds/examples/commercial-pc-account/queries/account-program.rq
+        - planning-mds/examples/commercial-pc-account/queries/account-team.rq
+        - planning-mds/examples/commercial-pc-account/queries/broker-contact-reach.rq
+        - planning-mds/examples/commercial-pc-account/queries/coverage-money.rq
+        - planning-mds/examples/commercial-pc-account/queries/decision-rights.rq
+        - planning-mds/examples/commercial-pc-account/queries/ownership.rq
+        - planning-mds/examples/commercial-pc-account/queries/program.rq
+        - planning-mds/examples/commercial-pc-account/queries/umbrella-schedule-review.rq
+        - planning-mds/examples/commercial-pc-account/queries/umbrella-schedule.rq
+        - planning-mds/examples/commercial-pc-account/records.json
+        - planning-mds/examples/commercial-pc-account/release.yaml
+        - planning-mds/examples/commercial-pc-account/shapes.ttl
+        - planning-mds/examples/commercial-pc-account/snapshot-index.json
+        - planning-mds/examples/commercial-pc-account/snapshot.jsonld
+        - planning-mds/examples/commercial-pc-account/snapshot.ttl
+        - planning-mds/examples/commercial-pc-account/source-package.md
+      schemas:
+        - planning-mds/schemas/commercial-pc-example.schema.json
+  - id: schema:content-artifact-manifest
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest.schema.json
+  - id: schema:content-artifact-manifest-v2
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest-v2.schema.json
+  - id: schema:content-records-v2
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/schemas/content-records-v2.schema.json
+  - id: schema:document-date-record
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/schemas/document-date-record.schema.json
+  - id: schema:interpretation-output-manifest
+    paths:
+      backend:
+        - engine/packages/brain-content/src/brain_content/outputs.py
+        - engine/packages/brain-content/src/brain_content/schemas/interpretation-output-manifest.schema.json

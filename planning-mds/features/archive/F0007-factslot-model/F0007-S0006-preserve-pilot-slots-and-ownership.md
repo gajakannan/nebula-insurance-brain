@@ -19,13 +19,13 @@ The F0001 pilot `fact_slot` (migration 0003) holds `entity_id` and a free-text `
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Every pre-existing `fact_slot` row and its fact versions read back through `GET /facts/{factSlotId}` with identical values, ranges and evidence after the upgrade. No fact version is rewritten.
-- [ ] **AC2:** Pilot slots that have no predicate key or qualifiers keep their `slot_type` and are labelled legacy. No predicate key or qualifier is fabricated for them. Identity-based resolution never matches a legacy slot implicitly; any mapping is explicit, recorded and reversible.
-- [ ] **AC3:** The existing pilot commit, review and assertion-consumer test suites pass unchanged (regression).
-- [ ] **AC4:** Every new F0007 row (qualifier, member, relationship) carries `tenant_id` and `knowledge_base_id` bound to its slot through composite foreign keys. A child row pointing at another tenant's or KB's slot is rejected by PostgreSQL. Updates to identity or ownership columns are rejected by trigger (the 0007 pattern).
-- [ ] **AC5:** The F0007 tables are listed in an RLS inventory handed to F0018. F0007 does not enable row-level security and introduces no superuser, `BYPASSRLS` or table-owner shortcut that would stop F0018 enabling it.
-- [ ] **AC6:** The migration is additive with a documented rollback. Upgrade, downgrade and upgrade again on a database seeded with pilot data leave pilot rows identical.
-- [ ] **AC7:** Unauthorized or cross-tenant/KB slot reads are denied with zero disclosure. Existing authorization-decision audit is unchanged, and new slot creation is audited (S0001).
+- [x] **AC1:** Every pre-existing `fact_slot` row and its fact versions read back through `GET /facts/{factSlotId}` with identical values, ranges and evidence after the upgrade. No fact version is rewritten.
+- [x] **AC2:** Pilot slots that have no predicate key or qualifiers keep their `slot_type` and are labelled legacy. No predicate key or qualifier is fabricated for them. Identity-based resolution never matches a legacy slot implicitly; any mapping is explicit, recorded and reversible.
+- [x] **AC3:** The existing pilot commit, review and assertion-consumer test suites pass unchanged (regression).
+- [x] **AC4:** Every new F0007 row (qualifier, member, relationship) carries `tenant_id` and `knowledge_base_id` bound to its slot through composite foreign keys. A child row pointing at another tenant's or KB's slot is rejected by PostgreSQL. Updates to identity or ownership columns are rejected by trigger (the 0007 pattern).
+- [x] **AC5:** The F0007 tables are listed in an RLS inventory handed to F0018. F0007 does not enable row-level security and introduces no superuser, `BYPASSRLS` or table-owner shortcut that would stop F0018 enabling it.
+- [x] **AC6:** The migration is additive with a documented rollback. Upgrade, downgrade and upgrade again on a database seeded with pilot data leave pilot rows identical.
+- [x] **AC7:** Unauthorized or cross-tenant/KB slot reads are denied with zero disclosure. Existing authorization-decision audit is unchanged, and new slot creation is audited (S0001).
 
 ## Interaction Contract
 
@@ -61,5 +61,5 @@ The Architect decides whether the pilot `slot_type` values get an explicit predi
 
 ## Definition of Done
 
-- [ ] Seven ACs pass with snapshot comparison, the migration cycle and ownership negative tests against PostgreSQL.
-- [ ] Feature action records tests, coverage and required signoffs.
+- [x] Seven ACs pass with snapshot comparison, the migration cycle and ownership negative tests against PostgreSQL.
+- [x] Feature action records tests, coverage and required signoffs.

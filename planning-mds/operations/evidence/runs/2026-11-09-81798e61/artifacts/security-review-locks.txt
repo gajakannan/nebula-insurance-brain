@@ -1,0 +1,311 @@
+"""Transaction-aware authorization execution (F0002-S0006, ADR-0062).
+
+`AuthorizationExecution` is the only way an async consumer performs a protected
+operation. It reloads current authority inside the caller's unit of work, evaluates
+with the shared pure evaluator, and makes the audit record durable before anything
+leaves the process:
+
+| Outcome                  | Behaviour                                                        |
+|--------------------------|------------------------------------------------------------------|
+| allowed read             | evaluate/lock -> load payload -> append decision -> commit -> return |
+| denied / missing read    | append minimal denial -> commit -> `AuthorizationDenied` (404)   |
+| allowed mutation         | stage decision -> operation in same UoW -> commit together       |
+| failed mutation          | rollback -> append `failed` decision in a fresh transaction      |
+| denied mutation          | rollback -> append denial in a fresh transaction                 |
+| storage/audit failure    | abort -> `AuthorizationUnavailable` (503); no payload, no success |
+
+Lock order (policy pointer, principal authority rows by ID, delegation row,
+resource-access rows by key, then the operation's own rows) is the store's
+contract. Nothing is cached across operations.
+"""
+
+from __future__ import annotations
+
+import contextlib
+from collections.abc import Awaitable, Callable, Sequence
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime
+from typing import Protocol, TypeVar
+from uuid import UUID, uuid4
+
+from brain_domain.authx import (
+    NO_FILTER,
+    Action,
+    AuthorizationContext,
+    AuthorizationDecision,
+    Delegation,
+    OperationOutcome,
+    PolicyRelease,
+    RequestedScope,
+    ResourceEnvelope,
+    ResourceKey,
+    ScopeSlice,
+)
+from brain_domain.principal import Principal
+
+from brain_security.evaluation import (
+    DependencySet,
+    PolicyEvaluator,
+    collect_dependencies,
+    evaluate,
+    pending_dependency_keys,
+)
+
+T = TypeVar("T")
+
+
+class AuthorizationDenied(Exception):
+    """Denied or nonexistent protected resource. Callers map this to the same
+    non-disclosing 404 used for a missing resource; the reason stays in audit."""
+
+    def __init__(self, decision: AuthorizationDecision) -> None:
+        super().__init__("authorization denied")
+        self.decision = decision
+
+
+class AuthorizationUnavailable(Exception):
+    """Current authority or durable audit could not be read/written. Callers map
+    this to a sanitized 503; no protected data or successful effect is released."""
+
+
+@dataclass(frozen=True, slots=True)
+class PrincipalAuthority:
+    principal: Principal
+    revision: int
+
+
+class AuthorityReader(Protocol):
+    """Synchronous trusted reads inside one unit of work (implemented in
+    brain_persistence). Both the async API and the sync worker drive the same
+    `decide` over this port, so the lock/load orchestration exists exactly once."""
+
+    def current_policy_release(self) -> str | None:
+        """Read the current release pointer FOR SHARE."""
+        ...
+
+    def peek_delegation(self, delegation_id: UUID) -> Delegation | None:
+        """Unlocked read, only to learn the (immutable) acting principal."""
+        ...
+
+    def lock_authority(self, principal_ids: Sequence[UUID]) -> dict[UUID, PrincipalAuthority]:
+        """Reload principals and FOR SHARE their authority rows in ascending ID order."""
+        ...
+
+    def lock_delegation(self, delegation_id: UUID) -> Delegation | None: ...
+
+    def scope_slices(self, principal_id: UUID) -> tuple[ScopeSlice, ...]:
+        """Unrevoked grant slices; validity windows are judged by the evaluator."""
+        ...
+
+    def hydrate(self, key: ResourceKey, *, require_record: bool = True) -> ResourceEnvelope | None:
+        """FOR SHARE the resource-access row and verify it against the semantic row's
+        ownership. `None` when missing or inconsistent (fail closed)."""
+        ...
+
+
+class AuthorityStore(Protocol):
+    """Async unit of work used by `AuthorizationExecution`."""
+
+    async def run_sync(self, fn: Callable[[AuthorityReader], T]) -> T:
+        """Run `fn` against a synchronous reader bound to this unit of work."""
+        ...
+
+    async def append_decision(self, decision: AuthorizationDecision) -> None: ...
+
+    async def commit(self) -> None: ...
+
+    async def rollback(self) -> None: ...
+
+
+@dataclass(frozen=True, slots=True)
+class Evaluated:
+    """One evaluated resource with the trusted inputs needed for the pre-effect recheck."""
+
+    context: AuthorizationContext
+    key: ResourceKey
+    envelope: ResourceEnvelope | None
+    dependencies: DependencySet
+    decision: AuthorizationDecision
+    delegation_unresolved: bool = False
+
+
+def assemble_context(
+    *,
+    authenticated: PrincipalAuthority,
+    acting: PrincipalAuthority,
+    delegation: Delegation | None,
+    at: datetime,
+    release: PolicyRelease,
+    slices: tuple[ScopeSlice, ...],
+    requested: RequestedScope,
+    trace_id: str,
+) -> AuthorizationContext:
+    """The one context constructor shared by the async and sync adapters."""
+    return AuthorizationContext(
+        authenticated=authenticated.principal,
+        acting=acting.principal,
+        delegation=delegation,
+        authorization_time=at,
+        authority_revision=acting.revision,
+        policy_release=release,
+        scope_slices=slices,
+        requested_scope=requested,
+        trace_id=trace_id,
+    )
+
+
+def recheck(evaluated: Evaluated, policy: PolicyEvaluator, at: datetime) -> Evaluated:
+    """Re-evaluate the same trusted inputs at the effect time so an expiry that
+    passes between decision and effect still denies (assembly plan Step 3.7)."""
+    if not evaluated.decision.allowed:
+        return evaluated
+    context = replace(evaluated.context, authorization_time=at)
+    decision = evaluate(
+        context,
+        evaluated.key,
+        evaluated.envelope,
+        evaluated.dependencies,
+        evaluated.decision.action,
+        policy,
+        decision_id=evaluated.decision.decision_id,
+        delegation_unresolved=evaluated.delegation_unresolved,
+    )
+    return replace(evaluated, context=context, decision=decision)
+
+
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+def decide(
+    reader: AuthorityReader,
+    policy: PolicyEvaluator,
+    release: PolicyRelease,
+    *,
+    authenticated_id: UUID,
+    keys: Sequence[ResourceKey],
+    action: str,
+    requested: RequestedScope,
+    trace_id: str,
+    delegation_id: UUID | None,
+    clock: Callable[[], datetime],
+    new_id: Callable[[], UUID],
+    require_record: bool = True,
+) -> list[Evaluated]:
+    """Lock and load current trusted state, then evaluate every key (ADR-0062).
+
+    The single orchestration shared by the async API facade and the sync worker.
+    Lock order: policy pointer, principal authority rows by ID, delegation row,
+    resource-access rows by key. The authorization time is read only after the
+    locks are held, so a revocation committed before this call is observed.
+    `require_record=False` is only for a worker step on an artifact whose trusted
+    submitter provisioned its metadata before the record exists."""
+    if reader.current_policy_release() != release.release_id:
+        raise AuthorizationUnavailable("policy release is not current")
+
+    acting_id = authenticated_id
+    peeked: Delegation | None = None
+    if delegation_id is not None:
+        peeked = reader.peek_delegation(delegation_id)
+        if peeked is not None:
+        envelope = reader.hydrate(key, require_record=require_record)
+        dependencies = DependencySet()
+        if envelope is not None:
+            hydrated: dict[ResourceKey, ResourceEnvelope | None] = {}
+            while pending := pending_dependency_keys(envelope, hydrated):
+                for dependency_key in pending:
+                    hydrated[dependency_key] = reader.hydrate(dependency_key)
+            dependencies = collect_dependencies(envelope, hydrated)
+        decision = evaluate(
+            context,
+            key,
+            envelope,
+            dependencies,
+            action,
+            policy,
+            decision_id=new_id(),
+            delegation_unresolved=not delegation_valid,
+        )
+        results.append(
+            Evaluated(context, key, envelope, dependencies, decision, not delegation_valid)
+        )
+    return results
+
+
+class AuthorizationExecution:
+    def __init__(
+        self,
+        store: AuthorityStore,
+        policy: PolicyEvaluator,
+        release: PolicyRelease,
+        *,
+        clock: Callable[[], datetime] = utc_now,
+        new_id: Callable[[], UUID] = uuid4,
+    ) -> None:
+        self._store = store
+        self._policy = policy
+        self._release = release
+        self._clock = clock
+        self._new_id = new_id
+
+    async def _decide(
+        self,
+        authenticated: Principal,
+        keys: Sequence[ResourceKey],
+        action: str,
+        requested: RequestedScope,
+        trace_id: str,
+        delegation_id: UUID | None,
+    ) -> list[Evaluated]:
+        return await self._store.run_sync(
+            lambda reader: decide(
+                reader,
+                self._policy,
+                self._release,
+                authenticated_id=authenticated.id,
+                keys=keys,
+                action=action,
+                requested=requested,
+                trace_id=trace_id,
+                delegation_id=delegation_id,
+                clock=self._clock,
+                new_id=self._new_id,
+            )
+        )
+
+    async def _guarded_decide(
+        self,
+        authenticated: Principal,
+        keys: Sequence[ResourceKey],
+        action: str,
+        requested: RequestedScope,
+        trace_id: str,
+        delegation_id: UUID | None,
+    ) -> list[Evaluated]:
+        try:
+            return await self._decide(
+                authenticated, keys, action, requested, trace_id, delegation_id
+            )
+        except AuthorizationUnavailable:
+            await self._safe_rollback()
+            raise
+        except Exception as exc:  # noqa: BLE001 - any authority read failure fails closed
+            await self._safe_rollback()
+            raise AuthorizationUnavailable("current authority unavailable") from exc
+
+    async def _safe_rollback(self) -> None:
+        # The original failure is what matters; a failed rollback adds nothing.
+        with contextlib.suppress(Exception):
+            await self._store.rollback()
+engine/packages/brain-persistence/src/brain_persistence/grants.py:6:evaluation holds FOR SHARE on the same row). Each change is audited with the
+engine/packages/brain-persistence/src/brain_persistence/grants.py:53:        .with_for_update()
+engine/packages/brain-persistence/src/brain_persistence/grants.py:126:def revoke_membership(
+engine/packages/brain-persistence/src/brain_persistence/grants.py:143:        .with_for_update()
+engine/packages/brain-persistence/src/brain_persistence/grants.py:202:        .with_for_update()
+engine/packages/brain-persistence/src/brain_persistence/grants.py:306:        .with_for_update()
+engine/packages/brain-persistence/src/brain_persistence/authx.py:8:Lock order (never violated): policy pointer -> principal_authority rows by
+engine/packages/brain-persistence/src/brain_persistence/authx.py:10:operation's own semantic rows. Reads take FOR SHARE; changes take FOR UPDATE.
+engine/packages/brain-persistence/src/brain_persistence/authx.py:137:        .with_for_update(read=True)
+engine/packages/brain-persistence/src/brain_persistence/authx.py:151:        .with_for_update(read=True)
+engine/packages/brain-persistence/src/brain_persistence/authx.py:165:            .with_for_update(read=True)
+engine/packages/brain-persistence/src/brain_persistence/authx.py:236:        .with_for_update(read=True)

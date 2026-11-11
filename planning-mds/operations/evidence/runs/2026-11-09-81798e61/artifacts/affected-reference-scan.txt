@@ -1,0 +1,177 @@
+planning-mds/architecture/feature-assembly-plan.md:21:| F0007 | [FactSlot model](../features/F0007-factslot-model/feature-assembly-plan.md) | Done / Archived 2026-11-09 (feature run `2026-11-09-b94cfa12`; plan run `2026-11-09-60865e32`); additive migration 0012; 39 ACs and ADR-0077 proof gates evidenced; ADR-0077 still Proposed |
+planning-mds/BLUEPRINT.md:146:| `ontology/`, `profiles/`, `schemas/`, `knowledge-packs/` | Authored ontology modules, document and extraction profiles, runtime JSON Schemas, OKF packs | architect (design), backend-developer (compiler and runtime loading) | Versioned, modular, compiled into normalized runtime structures (ADR-0011, ADR-0012) |
+planning-mds/BLUEPRINT.md:245:- [F0007 — FactSlot model](features/F0007-factslot-model/README.md) - Done / Archived (2026-11-09; feature run `2026-11-09-b94cfa12`; operator approval at G4)
+planning-mds/BLUEPRINT.md:246:  - [F0007-S0001](features/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md) — Done
+planning-mds/BLUEPRINT.md:247:  - [F0007-S0002](features/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md) — Done
+planning-mds/BLUEPRINT.md:248:  - [F0007-S0003](features/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md) — Done
+planning-mds/BLUEPRINT.md:249:  - [F0007-S0004](features/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) — Done
+planning-mds/BLUEPRINT.md:250:  - [F0007-S0005](features/F0007-factslot-model/F0007-S0005-define-name-factslots.md) — Done
+planning-mds/BLUEPRINT.md:251:  - [F0007-S0006](features/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) — Done
+planning-mds/BLUEPRINT.md:256:- [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned
+planning-mds/BLUEPRINT.md:355:Ontology prerequisite amendment: read the [planning handoff](architecture/ontology-planning-handoff.md) before planning F0012/F0013/F0015. It records release identities, constraint execution, missingness, dependency links, and deferred F0030/F0062 work. The six affected features have planning-only KG mappings so lookup exposes their context; PRDs, stories, assembly plans and Phase A/B approvals remain pending, and ADR-0045 stays Proposed.
+planning-mds/BLUEPRINT.md:403:- each insured organization has its own account, with at most one designated parent account; ownership between organizations is a separate relationship with any number of percentage owners (F0012);
+planning-mds/BLUEPRINT.md:404:- a policy belongs to exactly one account, normally the first named insured's; other named insureds stay roles on the term, and a program's master and local policies link to the program, which belongs to the parent account (F0012, F0023);
+planning-mds/BLUEPRINT.md:409:ADR-0070 lists its proof gates; until it is accepted, F0012/F0013 Phase B plan against it.
+planning-mds/BLUEPRINT.md:491:Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 with operator tokens `approve-phase-a` and `approve-phase-b`. The [assembly plan](features/F0007-factslot-model/feature-assembly-plan.md) and Proposed [ADR-0077](architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) define the design.
+planning-mds/BLUEPRINT.md:503:Feature run `2026-11-09-b94cfa12` implemented the design: domain modules in `brain_domain`, the `brain-factslots` package, migration 0012 and the commit/read hooks. The run proved all 39 ACs and the five ADR-0077 proof gates against PostgreSQL. The G3 security review fixed three access-control gaps:
+planning-mds/BLUEPRINT.md:534:2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
+planning-mds/BLUEPRINT.md:535:3. For F0012, run the `plan` action as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
+engine/tests/integration/test_factslot_migration.py:1:"""F0007-S0006: migration 0012 is additive and leaves pilot data byte-identical.
+engine/tests/integration/test_factslot_migration.py:117:    _upgrade("0012")
+engine/tests/integration/test_factslot_migration.py:210:        assert world.scalar("SELECT version_num FROM alembic_version") == "0012"
+"""The 26 F0007 design cases (`contract-examples.json`) against the design schemas
+and against the runtime parsers, so the schemas and the code cannot drift apart.
+
+Schema validity alone does not prove resolution, authorization or persistence;
+those are the PostgreSQL suites."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import jsonschema
+import pytest
+from brain_domain.fact_answers import FactAnswerRejected, parse_answer
+from brain_domain.fact_values import ValueType
+from referencing import Registry, Resource
+
+FEATURE = next(
+    p / "planning-mds/features"
+    for p in Path(__file__).resolve().parents
+    if (p / "planning-mds/features").is_dir()
+)
+EXAMPLES = next(FEATURE.glob("**/F0007-*/contract-examples.json"))
+SCHEMAS = FEATURE.parent / "schemas"
+CASES = json.loads(EXAMPLES.read_text())["cases"]
+
+
+def _registry() -> Registry:
+    resources = []
+    for name in ("fact-slot-key-v1", "fact-answer-v1", "fact-slot-resolution-result-v1"):
+        schema = json.loads((SCHEMAS / f"{name}.schema.json").read_text())
+        resource = Resource.from_contents(schema)
+        resources += [(schema["$id"], resource), (f"{name}.schema.json", resource)]
+    return Registry().with_resources(resources)
+
+
+REGISTRY = _registry()
+
+
+@pytest.mark.parametrize("case", CASES, ids=[c["id"] for c in CASES])
+def test_design_case_matches_its_schema(case):
+    schema = json.loads((EXAMPLES.parent / case["schema"]).resolve().read_text())
+    validator = jsonschema.Draft202012Validator(schema, registry=REGISTRY)
+    assert validator.is_valid(case["input"]) == case["valid"]
+
+
+ANSWERS = [c for c in CASES if "fact-answer" in c["schema"]]
+
+
+@pytest.mark.parametrize("case", ANSWERS, ids=[c["id"] for c in ANSWERS])
+def test_runtime_answer_parser_agrees_with_the_schema(case):
+    """A schema-invalid envelope is refused by the runtime parser too. Name cases
+    need a store for evidence, so only their shape is compared here."""
+    value = case["input"].get("value", {})
+    value_type = (
+        ValueType(value["type"])
+        if isinstance(value, dict) and "type" in value
+        else (ValueType.MONEY)
+    )
+    try:
+        parse_answer(case["input"], value_type=value_type, basis_required=False)
+        accepted = True
+    except FactAnswerRejected:
+        accepted = False
+    assert accepted == case["valid"], case["id"]
+
+
+def _seed_pilot(url: str) -> None:
+    engine = create_engine(url.replace("postgresql://", "postgresql+psycopg://"))
+    with Session(engine) as session, session.begin():
+        fixtures.seed_scope(session, TENANT, KB, WORKSPACE)
+    engine.dispose()
+    with psycopg.connect(url) as connection:
+        connection.execute((harness.FIXTURES / "pilot-seed.sql").read_text())
+
+
+def _upgrade(target: str) -> None:
+    command.upgrade(harness.configuration(), target)
+
+
+def _downgrade(target: str) -> None:
+    command.downgrade(harness.configuration(), target)
+
+
+async def test_s0006_ac1_ac6_up_down_up_keeps_pilot_rows_identical(database):
+    _upgrade("0011")
+    _seed_pilot(database)
+    before = _snapshot(database)
+    if os.environ.get("F0007_WRITE_PILOT_SNAPSHOT") == "1":
+        SNAPSHOT.write_bytes(_encode(before))
+    assert _encode(before) == SNAPSHOT.read_bytes(), "pilot-before.json drifted from the seed"
+
+    _upgrade("0012")
+    assert _snapshot(database) == before
+    _downgrade("0011")
+    assert _snapshot(database) == before
+    with psycopg.connect(database) as connection:
+        assert connection.execute("SELECT to_regclass('fact_slot_qualifier') IS NULL").fetchone()[0]
+    _upgrade("head")
+    assert _snapshot(database) == before
+
+
+async def test_s0006_ac1_ac2_legacy_slots_read_back_unchanged_and_stay_legacy(database):
+    _upgrade("0011")
+    _seed_pilot(database)
+    before = _snapshot(database)
+    _upgrade("head")
+    world = harness.FactSlotWorld(database)
+    try:
+        legacy_identity = world.rows(
+            "SELECT id, identity_version, slot_role, predicate_key, cardinality, "
+            "identity_fingerprint, subject_kb_entity_id FROM fact_slot ORDER BY id"
+        )
+        assert legacy_identity == [(s, None, None, None, None, None, None) for s in SLOTS]
+        assert world.scalar("SELECT count(*) FROM fact_slot_qualifier") == 0
+        # GET /facts/{id} reads the pilot values, ranges and evidence unchanged.
+        with Session(world.sync_engine) as session, session.begin():
+            for slot in SLOTS:
+                fixtures.protect(session, ResourceKey(ResourceType.FACT_SLOT, slot), TENANT, KB)
+            reader = fixtures.seed_principal(session, issuer="urn:f0007:test", subject="pilot")
+            fixtures.seed_grant(session, reader.id, TENANT, KB, "TenantMember")
+        body = (await world.get(SLOTS[0], principal=reader)).json()
+        assert body["value"] == {"amount": 2000000.5, "currency": "USD"}
+        assert body["evidenceRefs" if "evidenceRefs" in body else "evidence_refs"] == [
+            "00000000-0000-4000-8000-00000000f782"
+        ]
+        async with world.client(reader) as client:
+            past = await client.get(
+                f"/facts/{SLOTS[0]}",
+                params={"validAsOf": "2026-02-01T00:00:00Z", "knownAsOf": "2026-02-15T00:00:00Z"},
+            )
+        assert past.json()["value"] == {"amount": 1000000, "currency": "USD"}
+        # The internal reader labels a legacy slot instead of inventing a state.
+        now = datetime.now(UTC)
+        async with world.slots() as service:
+            legacy = await service.read_answer(
+                reader, SLOTS[1], valid_at=now, known_at=now, trace_id="pilot"
+            )
+        assert legacy.state == InformationState.PRESENT
+        assert legacy.legacy_value == {"value": "$2,000,000"}
+        # A legacy commit keeps its unwrapped pilot value (no envelope required).
+        with Session(world.sync_engine) as session, session.begin():
+            fixtures.seed_grant(session, world.service.id, TENANT, KB, "ServicePrincipal")
+        legacy_commit = await world.commit(
+            SLOTS[1], {"value": "$3,000,000"}, principal=world.service
+        )
+        assert legacy_commit.status_code == 201, legacy_commit.text
+        # Identity resolution never matches a legacy slot implicitly.
+        with Session(world.sync_engine) as session, session.begin():
+            fixtures.seed_content_artifact(session, TENANT, KB)
+            from brain_persistence.tenancy import associate_entity
+
+            associate_entity(
+                session, ENTITY, TENANT, KB, actor_id=fixtures.SYNTHETIC_OPERATOR, at=now
+            )
+        artifact = world.scalar("SELECT id FROM content_artifact WHERE knowledge_base_id = %s", KB)

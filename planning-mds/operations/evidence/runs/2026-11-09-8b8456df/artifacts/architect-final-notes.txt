@@ -1,0 +1,77 @@
+# Architect — F0007 Plan Readiness
+
+Reviewer: Codex / Architect. Date: 2026-11-09. Scope: archived F0007 planning package and governing raw ADR/schema artifacts. Findings were self-reviewed against the raw sources. No plan or canonical feature evidence was modified.
+
+## High — ARCH-PLAN-01: planned identity CHECK accepts incomplete identity rows
+
+Location: `planning-mds/features/archive/F0007-factslot-model/feature-assembly-plan.md:186` (identity CHECK through line 199); nullable columns at line 172; unique index at line 201.
+
+The proposed SQL combines a legacy branch with a v1 branch using ordinary comparisons on nullable identity fields. SQL CHECK rejects FALSE but accepts UNKNOWN. A v1 SINGLE SLOT with `identity_fingerprint = NULL` and otherwise valid values makes the entire expression UNKNOWN and passes. A row with `identity_version = NULL` but populated v1 role/predicate/fingerprint fields also passes. The deferred trigger described at line 223 only validates member parents and qualifier targets, so it does not make these SLOT rows fail.
+
+This undermines the promised database identity backstop: NULL fingerprints do not conflict in the unique index, and a NULL version also skips the generated subject-KB ownership key. The approved DDL needs explicit non-null requirements for every required v1 field and an expression guaranteed TRUE (for example `CHECK ((legacy_branch OR v1_branch) IS TRUE)` with correctly complete branches). Add direct-SQL negative cases for each nullable required field and for partially populated legacy rows. Owner: Architect and Backend; resolve before build/re-approval.
+
+Evidence: exact migration check expression has the same defect; read-only PostgreSQL SELECT evaluation recorded in `artifacts/architect-postgres-proof.md` returns `t|t` for both cases (`check_returns_unknown`, `postgres_check_accepts`). No shared database rows were written. This is review of an available design artifact; no assembly plan is demanded as a new plan deliverable.
+
+## Contract observations
+
+- Cardinality, versioned predicate keys, qualifier normalization, absence scopes, typed values, security actions, legacy handling, ownership, rollout/downgrade and role handoffs are concretely specified.
+- The no-UI/no-new-route justification is explicit. F0018 RLS/restriction re-derivation, F0008 envelope DB backstop and temporal close, F0017/F0023 display precedence, and F0011 schema publication are explicit downstream ownership decisions; none is falsely reported missing from F0007 scope.
+- The code-review lane owns the additional missing MULTI member/value commit invariant. Architectural support is ADR-0077:73 (member key is canonical member value/entity), ADR-0077:117 (normalized name is its member key), and S0002 AC3 at story line 24. Avoid counting that finding twice across roles.
+
+## Recommendation
+
+Architecture readiness: CONDITIONALLY READY, with one High finding owned in this section. Final action verdict and global validator evidence are owned by the primary reviewer.
+
+# Architect — F0007 Completion Audit
+
+Reviewer: Codex / Architect. Date: 2026-11-09. Scope: approved completion run `2026-11-09-b94cfa12`, commit range `ff0a619..fa8fc1d`, raw F0007 source/schema/ADR/archived plan. Manifest and latest-run pointer were read before selecting the cited architect report. No implementation, plan, KG or canonical completion evidence was changed.
+
+## High — ARCH-FEATURE-01: accepted canonical decimal/money cannot be read back
+
+Location: `engine/packages/brain-domain/src/brain_domain/fact_values.py:143` (input limit), lines 158–167 (output construction and distinct output limit), constants at lines 26–27; `engine/packages/brain-domain/src/brain_domain/fact_answers.py:224` (stored value revalidated). Schema: `planning-mds/schemas/fact-slot-key-v1.schema.json:108` (decimal input maxLength 64) and line 178 (money amount maxLength 64).
+
+`canonical_decimal` accepts at most 64 input characters but emits up to 128 canonical characters. A short, schema-valid `1E+64` is accepted by `parse_answer` and becomes a 65-character amount/value. `stored_answer` passes that canonical value back through the input validator, which raises `ValueRejected: DECIMAL_INVALID`. This reproduces for both money and decimal, without database writes. The stored carrier also violates the shared schema's 64-character limit. Identity normalization and answer reload are not closed under the declared canonical encoding.
+
+Impact: a valid exponent-form answer can commit successfully but cannot be loaded through the typed internal reader; replaying its canonical form is rejected. The current proof gates cover ordinary large amounts, not this valid exponent boundary. Remediation: align accepted input, canonical output and stored-carrier schema limits (or use a separate trusted canonical parser) and verify canonicalization idempotence plus commit/reload at positive/negative exponent limits. Owner: Backend with Architect schema reconciliation and QE regression evidence.
+
+Evidence: `artifacts/architect-probes.json` contains both safe reproductions: input `1E+64`, canonical length 65, reload `ValueRejected: DECIMAL_INVALID`. The probe script is `/tmp/f0007_architecture_probes.py`. The security lane owns the separate unbounded exponent allocation defect; do not merge that different failure mode into this one.
+
+## High — ARCH-FEATURE-02: database identity guard admits NULL identities
+
+Location: `engine/migrations/versions/0012_f0007_factslot_identity.py:75` (`ck_fact_slot_identity`, through line 88); partial unique index at line 90; generated subject-KB key at line 69; deferred integrity function at line 154 onward.
+
+Nullable v1 fields are compared without explicit non-null guards. SQL CHECK accepts UNKNOWN, so a v1 SINGLE SLOT with a NULL fingerprint satisfies the check, bypassing uniqueness on canonical identity. A NULL `identity_version` plus otherwise populated v1 fields is accepted too, outside the v1 index and the generated subject-KB FK. The integrity trigger only checks MEMBER parent shape or qualifier ownership; it does not reject incomplete SLOT rows. The identity immutability trigger makes any admitted malformed identity permanent rather than repairing it.
+
+Proof: evaluate the exact migration CHECK in PostgreSQL using a read-only candidate CTE. For both NULL-fingerprint and NULL-version cases, `check_result IS NULL` and `check_result IS NOT FALSE` return true. The guard is not guaranteed TRUE. No shared database insert or update was attempted. See `artifacts/architect-postgres-proof.md` and the query text in `artifacts/architect-probes.json` (initial sandbox-denied attempt is preserved; the successful direct approved Docker invocation is recorded separately).
+
+Remediation: a follow-up migration should make the complete legacy-or-v1 expression require TRUE, explicitly constrain every required v1 field, and audit existing malformed rows before adding the tightened constraint. Add service-role direct-SQL negatives for each NULL mandatory field, NULL version with populated fields, and duplicate NULL fingerprints. Owner: Backend/Architect; QE verifies real PostgreSQL behavior. The same defect exists in the approved plan SQL and is also recorded as ARCH-PLAN-01.
+
+## Alignment and limitations
+
+- Source follows the intended Domain → application ports/services → persistence → API composition boundaries. `brain-temporal` uses a protocol rather than a reverse dependency on `brain-factslots`.
+- MULTI children preserve per-member temporal exclusion without changing the F0008-owned version table. Legacy-slot bypass and downstream RLS, temporal close, schema-publication and precedence ownership are explicit.
+- New capabilities/entities/schema/migration paths are represented in the authored F0007 bindings. Global KG validators are owned by the primary reviewer; raw source overrides any stale prose notes.
+- Prior `architect-implementation-review.md` says PASS and claims typed-value and ownership proof gates. The concrete counterexamples above contradict a full completion verdict despite those summaries.
+- The code-review lane owns the separate member-key/value mismatch; architecture supports it under ADR-0077:73 and :117. It is not counted again here.
+- Fresh verification here is pure domain execution and PostgreSQL expression evaluation; this lane did not rerun the full migration/application test suite or alter live schema/data.
+
+## Recommendation
+
+Two High findings in this Architect section. Do not declare TRULY DONE before repair and regression evidence. Overall severity verdict is the primary reviewer's responsibility and includes the other role lanes.
+
+# Read-only PostgreSQL identity CHECK proof
+
+Date: 2026-11-09. Product: nebula-insurance-brain. Container: existing Compose `postgres` service, database `brain`, psql user `brain`.
+
+The exact `ck_fact_slot_identity` expression was extracted from migration 0012. A CTE supplied otherwise valid SINGLE SLOT fields. No persistent table was read or written and no migration was applied.
+
+Query output columns are `check_result IS NULL AS check_returns_unknown` and `check_result IS NOT FALSE AS postgres_check_accepts`.
+
+| Candidate | psql exit | Raw output |
+|---|---:|---|
+| identity_version=1; fingerprint=NULL; otherwise valid v1 SLOT | 0 | `t\|t` |
+| identity_version=NULL; all v1 fields including fingerprint populated | 0 | `t\|t` |
+
+Full exact queries are in `architect-probes.json`. Successful raw command/output records, including both exit codes, are in `architect-postgres-raw.json`. The first scripted invocation could not access the Docker socket inside the sandbox. Both queries were then executed successfully via direct `docker compose exec -T postgres psql -U brain -d brain -X -A -t -v ON_ERROR_STOP=1 -c <query>` using the approved Docker Compose escalation. Docker Compose emitted warnings for unset Authentik environment variable names; no credential values were read or printed.
+
+PostgreSQL CHECK rejects FALSE and accepts UNKNOWN. Requiring the entire expression `IS TRUE` rejects these incomplete identities while retaining correctly formed legacy/v1 branches.

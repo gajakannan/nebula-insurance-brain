@@ -1,0 +1,30 @@
+All checks passed!
+189 files already formatted
+Success: no issues found in 72 source files
+46:    - engine/tests/integration/test_factslot_authorized_reads.py
+64:    - engine/migrations/versions/0013_f0007_identity_guard.py
+66:    - engine/tests/integration/test_factslot_identity_guard_migration.py
++            # different canonical value must resolve its own member slot.
++            if (
++                slot.slot_role == SlotRole.MEMBER
++                and member_key(answer.value, contract) != slot.member_key
++            ):
++                raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
+         return answer.to_json()
+ 
+     async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
+@@ -134,6 +141,14 @@ class FactAnswerReader:
+         if slot is None or slot.legacy:
+             return ()
+         stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
++        return await self.scope_keys_for_value(slot_id, stored)
++
++    async def scope_keys_for_value(self, slot_id: UUID, stored: object) -> tuple[ResourceKey, ...]:
++        """Derive keys from the exact privately loaded version, without selecting
++        the answer again. Legacy JSON keeps its existing unwrapped semantics."""
++        slot = await self._store.slot(slot_id)
++        if slot is None or slot.legacy:
++            return ()
+         scope = stored.get("scope") if isinstance(stored, Mapping) else None
+         artifact = _uuid(scope.get("content_artifact_id")) if isinstance(scope, Mapping) else None
+         return (ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),) if artifact else ()

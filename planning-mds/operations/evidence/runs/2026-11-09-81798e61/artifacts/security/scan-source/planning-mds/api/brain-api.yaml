@@ -1,0 +1,677 @@
+openapi: 3.1.0
+info:
+  title: Nebula Insurance Brain API
+  description: 'Semantic API for Nebula Insurance Brain. This revision covers F0001: the health endpoint and the
+    proof-scope reads, the native review decision endpoint, and the canonical commit endpoint. Every protected path
+    verifies credentials before any storage read, hydrates resource attributes server-side, evaluates policy through
+    the Casbin adapter, and audits the decision. Denials are reported as 404 so resource existence is never disclosed
+    (master blueprint sections 66, 118.2). F0002 design: all protected operations use current typed scope and restriction
+    checks with durable decision audit. Internal AuthX context is never a public request payload; role grants remain
+    unchanged. F0002 runtime is approved in its archived feature evidence. F0004 proposes dual-version verified
+    content reads and integrity/unavailable responses; those refinements received Phase B design approval on 2026-10-16;
+    implementation proof remains required.'
+  version: 0.4.0
+  contact:
+    name: Nebula Insurance Brain
+servers:
+- url: http://localhost:8080
+  description: Local development (docker-compose)
+security:
+- bearerAuth: []
+tags:
+- name: Health
+  description: Liveness and build identity
+- name: Content
+  description: Parse-once content artifacts (F0001-S0003)
+- name: Reviews
+  description: Review items and the native review round trip (F0001-S0004)
+- name: Facts
+  description: FactSlots and bitemporal canonical fact versions (F0001-S0005)
+paths:
+  /health:
+    get:
+      summary: Liveness and build identity
+      description: No credentials required. Performs no I/O.
+      operationId: getHealth
+      tags:
+      - Health
+      security: []
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /content/{artifactId}:
+    get:
+      summary: Get a content artifact manifest
+      operationId: getContentArtifact
+      tags:
+      - Content
+      parameters:
+      - $ref: '#/components/parameters/ArtifactId'
+      responses:
+        '200':
+          description: Exact retained manifest bytes, dispatched by declared artifact contract version (legacy v1
+            or proposed v2). No synthesized date or provenance fields.
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/content-artifact-manifest-read.schema.json
+        '400':
+          description: Malformed input.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid verified credentials.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Absent, denied, not-ready or undeclared file; no protected existence or alternate lookup
+            is disclosed.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: 'Authorized read only: ARTIFACT_INTEGRITY (corrupt, inconsistent or quarantined artifact)
+            or ARTIFACT_VERSION_UNSUPPORTED. A definitive integrity failure fails this read, and an operator-run integrity sweep
+            quarantines the artifact; transient storage errors are 503, never 409. No reparse or alternate namespace fallback.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '503':
+          description: Authorization/audit unavailable (existing authorization code), or CONTENT_UNAVAILABLE for
+            transient content storage failure. No payload is released.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
+        constraints, bounded delegation and durable audit; no client-supplied trusted context.'
+      x-f0004-status: Phase B design approved 2026-10-16; runtime implementation and proof pending.
+  /reviews/{reviewItemId}:
+    get:
+      summary: Get a review item with its evidence locator and decision
+      operationId: getReviewItem
+      tags:
+      - Reviews
+      parameters:
+      - name: reviewItemId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Review item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Reserved by the shared error catalog. These resource operations return 404 for authorization
+            denial to conceal existence.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/AuthorizationUnavailable'
+      x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
+        constraints, bounded delegation and durable audit; no client-supplied trusted context.'
+  /reviews/batches/{reviewBatchId}/decisions:
+    post:
+      summary: Submit the reviewer's decisions for a review batch
+      description: Submitted by the Nebula Review Panel on the authenticated reviewer's session; the reviewer is
+        the session principal and is never read from the payload (ADR-0057). The batch is applied in one transaction
+        with one audit event per decision. Resubmission of an already-decided batch is a no-op; a decision against
+        a superseded assertion version is recorded as stale and not applied; a field whose evidence could not be
+        anchored is recorded as BLOCKED with reason code EVIDENCE_UNRESOLVED and produces no assertion (ADR-0058,
+        F0001-S0004). Canonical commit is a separate authorization and never happens here. F0006 approved design retains v2 kind, mood, interpretation basis and source restrictions on additive corrections; the legacy request cannot strip them or perform unsupported semantic edits (422). No new screen or request member is introduced.
+      operationId: submitReviewDecisions
+      tags:
+      - Reviews
+      parameters:
+      - name: reviewBatchId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewDecisionBatch'
+      responses:
+        '200':
+          description: Batch applied, duplicate, or partially stale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDecisionReceipt'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Reserved by the shared error catalog. These resource operations return 404 for authorization
+            denial to conceal existence.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/Unprocessable'
+        '503':
+          $ref: '#/components/responses/AuthorizationUnavailable'
+      x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
+        constraints, bounded delegation and durable audit; no client-supplied trusted context.'
+  /facts/{factSlotId}:
+    get:
+      summary: Resolve the canonical fact version at a valid-time and recorded-time coordinate
+      operationId: getFact
+      tags:
+      - Facts
+      parameters:
+      - name: factSlotId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: validAsOf
+        in: query
+        required: false
+        description: Valid-time coordinate; defaults to now
+        schema:
+          type: string
+          format: date-time
+      - name: knownAsOf
+        in: query
+        required: false
+        description: Recorded-time coordinate; defaults to now
+        schema:
+          type: string
+          format: date-time
+      responses:
+        '200':
+          description: The single version whose valid and recorded ranges contain both coordinates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FactVersion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Reserved by the shared error catalog. These resource operations return 404 for authorization
+            denial to conceal existence.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/AuthorizationUnavailable'
+      x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
+        constraints, bounded delegation and durable audit; no client-supplied trusted context.'
+  /facts/{factSlotId}/commits:
+    post:
+      summary: Propose a canonical commit for a FactSlot
+      description: >-
+        Executes master blueprint section 109.2 in one transaction (F0001-S0005).
+        F0006 approved design adds source eligibility checks before any canonical effect:
+        attributable v2 evidence and review/correction lineage retain kind, mood and verified
+        evidence-origin restrictions. Current source READ and fact-slot COMMIT decisions share
+        one unit of work. No new grants or required request fields; legacy pilot compatibility
+        remains as documented in ADR-0075. Phase B design approved by operator 2026-11-01; runtime not claimed.
+        F0007 Phase B design (ADR-0077; approved by operator 2026-11-09; runtime not claimed): for identity-v1 slots the value must be a
+        fact-answer/v1 envelope, validated and canonicalized before any effect; absence-scope artifacts and
+        name-evidence sources join the same-UoW source READ checks. A PRESENT member answer must retain its
+        immutable canonical member key. Decimal input and canonical output are bounded to 64 total characters;
+        oversized exponent expansions are rejected before allocation. Legacy pilot slots are unchanged.
+      operationId: commitFact
+      tags:
+      - Facts
+      parameters:
+      - name: factSlotId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../schemas/canonical-commit-request.schema.json
+      responses:
+        '201':
+          description: Committed
+          content:
+            application/json:
+              schema:
+                $ref: ../schemas/canonical-commit-response.schema.json
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthenticated'
+        '403':
+          description: Reserved by the shared error catalog. These resource operations return 404 for authorization
+            denial to conceal existence.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          description: Authorized request references an ineligible or inconsistent assertion source;
+            code ASSERTION_INELIGIBLE. No canonical mutation and no protected source excerpt. F0007 design
+            (identity-v1 slots only) adds the lowercase answer-rejection codes listed in ADR-0077 D5 (for example
+            state_value_mismatch, absence_scope_required, money_float_rejected, name_evidence_required,
+            member_value_mismatch, decimal_invalid) with no
+            detail text.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '503':
+          $ref: '#/components/responses/AuthorizationUnavailable'
+      x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
+        constraints, bounded delegation and durable audit; no client-supplied trusted context.'
+  /content/{artifactId}/files/{path}:
+    get:
+      summary: Read one declared artifact file through current authorization
+      description: Documents the existing FastAPI catch-all file route. Path is the manifest-relative path, may
+        contain slash-separated components, and must name an exact manifest entry. No public or signed URL is issued.
+        Apply the same current read restrictions as the manifest, before opening bytes.
+      operationId: getContentArtifactFile
+      tags:
+      - Content
+      parameters:
+      - $ref: '#/components/parameters/ArtifactId'
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+        description: Exact manifest-relative path; reject traversal and undeclared paths.
+      responses:
+        '200':
+          description: Declared file bytes; Content-Type reflects the manifest file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Malformed input.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Missing or invalid verified credentials.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Absent, denied, not-ready or undeclared file; no protected existence or alternate lookup
+            is disclosed.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: 'Authorized read only: ARTIFACT_INTEGRITY (corrupt, inconsistent or quarantined artifact)
+            or ARTIFACT_VERSION_UNSUPPORTED. A definitive integrity failure fails this read, and an operator-run integrity sweep
+            quarantines the artifact; transient storage errors are 503, never 409. No reparse or alternate namespace fallback.'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '503':
+          description: Authorization/audit unavailable (existing authorization code), or CONTENT_UNAVAILABLE for
+            transient content storage failure. No payload is released.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+      x-authorization-contract: content_artifact:read plus all F0002 current resource restrictions; commit read-decision
+        audit before releasing bytes.
+      x-f0004-status: Phase B design approved 2026-10-16; runtime implementation and proof pending.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: authentik OIDC access token; issuer and audience verified before any storage read
+  parameters:
+    ArtifactId:
+      name: artifactId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthenticated:
+      description: Credential verification failed; reason code recorded in the audit event only
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Forbidden:
+      description: Reserved for webhook mapping failures; user denials are reported as 404
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Absent or not authorized (indistinguishable)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: Stale expected version or concurrent commit
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unprocessable:
+      description: Event cannot be mapped to a review item or reviewer principal
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    AuthorizationUnavailable:
+      description: Current authority or durable audit is unavailable; no protected operation succeeds. Retry only
+        after resolving availability; do not automatically replay writes.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+  schemas:
+    ProblemDetails:
+      type: object
+      description: RFC 9457 problem details with a stable machine code and a traceId extension member. Mirrors planning-mds/schemas/problem-details.schema.json;
+        the framework contract validator requires the definition inline. Denials never carry a detail that discloses
+        resource existence.
+      additionalProperties: false
+      required:
+      - type
+      - title
+      - status
+      - code
+      - traceId
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        code:
+          type: string
+          pattern: ^[a-z][a-z0-9_]*$
+        traceId:
+          type: string
+          minLength: 1
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - status
+      - git_sha
+      - versions
+      properties:
+        status:
+          type: string
+          enum:
+          - ok
+        git_sha:
+          type: string
+        versions:
+          type: object
+          additionalProperties:
+            type: string
+    ReviewItem:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - type
+      - status
+      - assertion_id
+      - assertion_version
+      - tenant_id
+      - knowledge_base_id
+      - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - LOW_CONFIDENCE_ASSERTION
+          - EXTRACTION_CORRECTION
+          - PROVENANCE_CORRECTION
+          - ENTITY_CORRECTION
+          - RELATIONSHIP_CORRECTION
+        status:
+          type: string
+          enum:
+          - open
+          - in_review
+          - decided
+          - stale
+          - blocked
+        assertion_id:
+          type: string
+          format: uuid
+        assertion_version:
+          type: integer
+          minimum: 1
+        tenant_id:
+          type: string
+          format: uuid
+        knowledge_base_id:
+          type: string
+          format: uuid
+        review_batch_id:
+          type: string
+          format: uuid
+        evidence:
+          $ref: '#/components/schemas/EvidenceLocator'
+        decision:
+          $ref: ../schemas/review-decision.schema.json
+        created_at:
+          type: string
+          format: date-time
+    EvidenceLocator:
+      type: object
+      description: Where an assertion is grounded in the immutable artifact. Selectors follow the W3C Web Annotation
+        Data Model, with nebula:TableCellSelector as a declared local extension for spreadsheet cells; character
+        offsets are Unicode code points (ADR-0058).
+      additionalProperties: false
+      required:
+      - source
+      - precision
+      properties:
+        source:
+          type: string
+          description: Immutable Nebula artifact identity
+        part:
+          type: string
+          description: Package part path, e.g. word/document.xml
+        precision:
+          type: string
+          enum:
+          - exact-span
+          - table-cell
+          - block
+          - page
+          - document
+          - unresolved
+        unresolved_reason:
+          type: string
+        selector:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            required:
+            - type
+            properties:
+              type:
+                type: string
+    ReviewDecisionBatch:
+      type: object
+      additionalProperties: false
+      required:
+      - decisions
+      properties:
+        decisions:
+          type: array
+          minItems: 1
+          items:
+            $ref: ../schemas/review-decision.schema.json
+    ReviewDecisionReceipt:
+      type: object
+      additionalProperties: false
+      required:
+      - applied
+      - duplicate
+      - stale
+      - blocked
+      properties:
+        decision_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+        applied:
+          type: integer
+          minimum: 0
+        duplicate:
+          type: boolean
+        stale:
+          type: integer
+          minimum: 0
+        blocked:
+          type: integer
+          minimum: 0
+    FactVersion:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - fact_slot_id
+      - value
+      - valid
+      - recorded
+      - canonical_accepted_at
+      - commit_id
+      properties:
+        id:
+          type: string
+          format: uuid
+        fact_slot_id:
+          type: string
+          format: uuid
+        value:
+          type: object
+        valid:
+          $ref: '#/components/schemas/TimeRange'
+        recorded:
+          $ref: '#/components/schemas/TimeRange'
+        change_reason:
+          type:
+          - string
+          - 'null'
+          enum:
+          - superseded
+          - corrected
+          - retracted
+          - expired
+          - invalidated
+          - merged
+          - split
+          - null
+        evidence_refs:
+          type: array
+          items:
+            type: string
+            format: uuid
+        commit_id:
+          type: string
+          format: uuid
+        canonical_accepted_at:
+          type: string
+          format: date-time
+    TimeRange:
+      type: object
+      additionalProperties: false
+      required:
+      - start
+      - end
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type:
+          - string
+          - 'null'
+          format: date-time
+x-authx-kernel-contract:
+  schema: ../schemas/authx-kernel.schema.json
+  authority: server-derived-only
+  feature: F0002
+  status: design-pending-implementation
+  policy: existing pilot roles; membership AND action AND actual resource restrictions AND delegation ceiling
+  audit-failure: 503; no protected content or successful mutation
+  denial: 404 for inaccessible resources; 401 for invalid credentials

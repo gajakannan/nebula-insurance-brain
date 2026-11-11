@@ -1,0 +1,25 @@
+id: capability:factslot-identity-resolution
+label: FactSlot identity resolution
+notes: Implemented (F0007 run 2026-11-09-b94cfa12) deterministic resolve-or-create of KB-owned FactSlots from subject, opaque versioned predicate key and
+  normalized typed qualifiers; MULTI members are child slots and RELATIONSHIP slots include the object. Authorized from
+  source artifacts with derived restrictions; no grants, routes or producer activation.
+source_docs:
+- F0007/feature-assembly-plan.md
+- F0007/PRD.md
+- F0007/worked-examples.md
+rationale:
+- adr: adr:0077
+  section: Decision
+  summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with
+    scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending.'
+- adr: adr:0006
+  section: Decision
+  summary: FactSlot is first-class canonical semantic identity.
+related_nodes:
+- adr:0077
+- adr:0006
+- entity:fact-slot
+- entity:fact-slot-qualifier
+- schema:fact-slot-key-v1
+- schema:fact-slot-resolution-result-v1
+- capability:authorization-enforcement

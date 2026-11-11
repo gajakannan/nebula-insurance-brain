@@ -1,0 +1,350 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/fact-slot-key-v1.schema.json",
+  "title": "FactSlotKeyV1",
+  "description": "F0007 internal slot-resolution request (ADR-0077). Not an HTTP route. Tenant comes from the authorized scope, never from this payload. Qualifier names are declared by the predicate contract; ordering of the input object is irrelevant to identity.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "knowledge_base_id",
+    "subject_entity_id",
+    "predicate_key",
+    "predicate_release_ref",
+    "qualifiers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "knowledge_base_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "subject_entity_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "predicate_key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$",
+      "description": "Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference."
+    },
+    "predicate_release_ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$",
+      "description": "Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity."
+    },
+    "qualifiers": {
+      "type": "object",
+      "maxProperties": 16,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]{0,63}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/qualifier_value"
+      }
+    },
+    "object_entity_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Required for RELATIONSHIP predicates, forbidden otherwise."
+    },
+    "member": {
+      "$ref": "#/$defs/typed_value",
+      "description": "Required to address a member of a MULTI slot; forbidden otherwise."
+    }
+  },
+  "$defs": {
+    "text_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "text"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        }
+      }
+    },
+    "code_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "code"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+        }
+      }
+    },
+    "decimal_value": {
+      "description": "Input and canonical value have at most 64 total characters including sign/point. Server semantic validation rejects exponent forms whose canonical expansion exceeds that bound before allocating it; every emitted canonical form is a valid reload input.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "decimal"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "maxLength": 64
+        }
+      }
+    },
+    "date_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "date"
+        },
+        "value": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "boolean_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "const": "boolean"
+        },
+        "value": {
+          "type": "boolean"
+        }
+      }
+    },
+    "entity_ref_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "entity_id"
+      ],
+      "properties": {
+        "type": {
+          "const": "entity_ref"
+        },
+        "entity_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "money_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "amount",
+        "currency"
+      ],
+      "description": "ADR-0039 D4. Amount is an exact decimal string; a JSON number is rejected (MONEY_FLOAT_REJECTED). Input and canonical amount are bounded to 64 total characters including sign/point; oversized canonical expansions reject DECIMAL_INVALID before allocation. Original currency only in F0007: any conversion marker is rejected (CONVERTED_MONEY_UNSUPPORTED) at the domain validator, so the schema does not admit one.",
+      "properties": {
+        "type": {
+          "const": "money"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^[+-]?(?:[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+)(?:[eE][+-]?[0-9]+)?$",
+          "maxLength": 64
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "basis": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+        }
+      }
+    },
+    "identifier_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "scheme",
+        "identifier_type",
+        "value"
+      ],
+      "description": "ADR-0039 D5 scoped identifier. normalized_value is server-computed from the identifier-type normalization table; a supplied value that differs is rejected.",
+      "properties": {
+        "type": {
+          "const": "identifier"
+        },
+        "scheme": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,31}(?::[A-Za-z0-9._-]{1,128})?$"
+        },
+        "identifier_type": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "normalized_value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "effective": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "from"
+          ],
+          "properties": {
+            "from": {
+              "type": "string",
+              "format": "date"
+            },
+            "to": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        }
+      }
+    },
+    "name_value": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "verbatim",
+        "evidence"
+      ],
+      "description": "ADR-0066 name value. normalized is server-computed (NFC, casefold, whitespace collapse); evidence must name an admitted F0006 v2 assertion in the slot's tenant/KB.",
+      "properties": {
+        "type": {
+          "const": "name"
+        },
+        "verbatim": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "normalized": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "name_kind": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "assertion_id",
+            "document_version_id"
+          ],
+          "properties": {
+            "assertion_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "document_version_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      }
+    },
+    "typed_value": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/text_value"
+        },
+        {
+          "$ref": "#/$defs/code_value"
+        },
+        {
+          "$ref": "#/$defs/decimal_value"
+        },
+        {
+          "$ref": "#/$defs/date_value"
+        },
+        {
+          "$ref": "#/$defs/boolean_value"
+        },
+        {
+          "$ref": "#/$defs/entity_ref_value"
+        },
+        {
+          "$ref": "#/$defs/money_value"
+        },
+        {
+          "$ref": "#/$defs/identifier_value"
+        },
+        {
+          "$ref": "#/$defs/name_value"
+        }
+      ]
+    },
+    "qualifier_value": {
+      "description": "Qualifiers use the scalar typed values only (no name values). Explicit null is rejected with QUALIFIER_NULL_REJECTED; an omitted qualifier contributes nothing to identity.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/text_value"
+        },
+        {
+          "$ref": "#/$defs/code_value"
+        },
+        {
+          "$ref": "#/$defs/decimal_value"
+        },
+        {
+          "$ref": "#/$defs/date_value"
+        },
+        {
+          "$ref": "#/$defs/boolean_value"
+        },
+        {
+          "$ref": "#/$defs/entity_ref_value"
+        },
+        {
+          "$ref": "#/$defs/money_value"
+        },
+        {
+          "$ref": "#/$defs/identifier_value"
+        }
+      ]
+    }
+  }
+}

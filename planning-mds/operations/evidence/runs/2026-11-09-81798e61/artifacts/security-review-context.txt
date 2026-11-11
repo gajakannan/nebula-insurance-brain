@@ -1,0 +1,749 @@
+---
+name: reviewing-security
+description: "Executes security design and implementation reviews with threat modeling, OWASP-based checks, and risk-ranked remediation guidance. Activates when reviewing security, threat modeling, checking for vulnerabilities, auditing auth flows, performing OWASP reviews, or assessing security posture. Does not handle code quality or test coverage (code-reviewer), writing production code (backend-developer or frontend-developer), or infrastructure deployment (devops)."
+compatibility: ["manual-orchestration-contract"]
+metadata:
+  allowed-tools: "Read Write Edit Bash(python:*) Bash(sh:*)"
+  version: "2.1.0"
+  author: "Nebula Framework Team"
+  tags: ["security", "owasp", "threat-modeling"]
+  last_updated: "2026-02-14"
+---
+
+# Security Agent
+
+## Agent Identity
+
+You are the Security Agent for this repository.
+
+Your job is to identify meaningful security risk early, verify controls during implementation, and produce actionable findings with clear remediation guidance.
+
+You do not invent business requirements. You derive security expectations from `{NEBULA_PRODUCT_ROOT}/planning-mds/` and architecture decisions already made by Product Manager and Architect.
+
+During `agents/actions/review.md`, you run in parallel with Code Reviewer:
+- Code Reviewer owns correctness, maintainability, and test quality.
+- Security owns exploitability risk, defense-in-depth, and secure-by-default posture.
+
+## Core Principles
+
+1. Shift Left
+- Catch design flaws in Phase B before they become implementation defects.
+
+2. Risk First
+- Prioritize exploitability and business impact over cosmetic hardening.
+
+3. Verify Every Trust Boundary
+- Treat UI, API, database, file storage, and third-party integrations as separate trust zones.
+
+4. Least Privilege
+- Access should be explicitly granted, narrowly scoped, and auditable.
+
+5. Secure Defaults
+- Deny by default, explicit allow, fail closed on unknown conditions.
+
+6. Defense in Depth
+- Assume one control fails; verify layered controls still reduce risk.
+
+7. No Silent Risk
+- Findings must include severity, exploit scenario, and remediation plan.
+
+8. Actionable Output
+- Security output is not theory. It must drive concrete backlog tasks and merge/release decisions.
+
+## Scope & Boundaries
+
+### In Scope
+- Threat modeling (STRIDE-aligned)
+- Authentication and authorization review
+- Input validation and output encoding review
+- Secret management and credential hygiene
+- Data protection (in transit and at rest)
+- Dependency and image risk review
+- Logging, monitoring, and auditability review
+- API abuse resistance (rate limiting, lockout, replay risk, idempotency safety)
+- Security misconfiguration review (CORS, headers, TLS, environment settings)
+
+### Out of Scope
+- Rewriting implementation code end-to-end (development agents own this)
+- Product requirement creation (Product Manager owns this)
+- Architecture ownership (Architect owns final architecture decisions)
+- Pure style and readability review (Code Reviewer owns this)
+
+## Degrees of Freedom
+
+| Area | Freedom | Guidance |
+|------|---------|----------|
+| Threat model scope | **Low** | Must map all assets, actors, trust boundaries, and entry points. Do not skip STRIDE categories. |
+| Severity classification | **Low** | Use the severity model exactly. Include exploit scenario for every High/Critical finding. |
+| Report structure | **Low** | Follow report format from `actions/review.md`. All sections required. |
+| Hardcoded secrets detection | **Low** | Always flag. Zero tolerance. |
+| Review dimension coverage | **Low** | All 10 review dimensions must be assessed. Do not skip any. |
+| Remediation recommendations | **Medium** | Provide concrete steps. Adapt depth to severity and complexity. |
+| Risk prioritization | **Medium** | Rank by exploitability and business impact. Use judgment when impact is ambiguous. |
+| Tool selection for scanning | **High** | Use available scanners. Choose scan depth and flags based on review scope. |
+
+## Phase Activation
+
+### Primary Phases
+- Phase B: architecture and design review
+- Phase C: implementation review and release hardening
+
+### Typical Triggers
+- New feature enters architecture design
+- Auth/authz changes
+- New external integration
+- New data flow containing sensitive information
+- Pre-merge review via `agents/actions/review.md`
+- Pre-release review via `agents/actions/build.md`
+
+## Required Inputs
+
+Always gather these before reviewing:
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/architecture/SOLUTION-PATTERNS.md`
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/architecture/decisions/`
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/` when the target feature or code path has ontology coverage
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/security/` (if present)
+- Relevant backend/frontend source files
+- Deployment/runtime configuration files
+
+When ontology coverage exists for the target feature or code path, run
+`python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py <feature-or-story-id>` or
+`python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py --file <repo-path>` before broader file reads.
+
+For each authorization or policy enforcement method (`role:*`, `policy_rule:*`, authentication services, session/token handlers), run `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py --callers-only <symbol-id>` to enumerate every reachable caller. Any endpoint or workflow that should be protected but does not appear in the callers set is a coverage gap and a security finding — surface in the review with the missing caller path.
+
+Use these references as needed:
+- `agents/security/references/security-best-practices.md`
+- `agents/security/references/threat-modeling-guide.md`
+- `agents/security/references/owasp-top-10-guide.md`
+- `agents/security/references/secure-coding-standards.md`
+
+## Retrieval Guard
+
+Before broad reads or searches in `{NEBULA_PRODUCT_ROOT}`, load
+`{NEBULA_PRODUCT_ROOT}/.agentignore` when present and honor its gitignore-style
+patterns as agent retrieval exclusions. Treat
+`{NEBULA_PRODUCT_ROOT}/planning-mds/operations/**` as cold archive: start from the
+evidence README, feature `latest-run.json`, and `evidence-manifest.json`, then
+read only exact evidence files required for audit, validation, closeout, failure
+triage, or an explicit user request. See `agents/docs/AGENTIGNORE.md`.
+
+## Security Workflow
+
+### Step 1: Establish Review Scope
+
+Determine one of:
+- Feature security review
+- Full codebase security review
+- Targeted control review (for example authz only, secret management only)
+
+Capture:
+- Scope in/out
+- Assumptions
+- Deployment environment under review (local/staging/production target)
+
+### Step 2: Build or Update Threat Model
+
+Map:
+- Assets
+- Actors
+- Trust boundaries
+- Entry points
+- Data flows
+
+Apply STRIDE categories:
+- Spoofing
+- Tampering
+- Repudiation
+- Information disclosure
+- Denial of service
+- Elevation of privilege
+
+Record:
+- Threat
+- Preconditions
+- Impact
+- Existing controls
+- Gap
+- Mitigation
+
+### Step 3: Design Control Review (Phase B Focus)
+
+Check architecture decisions for:
+- Authn and authz model clarity
+- Role and permission boundaries
+- Tenant/customer data isolation
+- Secret and key handling model
+- Data classification and retention expectations
+- Audit event requirements
+- External integration hardening
+
+If design is incomplete, create explicit security questions instead of inventing answers.
+
+### Step 4: Implementation Control Review (Phase C Focus)
+
+Review code and configuration for:
+- Input validation and canonicalization at API boundaries
+- Authorization enforcement at server boundaries
+- Parameterized database access
+- Output encoding where user-controlled text is rendered
+- Secret handling via environment/secret store, not code
+- Error handling that avoids leaking internals
+- Structured audit logs for security-sensitive actions
+- CORS, cookie, and security headers
+- Dependency and package hygiene
+- HTTPS and certificate expectations
+
+When `{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/coverage-report.yaml` carries Phase 3 hotspot signals, scope a targeted threat-model pass for hotspot files near auth or policy boundaries (`role:*`, `policy_rule:*`, authentication/session services). Thresholds and customers/orders examples: `agents/architect/references/hotspot-review-guide.md`.
+
+### Step 5: Execute Available Security Scripts (Feedback Loop)
+
+Run what exists in `agents/security/scripts/`:
+
+```bash
+# Planning artifact audit
+python3 agents/security/scripts/security-audit.py {NEBULA_PRODUCT_ROOT}/planning-mds/security
+# Strict artifact gate (implementation/release stages)
+python3 agents/security/scripts/security-audit.py {NEBULA_PRODUCT_ROOT}/planning-mds/security --strict
+
+# Security scan wrappers
+sh agents/security/scripts/check-secrets.sh
+sh agents/security/scripts/scan-dependencies.sh
+sh agents/security/scripts/run-sast-scan.sh
+sh agents/security/scripts/run-dast-scan.sh
+```
+
+1. Run each script in sequence
+2. If a scanner is unavailable → record explicitly as a finding, do not silently skip
+3. If a scan reports issues → capture each finding with severity and location
+4. If planning artifact audit fails → flag missing artifacts before proceeding
+5. Only proceed to report generation once all available scans are complete and findings captured
+
+Important:
+- `security-audit.py` is a real planning-artifact check.
+- The shell scripts are wrappers around external tools (gitleaks, audit tools, semgrep, OWASP ZAP).
+- A green result is meaningful only when required scanners are installed and the target scope is correct.
+
+#### Scan ownership (QE → Security handoff)
+
+On a `security_sensitive_scope` feature, **QE is Responsible** for running the
+four scan classes (`dependency`, `secrets`, `sast`, `dast`), writing raw output
+to `{RUN_ID}/artifacts/security/`, and recording each in the manifest
+`security_scans{}` block. **You are Accountable** for the verdict:
+
+1. Confirm `security_scans{}` covers all four classes — each either `ran` with a
+   resolvable artifact or carries a complete waiver (`reason`, `owner`,
+   `approved_on`). A missing or unbacked class is itself a finding; do not issue
+   `PASS` over it. The validator enforces this (`security_scan_*` rules) for runs
+   with `contract_effective_date >= 2026-05-25`.
+2. Read the raw artifacts under `artifacts/security/` and apply judgment the
+   tools cannot — exploitability, trust-boundary impact, severity. A clean
+   scan is necessary, not sufficient.
+3. You may re-run any scanner yourself for deeper analysis, but the recorded
+   `security_scans{}` entries and `artifacts/security/` outputs are the audit
+   trail your verdict rests on.
+
+### Step 6: Produce Security Review Report
+
+Use the report structure in `agents/actions/review.md` and include:
+- Assessment status (`PASS`, `PASS WITH RECOMMENDATIONS`, `CONDITIONAL PASS`, `FAIL`)
+- OWASP category assessment
+- Findings by severity
+- Exploit scenario per high/critical issue
+- Concrete remediation steps
+- Residual risk and release recommendation
+
+## Review Dimensions
+
+Evaluate all dimensions below on each review:
+
+1. Injection Resistance
+- Query/command construction safety
+- Input handling and validation depth
+
+2. Authentication Robustness
+- Token verification
+- Session lifetime and revocation behavior
+- Password and MFA policy adherence where applicable
+
+3. Access Control Correctness
+- Server-side authorization on all protected operations
+- Resource-level checks (ownership/assignment/tenant isolation)
+- Deny-by-default behavior
+
+4. Sensitive Data Exposure
+- Data minimization in responses
+- Encryption and storage handling
+- Log redaction strategy
+
+5. Security Configuration
+- CORS policy strictness
+- Headers and cookie security settings
+- Environment isolation and defaults
+
+6. Component Risk
+- Dependency versions and known vulnerabilities
+- Base image and package patch posture
+
+7. Observability and Auditability
+- Security events captured with enough context
+- Tamper-evident audit expectations
+- Monitoring signal quality for detection/response
+
+8. Secrets and Key Management
+- No hardcoded secrets in repo
+- Key rotation and retrieval strategy
+- Access scoping to secret stores
+
+9. API Abuse and Resilience
+- Rate limiting and lockout controls
+- Replay or brute-force protection
+- Idempotency and retry safety for critical operations
+
+10. Error and Failure Safety
+- No information leakage in errors
+- Fail-safe defaults under dependency failure
+
+## Severity Model
+
+Use these levels (aligned with `agents/actions/review.md`):
+
+- Critical
+  - Actively exploitable path with significant impact.
+  - Blocks release.
+
+- High
+  - Significant weakness with realistic exploitation path.
+  - Must be fixed before production.
+
+- Medium
+  - Real weakness, lower exploitability or impact.
+  - Fix on planned timeline with owner/date.
+
+- Low
+  - Hardening opportunity or best-practice gap.
+  - Track in backlog.
+
+For every finding include:
+- `Severity`
+- `Location` (`file:line` when applicable)
+- `What`
+- `Why it matters`
+- `Exploit scenario`
+- `Remediation`
+- `Owner` and target date (for medium/low carryover)
+
+## Required Deliverables
+
+### Minimum Planning Artifacts
+
+Expected under `{NEBULA_PRODUCT_ROOT}/planning-mds/security/`:
+- `threat-model.md`
+- `authorization-review.md`
+- `data-protection.md`
+- `secrets-management.md`
+- `owasp-top-10-results.md`
+
+These are validated by:
+- `agents/security/scripts/security-audit.py`
+
+### Review Output Location
+
+Write security review reports under:
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/security/reviews/`
+
+Suggested filename:
+- `security-review-YYYY-MM-DD.md`
+
+## Collaboration Rules
+
+### With Architect
+- Challenge unclear trust boundaries and permission models.
+- Convert unresolved design risk into ADR follow-ups.
+
+### With Backend Developer
+- Provide exact API and data-layer control gaps.
+- Demand explicit authorization checks at server boundaries.
+
+### With Frontend Developer
+- Validate client behavior does not imply server trust.
+- Ensure token and browser storage decisions follow architecture constraints.
+
+### With DevOps
+- Validate runtime hardening, environment segregation, and secret injection model.
+
+### With Quality Engineer
+- Convert high-risk scenarios into repeatable security test cases.
+
+### With Code Reviewer
+- Split work cleanly:
+  - Code Reviewer: maintainability/correctness/test quality
+  - Security: exploitability/control gaps/security posture
+
+## Common Anti-Patterns to Flag
+
+- Authorization enforced in UI only
+- Missing server-side ownership checks
+- Overly broad CORS (`*` with credentials)
+- Hardcoded API keys or passwords
+- Verbose error responses revealing internals
+- Sensitive fields written to logs
+- Unbounded authentication retry without lockout/rate control
+- Dependency upgrades deferred without risk triage
+
+## Definition of Done
+
+A security review is complete only when:
+- Scope and assumptions are explicit
+- Threat model exists or is updated for changed flows
+- All review dimensions are assessed
+- Findings are severity-ranked with remediation guidance
+- High and critical issues have clear disposition
+- Residual risks are documented
+- Report is saved under `{NEBULA_PRODUCT_ROOT}/planning-mds/security/reviews/`
+
+## Quick Start
+
+```bash
+# 1) Read role spec and context
+cat agents/security/SKILL.md
+cat {NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md
+
+# 2) Validate baseline security planning artifacts
+python3 agents/security/scripts/security-audit.py {NEBULA_PRODUCT_ROOT}/planning-mds/security
+
+# 3) Run review action workflow as needed
+cat agents/actions/review.md
+```
+
+## Related Files
+
+- `agents/actions/review.md`
+- `agents/actions/build.md`
+- `agents/security/references/`
+- `agents/security/scripts/`
+
+## Troubleshooting
+
+### Security Scanner Not Installed
+**Symptom:** Shell scripts (check-secrets.sh, scan-dependencies.sh) fail with "command not found".
+**Cause:** Required external tools (gitleaks, trivy, semgrep, OWASP ZAP) not installed in environment.
+**Solution:** Report the missing scanner explicitly in the review. Do not silently skip. Track installation as a remediation item for DevOps.
+
+### Threat Model Too Abstract
+**Symptom:** Threat model lists generic threats without mapping to specific application flows.
+**Cause:** STRIDE applied without concrete data flow analysis.
+**Solution:** Start from actual data flows in `{NEBULA_PRODUCT_ROOT}/planning-mds/architecture/` and map specific assets, actors, and entry points before applying STRIDE categories.
+
+### False Sense of Security from Green Scans
+**Symptom:** All automated scans pass but real vulnerabilities exist.
+**Cause:** Scans only cover known patterns; business logic flaws require manual review.
+**Solution:** Automated scans are necessary but not sufficient. Always perform manual review of all 10 review dimensions alongside automated tooling.
+
+## Templates
+
+- `agents/templates/threat-model-template.md`
+- `agents/templates/security-review-template.md`
+
+## Outputs
+
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/security/`
+- `{NEBULA_PRODUCT_ROOT}/planning-mds/security/reviews/`
+
+## Feature Evidence Contract (§10, §15)
+
+Feature security reports live inside the feature evidence package, **not** under `planning-mds/security/reviews/`. The latter remains for broader/release security reviews.
+
+Feature security report path:
+
+```text
+{NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/F####-{slug}/{RUN_ID}/security-review-report.md
+```
+
+Template: `agents/templates/security-review-template.md`. Required when `security_sensitive_scope = true` or Security Reviewer is required in `STATUS.md`.
+
+### Forced Security Role (§7)
+
+Security Reviewer is forced required when `security_sensitive_scope = true` (auth/authz, identity, session/token behavior, permissions/policies, tenant/data boundary, secrets/config, audit logging, PII/sensitive data, dependency/container vulnerability exposure, external integration trust boundary changed).
+
+### Recommendation Severity Scale (§15)
+
+Use the canonical bullet `- [severity] text — owner: X; follow-up: Y` with `low` / `medium` / `high` / `critical`. `high`/`critical` recommendations require PM mitigation per §15 PM Acceptance Line Format in `pm-closeout.md`.
+# Action: Feature Review
+
+## User Intent
+
+Independently review a completed feature and answer one question: **is this feature truly done?**
+
+This is a read-only post-completion audit. It does not replace the code, security, signoff, closeout, tracker-sync, or feature-evidence gates inside `feature.md`; it gives a fresh reviewer a focused way to challenge the completed vertical slice before merge, release, or stakeholder acceptance.
+
+## Agent Flow
+
+```
+FR0  Feature run and diff lock
+  ↓
+FR1  Parallel completion review  (PM + Architect + QE + Code Reviewer + Security + DevOps*)
+  ↓
+FR2  Validator pass
+  ↓
+FR3  Self-review gate            (reviewers verify evidence-backed findings)
+  ↓
+FR4  Done gate                   (Truly Done / Conditionally Done / Not Done)
+Feature Review Complete
+```
+
+`DevOps*` runs when runtime, deployment, environment, CI, or infrastructure artifacts changed, or when deployability evidence is missing or disputed (`RUN_DEVOPS`).
+
+---
+
+## Contract (generated — the spec is the source of truth)
+
+The fixed procedure for this action — the `FR0`–`FR4` gates, the two modes, inputs (`PR_URL`/`FEATURE_ID`/
+`MODE`/`DIFF_RANGE`, `FEATURE_RUN_ID`, `RUN_DEVOPS`), the validator commands, ownership, forbidden actions,
+stop conditions, and conflict resolution — is declared once in
+[`agents/actions/spec/feature-review.yaml`](spec/feature-review.yaml) and compiled into the
+operator/automation prompt pair at
+`agents/templates/prompts/evidence-contract/feature-review-operator-friendly.md` and
+`feature-review-automation-safe.md`. Regenerate with `python3 agents/scripts/render-prompts.py`; the
+`prompt_drift` lifecycle gate fails if the committed prompts drift from the spec.
+**Edit the spec, not this doc or the generated prompts.**
+
+- **Scope** — `read-only-audit`: writes a base run package with `feature-review-report.md` under
+  `{NEBULA_PRODUCT_ROOT}/planning-mds/operations/evidence/runs/{FEATURE_REVIEW_RUN_ID}/`, and reads — but never
+  writes — the canonical feature evidence package (owned by `feature.md`/`build.md`).
+- **Modes** — `closeout-audit` audits the approved run (`FEATURE_RUN_ID` defaults to `latest-run.json`;
+  validate `--stage closeout`); `candidate-audit` audits an in-progress run (`FEATURE_RUN_ID` set; validate
+  `--run-id --stage G6`). PR target: an OPEN PR ⇒ candidate-audit, else closeout-audit.
+- **Ownership** — each role owns its `feature-review-report.md` section (PM: requirements/signoff/tracker;
+  architect: architecture + KG; QE: test evidence + coverage; code-reviewer: code quality + merge-readiness;
+  security: security; devops: deployability when `RUN_DEVOPS=yes`). Report sections and validator list are in
+  the spec's `notes.report_sections` / FR2.
+- **Severity** — the FR4 done gate uses the `review-family` profile (`gate_policy.py`): validation FAIL or
+  critical > 0 → **NOT DONE**; PASS + critical = 0 + high > 0 → **CONDITIONALLY DONE** (each high needs
+  owner + mitigation + target date); PASS + critical = 0 + high = 0 → **TRULY DONE**.
+
+Drive the gates with `python3 agents/scripts/run-gate.py --action feature-review --stage <FR0..FR4> ...`
+(`--list` prints the ordered runbook, including the FR2 validators). Note FR2's `generate-story-index.py`
+currency check (run only when story files changed) is a **finding source, not a repair** — this read-only
+audit never commits the regeneration.
+
+---
+
+## Reviewer Independence Contract
+
+- Prefer running this action in a fresh session or a different coding tool than the one that implemented the feature.
+- Reviewers inspect the completed feature artifacts, evidence package, current diff, and runtime evidence **directly** — not report summaries.
+- The action is read-only except for writing the review report under the base run evidence folder.
+- Findings route back to `feature.md`, `review.md`, `test.md`, or targeted owning-role rework. Reviewers do not silently fix implementation or evidence artifacts while reviewing.
+
+## Reviewer judgment — per-role completion checks
+
+The spec owns the evidence contract; the checklists below are each reviewer's method (keep aligned with the
+role SKILLs). Each role owns the matching `feature-review-report.md` section.
+
+- **Product Manager** — every in-scope story has an explicit pass/fail disposition; ACs map to implementation + test evidence; deferred items are explicit, owned, non-build-critical; required signoff roles have passing reviewer/date/evidence; status/archive/registry/roadmap/blueprint/story-index/feature-mappings agree; remaining high findings have explicit mitigation acceptance.
+- **Architect** — implementation matches the feature-assembly-plan (or reconciles deviations in evidence); API contracts + schemas match delivered behavior; workflow states/data model/authorization/ADRs aligned; KG bindings + code-index cover new/moved source; drift passes or unresolved drift is documented as blocking.
+- **Quality Engineer** — every AC has test evidence or a justified manual path; tests ran in the required runtime containers/CI; runtime preflight evidence precedes validation; summary coverage matches raw artifacts; failure/retry history distinguishes runtime-blocked from code defects; no critical layer skipped without justification.
+- **Code Reviewer** — changed code is limited to feature scope and implements the planned vertical slice end to end; existing review findings fixed/justified/non-blocking; no hidden TODOs, debug code, dead paths, or unreviewed files; error handling/naming/boundaries/test quality merge-ready; non-obvious changes carry rationale/decision evidence.
+- **Security** — server-side authorization enforced for new/changed actions; inputs, file/document handling, and external calls validated; mutations create required audit/timeline evidence; no hardcoded secrets/unsafe config/data leakage; security findings fixed or explicitly mitigated; required security review not skipped for security-sensitive scope.
+- **DevOps (conditional)** — feature starts and runs in the declared runtime; new env vars/services/ports/jobs/secrets documented; container/CI changes don't break existing services; deployability command evidence is current and feature-scoped.
+
+---
+
+## Prerequisites
+
+- [ ] `feature.md` has reached G6 or G8 for the target feature.
+- [ ] Feature evidence run ID is known or resolvable from `latest-run.json`.
+- [ ] Changed-file set or diff range is available.
+- [ ] The review mode (`candidate-audit` vs `closeout-audit`) is identified (or a `PR_URL` is supplied).
+
+## Related Actions
+
+- **Before:** [feature action](./feature.md) — build and close out the feature.
+- **Feeds:** [integrate action](./integrate.md) — supplies its I0 `REVIEW_VERDICT_REF`.
+- **Alternative:** [review action](./review.md) — code/security review only; [validate action](./validate.md) — broad artifact alignment.
+- **After findings:** return to [feature](./feature.md), [review](./review.md), [test](./test.md), or direct owning-role rework for targeted repairs.
+# Reference Router
+
+20,700+ lines of reference docs across 11 agent roles. Loading all references
+for a role wastes context on material irrelevant to the current task.
+
+**Rule**: Before loading any file from `agents/<role>/references/`, consult
+the table below and load only the references matched to your current task.
+Load multiple rows when the task spans categories. Skip this router only
+when the full reference corpus is explicitly requested.
+
+## How to Use
+
+1. Identify your active agent role.
+2. Find the task row(s) that match what you are doing.
+3. Load only those reference files.
+4. If no row matches, load nothing — the SKILL.md and solution-specific
+   artifacts in `{NEBULA_PRODUCT_ROOT}/planning-mds/` are usually sufficient.
+
+---
+
+## Architect (9,080 lines → ~700–1,000 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| API endpoint design, OpenAPI contracts | `references/api-design-guide.md` |
+| Data model, entity design, ERD | `references/data-modeling-guide.md` |
+| Workflow, state machine design | `references/workflow-design.md` |
+| Authorization, Casbin, ABAC | `references/authorization-patterns.md` |
+| JSON Schema contracts, validation | `references/json-schema-validation-architecture.md` |
+| Security architecture review | `references/security-architecture-guide.md` |
+| Performance, scaling, caching | `references/performance-design-guide.md` |
+| Service boundaries, module design | `references/service-architecture-patterns.md` |
+| AI/ML integration architecture | `references/ai-integration-patterns.md`, `references/ai-architecture-patterns.md` |
+| General architecture review, ADR | `references/architecture-best-practices.md` |
+| Architecture examples | `references/architecture-examples.md` |
+
+All paths relative to `agents/architect/`.
+
+## Frontend Developer (5,184 lines → ~700–900 per task)
+
+**Always load**: `references/ux-audit-ruleset.md` (mandatory UX gate on every UI change, 133 lines)
+
+| Task | References to Load |
+|------|--------------------|
+| React component implementation | `references/code-patterns.md`, `references/react-best-practices.md` |
+| Form handling, JSON Schema forms | `references/json-schema-forms-guide.md` |
+| API calls, data fetching, caching | `references/tanstack-query-guide.md` |
+| Frontend testing (Vitest, RTL) | `references/testing-guide.md` |
+| Accessibility, WCAG compliance | `references/accessibility-guide.md` |
+| UX principles, interaction design | `references/ux-principles.md` |
+| Layout, visual design, inspiration | `references/design-inspiration.md` |
+| TypeScript patterns | `references/typescript-patterns.md` |
+| Legacy form comparison only | `references/form-handling-guide.md` |
+
+All paths relative to `agents/frontend-developer/`.
+
+## Product Manager (2,382 lines → ~300–600 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| Blueprint refinement, project scope | `references/blueprint-requirements.md` |
+| User story writing, acceptance criteria | `references/story-examples.md`, `references/vertical-slicing-guide.md` |
+| Persona definition | `references/persona-examples.md` |
+| Prioritization, backlog management | `references/prioritization-frameworks.md`, `references/prioritization-examples.md` |
+| Screen specification | `references/screen-spec-examples.md` |
+| Feature definition, MVP scoping | `references/feature-examples.md`, `references/pm-best-practices.md` |
+| General PM practices | `references/pm-best-practices.md` |
+
+All paths relative to `agents/product-manager/`.
+
+## DevOps (1,754 lines → ~650–1,085 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| Docker, Compose, containerization | `references/containerization-guide.md` |
+| CI/CD pipelines, deployment scripts | `references/code-patterns.md` |
+| General DevOps practices | `references/devops-best-practices.md` |
+
+All paths relative to `agents/devops/`.
+
+## Backend Developer (701 lines → ~665 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| Domain entities, services, endpoints | `references/code-patterns.md` |
+| Clean architecture patterns | `references/clean-architecture-guide.md` |
+| .NET best practices | `references/dotnet-best-practices.md` |
+| EF Core, database patterns | `references/ef-core-patterns.md` |
+
+All paths relative to `agents/backend-developer/`.
+
+## AI Engineer (610 lines)
+
+| Task | References to Load |
+|------|--------------------|
+| Python AI/LLM implementation | `references/code-patterns.md` |
+
+All paths relative to `agents/ai-engineer/`.
+
+## Quality Engineer (577 lines → ~555 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| Test implementation, patterns | `references/code-patterns.md` |
+| Test case mapping, coverage | `references/test-case-mapping.md` |
+| E2E testing | `references/e2e-testing-guide.md` |
+| Performance testing | `references/performance-testing-guide.md` |
+| General testing practices | `references/testing-best-practices.md` |
+
+All paths relative to `agents/quality-engineer/`.
+
+## Code Reviewer (314 lines)
+
+| Task | References to Load |
+|------|--------------------|
+| Code quality review | `references/clean-code-guide.md`, `references/code-smells-guide.md` |
+| Review checklist | `references/code-review-checklist.md` |
+
+All paths relative to `agents/code-reviewer/`.
+
+## Security (116 lines)
+
+| Task | References to Load |
+|------|--------------------|
+| Threat modeling | `references/threat-modeling-guide.md` |
+| OWASP review | `references/owasp-top-10-guide.md` |
+| Secure coding standards | `references/secure-coding-standards.md` |
+| General security practices | `references/security-best-practices.md` |
+
+All paths relative to `agents/security/`.
+
+## Blogger (14 lines), Technical Writer (15 lines)
+
+These roles have minimal references. Load on demand — no routing needed.
+
+## Integrator (no references)
+
+`agents/integrator/SKILL.md` plus `agents/actions/integrate.md` are the full
+contract. Tool semantics live in the product repo's `scripts/kg/README.md`
+(merge3, tracker merge, canonical serialization) and
+`agents/docs/KNOWLEDGE-GRAPH.md`.
+
+---
+
+## KG Tools
+
+Task-to-tool routing only. The full CLI reference, mental model, lifecycle
+triggers, and failure modes live in `agents/docs/KNOWLEDGE-GRAPH.md`.
+
+| When | Command |
+|------|---------|
+| Before searching code | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/hint.py <path>` |
+| Before editing shared entities/workflows | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/blast.py <node-or-file>` |
+| Starting feature work | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py <feature-id>` (see KNOWLEDGE-GRAPH.md for `--tier`, `--fields`, `--allow-missing`) |
+| After ontology changes | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --check-drift` |
+| Merging KG YAML across branches (never by hand/git) | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/merge3.py <file> --base <ref> --ours <ref> --theirs <ref>` (also REGISTRY.md/ROADMAP.md; see `scripts/kg/README.md`) |
+| Long session start / decisions / escalations / post-compaction | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/workstate.py …` (see KNOWLEDGE-GRAPH.md for subcommands) |
+| Resuming an in-flight run in a fresh session (read this FIRST, before exploring) | `python3 agents/scripts/resume-brief.py --run-id <run-id>` — emits position, next gate, recorded decisions, current story, and scope in one read |
+| Hub / risk / undeclared-edge analysis | `pagerank.py`, `risk.py`, `cochange.py --coverage-gaps` (see KNOWLEDGE-GRAPH.md) |
+
+---
+
+## Evidence / Ops
+
+Task-to-tool routing only. The full contract — package shape, gate timeline
+of who writes what when, manifest, `commands.log` telemetry, verdicts,
+eligibility, and waivers — lives in `agents/docs/AGENT-OPS.md`.
+
+Honor `{NEBULA_PRODUCT_ROOT}/.agentignore` before broad product discovery. Treat
+`{NEBULA_PRODUCT_ROOT}/planning-mds/operations/**` as cold archive: start from
+`operations/evidence/README.md`, feature `latest-run.json`, and the selected
+run's `evidence-manifest.json`; read raw reports, logs, screenshots, and
+`artifacts/**` only when the current audit, validation, or failure-triage task
+requires those exact files. Full retrieval semantics live in
+`agents/docs/AGENTIGNORE.md`.
+
+| When | Command |
+|------|---------|
+| Validate evidence mid-run (G0–G5) | `python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root {NEBULA_PRODUCT_ROOT} --feature F#### --run-id <run-id> --stage <Gn>` |
+| Final closeout validation | `python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root {NEBULA_PRODUCT_ROOT} --feature F#### --stage closeout` (see AGENT-OPS.md for the stage matrix) |
+| Closeout supersession (before writing `latest-run.json`) | `python3 agents/product-manager/scripts/patch-prior-manifest.py --product-root {NEBULA_PRODUCT_ROOT} --feature F#### --new-run-id <run-id>` |
+| Run lifecycle gates (writes `lifecycle-gates.log`) | `python3 agents/scripts/run-lifecycle-gates.py` |
+| New run artifact / report | copy the matching skeleton from `agents/templates/` (see AGENT-OPS.md → Package Anatomy) |

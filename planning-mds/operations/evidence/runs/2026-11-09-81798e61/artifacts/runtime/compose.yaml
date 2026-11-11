@@ -1,0 +1,44 @@
+name: brain-f0007-remediation-81798e61
+services:
+  engine-validation:
+    image: brain-f0006-engine:2026-11-02-5a00b0ff
+    group_add: ['1001']
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-09-81798e61:/evidence
+      - /usr/bin/docker:/usr/bin/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    tmpfs:
+      - /app/brain/content:uid=1000,gid=1000,mode=0700
+    environment:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONPATH: /app/brain/engine/packages/brain-factslots/src:/app/brain
+      XDG_CACHE_HOME: /tmp/.cache
+      COVERAGE_FILE: /evidence/artifacts/coverage/.coverage
+      BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@postgres:5432/brain
+      BRAIN_RESTORE_NETWORK: nebula-insurance-brain_default
+    working_dir: /app/brain
+    command: [python, -c, 'from threading import Event; Event().wait()']
+    healthcheck:
+      test: [CMD, python, -c, 'import brain_api,brain_factslots,brain_persistence,psycopg; print("ready")']
+      interval: 5s
+      timeout: 10s
+      retries: 6
+    networks: [dependencies]
+  neuron-validation:
+    image: brain-f0006-neuron:2026-11-02-5a00b0ff
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-09-81798e61:/evidence
+    environment:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONPATH: /app/brain/engine/packages/brain-factslots/src:/app/brain
+      XDG_CACHE_HOME: /tmp/.cache
+      BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@postgres:5432/brain
+    working_dir: /app/brain
+    command: [python, -c, 'from threading import Event; Event().wait()']
+    networks: [dependencies]
+networks:
+  dependencies:
+    external: true
+    name: nebula-insurance-brain_default

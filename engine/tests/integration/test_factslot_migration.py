@@ -196,6 +196,7 @@ async def test_s0006_ac6_downgrade_refuses_while_identity_rows_exist(database):
     _upgrade("head")
     world = harness.FactSlotWorld(database)
     try:
+        starting_revision = world.scalar("SELECT version_num FROM alembic_version")
         result = await world.resolve(
             world.key(
                 world.a,
@@ -207,6 +208,6 @@ async def test_s0006_ac6_downgrade_refuses_while_identity_rows_exist(database):
         with pytest.raises(RuntimeError, match="downgrade refused"):
             _downgrade("0011")
         assert world.scalar("SELECT count(*) FROM fact_slot_qualifier") == 1
-        assert world.scalar("SELECT version_num FROM alembic_version") == "0012"
+        assert world.scalar("SELECT version_num FROM alembic_version") == starting_revision
     finally:
         await world.close()

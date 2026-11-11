@@ -19,12 +19,12 @@ Master blueprint §109.1: the single-valued overlap constraint (§15) must not b
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Every slot has a cardinality of `SINGLE`, `MULTI` or `RELATIONSHIP`, fixed at creation from the predicate contract. Resolving an existing identity with a different cardinality is rejected with `CARDINALITY_CONFLICT` and writes no rows.
-- [ ] **AC2:** For a `SINGLE` slot, a second fact version that overlaps an existing version in both valid and recorded time is rejected by the existing ADR-0008 exclusion constraint (pilot regression).
-- [ ] **AC3:** For a `MULTI` slot, each member has its own member identity derived from its normalized value or member entity identity. Two different additional insureds give two members under one slot. Asserting the same insured twice resolves to the one existing member. Overlap is enforced per member, so the second insured is not rejected.
-- [ ] **AC4:** A `RELATIONSHIP` slot's identity is subject, predicate key, object entity identity and qualifiers, so two relationships that differ only in object are distinct. An object outside the slot's tenant, or not associated with the slot's KB, is rejected with `RELATIONSHIP_OBJECT_OUT_OF_SCOPE`.
-- [ ] **AC5:** §109.1 identity fixture: with members A and B in one `MULTI` slot, a version change addressed to member A references no row of member B. F0008 proves the temporal close.
-- [ ] **AC6:** An unknown cardinality, a `MULTI` member with no member key, or a `RELATIONSHIP` without an object is rejected with a named reason and zero rows. Creating a member writes an audit event with actor, slot and member identity, and unauthorized member creation is denied.
+- [x] **AC1:** Every slot has a cardinality of `SINGLE`, `MULTI` or `RELATIONSHIP`, fixed at creation from the predicate contract. Resolving an existing identity with a different cardinality is rejected with `CARDINALITY_CONFLICT` and writes no rows.
+- [x] **AC2:** For a `SINGLE` slot, a second fact version that overlaps an existing version in both valid and recorded time is rejected by the existing ADR-0008 exclusion constraint (pilot regression).
+- [x] **AC3:** For a `MULTI` slot, each member has its own member identity derived from its normalized value or member entity identity. Two different additional insureds give two members under one slot. Asserting the same insured twice resolves to the one existing member. A later `PRESENT` answer must canonicalize to that member's immutable key; a different canonical value is rejected with `MEMBER_VALUE_MISMATCH` and zero writes, while equivalent spellings remain accepted. Overlap is enforced per member, so the second insured is not rejected.
+- [x] **AC4:** A `RELATIONSHIP` slot's identity is subject, predicate key, object entity identity and qualifiers, so two relationships that differ only in object are distinct. An object outside the slot's tenant, or not associated with the slot's KB, is rejected with `RELATIONSHIP_OBJECT_OUT_OF_SCOPE`.
+- [x] **AC5:** §109.1 identity fixture: with members A and B in one `MULTI` slot, a version change addressed to member A references no row of member B. F0008 proves the temporal close.
+- [x] **AC6:** An unknown cardinality, a `MULTI` member with no member key, or a `RELATIONSHIP` without an object is rejected with a named reason and zero rows. Creating a member writes an audit event with actor, slot and member identity, and unauthorized member creation is denied.
 
 ## Interaction Contract
 
@@ -60,5 +60,5 @@ The Architect decides whether member identity is a child row of the slot or a sl
 
 ## Definition of Done
 
-- [ ] Six ACs pass against PostgreSQL, including the two-insureds fixture and the cardinality conflict.
-- [ ] Feature action records tests, coverage and required signoffs.
+- [x] Six ACs pass against PostgreSQL, including the two-insureds fixture and the cardinality conflict.
+- [x] Feature action records tests, coverage and required signoffs.

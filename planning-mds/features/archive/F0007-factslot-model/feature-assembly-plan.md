@@ -2,7 +2,7 @@
 
 **Created:** 2026-11-09
 **Author:** Architect
-**Status:** Phase B design approved by operator token `approve-phase-b` on 2026-11-09; implemented and closed in feature run `2026-11-09-b94cfa12` (archived 2026-11-09).
+**Status:** Implemented, reviewed and operator-approved remediation; archived 2026-11-10 in run `2026-11-09-81798e61`. Original Phase B approval remains history; Proposed ADR status is unchanged.
 **Run:** `2026-11-09-60865e32` (A+B, new); Phase A approved with `approve-phase-a` on 2026-11-09.
 **NEBULA_PRODUCT_ROOT:** `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`
 
@@ -183,20 +183,26 @@ ALTER TABLE fact_slot
   ADD COLUMN subject_kb_entity_id uuid
     GENERATED ALWAYS AS (CASE WHEN identity_version IS NOT NULL THEN entity_id END) STORED;
 
-ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity CHECK (
+-- Desired invariant; shipped 0012 stays immutable. Follow-up 0013 installs this guard.
+ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity CHECK ((
   (identity_version IS NULL AND slot_role IS NULL AND predicate_key IS NULL
      AND predicate_release_ref IS NULL AND cardinality IS NULL AND object_entity_id IS NULL
      AND parent_slot_id IS NULL AND member_key IS NULL AND fingerprint_version IS NULL
-     AND identity_fingerprint IS NULL)
-  OR (identity_version = 1 AND fingerprint_version = 1 AND created_by IS NOT NULL
-     AND identity_fingerprint ~ '^[0-9a-f]{64}$'
+     AND identity_fingerprint IS NULL AND created_by IS NULL)
+  OR (identity_version IS NOT NULL AND identity_version = 1
+     AND fingerprint_version IS NOT NULL AND fingerprint_version = 1
+     AND created_by IS NOT NULL AND slot_role IS NOT NULL
+     AND identity_fingerprint IS NOT NULL AND identity_fingerprint ~ '^[0-9a-f]{64}$'
+     AND predicate_key IS NOT NULL
      AND predicate_key ~ '^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
-     AND length(predicate_release_ref) > 0 AND slot_type = predicate_key
+     AND predicate_release_ref IS NOT NULL AND length(predicate_release_ref) > 0
+     AND slot_type = predicate_key AND cardinality IS NOT NULL
      AND cardinality IN ('SINGLE','MULTI','RELATIONSHIP')
      AND ((slot_role = 'SLOT' AND parent_slot_id IS NULL AND member_key IS NULL
             AND ((cardinality = 'RELATIONSHIP') = (object_entity_id IS NOT NULL)))
        OR (slot_role = 'MEMBER' AND cardinality = 'MULTI' AND parent_slot_id IS NOT NULL
-            AND length(member_key) > 0 AND object_entity_id IS NULL))));
+            AND member_key IS NOT NULL AND length(member_key) > 0 AND object_entity_id IS NULL)))
+) IS TRUE);
 
 CREATE UNIQUE INDEX uq_fact_slot_identity ON fact_slot (tenant_id, knowledge_base_id, identity_fingerprint)
   WHERE identity_version IS NOT NULL;
@@ -278,6 +284,8 @@ Validation rules:
   - A scope artifact owned by a different tenant/KB than the slot is `ABSENCE_SCOPE_OUT_OF_SCOPE`. That is reachable only when the caller can read the artifact.
   - A MULTI header is `MULTI_SLOT_REQUIRES_MEMBER`.
 - **Value type:** a value whose type differs from the contract is `VALUE_TYPE_MISMATCH`.
+- **Member identity:** after authorization and evidence/ownership checks, a PRESENT answer addressed to a MEMBER row must derive exactly its stored `member_key` under the pinned predicate contract. Otherwise reject `MEMBER_VALUE_MISMATCH` with zero fact versions, commits or outbox rows. Canonically equivalent inputs remain valid; a different member resolves a different row.
+- **Numeric bounds:** input and canonical output both have a maximum of 64 total characters, including minus sign and decimal point, matching the design schema. Compute canonical length from digits/exponent before constructing zero padding. Oversized canonical outputs reject `DECIMAL_INVALID`, including short exponent inputs. Accepted values must satisfy `canonical_decimal(canonical_decimal(x)) == canonical_decimal(x)` and schema validation on reload.
 - **Value detail:**
   - Money and identifier reasons follow D5.
   - A name value with no admitted, eligible, same-owner F0006 v2 assertion is `NAME_EVIDENCE_REQUIRED`. Eligibility reuses the F0006 guard.
@@ -334,12 +342,12 @@ Latency is observed and recorded, not given a target.
 
 ## Rollout, Rollback and Caching
 
-1. Capture the pilot snapshot and schema hash, and confirm the migration head is 0011.
-2. Apply 0012, then deploy the domain, the application package and the commit hook. No producer calls the resolver until F0016/F0018 adopt it, and the `test` namespace registry is wired only in test composition.
+1. Preserve the committed pilot snapshot and schema hash. Confirm the single migration lineage `0011 → 0012 → 0013`; shipped0012 remains immutable. Inventory existing identities, numeric carriers and member answers before deployment; detected corruption requires explicit governed resolution, not automatic repair.
+2. Apply follow-up0013 under its refusal-only preflight, then deploy the corrected domain, application policy and protected-read code. No producer calls the resolver until F0016/F0018 adopt it, and the `test` namespace registry is wired only in test composition.
 3. Rollback:
    - stop resolver callers;
    - identity-v1 slots and versions stay readable by the deployed binary, and no binary without the answer policy may commit to them;
-   - downgrade refuses while v1 or qualifier rows exist, and evidence is never deleted to make a downgrade pass.
+   - downgrade0013 restores the exact0012 guard without rewriting data; downgrading below0012 refuses while v1 or qualifier rows exist, and evidence is never deleted to make a downgrade pass.
 4. Caching: no result, slot or authorization cache. Only the immutable predicate registry, the ISO 4217 list and the normalization tables are process-cached, and each is versioned.
 
 ## RLS Inventory Handoff (F0018)
@@ -403,3 +411,15 @@ At G7 the Architect compares the as-built code with these expected surfaces:
 | Commit integration | existing globs for `brain_temporal/commit.py`, `repositories.py`, `brain_api/routes/facts.py`; extend only missing coverage |
 
 G7 authors binding shards under `kg-source/**` and recompiles. Generated YAML is never hand-edited.
+
+## Authorized Review Remediation — run 2026-11-09-81798e61
+
+The operator authorized all seven findings from audits 2026-11-09-7c8e8461 and 2026-11-09-8b8456df. This amendment corrects the existing invariants; it introduces no new producer, route, permission, currency semantics or ontology behavior.
+
+- Backend owns member-key equality, named zero-write rejection, a single 64-character numeric input/canonical bound and preallocation validation. QE tests entity/name/identifier mismatches, normalized equivalents, positive/negative decimal limits, canonical/schema round trips and extreme exponents.
+- Backend/DevOps add migration 0013 after immutable0012. Under an ACCESS EXCLUSIVE fact_slot lock, inventory rows for which the complete identity expression is not TRUE; report counts and limited slot IDs only and refuse the migration without changing evidence. Existing malformed identities require explicit governed repair. Replace the CHECK atomically; downgrade restores the exact0012 guard without rewriting rows. QE proves up/down/up, NULL mandatory fields, partial legacy and occupied malformed-data refusal on owned databases.
+- Protected reads extend AuthorizationExecution.read with an optional `additional_reads(payload)` callback. Authorize/lock the primary resource, load the selected payload exactly once into private memory, derive the actual payload's scope keys, authorize them under the same current-authority unit of work, recheck all decisions, audit all and commit once before returning. Do not prequery a possibly different answer. Denied scope returns the established non-disclosing denial; legacy values do not gain carrier parsing. QE verifies revocation interleavings and selection/denial behavior at the real facade and HTTP boundary.
+- PM reconciles final and inherited post-CI changed-file inventory and removes stale Not Started entry statuses. Architect reconciles bindings for0013 and protected-read semantics. Original approved reports remain history; a new evidence run owns current proofs and fresh reviews.
+- Runtime remains the product's CI-equivalent locked engine Python environment plus Compose PostgreSQL; all destructive migration/rollback tests use owned databases. Inspect shared data read-only for rollout readiness; never repair it automatically.
+
+Required remediation roles: Backend Developer, Architect, QE, Code Reviewer, Security Reviewer and DevOps. No frontend or AI behavior changes. Re-review plan readiness and completed/candidate feature after regression evidence. No acceptance of Proposed ADRs is implied.

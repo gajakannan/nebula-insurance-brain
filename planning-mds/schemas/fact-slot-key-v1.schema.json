@@ -92,6 +92,7 @@
       }
     },
     "decimal_value": {
+      "description": "Input and canonical value have at most 64 total characters including sign/point. Server semantic validation rejects exponent forms whose canonical expansion exceeds that bound before allocating it; every emitted canonical form is a valid reload input.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -167,7 +168,7 @@
         "amount",
         "currency"
       ],
-      "description": "ADR-0039 D4. Amount is an exact decimal string; a JSON number is rejected (MONEY_FLOAT_REJECTED). Original currency only in F0007: any conversion marker is rejected (CONVERTED_MONEY_UNSUPPORTED) at the domain validator, so the schema does not admit one.",
+      "description": "ADR-0039 D4. Amount is an exact decimal string; a JSON number is rejected (MONEY_FLOAT_REJECTED). Input and canonical amount are bounded to 64 total characters including sign/point; oversized canonical expansions reject DECIMAL_INVALID before allocation. Original currency only in F0007: any conversion marker is rejected (CONVERTED_MONEY_UNSUPPORTED) at the domain validator, so the schema does not admit one.",
       "properties": {
         "type": {
           "const": "money"

@@ -1,0 +1,227 @@
+planning-mds/architecture/feature-assembly-plan.md:21:| F0007 | [FactSlot model](../features/F0007-factslot-model/feature-assembly-plan.md) | Done / Archived 2026-11-09 (feature run `2026-11-09-b94cfa12`; plan run `2026-11-09-60865e32`); additive migration 0012; 39 ACs and ADR-0077 proof gates evidenced; ADR-0077 still Proposed |
+planning-mds/BLUEPRINT.md:245:- [F0007 — FactSlot model](features/F0007-factslot-model/README.md) - Done / Archived (2026-11-09; feature run `2026-11-09-b94cfa12`; operator approval at G4)
+planning-mds/BLUEPRINT.md:246:  - [F0007-S0001](features/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md) — Done
+planning-mds/BLUEPRINT.md:247:  - [F0007-S0002](features/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md) — Done
+planning-mds/BLUEPRINT.md:248:  - [F0007-S0003](features/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md) — Done
+planning-mds/BLUEPRINT.md:249:  - [F0007-S0004](features/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) — Done
+planning-mds/BLUEPRINT.md:250:  - [F0007-S0005](features/F0007-factslot-model/F0007-S0005-define-name-factslots.md) — Done
+planning-mds/BLUEPRINT.md:251:  - [F0007-S0006](features/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) — Done
+planning-mds/BLUEPRINT.md:439:- F0007 and F0013 (name FactSlots, temporal kinds);
+planning-mds/BLUEPRINT.md:489:### 4.14 F0007 FactSlot identity and answer carriers (Phase B approved 2026-11-09; implemented and archived 2026-11-09)
+planning-mds/BLUEPRINT.md:491:Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 with operator tokens `approve-phase-a` and `approve-phase-b`. The [assembly plan](features/F0007-factslot-model/feature-assembly-plan.md) and Proposed [ADR-0077](architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) define the design.
+planning-mds/BLUEPRINT.md:496:- **Names:** the four ADR-0066 name predicates are F0007 system predicates. The display hook applies no precedence.
+planning-mds/BLUEPRINT.md:497:- **Authorization:** slot creation derives restrictions from its source artifacts under the existing `content_artifact:interpret` authority. F0007 adds no grants, routes or UI.
+planning-mds/BLUEPRINT.md:503:Feature run `2026-11-09-b94cfa12` implemented the design: domain modules in `brain_domain`, the `brain-factslots` package, migration 0012 and the commit/read hooks. The run proved all 39 ACs and the five ADR-0077 proof gates against PostgreSQL. The G3 security review fixed three access-control gaps:
+planning-mds/BLUEPRINT.md:531:Current position (2026-11-09): F0001 to F0007 are done and archived. ADR-0060 is Rejected; the direct-baseline pipeline is the v0.1 path. The 2026-11-08 requirement-ownership amendment (master blueprint section 106.3) assigned every unowned blueprint requirement to a feature, added F0069, corrected the v0.1 dependency graph, and recorded operator decisions for ADR-0038, ADR-0039, ADR-0042, ADR-0043, ADR-0051, ADR-0052 and ADR-0053. F0007 (FactSlot model) was completed on 2026-11-09 (feature run `2026-11-09-b94cfa12`), which unblocks F0008, F0013 and F0017. The roadmap's Now lane is empty again: choosing the next feature is an operator decision. Whether to mark ADR-0077 Accepted, now that all five of its proof gates have evidence, is also an operator decision.
+planning-mds/BLUEPRINT.md:539:### F0007 review remediation
+planning-mds/BLUEPRINT.md:541:F0007 is reopened In Progress in feature run `2026-11-09-81798e61`, on explicit operator authorization, to resolve the seven independent audit findings. Prior completion is historical until renewed tests/reviews/signoffs. The active feature package and amended assembly plan define the bounded fixes; no new route, producer, permission or formal ADR acceptance.
+"""The 26 F0007 design cases (`contract-examples.json`) against the design schemas
+and against the runtime parsers, so the schemas and the code cannot drift apart.
+
+Schema validity alone does not prove resolution, authorization or persistence;
+those are the PostgreSQL suites."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import jsonschema
+import pytest
+from brain_domain.fact_answers import FactAnswerRejected, parse_answer
+from brain_domain.fact_values import ValueType
+from referencing import Registry, Resource
+
+FEATURE = next(
+    p / "planning-mds/features"
+    for p in Path(__file__).resolve().parents
+    if (p / "planning-mds/features").is_dir()
+)
+EXAMPLES = next(FEATURE.glob("**/F0007-*/contract-examples.json"))
+SCHEMAS = FEATURE.parent / "schemas"
+CASES = json.loads(EXAMPLES.read_text())["cases"]
+
+
+def _registry() -> Registry:
+    resources = []
+    for name in ("fact-slot-key-v1", "fact-answer-v1", "fact-slot-resolution-result-v1"):
+        schema = json.loads((SCHEMAS / f"{name}.schema.json").read_text())
+        resource = Resource.from_contents(schema)
+        assert legacy.state == InformationState.PRESENT
+        assert legacy.legacy_value == {"value": "$2,000,000"}
+        # A legacy commit keeps its unwrapped pilot value (no envelope required).
+        with Session(world.sync_engine) as session, session.begin():
+            fixtures.seed_grant(session, world.service.id, TENANT, KB, "ServicePrincipal")
+        legacy_commit = await world.commit(
+            SLOTS[1], {"value": "$3,000,000"}, principal=world.service
+        )
+        assert legacy_commit.status_code == 201, legacy_commit.text
+        # Identity resolution never matches a legacy slot implicitly.
+        with Session(world.sync_engine) as session, session.begin():
+            fixtures.seed_content_artifact(session, TENANT, KB)
+            from brain_persistence.tenancy import associate_entity
+
+            associate_entity(
+                session, ENTITY, TENANT, KB, actor_id=fixtures.SYNTHETIC_OPERATOR, at=now
+            )
+        artifact = world.scalar("SELECT id FROM content_artifact WHERE knowledge_base_id = %s", KB)
+        key = harness.slot_key(
+            KB,
+            ENTITY,
+            LIMIT_AMOUNT,
+            qualifiers={"basis": {"type": "code", "value": "EachOccurrence"}},
+        )
+        created = await world.resolve(key, sources=[artifact])
+        assert created.outcome == "CREATED" and created.slot_id not in SLOTS
+        after = _snapshot(database)["rows"]
+        assert all(row in after["fact_slot"] for row in before["rows"]["fact_slot"])
+    finally:
+        await world.close()
+
+
+async def test_s0006_ac6_downgrade_refuses_while_identity_rows_exist(database):
+    _upgrade("head")
+    world = harness.FactSlotWorld(database)
+    try:
+        result = await world.resolve(
+            world.key(
+                world.a,
+                LIMIT_AMOUNT,
+                qualifiers={"basis": {"type": "code", "value": "EachOccurrence"}},
+            )
+        )
+        assert result.outcome == "CREATED"
+        with pytest.raises(RuntimeError, match="downgrade refused"):
+            _downgrade("0011")
+        assert world.scalar("SELECT count(*) FROM fact_slot_qualifier") == 1
+        assert world.scalar("SELECT version_num FROM alembic_version") == "0012"
+    finally:
+        await world.close()
+#!/usr/bin/env bash
+# F0007 run 2026-11-09-b94cfa12: run a command against a fresh owned database at
+# migration head, then drop it. Never migrates or truncates the shared dev DB.
+# usage: owned_regression_db.sh <command...>   (cwd: product root)
+set -u
+ADMIN=postgresql://brain:brain@localhost:5432/brain
+NAME="f0007_regr_$(python3 -c 'import secrets; print(secrets.token_hex(4))')"
+docker exec brain-postgres psql -U brain -d brain -qAtc "CREATE DATABASE $NAME" >/dev/null
+docker exec brain-postgres psql -U brain -d "$NAME" -qAtc "CREATE EXTENSION IF NOT EXISTS btree_gist" >/dev/null
+( cd engine/migrations && BRAIN_DATABASE_URL="postgresql+psycopg://brain:brain@localhost:5432/$NAME" ../.venv/bin/alembic upgrade head >/dev/null 2>&1 ) || { echo "migration failed"; exit 3; }
+echo "owned regression database: $NAME (alembic head applied)"
+BRAIN_DATABASE_URL="postgresql+asyncpg://brain:brain@localhost:5432/$NAME" \
+BRAIN_TEST_POSTGRES_URL="postgresql+psycopg://brain:brain@localhost:5432/$NAME" \
+BRAIN_MIGRATION_ADMIN_URL="$ADMIN" "$@"
+rc=$?
+docker exec brain-postgres psql -U brain -d brain -qAtc "DROP DATABASE $NAME WITH (FORCE)" >/dev/null
+echo "dropped $NAME; exit=$rc"
+exit $rc
+#!/bin/sh
+# run-sast-scan.sh -- Run static application security testing (SAST).
+#
+# Usage:
+#   sh run-sast-scan.sh [options] [-- <semgrep-extra-args>]
+#
+# Options:
+#   --path DIR          Path to scan (default: .)
+#   --config CONFIG     Semgrep config (default: auto)
+#   --report-dir DIR    Output directory for SARIF report (default: security-reports)
+#   --no-error          Do not fail build on findings (omit --error)
+#   -h, --help          Show help
+#
+# Env override:
+#   SAST_SCAN_CMD       Custom executable to run instead of semgrep
+#
+# Exit codes:
+#   0  Scan passed (or findings allowed with --no-error)
+#   1  Findings detected (default behavior)
+#   2  Setup/usage/tooling error
+
+TARGET_PATH="${TARGET_PATH:-.}"
+SAST_CONFIG="${SAST_CONFIG:-auto}"
+REPORT_DIR="${REPORT_DIR:-security-reports}"
+ERROR_ON_FINDINGS=1
+
+print_usage() {
+  cat <<EOF
+Usage: $0 [options] [-- <semgrep-extra-args>]
+
+Options:
+  --path DIR          Path to scan (default: .)
+  --config CONFIG     Semgrep config (default: auto)
+  --report-dir DIR    Output directory for SARIF report (default: security-reports)
+  --no-error          Do not fail build on findings (omit --error)
+  -h, --help          Show help
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --path)
+      TARGET_PATH="$2"
+      shift 2
+      ;;
+    --config)
+      SAST_CONFIG="$2"
+      shift 2
+      ;;
+    --report-dir)
+      REPORT_DIR="$2"
+      shift 2
+      ;;
+    --no-error)
+      ERROR_ON_FINDINGS=0
+      shift
+      ;;
+    -h|--help)
+      print_usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [ ! -d "$TARGET_PATH" ]; then
+  echo "ERROR: scan path not found: $TARGET_PATH" >&2
+  exit 2
+fi
+
+if [ -n "${SAST_SCAN_CMD:-}" ]; then
+  echo "Running SAST via SAST_SCAN_CMD in $TARGET_PATH"
+  (
+    cd "$TARGET_PATH" || exit 2
+    "$SAST_SCAN_CMD" "$@"
+  )
+  exit $?
+fi
+
+if ! command -v semgrep >/dev/null 2>&1; then
+  echo "ERROR: semgrep not found in PATH." >&2
+  echo "Install semgrep or set SAST_SCAN_CMD." >&2
+  exit 2
+fi
+
+mkdir -p "$REPORT_DIR"
+REPORT_DIR_ABS=$(CDPATH= cd -- "$REPORT_DIR" && pwd)
+STAMP=$(date +%Y%m%d-%H%M%S)
+REPORT_PATH="${REPORT_DIR_ABS}/sast-semgrep-${STAMP}.sarif"
+
+echo "Running semgrep SAST scan on ${TARGET_PATH} (config: ${SAST_CONFIG})"
+echo "Report: ${REPORT_PATH}"
+
+if [ "$ERROR_ON_FINDINGS" -eq 1 ]; then
+  semgrep scan --config "$SAST_CONFIG" --error --sarif --output "$REPORT_PATH" "$TARGET_PATH" "$@"
+else
+  semgrep scan --config "$SAST_CONFIG" --sarif --output "$REPORT_PATH" "$TARGET_PATH" "$@"
+fi
+
+rc=$?
+if [ $rc -eq 0 ]; then
+  echo "SAST scan completed with no blocking findings."
+  exit 0
+fi

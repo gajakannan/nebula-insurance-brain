@@ -1,0 +1,93 @@
+tests/integration/test_assertion_consumers.py: 16 warnings
+tests/integration/test_assertion_migration.py: 21 warnings
+tests/integration/test_assertion_ownership.py: 15 warnings
+tests/integration/test_authx_migration.py: 13 warnings
+tests/integration/test_content_migration_states.py: 37 warnings
+tests/integration/test_content_restore_v2.py: 3 warnings
+tests/integration/test_factslot_answers.py: 39 warnings
+tests/integration/test_factslot_authorized_reads.py: 2 warnings
+tests/integration/test_factslot_identity_guard_migration.py: 24 warnings
+tests/integration/test_factslot_migration.py: 8 warnings
+tests/integration/test_factslot_names.py: 7 warnings
+tests/integration/test_factslot_ownership.py: 5 warnings
+tests/integration/test_factslot_resolution.py: 19 warnings
+tests/integration/test_job_event_reason_migration.py: 22 warnings
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Coverage XML written to file /evidence/artifacts/coverage/engine-full-final.xml
+Coverage JSON written to file /evidence/artifacts/coverage/engine-full-final.json
+868 passed, 267 warnings in 207.55s (0:03:27)
+Removed owned validation database: f0007_remediation_5fafa3dce040
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+INFO  [alembic.runtime.migration] Running upgrade 0011 -> 0012, F0007 FactSlot identity: additive identity columns and qualifier rows (ADR-0077 D8).
+INFO  [alembic.runtime.migration] 0012 preflight: uq_fact_slot_owner present; 0 legacy fact_slot rows kept
+INFO  [alembic.runtime.migration] Running upgrade 0012 -> 0013, Require a complete legacy/v1 FactSlot identity shape (F0007 review FR-H2).
+INFO  [alembic.runtime.migration] 0013 identity guard installed; existing FactSlot rows preserved
+Owned migrated validation database: f0007_remediation_c9055f8c92c4
+......        env=environment,
+        text=True,
+        capture_output=True,
+        timeout=100,
+    )
+    container = None
+    try:
+        assert restored.returncode == 0, restored.stdout + restored.stderr
+        assert "Restore drill PASSED" in restored.stdout
+        container = restored.stdout.split("Kept isolated target: ")[1].split(";")[0].strip()
+        query = (
+            "SELECT id, reason FROM document_job_event ORDER BY occurred_at;"
+            "SELECT conname FROM pg_constraint WHERE conname='ck_document_job_event_reason';"
+            "SELECT version_num FROM alembic_version;"
+        )
+        out = subprocess.run(
+            [
+                "docker",
+                "exec",
+                "-e",
+                "PGPASSWORD=brain",
+                container,
+                "psql",
+                "-h",
+                "127.0.0.1",
+                "-U",
+                "brain",
+                "-d",
+                "brain",
+                "-At",
+                "-F",
+                "|",
+                "-c",
+                query,
+            ],
+            text=True,
+            capture_output=True,
+            timeout=30,
+        )
+        assert out.returncode == 0, out.stderr
+        lines = out.stdout.split()
+        assert f"{legacy_event}|" in lines
+        assert f"{reasoned}|model_timeout" in lines
+        assert "ck_document_job_event_reason" in lines and "0009" in lines
+    finally:
+        if container:
+            subprocess.run(["docker", "rm", "-f", container], capture_output=True, timeout=60)
+        kept = (
+            restored.stdout.split("content: ")[-1].split()[0]
+            if "content: " in restored.stdout

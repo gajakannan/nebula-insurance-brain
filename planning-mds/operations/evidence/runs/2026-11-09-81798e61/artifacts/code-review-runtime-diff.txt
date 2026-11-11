@@ -1,0 +1,467 @@
+diff --git a/engine/apps/api/src/brain_api/routes/facts.py b/engine/apps/api/src/brain_api/routes/facts.py
+index 39abde3..f0696c2 100644
+--- a/engine/apps/api/src/brain_api/routes/facts.py
++++ b/engine/apps/api/src/brain_api/routes/facts.py
+@@ -50,10 +50,6 @@ def _slot(fact_slot_id: UUID) -> ResourceKey:
+     return ResourceKey(ResourceType.FACT_SLOT, fact_slot_id)
+ 
+ 
+-async def _nothing(_decision: AuthorizationDecision) -> None:
+-    return None
+-
+-
+ @router.get("/{fact_slot_id}", response_model=FactVersionOut)
+ async def get_fact(
+     fact_slot_id: UUID,
+@@ -83,22 +79,20 @@ async def get_fact(
+             raise NotFoundError()
+         return version
+ 
+-    # F0007 (S0003 AC6, T-08): an identity-v1 answer's absence scope names pages and
+-    # blocks of an artifact. The reader must be able to read that artifact, or the
+-    # read is denied like a missing slot. Legacy pilot slots need no extra check.
+-    trace_id = new_trace_id()
+-    for scope_key in await answers.scope_read_keys(
+-        fact_slot_id, valid_at=valid_as_of or now, known_at=known_as_of or now
+-    ):
+-        await execution.read(principal, scope_key, Action.READ, trace_id=trace_id, load=_nothing)
++    async def scope_reads(version: FactVersion) -> Sequence[ResourceKey]:
++        # WHY: authorize the scope of this exact payload in the slot read's UoW.
++        # A prior independent read commits and releases authority locks, and a
++        # second version selection could return a different, unchecked scope.
++        return await answers.scope_keys_for_value(fact_slot_id, version.value)
+ 
+     version = await execution.read(
+         principal,
+         _slot(fact_slot_id),
+         Action.READ,
+-        trace_id=trace_id,
++        trace_id=new_trace_id(),
+         load=load,
+         requested=requested,
++        additional_reads=scope_reads,
+     )
+     return FactVersionOut.from_domain(version)
+ 
+diff --git a/engine/packages/brain-domain/src/brain_domain/fact_answers.py b/engine/packages/brain-domain/src/brain_domain/fact_answers.py
+index aa914dd..12fc693 100644
+--- a/engine/packages/brain-domain/src/brain_domain/fact_answers.py
++++ b/engine/packages/brain-domain/src/brain_domain/fact_answers.py
+@@ -67,6 +67,7 @@ class AnswerReason(StrEnum):
+     IDENTIFIER_INVALID = "IDENTIFIER_INVALID"
+     NAME_EVIDENCE_REQUIRED = "NAME_EVIDENCE_REQUIRED"
+     RELATIONSHIP_OBJECT_OUT_OF_SCOPE = "RELATIONSHIP_OBJECT_OUT_OF_SCOPE"
++    MEMBER_VALUE_MISMATCH = "MEMBER_VALUE_MISMATCH"
+ 
+ 
+ class FactAnswerRejected(Exception):
+diff --git a/engine/packages/brain-domain/src/brain_domain/fact_values.py b/engine/packages/brain-domain/src/brain_domain/fact_values.py
+index be793f3..dbe1e66 100644
+--- a/engine/packages/brain-domain/src/brain_domain/fact_values.py
++++ b/engine/packages/brain-domain/src/brain_domain/fact_values.py
+@@ -24,7 +24,7 @@ from uuid import UUID
+ ISO4217_LIST_VERSION = "2026-01"
+ IDENTIFIER_NORMALIZATION_VERSION = 1
+ DECIMAL_MAX_INPUT = 64
+-DECIMAL_MAX_CANONICAL = 128
++DECIMAL_MAX_CANONICAL = DECIMAL_MAX_INPUT
+ TEXT_MAX = 4000
+ NAME_MAX = 1000
+ IDENTIFIER_MAX = 256
+@@ -138,8 +138,10 @@ def canonical_decimal(raw: object) -> str:
+     """One canonical decimal text: no exponent, no trailing fractional zeros, `-0`
+     becomes `0`. `1E+6`, `1000000.00` and `1000000` all become `1000000`.
+ 
+-    The input must be a string. Digits are handled exactly, never through a
+-    float or a precision-limited Decimal context."""
++    Input and canonical output are limited to 64 total characters, including
++    sign and decimal point, so every emitted form can be read back. Digits are
++    handled exactly, never through a float or a precision-limited Decimal context.
++    """
+     if not isinstance(raw, str) or len(raw) > DECIMAL_MAX_INPUT or not _DECIMAL.match(raw):
+         raise ValueRejected(ValueReason.DECIMAL_INVALID)
+     try:
+@@ -156,14 +158,22 @@ def canonical_decimal(raw: object) -> str:
+         digits.pop()
+         exponent += 1
+     text = "".join(str(d) for d in digits)
++    # WHY: exponent text is short even when its expanded value is enormous.
++    # Bound the total canonical size before allocating any exponent-sized string.
++    if exponent >= 0:
++        body_length = len(text) + exponent
++    elif -exponent >= len(text):
++        body_length = 2 - exponent
++    else:
++        body_length = len(text) + 1
++    if body_length + sign > DECIMAL_MAX_CANONICAL:
++        raise ValueRejected(ValueReason.DECIMAL_INVALID)
+     if exponent >= 0:
+         body = text + "0" * exponent
+     elif -exponent >= len(text):
+         body = "0." + "0" * (-exponent - len(text)) + text
+     else:
+         body = text[:exponent] + "." + text[exponent:]
+-    if len(body) > DECIMAL_MAX_CANONICAL:
+-        raise ValueRejected(ValueReason.DECIMAL_INVALID)
+     return ("-" if sign else "") + body
+ 
+ 
+diff --git a/engine/packages/brain-factslots/src/brain_factslots/answers.py b/engine/packages/brain-factslots/src/brain_factslots/answers.py
+index bcfe4f5..8d1a14d 100644
+--- a/engine/packages/brain-factslots/src/brain_factslots/answers.py
++++ b/engine/packages/brain-factslots/src/brain_factslots/answers.py
+@@ -21,7 +21,7 @@ from brain_domain.fact_answers import (
+     parse_answer,
+     stored_answer,
+ )
+-from brain_domain.fact_slots import PredicateKey, SlotRejected
++from brain_domain.fact_slots import PredicateKey, SlotRejected, SlotRole, member_key
+ from brain_domain.fact_values import ValueType
+ 
+ from brain_factslots.ports import FactSlotStore, PredicateContractRegistry, StoredSlot
+@@ -101,6 +101,13 @@ class FactAnswerPolicy:
+                 raise FactAnswerRejected(AnswerReason.ABSENCE_SCOPE_OUT_OF_SCOPE)
+         if answer.value is not None:
+             await self._check_value_detail(slot, answer)
++            # WHY: a member's immutable identity is derived from its value; a
++            # different canonical value must resolve its own member slot.
++            if (
++                slot.slot_role == SlotRole.MEMBER
++                and member_key(answer.value, contract) != slot.member_key
++            ):
++                raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
+         return answer.to_json()
+ 
+     async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
+@@ -134,6 +141,16 @@ class FactAnswerReader:
+         if slot is None or slot.legacy:
+             return ()
+         stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
++        return await self.scope_keys_for_value(slot_id, stored)
++
++    async def scope_keys_for_value(
++        self, slot_id: UUID, stored: object
++    ) -> tuple[ResourceKey, ...]:
++        """Derive keys from the exact privately loaded version, without selecting
++        the answer again. Legacy JSON keeps its existing unwrapped semantics."""
++        slot = await self._store.slot(slot_id)
++        if slot is None or slot.legacy:
++            return ()
+         scope = stored.get("scope") if isinstance(stored, Mapping) else None
+         artifact = _uuid(scope.get("content_artifact_id")) if isinstance(scope, Mapping) else None
+         return (ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),) if artifact else ()
+diff --git a/engine/packages/brain-factslots/src/brain_factslots/service.py b/engine/packages/brain-factslots/src/brain_factslots/service.py
+index aa1add8..feaef93 100644
+--- a/engine/packages/brain-factslots/src/brain_factslots/service.py
++++ b/engine/packages/brain-factslots/src/brain_factslots/service.py
+@@ -118,36 +118,23 @@ class AuthorizedFactSlots:
+             except LookupError as exc:
+                 raise SlotNotFound(str(slot_id)) from exc
+ 
++        async def scope_reads(answer: FactAnswer) -> Sequence[ResourceKey]:
++            if answer.scope is None:
++                return ()
++            return (ResourceKey(ResourceType.CONTENT_ARTIFACT, answer.scope.content_artifact_id),)
++
+         try:
+-            await self.authorize_scope_reads(
+-                principal, slot_id, valid_at=valid_at, known_at=known_at, trace_id=trace_id
+-            )
+             return await self._execution.read(
+-                principal, _slot_key(slot_id), Action.READ, trace_id=trace_id, load=load
++                principal,
++                _slot_key(slot_id),
++                Action.READ,
++                trace_id=trace_id,
++                load=load,
++                additional_reads=scope_reads,
+             )
+         except AuthorizationDenied as exc:
+             raise SlotNotFound(str(slot_id)) from exc
+ 
+-    async def authorize_scope_reads(
+-        self,
+-        principal: Principal,
+-        slot_id: UUID,
+-        *,
+-        valid_at: datetime,
+-        known_at: datetime,
+-        trace_id: str,
+-    ) -> None:
+-        """T-08: an answer's absence scope (pages, blocks) is shown only to a reader
+-        who may read the scope's artifact. Raises `AuthorizationDenied` otherwise."""
+-
+-        async def nothing(_decision: AuthorizationDecision) -> None:
+-            return None
+-
+-        for key in await self._answers.scope_read_keys(
+-            slot_id, valid_at=valid_at, known_at=known_at
+-        ):
+-            await self._execution.read(principal, key, Action.READ, trace_id=trace_id, load=nothing)
+-
+     async def current_names(
+         self,
+         principal: Principal,
+diff --git a/engine/packages/brain-security/src/brain_security/execution.py b/engine/packages/brain-security/src/brain_security/execution.py
+index dd6593c..8f175eb 100644
+--- a/engine/packages/brain-security/src/brain_security/execution.py
++++ b/engine/packages/brain-security/src/brain_security/execution.py
+@@ -363,7 +363,11 @@ class AuthorizationExecution:
+         load: Callable[[AuthorizationDecision], Awaitable[T]],
+         requested: RequestedScope = NO_FILTER,
+         delegation_id: UUID | None = None,
++        additional_reads: Callable[[T], Awaitable[Sequence[ResourceKey]]] | None = None,
+     ) -> T:
++        """Load once under the primary lock, then authorize dependencies derived
++        from that exact private payload before auditing and returning it. All
++        authority/resource locks remain held until the single final commit."""
+         evaluated = await self._guarded_decide(
+             authenticated, [key], action, requested, trace_id, delegation_id
+         )
+@@ -378,8 +382,36 @@ class AuthorizationExecution:
+         except Exception:
+             await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
+             raise
++        if additional_reads is not None:
++            # WHY: a separate scope read would commit and release the current
++            # authority locks before returning the answer. Deriving keys from
++            # this exact payload also prevents authorizing one version's scope
++            # and then returning a freshly selected, different version.
++            try:
++                source_keys = sorted(set(await additional_reads(payload)))
++                source_evaluated = (
++                    await self._guarded_decide(
++                        authenticated, source_keys, Action.READ, requested, trace_id, delegation_id
++                    )
++                    if source_keys
++                    else []
++                )
++            except Exception:
++                await self._persist_fresh(
++                    [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
++                )
++                raise
++            evaluated.extend(source_evaluated)
++            if not all(e.decision.allowed for e in evaluated):
++                raise await self._deny(evaluated)
++            evaluated = self._recheck_all(evaluated)
++            if not all(e.decision.allowed for e in evaluated):
++                raise await self._deny(evaluated)
+         try:
+-            await self._store.append_decision(decision.with_outcome(OperationOutcome.SUCCEEDED))
++            for item in evaluated:
++                await self._store.append_decision(
++                    item.decision.with_outcome(OperationOutcome.SUCCEEDED)
++                )
+             await self._store.commit()
+         except Exception as exc:  # noqa: BLE001 - no payload leaves without durable audit
+             await self._safe_rollback()
+diff --git a/engine/tests/integration/test_factslot_answers.py b/engine/tests/integration/test_factslot_answers.py
+index 1947830..a85a013 100644
+--- a/engine/tests/integration/test_factslot_answers.py
++++ b/engine/tests/integration/test_factslot_answers.py
+@@ -12,7 +12,14 @@ import pytest
+ from brain_domain.fact_answers import InformationState
+ from brain_factslots.service import SlotNotFound
+ from brain_testing import fixtures
+-from brain_testing.factslots import AGGREGATE_LIMIT, LIMIT_AMOUNT, TAX_ID
++from brain_testing.factslots import (
++    ADDITIONAL_INSURED,
++    AGGREGATE_LIMIT,
++    LIMIT_AMOUNT,
++    POLICY_NUMBER,
++    RELATED_TO,
++    TAX_ID,
++)
+ from engine.tests.fixtures.factslots import harness
+ from sqlalchemy.orm import Session
+ 
+@@ -314,6 +321,45 @@ async def test_s0004_ac2_exact_decimal_canonical_form_and_round_trip(slot_world)
+         assert (await _read(w, slot)).value.canonical["amount"] == amount
+ 
+ 
++@pytest.mark.parametrize("kind", ["money", "decimal"])
++async def test_numeric_answer_canonical_bound_round_trips_or_rejects_without_writes(
++    slot_world, kind
++):
++    w = slot_world
++    predicate = AGGREGATE_LIMIT if kind == "money" else RELATED_TO
++    for amount in ("1E+63", "-1E+62", "1E-62", "-1E-61"):
++        kwargs = {"object_entity_id": str(w.entity(w.a))} if kind == "decimal" else {}
++        slot = await _slot(w, predicate, **kwargs)
++        value = (
++            {"type": "money", "amount": amount, "currency": "USD"}
++            if kind == "money"
++            else {"type": "decimal", "value": amount}
++        )
++        response = await w.commit(
++            slot, {"answer_contract": ENVELOPE, "state": "PRESENT", "value": value}
++        )
++        assert response.status_code == 201, response.text
++        reloaded = (await _read(w, slot)).to_json()
++        text = reloaded["value"]["amount" if kind == "money" else "value"]
++        assert len(text) == 64
++        assert (await w.get(slot)).json()["value"] == reloaded
++    for amount in ("1E+64", "-1E+63", "1E-63", "-1E-62", "1e999999999", "1e-999999999"):
++        kwargs = {"object_entity_id": str(w.entity(w.a))} if kind == "decimal" else {}
++        slot = await _slot(w, predicate, **kwargs)
++        value = (
++            {"type": "money", "amount": amount, "currency": "USD"}
++            if kind == "money"
++            else {"type": "decimal", "value": amount}
++        )
++        before = w.counts()
++        response = await w.commit(
++            slot, {"answer_contract": ENVELOPE, "state": "PRESENT", "value": value}
++        )
++        assert response.status_code == 422, response.text
++        assert response.json()["code"] == "decimal_invalid"
++        assert w.counts() == before
++
++
+ async def test_s0004_ac4_ac5_identifier_values(slot_world):
+     w = slot_world
+     slot = await _slot(w, TAX_ID)
+@@ -377,12 +423,9 @@ async def test_s0004_ac7_unauthorized_caller_gets_denial_before_value_detail(slo
+ 
+ async def test_multi_header_and_unregistered_contract_are_rejected(slot_world):
+     w = slot_world
+-    from brain_testing.factslots import ADDITIONAL_INSURED
+-
++    insured = w.entity(w.a)
+     member = await w.resolve(
+-        w.key(
+-            w.a, ADDITIONAL_INSURED, member={"type": "entity_ref", "entity_id": str(w.entity(w.a))}
+-        )
++        w.key(w.a, ADDITIONAL_INSURED, member={"type": "entity_ref", "entity_id": str(insured)})
+     )
+     header = await w.commit(
+         member.slot_id, {"answer_contract": ENVELOPE, "state": "NOT_APPLICABLE"}
+@@ -393,7 +436,7 @@ async def test_multi_header_and_unregistered_contract_are_rejected(slot_world):
+         {
+             "answer_contract": ENVELOPE,
+             "state": "PRESENT",
+-            "value": {"type": "entity_ref", "entity_id": str(w.subject)},
++            "value": {"type": "entity_ref", "entity_id": str(insured)},
+         },
+     )
+     assert ok.status_code == 201
+@@ -418,6 +461,56 @@ async def test_multi_header_and_unregistered_contract_are_rejected(slot_world):
+     assert unsupported.json()["code"] == "answer_contract_unsupported"
+ 
+ 
++async def test_member_commit_rejects_another_entity_before_writing(slot_world):
++    w = slot_world
++    insured = w.entity(w.a)
++    member = await w.resolve(
++        w.key(w.a, ADDITIONAL_INSURED, member={"type": "entity_ref", "entity_id": str(insured)})
++    )
++    envelope = {
++        "answer_contract": ENVELOPE,
++        "state": "PRESENT",
++        "value": {"type": "entity_ref", "entity_id": str(w.subject)},
++    }
++    before = w.counts()
++    denied = await w.commit(member.member_slot_id, envelope, principal=w.reader_b)
++    assert denied.status_code == 404 and denied.json()["code"] == "not_found"
++    rejected = await w.commit(member.member_slot_id, envelope)
++    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"
++    assert rejected.json()["detail"] is None
++    assert w.counts() == before
++    accepted = await w.commit(
++        member.member_slot_id,
++        {**envelope, "value": {"type": "entity_ref", "entity_id": str(insured)}},
++    )
++    assert accepted.status_code == 201, accepted.text
++    assert (await _read(w, member.member_slot_id)).value.canonical["entity_id"] == str(insured)
++
++
++async def test_identifier_member_commit_accepts_equivalence_but_rejects_issuer_change(slot_world):
++    w = slot_world
++    value = {
++        "type": "identifier",
++        "scheme": "us-irs",
++        "identifier_type": "fein",
++        "value": "12-3456789",
++    }
++    member = await w.resolve(w.key(w.a, POLICY_NUMBER, member=value))
++    envelope = {"answer_contract": ENVELOPE, "state": "PRESENT", "value": value}
++    before = w.counts()
++    rejected = await w.commit(
++        member.member_slot_id, {**envelope, "value": {**value, "scheme": "carrier:B"}}
++    )
++    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"
++    assert w.counts() == before
++    accepted = await w.commit(
++        member.member_slot_id, {**envelope, "value": {**value, "value": "123456789"}}
++    )
++    assert accepted.status_code == 201, accepted.text
++    reloaded = (await _read(w, member.member_slot_id)).value.canonical
++    assert reloaded["scheme"] == "us-irs" and reloaded["normalized_value"] == "123456789"
++
++
+ async def test_s0003_ac6_reads_never_expose_a_scope_the_reader_cannot_read(slot_world):
+     """G3 security fix (SEC-F7-02): T-08 also holds on the read path. A reader who
+     may read the slot but not the scope's artifact gets the non-disclosing 404 from
+diff --git a/engine/tests/integration/test_factslot_migration.py b/engine/tests/integration/test_factslot_migration.py
+index c9133e9..42f9229 100644
+--- a/engine/tests/integration/test_factslot_migration.py
++++ b/engine/tests/integration/test_factslot_migration.py
+@@ -196,6 +196,7 @@ async def test_s0006_ac6_downgrade_refuses_while_identity_rows_exist(database):
+     _upgrade("head")
+     world = harness.FactSlotWorld(database)
+     try:
++        starting_revision = world.scalar("SELECT version_num FROM alembic_version")
+         result = await world.resolve(
+             world.key(
+                 world.a,
+@@ -207,6 +208,6 @@ async def test_s0006_ac6_downgrade_refuses_while_identity_rows_exist(database):
+         with pytest.raises(RuntimeError, match="downgrade refused"):
+             _downgrade("0011")
+         assert world.scalar("SELECT count(*) FROM fact_slot_qualifier") == 1
+-        assert world.scalar("SELECT version_num FROM alembic_version") == "0012"
++        assert world.scalar("SELECT version_num FROM alembic_version") == starting_revision
+     finally:
+         await world.close()
+diff --git a/engine/tests/integration/test_factslot_names.py b/engine/tests/integration/test_factslot_names.py
+index c654906..e1df700 100644
+--- a/engine/tests/integration/test_factslot_names.py
++++ b/engine/tests/integration/test_factslot_names.py
+@@ -238,6 +238,37 @@ async def test_s0005_ac3_name_without_admitted_evidence_is_rejected(names):
+     assert names.http.counts() == before
+ 
+ 
++async def test_trade_name_member_commit_keeps_its_normalized_identity(names):
++    evidence = await names.admitted()
++    member = await names.resolve(TRADE, member=names.name("Acme Restoration", evidence))
++    before = names.http.counts()
++    rejected = await names.http.commit(
++        member.member_slot_id,
++        {
++            "answer_contract": ENVELOPE,
++            "state": "PRESENT",
++            "value": names.name("Zed Services", evidence),
++        },
++        principal=names.world.actor,
++    )
++    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"
++    assert rejected.json()["detail"] is None
++    assert names.http.counts() == before
++    accepted = await names.http.commit(
++        member.member_slot_id,
++        {
++            "answer_contract": ENVELOPE,
++            "state": "PRESENT",
++            "value": names.name("  ACME   restoration ", evidence),
++        },
++        principal=names.world.actor,
++    )
++    assert accepted.status_code == 201, accepted.text
++    shown = await names.http.get(member.member_slot_id, principal=names.world.actor)
++    assert shown.status_code == 200
++    assert shown.json()["value"]["value"]["normalized"] == "acme restoration"
++
++
+ async def test_s0005_ac4_kb_a_trade_name_is_invisible_in_kb_b(names):
+     evidence = await names.admitted()
+     trade = await names.resolve(TRADE, member=names.name("Acme Restoration", evidence))

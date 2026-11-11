@@ -1,11 +1,11 @@
 # F0007 — FactSlot model — Status
 
-**Overall Status:** Done. Archived 2026-11-09 after feature run `2026-11-09-b94cfa12` (G0-G8; operator approval at G4).
-**Last Updated:** 2026-11-09
+**Overall Status:** Done / Archived after remediation, 2026-11-10; current run `2026-11-09-81798e61`, operator G4 approval recorded.
+**Last Updated:** 2026-11-10
 **Plan Run:** `2026-11-09-60865e32` (A+B, new)
 **Phase A:** Approved 2026-11-09 (`approve-phase-a`, G3 PASS)
 **Phase B:** Approved 2026-11-09 (`approve-phase-b`; assembly plan, ADR-0077, three design schemas)
-**Implementation:** Feature run `2026-11-09-b94cfa12`: Done 2026-11-09
+**Implementation:** Remediation completed in `2026-11-09-81798e61`; original completed run `2026-11-09-b94cfa12` retained as superseded history.
 
 ## Story Checklist
 
@@ -19,6 +19,8 @@
 | F0007-S0006 | Preserve pilot slots and ownership | Done |
 
 ## Story × Role Progress
+
+Current remediation run: all implementation, reviewer and operator approval gates are complete. Original completion and collected pre-approval rows below are append-only history.
 
 | Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
 |---|---|---|---|---|---|---|---|---|
@@ -45,7 +47,7 @@ Set by the Architect at Phase B (G5), 2026-11-09.
 
 ## Story Signoff Provenance
 
-Append-only history. The PM records the required reviewers' verdicts during the feature action.
+Append-only history. Rows for `2026-11-09-b94cfa12` are prior completion provenance, not signoff for the current remediation run. New verdicts are appended after fresh review.
 
 | Story | Role | Reviewer | Verdict | Evidence | Date | Notes |
 |---|---|---|---|---|---|---|
@@ -79,8 +81,68 @@ Append-only history. The PM records the required reviewers' verdicts during the 
 | F0007-S0006 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
 | F0007-S0006 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
 | F0007-S0006 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0001 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0001 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0001 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0001 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0003 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0003 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0003 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0003 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0003 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0004 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0004 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0004 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0004 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0004 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0005 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0005 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0005 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0005 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0005 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0006 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0006 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0006 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0006 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0006 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
 
-## Closeout Summary (PM, 2026-11-09)
+## Prior Closeout Summary (PM, 2026-11-09; historical)
 
 - **Delivered:** all six stories and all 39 ACs, with PostgreSQL evidence in run `2026-11-09-b94cfa12`:
   - KB-owned slot identity with authoritative qualifier rows;
@@ -112,3 +174,7 @@ Append-only history. The PM records the required reviewers' verdicts during the 
 1. **Row security:** F0007 binds new rows to tenant/KB ownership with composite keys and immutability triggers. F0018 Phase B designs and enables RLS on all tenant-owned tables, F0007's included.
 2. **Predicate identity:** an opaque, versioned predicate key with a minimal F0007 system-predicate set (the four name predicates plus test fixtures). F0012/F0013 register real predicates.
 3. **Display name:** F0007 provides the hook only. The order of preference is an open decision owned by F0017/F0023.
+
+## Remediation Closeout Summary (PM, 2026-11-10)
+
+All seven independent findings resolved with no deferred product defect. New evidence868 engine/27 Neuron tests (no skips),97.37% changed application coverage, current static checks/scans and independent Code APPROVED/Security PASS/plan READY. User explicitly approved G4; all five required roles pass all six stories. Migration0013 is additive;0012 unchanged; existing malformed evidence is never silently repaired. Current source/CI/KG and original final Neuron test inventory are reconciled. Prior approved completion and original audits remain preserved; only completion supersession metadata/latest pointer change at the governed G8 step. Formal ADR acceptance and production deployment are not implied.

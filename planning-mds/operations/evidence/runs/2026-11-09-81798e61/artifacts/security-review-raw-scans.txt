@@ -1,0 +1,81 @@
+dependency vulnerabilities 0
+dependency packages 57
+secrets results 0
+SAST results [
+  {
+    "ruleId": "python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text",
+    "level": null,
+    "message": {
+      "text": "sqlalchemy.text passes the constructed SQL statement to the database mostly unchanged. This means that the usual SQL injection protections are not applied and this function is vulnerable to SQL injection if user input can reach here. Use normal SQLAlchemy operators (such as `or_()`, `and_()`, etc.) to construct SQL."
+    },
+    "locations": [
+      {
+        "physicalLocation": {
+          "artifactLocation": {
+            "uri": "engine/migrations/versions/0013_f0007_identity_guard.py",
+            "uriBaseId": "%SRCROOT%"
+          },
+          "region": {
+            "endColumn": 85,
+            "endLine": 70,
+            "snippet": {
+              "text": "    malformed = bind.execute(text(f\"SELECT count(*) FROM fact_slot WHERE {invalid}\")).scalar_one()"
+            },
+            "startColumn": 30,
+            "startLine": 70
+          }
+        }
+      }
+    ]
+  },
+  {
+    "ruleId": "python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text",
+    "level": null,
+    "message": {
+      "text": "sqlalchemy.text passes the constructed SQL statement to the database mostly unchanged. This means that the usual SQL injection protections are not applied and this function is vulnerable to SQL injection if user input can reach here. Use normal SQLAlchemy operators (such as `or_()`, `and_()`, etc.) to construct SQL."
+    },
+    "locations": [
+      {
+        "physicalLocation": {
+          "artifactLocation": {
+            "uri": "engine/migrations/versions/0013_f0007_identity_guard.py",
+            "uriBaseId": "%SRCROOT%"
+          },
+          "region": {
+            "endColumn": 83,
+            "endLine": 73,
+            "snippet": {
+              "text": "            text(f\"SELECT id FROM fact_slot WHERE {invalid} ORDER BY id LIMIT 10\")"
+            },
+            "startColumn": 13,
+            "startLine": 73
+          }
+        }
+      }
+    ]
+  }
+]
+DAST alerts [
+  {
+    "pluginid": "100000",
+    "alert": "A Client Error response code was returned by the server",
+    "riskcode": "0",
+    "confidence": "3",
+    "riskdesc": "Informational (High)",
+    "count": "43"
+  },
+  {
+    "pluginid": "10112",
+    "alert": "Session Management Response Identified",
+    "riskcode": "0",
+    "confidence": "3",
+    "riskdesc": "Informational (High)",
+    "count": "1"
+  }
+]
+manifest {
+  "dependency": {},
+  "secrets": {},
+  "sast": {},
+  "dast": {}
+}

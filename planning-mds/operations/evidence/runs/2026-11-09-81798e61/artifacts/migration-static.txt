@@ -1,0 +1,23 @@
+E501 Line too long (107 > 100)
+   --> engine/tests/integration/test_factslot_identity_guard_migration.py:126:101
+    |
+124 |     _insert(
+125 |         database,
+126 |         _slot(owner, cardinality="MULTI", slot_role="MEMBER", parent_slot_id=header["id"], member_key="a"),
+    |                                                                                                     ^^^^^^^
+127 |     )
+128 |     _insert(database, _slot(owner, cardinality="RELATIONSHIP", object_entity_id=owner[2]))
+    |
+
+E501 Line too long (101 > 100)
+   --> engine/tests/integration/test_factslot_identity_guard_migration.py:131:101
+    |
+129 |     with psycopg.connect(database) as connection:
+130 |         connection.execute(
+131 |             "INSERT INTO fact_slot_qualifier VALUES (%s, %s, %s, 'basis', 'code', '\"USD\"', now())",
+    |                                                                                                     ^
+132 |             (header["id"], owner[0], owner[1]),
+133 |         )
+    |
+
+Found 2 errors.

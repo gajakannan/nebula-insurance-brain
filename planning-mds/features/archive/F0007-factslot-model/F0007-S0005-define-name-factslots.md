@@ -19,11 +19,11 @@ ADR-0066 (Proposed, direction authorized 2026-09-25) has F0007 define the name F
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** The F0007 system-predicate set contains `hasLegalName` (`SINGLE`), `hasTradeName` (`MULTI`), `hasFormerName` (`MULTI`) and `knownAs` (`MULTI`). Resolving any of them with another cardinality is rejected with `CARDINALITY_CONFLICT`.
-- [ ] **AC2:** EX-SEM-008: "Acme Roofing Inc." and "Acme Roofing & Restoration Inc." for the same entity resolve to the same `hasLegalName` slot. No new entity or slot is created. F0008/F0019 own the valid-time split.
-- [ ] **AC3:** A name value carries the verbatim text, a normalized comparison form, an optional name-kind qualifier and a reference to its admitted F0006 name claim and quote. A name with no admitted evidence reference is rejected with `NAME_EVIDENCE_REQUIRED`.
-- [ ] **AC4:** A trade name admitted only in KB A for a tenant entity associated with KBs A and B cannot be resolved, read or returned by the display-name hook in KB B. A KB B-only principal is denied, and the denial is indistinguishable from not found.
-- [ ] **AC5:** The display-name hook returns the current accepted name facts of the reader's KB, each with its kind and slot. It applies no precedence (an open decision owned by F0017/F0023) and creates no `entity_alias` rows. Creating a name slot or member is authorized and audited like any slot (S0001).
+- [x] **AC1:** The F0007 system-predicate set contains `hasLegalName` (`SINGLE`), `hasTradeName` (`MULTI`), `hasFormerName` (`MULTI`) and `knownAs` (`MULTI`). Resolving any of them with another cardinality is rejected with `CARDINALITY_CONFLICT`.
+- [x] **AC2:** EX-SEM-008: "Acme Roofing Inc." and "Acme Roofing & Restoration Inc." for the same entity resolve to the same `hasLegalName` slot. No new entity or slot is created. F0008/F0019 own the valid-time split.
+- [x] **AC3:** A name value carries the verbatim text, a normalized comparison form, an optional name-kind qualifier and a reference to its admitted F0006 name claim and quote. A name with no admitted evidence reference is rejected with `NAME_EVIDENCE_REQUIRED`.
+- [x] **AC4:** A trade name admitted only in KB A for a tenant entity associated with KBs A and B cannot be resolved, read or returned by the display-name hook in KB B. A KB B-only principal is denied, and the denial is indistinguishable from not found.
+- [x] **AC5:** The display-name hook returns the current accepted name facts of the reader's KB, each with its kind and slot. It applies no precedence (an open decision owned by F0017/F0023) and creates no `entity_alias` rows. Creating a name slot or member is authorized and audited like any slot (S0001).
 
 ## Interaction Contract
 
@@ -59,5 +59,5 @@ Open decision (G1, deferred): the order of preference across legal, trade and in
 
 ## Definition of Done
 
-- [ ] Five ACs pass, including the EX-SEM-008 identity fixture and the cross-KB negative case.
-- [ ] Feature action records tests, coverage and required signoffs.
+- [x] Five ACs pass, including the EX-SEM-008 identity fixture and the cross-KB negative case.
+- [x] Feature action records tests, coverage and required signoffs.

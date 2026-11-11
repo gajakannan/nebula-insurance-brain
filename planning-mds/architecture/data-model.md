@@ -334,9 +334,9 @@ The [close/reopen boundary](../examples/commercial-pc-account/boundaries/account
 Preserve existing source/version/artifact IDs and tenant/KB constraints. Replace only the one-artifact-per-version uniqueness after reconciliation, permitting explicitly governed replacements. Full text remains in immutable files; index rows retain line ordinal/hash and provenance. Dates belong to the document version, never the manifest. Explicit append-only selections retain a previous selection, sequence and optimistic concurrency token; no selection means undated. The semantic authorization decision UUID is separate from the authorization audit row primary key.
 
 
-## F0007 FactSlot identity and answer carriers (Phase B design approved 2026-11-09; implementation pending)
+## F0007 FactSlot identity and answer carriers (review remediation completed 2026-11-10)
 
-Plan run `2026-11-09-60865e32`. [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (Proposed) and the [assembly plan](../features/archive/F0007-factslot-model/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, constraints and migration `0012`.
+Plan run `2026-11-09-60865e32`. [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (Proposed) and the [assembly plan](../features/archive/F0007-factslot-model/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns and constraints. Shipped migration `0012` remains immutable; remediation run `2026-11-09-81798e61` adds follow-up `0013`, requiring the complete legacy/v1 identity expression to be TRUE and refusing existing malformed rows without repair. PRESENT member values must retain their canonical member key; numeric input/output share a 64-character total bound; actual answer scopes are authorized under the same read unit of work.
 
 - **`fact_slot`:** gains nullable identity columns. A NULL `identity_version` marks a legacy pilot slot. Identity-v1 rows carry the predicate key, release reference, cardinality, slot role, optional relationship object, optional parent and member key, and a versioned fingerprint under a partial unique index per tenant/KB.
 - **Members:** MULTI members are child `fact_slot` rows, so `canonical_fact_version` and its ADR-0008 exclusion are unchanged.

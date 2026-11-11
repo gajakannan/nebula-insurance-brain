@@ -238,6 +238,37 @@ async def test_s0005_ac3_name_without_admitted_evidence_is_rejected(names):
     assert names.http.counts() == before
 
 
+async def test_trade_name_member_commit_keeps_its_normalized_identity(names):
+    evidence = await names.admitted()
+    member = await names.resolve(TRADE, member=names.name("Acme Restoration", evidence))
+    before = names.http.counts()
+    rejected = await names.http.commit(
+        member.member_slot_id,
+        {
+            "answer_contract": ENVELOPE,
+            "state": "PRESENT",
+            "value": names.name("Zed Services", evidence),
+        },
+        principal=names.world.actor,
+    )
+    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"
+    assert rejected.json()["detail"] is None
+    assert names.http.counts() == before
+    accepted = await names.http.commit(
+        member.member_slot_id,
+        {
+            "answer_contract": ENVELOPE,
+            "state": "PRESENT",
+            "value": names.name("  ACME   restoration ", evidence),
+        },
+        principal=names.world.actor,
+    )
+    assert accepted.status_code == 201, accepted.text
+    shown = await names.http.get(member.member_slot_id, principal=names.world.actor)
+    assert shown.status_code == 200
+    assert shown.json()["value"]["value"]["normalized"] == "acme restoration"
+
+
 async def test_s0005_ac4_kb_a_trade_name_is_invisible_in_kb_b(names):
     evidence = await names.admitted()
     trade = await names.resolve(TRADE, member=names.name("Acme Restoration", evidence))

@@ -1,0 +1,197 @@
+activate
+activate.bat
+activate.csh
+activate.fish
+activate.nu
+activate.ps1
+activate_this.py
+alembic
+cffi-gen-src
+coverage
+coverage-3.14
+coverage3
+deactivate.bat
+dmypy
+dotenv
+fastapi
+httpx2
+idna
+jsonschema
+mako-render
+mypy
+mypyc
+py.test
+pydoc.bat
+pygmentize
+pytest
+python
+python3
+python3.14
+ruff
+stubgen
+stubtest
+uvicorn
+watchfiles
+websockets
+claude-1000
+codex-bwrap-synthetic-mount-targets-1000
+codex-daemon-1000
+f0007_amend_plan.py
+f0007_architecture_probes.py
+f0007_code_repro.py
+f0007_finish_reviews.py
+f0007_refresh_manifest.py
+f0007_remediation_run.py
+f0007_reopen.py
+f0007_review_run.py
+f0007_scope_revocation_repro.py
+gajap-code-insiders-zsh
+gh-cli-cache
+mcp-1zSUk6
+nebula-brain-inference-1000
+nebula-source-020n1xa2
+nebula-source-3wgt0z8p
+nebula-source-9fonmo41
+nebula-source-aqpqz4f5
+nebula-source-bvnwma5i
+nebula-source-gwr5k0su
+nebula-source-jrpxb97i
+nebula-source-nn0mjiyp
+nebula-source-pphic06k
+nebula-source-rvbjh89f
+nebula-source-siqnr5d5
+nebula-source-vidnj9hq
+nebula-source-vlpo7fmv
+nebula-source-xtn4txos
+nebula-source-z_r1ptt0
+node-compile-cache
+pytest-of-gajap
+snap-private-tmp
+systemd-private-1dca49965b7e4fa88068a27313b47deb-chrony.service-YrSvui
+systemd-private-1dca49965b7e4fa88068a27313b47deb-polkit.service-3qdsUp
+systemd-private-1dca49965b7e4fa88068a27313b47deb-systemd-logind.service-sGEEQZ
+tmpmmn4ie97
+tmptxh2e4m4
+tmpwnycesjm
+tmpy7g6j07u
+tmpz3vkl17t
+torchinductor_gajap
+uv-0d769011c4f4efa9.lock
+uv-7a325edbb01f7841.lock
+uv-dde50d55d7331a9c.lock
+uv-e7a2b5d7007ee5b0.lock
+uv-f7af80b90c879a27.lock
+uv-setuptools-01ceb684a4568e9b.lock
+uv-setuptools-07b2a9b3f74208d9.lock
+uv-setuptools-095cf748d06057d3.lock
+uv-setuptools-1f1b43abba8bf9b1.lock
+uv-setuptools-35a9bc5b4d8677d6.lock
+uv-setuptools-3c0d4b60cc0f454f.lock
+uv-setuptools-446cca91b4a7c942.lock
+uv-setuptools-44f39adb27186fc6.lock
+uv-setuptools-456c67597bf1b928.lock
+uv-setuptools-4658f2a19a0b60c4.lock
+uv-setuptools-4ee9df8b2ffb4933.lock
+uv-setuptools-53e18a14d8dd0d8c.lock
+uv-setuptools-579277595a7929df.lock
+uv-setuptools-700ef49b8f017c3b.lock
+uv-setuptools-731ec104ba4d85ef.lock
+uv-setuptools-82716a88ec974338.lock
+uv-setuptools-87265875fd837890.lock
+uv-setuptools-8c61b92b66f87383.lock
+uv-setuptools-99eac4088e7678c3.lock
+uv-setuptools-9ebcf7b3cd6f3edb.lock
+uv-setuptools-a0d3675bdc0ffdeb.lock
+uv-setuptools-a17cf67ff1a8ea6c.lock
+uv-setuptools-ab7345705afb7bfd.lock
+uv-setuptools-b25748f52caefb9d.lock
+uv-setuptools-b88ca32d2125ba02.lock
+uv-setuptools-b94531ae8f229421.lock
+uv-setuptools-b9f24942a69852c3.lock
+uv-setuptools-d009d72598dda643.lock
+uv-setuptools-d81aa97ba7fb19cf.lock
+uv-setuptools-dd80cbf23358bc76.lock
+uv-setuptools-df295e25b3cf70fd.lock
+uv-setuptools-f27ef28843f5b048.lock
+uv-setuptools-fdf556383388c4fc.lock
+vscode-typescript1000
+#!/usr/bin/env bash
+# F0007 run 2026-11-09-b94cfa12 DAST: boot brain_api on an owned DB at head and run a
+# ZAP API scan from its OpenAPI. No credentials are configured, so protected routes
+# are exercised unauthenticated (401 path) plus request validation (422 path).
+# The OIDC issuer is not running locally, so credential verification is not part of
+# this scan's reach; F0007 adds no authentication surface.
+set -u
+PR=/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+OUT=$PR/planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/artifacts/security/dast
+PORT=8765
+if curl -sf "http://127.0.0.1:$PORT/openapi.json" >/dev/null; then
+  echo "port $PORT already served; refusing to scan a stale server"; exit 3
+fi
+NAME="f0007_dast_$(python3 -c 'import secrets; print(secrets.token_hex(4))')"
+docker exec brain-postgres psql -U brain -d brain -qAtc "CREATE DATABASE $NAME" >/dev/null
+docker exec brain-postgres psql -U brain -d "$NAME" -qAtc "CREATE EXTENSION IF NOT EXISTS btree_gist" >/dev/null
+( cd "$PR/engine/migrations" && BRAIN_DATABASE_URL="postgresql+psycopg://brain:brain@localhost:5432/$NAME" ../.venv/bin/alembic upgrade head >/dev/null 2>&1 )
+cd "$PR"
+BRAIN_DATABASE_URL="postgresql+asyncpg://brain:brain@localhost:5432/$NAME" \
+  engine/.venv/bin/uvicorn brain_api.app:create_app --factory --host 0.0.0.0 --port "$PORT" \
+  > "$OUT/uvicorn.log" 2>&1 &
+API=$!
+for _ in $(seq 1 30); do curl -sf "http://127.0.0.1:$PORT/openapi.json" >/dev/null && break; sleep 1; done
+curl -s -o /dev/null -w "openapi HTTP %{http_code} (api pid $API, db $NAME)\n" "http://127.0.0.1:$PORT/openapi.json"
+docker run --rm --add-host=host.docker.internal:host-gateway -v "$OUT":/zap/wrk:rw -u "$(id -u):$(id -g)" \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap-api-scan.py -t "http://host.docker.internal:$PORT/openapi.json" -f openapi \
+  -r api-scan.html -J api-scan.json -T 4 \
+  -z "-silent -config autoupdate.checkOnStart=false -config autoupdate.installAddonUpdates=false -config autoupdate.installScannerRules=false" \
+  > "$OUT/zap.out" 2>&1
+rc=$?
+kill "$API" 2>/dev/null; wait "$API" 2>/dev/null
+if curl -sf "http://127.0.0.1:$PORT/openapi.json" >/dev/null; then echo "WARNING: port $PORT still served"; fi
+docker exec brain-postgres psql -U brain -d brain -qAtc "DROP DATABASE $NAME WITH (FORCE)" >/dev/null
+echo "zap exit=$rc (0 pass, 1 fail alerts, 2 warn alerts, 3 error)"
+grep -E "^(FAIL-NEW|WARN-NEW|PASS)" "$OUT/zap.out" | tail -5
+exit 0
+.github/workflows/ci-gates.yml
+engine/apps/api/pyproject.toml
+engine/apps/api/src/brain_api/deps.py
+engine/apps/api/src/brain_api/errors.py
+engine/apps/api/src/brain_api/routes/facts.py
+engine/packages/brain-domain/pyproject.toml
+engine/packages/brain-persistence/pyproject.toml
+engine/packages/brain-persistence/src/brain_persistence/models.py
+engine/packages/brain-temporal/src/brain_temporal/commit.py
+engine/packages/brain-testing/pyproject.toml
+engine/pyproject.toml
+engine/tests/integration/test_assertion_migration.py
+engine/uv.lock
+scripts/ops/verify_content.py
+engine/migrations/versions/0012_f0007_factslot_identity.py
+engine/packages/brain-domain/src/brain_domain/data/iso4217-2026-01.txt
+engine/packages/brain-domain/src/brain_domain/fact_answers.py
+engine/packages/brain-domain/src/brain_domain/fact_slots.py
+engine/packages/brain-domain/src/brain_domain/fact_values.py
+engine/packages/brain-domain/tests/test_fact_slots.py
+engine/packages/brain-factslots/pyproject.toml
+engine/packages/brain-factslots/src/brain_factslots/__init__.py
+engine/packages/brain-factslots/src/brain_factslots/answers.py
+engine/packages/brain-factslots/src/brain_factslots/names.py
+engine/packages/brain-factslots/src/brain_factslots/ports.py
+engine/packages/brain-factslots/src/brain_factslots/predicates.py
+engine/packages/brain-factslots/src/brain_factslots/py.typed
+engine/packages/brain-factslots/src/brain_factslots/resolution.py
+engine/packages/brain-factslots/src/brain_factslots/service.py
+engine/packages/brain-factslots/tests/conftest.py
+engine/packages/brain-factslots/tests/test_contract_examples.py
+engine/packages/brain-factslots/tests/test_factslots_unit.py
+engine/packages/brain-persistence/src/brain_persistence/fact_slot_models.py
+engine/packages/brain-persistence/src/brain_persistence/fact_slots.py
+engine/packages/brain-testing/src/brain_testing/factslots.py
+engine/tests/fixtures/factslots/harness.py
+engine/tests/fixtures/factslots/pilot-before.json
+engine/tests/fixtures/factslots/pilot-seed.sql
+engine/tests/integration/test_factslot_answers.py
+engine/tests/integration/test_factslot_migration.py
+engine/tests/integration/test_factslot_names.py
+engine/tests/integration/test_factslot_ownership.py
+engine/tests/integration/test_factslot_resolution.py

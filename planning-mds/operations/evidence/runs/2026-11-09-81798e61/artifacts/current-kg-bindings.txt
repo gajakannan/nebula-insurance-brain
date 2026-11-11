@@ -1,0 +1,39 @@
+id: migration:f0007-factslot-identity
+label: F0007 FactSlot identity (revision 0012, additive)
+path: engine/migrations/versions/0012_f0007_factslot_identity.py
+notes: Adds nullable identity columns to fact_slot (NULL marks a legacy pilot slot), a generated
+  subject_kb_entity_id, the partial unique fingerprint index, owner-bound parent/subject/object keys,
+  and the append-only fact_slot_qualifier table. Triggers make identity immutable (including NULL to
+  value) and a deferred trigger checks member and qualifier parents. No DDL on canonical_fact_version,
+  no RLS, BYPASSRLS or SECURITY DEFINER. Downgrade refuses while identity-v1 or qualifier rows exist.
+related_nodes:
+- capability:factslot-identity-resolution
+- entity:fact-slot
+- entity:fact-slot-qualifier
+- adr:0077
+planning-mds/kg-source/bindings/f0002.yaml-25-    - engine/packages/brain-security/src/brain_security/delegation.py
+planning-mds/kg-source/bindings/f0002.yaml-26-    infra:
+planning-mds/kg-source/bindings/f0002.yaml-27-    - scripts/dev/provision_delegation.py
+planning-mds/kg-source/bindings/f0002.yaml-28-- id: capability:durable-authorization-decisions
+planning-mds/kg-source/bindings/f0002.yaml-29-  paths:
+planning-mds/kg-source/bindings/f0002.yaml-30-    backend:
+planning-mds/kg-source/bindings/f0002.yaml:31:    - engine/packages/brain-security/src/brain_security/execution.py
+planning-mds/kg-source/bindings/f0002.yaml-32-    - engine/packages/brain-security/src/brain_security/audit.py
+planning-mds/kg-source/bindings/f0002.yaml-33-    - engine/packages/brain-domain/src/brain_domain/audit.py
+planning-mds/kg-source/bindings/f0002.yaml:34:    - engine/apps/api/src/brain_api/routes/facts.py
+planning-mds/kg-source/bindings/f0002.yaml-35-    - engine/apps/api/src/brain_api/routes/reviews.py
+planning-mds/kg-source/bindings/f0002.yaml-36-    - engine/packages/brain-assertions/src/brain_assertions/service.py
+planning-mds/kg-source/bindings/f0002.yaml-37-    tests:
+planning-mds/kg-source/bindings/f0002.yaml:38:    - engine/packages/brain-security/tests/test_execution.py
+5:PostgreSQL is the authoritative runtime store (ADR-0002). Graph and vector stores are projections (ADR-0022, ADR-0023). Semantics of the tables below are defined in the master blueprint: canonical world model (section 12), FactSlot (section 13), bitemporal facts (sections 14 to 16), provenance (section 17), content versus evidence identity (section 18), and flexible schema representation (section 20). Every authoritative row carries `tenant_id` and `knowledge_base_id` (ADR-0030) and audit fields (`created_at`, `recorded_at`, actor).
+133:## Proposed ontology release records (F0012/F0013, ADR-0045)
+135:An authored module version and a composed release have different identities. A release fixes the complete set of module versions used together. F0012/F0013 Phase B must settle the following logical records and ownership constraints under [ADR-0045](decisions/ADR-0045-ontology-release-compatibility.md), which remains Proposed. These are planning targets, not persistence migrations.
+140:| `ontology_version` | Immutable revision of one module, with its module reference, version, content digest, authoring-schema version, supported semantics, constraints and dependency declarations. F0012 must make this module-version role explicit in its schema. |
+144:Semantic content retains tenant/KB ownership and audit requirements under ADR-0002/ADR-0030, subject to the identity-control exceptions in ADR-0061. Shared vocabulary distribution must not bypass scoped release installation or tenant-extension isolation; F0012 Phase B settles those references. Content hashes establish artifact identity, not authorization or semantic compatibility.
+186:The following proposed GL mapping makes that phrase concrete. F0012/F0013 and the projection consumer must freeze a mapping version in the release manifest before computing projection impact; these are planning labels, not claims that AGE edges exist today.
+304:| Name facts | `hasLegalName`, `hasTradeName`, `hasFormerName`, `knownAs` FactSlots; `entity_alias` becomes a projection | F0007/F0013/F0017 |
+311:[ADR-0070](decisions/ADR-0070-account-party-and-role-model.md) (Proposed) sets the commercial P&C account model. In the Brain these are foundation-ontology classes and properties, stored as tenant-scoped entities with evidence-backed FactSlots and canonical fact versions. They are not new kernel tables. F0012 Phase B settles names, IRIs and constraints; the [Cedar Bridge example](../examples/commercial-pc-account/README.md) shows a proposed shape.
+328:The [close/reopen boundary](../examples/commercial-pc-account/boundaries/account-close-reopen.ttl) retains a closed account and its policy beside the replacement. The single-tenant SHACL graph counts only `CURRENT` accounts; F0012/F0017 canonical admission must enforce the same invariant across knowledge bases and time intervals. Account 360 selects owned policies independently of named-insured-role completeness ([EX-PC-020/021](../examples/commercial-pc-account/cases.md)); closure does not reassign policies.
+337:## F0007 FactSlot identity and answer carriers (Phase B design approved 2026-11-09; implementation pending)
+339:Plan run `2026-11-09-60865e32`. [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (Proposed) and the [assembly plan](../features/F0007-factslot-model/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, constraints and migration `0012`.
+411:A document-local reference is not a canonical Entity. An admission name claim is not a canonical name FactSlot. Proposed ontology/time stores are not claimed as existing FK targets: the scoped time resolver rejects unavailable references, and release identifiers remain pinned opaque contract values until their owning features validate them. Source selectors/origins are server-computed immutable snapshots; no supplied eligibility flag is authoritative. The existing assertion version counter may still increment for stale-review detection, while original claim/evidence fields and new extension/reference/name tables reject mutation.

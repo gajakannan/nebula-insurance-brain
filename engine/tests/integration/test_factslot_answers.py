@@ -12,7 +12,14 @@ import pytest
 from brain_domain.fact_answers import InformationState
 from brain_factslots.service import SlotNotFound
 from brain_testing import fixtures
-from brain_testing.factslots import AGGREGATE_LIMIT, LIMIT_AMOUNT, TAX_ID
+from brain_testing.factslots import (
+    ADDITIONAL_INSURED,
+    AGGREGATE_LIMIT,
+    LIMIT_AMOUNT,
+    POLICY_NUMBER,
+    RELATED_TO,
+    TAX_ID,
+)
 from engine.tests.fixtures.factslots import harness
 from sqlalchemy.orm import Session
 
@@ -314,6 +321,45 @@ async def test_s0004_ac2_exact_decimal_canonical_form_and_round_trip(slot_world)
         assert (await _read(w, slot)).value.canonical["amount"] == amount
 
 
+@pytest.mark.parametrize("kind", ["money", "decimal"])
+async def test_numeric_answer_canonical_bound_round_trips_or_rejects_without_writes(
+    slot_world, kind
+):
+    w = slot_world
+    predicate = AGGREGATE_LIMIT if kind == "money" else RELATED_TO
+    for amount in ("1E+63", "-1E+62", "1E-62", "-1E-61"):
+        kwargs = {"object_entity_id": str(w.entity(w.a))} if kind == "decimal" else {}
+        slot = await _slot(w, predicate, **kwargs)
+        value = (
+            {"type": "money", "amount": amount, "currency": "USD"}
+            if kind == "money"
+            else {"type": "decimal", "value": amount}
+        )
+        response = await w.commit(
+            slot, {"answer_contract": ENVELOPE, "state": "PRESENT", "value": value}
+        )
+        assert response.status_code == 201, response.text
+        reloaded = (await _read(w, slot)).to_json()
+        text = reloaded["value"]["amount" if kind == "money" else "value"]
+        assert len(text) == 64
+        assert (await w.get(slot)).json()["value"] == reloaded
+    for amount in ("1E+64", "-1E+63", "1E-63", "-1E-62", "1e999999999", "1e-999999999"):
+        kwargs = {"object_entity_id": str(w.entity(w.a))} if kind == "decimal" else {}
+        slot = await _slot(w, predicate, **kwargs)
+        value = (
+            {"type": "money", "amount": amount, "currency": "USD"}
+            if kind == "money"
+            else {"type": "decimal", "value": amount}
+        )
+        before = w.counts()
+        response = await w.commit(
+            slot, {"answer_contract": ENVELOPE, "state": "PRESENT", "value": value}
+        )
+        assert response.status_code == 422, response.text
+        assert response.json()["code"] == "decimal_invalid"
+        assert w.counts() == before
+
+
 async def test_s0004_ac4_ac5_identifier_values(slot_world):
     w = slot_world
     slot = await _slot(w, TAX_ID)
@@ -377,12 +423,9 @@ async def test_s0004_ac7_unauthorized_caller_gets_denial_before_value_detail(slo
 
 async def test_multi_header_and_unregistered_contract_are_rejected(slot_world):
     w = slot_world
-    from brain_testing.factslots import ADDITIONAL_INSURED
-
+    insured = w.entity(w.a)
     member = await w.resolve(
-        w.key(
-            w.a, ADDITIONAL_INSURED, member={"type": "entity_ref", "entity_id": str(w.entity(w.a))}
-        )
+        w.key(w.a, ADDITIONAL_INSURED, member={"type": "entity_ref", "entity_id": str(insured)})
     )
     header = await w.commit(
         member.slot_id, {"answer_contract": ENVELOPE, "state": "NOT_APPLICABLE"}
@@ -393,7 +436,7 @@ async def test_multi_header_and_unregistered_contract_are_rejected(slot_world):
         {
             "answer_contract": ENVELOPE,
             "state": "PRESENT",
-            "value": {"type": "entity_ref", "entity_id": str(w.subject)},
+            "value": {"type": "entity_ref", "entity_id": str(insured)},
         },
     )
     assert ok.status_code == 201
@@ -416,6 +459,56 @@ async def test_multi_header_and_unregistered_contract_are_rejected(slot_world):
     unsupported = await w.commit(slot, {"answer_contract": ENVELOPE, "state": "NOT_APPLICABLE"})
     assert unsupported.status_code == 422
     assert unsupported.json()["code"] == "answer_contract_unsupported"
+
+
+async def test_member_commit_rejects_another_entity_before_writing(slot_world):
+    w = slot_world
+    insured = w.entity(w.a)
+    member = await w.resolve(
+        w.key(w.a, ADDITIONAL_INSURED, member={"type": "entity_ref", "entity_id": str(insured)})
+    )
+    envelope = {
+        "answer_contract": ENVELOPE,
+        "state": "PRESENT",
+        "value": {"type": "entity_ref", "entity_id": str(w.subject)},
+    }
+    before = w.counts()
+    denied = await w.commit(member.member_slot_id, envelope, principal=w.reader_b)
+    assert denied.status_code == 404 and denied.json()["code"] == "not_found"
+    rejected = await w.commit(member.member_slot_id, envelope)
+    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"
+    assert rejected.json()["detail"] is None
+    assert w.counts() == before
+    accepted = await w.commit(
+        member.member_slot_id,
+        {**envelope, "value": {"type": "entity_ref", "entity_id": str(insured)}},
+    )
+    assert accepted.status_code == 201, accepted.text
+    assert (await _read(w, member.member_slot_id)).value.canonical["entity_id"] == str(insured)
+
+
+async def test_identifier_member_commit_accepts_equivalence_but_rejects_issuer_change(slot_world):
+    w = slot_world
+    value = {
+        "type": "identifier",
+        "scheme": "us-irs",
+        "identifier_type": "fein",
+        "value": "12-3456789",
+    }
+    member = await w.resolve(w.key(w.a, POLICY_NUMBER, member=value))
+    envelope = {"answer_contract": ENVELOPE, "state": "PRESENT", "value": value}
+    before = w.counts()
+    rejected = await w.commit(
+        member.member_slot_id, {**envelope, "value": {**value, "scheme": "carrier:B"}}
+    )
+    assert rejected.status_code == 422 and rejected.json()["code"] == "member_value_mismatch"
+    assert w.counts() == before
+    accepted = await w.commit(
+        member.member_slot_id, {**envelope, "value": {**value, "value": "123456789"}}
+    )
+    assert accepted.status_code == 201, accepted.text
+    reloaded = (await _read(w, member.member_slot_id)).value.canonical
+    assert reloaded["scheme"] == "us-irs" and reloaded["normalized_value"] == "123456789"
 
 
 async def test_s0003_ac6_reads_never_expose_a_scope_the_reader_cannot_read(slot_world):

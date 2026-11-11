@@ -1,0 +1,35 @@
+[project]
+name = "brain-factslots"
+version = "0.1.0"
+description = "FactSlot identity resolution, typed answer policy and name-fact reader (F0007, ADR-0077)."
+requires-python = ">=3.13"
+dependencies = [
+  "brain-domain",
+  "brain-security",
+]
+
+[tool.uv.sources]
+brain-domain = { workspace = true }
+brain-security = { workspace = true }
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pytest-asyncio>=0.24",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+brain_factslots = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+asyncio_mode = "auto"

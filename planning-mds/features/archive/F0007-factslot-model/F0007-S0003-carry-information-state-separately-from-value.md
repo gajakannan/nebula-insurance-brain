@@ -19,13 +19,13 @@ ADR-0039 decisions 1–3 and master blueprint §107.4. F0007 is the carrier. F00
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** The answer carrier accepts exactly `PRESENT` and the eight ADR-0039 states (`NOT_PROCESSED`, `NOT_FOUND`, `NOT_STATED`, `ILLEGIBLE`, `AMBIGUOUS`, `CONFLICTING`, `EXPLICIT_NEGATIVE`, `NOT_APPLICABLE`). Any other state is rejected with `INFORMATION_STATE_INVALID`. No access-denied or restricted state exists.
-- [ ] **AC2:** Only `PRESENT` carries a value. A value on any other state, or `PRESENT` with no value, is rejected with `STATE_VALUE_MISMATCH` and no fact version is written.
-- [ ] **AC3:** `NOT_FOUND` and `NOT_STATED` require a scope naming the content artifact version, the profile release reference and the pages or blocks covered. A missing or empty scope is rejected with `ABSENCE_SCOPE_REQUIRED`. A scope reference outside the slot's tenant/KB is rejected.
-- [ ] **AC4:** Reading a slot, or a resolvable slot key, that has no recorded answer returns `NOT_PROCESSED`. It never returns null or an empty body.
-- [ ] **AC5:** EX-OWN-003: `NOT_PROCESSED`, `NOT_FOUND` (pages 1–3) and `NOT_STATED` (reviewed scope), each committed through the existing pilot commit path, reload as three distinguishable answers with their scopes intact. F0008 owns how a later answer supersedes an earlier one.
-- [ ] **AC6:** A principal without read authority over a scope's content receives an authorization denial before any missingness explanation. No state answer exposes block IDs, page numbers or excerpts from a scope the principal is not authorized to read (threat T-08).
-- [ ] **AC7:** Each accepted state answer is recorded under the existing commit audit. A rejected carrier produces no fact version, and the rejection reason is returned to the caller.
+- [x] **AC1:** The answer carrier accepts exactly `PRESENT` and the eight ADR-0039 states (`NOT_PROCESSED`, `NOT_FOUND`, `NOT_STATED`, `ILLEGIBLE`, `AMBIGUOUS`, `CONFLICTING`, `EXPLICIT_NEGATIVE`, `NOT_APPLICABLE`). Any other state is rejected with `INFORMATION_STATE_INVALID`. No access-denied or restricted state exists.
+- [x] **AC2:** Only `PRESENT` carries a value. A value on any other state, or `PRESENT` with no value, is rejected with `STATE_VALUE_MISMATCH` and no fact version is written.
+- [x] **AC3:** `NOT_FOUND` and `NOT_STATED` require a scope naming the content artifact version, the profile release reference and the pages or blocks covered. A missing or empty scope is rejected with `ABSENCE_SCOPE_REQUIRED`. A scope reference outside the slot's tenant/KB is rejected.
+- [x] **AC4:** Reading a slot, or a resolvable slot key, that has no recorded answer returns `NOT_PROCESSED`. It never returns null or an empty body.
+- [x] **AC5:** EX-OWN-003: `NOT_PROCESSED`, `NOT_FOUND` (pages 1–3) and `NOT_STATED` (reviewed scope), each committed through the existing pilot commit path, reload as three distinguishable answers with their scopes intact. F0008 owns how a later answer supersedes an earlier one.
+- [x] **AC6:** A principal without read authority over a scope's content receives an authorization denial before any missingness explanation. No state answer exposes block IDs, page numbers or excerpts from a scope the principal is not authorized to read (threat T-08).
+- [x] **AC7:** Each accepted state answer is recorded under the existing commit audit. A rejected carrier produces no fact version, and the rejection reason is returned to the caller.
 
 ## Interaction Contract
 
@@ -61,5 +61,5 @@ Assumption: an unread slot answers `NOT_PROCESSED` at read time, with no stored 
 
 ## Definition of Done
 
-- [ ] Seven ACs pass with positive and negative carrier fixtures and the EX-OWN-003 sequence.
-- [ ] Feature action records tests, coverage and required signoffs.
+- [x] Seven ACs pass with positive and negative carrier fixtures and the EX-OWN-003 sequence.
+- [x] Feature action records tests, coverage and required signoffs.

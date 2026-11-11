@@ -242,7 +242,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0006-S0003](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md) — Done
   - [F0006-S0004](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md) — Done
   - [F0006-S0005](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md) — Done
-- [F0007 — FactSlot model](features/archive/F0007-factslot-model/README.md) - Done / Archived (2026-11-09; feature run `2026-11-09-b94cfa12`; operator approval at G4)
+- [F0007 — FactSlot model](features/archive/F0007-factslot-model/README.md) - Done / Archived after approved remediation (2026-11-10; current feature run `2026-11-09-81798e61`)
   - [F0007-S0001](features/archive/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md) — Done
   - [F0007-S0002](features/archive/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md) — Done
   - [F0007-S0003](features/archive/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md) — Done
@@ -486,7 +486,7 @@ PM owns requirements and sequencing; Architect owns design, ADR and structural K
 
 ---
 
-### 4.14 F0007 FactSlot identity and answer carriers (Phase B approved 2026-11-09; implemented and archived 2026-11-09)
+### 4.14 F0007 FactSlot identity and answer carriers (Phase B approved 2026-11-09; review remediation completed 2026-11-10)
 
 Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 with operator tokens `approve-phase-a` and `approve-phase-b`. The [assembly plan](features/archive/F0007-factslot-model/feature-assembly-plan.md) and Proposed [ADR-0077](architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) define the design.
 
@@ -528,9 +528,14 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Current position (2026-11-09): F0001 to F0007 are done and archived. ADR-0060 is Rejected; the direct-baseline pipeline is the v0.1 path. The 2026-11-08 requirement-ownership amendment (master blueprint section 106.3) assigned every unowned blueprint requirement to a feature, added F0069, corrected the v0.1 dependency graph, and recorded operator decisions for ADR-0038, ADR-0039, ADR-0042, ADR-0043, ADR-0051, ADR-0052 and ADR-0053. F0007 (FactSlot model) was completed on 2026-11-09 (feature run `2026-11-09-b94cfa12`), which unblocks F0008, F0013 and F0017. The roadmap's Now lane is empty again: choosing the next feature is an operator decision. Whether to mark ADR-0077 Accepted, now that all five of its proof gates have evidence, is also an operator decision.
+Current position (2026-11-10): F0001 to F0007 are done and archived. F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 stays Proposed. No production rollout or new ontology/producer/permission scope.
 
 1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
 3. For F0012, run the `plan` action as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
 4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.
+
+
+### F0007 review remediation
+
+F0007 remediation is complete and archived in run `2026-11-09-81798e61`, with explicit operator G4 approval. All seven independent findings were resolved and revalidated; original completion/audits remain historical. No new route, producer, permission or formal ADR acceptance.

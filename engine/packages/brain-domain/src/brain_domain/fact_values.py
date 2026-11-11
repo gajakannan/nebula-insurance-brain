@@ -24,7 +24,7 @@ from uuid import UUID
 ISO4217_LIST_VERSION = "2026-01"
 IDENTIFIER_NORMALIZATION_VERSION = 1
 DECIMAL_MAX_INPUT = 64
-DECIMAL_MAX_CANONICAL = 128
+DECIMAL_MAX_CANONICAL = DECIMAL_MAX_INPUT
 TEXT_MAX = 4000
 NAME_MAX = 1000
 IDENTIFIER_MAX = 256
@@ -138,8 +138,10 @@ def canonical_decimal(raw: object) -> str:
     """One canonical decimal text: no exponent, no trailing fractional zeros, `-0`
     becomes `0`. `1E+6`, `1000000.00` and `1000000` all become `1000000`.
 
-    The input must be a string. Digits are handled exactly, never through a
-    float or a precision-limited Decimal context."""
+    Input and canonical output are limited to 64 total characters, including
+    sign and decimal point, so every emitted form can be read back. Digits are
+    handled exactly, never through a float or a precision-limited Decimal context.
+    """
     if not isinstance(raw, str) or len(raw) > DECIMAL_MAX_INPUT or not _DECIMAL.match(raw):
         raise ValueRejected(ValueReason.DECIMAL_INVALID)
     try:
@@ -156,14 +158,22 @@ def canonical_decimal(raw: object) -> str:
         digits.pop()
         exponent += 1
     text = "".join(str(d) for d in digits)
+    # WHY: exponent text is short even when its expanded value is enormous.
+    # Bound the total canonical size before allocating any exponent-sized string.
+    if exponent >= 0:
+        body_length = len(text) + exponent
+    elif -exponent >= len(text):
+        body_length = 2 - exponent
+    else:
+        body_length = len(text) + 1
+    if body_length + sign > DECIMAL_MAX_CANONICAL:
+        raise ValueRejected(ValueReason.DECIMAL_INVALID)
     if exponent >= 0:
         body = text + "0" * exponent
     elif -exponent >= len(text):
         body = "0." + "0" * (-exponent - len(text)) + text
     else:
         body = text[:exponent] + "." + text[exponent:]
-    if len(body) > DECIMAL_MAX_CANONICAL:
-        raise ValueRejected(ValueReason.DECIMAL_INVALID)
     return ("-" if sign else "") + body
 
 

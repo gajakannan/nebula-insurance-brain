@@ -1,0 +1,98 @@
+   131	        text.encode("utf-8")
+   132	    except UnicodeEncodeError as exc:
+   133	        raise ValueRejected(ValueReason.TEXT_INVALID) from exc
+   134	    return text
+   135	
+   136	
+   137	def canonical_decimal(raw: object) -> str:
+   138	    """One canonical decimal text: no exponent, no trailing fractional zeros, `-0`
+   139	    becomes `0`. `1E+6`, `1000000.00` and `1000000` all become `1000000`.
+   140	
+   141	    The input must be a string. Digits are handled exactly, never through a
+   142	    float or a precision-limited Decimal context."""
+   143	    if not isinstance(raw, str) or len(raw) > DECIMAL_MAX_INPUT or not _DECIMAL.match(raw):
+   144	        raise ValueRejected(ValueReason.DECIMAL_INVALID)
+   145	    try:
+   146	        sign, digit_tuple, exponent = Decimal(raw).as_tuple()
+   147	    except InvalidOperation as exc:  # pragma: no cover - the pattern admits only finite forms
+   148	        raise ValueRejected(ValueReason.DECIMAL_INVALID) from exc
+   149	    assert isinstance(exponent, int)
+   150	    digits = list(digit_tuple)
+   151	    while len(digits) > 1 and digits[0] == 0:
+   152	        digits.pop(0)
+   153	    if all(d == 0 for d in digits):
+   154	        return "0"
+   155	    while exponent < 0 and digits[-1] == 0:
+   156	        digits.pop()
+   157	        exponent += 1
+   158	    text = "".join(str(d) for d in digits)
+   159	    if exponent >= 0:
+   160	        body = text + "0" * exponent
+   161	    elif -exponent >= len(text):
+   162	        body = "0." + "0" * (-exponent - len(text)) + text
+   163	    else:
+   164	        body = text[:exponent] + "." + text[exponent:]
+   165	    if len(body) > DECIMAL_MAX_CANONICAL:
+   166	        raise ValueRejected(ValueReason.DECIMAL_INVALID)
+   167	    return ("-" if sign else "") + body
+   168	
+   169	
+   170	@cache
+   171	def iso4217_codes() -> frozenset[str]:
+   172	    """The pinned ISO 4217 alphabetic list (`ISO4217_LIST_VERSION`), process-cached."""
+    72	        value: Mapping[str, Any],
+    73	        *,
+    74	        authorized_scope: tuple[UUID, UUID],
+    75	    ) -> Mapping[str, Any] | None:
+    76	        """The canonical envelope to store, or `None` for a legacy slot."""
+    77	        slot = await self._store.slot(slot_id)
+    78	        if slot is None or slot.legacy:
+    79	            return None
+    80	        if slot.owner != authorized_scope:  # pragma: no cover - the commit lock checks it first
+    81	            raise FactAnswerRejected(AnswerReason.ANSWER_CONTRACT_UNSUPPORTED)
+    82	        contract = None
+    83	        try:
+    84	            if slot.predicate_key and slot.predicate_release_ref:
+    85	                contract = self._registry.find(
+    86	                    PredicateKey.parse(slot.predicate_key), slot.predicate_release_ref
+    87	                )
+    88	        except SlotRejected:
+    89	            contract = None
+    90	        if contract is None:
+    91	            raise FactAnswerRejected(AnswerReason.ANSWER_CONTRACT_UNSUPPORTED)
+    92	        answer = parse_answer(
+    93	            value,
+    94	            value_type=contract.value_type,
+    95	            basis_required=contract.basis_required,
+    96	            multi_header=slot.multi_header,
+    97	        )
+    98	        if answer.scope is not None:
+    99	            owner = await self._store.artifact_owner(answer.scope.content_artifact_id)
+   100	            if owner != slot.owner:
+   101	                raise FactAnswerRejected(AnswerReason.ABSENCE_SCOPE_OUT_OF_SCOPE)
+   102	        if answer.value is not None:
+   103	            await self._check_value_detail(slot, answer)
+   104	        return answer.to_json()
+   105	
+   106	    async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
+   107	        assert answer.value is not None
+   108	        name = answer.name
+   109	        if name is not None and not await self._store.name_evidence_eligible(
+   110	            name.evidence, slot.owner
+   111	        ):
+   112	            raise FactAnswerRejected(AnswerReason.NAME_EVIDENCE_REQUIRED)
+   113	        if answer.value.value_type == ValueType.ENTITY_REF and not await self._store.entity_in_kb(
+   114	            slot.tenant_id, slot.knowledge_base_id, UUID(str(answer.value.identity))
+   115	        ):
+   116	            raise FactAnswerRejected(AnswerReason.RELATIONSHIP_OBJECT_OUT_OF_SCOPE)
+   117	
+   118	
+   119	class FactAnswerReader:
+   120	    """Internal reader: an identity-v1 slot with no version at the coordinates
+   121	    answers `NOT_PROCESSED`, never null. Read authorization is the caller's
+   400	| Identity domain and resolver | `engine/packages/brain-domain/src/brain_domain/fact_slots.py`, `engine/packages/brain-factslots/src/brain_factslots/**` |
+   401	| Typed values and answers | `engine/packages/brain-domain/src/brain_domain/{fact_values,fact_answers}.py` |
+   402	| Persistence | `engine/packages/brain-persistence/src/brain_persistence/{fact_slot_models,fact_slots}.py`, `engine/migrations/versions/0012_f0007_factslot_identity.py` |
+   403	| Commit integration | existing globs for `brain_temporal/commit.py`, `repositories.py`, `brain_api/routes/facts.py`; extend only missing coverage |
+   404	
+   405	G7 authors binding shards under `kg-source/**` and recompiles. Generated YAML is never hand-edited.
