@@ -5,7 +5,7 @@
 **Title:** Inventory core persistence ownership and phase boundaries  
 **Priority:** Critical  
 **Phase:** v0.1A  
-**Status:** Not Started
+**Status:** Done
 
 ## User Story
 
