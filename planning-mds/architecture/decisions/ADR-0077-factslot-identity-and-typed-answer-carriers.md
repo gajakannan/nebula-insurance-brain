@@ -2,17 +2,18 @@
 
 ## Status
 
-- [x] Proposed
-- [ ] Accepted
+- [ ] Proposed
+- [x] Accepted
 - [ ] Superseded
 - [ ] Rejected
 
 **Date:** 2026-11-09
 **Owner:** Architect
-**Design review:** F0007 Phase B approved by operator token `approve-phase-b` on 2026-11-09, plan run `2026-11-09-60865e32`. Formal ADR acceptance remains pending the operator's decision on the recorded runtime proofs below.
+**Accepted:** 2026-11-10 by the operator, on the five-gate proof map in [`adr-acceptance-proposal.md`](../../operations/evidence/runs/2026-11-10-d49d1afa/adr-acceptance-proposal.md), after remediation PR #44 merged to `main` as `a2d3d77`. ADR-0039 and ADR-0066 remain Proposed; this acceptance does not accept them.
+**Design review:** F0007 Phase B approved by operator token `approve-phase-b` on 2026-11-09, plan run `2026-11-09-60865e32`. Formal acceptance was recorded on 2026-11-10 (see **Accepted**).
 **Formal acceptance:** requires the PostgreSQL migration, concurrent-resolution, ownership, carrier-validation and pilot-regression proofs listed in the F0007 assembly plan. Plan approval alone is not runtime acceptance.
-**Proof evidence:** the current F0007 remediation run is `2026-11-09-81798e61`, which supersedes `2026-11-09-b94cfa12` and includes the regression proofs for the five gates below. The status stays Proposed because the operator has approved implementation and closeout but has not recorded formal ADR acceptance. Record acceptance, or an explicit deferral, before F0008 Phase B. ADR-0039 and ADR-0066 retain their own broader acceptance gates; F0007 does not accept them by implication.
-**Acceptance review:** the [five-gate proof map and proposed disposition](../../operations/evidence/runs/2026-11-10-d49d1afa/adr-acceptance-proposal.md) identify the current tests and passing PR CI. The operator's formal decision is pending; PR #44 is explicitly held unmerged.
+**Proof evidence:** the current F0007 remediation run is `2026-11-09-81798e61`, which supersedes `2026-11-09-b94cfa12` and includes the regression proofs for the five gates below. ADR-0039 and ADR-0066 retain their own broader acceptance gates; F0007 does not accept them by implication.
+**Acceptance review:** the [five-gate proof map and proposed disposition](../../operations/evidence/runs/2026-11-10-d49d1afa/adr-acceptance-proposal.md) identify the current tests and passing PR CI. The operator accepted the proposed disposition on 2026-11-10; PR #44 merged as `a2d3d77`.
 **Refines:** [ADR-0006](ADR-0006-factslot-defines-canonical-semantic-identity.md) (Accepted) beyond its first scalar example. Implements the F0007 share of [ADR-0039](ADR-0039-typed-insurance-values-and-completeness.md) decisions 1–5 and [ADR-0066](ADR-0066-names-are-time-bounded-claims.md) §1/§1a/§2. Does not accept those Proposed ADRs and does not implement ADR-0039 decision 6 (package completeness, F0014).
 
 ## Context
@@ -190,4 +191,4 @@ fact_slot_qualifier (slot, name, type, canonical value)  ×N per slot
 
 ## Review remediation history
 
-Operator-authorized run `2026-11-09-81798e61` tightened the member-value, decimal-bound, identity-guard and protected-read rules. On 2026-11-10 those rules were folded into D4, D5, D7 and D8 in response to plan-review finding PR-M1. This clarification preserves the Proposed status and the operator's separate formal acceptance decision.
+Operator-authorized run `2026-11-09-81798e61` tightened the member-value, decimal-bound, identity-guard and protected-read rules. On 2026-11-10 those rules were folded into D4, D5, D7 and D8 in response to plan-review finding PR-M1. The operator formally accepted the ADR on 2026-11-10, after PR #44 merged.

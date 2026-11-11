@@ -488,7 +488,7 @@ PM owns requirements and sequencing; Architect owns design, ADR and structural K
 
 ### 4.14 F0007 FactSlot identity and answer carriers (Phase B approved 2026-11-09; review remediation completed 2026-11-10)
 
-Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 with operator tokens `approve-phase-a` and `approve-phase-b`. The [assembly plan](features/archive/F0007-factslot-model/feature-assembly-plan.md) and Proposed [ADR-0077](architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) define the design.
+Plan run `2026-11-09-60865e32`: Phase A and Phase B were approved on 2026-11-09 with operator tokens `approve-phase-a` and `approve-phase-b`. The [assembly plan](features/archive/F0007-factslot-model/feature-assembly-plan.md) and [ADR-0077](architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) define the design.
 
 - **Slot identity:** tenant, KB, subject, an opaque major-versioned predicate key and normalized qualifier rows, with a versioned SHA-256/JCS fingerprint used only for lookup. Concurrent resolvers converge on one slot. A collision is rejected, never merged.
 - **Members:** MULTI members are child slot rows, so the ADR-0008 exclusion applies per member without changing the F0008-owned version table.
@@ -506,7 +506,7 @@ Feature run `2026-11-09-b94cfa12` implemented the design: domain modules in `bra
 - T-08 now holds on the answer read path;
 - a foreign evidence assertion is indistinguishable from a missing one.
 
-ADR-0077 stays Proposed. Formal acceptance is an operator decision.
+ADR-0077 was accepted by the operator on 2026-11-10; ADR-0039 and ADR-0066 stay Proposed.
 
 ---
 
@@ -528,7 +528,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Current position (2026-11-10): F0001 to F0007 are done and archived. F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 stays Proposed. No production rollout or new ontology/producer/permission scope.
+Current position (2026-11-10): F0001 to F0007 are done and archived. F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
 
 1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).

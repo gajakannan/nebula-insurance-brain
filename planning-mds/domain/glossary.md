@@ -74,7 +74,7 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 ### FactSlot
 **Type:** Entity
 **Definition:** The canonical semantic identity of one fact about an entity, for example the EachOccurrence limit of a coverage; the unit that fact versions attach to (13, ADR-0006)
-**Refinement (F0007 design, Proposed ADR-0077):** Identity is tenant + knowledge base + subject entity + predicate key + normalized qualifiers. Relationship slots add the object entity. Slots are KB-owned. Pilot slots without a predicate key are labelled legacy and never acquire a fabricated identity.
+**Refinement (F0007, ADR-0077 Accepted):** Identity is tenant + knowledge base + subject entity + predicate key + normalized qualifiers. Relationship slots add the object entity. Slots are KB-owned. Pilot slots without a predicate key are labelled legacy and never acquire a fabricated identity.
 
 ### Predicate Key
 **Type:** Value Object
