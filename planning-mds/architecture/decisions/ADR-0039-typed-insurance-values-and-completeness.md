@@ -12,6 +12,7 @@
 **Owner:** Architect
 **Proving features:** F0007 (state and value carriers), F0011 (schemas), F0013 (GL value types), F0014 (expected package contents), F0023 (display)
 **Formal acceptance:** F0011 schema fixtures cover every information state, qualified money and scoped identifiers, including failure cases; F0023 shows the missing-endorsement example as an incomplete package.
+**F0007 review disposition (2026-11-10, PR-M1):** retaining Proposed is intentional. F0007 proves decisions 1–5 at the answer carrier and commit boundary; it does not prove decision 6's expected-package behavior or the F0011/F0023 acceptance gates above. F0011 owns schema publication and fixtures, F0014 owns expected package contents, and F0023 owns the incomplete-package display proof. Their architecture closeout must revisit formal acceptance with those proofs. F0007 completion and acceptance of ADR-0077 do not accept this broader ADR.
 **Source:** `planning-mds/architecture/master-blueprint.md` sections 107.3, 107.4 and 116
 
 ## Context

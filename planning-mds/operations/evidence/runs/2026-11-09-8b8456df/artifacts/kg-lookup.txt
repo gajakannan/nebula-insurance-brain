@@ -1,0 +1,621 @@
+{
+  "target": {
+    "status": "archived-done",
+    "id": "feature:F0007",
+    "path": "planning-mds/features/archive/F0007-factslot-model",
+    "affects": [
+      "capability:bitemporal-canonical-commit",
+      "capability:factslot-identity-resolution",
+      "capability:typed-fact-answer",
+      "endpoint:fact-commit",
+      "entity:canonical-fact-version",
+      "entity:fact-slot",
+      "entity:fact-slot-qualifier"
+    ],
+    "depends_on": [
+      "feature:F0002",
+      "feature:F0003",
+      "feature:F0006"
+    ],
+    "governed_by": [
+      "adr:0006",
+      "adr:0038",
+      "adr:0039",
+      "adr:0042",
+      "adr:0061",
+      "adr:0066",
+      "adr:0077"
+    ],
+    "notes": [
+      "As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/kg-reconciliation.md; archive path/status and generated trackers are PM G8 ownership.",
+      "G3 security review fixed SEC-F7-01 (name evidence READ before reason), SEC-F7-02 (T-08 on the answer read path) and SEC-F7-03 (cross-KB evidence oracle). Residual: slot restrictions fixed at creation (F0018 re-derivation); envelope DB backstop (F0008); name-hook per-slot authorization cost is a design note for F0017/F0023.",
+      "Phase B (Proposed ADR-0077): MULTI members are child fact_slot rows so the ADR-0008 exclusion applies per member with no DDL on the F0008-owned canonical_fact_version; answers use the fact-answer/v1 envelope in its value for identity-v1 slots only. Pilot slots stay legacy and the pilot GET contract is unchanged.",
+      "Plan run 2026-11-09-60865e32 G1 decisions: F0007 binds ownership only and hands the RLS inventory (fact_slot, fact_slot_qualifier) to F0018; predicate keys are opaque and versioned with a minimal sys namespace; display-name precedence is deferred to F0017/F0023.",
+      "Requirement-ownership amendment 2026-11-08 - Carry 109.1: define FactSlot identity beyond the first scalar example (multi-valued, qualified and relationship slots). FactSlot keys are the predicate key referenced by the ADR-0038 SourceAuthorityPolicy owned by F0018.",
+      "Requirement-ownership amendment 2026-11-08 - Carry master blueprint 107.4 and ADR-0039 into the PRD: information state (eight states) is separate from the value, NOT_FOUND/NOT_STATED carry the exact scope searched, and access denial is never an information state. Values use qualified money (exact decimal, ISO 4217 currency, basis) and scoped identifiers (scheme, type, value).",
+      "Requirement-ownership amendment 2026-11-08 - New tenant-owned tables bind child rows and foreign keys to tenant ownership and follow the ADR-0042 row-security pattern settled in F0018 Phase B."
+    ],
+    "uses_api_contract": [
+      "api:brain-api"
+    ],
+    "uses_schema": [
+      "schema:canonical-commit-request",
+      "schema:fact-answer-v1",
+      "schema:fact-slot-key-v1",
+      "schema:fact-slot-resolution-result-v1",
+      "schema:problem-details"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:bitemporal-canonical-commit",
+      "label": "Bitemporal canonical commit",
+      "notes": "Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals, explicit change reasons, and facts plus audit plus outbox in one transaction (ADR-0007, ADR-0008, ADR-0009).",
+      "related_nodes": [
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "entity:canonical-fact-version",
+        "entity:fact-slot",
+        "entity:outbox-event",
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "workflow:canonical-commit"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "backend": [
+          "engine/migrations/versions/0003_fact_slots_and_commits.py",
+          "engine/packages/brain-temporal/src/**"
+        ],
+        "tests": [
+          "engine/apps/api/tests/test_facts.py",
+          "engine/packages/brain-temporal/tests/**"
+        ]
+      }
+    },
+    {
+      "id": "capability:factslot-identity-resolution",
+      "label": "FactSlot identity resolution",
+      "notes": "Implemented (F0007 run 2026-11-09-b94cfa12) deterministic resolve-or-create of KB-owned FactSlots from subject, opaque versioned predicate key and normalized typed qualifiers; MULTI members are child slots and RELATIONSHIP slots include the object. Authorized from source artifacts with derived restrictions; no grants, routes or producer activation.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        },
+        {
+          "adr": "adr:0006",
+          "section": "Decision",
+          "summary": "FactSlot is first-class canonical semantic identity."
+        }
+      ],
+      "related_nodes": [
+        "adr:0006",
+        "adr:0077",
+        "capability:authorization-enforcement",
+        "entity:fact-slot",
+        "entity:fact-slot-qualifier",
+        "schema:fact-slot-key-v1",
+        "schema:fact-slot-resolution-result-v1"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0007-factslot-model/PRD.md",
+        "planning-mds/features/archive/F0007-factslot-model/feature-assembly-plan.md",
+        "planning-mds/features/archive/F0007-factslot-model/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md"
+        ],
+        "backend": [
+          "engine/packages/brain-domain/src/brain_domain/fact_slots.py",
+          "engine/packages/brain-factslots/pyproject.toml",
+          "engine/packages/brain-factslots/src/brain_factslots/__init__.py",
+          "engine/packages/brain-factslots/src/brain_factslots/names.py",
+          "engine/packages/brain-factslots/src/brain_factslots/ports.py",
+          "engine/packages/brain-factslots/src/brain_factslots/predicates.py",
+          "engine/packages/brain-factslots/src/brain_factslots/resolution.py",
+          "engine/packages/brain-factslots/src/brain_factslots/service.py",
+          "engine/packages/brain-persistence/src/brain_persistence/fact_slots.py",
+          "engine/packages/brain-testing/src/brain_testing/factslots.py"
+        ],
+        "schemas": [
+          "planning-mds/schemas/fact-slot-key-v1.schema.json",
+          "planning-mds/schemas/fact-slot-resolution-result-v1.schema.json"
+        ],
+        "tests": [
+          "engine/packages/brain-factslots/tests/conftest.py",
+          "engine/packages/brain-factslots/tests/test_contract_examples.py",
+          "engine/packages/brain-factslots/tests/test_factslots_unit.py",
+          "engine/tests/fixtures/factslots/harness.py",
+          "engine/tests/integration/test_factslot_names.py",
+          "engine/tests/integration/test_factslot_ownership.py",
+          "engine/tests/integration/test_factslot_resolution.py"
+        ]
+      }
+    },
+    {
+      "id": "capability:typed-fact-answer",
+      "label": "Typed fact answer carrier",
+      "notes": "Implemented (F0007 run 2026-11-09-b94cfa12) fact-answer/v1 envelope for identity-v1 slots: PRESENT plus eight ADR-0039 states, mandatory absence scope for NOT_FOUND/NOT_STATED, no access-denied state, exact original-currency money and scheme-scoped identifiers. Validated at the existing commit; unread slots read NOT_PROCESSED internally. HTTP return of states is F0020.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        },
+        {
+          "adr": "adr:0039",
+          "section": "Decision",
+          "summary": "Information state is separate from value; money is qualified and identifiers are scoped."
+        }
+      ],
+      "related_nodes": [
+        "adr:0039",
+        "adr:0077",
+        "capability:bitemporal-canonical-commit",
+        "endpoint:fact-commit",
+        "entity:canonical-fact-version",
+        "entity:fact-slot",
+        "schema:fact-answer-v1"
+      ],
+      "source_docs": [
+        "planning-mds/domain/glossary.md",
+        "planning-mds/features/archive/F0007-factslot-model/feature-assembly-plan.md",
+        "planning-mds/features/archive/F0007-factslot-model/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md"
+        ],
+        "backend": [
+          "engine/packages/brain-domain/src/brain_domain/data/iso4217-2026-01.txt",
+          "engine/packages/brain-domain/src/brain_domain/fact_answers.py",
+          "engine/packages/brain-domain/src/brain_domain/fact_values.py",
+          "engine/packages/brain-factslots/src/brain_factslots/answers.py"
+        ],
+        "schemas": [
+          "planning-mds/schemas/fact-answer-v1.schema.json"
+        ],
+        "tests": [
+          "engine/packages/brain-domain/tests/test_fact_slots.py",
+          "engine/tests/integration/test_factslot_answers.py"
+        ]
+      }
+    },
+    {
+      "id": "endpoint:fact-commit",
+      "label": "POST /facts/{factSlotId}/commits",
+      "method": "POST",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "capability:authorization-enforcement",
+        "capability:bitemporal-canonical-commit"
+      ],
+      "resource": "fact_slot",
+      "route": "/facts/{factSlotId}/commits",
+      "source_docs": [
+        "planning-mds/api/brain-api.yaml",
+        "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+      ],
+      "_kind": "endpoint"
+    },
+    {
+      "id": "entity:canonical-fact-version",
+      "label": "Canonical fact version",
+      "notes": "Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references, commit id, and the four separately stored timestamps; overlap prevented by a two-range GiST exclusion.",
+      "related_entities": [
+        "entity:fact-slot",
+        "entity:outbox-event"
+      ],
+      "related_nodes": [
+        "capability:bitemporal-canonical-commit",
+        "schema:canonical-commit-response"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/master-blueprint.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md"
+      ],
+      "_kind": "entity"
+    },
+    {
+      "id": "entity:fact-slot",
+      "label": "Fact slot",
+      "notes": "Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit of a coverage); the parent of bitemporal fact versions. F0007 refinement (ADR-0077, implemented in run 2026-11-09-b94cfa12, migration 0012): identity-v1 rows add an opaque versioned predicate key, cardinality, optional relationship object and MULTI member children; pilot rows stay legacy with NULL identity and no fabricated predicate.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_entities": [
+        "entity:canonical-fact-version",
+        "entity:fact-slot-qualifier"
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:bitemporal-canonical-commit",
+        "capability:factslot-identity-resolution",
+        "capability:typed-fact-answer"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/master-blueprint.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md",
+        "planning-mds/features/archive/F0007-factslot-model/feature-assembly-plan.md"
+      ],
+      "_kind": "entity"
+    },
+    {
+      "id": "entity:fact-slot-qualifier",
+      "label": "FactSlot qualifier",
+      "notes": "Implemented (F0007 run 2026-11-09-b94cfa12, migration 0012) authoritative, append-only normalized identity part of an identity-v1 FactSlot (name, declared type, canonical value) with composite tenant/KB ownership to its slot. Omitted qualifiers contribute nothing; explicit null is rejected. Listed in the RLS inventory handed to F0018.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_entities": [
+        "entity:fact-slot"
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:factslot-identity-resolution"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/data-model.md",
+        "planning-mds/features/archive/F0007-factslot-model/feature-assembly-plan.md"
+      ],
+      "_kind": "entity",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/data-model.md"
+        ],
+        "backend": [
+          "engine/packages/brain-persistence/src/brain_persistence/fact_slot_models.py"
+        ]
+      }
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0006",
+      "label": "FactSlot Defines Canonical Semantic Identity",
+      "path": "planning-mds/architecture/decisions/ADR-0006-factslot-defines-canonical-semantic-identity.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0038",
+      "label": "Semantic Authority and Source Ownership",
+      "path": "planning-mds/architecture/decisions/ADR-0038-semantic-authority-and-source-ownership.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0039",
+      "label": "Typed Insurance Values and Completeness",
+      "path": "planning-mds/architecture/decisions/ADR-0039-typed-insurance-values-and-completeness.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0042",
+      "label": "Resource and Derivation Authorization",
+      "path": "planning-mds/architecture/decisions/ADR-0042-resource-and-derivation-authorization.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0061",
+      "label": "Tenant identity and structural ownership",
+      "path": "planning-mds/architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md",
+      "related_nodes": [
+        "schema:authx-kernel"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0066",
+      "label": "Names Are Time-Bounded Claims",
+      "path": "planning-mds/architecture/decisions/ADR-0066-names-are-time-bounded-claims.md",
+      "related_nodes": [
+        "adr:0006",
+        "adr:0025",
+        "entity:fact-slot",
+        "entity:tenant-entity-identity"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0077",
+      "label": "FactSlot Identity and Typed Answer Carriers (Proposed; F0007 Phase B design approved 2026-11-09, runtime proofs pending)",
+      "path": "planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md",
+      "related_nodes": [
+        "adr:0006",
+        "adr:0039",
+        "adr:0066",
+        "capability:factslot-identity-resolution",
+        "capability:typed-fact-answer",
+        "entity:fact-slot",
+        "entity:fact-slot-qualifier"
+      ],
+      "_kind": "adr"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:canonical-commit-request",
+      "label": "CanonicalCommitRequest",
+      "path": "planning-mds/schemas/canonical-commit-request.schema.json",
+      "related_nodes": [
+        "capability:bitemporal-canonical-commit",
+        "endpoint:fact-commit"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-answer-v1",
+      "label": "Fact Answer V1",
+      "path": "planning-mds/schemas/fact-answer-v1.schema.json",
+      "notes": "F0007 answer envelope stored in canonical_fact_version.value for identity-v1 slots; Phase B approved by operator 2026-11-09; runtime implementation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:typed-fact-answer",
+        "entity:canonical-fact-version"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-slot-key-v1",
+      "label": "FactSlot Key V1",
+      "path": "planning-mds/schemas/fact-slot-key-v1.schema.json",
+      "notes": "F0007 internal slot-resolution request design contract; Phase B approved by operator 2026-11-09. Not an HTTP payload; runtime implementation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:factslot-identity-resolution",
+        "entity:fact-slot"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-slot-resolution-result-v1",
+      "label": "FactSlot Resolution Result V1",
+      "path": "planning-mds/schemas/fact-slot-resolution-result-v1.schema.json",
+      "notes": "F0007 server-computed resolution outcome design contract; Phase B approved by operator 2026-11-09; runtime implementation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:factslot-identity-resolution",
+        "entity:fact-slot"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:problem-details",
+      "label": "ProblemDetails",
+      "path": "planning-mds/schemas/problem-details.schema.json",
+      "related_nodes": [
+        "api:brain-api",
+        "capability:runtime-roots-and-toolchain"
+      ],
+      "_kind": "schema"
+    }
+  ],
+  "uses_api_contract": [
+    {
+      "id": "api:brain-api",
+      "label": "Nebula Insurance Brain API",
+      "path": "planning-mds/api/brain-api.yaml",
+      "related_nodes": [
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:health",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get"
+      ],
+      "_kind": "api_contract"
+    }
+  ],
+  "depends_on": [
+    {
+      "status": "archived-done",
+      "id": "feature:F0002",
+      "path": "planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts",
+      "affects": [
+        "capability:authorization-enforcement",
+        "capability:bounded-delegation",
+        "capability:credential-verification-and-principal-resolution",
+        "capability:current-resource-scope",
+        "capability:durable-authorization-decisions",
+        "capability:structural-tenancy-and-entity-identity",
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get",
+        "entity:audit-event",
+        "entity:delegation",
+        "entity:knowledge-base",
+        "entity:membership",
+        "entity:principal",
+        "entity:resource-scope",
+        "entity:tenant",
+        "entity:tenant-entity-identity",
+        "entity:workspace"
+      ],
+      "depends_on": [
+        "feature:F0001"
+      ],
+      "governed_by": [
+        "adr:0030",
+        "adr:0042",
+        "adr:0049",
+        "adr:0050",
+        "adr:0052",
+        "adr:0053",
+        "adr:0061",
+        "adr:0062"
+      ],
+      "notes": [
+        "F0005 synchronous worker is an impacted consumer requiring adapter regression; its ADR-0060 production activation is not accepted by F0002.",
+        "Historical review-to-commit wording reconciled in ADR-0062: F0002 owns authorization of existing consumers, F0018 owns full orchestration, F0022 owns review UI.",
+        "Identity is tenant-scoped; KB access is explicit. Existing pilot roles only.",
+        "Implemented in feature run 2026-09-27-bb7c8d1d: capabilities bound to as-built source at G7; ADR-0061/0062 accepted for the bounded F0002 scope; ADR-0042/0052/0053 remain Proposed.",
+        "Phases A and B explicitly approved by user with approve-phase-a and approve-phase-b on 2026-09-25."
+      ],
+      "restricted_to_role": [
+        "role:reviewer",
+        "role:service-principal",
+        "role:tenant-member"
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:authx-kernel",
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "schema:problem-details",
+        "schema:review-decision"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0003",
+      "path": "planning-mds/features/archive/F0003-postgresql-persistence",
+      "affects": [
+        "capability:bitemporal-canonical-commit",
+        "capability:postgresql-persistence-contract",
+        "capability:structural-tenancy-and-entity-identity",
+        "entity:assertion",
+        "entity:audit-event",
+        "entity:canonical-fact-version",
+        "entity:content-artifact",
+        "entity:fact-slot",
+        "entity:knowledge-base",
+        "entity:membership",
+        "entity:outbox-event",
+        "entity:principal",
+        "entity:review-decision",
+        "entity:review-item",
+        "entity:semantic-interpretation-run",
+        "entity:tenant",
+        "entity:workspace",
+        "workflow:canonical-commit"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002"
+      ],
+      "governed_by": [
+        "adr:0002",
+        "adr:0003",
+        "adr:0007",
+        "adr:0008",
+        "adr:0009",
+        "adr:0010",
+        "adr:0030",
+        "adr:0059"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0006",
+      "path": "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis",
+      "affects": [
+        "capability:assertion-eligibility-guards",
+        "capability:structural-assertion-admission",
+        "capability:versioned-assertion-semantics",
+        "endpoint:fact-commit",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get",
+        "entity:assertion",
+        "entity:assertion-document-reference",
+        "entity:assertion-name-claim",
+        "entity:assertion-semantics"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002",
+        "feature:F0003",
+        "feature:F0004",
+        "feature:F0005"
+      ],
+      "governed_by": [
+        "adr:0005",
+        "adr:0010",
+        "adr:0013",
+        "adr:0030",
+        "adr:0035",
+        "adr:0037",
+        "adr:0058",
+        "adr:0061",
+        "adr:0062",
+        "adr:0063",
+        "adr:0065",
+        "adr:0075"
+      ],
+      "notes": [
+        "ADR-0065/0075 remain Proposed; bounded feature completion does not accept the broader ADR proof gates. Unregistered legacy pilot evidence compatibility remains explicit; attributable v2 correction lineage retains basis/mood/evidence restrictions.",
+        "As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/kg-reconciliation.md; archive path/status and generated trackers are PM G8 ownership.",
+        "Automatic importer remains v1-only. No live producer/model, UI, grants or broader extraction activation. F0016 owns durable drop/run adoption, F0018 full canonical orchestration, F0022 display and F0066 open extraction/alignment.",
+        "SEC-01 High is accepted only for trusted local synthetic fixtures; AI Engineer + DevOps remediate/qualify dependencies and verify resource isolation, Security verifies, target2026-11-10 and before untrusted/production PDFs. SEC-02 Medium global planning-audit carryover targets2026-11-10; SEC-03 Low nosniff follow-up targets2026-11-17."
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:assertion-admission-result-v1",
+        "schema:assertion-record-v2",
+        "schema:interpretation-result",
+        "schema:interpretation-result-v2",
+        "schema:problem-details"
+      ],
+      "_kind": "feature"
+    }
+  ]
+}

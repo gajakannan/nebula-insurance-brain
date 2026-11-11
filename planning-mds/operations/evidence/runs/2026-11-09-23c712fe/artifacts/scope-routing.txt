@@ -1,0 +1,157 @@
+{
+  "target": {
+    "status": "in-progress",
+    "id": "feature:F0007",
+    "path": "planning-mds/features/F0007-factslot-model",
+    "affects": [
+      "capability:bitemporal-canonical-commit",
+      "capability:factslot-identity-resolution",
+      "capability:typed-fact-answer",
+      "endpoint:fact-commit",
+      "entity:canonical-fact-version",
+      "entity:fact-slot",
+      "entity:fact-slot-qualifier"
+    ],
+    "depends_on": [
+      "feature:F0002",
+      "feature:F0003",
+      "feature:F0006"
+    ],
+    "governed_by": [
+      "adr:0006",
+      "adr:0038",
+      "adr:0039",
+      "adr:0042",
+      "adr:0061",
+      "adr:0066",
+      "adr:0077"
+    ],
+    "notes": [
+      "As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/kg-reconciliation.md; archive path/status and generated trackers are PM G8 ownership.",
+      "G3 security review fixed SEC-F7-01 (name evidence READ before reason), SEC-F7-02 (T-08 on the answer read path) and SEC-F7-03 (cross-KB evidence oracle). Residual: slot restrictions fixed at creation (F0018 re-derivation); envelope DB backstop (F0008); name-hook per-slot authorization cost is a design note for F0017/F0023.",
+      "Operator authorized targeted remediation of review findings; the prior archive is reopened, with no new producer, route, permission or ontology scope.",
+      "Phase B (Proposed ADR-0077): MULTI members are child fact_slot rows so the ADR-0008 exclusion applies per member with no DDL on the F0008-owned canonical_fact_version; answers use the fact-answer/v1 envelope in its value for identity-v1 slots only. Pilot slots stay legacy and the pilot GET contract is unchanged.",
+      "Plan run 2026-11-09-60865e32 G1 decisions: F0007 binds ownership only and hands the RLS inventory (fact_slot, fact_slot_qualifier) to F0018; predicate keys are opaque and versioned with a minimal sys namespace; display-name precedence is deferred to F0017/F0023.",
+      "Requirement-ownership amendment 2026-11-08 - Carry 109.1: define FactSlot identity beyond the first scalar example (multi-valued, qualified and relationship slots). FactSlot keys are the predicate key referenced by the ADR-0038 SourceAuthorityPolicy owned by F0018.",
+      "Requirement-ownership amendment 2026-11-08 - Carry master blueprint 107.4 and ADR-0039 into the PRD: information state (eight states) is separate from the value, NOT_FOUND/NOT_STATED carry the exact scope searched, and access denial is never an information state. Values use qualified money (exact decimal, ISO 4217 currency, basis) and scoped identifiers (scheme, type, value).",
+      "Requirement-ownership amendment 2026-11-08 - New tenant-owned tables bind child rows and foreign keys to tenant ownership and follow the ADR-0042 row-security pattern settled in F0018 Phase B."
+    ],
+    "uses_api_contract": [
+      "api:brain-api"
+    ],
+    "uses_schema": [
+      "schema:canonical-commit-request",
+      "schema:fact-answer-v1",
+      "schema:fact-slot-key-v1",
+      "schema:fact-slot-resolution-result-v1",
+      "schema:problem-details"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:bitemporal-canonical-commit",
+      "label": "Bitemporal canonical commit"
+    },
+    {
+      "id": "capability:factslot-identity-resolution",
+      "label": "FactSlot identity resolution"
+    },
+    {
+      "id": "capability:typed-fact-answer",
+      "label": "Typed fact answer carrier"
+    },
+    {
+      "id": "endpoint:fact-commit",
+      "label": "POST /facts/{factSlotId}/commits"
+    },
+    {
+      "id": "entity:canonical-fact-version",
+      "label": "Canonical fact version"
+    },
+    {
+      "id": "entity:fact-slot",
+      "label": "Fact slot"
+    },
+    {
+      "id": "entity:fact-slot-qualifier",
+      "label": "FactSlot qualifier"
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0006",
+      "label": "FactSlot Defines Canonical Semantic Identity"
+    },
+    {
+      "id": "adr:0038",
+      "label": "Semantic Authority and Source Ownership"
+    },
+    {
+      "id": "adr:0039",
+      "label": "Typed Insurance Values and Completeness"
+    },
+    {
+      "id": "adr:0042",
+      "label": "Resource and Derivation Authorization"
+    },
+    {
+      "id": "adr:0061",
+      "label": "Tenant identity and structural ownership"
+    },
+    {
+      "id": "adr:0066",
+      "label": "Names Are Time-Bounded Claims"
+    },
+    {
+      "id": "adr:0077",
+      "label": "FactSlot Identity and Typed Answer Carriers (Proposed; F0007 Phase B design approved 2026-11-09, runtime proofs pending)"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:canonical-commit-request",
+      "label": "CanonicalCommitRequest"
+    },
+    {
+      "id": "schema:fact-answer-v1",
+      "label": "Fact Answer V1"
+    },
+    {
+      "id": "schema:fact-slot-key-v1",
+      "label": "FactSlot Key V1"
+    },
+    {
+      "id": "schema:fact-slot-resolution-result-v1",
+      "label": "FactSlot Resolution Result V1"
+    },
+    {
+      "id": "schema:problem-details",
+      "label": "ProblemDetails"
+    }
+  ],
+  "uses_api_contract": [
+    {
+      "id": "api:brain-api",
+      "label": "Nebula Insurance Brain API"
+    }
+  ],
+  "depends_on": [
+    {
+      "id": "feature:F0002"
+    },
+    {
+      "id": "feature:F0003"
+    },
+    {
+      "id": "feature:F0006"
+    }
+  ]
+}

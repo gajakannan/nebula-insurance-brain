@@ -1,0 +1,142 @@
+238:  /facts/{factSlotId}/commits:
+239-    post:
+240-      summary: Propose a canonical commit for a FactSlot
+241-      description: >-
+242-        Executes master blueprint section 109.2 in one transaction (F0001-S0005).
+243-        F0006 approved design adds source eligibility checks before any canonical effect:
+244-        attributable v2 evidence and review/correction lineage retain kind, mood and verified
+245-        evidence-origin restrictions. Current source READ and fact-slot COMMIT decisions share
+246-        one unit of work. No new grants or required request fields; legacy pilot compatibility
+247-        remains as documented in ADR-0075. Phase B design approved by operator 2026-11-01; runtime not claimed.
+248-        F0007 Phase B design (ADR-0077; approved by operator 2026-11-09; runtime not claimed): for identity-v1 slots the value must be a
+249-        fact-answer/v1 envelope, validated and canonicalized before any effect; absence-scope artifacts and
+250-        name-evidence sources join the same-UoW source READ checks. Legacy pilot slots are unchanged.
+251-      operationId: commitFact
+252-      tags:
+253-      - Facts
+254-      parameters:
+255-      - name: factSlotId
+256-        in: path
+257-        required: true
+258-        schema:
+259-          type: string
+260-          format: uuid
+261-      requestBody:
+262-        required: true
+263-        content:
+264-          application/json:
+265-            schema:
+266-              $ref: ../schemas/canonical-commit-request.schema.json
+267-      responses:
+268-        '201':
+269-          description: Committed
+270-          content:
+271-            application/json:
+272-              schema:
+273-                $ref: ../schemas/canonical-commit-response.schema.json
+274-        '400':
+275-          $ref: '#/components/responses/BadRequest'
+276-        '401':
+277-          $ref: '#/components/responses/Unauthenticated'
+278-        '403':
+279-          description: Reserved by the shared error catalog. These resource operations return 404 for authorization
+280-            denial to conceal existence.
+281-          content:
+282-            application/problem+json:
+283-              schema:
+284-                $ref: '#/components/schemas/ProblemDetails'
+285-        '404':
+286-          $ref: '#/components/responses/NotFound'
+287-        '409':
+288-          $ref: '#/components/responses/Conflict'
+289-        '422':
+290-          description: Authorized request references an ineligible or inconsistent assertion source;
+291-            code ASSERTION_INELIGIBLE. No canonical mutation and no protected source excerpt. F0007 design
+292-            (identity-v1 slots only) adds the lowercase answer-rejection codes listed in ADR-0077 D5 (for example
+293-            state_value_mismatch, absence_scope_required, money_float_rejected, name_evidence_required) with no
+294-            detail text.
+295-          content:
+296-            application/problem+json:
+297-              schema:
+298-                $ref: '#/components/schemas/ProblemDetails'
+299-        '503':
+300-          $ref: '#/components/responses/AuthorizationUnavailable'
+301-      x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
+302-        constraints, bounded delegation and durable audit; no client-supplied trusted context.'
+303-  /content/{artifactId}/files/{path}:
+304-    get:
+305-      summary: Read one declared artifact file through current authorization
+306-      description: Documents the existing FastAPI catch-all file route. Path is the manifest-relative path, may
+307-        contain slash-separated components, and must name an exact manifest entry. No public or signed URL is issued.
+308-        Apply the same current read restrictions as the manifest, before opening bytes.
+309-      operationId: getContentArtifactFile
+310-      tags:
+_SYSTEM_CARDINALITY = {c.key: c.cardinality for c in SYSTEM_PREDICATES}
+
+
+class StaticPredicateRegistry:
+    """An immutable, process-cacheable registry keyed by (predicate key, release).
+
+    System predicates are fixed: a contract that redeclares one with another
+    cardinality is refused with `CARDINALITY_CONFLICT`."""
+
+    def __init__(self, contracts: Iterable[PredicateContract]) -> None:
+        table: dict[tuple[PredicateKey, str], PredicateContract] = {}
+        for contract in contracts:
+            fixed = _SYSTEM_CARDINALITY.get(contract.key)
+            if contract.key.namespace == SYSTEM_NAMESPACE and fixed != contract.cardinality:
+                raise SlotRejected(SlotReason.CARDINALITY_CONFLICT)
+            table[(contract.key, contract.release_ref)] = contract
+        self._table = table
+
+    def contract(self, key: PredicateKey, release_ref: str) -> PredicateContract:
+        found = self.find(key, release_ref)
+        if found is None:
+            raise SlotRejected(SlotReason.PREDICATE_UNREGISTERED)
+        return found
+
+    def find(self, key: PredicateKey, release_ref: str) -> PredicateContract | None:
+        return self._table.get((key, release_ref))
+
+
+def production_registry() -> StaticPredicateRegistry:
+    return StaticPredicateRegistry(SYSTEM_PREDICATES)
+    missing = [s.name for s in contract.qualifiers if s.required and s.name not in raw]
+    if missing:
+        raise SlotRejected(SlotReason.QUALIFIER_REQUIRED)
+    return tuple(sorted(result)), tuple(entities)
+
+
+def member_key(value: TypedValue, contract: PredicateContract) -> str:
+    """The member key is the canonical encoding of the member value or entity. For
+    name predicates it is the normalized name (ADR-0077 D6)."""
+    if contract.member_key_source == "entity":
+        if value.value_type != ValueType.ENTITY_REF:
+            raise SlotRejected(SlotReason.QUALIFIER_TYPE_INVALID)
+        return str(value.identity)
+    if value.value_type == ValueType.NAME:
+        return str(value.identity)
+    return value.identity_text()
+
+
+@dataclass(frozen=True, slots=True)
+class SlotIdentity:
+    tenant_id: UUID
+    knowledge_base_id: UUID
+    subject_entity_id: UUID
+    predicate_key: PredicateKey
+    qualifiers: tuple[CanonicalQualifier, ...]  # sorted by name
+    object_entity_id: UUID | None = None
+    parent_slot_id: UUID | None = None
+    member_key: str | None = None
+
+    def document(self) -> dict[str, Json]:
+        """The fingerprint input (version 1). Release reference and cardinality are
+        deliberately excluded: a release bump never splits a slot."""
+        return {
+            "fp_version": FINGERPRINT_VERSION,
+            "tenant_id": str(self.tenant_id),
+            "knowledge_base_id": str(self.knowledge_base_id),
+            "subject_entity_id": str(self.subject_entity_id),
+            "predicate_key": str(self.predicate_key),
+            "qualifiers": [q.to_row() for q in sorted(self.qualifiers)],

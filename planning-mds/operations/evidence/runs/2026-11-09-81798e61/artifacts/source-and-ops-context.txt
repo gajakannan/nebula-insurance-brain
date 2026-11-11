@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+# Local DB + complete content snapshot. Operator must stop ingestion/date writes.
+set -euo pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if [ "${BRAIN_WRITERS_QUIESCED:-}" != "1" ]; then
+  echo "FAIL: stop local ingestion/date writers, then set BRAIN_WRITERS_QUIESCED=1" >&2
+  exit 1
+fi
+CONTENT_ROOT="${BRAIN_CONTENT_ROOT:-$REPO_ROOT/content}"
+BACKUP_ROOT="${BRAIN_BACKUP_ROOT:-$REPO_ROOT/backups}"
+CONTAINER="${BRAIN_POSTGRES_CONTAINER:-brain-postgres}"
+DATABASE="${BRAIN_POSTGRES_DATABASE:-brain}"
+DATABASE_URL="${BRAIN_OPS_DATABASE_URL:-postgresql://brain:brain@127.0.0.1:5432/$DATABASE}"
+mkdir -p "$BACKUP_ROOT" "$CONTENT_ROOT"
+DEST="$(mktemp -d "$BACKUP_ROOT/$(date -u +%Y%m%dT%H%M%SZ)-XXXXXX")"
+ops_python() {
+  if [ -n "${BRAIN_OPS_PYTHON:-}" ]; then
+    "$BRAIN_OPS_PYTHON" "$@"
+  else
+    uv run --frozen --directory "$REPO_ROOT/engine" python "$@"
+  fi
+}
+# Quiescence is an operator precondition, not a distributed snapshot claim.
+ops_python "$REPO_ROOT/scripts/ops/verify_content.py" \
+  --database-url "$DATABASE_URL" --content-root "$CONTENT_ROOT" \
+  --write "$DEST/content-inventory.json"
+docker exec -e PGPASSWORD=brain "$CONTAINER" \
+  pg_dump -U brain -Fc -d "$DATABASE" > "$DEST/db.dump"
+tar -czf "$DEST/content.tar.gz" -C "$CONTENT_ROOT" .
+cp "$REPO_ROOT/docker/DEPENDENCY-MATRIX.md" "$DEST/DEPENDENCY-MATRIX.md"
+cp "$REPO_ROOT/engine/uv.lock" "$DEST/engine.uv.lock"
+cp "$REPO_ROOT/neuron/uv.lock" "$DEST/neuron.uv.lock"
+mkdir "$DEST/contracts"
+cp "$REPO_ROOT/engine/packages/brain-content/src/brain_content/schemas/"*.json "$DEST/contracts/"
+ops_python "$REPO_ROOT/scripts/ops/verify_content.py" \
+  --database-url "$DATABASE_URL" --content-root "$CONTENT_ROOT" \
+  --expect "$DEST/content-inventory.json"
+python3 "$REPO_ROOT/scripts/ops/backup_inventory.py" seal "$DEST"
+echo "Backup complete: $DEST"
+#!/usr/bin/env bash
+# Always restore into a new container and fresh content directory.
+set -euo pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+BACKUP_DIR="${1:?usage: restore.sh <backup-dir> [--keep]}"
+KEEP="${2:-}"
+python3 "$REPO_ROOT/scripts/ops/backup_inventory.py" verify "$BACKUP_DIR"
+IMAGE="${BRAIN_RESTORE_IMAGE:-brain-postgres:18-pgvector-age}"
+RESTORE_CONTENT_ROOT="$(mktemp -d)"
+RESTORE_CONTAINER="brain-restore-$(date -u +%Y%m%d%H%M%S)-$$"
+cleanup() {
+  if [ "$KEEP" != "--keep" ]; then
+    docker rm -f "$RESTORE_CONTAINER" >/dev/null 2>&1 || true
+    rm -rf "$RESTORE_CONTENT_ROOT"
+  else
+    echo "Kept isolated target: $RESTORE_CONTAINER; content: $RESTORE_CONTENT_ROOT"
+  fi
+}
+trap cleanup EXIT
+START_TIME=$(date +%s)
+NETWORK_ARGS=(-p "127.0.0.1::5432")
+if [ -n "${BRAIN_RESTORE_NETWORK:-}" ]; then
+  NETWORK_ARGS=(--network "$BRAIN_RESTORE_NETWORK")
+fi
+docker run -d --name "$RESTORE_CONTAINER" \
+  -e POSTGRES_USER=brain -e POSTGRES_PASSWORD=brain -e POSTGRES_DB=brain \
+  "${NETWORK_ARGS[@]}" "$IMAGE" >/dev/null
+READY=""
+for _ in $(seq 1 60); do
+  if docker exec -e PGPASSWORD=brain "$RESTORE_CONTAINER" \
+      psql -h 127.0.0.1 -U brain -d brain -c "SELECT 1" >/dev/null 2>&1; then
+    READY="1"
+    break
+  fi
+  sleep 1
+done
+if [ -z "$READY" ]; then
+  echo "FAIL: isolated database did not become ready" >&2
+  exit 1
+fi
+RESTORE_HOST=127.0.0.1
+if [ -n "${BRAIN_RESTORE_NETWORK:-}" ]; then
+  RESTORE_HOST="$RESTORE_CONTAINER"
+  RESTORE_PORT=5432
+else
+  RESTORE_PORT="$(docker port "$RESTORE_CONTAINER" 5432/tcp)"
+  RESTORE_PORT="${RESTORE_PORT##*:}"
+fi
+docker exec -i -e PGPASSWORD=brain "$RESTORE_CONTAINER" \
+  pg_restore -U brain -d brain --no-owner --exit-on-error < "$BACKUP_DIR/db.dump"
+python3 "$REPO_ROOT/scripts/ops/backup_inventory.py" extract "$BACKUP_DIR" \
+  --destination "$RESTORE_CONTENT_ROOT"
+ops_python() {
+  if [ -n "${BRAIN_OPS_PYTHON:-}" ]; then
+    "$BRAIN_OPS_PYTHON" "$@"
+  else
+    uv run --frozen --directory "$REPO_ROOT/engine" python "$@"
+  fi
+}
+DATABASE_URL="postgresql://brain:brain@$RESTORE_HOST:$RESTORE_PORT/brain"
+ops_python "$REPO_ROOT/scripts/ops/verify_content.py" \
+  --database-url "$DATABASE_URL" --content-root "$RESTORE_CONTENT_ROOT" \
+  --expect "$BACKUP_DIR/content-inventory.json"
+ops_python "$REPO_ROOT/scripts/ops/verify_citations.py" \
+  --database-url "$DATABASE_URL" --content-root "$RESTORE_CONTENT_ROOT"
+echo "Restore drill PASSED: $(( $(date +%s) - START_TIME ))s; isolated DB and content verified"
+name: brain-f0007-remediation-81798e61
+services:
+  engine-validation:
+    image: brain-f0006-engine:2026-11-02-5a00b0ff
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-09-81798e61:/evidence
+    tmpfs:
+      - /app/brain/content:uid=1000,gid=1000,mode=0700
+    environment:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONPATH: /app/brain/engine/packages/brain-factslots/src:/app/brain
+      XDG_CACHE_HOME: /tmp/.cache
+      COVERAGE_FILE: /evidence/artifacts/coverage/.coverage
+      BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@postgres:5432/brain
+    working_dir: /app/brain
+    command: [python, -c, 'from threading import Event; Event().wait()']
+    healthcheck:
+      test: [CMD, python, -c, 'import brain_api,brain_factslots,brain_persistence,psycopg; print("ready")']
+      interval: 5s
+      timeout: 10s
+      retries: 6
+    networks: [dependencies]
+  neuron-validation:
+    image: brain-f0006-neuron:2026-11-02-5a00b0ff
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain:ro
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-09-81798e61:/evidence
+    environment:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONPATH: /app/brain/engine/packages/brain-factslots/src:/app/brain
+      XDG_CACHE_HOME: /tmp/.cache
+      BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@postgres:5432/brain
+    working_dir: /app/brain
+    command: [python, -c, 'from threading import Event; Event().wait()']
+    networks: [dependencies]
+networks:
+  dependencies:
+    external: true
+    name: nebula-insurance-brain_default
+    ) -> tuple[ResourceKey, ...]:
+        """READ keys a reader must hold before an identity-v1 answer is returned:
+        the absence scope's artifact (S0003 AC6, threat T-08). Legacy slots and
+        answers without a scope need none, so pilot reads are unchanged."""
+        slot = await self._store.slot(slot_id)
+        if slot is None or slot.legacy:
+            return ()
+        stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
+        return await self.scope_keys_for_value(slot_id, stored)
+
+    async def scope_keys_for_value(
+        self, slot_id: UUID, stored: object
+    ) -> tuple[ResourceKey, ...]:
+        """Derive keys from the exact privately loaded version, without selecting
+        the answer again. Legacy JSON keeps its existing unwrapped semantics."""
+        slot = await self._store.slot(slot_id)
+        if slot is None or slot.legacy:
+            return ()
+        scope = stored.get("scope") if isinstance(stored, Mapping) else None
+        artifact = _uuid(scope.get("content_artifact_id")) if isinstance(scope, Mapping) else None
+        return (ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),) if artifact else ()
+
+    async def read(self, slot_id: UUID, *, valid_at: datetime, known_at: datetime) -> FactAnswer:
+        slot = await self._store.slot(slot_id)
+        if slot is None:
+            raise LookupError(str(slot_id))
+        stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
+        if slot.legacy:
+            if stored is None:
+                return FactAnswer(InformationState.NOT_PROCESSED)

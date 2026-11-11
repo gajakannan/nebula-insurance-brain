@@ -307,6 +307,78 @@ async def test_answer_policy_names_and_entity_refs(scene):
     assert rejected.value.reason == AnswerReason.RELATIONSHIP_OBJECT_OUT_OF_SCOPE
 
 
+async def test_present_entity_answer_must_match_the_immutable_member_key(scene):
+    policy = FactAnswerPolicy(test_registry(), scene.store)
+    owner = (scene.tenant, scene.kb)
+    insured = scene.entity()
+    member = await _policy_slot(
+        scene, ADDITIONAL_INSURED, member={"type": "entity_ref", "entity_id": str(insured)}
+    )
+    envelope = {
+        "answer_contract": "fact-answer/v1",
+        "state": "PRESENT",
+        "value": {"type": "entity_ref", "entity_id": str(insured)},
+    }
+    assert await policy.canonical_value(member, envelope, authorized_scope=owner) == envelope
+    other = {**envelope, "value": {"type": "entity_ref", "entity_id": str(scene.entity())}}
+    with pytest.raises(FactAnswerRejected) as rejected:
+        await policy.canonical_value(member, other, authorized_scope=owner)
+    assert rejected.value.code == "member_value_mismatch"
+    assert scene.store.slots[member].member_key == str(insured)
+    assert await policy.canonical_value(
+        member,
+        {"answer_contract": "fact-answer/v1", "state": "NOT_APPLICABLE"},
+        authorized_scope=owner,
+    ) == {"answer_contract": "fact-answer/v1", "state": "NOT_APPLICABLE"}
+
+
+async def test_name_member_accepts_equivalent_spelling_and_rejects_a_different_name(scene):
+    policy = FactAnswerPolicy(test_registry(), scene.store)
+    owner = (scene.tenant, scene.kb)
+    assertion, version = uuid4(), uuid4()
+    scene.store.evidence[assertion] = (version, owner, ())
+    evidence = {"assertion_id": str(assertion), "document_version_id": str(version)}
+    value = {"type": "name", "verbatim": "Acme Restoration", "evidence": evidence}
+    member = await _policy_slot(scene, TRADE, member=value)
+    envelope = {"answer_contract": "fact-answer/v1", "state": "PRESENT", "value": value}
+    equivalent = {**value, "verbatim": "  ACME   restoration "}
+    accepted = await policy.canonical_value(
+        member, {**envelope, "value": equivalent}, authorized_scope=owner
+    )
+    assert accepted["value"]["normalized"] == "acme restoration"
+    with pytest.raises(FactAnswerRejected) as rejected:
+        await policy.canonical_value(
+            member,
+            {**envelope, "value": {**value, "verbatim": "Zed Services"}},
+            authorized_scope=owner,
+        )
+    assert rejected.value.code == "member_value_mismatch"
+    assert scene.store.slots[member].member_key == "acme restoration"
+
+
+async def test_identifier_member_uses_normalized_value_and_keeps_issuer_identity(scene):
+    policy = FactAnswerPolicy(test_registry(), scene.store)
+    owner = (scene.tenant, scene.kb)
+    value = {
+        "type": "identifier",
+        "scheme": "us-irs",
+        "identifier_type": "fein",
+        "value": "12-3456789",
+    }
+    member = await _policy_slot(scene, POLICY_NUMBER, member=value)
+    envelope = {"answer_contract": "fact-answer/v1", "state": "PRESENT", "value": value}
+    accepted = await policy.canonical_value(
+        member, {**envelope, "value": {**value, "value": "123456789"}}, authorized_scope=owner
+    )
+    assert accepted["value"]["normalized_value"] == "123456789"
+    for changed in ({"scheme": "carrier:B"}, {"value": "987654321"}):
+        with pytest.raises(FactAnswerRejected) as rejected:
+            await policy.canonical_value(
+                member, {**envelope, "value": {**value, **changed}}, authorized_scope=owner
+            )
+        assert rejected.value.code == "member_value_mismatch"
+
+
 async def test_reader_and_name_hook(scene):
     reader = FactAnswerReader(scene.store)
     with pytest.raises(LookupError):
@@ -389,7 +461,7 @@ async def test_reader_and_name_hook(scene):
     )
 
 
-async def test_g3_evidence_and_scope_read_keys(scene):
+async def test_g3_evidence_and_payload_scope_keys(scene):
     resolver = _resolver(scene)
     assertion, version, artifact = uuid4(), uuid4(), uuid4()
     scene.store.evidence[assertion] = (version, (scene.tenant, scene.kb), (artifact,))
@@ -412,14 +484,17 @@ async def test_g3_evidence_and_scope_read_keys(scene):
         assert await resolver.evidence_source_keys(other) == ()
     reader = FactAnswerReader(scene.store)
     slot = await _policy_slot(scene, qualifiers=BASIS)
-    assert await reader.scope_read_keys(slot, valid_at=NOW, known_at=NOW) == ()
+    assert await reader.scope_keys_for_value(slot, None) == ()
     scope_artifact = uuid4()
-    scene.store.answers[slot] = {
+    payload = {
         "answer_contract": "fact-answer/v1",
         "state": "NOT_FOUND",
         "scope": {"content_artifact_id": str(scope_artifact)},
     }
-    assert await reader.scope_read_keys(slot, valid_at=NOW, known_at=NOW) == (
+    # The selected payload determines the scope, even if the store now has
+    # another answer. Permission checks must not select the answer a second time.
+    scene.store.answers[slot] = {"scope": {"content_artifact_id": str(uuid4())}}
+    assert await reader.scope_keys_for_value(slot, payload) == (
         ResourceKey(ResourceType.CONTENT_ARTIFACT, scope_artifact),
     )
-    assert await reader.scope_read_keys(uuid4(), valid_at=NOW, known_at=NOW) == ()
+    assert await reader.scope_keys_for_value(uuid4(), payload) == ()

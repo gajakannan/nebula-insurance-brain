@@ -1,0 +1,23 @@
+id: entity:fact-slot
+label: Fact slot
+notes: 'Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit of a coverage);
+  the parent of bitemporal fact versions. F0007 refinement (ADR-0077, implemented in run 2026-11-09-b94cfa12, migration 0012): identity-v1 rows add an opaque versioned
+  predicate key, cardinality, optional relationship object and MULTI member children; pilot rows stay legacy with NULL
+  identity and no fabricated predicate.'
+source_docs:
+- F0001/F0001-S0005-proof-bitemporal-commit.md
+- planning-mds/architecture/master-blueprint.md
+- F0007/feature-assembly-plan.md
+related_nodes:
+- capability:bitemporal-canonical-commit
+- capability:factslot-identity-resolution
+- capability:typed-fact-answer
+- adr:0077
+related_entities:
+- entity:canonical-fact-version
+- entity:fact-slot-qualifier
+rationale:
+- adr: adr:0077
+  section: Decision
+  summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with
+    scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending.'

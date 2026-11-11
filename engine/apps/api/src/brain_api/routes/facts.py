@@ -50,10 +50,6 @@ def _slot(fact_slot_id: UUID) -> ResourceKey:
     return ResourceKey(ResourceType.FACT_SLOT, fact_slot_id)
 
 
-async def _nothing(_decision: AuthorizationDecision) -> None:
-    return None
-
-
 @router.get("/{fact_slot_id}", response_model=FactVersionOut)
 async def get_fact(
     fact_slot_id: UUID,
@@ -83,22 +79,20 @@ async def get_fact(
             raise NotFoundError()
         return version
 
-    # F0007 (S0003 AC6, T-08): an identity-v1 answer's absence scope names pages and
-    # blocks of an artifact. The reader must be able to read that artifact, or the
-    # read is denied like a missing slot. Legacy pilot slots need no extra check.
-    trace_id = new_trace_id()
-    for scope_key in await answers.scope_read_keys(
-        fact_slot_id, valid_at=valid_as_of or now, known_at=known_as_of or now
-    ):
-        await execution.read(principal, scope_key, Action.READ, trace_id=trace_id, load=_nothing)
+    async def scope_reads(version: FactVersion) -> Sequence[ResourceKey]:
+        # WHY: authorize the scope of this exact payload in the slot read's UoW.
+        # A prior independent read commits and releases authority locks, and a
+        # second version selection could return a different, unchecked scope.
+        return await answers.scope_keys_for_value(fact_slot_id, version.value)
 
     version = await execution.read(
         principal,
         _slot(fact_slot_id),
         Action.READ,
-        trace_id=trace_id,
+        trace_id=new_trace_id(),
         load=load,
         requested=requested,
+        additional_reads=scope_reads,
     )
     return FactVersionOut.from_domain(version)
 

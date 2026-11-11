@@ -1,0 +1,88 @@
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/coverage-report.md:7:Changed executable application lines: **37/38 = 97.37%**, above the policy floor. Source: artifacts/coverage/changed-code-summary.json; raw current full-engine coverage: artifacts/coverage/engine-full-final.json and XML. Baseline fa8fc1d, current uncommitted diff. Script source preserved as artifacts/coverage/measure_changed.py. The one uncovered changed line is the denial branch after the final current-time authorization recheck in brain_security/execution.py:409. No behavior is waived by that line observation.
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/coverage-report.md:9:The combined319 suite's selected domain/factslots/security aggregate is96.16%. The changed-line number measures only changed executable src/ lines, excluding comments/docstrings/tests and migration DDL. Migration0013 correctness is demonstrated by16 owned PostgreSQL tests, including direct-SQL negatives and refusal without data changes. Do not substitute line coverage for these invariants.
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/coverage-report.md:13:- artifacts/coverage/engine-full-final.json / engine-full-final.xml
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/coverage-report.md:14:- artifacts/coverage/remediation.json / remediation.xml
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/coverage-report.md:15:- artifacts/coverage/changed-code-summary.json
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/coverage-report.md:16:- artifacts/test-results/remediation.xml, engine-full-final.xml, neuron-postgres-final.xml
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/coverage-report.md:18:## Result
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md:13:| Combined domain/application/security + F0007 PostgreSQL | 319 | 319 | 0 | 0 | artifacts/test-results/remediation.xml |
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md:14:| Full engine including backup/restore | 868 | 868 | 0 | 0 | artifacts/test-results/engine-full-final.xml |
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md:15:| Affected Neuron PostgreSQL worker/recovery/delivery | 27 | 27 | 0 | 0 | artifacts/test-results/neuron-postgres-final.xml |
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md:17:The combined319 and migration16 cases are subsets of the full868, not additive unique-test counts. All commands exited0. Static checks: Ruff passes189 files; mypy passes72 sources (artifacts/static-final.txt). New source tests first reproduced12 failing member/numeric cases before fixes; migration red execution failed because0013 was absent, then16 real PostgreSQL cases passed.
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md:27:- First full engine run:865pass/3fail, each backup.sh Docker command missing in the validation image. Classified runtime-blocked; no application fix made. Exposed the existing Docker CLI/socket to the isolated validation runner with its Docker group and dedicated restore network, rechecked Docker/PostgreSQL readiness, reran the full same suite:868pass. Initial failure remains artifacts/engine-full.txt/XML.
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md:28:- First Neuron runner could not migrate because the Neuron image does not contain Alembic. The engine image now creates/migrates its owned database, and the unchanged Neuron image runs the27 tests against it; all pass, database dropped afterward.
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md:31:## AC Coverage Result
+planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md:35:## Result
+100-      tests:
+101-        - engine/packages/brain-security/tests/test_execution.py
+102:        - engine/packages/brain-security/tests/test_payload_reads.py
+103-  - id: capability:evidence-review-round-trip
+104-    paths:
+105-      backend:
+106-        - engine/packages/brain-review/src/**
+107-      frontend:
+108-        - experience/src/review-panel/**
+109-      tests:
+110-        - engine/apps/api/tests/test_reviews.py
+111-        - engine/packages/brain-review/tests/**
+--
+299-        - engine/packages/brain-domain/tests/test_fact_slots.py
+300-        - engine/tests/integration/test_factslot_answers.py
+301:        - engine/tests/integration/test_factslot_authorized_reads.py
+302-  - id: capability:versioned-assertion-semantics
+303-    paths:
+304-      architecture:
+305-        - planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
+306-      backend:
+307-        - engine/migrations/versions/0011_f0006_assertion_semantics.py
+308-        - engine/packages/brain-contracts/src/brain_contracts/assertions.py
+309-        - engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+310-        - engine/packages/brain-domain/src/brain_domain/assertions.py
+--
+481-        - engine/tests/fixtures/factslots/pilot-seed.sql
+482-        - engine/tests/integration/test_factslot_migration.py
+483:  - id: migration:f0007-identity-guard
+484-    paths:
+485-      backend:
+486-        - engine/migrations/versions/0013_f0007_identity_guard.py
+487-      tests:
+488-        - engine/tests/integration/test_factslot_identity_guard_migration.py
+489-  - id: schema:commercial-pc-example
+490-    paths:
+491-      architecture:
+492-        - planning-mds/architecture/commercial-pc-example-handoff.md
+108:Stage: G8
+109:Exit Code: 0
+110:Result: PASS
+114:### G8
+116:Stage: G8
+117:Exit Code: 0
+118:Result: PASS
+122:### G8
+124:Stage: G8
+125:Exit Code: 0
+126:Result: PASS
+130:### G8
+132:Stage: G8
+133:Exit Code: 0
+134:Result: PASS
+138:### G8
+140:Stage: G8
+141:Exit Code: 0
+142:Result: PASS
+146:### G8
+148:Stage: G8
+149:Exit Code: 1
+150:Result: FAIL
+154:### G8
+156:Stage: G8
+157:Exit Code: 0
+158:Result: PASS
+162:### G8
+164:Stage: G8
+165:Exit Code: 0
+166:Result: PASS
+170:### G8
+172:Stage: G8
+173:Exit Code: 0
+174:Result: PASS

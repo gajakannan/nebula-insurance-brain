@@ -19,13 +19,13 @@ ADR-0006 makes FactSlot first-class; master blueprint §13 gives the scalar exam
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** Given subject S, predicate key `hasLimitAmount` with pinned release R, and qualifiers `{basis: EachOccurrence, currency: USD}`, resolving twice, including from two concurrent sessions, returns the same slot ID and leaves exactly one slot with one set of qualifier rows.
-- [ ] **AC2:** Changing only `basis` to `GeneralAggregate` resolves a different slot (ADR-0006 use case). Supplying the same qualifiers in a different input order resolves the original slot.
-- [ ] **AC3:** Qualifier values are normalized by declared type before identity: Unicode NFC for text and one canonical decimal encoding (`1000000`, `1000000.00` and `1E+6` are equal). The normalized qualifier rows are stored and the fingerprint records its algorithm version. If two different normalized qualifier sets ever produce the same fingerprint, the second is rejected with `FINGERPRINT_COLLISION` and the slots are not merged.
-- [ ] **AC4:** An omitted qualifier and a qualifier supplied as explicit null follow one documented rule (settled in Phase B). Fixtures prove the rule's outcome for both inputs, and neither input is silently coerced into the other.
-- [ ] **AC5:** For a tenant entity associated with KB A and KB B, the same predicate key and qualifiers resolve to two distinct slots, one owned by each KB. A principal authorized only for KB B is denied resolution or reads of the KB A slot, and the denial is indistinguishable from not found.
-- [ ] **AC6:** A malformed predicate key, or one with no pinned release reference, is rejected with `PREDICATE_KEY_INVALID` and no slot row is written. The resolved slot exposes its predicate key unchanged for SourceAuthorityPolicy lookup. F0007 does not check predicate semantics against an ontology.
-- [ ] **AC7:** Creating a slot is authorized against the caller's existing KB write authority (F0002). Each creation writes one audit event naming actor, tenant, KB, slot ID and fingerprint version. Unauthorized or cross-tenant subject attempts are denied with zero slot rows. Updating identity fields after creation is rejected.
+- [x] **AC1:** Given subject S, predicate key `hasLimitAmount` with pinned release R, and qualifiers `{basis: EachOccurrence, currency: USD}`, resolving twice, including from two concurrent sessions, returns the same slot ID and leaves exactly one slot with one set of qualifier rows.
+- [x] **AC2:** Changing only `basis` to `GeneralAggregate` resolves a different slot (ADR-0006 use case). Supplying the same qualifiers in a different input order resolves the original slot.
+- [x] **AC3:** Qualifier values are normalized by declared type before identity: Unicode NFC for text and one canonical decimal encoding (`1000000`, `1000000.00` and `1E+6` are equal). The normalized qualifier rows are stored and the fingerprint records its algorithm version. If two different normalized qualifier sets ever produce the same fingerprint, the second is rejected with `FINGERPRINT_COLLISION` and the slots are not merged.
+- [x] **AC4:** An omitted qualifier and a qualifier supplied as explicit null follow one documented rule (settled in Phase B). Fixtures prove the rule's outcome for both inputs, and neither input is silently coerced into the other.
+- [x] **AC5:** For a tenant entity associated with KB A and KB B, the same predicate key and qualifiers resolve to two distinct slots, one owned by each KB. A principal authorized only for KB B is denied resolution or reads of the KB A slot, and the denial is indistinguishable from not found.
+- [x] **AC6:** A malformed predicate key, or one with no pinned release reference, is rejected with `PREDICATE_KEY_INVALID` and no slot row is written. The resolved slot exposes its predicate key unchanged for SourceAuthorityPolicy lookup. F0007 does not check predicate semantics against an ontology.
+- [x] **AC7:** Creating a slot is authorized against the caller's existing KB write authority (F0002). Each creation writes one audit event naming actor, tenant, KB, slot ID and fingerprint version. Unauthorized or cross-tenant subject attempts are denied with zero slot rows. Updating identity fields after creation is rejected.
 
 ## Interaction Contract
 
@@ -61,6 +61,6 @@ G1 decided the predicate key form. The Architect owns the canonical encoding, th
 
 ## Definition of Done
 
-- [ ] Seven ACs pass against PostgreSQL, including the concurrent and cross-KB negative fixtures.
-- [ ] Normalization and fingerprint rules are documented with worked and boundary examples.
-- [ ] Feature action records tests, coverage and required signoffs.
+- [x] Seven ACs pass against PostgreSQL, including the concurrent and cross-KB negative fixtures.
+- [x] Normalization and fingerprint rules are documented with worked and boundary examples.
+- [x] Feature action records tests, coverage and required signoffs.

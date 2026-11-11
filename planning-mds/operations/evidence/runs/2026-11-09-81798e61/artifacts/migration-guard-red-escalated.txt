@@ -1,0 +1,237 @@
+F
+=================================== FAILURES ===================================
+______ test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes ______
+
+self = <alembic.script.base.ScriptDirectory object at 0x7ce5390c9a90>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = None, start = None, end = '0013'
+resolution = "Can't locate revision identified by '0013'"
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+engine/.venv/lib/python3.14/site-packages/alembic/script/base.py:207: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+engine/.venv/lib/python3.14/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+engine/.venv/lib/python3.14/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+engine/.venv/lib/python3.14/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+engine/.venv/lib/python3.14/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/.venv/lib/python3.14/site-packages/alembic/script/revision.py:558: in get_revisions
+    return tuple(
+           ^^^^^
+engine/.venv/lib/python3.14/site-packages/alembic/script/revision.py:559: in <genexpr>
+    self._revision_for_ident(rev_id, branch_label)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <alembic.script.revision.RevisionMap object at 0x7ce5390cad50>
+resolved_id = '0013', check_branch = None
+
+    def _revision_for_ident(
+        self,
+        resolved_id: str | tuple[()] | None,
+        check_branch: str | None = None,
+    ) -> Revision | None:
+        branch_rev: Revision | None
+        if check_branch:
+            branch_rev = self._resolve_branch(check_branch)
+        else:
+            branch_rev = None
+    
+        revision: Revision | None | Literal[False]
+        try:
+            revision = self._revision_map[resolved_id]
+        except KeyError:
+            # break out to avoid misleading py3k stack traces
+            revision = False
+        revs: Sequence[str]
+        if revision is False:
+            assert resolved_id
+            # do a partial lookup
+            revs = [
+                x
+                for x in self._revision_map
+                if x and len(x) > 3 and x.startswith(resolved_id)
+            ]
+    
+            if branch_rev:
+                revs = self.filter_for_lineage(revs, check_branch)
+            if not revs:
+>               raise ResolutionError(
+                    "No such revision or branch '%s'%s"
+                    % (
+                        resolved_id,
+                        (
+                            "; please ensure at least four characters are "
+                            "present for partial revision identifier matches"
+                            if len(resolved_id) < 4
+                            else ""
+                        ),
+                    ),
+                    resolved_id,
+E                   alembic.script.revision.ResolutionError: No such revision or branch '0013'
+
+engine/.venv/lib/python3.14/site-packages/alembic/script/revision.py:630: ResolutionError
+
+The above exception was the direct cause of the following exception:
+
+database = 'postgresql://brain:brain@localhost:5432/f0006_qe_004c7347bc68'
+
+    def test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes(database):
+        _upgrade("0011")
+        pilot._seed_pilot(database)
+        _upgrade("0012")
+        owner = _owner(database)
+        _insert(database, _slot(owner))
+        header = _slot(owner, cardinality="MULTI")
+        _insert(database, header)
+        _insert(
+            database,
+            _slot(owner, cardinality="MULTI", slot_role="MEMBER", parent_slot_id=header["id"], member_key="a"),
+        )
+        _insert(database, _slot(owner, cardinality="RELATIONSHIP", object_entity_id=owner[2]))
+        with psycopg.connect(database) as connection:
+            connection.execute(
+                "INSERT INTO fact_slot_qualifier VALUES (%s, %s, %s, 'basis', 'code', '\"USD\"', now())",
+                (header["id"], owner[0], owner[1]),
+            )
+        before = _rows(database)
+        original_guard = _revision_and_guard(database)[1]
+    
+>       _upgrade("0013")
+
+engine/tests/integration/test_factslot_identity_guard_migration.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+engine/tests/integration/test_factslot_identity_guard_migration.py:27: in _upgrade
+    command.upgrade(harness.configuration(), revision)
+engine/.venv/lib/python3.14/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+engine/.venv/lib/python3.14/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+engine/.venv/lib/python3.14/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/.venv/lib/python3.14/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:759: in exec_module
+    ???
+<frozen importlib._bootstrap>:491: in _call_with_frames_removed
+    ???
+engine/migrations/env.py:67: in <module>
+    run_migrations_online()
+engine/migrations/env.py:61: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+engine/.venv/lib/python3.14/site-packages/alembic/runtime/environment.py:967: in run_migrations
+    self.get_context().run_migrations(**kw)
+engine/.venv/lib/python3.14/site-packages/alembic/runtime/migration.py:609: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/.venv/lib/python3.14/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+engine/.venv/lib/python3.14/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/usr/lib/python3.14/contextlib.py:162: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <alembic.script.base.ScriptDirectory object at 0x7ce5390c9a90>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = None, start = None, end = '0013'
+resolution = "Can't locate revision identified by '0013'"
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+            raise util.CommandError(multiple_heads) from mh
+        except revision.ResolutionError as re:
+            if resolution is None:
+                resolution = "Can't locate revision identified by '%s'" % (
+                    re.argument
+                )
+>           raise util.CommandError(resolution) from re
+E           alembic.util.exc.CommandError: Can't locate revision identified by '0013'
+
+engine/.venv/lib/python3.14/site-packages/alembic/script/base.py:239: CommandError
+----------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 0011 -> 0012, F0007 FactSlot identity: additive identity columns and qualifier rows (ADR-0077 D8).
+INFO  [alembic.runtime.migration] 0012 preflight: uq_fact_slot_owner present; 2 legacy fact_slot rows kept
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+=============================== warnings summary ===============================
+tests/integration/test_factslot_identity_guard_migration.py::test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes
+tests/integration/test_factslot_identity_guard_migration.py::test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes
+tests/integration/test_factslot_identity_guard_migration.py::test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes
+  /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/.venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED engine/tests/integration/test_factslot_identity_guard_migration.py::test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 3 warnings in 0.95s

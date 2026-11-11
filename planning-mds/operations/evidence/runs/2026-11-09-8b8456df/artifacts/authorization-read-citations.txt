@@ -1,0 +1,169 @@
+    96	                Action.INTERPRET,
+    97	                trace_id=trace_id,
+    98	                operation=operation,
+    99	                additional_reads=evidence_reads,
+   100	            )
+   101	        except SlotRejected as exc:
+   102	            # `mutate` rolled the unit of work back and durably recorded the
+   103	            # decisions as FAILED, so the rejection left zero rows.
+   104	            return ResolutionResult.rejected(exc.reason)
+   105	
+   106	    async def read_answer(
+   107	        self,
+   108	        principal: Principal,
+   109	        slot_id: UUID,
+   110	        *,
+   111	        valid_at: datetime,
+   112	        known_at: datetime,
+   113	        trace_id: str,
+   114	    ) -> FactAnswer:
+   115	        async def load(decision: AuthorizationDecision) -> FactAnswer:
+   116	            try:
+   117	                return await self._answers.read(slot_id, valid_at=valid_at, known_at=known_at)
+   118	            except LookupError as exc:
+   119	                raise SlotNotFound(str(slot_id)) from exc
+   120	
+   121	        try:
+   122	            await self.authorize_scope_reads(
+   123	                principal, slot_id, valid_at=valid_at, known_at=known_at, trace_id=trace_id
+   124	            )
+   125	            return await self._execution.read(
+   126	                principal, _slot_key(slot_id), Action.READ, trace_id=trace_id, load=load
+   127	            )
+   128	        except AuthorizationDenied as exc:
+   129	            raise SlotNotFound(str(slot_id)) from exc
+   130	
+   131	    async def authorize_scope_reads(
+   132	        self,
+   133	        principal: Principal,
+   134	        slot_id: UUID,
+   135	        *,
+   136	        valid_at: datetime,
+   137	        known_at: datetime,
+   138	        trace_id: str,
+    63	    execution: AuthorizationExecution = Depends(get_authorization_execution),
+    64	    session: AsyncSession = Depends(get_db_session),
+    65	) -> FactVersionOut:
+    66	    """Business valid/known coordinates select history only; authorization always
+    67	    uses current enforcement time and current grants (S0003 AC4)."""
+    68	    repository = SqlAlchemyFactCommitRepository(session)
+    69	    answers = FactAnswerReader(SqlAlchemyFactSlotStore(session))
+    70	    now = datetime.now(UTC)
+    71	    requested = RequestedScope(
+    72	        knowledge_base_ids=None,
+    73	        selectors=(),
+    74	        business_valid_as_of=valid_as_of,
+    75	        business_known_as_of=known_as_of,
+    76	    )
+    77	
+    78	    async def load(_decision: AuthorizationDecision) -> FactVersion:
+    79	        version = await repository.resolve_at(
+    80	            fact_slot_id, valid_as_of=valid_as_of or now, known_as_of=known_as_of or now
+    81	        )
+    82	        if version is None:
+    83	            raise NotFoundError()
+    84	        return version
+    85	
+    86	    # F0007 (S0003 AC6, T-08): an identity-v1 answer's absence scope names pages and
+    87	    # blocks of an artifact. The reader must be able to read that artifact, or the
+    88	    # read is denied like a missing slot. Legacy pilot slots need no extra check.
+    89	    trace_id = new_trace_id()
+    90	    for scope_key in await answers.scope_read_keys(
+    91	        fact_slot_id, valid_at=valid_as_of or now, known_at=known_as_of or now
+    92	    ):
+    93	        await execution.read(principal, scope_key, Action.READ, trace_id=trace_id, load=_nothing)
+    94	
+    95	    version = await execution.read(
+    96	        principal,
+    97	        _slot(fact_slot_id),
+    98	        Action.READ,
+    99	        trace_id=trace_id,
+   100	        load=load,
+   101	        requested=requested,
+   102	    )
+   103	    return FactVersionOut.from_domain(version)
+   104	
+   105	
+   106	@router.post("/{fact_slot_id}/commits", response_model=CommitResponseOut, status_code=201)
+   107	async def commit_fact(
+   108	    fact_slot_id: UUID,
+   109	    proposal_in: CommitProposalIn,
+   110	    principal: Principal = Depends(current_principal),
+   111	    execution: AuthorizationExecution = Depends(get_authorization_execution),
+   112	    session: AsyncSession = Depends(get_db_session),
+   320	            raise
+   321	        except Exception as exc:  # noqa: BLE001 - any authority read failure fails closed
+   322	            await self._safe_rollback()
+   323	            raise AuthorizationUnavailable("current authority unavailable") from exc
+   324	
+   325	    async def _safe_rollback(self) -> None:
+   326	        # The original failure is what matters; a failed rollback adds nothing.
+   327	        with contextlib.suppress(Exception):
+   328	            await self._store.rollback()
+   329	
+   330	    async def _persist_fresh(self, decisions: Sequence[AuthorizationDecision]) -> None:
+   331	        """Roll back any business work, then durably audit in a new transaction."""
+   332	        await self._safe_rollback()
+   333	        try:
+   334	            for decision in decisions:
+   335	                await self._store.append_decision(decision)
+   336	            await self._store.commit()
+   337	        except Exception as exc:  # noqa: BLE001
+   338	            await self._safe_rollback()
+   339	            raise AuthorizationUnavailable("decision audit could not be persisted") from exc
+   340	
+   341	    async def _deny(self, evaluated: Sequence[Evaluated]) -> AuthorizationDenied:
+   342	        decisions = [
+   343	            e.decision
+   344	            if not e.decision.allowed
+   345	            else e.decision.with_outcome(OperationOutcome.FAILED)
+   346	            for e in evaluated
+   347	        ]
+   348	        await self._persist_fresh(decisions)
+   349	        denied = next(d for d in decisions if not d.allowed)
+   350	        return AuthorizationDenied(denied)
+   351	
+   352	    def _recheck_all(self, evaluated: Sequence[Evaluated]) -> list[Evaluated]:
+   353	        at = self._clock()
+   354	        return [recheck(e, self._policy, at) for e in evaluated]
+   355	
+   356	    async def read(
+   357	        self,
+   358	        authenticated: Principal,
+   359	        key: ResourceKey,
+   360	        action: str,
+   361	        *,
+   362	        trace_id: str,
+   363	        load: Callable[[AuthorizationDecision], Awaitable[T]],
+   364	        requested: RequestedScope = NO_FILTER,
+   365	        delegation_id: UUID | None = None,
+   366	    ) -> T:
+   367	        evaluated = await self._guarded_decide(
+   368	            authenticated, [key], action, requested, trace_id, delegation_id
+   369	        )
+   370	        if not evaluated[0].decision.allowed:
+   371	            raise await self._deny(evaluated)
+   372	        evaluated = self._recheck_all(evaluated)
+   373	        if not evaluated[0].decision.allowed:
+   374	            raise await self._deny(evaluated)
+   375	        decision = evaluated[0].decision
+   376	        try:
+   377	            payload = await load(decision)
+   378	        except Exception:
+   379	            await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
+   380	            raise
+   381	        try:
+   382	            await self._store.append_decision(decision.with_outcome(OperationOutcome.SUCCEEDED))
+   383	            await self._store.commit()
+   384	        except Exception as exc:  # noqa: BLE001 - no payload leaves without durable audit
+   385	            await self._safe_rollback()
+   386	            raise AuthorizationUnavailable("read audit could not be persisted") from exc
+   387	        return payload
+   388	
+   389	    async def mutate(
+   390	        self,
+   391	        authenticated: Principal,
+   392	        keys: Sequence[ResourceKey],
+   393	        action: str,
+   394	        *,
+   395	        trace_id: str,

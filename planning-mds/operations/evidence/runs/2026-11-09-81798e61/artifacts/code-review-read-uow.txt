@@ -1,0 +1,434 @@
+        envelope = reader.hydrate(key, require_record=require_record)
+        dependencies = DependencySet()
+        if envelope is not None:
+            hydrated: dict[ResourceKey, ResourceEnvelope | None] = {}
+            while pending := pending_dependency_keys(envelope, hydrated):
+                for dependency_key in pending:
+                    hydrated[dependency_key] = reader.hydrate(dependency_key)
+            dependencies = collect_dependencies(envelope, hydrated)
+        decision = evaluate(
+            context,
+            key,
+            envelope,
+            dependencies,
+            action,
+            policy,
+            decision_id=new_id(),
+            delegation_unresolved=not delegation_valid,
+        )
+        results.append(
+            Evaluated(context, key, envelope, dependencies, decision, not delegation_valid)
+        )
+    return results
+
+
+class AuthorizationExecution:
+    def __init__(
+        self,
+        store: AuthorityStore,
+        policy: PolicyEvaluator,
+        release: PolicyRelease,
+        *,
+        clock: Callable[[], datetime] = utc_now,
+        new_id: Callable[[], UUID] = uuid4,
+    ) -> None:
+        self._store = store
+        self._policy = policy
+        self._release = release
+        self._clock = clock
+        self._new_id = new_id
+
+    async def _decide(
+        self,
+        authenticated: Principal,
+        keys: Sequence[ResourceKey],
+        action: str,
+        requested: RequestedScope,
+        trace_id: str,
+        delegation_id: UUID | None,
+    ) -> list[Evaluated]:
+        return await self._store.run_sync(
+            lambda reader: decide(
+                reader,
+                self._policy,
+                self._release,
+                authenticated_id=authenticated.id,
+                keys=keys,
+                action=action,
+                requested=requested,
+                trace_id=trace_id,
+                delegation_id=delegation_id,
+                clock=self._clock,
+                new_id=self._new_id,
+            )
+        )
+
+    async def _guarded_decide(
+        self,
+        authenticated: Principal,
+        keys: Sequence[ResourceKey],
+        action: str,
+        requested: RequestedScope,
+        trace_id: str,
+        delegation_id: UUID | None,
+    ) -> list[Evaluated]:
+        try:
+            return await self._decide(
+                authenticated, keys, action, requested, trace_id, delegation_id
+            )
+        except AuthorizationUnavailable:
+            await self._safe_rollback()
+            raise
+        except Exception as exc:  # noqa: BLE001 - any authority read failure fails closed
+            await self._safe_rollback()
+            raise AuthorizationUnavailable("current authority unavailable") from exc
+
+    async def _safe_rollback(self) -> None:
+        # The original failure is what matters; a failed rollback adds nothing.
+        with contextlib.suppress(Exception):
+            await self._store.rollback()
+
+    async def _persist_fresh(self, decisions: Sequence[AuthorizationDecision]) -> None:
+        """Roll back any business work, then durably audit in a new transaction."""
+        await self._safe_rollback()
+        try:
+            for decision in decisions:
+                await self._store.append_decision(decision)
+            await self._store.commit()
+        except Exception as exc:  # noqa: BLE001
+            await self._safe_rollback()
+            raise AuthorizationUnavailable("decision audit could not be persisted") from exc
+
+    async def _deny(self, evaluated: Sequence[Evaluated]) -> AuthorizationDenied:
+        decisions = [
+            e.decision
+            if not e.decision.allowed
+            else e.decision.with_outcome(OperationOutcome.FAILED)
+            for e in evaluated
+        ]
+        await self._persist_fresh(decisions)
+        denied = next(d for d in decisions if not d.allowed)
+        return AuthorizationDenied(denied)
+
+    def _recheck_all(self, evaluated: Sequence[Evaluated]) -> list[Evaluated]:
+        at = self._clock()
+        return [recheck(e, self._policy, at) for e in evaluated]
+
+    async def read(
+        self,
+        authenticated: Principal,
+        key: ResourceKey,
+        action: str,
+        *,
+        trace_id: str,
+        load: Callable[[AuthorizationDecision], Awaitable[T]],
+        requested: RequestedScope = NO_FILTER,
+        delegation_id: UUID | None = None,
+        additional_reads: Callable[[T], Awaitable[Sequence[ResourceKey]]] | None = None,
+    ) -> T:
+        """Load once under the primary lock, then authorize dependencies derived
+        from that exact private payload before auditing and returning it. All
+        authority/resource locks remain held until the single final commit."""
+        evaluated = await self._guarded_decide(
+            authenticated, [key], action, requested, trace_id, delegation_id
+        )
+        if not evaluated[0].decision.allowed:
+            raise await self._deny(evaluated)
+        evaluated = self._recheck_all(evaluated)
+        if not evaluated[0].decision.allowed:
+            raise await self._deny(evaluated)
+        decision = evaluated[0].decision
+        try:
+            payload = await load(decision)
+        except Exception:
+            await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
+            raise
+        if additional_reads is not None:
+            # WHY: a separate scope read would commit and release the current
+            # authority locks before returning the answer. Deriving keys from
+            # this exact payload also prevents authorizing one version's scope
+            # and then returning a freshly selected, different version.
+            try:
+                source_keys = sorted(set(await additional_reads(payload)))
+                source_evaluated = (
+                    await self._guarded_decide(
+                        authenticated, source_keys, Action.READ, requested, trace_id, delegation_id
+                    )
+                    if source_keys
+                    else []
+                )
+            except Exception:
+                await self._persist_fresh(
+                    [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
+                )
+                raise
+            evaluated.extend(source_evaluated)
+            if not all(e.decision.allowed for e in evaluated):
+                raise await self._deny(evaluated)
+            evaluated = self._recheck_all(evaluated)
+            if not all(e.decision.allowed for e in evaluated):
+                raise await self._deny(evaluated)
+        try:
+            for item in evaluated:
+                await self._store.append_decision(
+                    item.decision.with_outcome(OperationOutcome.SUCCEEDED)
+                )
+            await self._store.commit()
+        except Exception as exc:  # noqa: BLE001 - no payload leaves without durable audit
+            await self._safe_rollback()
+            raise AuthorizationUnavailable("read audit could not be persisted") from exc
+        return payload
+
+    async def mutate(
+        self,
+        authenticated: Principal,
+        keys: Sequence[ResourceKey],
+        action: str,
+        *,
+        trace_id: str,
+        operation: Callable[[Sequence[AuthorizationDecision]], Awaitable[T]],
+        requested: RequestedScope = NO_FILTER,
+        delegation_id: UUID | None = None,
+        additional_reads: Callable[[], Awaitable[Sequence[ResourceKey]]] | None = None,
+    ) -> T:
+        """Authorize every key (resolved and locked before any mutation), run the
+        operation in the same UoW, and commit its effects with the decisions."""
+        if not keys:
+            raise ValueError("a protected mutation names at least one resource")
+        evaluated = await self._guarded_decide(
+            authenticated, keys, action, requested, trace_id, delegation_id
+        )
+        if not all(e.decision.allowed for e in evaluated):
+            raise await self._deny(evaluated)
+        evaluated = self._recheck_all(evaluated)
+        if not all(e.decision.allowed for e in evaluated):
+            raise await self._deny(evaluated)
+        if additional_reads is not None:
+
+    async def read_answer(
+        self,
+        principal: Principal,
+        slot_id: UUID,
+        *,
+        valid_at: datetime,
+        known_at: datetime,
+        trace_id: str,
+    ) -> FactAnswer:
+        async def load(decision: AuthorizationDecision) -> FactAnswer:
+            try:
+                return await self._answers.read(slot_id, valid_at=valid_at, known_at=known_at)
+            except LookupError as exc:
+                raise SlotNotFound(str(slot_id)) from exc
+
+        async def scope_reads(answer: FactAnswer) -> Sequence[ResourceKey]:
+            if answer.scope is None:
+                return ()
+            return (ResourceKey(ResourceType.CONTENT_ARTIFACT, answer.scope.content_artifact_id),)
+
+        try:
+            return await self._execution.read(
+                principal,
+                _slot_key(slot_id),
+                Action.READ,
+                trace_id=trace_id,
+                load=load,
+                additional_reads=scope_reads,
+            )
+        except AuthorizationDenied as exc:
+            raise SlotNotFound(str(slot_id)) from exc
+
+    async def current_names(
+        self,
+        principal: Principal,
+        *,
+        knowledge_base_id: UUID,
+        entity_id: UUID,
+        valid_at: datetime,
+        known_at: datetime,
+        trace_id: str,
+    ) -> list[NameFact]:
+        """The display-name hook. Each candidate slot is authorized for READ; a slot
+        the principal cannot read is silently absent, exactly like a missing one."""
+        facts: list[NameFact] = []
+        for slot_id in await self._names.candidate_slots(knowledge_base_id, entity_id):
+
+            async def load(
+                _decision: AuthorizationDecision, slot_id: UUID = slot_id
+            ) -> NameFact | None:
+                return await self._names.name_fact(slot_id, valid_at=valid_at, known_at=known_at)
+
+            try:
+                fact = await self._execution.read(
+                    principal, _slot_key(slot_id), Action.READ, trace_id=trace_id, load=load
+                )
+            except AuthorizationDenied:
+                continue
+            if fact is not None:
+                facts.append(fact)
+        return order_names(facts)
+    fact_slot_id: UUID,
+    valid_as_of: datetime | None = Query(default=None, alias="validAsOf"),
+    known_as_of: datetime | None = Query(default=None, alias="knownAsOf"),
+    principal: Principal = Depends(current_principal),
+    execution: AuthorizationExecution = Depends(get_authorization_execution),
+    session: AsyncSession = Depends(get_db_session),
+) -> FactVersionOut:
+    """Business valid/known coordinates select history only; authorization always
+    uses current enforcement time and current grants (S0003 AC4)."""
+    repository = SqlAlchemyFactCommitRepository(session)
+    answers = FactAnswerReader(SqlAlchemyFactSlotStore(session))
+    now = datetime.now(UTC)
+    requested = RequestedScope(
+        knowledge_base_ids=None,
+        selectors=(),
+        business_valid_as_of=valid_as_of,
+        business_known_as_of=known_as_of,
+    )
+
+    async def load(_decision: AuthorizationDecision) -> FactVersion:
+        version = await repository.resolve_at(
+            fact_slot_id, valid_as_of=valid_as_of or now, known_as_of=known_as_of or now
+        )
+        if version is None:
+            raise NotFoundError()
+        return version
+
+    async def scope_reads(version: FactVersion) -> Sequence[ResourceKey]:
+        # WHY: authorize the scope of this exact payload in the slot read's UoW.
+        # A prior independent read commits and releases authority locks, and a
+        # second version selection could return a different, unchecked scope.
+        return await answers.scope_keys_for_value(fact_slot_id, version.value)
+
+    version = await execution.read(
+        principal,
+        _slot(fact_slot_id),
+        Action.READ,
+        trace_id=new_trace_id(),
+        load=load,
+        requested=requested,
+        additional_reads=scope_reads,
+    )
+    return FactVersionOut.from_domain(version)
+
+
+@router.post("/{fact_slot_id}/commits", response_model=CommitResponseOut, status_code=201)
+async def commit_fact(
+    fact_slot_id: UUID,
+    proposal_in: CommitProposalIn,
+    principal: Principal = Depends(current_principal),
+    execution: AuthorizationExecution = Depends(get_authorization_execution),
+    session: AsyncSession = Depends(get_db_session),
+    registry: PredicateContractRegistry = Depends(get_predicate_registry),
+) -> CommitResponseOut:
+    """The commit independently re-checks current `fact_slot:commit` authority inside
+    its own unit of work; a review annotation never implies it (S0006 AC5).
+
+    F0007: an identity-v1 slot validates the `fact-answer/v1` carrier after the
+    slot lock. The answer's scope artifact and name-evidence artifacts join the
+    READ checks, so an unreadable scope is denied before any reason (T-08)."""
+    repository = SqlAlchemyFactCommitRepository(session)
+                        await self._store.name_evidence_artifacts(assertion, slot.knowledge_base_id)
+                    )
+        return tuple(sorted(ResourceKey(ResourceType.CONTENT_ARTIFACT, a) for a in artifacts))
+
+    async def canonical_value(
+        self,
+        slot_id: UUID,
+        value: Mapping[str, Any],
+        *,
+        authorized_scope: tuple[UUID, UUID],
+    ) -> Mapping[str, Any] | None:
+        """The canonical envelope to store, or `None` for a legacy slot."""
+        slot = await self._store.slot(slot_id)
+        if slot is None or slot.legacy:
+            return None
+        if slot.owner != authorized_scope:  # pragma: no cover - the commit lock checks it first
+            raise FactAnswerRejected(AnswerReason.ANSWER_CONTRACT_UNSUPPORTED)
+        contract = None
+        try:
+            if slot.predicate_key and slot.predicate_release_ref:
+                contract = self._registry.find(
+                    PredicateKey.parse(slot.predicate_key), slot.predicate_release_ref
+                )
+        except SlotRejected:
+            contract = None
+        if contract is None:
+            raise FactAnswerRejected(AnswerReason.ANSWER_CONTRACT_UNSUPPORTED)
+        answer = parse_answer(
+            value,
+            value_type=contract.value_type,
+            basis_required=contract.basis_required,
+            multi_header=slot.multi_header,
+        )
+        if answer.scope is not None:
+            owner = await self._store.artifact_owner(answer.scope.content_artifact_id)
+            if owner != slot.owner:
+                raise FactAnswerRejected(AnswerReason.ABSENCE_SCOPE_OUT_OF_SCOPE)
+        if answer.value is not None:
+            await self._check_value_detail(slot, answer)
+            # WHY: a member's immutable identity is derived from its value; a
+            # different canonical value must resolve its own member slot.
+            if (
+                slot.slot_role == SlotRole.MEMBER
+                and member_key(answer.value, contract) != slot.member_key
+            ):
+                raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
+        return answer.to_json()
+
+    async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
+        assert answer.value is not None
+        name = answer.name
+        if name is not None and not await self._store.name_evidence_eligible(
+            name.evidence, slot.owner
+        ):
+            raise FactAnswerRejected(AnswerReason.NAME_EVIDENCE_REQUIRED)
+        if answer.value.value_type == ValueType.ENTITY_REF and not await self._store.entity_in_kb(
+            slot.tenant_id, slot.knowledge_base_id, UUID(str(answer.value.identity))
+        ):
+            raise FactAnswerRejected(AnswerReason.RELATIONSHIP_OBJECT_OUT_OF_SCOPE)
+
+
+class FactAnswerReader:
+    """Internal reader: an identity-v1 slot with no version at the coordinates
+    answers `NOT_PROCESSED`, never null. Read authorization is the caller's
+    (`fact_slot:read` through `AuthorizationExecution.read`)."""
+
+    def __init__(self, store: FactSlotStore) -> None:
+        self._store = store
+
+    async def scope_read_keys(
+        self, slot_id: UUID, *, valid_at: datetime, known_at: datetime
+    ) -> tuple[ResourceKey, ...]:
+        """READ keys a reader must hold before an identity-v1 answer is returned:
+        the absence scope's artifact (S0003 AC6, threat T-08). Legacy slots and
+        answers without a scope need none, so pilot reads are unchanged."""
+        slot = await self._store.slot(slot_id)
+        if slot is None or slot.legacy:
+            return ()
+        stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
+        return await self.scope_keys_for_value(slot_id, stored)
+
+    async def scope_keys_for_value(
+        self, slot_id: UUID, stored: object
+    ) -> tuple[ResourceKey, ...]:
+        """Derive keys from the exact privately loaded version, without selecting
+        the answer again. Legacy JSON keeps its existing unwrapped semantics."""
+        slot = await self._store.slot(slot_id)
+        if slot is None or slot.legacy:
+            return ()
+        scope = stored.get("scope") if isinstance(stored, Mapping) else None
+        artifact = _uuid(scope.get("content_artifact_id")) if isinstance(scope, Mapping) else None
+        return (ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact),) if artifact else ()
+
+    async def read(self, slot_id: UUID, *, valid_at: datetime, known_at: datetime) -> FactAnswer:
+        slot = await self._store.slot(slot_id)
+        if slot is None:
+            raise LookupError(str(slot_id))
+        stored = await self._store.answer_at(slot_id, valid_at=valid_at, known_at=known_at)
+        if slot.legacy:
+            if stored is None:
+                return FactAnswer(InformationState.NOT_PROCESSED)
+            return FactAnswer(InformationState.PRESENT, legacy_value=dict(stored))
+        if stored is None:
+            return FactAnswer(InformationState.NOT_PROCESSED)
+        return stored_answer(stored)

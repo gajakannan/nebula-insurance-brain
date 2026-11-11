@@ -1,0 +1,168 @@
+     1	# F0007 — Getting started
+     2	
+     3	**State:** In Progress — authorized review remediation run `2026-11-09-81798e61`. The original Phase A/B approval (`2026-11-09-60865e32`) and completion (`2026-11-09-b94cfa12`) remain historical evidence. Fresh validation and signoff are required before renewed closeout.
+     4	
+     5	Read these in order:
+     6	
+     7	1. [PRD.md](PRD.md)
+     8	2. [personas.md](personas.md)
+     9	3. the six story files
+    10	4. [acceptance-criteria-checklist.md](acceptance-criteria-checklist.md)
+    11	5. [STATUS.md](STATUS.md)
+    12	6. the [assembly plan](feature-assembly-plan.md)
+    13	7. [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md)
+    14	8. the [worked examples](worked-examples.md)
+    15	
+    16	The bound product root is `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`. Framework commands run from `nebula-agents` and always receive that absolute root.
+    17	
+    18	## Key files (as built)
+    19	
+    20	| Concern | Path |
+    21	|---|---|
+    22	| Identity, predicate keys, qualifiers, fingerprint | `engine/packages/brain-domain/src/brain_domain/fact_slots.py` |
+    23	| Typed values: decimal, money, identifiers, names, JCS | `engine/packages/brain-domain/src/brain_domain/fact_values.py`, `data/iso4217-2026-01.txt` |
+    24	| `fact-answer/v1` carrier and reasons | `engine/packages/brain-domain/src/brain_domain/fact_answers.py` |
+    25	| Resolver, answer policy, name hook, registry, authorized facade | `engine/packages/brain-factslots/src/brain_factslots/` |
+    26	| PostgreSQL store and qualifier mapping | `engine/packages/brain-persistence/src/brain_persistence/fact_slots.py`, `fact_slot_models.py` |
+    27	| Migrations | immutable `0012_f0007_factslot_identity.py`; follow-up `0013_f0007_identity_guard.py` |
+    28	| Commit hook and API wiring | `brain_temporal/commit.py` (`CommitAnswerPolicy`), `brain_api/routes/facts.py`, `errors.py`, `deps.py` (`get_predicate_registry`) |
+    29	| Test composition (`test` namespace, seed helpers) | `engine/packages/brain-testing/src/brain_testing/factslots.py` |
+    30	| PostgreSQL harness and pilot fixtures | `engine/tests/fixtures/factslots/` |
+    31	
+    32	Release references: system predicates are pinned at `f0007-system-predicates/1`; the test namespace at `f0007-fixtures/1`.
+    33	
+    34	## Verify locally
+    35	
+    36	```bash
+    37	# product root; needs the Compose PostgreSQL and an admin URL for owned test databases
+    38	export BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@localhost:5432/brain
+    39	engine/.venv/bin/python -m pytest engine/packages/brain-factslots/tests \
+    40	  engine/tests/integration/test_factslot_{migration,resolution,ownership,answers,names}.py \
+    41	  engine/tests/integration/test_factslot_identity_guard_migration.py \
+    42	  engine/tests/integration/test_factslot_authorized_reads.py \
+    43	  --cov=brain_factslots --cov-fail-under=80
+    44	```
+    45	
+    46	Each integration test creates and drops its own database. The shared development database is never migrated or truncated by these suites. To regenerate the pilot snapshot after an intentional seed change, run the migration test once with `F0007_WRITE_PILOT_SNAPSHOT=1`.
+    47	
+    48	## Remediation and rollout (feature action G0)
+    49	
+    50	- Confirm the single Alembic lineage is `0011 → 0012 → 0013`. Never renumber or edit shipped migration `0012`; migration `0013` tightens its identity guard.
+    51	- Migration `0013` locks and inventories identity rows before replacing the constraint. If malformed rows exist it refuses, reports counts and limited slot IDs, and changes no data. Resolve such rows through explicit governed repair before rollout; never fabricate identities or delete evidence to make upgrade pass.
+    52	- Preserve the committed `engine/tests/fixtures/factslots/pilot-before.json`; migration tests compare it across upgrade/downgrade/re-upgrade. Existing numeric carriers and member answers also require read-only rollout inventory; no automatic value rewrite is authorized.
+    53	- The `test:` predicate namespace exists only in test composition. Production composition registers only `sys:` until F0012/F0013 land. An unregistered key is `PREDICATE_UNREGISTERED` by design, not a bug.
+    54	
+    55	## Gotchas
+    56	
+    57	- **The fingerprint is not the identity.** Always compare the stored qualifier rows on conflict. Never treat a matching hash as proof of equality, and never merge slots on a collision.
+    58	- **Release reference is not identity.** Recording a new `predicate_release_ref` on resolution of an existing slot must not create a new slot or update the old one, because identity columns are immutable by trigger.
+    59	- **Members are slots.** Commit to the member slot ID, never to the MULTI header. This keeps the ADR-0008 exclusion per member without touching `canonical_fact_version`, which F0008 owns.
+    60	- **Member values retain their identity.** PRESENT answers must canonicalize to the stored member key. A different entity, name or identifier is `MEMBER_VALUE_MISMATCH` and creates no commit/version/outbox rows; resolve a different member instead.
+    61	- **Legacy rows stay legacy.** A NULL `identity_version` marks a pilot slot. Do not backfill predicate keys or qualifiers. Any later mapping must be explicit and reversible (F0012/F0013).
+    62	- **Authorization comes first.** Run the resolver as the `operation` of `AuthorizationExecution.mutate` over the source artifacts with `INTERPRET`. Add the scope artifact and name-evidence source to `commit_source_keys` so denial precedes any reason code.
+    63	- **Money amounts are strings.** Pydantic must not coerce a JSON number into a decimal string. Reject it (`MONEY_FLOAT_REJECTED`) before any model conversion.
+    64	- **Decimal normalization is closed and bounded.** Input and canonical output use at most 64 total characters, including sign/point. The canonical length is checked before exponent expansion; oversized forms reject `DECIMAL_INVALID` rather than allocating padding.
+    65	- **Scope-dependent reads are one protected operation.** Authorize the actual privately loaded answer and its scope in one current-authority unit of work, audit and commit once, then return. A separate precheck cannot authorize a later answer.
+    66	- **`subject_kb_entity_id` is a generated column.** Never write it. It exists so the subject-KB foreign key ignores legacy rows (MATCH SIMPLE).
+    67	- **Entity references that leave the KB.** An entity reference in a qualifier, a MULTI member or an answer value that is not associated with the slot's KB is rejected with `RELATIONSHIP_OBJECT_OUT_OF_SCOPE`, the same reason as an out-of-KB relationship object.
+    68	- **The name hook authorizes per slot.** `AuthorizedFactSlots.current_names` runs `fact_slot:read` on each candidate slot. A slot the reader cannot read is absent, exactly like a missing one.
+    69	- **The backup inventory hashes present columns only.** `scripts/ops/verify_content.py` reads the columns that exist at the database's revision, so backups of databases older than 0012 still work.
+    70	
+    71	## RLS inventory handed to F0018
+    72	
+    73	`fact_slot` and `fact_slot_qualifier`, both owned by `(tenant_id, knowledge_base_id)`. F0007 enables no RLS policy and adds no `BYPASSRLS`, superuser or `SECURITY DEFINER` path. F0026 proves isolation.
+     1	# F0007 — FactSlot model — Status
+     2	
+     3	**Overall Status:** In Progress — remediation run `2026-11-09-81798e61`; prior completion retained as history.
+     4	**Last Updated:** 2026-11-09
+     5	**Plan Run:** `2026-11-09-60865e32` (A+B, new)
+     6	**Phase A:** Approved 2026-11-09 (`approve-phase-a`, G3 PASS)
+     7	**Phase B:** Approved 2026-11-09 (`approve-phase-b`; assembly plan, ADR-0077, three design schemas)
+     8	**Implementation:** Current remediation `2026-11-09-81798e61`; original run `2026-11-09-b94cfa12` closed 2026-11-09 and is retained as history.
+     9	
+    10	## Story Checklist
+    11	
+    12	| Story | Title | Status |
+    13	|---|---|---|
+    14	| F0007-S0001 | Resolve stable FactSlot identity | In Progress |
+    15	| F0007-S0002 | Distinguish single, multi-valued and relationship slots | In Progress |
+    16	| F0007-S0003 | Carry information state separately from value | In Progress |
+    17	| F0007-S0004 | Type money and identifiers | In Progress |
+    18	| F0007-S0005 | Define name FactSlots | In Progress |
+    19	| F0007-S0006 | Preserve pilot slots and ownership | In Progress |
+    20	
+    21	## Story × Role Progress
+    22	
+    23	Current remediation run only. Prior passing verdicts below are history, not current signoff.
+    24	
+    25	| Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
+    26	|---|---|---|---|---|---|---|---|---|
+    27	| F0007-S0001 | done | not-in-scope | not-in-scope | validating | pending | pending | validating | in-progress |
+    28	| F0007-S0002 | done | not-in-scope | not-in-scope | validating | pending | pending | validating | in-progress |
+    29	| F0007-S0003 | done | not-in-scope | not-in-scope | validating | pending | pending | validating | in-progress |
+    30	| F0007-S0004 | done | not-in-scope | not-in-scope | validating | pending | pending | validating | in-progress |
+    31	| F0007-S0005 | done | not-in-scope | not-in-scope | validating | pending | pending | validating | in-progress |
+    32	| F0007-S0006 | done | not-in-scope | not-in-scope | validating | pending | pending | validating | in-progress |
+    33	
+    34	Frontend and AI are out of scope: F0007 has no UI and no model call. The Architect set the required roles at Phase B (below).
+    35	
+    36	## Required Role Matrix
+    37	
+    38	Set by the Architect at Phase B (G5), 2026-11-09.
+    39	
+    40	| Role | Required | Why Required | Set By | Date |
+    41	|---|---|---|---|---|
+    42	| Quality Engineer | Yes | 39 ACs need independent PostgreSQL, concurrency and negative-fixture evidence | Architect | 2026-11-09 |
+    43	| Code Reviewer | Yes | New application package, migration and commit-path change | Architect | 2026-11-09 |
+    44	| Security Reviewer | Yes | Ownership keys, derived restrictions, non-disclosing denial (T-08) and RLS handoff | Architect | 2026-11-09 |
+    45	| DevOps | Yes | Additive migration 0012 with up/down/up proof on seeded pilot data | Architect | 2026-11-09 |
+    46	| Architect | Yes | Identity, legacy compatibility and ADR-0077 proof gates | Architect | 2026-11-09 |
+    47	
+    48	## Story Signoff Provenance
+    49	
+    50	Append-only history. Rows for `2026-11-09-b94cfa12` are prior completion provenance, not signoff for the current remediation run. New verdicts are appended after fresh review.
+    51	
+    52	| Story | Role | Reviewer | Verdict | Evidence | Date | Notes |
+    53	|---|---|---|---|---|---|---|
+    54	| F0007-S0001 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+    55	| F0007-S0001 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+    56	| F0007-S0001 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+    57	| F0007-S0001 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+    58	| F0007-S0001 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+    59	| F0007-S0002 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+    60	| F0007-S0002 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+     1	# Feature Assembly Plan — F0007: FactSlot model
+     2	
+     3	**Created:** 2026-11-09
+     4	**Author:** Architect
+     5	**Status:** In Progress — authorized review remediation run `2026-11-09-81798e61`. Phase B approval and completion run `2026-11-09-b94cfa12` are retained as history; fresh validation and signoff precede renewed closeout.
+     6	**Run:** `2026-11-09-60865e32` (A+B, new); Phase A approved with `approve-phase-a` on 2026-11-09.
+     7	**NEBULA_PRODUCT_ROOT:** `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`
+     8	
+   340	
+   341	Latency is observed and recorded, not given a target.
+   342	
+   343	## Rollout, Rollback and Caching
+   344	
+   345	1. Preserve the committed pilot snapshot and schema hash. Confirm the single migration lineage `0011 → 0012 → 0013`; shipped0012 remains immutable. Inventory existing identities, numeric carriers and member answers before deployment; detected corruption requires explicit governed resolution, not automatic repair.
+   346	2. Apply follow-up0013 under its refusal-only preflight, then deploy the corrected domain, application policy and protected-read code. No producer calls the resolver until F0016/F0018 adopt it, and the `test` namespace registry is wired only in test composition.
+   347	3. Rollback:
+   348	   - stop resolver callers;
+   349	   - identity-v1 slots and versions stay readable by the deployed binary, and no binary without the answer policy may commit to them;
+   350	   - downgrade0013 restores the exact0012 guard without rewriting data; downgrading below0012 refuses while v1 or qualifier rows exist, and evidence is never deleted to make a downgrade pass.
+   351	4. Caching: no result, slot or authorization cache. Only the immutable predicate registry, the ISO 4217 list and the normalization tables are process-cached, and each is versioned.
+   352	
+   353	## RLS Inventory Handoff (F0018)
+   354	
+   355	| Table | Owner columns | Notes for F0018 |
+   415	## Authorized Review Remediation — run 2026-11-09-81798e61
+   416	
+   417	The operator authorized all seven findings from audits 2026-11-09-7c8e8461 and 2026-11-09-8b8456df. This amendment corrects the existing invariants; it introduces no new producer, route, permission, currency semantics or ontology behavior.
+   418	
+   419	- Backend owns member-key equality, named zero-write rejection, a single 64-character numeric input/canonical bound and preallocation validation. QE tests entity/name/identifier mismatches, normalized equivalents, positive/negative decimal limits, canonical/schema round trips and extreme exponents.
+   420	- Backend/DevOps add migration 0013 after immutable0012. Under an ACCESS EXCLUSIVE fact_slot lock, inventory rows for which the complete identity expression is not TRUE; report counts and limited slot IDs only and refuse the migration without changing evidence. Existing malformed identities require explicit governed repair. Replace the CHECK atomically; downgrade restores the exact0012 guard without rewriting rows. QE proves up/down/up, NULL mandatory fields, partial legacy and occupied malformed-data refusal on owned databases.
+   421	- Protected reads extend AuthorizationExecution.read with an optional `additional_reads(payload)` callback. Authorize/lock the primary resource, load the selected payload exactly once into private memory, derive the actual payload's scope keys, authorize them under the same current-authority unit of work, recheck all decisions, audit all and commit once before returning. Do not prequery a possibly different answer. Denied scope returns the established non-disclosing denial; legacy values do not gain carrier parsing. QE verifies revocation interleavings and selection/denial behavior at the real facade and HTTP boundary.
+   422	- PM reconciles final and inherited post-CI changed-file inventory and removes stale Not Started entry statuses. Architect reconciles bindings for0013 and protected-read semantics. Original approved reports remain history; a new evidence run owns current proofs and fresh reviews.
+   423	- Runtime remains the product's CI-equivalent locked engine Python environment plus Compose PostgreSQL; all destructive migration/rollback tests use owned databases. Inspect shared data read-only for rollout readiness; never repair it automatically.
+   424	
+   425	Required remediation roles: Backend Developer, Architect, QE, Code Reviewer, Security Reviewer and DevOps. No frontend or AI behavior changes. Re-review plan readiness and completed/candidate feature after regression evidence. No acceptance of Proposed ADRs is implied.

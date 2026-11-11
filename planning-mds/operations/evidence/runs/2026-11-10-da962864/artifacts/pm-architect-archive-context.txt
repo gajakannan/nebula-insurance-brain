@@ -1,0 +1,193 @@
+# F0007 — FactSlot model
+
+**Status:** Done / Archived — remediation run `2026-11-09-81798e61`, operator approved 2026-11-10
+**Prior archive:** 2026-11-09
+**Archived after remediation:** 2026-11-10
+**Phase:** v0.1A
+**Roadmap:** Completed
+
+## Overview
+
+FactSlot defines canonical semantic identity for every fact; the GL limits in the v0.1 acceptance question are distinct FactSlots (section 13).
+
+Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0006](../../../architecture/decisions/ADR-0006-factslot-defines-canonical-semantic-identity.md).
+
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0002, F0003, F0006 (previously F0001).
+- Carry master blueprint 107.4 and ADR-0039 into the PRD: information state (eight states) is separate from the value, NOT_FOUND/NOT_STATED carry the exact scope searched, and access denial is never an information state. Values use qualified money (exact decimal, ISO 4217 currency, basis) and scoped identifiers (scheme, type, value).
+- Carry 109.1: define FactSlot identity beyond the first scalar example (multi-valued, qualified and relationship slots). FactSlot keys are the predicate key referenced by the ADR-0038 SourceAuthorityPolicy owned by F0018.
+- New tenant-owned tables bind child rows and foreign keys to tenant ownership and follow the ADR-0042 row-security pattern settled in F0018 Phase B.
+
+## Documents
+
+- [PRD](PRD.md): scope, data requirements, access rules, and the G1 clarifications from 2026-11-09
+- [Personas](personas.md) and [acceptance checklist](acceptance-criteria-checklist.md) (39 ACs)
+- [STATUS](STATUS.md): plan run `2026-11-09-60865e32` (A+B, new)
+- [Feature assembly plan](feature-assembly-plan.md) and Proposed [ADR-0077](../../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md): Phase B design approved by operator 2026-11-09
+- [Worked examples](worked-examples.md), [contract examples](contract-examples.json) and [GETTING-STARTED](GETTING-STARTED.md)
+- Design schemas: [fact-slot-key-v1](../../../schemas/fact-slot-key-v1.schema.json), [fact-answer-v1](../../../schemas/fact-answer-v1.schema.json), [fact-slot-resolution-result-v1](../../../schemas/fact-slot-resolution-result-v1.schema.json)
+
+The feature shard is `planning-mds/kg-source/features/F0007.yaml`.
+
+## Feature ERD
+
+# F0007 — FactSlot model
+
+**Feature ID:** F0007
+**Feature Name:** FactSlot model
+**Priority:** Critical
+**Phase:** MVP — v0.1A
+**Status:** Done / Archived — seven audit findings repaired and approved in remediation run `2026-11-09-81798e61`
+**Plan Run:** `2026-11-09-60865e32` (A+B, new)
+
+## Feature Statement
+
+**As a** persistence engineer, business reviewer and GL underwriter
+**I want** every semantic question the Brain answers about a subject to have one stable, typed identity whose answer states its information state separately from its value
+**So that** distinct limits, insureds and names never share or split an answer, and "not found here" is never read as "does not exist".
+# F0007 — Getting started
+
+**State:** Done / Archived after remediation, 2026-11-10, run `2026-11-09-81798e61`. Original planning/completion records remain history; current regression/review/signoff evidence is in the remediation run.
+
+Read these in order:
+
+1. [PRD.md](PRD.md)
+2. [personas.md](personas.md)
+3. the six story files
+4. [acceptance-criteria-checklist.md](acceptance-criteria-checklist.md)
+5. [STATUS.md](STATUS.md)
+6. the [assembly plan](feature-assembly-plan.md)
+7. [ADR-0077](../../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md)
+8. the [worked examples](worked-examples.md)
+
+The bound product root is `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`. Framework commands run from `nebula-agents` and always receive that absolute root.
+
+## Key files (as built)
+# F0007 — FactSlot model — Status
+
+**Overall Status:** Done / Archived after remediation, 2026-11-10; current run `2026-11-09-81798e61`, operator G4 approval recorded.
+**Last Updated:** 2026-11-10
+**Plan Run:** `2026-11-09-60865e32` (A+B, new)
+**Phase A:** Approved 2026-11-09 (`approve-phase-a`, G3 PASS)
+**Phase B:** Approved 2026-11-09 (`approve-phase-b`; assembly plan, ADR-0077, three design schemas)
+**Implementation:** Remediation completed in `2026-11-09-81798e61`; original completed run `2026-11-09-b94cfa12` retained as superseded history.
+
+## Story Checklist
+
+| Story | Title | Status |
+|---|---|---|
+| F0007-S0001 | Resolve stable FactSlot identity | Done |
+| F0007-S0002 | Distinguish single, multi-valued and relationship slots | Done |
+| F0007-S0003 | Carry information state separately from value | Done |
+| F0007-S0004 | Type money and identifiers | Done |
+| F0007-S0005 | Define name FactSlots | Done |
+| F0007-S0006 | Preserve pilot slots and ownership | Done |
+
+## Story × Role Progress
+
+Current remediation run: all implementation, reviewer and operator approval gates are complete. Original completion and collected pre-approval rows below are append-only history.
+
+| Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
+|---|---|---|---|---|---|---|---|---|
+| F0007-S0001 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0002 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0003 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0004 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0005 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0006 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+
+Frontend and AI are out of scope: F0007 has no UI and no model call. The Architect set the required roles at Phase B (below).
+
+## Required Role Matrix
+
+Set by the Architect at Phase B (G5), 2026-11-09.
+
+| Role | Required | Why Required | Set By | Date |
+|---|---|---|---|---|
+| Quality Engineer | Yes | 39 ACs need independent PostgreSQL, concurrency and negative-fixture evidence | Architect | 2026-11-09 |
+| Code Reviewer | Yes | New application package, migration and commit-path change | Architect | 2026-11-09 |
+| Security Reviewer | Yes | Ownership keys, derived restrictions, non-disclosing denial (T-08) and RLS handoff | Architect | 2026-11-09 |
+| DevOps | Yes | Additive migration 0012 with up/down/up proof on seeded pilot data | Architect | 2026-11-09 |
+| Architect | Yes | Identity, legacy compatibility and ADR-0077 proof gates | Architect | 2026-11-09 |
+
+## Story Signoff Provenance
+
+Append-only history. Rows for `2026-11-09-b94cfa12` are prior completion provenance, not signoff for the current remediation run. New verdicts are appended after fresh review.
+
+| Story | Role | Reviewer | Verdict | Evidence | Date | Notes |
+|---|---|---|---|---|---|---|
+| F0007-S0001 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0002 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0003 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0004 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0005 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0006 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Current role verdict collected; operator G4 and final lifecycle transition remain pending |
+| F0007-S0001 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0001 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0001 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0001 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0001 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | Security Reviewer | Codex / independent remediation_security_review | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/security-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | DevOps | Codex primary / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/deployability-check.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0002 | Architect | Codex / Architect role switch | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/architect-implementation-review.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0003 | Quality Engineer | Codex primary / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/test-execution-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |
+| F0007-S0003 | Code Reviewer | Codex / independent remediation_code_review | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-81798e61/code-review-report.md` | 2026-11-10 | Final current signoff verified after explicit operator G4 approval; all seven findings resolved |

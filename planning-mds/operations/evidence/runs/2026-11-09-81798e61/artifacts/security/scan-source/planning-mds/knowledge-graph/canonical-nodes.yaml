@@ -1,0 +1,2394 @@
+version: 1
+status: generated
+coverage_note: Canonical solution nodes are compiled from role-owned shards under planning-mds/kg-source/.
+  Coverage starts empty for Nebula Insurance Brain and grows as features complete Phase B (plan action
+  G4) and G7 reconciliation.
+adrs:
+  - id: adr:0001
+    label: The Brain Owns Semantics
+    path: planning-mds/architecture/decisions/ADR-0001-the-brain-owns-semantics.md
+  - id: adr:0002
+    label: PostgreSQL Is the Authoritative Runtime Store
+    path: planning-mds/architecture/decisions/ADR-0002-postgresql-is-the-authoritative-runtime-store.md
+  - id: adr:0003
+    label: One-Time Content Extraction
+    path: planning-mds/architecture/decisions/ADR-0003-one-time-content-extraction.md
+  - id: adr:0004
+    label: Source, Content Artifact, and Interpretation Are Separately Versioned
+    path: planning-mds/architecture/decisions/ADR-0004-source-content-artifact-and-interpretation-are-separately-versioned.md
+  - id: adr:0005
+    label: Three-Plane Knowledge Model
+    path: planning-mds/architecture/decisions/ADR-0005-three-plane-knowledge-model.md
+  - id: adr:0006
+    label: FactSlot Defines Canonical Semantic Identity
+    path: planning-mds/architecture/decisions/ADR-0006-factslot-defines-canonical-semantic-identity.md
+  - id: adr:0007
+    label: Full Bitemporality
+    path: planning-mds/architecture/decisions/ADR-0007-full-bitemporality.md
+  - id: adr:0008
+    label: Database-Level Temporal Integrity
+    path: planning-mds/architecture/decisions/ADR-0008-database-level-temporal-integrity.md
+  - id: adr:0009
+    label: Explicit Change Semantics
+    path: planning-mds/architecture/decisions/ADR-0009-explicit-change-semantics.md
+  - id: adr:0010
+    label: Provenance Is Mandatory
+    path: planning-mds/architecture/decisions/ADR-0010-provenance-is-mandatory.md
+  - id: adr:0011
+    label: Ontology Is Versioned and Modular
+    path: planning-mds/architecture/decisions/ADR-0011-ontology-is-versioned-and-modular.md
+  - id: adr:0012
+    label: Flexible Authoring, Normalized Runtime
+    path: planning-mds/architecture/decisions/ADR-0012-flexible-authoring-normalized-runtime.md
+    notes: Accepted authoring/runtime boundary remains unchanged. ADR-0045 proposes a scoped reconciliation
+      of the undefined OKF format with blueprint section 112; that clarification is not yet accepted.
+    related_nodes:
+      - adr:0045
+  - id: adr:0013
+    label: JSON Schema Is the Structural Contract
+    path: planning-mds/architecture/decisions/ADR-0013-json-schema-is-the-structural-contract.md
+  - id: adr:0014
+    label: Document Profiles Drive Interpretation
+    path: planning-mds/architecture/decisions/ADR-0014-document-profiles-drive-interpretation.md
+  - id: adr:0015
+    label: Extraction Profiles Are Composable
+    path: planning-mds/architecture/decisions/ADR-0015-extraction-profiles-are-composable.md
+  - id: adr:0016
+    label: Semantic Reinterpretation Is Incremental
+    path: planning-mds/architecture/decisions/ADR-0016-semantic-reinterpretation-is-incremental.md
+  - id: adr:0017
+    label: Knowledge Evolution Is First-Class
+    path: planning-mds/architecture/decisions/ADR-0017-knowledge-evolution-is-first-class.md
+  - id: adr:0018
+    label: Conversation Is Knowledge-Producing
+    path: planning-mds/architecture/decisions/ADR-0018-conversation-is-knowledge-producing.md
+  - id: adr:0019
+    label: Conversation Knowledge Is Not Canonical by Default
+    path: planning-mds/architecture/decisions/ADR-0019-conversation-knowledge-is-not-canonical-by-default.md
+  - id: adr:0020
+    label: Learning Plane Is Separate From Canonical Truth
+    path: planning-mds/architecture/decisions/ADR-0020-learning-plane-is-separate-from-canonical-truth.md
+  - id: adr:0021
+    label: Learned Knowledge Requires Provenance
+    path: planning-mds/architecture/decisions/ADR-0021-learned-knowledge-requires-provenance.md
+  - id: adr:0022
+    label: Apache AGE Is the Graph Projection
+    path: planning-mds/architecture/decisions/ADR-0022-apache-age-is-the-graph-projection.md
+  - id: adr:0023
+    label: pgvector Is a Retrieval Projection
+    path: planning-mds/architecture/decisions/ADR-0023-pgvector-is-a-retrieval-projection.md
+  - id: adr:0024
+    label: Search Is Multi-Modal
+    path: planning-mds/architecture/decisions/ADR-0024-search-is-multi-modal.md
+  - id: adr:0025
+    label: Deterministic ER Ships Before Probabilistic ER
+    path: planning-mds/architecture/decisions/ADR-0025-deterministic-er-ships-before-probabilistic-er.md
+  - id: adr:0026
+    label: Derived Facts Have Dependency Lineage
+    path: planning-mds/architecture/decisions/ADR-0026-derived-facts-have-dependency-lineage.md
+  - id: adr:0027
+    label: Normative and Hypothetical Semantics Are Not Fact Modes
+    path: planning-mds/architecture/decisions/ADR-0027-normative-and-hypothetical-semantics-are-not-fact-modes.md
+  - id: adr:0028
+    label: Temporal Owns Execution; Brain Owns Semantic State
+    path: planning-mds/architecture/decisions/ADR-0028-temporal-owns-execution-brain-owns-semantic-state.md
+  - id: adr:0029
+    label: Process DSL Is Future
+    path: planning-mds/architecture/decisions/ADR-0029-process-dsl-is-future.md
+  - id: adr:0030
+    label: Tenancy Is Structural
+    path: planning-mds/architecture/decisions/ADR-0030-tenancy-is-structural.md
+  - id: adr:0031
+    label: Agent Memory Is Separate
+    path: planning-mds/architecture/decisions/ADR-0031-agent-memory-is-separate.md
+  - id: adr:0032
+    label: Decision Replay Uses Recorded-Time State
+    path: planning-mds/architecture/decisions/ADR-0032-decision-replay-uses-recorded-time-state.md
+  - id: adr:0033
+    label: Qdrant Is Optional
+    path: planning-mds/architecture/decisions/ADR-0033-qdrant-is-optional.md
+  - id: adr:0034
+    label: Label Studio Is the Human Evidence-Adjudication Engine (superseded by adr:0057)
+    path: planning-mds/architecture/decisions/ADR-0034-label-studio-is-the-human-evidence-adjudication-engine.md
+    related_nodes:
+      - adr:0057
+  - id: adr:0035
+    label: Interpretation Basis Is First-Class
+    path: planning-mds/architecture/decisions/ADR-0035-interpretation-basis-is-first-class.md
+  - id: adr:0036
+    label: Nebula Keeps a Native Semantic UX; Onyx Is a Reference Implementation
+    path: planning-mds/architecture/decisions/ADR-0036-nebula-keeps-a-native-semantic-ux-onyx-is-a-reference-implementation.md
+  - id: adr:0037
+    label: Human Corrections Append; They Do Not Rewrite Evidence
+    path: planning-mds/architecture/decisions/ADR-0037-human-corrections-append-they-do-not-rewrite-evidence.md
+  - id: adr:0038
+    label: Semantic Authority and Source Ownership
+    path: planning-mds/architecture/decisions/ADR-0038-semantic-authority-and-source-ownership.md
+  - id: adr:0039
+    label: Typed Insurance Values and Completeness
+    path: planning-mds/architecture/decisions/ADR-0039-typed-insurance-values-and-completeness.md
+  - id: adr:0040
+    label: Lossless Content and Evidence Contract
+    path: planning-mds/architecture/decisions/ADR-0040-lossless-content-and-evidence-contract.md
+  - id: adr:0041
+    label: Atomic Semantic Commit and Projection Delivery
+    path: planning-mds/architecture/decisions/ADR-0041-atomic-semantic-commit-and-projection-delivery.md
+  - id: adr:0042
+    label: Resource and Derivation Authorization
+    path: planning-mds/architecture/decisions/ADR-0042-resource-and-derivation-authorization.md
+  - id: adr:0043
+    label: Retention and Revocation Lifecycle
+    path: planning-mds/architecture/decisions/ADR-0043-retention-and-revocation-lifecycle.md
+  - id: adr:0044
+    label: Review Surface and Approval Contract
+    path: planning-mds/architecture/decisions/ADR-0044-review-surface-and-approval-contract.md
+  - id: adr:0045
+    label: Ontology Release Compatibility
+    path: planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
+    notes: Proposed contract; architecture prerequisites and retrieval bindings only. Phase approvals
+      and runtime acceptance evidence remain pending. See ontology-planning-handoff.md before planning
+      F0012/F0013/F0015.
+    related_nodes:
+      - adr:0012
+      - capability:ontology-release-compatibility
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:constraint-execution-context
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+  - id: adr:0046
+    label: Grounded Answer and Analytic Query Contract
+    path: planning-mds/architecture/decisions/ADR-0046-grounded-answer-and-analytic-query-contract.md
+  - id: adr:0047
+    label: Controlled Learning and Reinterpretation
+    path: planning-mds/architecture/decisions/ADR-0047-controlled-learning-and-reinterpretation.md
+  - id: adr:0048
+    label: Pilot Evidence and Operational Readiness
+    path: planning-mds/architecture/decisions/ADR-0048-pilot-evidence-and-operational-readiness.md
+  - id: adr:0049
+    label: Shared Identity and Verified Principal Boundary
+    path: planning-mds/architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md
+  - id: adr:0050
+    label: Native Policy Evaluation and Resource Scope
+    path: planning-mds/architecture/decisions/ADR-0050-native-policy-evaluation-and-resource-scope.md
+  - id: adr:0051
+    label: Browser Session and Revocation Contract
+    path: planning-mds/architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md
+  - id: adr:0052
+    label: Delegated Agents and Review Authority
+    path: planning-mds/architecture/decisions/ADR-0052-delegated-agents-and-review-authority.md
+  - id: adr:0053
+    label: Permission-Safe Retrieval and Historical Access
+    path: planning-mds/architecture/decisions/ADR-0053-permission-safe-retrieval-and-historical-access.md
+  - id: adr:0054
+    label: Repository Layout, Runtime Roots, and Local Development Topology
+    path: planning-mds/architecture/decisions/ADR-0054-repository-layout-runtime-roots-and-local-topology.md
+    related_nodes:
+      - capability:local-dependency-stack
+      - capability:runtime-roots-and-toolchain
+  - id: adr:0055
+    label: Local Inference Profile — Phi-4-mini-instruct on vLLM
+    path: planning-mds/architecture/decisions/ADR-0055-local-inference-profile-phi-4-mini-on-vllm.md
+    related_nodes:
+      - capability:local-inference-service
+      - capability:semantic-interpretation-run
+  - id: adr:0056
+    label: Bounded Neurosymbolic Assessment in v0.1
+    path: planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md
+  - id: adr:0057
+    label: Nebula Owns the Native Evidence Review Panel
+    path: planning-mds/architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md
+    related_nodes:
+      - adr:0034
+      - adr:0044
+      - adr:0058
+      - capability:evidence-review-round-trip
+      - workflow:human-review
+  - id: adr:0058
+    label: Evidence Anchoring and Selector Contract
+    path: planning-mds/architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md
+    related_nodes:
+      - adr:0040
+      - adr:0057
+      - capability:evidence-review-round-trip
+      - entity:review-decision
+  - id: adr:0059
+    label: Provider-Neutral Content Artifact Storage
+    path: planning-mds/architecture/decisions/ADR-0059-provider-neutral-content-artifact-storage.md
+    related_nodes:
+      - adr:0002
+      - adr:0003
+      - adr:0004
+      - adr:0040
+      - adr:0054
+      - capability:backup-and-restore
+      - capability:local-dependency-stack
+      - capability:parse-once-content-artifact
+  - id: adr:0060
+    label: Docling-Graph Document Pipeline Orchestration (Rejected 2026-11-08; Graph dense failed F0005
+      qualification 2026-10-28)
+    path: planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+    related_nodes:
+      - adr:0003
+      - adr:0004
+      - adr:0015
+      - adr:0028
+      - adr:0040
+      - adr:0055
+      - adr:0058
+      - adr:0059
+      - adr:0074
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+      - entity:content-artifact
+      - entity:semantic-interpretation-run
+  - id: adr:0061
+    label: Tenant identity and structural ownership
+    path: planning-mds/architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md
+    related_nodes:
+      - schema:authx-kernel
+  - id: adr:0062
+    label: Current authorization and durable decisions
+    path: planning-mds/architecture/decisions/ADR-0062-current-authorization-and-durable-decisions.md
+    related_nodes:
+      - schema:authx-kernel
+  - id: adr:0063
+    label: Open Statements and Signature Alignment
+    path: planning-mds/architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md
+    related_nodes:
+      - adr:0005
+      - adr:0014
+      - adr:0015
+      - adr:0016
+      - adr:0035
+      - adr:0060
+      - capability:semantic-interpretation-run
+      - entity:assertion
+  - id: adr:0064
+    label: Time Interpretation and Valid-Time Precision
+    path: planning-mds/architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md
+    related_nodes:
+      - adr:0007
+      - adr:0008
+      - adr:0039
+      - entity:canonical-fact-version
+      - entity:semantic-interpretation-run
+  - id: adr:0065
+    label: Assertion Admission, Text Origin, and Statement Mood
+    path: planning-mds/architecture/decisions/ADR-0065-assertion-admission-text-origin-and-mood.md
+    related_nodes:
+      - adr:0010
+      - adr:0027
+      - adr:0040
+      - adr:0058
+      - entity:assertion
+      - entity:content-artifact
+  - id: adr:0066
+    label: Names Are Time-Bounded Claims
+    path: planning-mds/architecture/decisions/ADR-0066-names-are-time-bounded-claims.md
+    related_nodes:
+      - adr:0006
+      - adr:0025
+      - entity:fact-slot
+      - entity:tenant-entity-identity
+  - id: adr:0067
+    label: Automation Gated by Unrecallable Impact, Human Precedent, and a Fuse
+    path: planning-mds/architecture/decisions/ADR-0067-automation-gated-by-unrecallable-impact.md
+    related_nodes:
+      - adr:0044
+      - adr:0047
+      - adr:0052
+      - entity:review-decision
+      - workflow:human-review
+  - id: adr:0068
+    label: Decision Basis Fingerprints Define Staleness
+    path: planning-mds/architecture/decisions/ADR-0068-decision-basis-fingerprints.md
+    related_nodes:
+      - adr:0016
+      - adr:0017
+      - adr:0026
+      - adr:0045
+      - entity:assessment-record
+      - entity:semantic-interpretation-run
+  - id: adr:0069
+    label: Action Attempts Keep Their Identity and Uncertain Outcome
+    path: planning-mds/architecture/decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md
+    related_nodes:
+      - adr:0028
+      - adr:0041
+      - adr:0052
+      - entity:audit-event
+  - id: adr:0070
+    label: Account, Party and Role Model for Commercial P&C
+    path: planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+    related_nodes:
+      - adr:0011
+      - adr:0062
+      - adr:0064
+      - adr:0066
+      - entity:account
+      - entity:insurance-party
+      - entity:insurance-party-role-assignment
+      - entity:ownership-interest
+      - entity:resource-scope
+  - id: adr:0071
+    label: Semantic Execution Trace and Answer-Basis Contract
+    path: planning-mds/architecture/decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md
+    related_nodes:
+      - adr:0010
+      - adr:0032
+      - adr:0046
+      - adr:0053
+      - adr:0063
+      - adr:0064
+      - schema:semantic-execution-trace
+  - id: adr:0072
+    label: The Observatory Is a Read-Only Projection
+    path: planning-mds/architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md
+    related_nodes:
+      - adr:0020
+      - adr:0053
+      - adr:0062
+      - adr:0069
+      - adr:0071
+      - entity:audit-event
+      - entity:semantic-interpretation-run
+  - id: adr:0073
+    label: Versioned Content Contracts and Append-Only Document Metadata (Proposed; 2026-10-27 OCR quality
+      amendment)
+    path: planning-mds/architecture/decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md
+    related_nodes:
+      - capability:document-date-provenance
+      - capability:versioned-content-contracts
+      - entity:content-artifact
+  - id: adr:0074
+    label: Local Document-Job Execution Controls (Accepted 2026-10-28)
+    path: planning-mds/architecture/decisions/ADR-0074-local-document-job-execution-controls.md
+    related_nodes:
+      - adr:0003
+      - adr:0004
+      - adr:0055
+      - adr:0060
+      - capability:local-inference-service
+      - capability:parse-once-content-artifact
+      - migration:f0005-job-event-reason
+  - id: adr:0075
+    label: Versioned Assertion Semantics and Structural Admission (Proposed; Phase B design approved 2026-11-01,
+      runtime proofs pending)
+    path: planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md
+    related_nodes:
+      - adr:0063
+      - adr:0065
+      - capability:assertion-eligibility-guards
+      - capability:structural-assertion-admission
+      - capability:versioned-assertion-semantics
+      - entity:assertion
+  - id: adr:0076
+    label: Retrieval graph structure is a governed, derived ranking signal (Proposed)
+    path: planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+    related_nodes:
+      - adr:0022
+      - adr:0023
+      - adr:0046
+      - adr:0053
+      - adr:0071
+      - adr:0075
+      - capability:budgeted-evidence-context
+      - capability:governed-evidence-retrieval
+      - capability:spectral-retrieval-experiments
+  - id: adr:0077
+    label: FactSlot Identity and Typed Answer Carriers (Proposed; F0007 Phase B design approved 2026-11-09,
+      runtime proofs pending)
+    path: planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md
+    related_nodes:
+      - adr:0006
+      - adr:0039
+      - adr:0066
+      - capability:factslot-identity-resolution
+      - capability:typed-fact-answer
+      - entity:fact-slot
+      - entity:fact-slot-qualifier
+api_contracts:
+  - id: api:brain-api
+    label: Nebula Insurance Brain API
+    path: planning-mds/api/brain-api.yaml
+    related_nodes:
+      - endpoint:content-artifact-file-get
+      - endpoint:content-artifact-get
+      - endpoint:fact-commit
+      - endpoint:fact-get
+      - endpoint:health
+      - endpoint:review-decisions-submit
+      - endpoint:review-item-get
+capabilities:
+  - id: capability:assertion-eligibility-guards
+    label: Assertion eligibility guards
+    notes: 'Implemented for F0006 run 2026-11-02-5a00b0ff: conjunctive kind/mood/verified-origin restrictions
+      at existing review/correction and mandatory pilot commit guards. Source discovery projects metadata
+      only; current source READ and same-UoW proof precede protected semantic loading. Basis remains visible
+      with existing policy, not a new compulsory review rule. Legacy unregistered pilot behavior remains
+      explicit; no new grants, auto-acceptance or full F0018 orchestration.'
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
+    related_nodes:
+      - adr:0065
+      - adr:0075
+      - endpoint:fact-commit
+      - entity:assertion
+      - entity:assertion-semantics
+      - entity:review-item
+    source_docs:
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+  - id: capability:authorization-enforcement
+    label: Authorization enforcement
+    notes: F0002 replaced the F0001 snapshot authorizer with the pure conjunctive evaluator (brain_security/evaluation.py)
+      over complete current grant slices and server-hydrated resource envelopes (parent, classification,
+      source, evidence dependencies, delegation ceiling); the unchanged Casbin pilot policy evaluates
+      role/resource/action; denials never disclose existence.
+    related_nodes:
+      - adr:0050
+      - adr:0062
+      - entity:audit-event
+      - policy_rule:content-artifact-read
+      - policy_rule:fact-slot-commit
+      - policy_rule:fact-slot-read
+      - policy_rule:review-task-annotate
+      - policy_rule:review-task-read
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:backup-and-restore
+    label: Backup and restore
+    notes: Timed backup of relational state, content objects, artifact manifests, and review evidence,
+      restored to a fresh stack with every citation verified (section 114.3).
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - capability:parse-once-content-artifact
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:bitemporal-canonical-commit
+    label: Bitemporal canonical commit
+    notes: Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals,
+      explicit change reasons, and facts plus audit plus outbox in one transaction (ADR-0007, ADR-0008,
+      ADR-0009).
+    related_nodes:
+      - endpoint:fact-commit
+      - endpoint:fact-get
+      - entity:canonical-fact-version
+      - entity:fact-slot
+      - entity:outbox-event
+      - schema:canonical-commit-request
+      - schema:canonical-commit-response
+      - workflow:canonical-commit
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:bounded-delegation
+    label: Bounded delegation
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): server-owned expiring delegation bound to
+      one agent/service executor, ceiling cannot exceed the acting principal''s current authority, no
+      onward delegation; re-intersected with current grants and rechecked before every effect.'
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Bounded delegation with current verified authority and bounded implementation scope.
+    related_nodes:
+      - adr:0062
+      - entity:delegation
+      - entity:principal
+      - schema:authx-kernel
+    source_docs:
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:budgeted-evidence-context
+    label: Budgeted evidence context and answer linkage
+    notes: Planning direction only. Exact final-payload tokenizer/model budget, precision-preserving locator
+      resolution, current reauthorization, gaps and grounded answer-basis linkage. Selection never establishes
+      use or truth; recording is non-blocking and does not depend on F0067.
+    rationale:
+      - adr: adr:0076
+        section: Decision (proposed)
+        summary: Derived retrieval ranks authorized evidence under existing temporal/evidence contracts;
+          baseline and optional numerical experiments have separate delivery gates.
+    related_nodes:
+      - adr:0046
+      - adr:0071
+      - adr:0076
+      - capability:governed-evidence-retrieval
+      - glossary_term:bridge-evidence
+      - glossary_term:evidence-block
+      - glossary_term:evidence-context
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/features/F0036-evidence-aware-retrieval-and-grounded-generation/README.md
+  - id: capability:credential-verification-and-principal-resolution
+    label: Credential verification and principal resolution
+    notes: OIDC token verification (issuer, audience, signature, expiry) before any storage read; verified
+      (issuer, subject) mapped to a stable internal principal with current memberships.
+    related_nodes:
+      - adr:0049
+      - adr:0061
+      - entity:principal
+      - role:reviewer
+      - role:service-principal
+      - role:tenant-member
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:current-resource-scope
+    label: Current resource scope
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): complete grant slices (role + parent selectors
+      + classification/source labels, no defaults) under a monotonic principal_authority revision; evaluation
+      locks authority FOR SHARE, grant changes FOR UPDATE; request filters only narrow.'
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Current resource scope with current verified authority and bounded implementation scope.
+    related_nodes:
+      - adr:0062
+      - capability:authorization-enforcement
+      - entity:membership
+      - entity:resource-scope
+      - schema:authx-kernel
+    source_docs:
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:document-date-provenance
+    label: Append-only document-date provenance
+    notes: Implemented F0004 attributable candidates and explicit append-only human selection/clear outside
+      parse hashes. Trusted metadata/human ports default deny. FOR SHARE version lock spans read/audit
+      commit against writer FOR UPDATE, preventing a selected candidate from being omitted under READ
+      COMMITTED. No UI, grant or temporal resolver.
+    related_nodes:
+      - adr:0073
+      - entity:content-artifact
+    source_docs:
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/worked-examples.md
+  - id: capability:durable-authorization-decisions
+    label: Durable authorization decisions
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): AuthorizationExecution commits a schema-v1
+      Decision to append-only audit_event before any payload or with the mutation atomically; denials/failures
+      audited in a fresh transaction; audit failure is a sanitized 503. The single lock/load orchestration
+      is execution.decide (API and worker). F0006 extends the same mutation UoW with source READ discovery/recheck/audit
+      for assertion, review and commit consumers; metadata-only discovery precedes protected loads and
+      direct v2 commits require current source proof. No new grants or nested read-facade commit is introduced.'
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Durable authorization decisions with current verified authority and bounded implementation
+          scope.
+    related_nodes:
+      - adr:0062
+      - capability:authorization-enforcement
+      - entity:audit-event
+      - schema:authx-kernel
+    source_docs:
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+  - id: capability:evidence-review-round-trip
+    label: Evidence review round trip
+    notes: ReviewItem routing into a review batch, rendering and anchor resolution in the native Review
+      Panel, duplicate and stale rejection, blocked decisions on unresolved evidence, and a governed ReviewDecision
+      with correction lineage (ADR-0057, ADR-0058, ADR-0037).
+    related_nodes:
+      - endpoint:review-decisions-submit
+      - endpoint:review-item-get
+      - entity:review-decision
+      - entity:review-item
+      - schema:review-decision
+      - workflow:human-review
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:factslot-identity-resolution
+    label: FactSlot identity resolution
+    notes: Implemented (F0007 run 2026-11-09-b94cfa12) deterministic resolve-or-create of KB-owned FactSlots
+      from subject, opaque versioned predicate key and normalized typed qualifiers; MULTI members are
+      child slots and RELATIONSHIP slots include the object. Authorized from source artifacts with derived
+      restrictions; no grants, routes or producer activation.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in
+          feature run 2026-11-09-b94cfa12, formal acceptance pending.'
+      - adr: adr:0006
+        section: Decision
+        summary: FactSlot is first-class canonical semantic identity.
+    related_nodes:
+      - adr:0006
+      - adr:0077
+      - capability:authorization-enforcement
+      - entity:fact-slot
+      - entity:fact-slot-qualifier
+      - schema:fact-slot-key-v1
+      - schema:fact-slot-resolution-result-v1
+    source_docs:
+      - planning-mds/features/F0007-factslot-model/PRD.md
+      - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
+      - planning-mds/features/F0007-factslot-model/worked-examples.md
+  - id: capability:governed-evidence-retrieval
+    label: Governed evidence retrieval
+    notes: Planning direction only. F0035 owns authorized hybrid seeds, bounded typed expansion and one
+      compatible execution basis. F0033/F0034 projection/checkpoint contracts precede its Phase B approval;
+      runtime adapters precede production integration. PPR is optional; no spectral prerequisite.
+    rationale:
+      - adr: adr:0076
+        section: Decision (proposed)
+        summary: Derived retrieval ranks authorized evidence under existing temporal/evidence contracts;
+          baseline and optional numerical experiments have separate delivery gates.
+    related_nodes:
+      - adr:0076
+      - capability:assertion-eligibility-guards
+      - capability:authorization-enforcement
+      - capability:versioned-content-contracts
+      - glossary_term:projection-compatibility
+      - glossary_term:retrieval-execution-basis
+      - glossary_term:retrieval-mode
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/features/F0033-pgvector-retrieval/README.md
+      - planning-mds/features/F0034-age-graph-projection/README.md
+      - planning-mds/features/F0035-hybrid-search-and-authorized-scope/README.md
+  - id: capability:grounded-gl-guideline-assessment
+    label: Grounded GL guideline assessment
+    notes: Proposed v0.1B bounded on-demand comparison; planned, not implemented. Exact canonical input/rule
+      versions, temporal snapshot, evidence lineage, and current authorization. The single operation is
+      money_gte_minimum over accepted canonical facts; outcomes are a closed set and authorization failures
+      are errors outside it. Runtime endpoints, permission mapping, and DTO schemas are open decisions
+      in the assembly plan and are deliberately not bound here.
+    related_nodes:
+      - adr:0026
+      - adr:0056
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+      - capability:semantic-interpretation-run
+      - entity:assessment-record
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:guideline-rule-version
+      - schema:semantic-example
+      - workflow:guideline-assessment
+    source_docs:
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0006-reproducible-worked-examples.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/PRD.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/feature-assembly-plan.md
+  - id: capability:local-dependency-stack
+    label: Local dependency stack
+    notes: 'Docker Compose stack: PostgreSQL 18 with pgvector, AGE, btree_gist; local filesystem content-artifact
+      store loaded from committed config/local.yaml; authentik; pinned dependency matrix including the
+      experience/ toolchain, pdf.js, and fflate.'
+    related_nodes:
+      - adr:0054
+      - adr:0059
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:local-inference-service
+    label: Local inference service
+    notes: vLLM OpenAI-compatible service on the host GPU serving microsoft/Phi-4-mini-instruct with a
+      4,096-token context; client-side context enforcement; no identity data sent to the model (ADR-0055).
+    related_nodes:
+      - adr:0055
+      - capability:semantic-interpretation-run
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:ontology-release-compatibility
+    label: Ontology release compatibility analysis
+    notes: Proposed contract and future tooling, not implemented. Historical reproducibility uses pinned
+      releases and exact inputs. Consumer compatibility also covers constraints, applicability, profiles
+      and evidence obligations. Bounded conservativity is one input; unsupported or undecided is not a
+      pass. F0012/F0013 settle contracts; F0030/F0062 add later tooling. First-assessment lineage is already
+      required by F0065/ADR-0026 and must not wait for these tools. See the handoff for formal plan prerequisites.
+    rationale:
+      - adr: adr:0045
+        section: Compatibility and impact gate
+        summary: Proposed release gate requires change classification, scoped impact, replay, migration
+          and rollback evidence.
+    related_nodes:
+      - adr:0026
+      - adr:0045
+      - entity:assessment-record
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:constraint-execution-context
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0015-extraction-profile-compiler/README.md
+      - planning-mds/features/F0030-ontology-workbench/README.md
+      - planning-mds/features/F0062-advanced-reasoners/README.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: capability:parse-once-content-artifact
+    label: Parse-once content artifact
+    notes: 'As built (F0005, 2026-10-28): Docling converts in a supervised conversion-only child with
+      a 300 s parent deadline; Nebula publishes the immutable native bundle (with observed OCR quality)
+      before extraction and reuses it on restart. The direct-baseline client stays the default; Graph
+      dense was rejected and ADR-0060 was Rejected on 2026-11-08. Execution controls: ADR-0074.'
+    related_nodes:
+      - adr:0003
+      - adr:0004
+      - adr:0060
+      - adr:0074
+      - capability:versioned-content-contracts
+      - entity:content-artifact
+      - schema:content-artifact-manifest
+      - workflow:ingestion-interpretation
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+  - id: capability:postgresql-persistence-contract
+    label: PostgreSQL persistence contract and migration boundary
+    notes: Shared PostgreSQL 18 persistence boundary. Preserves existing migration and identifier history,
+      enforces declared ownership and two-axis temporal integrity at the database boundary, and routes
+      section 78 schema ownership by feature and release phase. Domain-specific records are added by their
+      owning features, not pre-created by F0003. The physical representation of F0002 role and permission
+      concepts remains an explicit reconciliation item. F0003's direct PostgreSQL exclusion test at engine/tests/integration/test_persistence_contract.py
+      verifies that overlapping valid and recorded ranges are rejected by the database and the failed
+      commit is absent afterward.
+    related_nodes:
+      - adr:0002
+      - adr:0007
+      - adr:0008
+      - adr:0009
+      - adr:0010
+      - adr:0030
+      - adr:0059
+      - capability:bitemporal-canonical-commit
+      - capability:structural-tenancy-and-entity-identity
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:content-artifact
+      - entity:knowledge-base
+      - entity:outbox-event
+      - entity:semantic-interpretation-run
+      - entity:tenant
+      - entity:workspace
+    source_docs:
+      - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md
+      - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md
+      - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md
+      - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
+      - planning-mds/features/archive/F0003-postgresql-persistence/feature-assembly-plan.md
+  - id: capability:runtime-roots-and-toolchain
+    label: Runtime roots and toolchain
+    notes: engine/ and neuron/ uv workspaces, FastAPI application factory with /health, Alembic, lint
+      and type configuration, CI wiring (ADR-0054).
+    related_nodes:
+      - adr:0054
+      - endpoint:health
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:semantic-example-validation
+    label: Teaching-example validation
+    notes: 'Planning tooling, not runtime. validate_semantic_examples.py checks both teaching bundles
+      (EX-GL-001 and Cedar Bridge) for schema, references, evidence quotes, lineage and fixture digests.
+      build_commercial_pc_snapshot.py generates the Cedar Bridge snapshot.ttl/.jsonld/index from records.json,
+      and the structural check fails when they drift. validate_semantic_rdf.py executes the Cedar Bridge
+      RDF/OWL-RL/SHACL/query expectations; it skips locally without the optional semantic-rdf tools and
+      is strict in CI. Gotcha that motivated the generator change: rdflib and pySHACL compare literal
+      terms, so sh:hasValue "X" does not match "X"^^xsd:string even though RDF 1.1 treats them as one
+      value; generated snapshots emit strings as simple literals.'
+    related_nodes:
+      - schema:commercial-pc-example
+      - schema:semantic-example
+    source_docs:
+      - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+  - id: capability:semantic-interpretation-run
+    label: Semantic interpretation run
+    notes: 'Target: interpretation runs extract from saved native content through the direct-baseline
+      pipeline (ADR-0055) behind a pipeline-neutral port, producing a provider-neutral InterpretationResult
+      with honest evidence precision and recorded pipeline identity. ADR-0060 (Docling-Graph) was Rejected
+      on 2026-11-08.'
+    related_nodes:
+      - adr:0016
+      - adr:0035
+      - adr:0060
+      - entity:assertion
+      - entity:semantic-interpretation-run
+      - schema:interpretation-result
+      - workflow:ingestion-interpretation
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:spectral-retrieval-experiments
+    label: Conditional spectral graph retrieval experiments
+    notes: Future conditional v0.4+ experiment only. Versioned sparse adjacency/eigenpairs, spectral/heat
+      scoring and incremental evaluation under exact authorized temporal compatibility. Separate experiment/cost
+      decision after measured baseline; reservation does not enable a runtime path. F0061 retains Advanced
+      Retrieval.
+    rationale:
+      - adr: adr:0076
+        section: Decision (proposed)
+        summary: Derived retrieval ranks authorized evidence under existing temporal/evidence contracts;
+          baseline and optional numerical experiments have separate delivery gates.
+    related_nodes:
+      - adr:0076
+      - capability:budgeted-evidence-context
+      - capability:governed-evidence-retrieval
+      - glossary_term:projection-compatibility
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/features/F0068-spectral-graph-retrieval-experiments/README.md
+  - id: capability:structural-assertion-admission
+    label: Structural assertion admission
+    notes: 'Implemented for F0006 run 2026-11-02-5a00b0ff: authorized deterministic quote/name/time/reference
+      checks with server-derived honest selectors, atomic scoped name ownership and protected per-item
+      outcomes. Admission performs zero model/conversion/canonical writes. F0016 still owns durable drops,
+      time production and full run adoption; native examples are synthetic retained-source proof.'
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
+    related_nodes:
+      - adr:0075
+      - entity:assertion
+      - entity:assertion-name-claim
+      - entity:content-block
+      - schema:assertion-admission-result-v1
+    source_docs:
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+  - id: capability:structural-tenancy-and-entity-identity
+    label: Structural tenancy and entity identity
+    notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): Tenant/Workspace/KB registries with composite
+      ownership FKs (migrations 0005 expand, 0006 constrain after a digest-bound reviewed reconciliation,
+      0007 immutable ownership); tenant-scoped entity identity with explicit KB associations that never
+      grant access.'
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Structural tenancy and entity identity with current verified authority and bounded implementation
+          scope.
+    related_nodes:
+      - adr:0061
+      - entity:knowledge-base
+      - entity:tenant
+      - entity:tenant-entity-identity
+      - entity:workspace
+      - schema:authx-kernel
+    source_docs:
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:typed-fact-answer
+    label: Typed fact answer carrier
+    notes: 'Implemented (F0007 run 2026-11-09-b94cfa12) fact-answer/v1 envelope for identity-v1 slots:
+      PRESENT plus eight ADR-0039 states, mandatory absence scope for NOT_FOUND/NOT_STATED, no access-denied
+      state, exact original-currency money and scheme-scoped identifiers. Validated at the existing commit;
+      unread slots read NOT_PROCESSED internally. HTTP return of states is F0020.'
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in
+          feature run 2026-11-09-b94cfa12, formal acceptance pending.'
+      - adr: adr:0039
+        section: Decision
+        summary: Information state is separate from value; money is qualified and identifiers are scoped.
+    related_nodes:
+      - adr:0039
+      - adr:0077
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+      - entity:canonical-fact-version
+      - entity:fact-slot
+      - schema:fact-answer-v1
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
+      - planning-mds/features/F0007-factslot-model/worked-examples.md
+  - id: capability:versioned-assertion-semantics
+    label: Versioned assertion semantics
+    notes: 'Implemented for F0006 run 2026-11-02-5a00b0ff: strict typed/open contracts, explicit version
+      dispatch, independent dimensions and immutable semantic extensions. Legacy source rows and v1-only
+      importer/defaults are preserved. Qualified synthetic fixture proof does not activate a live producer
+      or grant canonical acceptance; ADR-0075 remains Proposed.'
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
+    related_nodes:
+      - adr:0075
+      - entity:assertion
+      - entity:assertion-document-reference
+      - entity:assertion-semantics
+      - schema:assertion-record-v2
+      - schema:interpretation-result-v2
+    source_docs:
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+  - id: capability:versioned-content-contracts
+    label: Versioned verified content contracts
+    notes: Implemented F0004 shared v1/v2 byte/record verification, manifest-last immutable storage, fenced
+      ready publication and legacy preservation. V2 remains default false pending deployment reconciliation/consumer
+      gates. Integrity failures on reads never quarantine or reparse; explicit authorized operator units
+      own repair.
+    related_nodes:
+      - adr:0073
+      - entity:content-artifact
+    source_docs:
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/worked-examples.md
+endpoints:
+  - id: endpoint:content-artifact-file-get
+    label: GET /content/{artifactId}/files/{path}
+    method: GET
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:parse-once-content-artifact
+      - capability:versioned-content-contracts
+    resource: content_artifact
+    route: /content/{artifactId}/files/{path}
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+  - id: endpoint:content-artifact-get
+    label: GET /content/{artifactId}
+    method: GET
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:parse-once-content-artifact
+      - capability:versioned-content-contracts
+    resource: content_artifact
+    route: /content/{artifactId}
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+  - id: endpoint:fact-commit
+    label: POST /facts/{factSlotId}/commits
+    method: POST
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
+          and source eligibility guards; runtime proof pending.
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+    resource: fact_slot
+    route: /facts/{factSlotId}/commits
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+  - id: endpoint:fact-get
+    label: GET /facts/{factSlotId}
+    method: GET
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+    resource: fact_slot
+    route: /facts/{factSlotId}
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+  - id: endpoint:health
+    label: GET /health
+    method: GET
+    related_nodes:
+      - capability:runtime-roots-and-toolchain
+    route: /health
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+  - id: endpoint:review-decisions-submit
+    label: POST /reviews/batches/{reviewBatchId}/decisions
+    method: POST
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
+          and source eligibility guards; runtime proof pending.
+    related_nodes:
+      - capability:evidence-review-round-trip
+    resource: review_task
+    route: /reviews/batches/{reviewBatchId}/decisions
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+  - id: endpoint:review-item-get
+    label: GET /reviews/{reviewItemId}
+    method: GET
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
+          and source eligibility guards; runtime proof pending.
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:evidence-review-round-trip
+    resource: review_task
+    route: /reviews/{reviewItemId}
+    source_docs:
+      - planning-mds/api/brain-api.yaml
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+entities:
+  - id: entity:account
+    label: Insurance account
+    notes: The carrier's customer relationship with exactly one insured organization, and the root of
+      Account 360 (proposed ADR-0070). At most one current account per organization in a tenant; accountOrganization
+      remains eternal while dated accountStatus distinguishes CURRENT and CLOSED in the teaching model.
+      Closed accounts retain history and permit a replacement; unknown status is incomplete. Each account
+      has at most one designated parent account for roll-up; the parent is designated, not computed from
+      ownership. Each account has a dated broker of record and broker contacts; brokers are organizations,
+      not accounts. Each policy belongs to exactly one account, normally the first named insured's; ownership
+      remains visible without a current insured role, and other named insureds stay roles on the term.
+      A program belongs to the parent account, and its master and local policies link to it. Parentage
+      and ownership never imply named-insured status. External people reach only what their authoritative
+      roles name, never the parent or siblings, and a policy-only role never opens the account; carrier
+      staff see all and act by role (F0002-successor amendment pending). F0012 owns the representation,
+      F0017 account versus organization identity, F0023 Account 360. No fictional Cedar Bridge instance
+      belongs in the planning KG.
+    rationale:
+      - adr: adr:0070
+        section: Proposed Decision
+        summary: At most one current account per organization, with retained closed history and a designated
+          parent; policy ownership is independent of insured roles.
+      - adr: adr:0011
+        section: Decision
+        summary: Shared account and party concepts compose with line-specific coverage modules.
+      - adr: adr:0062
+        section: Decision
+        summary: Account is also a trusted resource scope; role-based reach never expands to parent or
+          sibling accounts.
+    related_entities:
+      - entity:insurance-party
+      - entity:insurance-party-role-assignment
+      - entity:ownership-interest
+      - entity:policy-term
+      - entity:resource-scope
+    related_nodes:
+      - adr:0062
+      - adr:0070
+      - glossary_term:insurance-product-composition
+      - schema:commercial-pc-example
+    source_docs:
+      - planning-mds/architecture/account-model-cross-repo-plan.md
+      - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0017-deterministic-entity-resolution/README.md
+      - planning-mds/features/F0023-minimal-entity-360/README.md
+  - id: entity:assertion
+    label: Assertion
+    notes: Source claim distinct from canonical truth. F0006 run 2026-11-02-5a00b0ff adds versioned typed/open
+      semantics, independent mode/origin/basis, server-grounded evidence and current-consumer eligibility.
+      The legacy carrier remains a compatibility projection; v2 meaning resides in its immutable one-to-one
+      extension. Admission creates no canonical fact and does not activate a producer.
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
+    related_entities:
+      - entity:review-decision
+      - entity:semantic-interpretation-run
+    related_nodes:
+      - capability:assertion-eligibility-guards
+      - capability:semantic-interpretation-run
+      - capability:structural-assertion-admission
+      - capability:versioned-assertion-semantics
+      - entity:review-item
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+  - id: entity:assertion-document-reference
+    label: Document-local assertion reference
+    notes: Implemented document-version-scoped reference declaration with a grounded introducing name
+      and structural tenant/KB keys. Only references used by accepted claims are retained atomically.
+      These local subjects/objects do not create or resolve canonical Entity identity; F0017 owns later
+      identity work.
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
+    related_nodes:
+      - adr:0075
+      - entity:assertion
+      - entity:assertion-name-claim
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+  - id: entity:assertion-name-claim
+    label: Assertion admission name claim
+    notes: Implemented append-only document-scoped NFC/case/whitespace name ownership, protected by document
+      locking and a scoped unique key. It supplies NAME_CLAIMED_BY_ANOTHER checks with rollback/replay
+      behavior; it is not a canonical name FactSlot or alias projection.
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
+    related_nodes:
+      - adr:0075
+      - capability:structural-assertion-admission
+      - entity:assertion-document-reference
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+  - id: entity:assertion-semantics
+    label: Assertion semantic extension
+    notes: Implemented immutable one-to-one v2 extension keyed to the existing assertion ID, retaining
+      the complete source record, independent dimensions, verified evidence/source hashes and scoped reference/time
+      snapshots. PostgreSQL deferred integrity mirrors carrier and evidence coordinates, and v2 corrections
+      own their extension/evidence while inheriting basis. It is not a second assertion identity or canonical
+      fact.
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: F0006 as-built versioned claims, structural admission and guarded current consumers have
+          source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal
+          Proposed ADR acceptance is implied.
+    related_nodes:
+      - adr:0075
+      - entity:assertion
+      - entity:assertion-document-reference
+      - schema:assertion-record-v2
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+      - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+  - id: entity:assessment-record
+    label: Assessment record
+    notes: Append-only result of applying one guideline rule version to exact canonical inputs at explicit
+      valid and known coordinates. Records outcome and reason codes from the closed vocabulary MEETS_GUIDELINE,
+      BELOW_GUIDELINE, UNKNOWN, CONFLICT, NOT_APPLICABLE, plus input fact-version IDs, rule and ontology
+      releases, evaluator version, semantic snapshot, acting principal, audit reference, evidence and
+      derivation links, and the typed comparison when one was performed. Tenant/knowledge-base scoped
+      and stored outside the canonical fact plane; it is never promoted to a canonical fact and is not
+      a policy approval. Authorization failures and invalid definitions are errors, not recorded outcomes.
+    related_entities:
+      - entity:assertion
+      - entity:audit-event
+      - entity:canonical-fact-version
+      - entity:guideline-rule-version
+      - entity:ontology-release
+      - entity:principal
+    related_nodes:
+      - adr:0026
+      - adr:0056
+      - capability:authorization-enforcement
+      - capability:grounded-gl-guideline-assessment
+      - workflow:guideline-assessment
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0026-derived-facts-have-dependency-lineage.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0004-temporal-reassessment.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: entity:audit-event
+    label: Audit event
+    notes: 'Append-only record of authorization decisions, commits, and review decisions: actor and delegate,
+      resource, action, decision, reason code, policy hash, grant revision, trace id.'
+    related_entities:
+      - entity:principal
+    related_nodes:
+      - adr:0062
+      - capability:authorization-enforcement
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:canonical-fact-version
+    label: Canonical fact version
+    notes: Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references,
+      commit id, and the four separately stored timestamps; overlap prevented by a two-range GiST exclusion.
+    related_entities:
+      - entity:fact-slot
+      - entity:outbox-event
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+      - schema:canonical-commit-response
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:content-artifact
+    label: Content artifact
+    notes: 'Immutable parse-once bundle for one document version: docling-document.json, normalized.md,
+      blocks.jsonl, tables.jsonl, layout.jsonl, manifest.json with per-file sha256 and execution record.
+      Implemented F0004 permits governed artifact versions per retained source version, with preserved
+      legacy identities and separate append-only document-date metadata. Multiple-artifact global uniqueness
+      reconciliation remains an explicit quiesced operator gate; a fallback retains its source version
+      and original lease fence.'
+    related_entities:
+      - entity:semantic-interpretation-run
+    related_nodes:
+      - adr:0073
+      - capability:document-date-provenance
+      - capability:parse-once-content-artifact
+      - capability:versioned-content-contracts
+      - schema:content-artifact-manifest
+      - schema:content-artifact-manifest-v2
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+  - id: entity:content-block
+    label: Content block index
+    notes: Implemented F0004 immutable owned pointer to an exact v2 blocks.jsonl line, native reference,
+      reading order and one observed origin; full text stays in retained bytes. Engine/package receipts
+      establish bounded attribution, not model-weight identity.
+    related_nodes:
+      - adr:0073
+      - capability:versioned-content-contracts
+      - entity:content-artifact
+      - schema:content-records-v2
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
+  - id: entity:content-table
+    label: Content table index
+    notes: Implemented F0004 immutable owned pointer to an exact tables.jsonl line, dimensions, header
+      and continuation metadata. Dependency-ordered inserts preserve original record ordinals/hashes;
+      full text stays in retained bytes.
+    related_nodes:
+      - adr:0073
+      - capability:versioned-content-contracts
+      - entity:content-artifact
+      - schema:content-records-v2
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
+  - id: entity:content-table-cell
+    label: Content table cell index
+    notes: Implemented F0004 immutable same-artifact cell geometry, merged spans and block links with
+      ownership constraints; native normalized records remain the byte authority.
+    related_nodes:
+      - adr:0073
+      - capability:versioned-content-contracts
+      - entity:content-artifact
+      - schema:content-records-v2
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
+  - id: entity:delegation
+    label: Delegation
+    notes: Proposed F0002 design; implementation pending. Trusted acting/executor binding with finite
+      resource/action ceiling and expiry; no onward delegation in v1.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Trusted acting/executor binding with finite resource/action ceiling and expiry; no onward
+          delegation in v1.
+    related_nodes:
+      - adr:0062
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:document-date-candidate
+    label: Document-date candidate
+    notes: Implemented F0004 append-only dated candidate with exact CONTENT line/hash/quote or trusted
+      metadata/human receipt and independent current authority. Candidate recording does not select a
+      date or canonical interval.
+    related_nodes:
+      - adr:0073
+      - capability:document-date-provenance
+      - entity:content-artifact
+      - schema:document-date-record
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
+  - id: entity:document-date-selection
+    label: Document-date selection
+    notes: Implemented F0004 explicit human candidate choice or clear, previous-selection CAS, sequence
+      and immutable history. Consumers may pin a historical selection; processing time and source precedence
+      never select automatically.
+    related_nodes:
+      - adr:0073
+      - capability:document-date-provenance
+      - entity:content-artifact
+      - schema:document-date-record
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0004-content-artifact-model/persistence-design.sql
+  - id: entity:fact-slot
+    label: Fact slot
+    notes: 'Canonical semantic identity of one fact about an entity (for example the EachOccurrence limit
+      of a coverage); the parent of bitemporal fact versions. F0007 refinement (ADR-0077, implemented
+      in run 2026-11-09-b94cfa12, migration 0012): identity-v1 rows add an opaque versioned predicate
+      key, cardinality, optional relationship object and MULTI member children; pilot rows stay legacy
+      with NULL identity and no fabricated predicate.'
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in
+          feature run 2026-11-09-b94cfa12, formal acceptance pending.'
+    related_entities:
+      - entity:canonical-fact-version
+      - entity:fact-slot-qualifier
+    related_nodes:
+      - adr:0077
+      - capability:bitemporal-canonical-commit
+      - capability:factslot-identity-resolution
+      - capability:typed-fact-answer
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:fact-slot-qualifier
+    label: FactSlot qualifier
+    notes: Implemented (F0007 run 2026-11-09-b94cfa12, migration 0012) authoritative, append-only normalized
+      identity part of an identity-v1 FactSlot (name, declared type, canonical value) with composite tenant/KB
+      ownership to its slot. Omitted qualifiers contribute nothing; explicit null is rejected. Listed
+      in the RLS inventory handed to F0018.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in
+          feature run 2026-11-09-b94cfa12, formal acceptance pending.'
+    related_entities:
+      - entity:fact-slot
+    related_nodes:
+      - adr:0077
+      - capability:factslot-identity-resolution
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/features/F0007-factslot-model/feature-assembly-plan.md
+  - id: entity:guideline-rule-version
+    label: Guideline rule version
+    notes: Immutable reviewed release of one bounded guideline. Carries rule identity, version, ontology
+      release, guideline source and approved authority references, tenant/knowledge-base scope, effective
+      interval, coverage type, limit basis, currency, the single v0.1 operation money_gte_minimum, and
+      an exact decimal minimum. A changed minimum produces a new release; installation is a separately
+      authorized administrative act with an audit record. Selection is verified against known_as_of and
+      valid_as_of, so a later release is never applied to an earlier question.
+    related_entities:
+      - entity:assessment-record
+      - entity:audit-event
+      - entity:ontology-release
+      - entity:principal
+    related_nodes:
+      - adr:0056
+      - capability:authorization-enforcement
+      - capability:grounded-gl-guideline-assessment
+      - workflow:guideline-assessment
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: entity:insurance-party
+    label: Insurance party (organization or person)
+    notes: A person or an organization (proposed ADR-0070). Insured, broker, carrier, MGA and underwriter
+      are scoped roles a party plays, not party types. Organizations form an effective-dated hierarchy
+      with no fixed depth (a brokerage's branches and offices, a company's divisions), operate at locations,
+      and employ people; employment is separate from any role. Names are time-bounded claims (ADR-0066).
+      Aligns with the canonical Party and PartyRelationship contracts. Distinct from an authenticated
+      application principal.
+    rationale:
+      - adr: adr:0070
+        section: Proposed Decision
+        summary: Brokers, carriers, MGAs and insureds are organizations; roles are scoped, never party
+          types.
+    related_entities:
+      - entity:account
+      - entity:insurance-party-role-assignment
+      - entity:ownership-interest
+    related_nodes:
+      - adr:0066
+      - adr:0070
+      - schema:commercial-pc-example
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0017-deterministic-entity-resolution/README.md
+  - id: entity:insurance-party-role-assignment
+    label: Scoped insurance party role
+    notes: 'A party acting as named insured, broker of record, placement broker, broker contact, risk
+      manager, account contact, carrier, MGA or underwriter in an explicit account, submission or policy-term
+      scope, with the organization or branch a person acts for (proposed ADR-0070). Broker of record is
+      account-scoped and dated; a placement broker on a term can override it for one line. One person
+      can hold roles on several accounts. Once confirmed by an authoritative source, a role decides an
+      external person''s reach (an account role: that account and its own policies; a policy role: that
+      policy only; nothing cascades) and a carrier employee''s decision rights; a role read from a document
+      grants nothing. The access check is a proposed F0002-successor amendment to ADR-0062. Evidence and
+      temporal context remain mandatory. F0012/F0013 settle production representation; the example establishes
+      no delegation authority or runtime schema.'
+    rationale:
+      - adr: adr:0070
+        section: Proposed Decision
+        summary: Role assignments carry party, kind, scope and acted-for organization; confirmed ones
+          feed reach and decision rights.
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Projection mappings must preserve scoped relationship identity and lineage.
+    related_entities:
+      - entity:account
+      - entity:insurance-party
+      - entity:policy-term
+    related_nodes:
+      - adr:0061
+      - adr:0062
+      - adr:0070
+      - glossary_term:ontology-projection-mapping
+      - schema:commercial-pc-example
+    source_docs:
+      - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+  - id: entity:knowledge-base
+    label: Knowledge base
+    notes: Proposed F0002 design; implementation pending. Exactly one tenant/workspace owner; semantic
+      ownership and explicit grants meet here.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Exactly one tenant/workspace owner; semantic ownership and explicit grants meet here.
+    related_nodes:
+      - adr:0061
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:membership
+    label: Membership
+    notes: Proposed F0002 design; implementation pending. Current complete tenant/KB role and restriction
+      slice; expiry and monotonic authority revisions are explicit.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Current complete tenant/KB role and restriction slice; expiry and monotonic authority
+          revisions are explicit.
+    related_nodes:
+      - adr:0062
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:ontology-module-version
+    label: Ontology module version
+    notes: Proposed immutable revision of one authored module, represented by ontology_version in the
+      proposed data model. Locks content, authoring schema, supported semantics, constraints and dependency
+      declarations. Physical schema and ownership details remain F0012/F0013 Phase B decisions; no runtime
+      implementation is claimed.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Proposed contract distinguishes an authored module version from a composed release.
+    related_entities:
+      - entity:ontology-release
+      - entity:ontology-release-module
+    related_nodes:
+      - adr:0011
+      - adr:0045
+      - glossary_term:constraint-execution-context
+      - glossary_term:stable-term-iri
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+  - id: entity:ontology-release
+    label: Ontology release
+    notes: Proposed immutable composition of exact module versions with dependency locks and associated
+      profile/template/compiler/validation/projection-mapping artifact references. PostgreSQL remains
+      authoritative. Historical runs and assessments retain their original release; activation and rollback
+      govern future processing. Stable term identity alone does not freeze meaning. Phase B schema and
+      ADR-0045 acceptance remain pending.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Proposed composed-release identity preserves exact interpretation and assessment context.
+    related_entities:
+      - entity:assessment-record
+      - entity:guideline-rule-version
+      - entity:ontology-module-version
+      - entity:ontology-release-module
+      - entity:semantic-interpretation-run
+    related_nodes:
+      - adr:0002
+      - adr:0045
+      - capability:ontology-release-compatibility
+      - glossary_term:ontology-projection-mapping
+      - glossary_term:stable-term-iri
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0015-extraction-profile-compiler/README.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: entity:ontology-release-module
+    label: Ontology release module membership
+    notes: Proposed exact release-to-module-version membership. A release selects one version per module;
+      dependencies resolve within that locked composition at exact versions and digests. Floating latest
+      dependencies cannot define a reproducible release. Physical persistence remains a Phase B decision.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Proposed membership record makes module composition and dependency locks explicit.
+    related_entities:
+      - entity:ontology-module-version
+      - entity:ontology-release
+    related_nodes:
+      - adr:0045
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+  - id: entity:outbox-event
+    label: Outbox event
+    notes: Transactional outbox row written with every canonical commit and consumed idempotently by projectors;
+      carries commit id and processed watermark.
+    related_entities:
+      - entity:canonical-fact-version
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+  - id: entity:ownership-interest
+    label: Organization ownership interest
+    notes: One party's percentage interest in an organization, with valid time (proposed ADR-0070). Any
+      number of owners (60/40, 50/50, four equal owners); majority ownership is computed, never stored.
+      The designated parent account is set separately and is at most one, so a joint venture is never
+      rolled up twice; without a majority owner it is normally a root account, listed as an ownership
+      interest on each owner's Account 360. Ownership never merges identities or implies named-insured
+      status.
+    rationale:
+      - adr: adr:0070
+        section: Proposed Decision
+        summary: Ownership is a percentage-bearing relationship separate from the account hierarchy.
+    related_entities:
+      - entity:account
+      - entity:insurance-party
+    related_nodes:
+      - adr:0070
+      - schema:commercial-pc-example
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0023-minimal-entity-360/README.md
+  - id: entity:policy-term
+    label: Insurance policy term
+    notes: A particular period of an identified policy. Preserve issuer-scoped policy identifiers, scoped
+      party roles, qualified coverage terms and bitemporal endorsement facts. The example's shared policy-number
+      string does not merge the GL and auto contracts. Runtime contracts remain owned by the feature plans;
+      synthetic examples are not accepted runtime records.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Preserve exact ontology context for policy, coverage and historical fact interpretations.
+    related_entities:
+      - entity:account
+      - entity:insurance-party-role-assignment
+      - entity:ontology-release
+    related_nodes:
+      - adr:0007
+      - schema:commercial-pc-example
+    source_docs:
+      - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+  - id: entity:principal
+    label: Principal
+    notes: Verified identity (user, service, or agent) mapped from (issuer, subject) to a stable internal
+      id, with current memberships per tenant and knowledge base and a grant revision.
+    related_entities:
+      - entity:audit-event
+    related_nodes:
+      - adr:0061
+      - capability:credential-verification-and-principal-resolution
+      - role:reviewer
+      - role:service-principal
+      - role:tenant-member
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:resource-scope
+    label: Resource scope
+    notes: Proposed F0002 design; implementation pending. Trusted resource/parent/classification/source
+      scope; request filters only narrow authority.
+    rationale:
+      - adr: adr:0062
+        section: Decision
+        summary: Trusted resource/parent/classification/source scope; request filters only narrow authority.
+    related_nodes:
+      - adr:0062
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:review-decision
+    label: Review decision
+    notes: Governed outcome of a review (ACCEPT, CORRECT, REJECT) bound to the authenticated reviewer
+      principal, the decision event hash, and the assertion version; corrections append a new assertion
+      linked to the original. BLOCKED records unresolved evidence and is not an adjudication (ADR-0058).
+    related_entities:
+      - entity:assertion
+      - entity:principal
+      - entity:review-item
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - schema:review-decision
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
+  - id: entity:review-item
+    label: Review item
+    notes: Nebula-owned unit of human adjudication for a low-confidence or corrected assertion; carries
+      the assertion version, its review batch, and the evidence locator the panel renders from.
+    related_entities:
+      - entity:assertion
+      - entity:review-decision
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - workflow:human-review
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
+  - id: entity:semantic-interpretation-run
+    label: Semantic interpretation run
+    notes: Versioned execution of an extraction profile over a content artifact; records run configuration,
+      counters, status (complete, partial, failed), and the external provenance ledger.
+    related_entities:
+      - entity:assertion
+      - entity:content-artifact
+      - entity:ontology-release
+    related_nodes:
+      - capability:semantic-interpretation-run
+      - schema:interpretation-result
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+  - id: entity:tenant
+    label: Tenant
+    notes: Proposed F0002 design; implementation pending. Structural tenancy root; no fabricated KB owner
+      for the tenancy registry.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Structural tenancy root; no fabricated KB owner for the tenancy registry.
+    related_nodes:
+      - adr:0061
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:tenant-entity-identity
+    label: Tenant entity identity
+    notes: Proposed F0002 design; implementation pending. Tenant-scoped identity can have explicit KB
+      associations; an association grants no access. Full resolution remains F0017.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Tenant-scoped identity can have explicit KB associations; an association grants no access.
+          Full resolution remains F0017.
+    related_nodes:
+      - adr:0061
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:workspace
+    label: Workspace
+    notes: Proposed F0002 design; implementation pending. Exactly one tenant owner; groups KBs without
+      granting access.
+    rationale:
+      - adr: adr:0061
+        section: Decision
+        summary: Exactly one tenant owner; groups KBs without granting access.
+    related_nodes:
+      - adr:0061
+    source_docs:
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+glossary_terms:
+  - id: glossary_term:bridge-evidence
+    label: Bridge evidence
+    related_nodes:
+      - adr:0076
+      - capability:budgeted-evidence-context
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:constraint-execution-context
+    label: Constraint execution context
+    notes: Proposed authoring metadata names lifecycle stage, consumer, applicability, severity/action
+      and asserted or inferred data basis, including the supported inference ruleset. Missing limit inputs
+      produce UNKNOWN for a requesting F0065 assessment; they are not a universal canonical-commit rejection.
+    rationale:
+      - adr: adr:0045
+        section: Semantics and constraint execution
+        summary: Inference, validation and consumer completeness require distinct execution contracts.
+    related_nodes:
+      - adr:0045
+      - adr:0056
+      - capability:ontology-release-compatibility
+      - entity:ontology-module-version
+    source_docs:
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+  - id: glossary_term:evidence-block
+    label: Evidence block
+    related_nodes:
+      - adr:0076
+      - capability:budgeted-evidence-context
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:evidence-context
+    label: Evidence context
+    related_nodes:
+      - adr:0076
+      - capability:budgeted-evidence-context
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:insurance-product-composition
+    label: Insurance product composition
+    notes: Proposed example distinction between policy product/package type and coverage line. A BOP contains
+      property and liability sections; shared GL vocabulary does not establish equivalent forms, terms
+      or insured scope. Other lines in the Cedar Bridge example are illustrative future breadth, not an
+      expansion of F0013 or F0065 delivery commitments.
+    rationale:
+      - adr: adr:0011
+        section: Decision
+        summary: Shared insurance core composes with separate coverage modules without collapsing their
+          meanings.
+    related_nodes:
+      - entity:ontology-release-module
+      - entity:policy-term
+      - schema:commercial-pc-example
+    source_docs:
+      - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+  - id: glossary_term:ontology-projection-mapping
+    label: Ontology projection mapping
+    notes: Proposed versioned release artifact mapping predicate IRIs to directed AGE edges or properties,
+      with endpoint identity, qualifiers, exact source lineage, ownership, time and explicit omissions.
+      Mapping changes require projection impact and rebuild analysis. Synthetic examples do not establish
+      an implemented exporter or graph writer; the production schema remains a F0012/F0013 decision.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Pin predicate-to-projection mapping versions and digests so impact analysis can identify
+          changed projections.
+    related_nodes:
+      - adr:0045
+      - capability:ontology-release-compatibility
+      - entity:ontology-release
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/F0015-extraction-profile-compiler/README.md
+  - id: glossary_term:projection-compatibility
+    label: Projection compatibility
+    related_nodes:
+      - adr:0076
+      - capability:governed-evidence-retrieval
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:retrieval-execution-basis
+    label: Retrieval execution basis
+    related_nodes:
+      - adr:0076
+      - capability:governed-evidence-retrieval
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:retrieval-mode
+    label: Retrieval mode
+    related_nodes:
+      - adr:0076
+      - capability:governed-evidence-retrieval
+    source_docs:
+      - planning-mds/architecture/governed-evidence-retrieval-design.md
+      - planning-mds/domain/glossary.md
+  - id: glossary_term:stable-term-iri
+    label: Stable term IRI
+    notes: Proposed stable identity with deterministic namespace mapping. Labels may change and an IRI
+      is never reassigned, but meaning changes still need release classification and migration records.
+      Production namespace and mapping rules remain F0012 PRD decisions; example.invalid is illustrative
+      only.
+    rationale:
+      - adr: adr:0045
+        section: Identity and release records
+        summary: Stable identity and explicit semantic-change classes must be specified together.
+    related_nodes:
+      - adr:0045
+      - entity:ontology-module-version
+      - entity:ontology-release
+    source_docs:
+      - planning-mds/architecture/ontology-planning-handoff.md
+      - planning-mds/domain/glossary.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+migrations:
+  - id: migration:f0004-content-contract
+    label: F0004 additive content contracts and document dates (revision 0008)
+    path: engine/migrations/versions/0008_f0004_content_contract.py
+    related_nodes:
+      - adr:0073
+      - capability:document-date-provenance
+      - capability:versioned-content-contracts
+      - entity:content-artifact
+  - id: migration:f0005-job-event-reason
+    label: F0005 job failure reasons (revisions 0009, 0010 expand-only)
+    path: engine/migrations/versions/0009_f0005_job_event_reason.py
+    notes: 0009 adds the CHECK-constrained `document_job_event.reason`; 0010 widens it with model_budget_exceeded,
+      model_deadline_exceeded, model_contract_fallback and interpretation_failed. Downgrades refuse while
+      recorded reasons exist. The vocabulary is part of ADR-0074.
+    related_nodes:
+      - adr:0074
+      - capability:parse-once-content-artifact
+  - id: migration:f0007-factslot-identity
+    label: F0007 FactSlot identity (revision 0012, additive)
+    path: engine/migrations/versions/0012_f0007_factslot_identity.py
+    notes: Adds nullable identity columns to fact_slot (NULL marks a legacy pilot slot), a generated subject_kb_entity_id,
+      the partial unique fingerprint index, owner-bound parent/subject/object keys, and the append-only
+      fact_slot_qualifier table. Triggers make identity immutable (including NULL to value) and a deferred
+      trigger checks member and qualifier parents. No DDL on canonical_fact_version, no RLS, BYPASSRLS
+      or SECURITY DEFINER. Downgrade refuses while identity-v1 or qualifier rows exist.
+    related_nodes:
+      - adr:0077
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
+      - entity:fact-slot-qualifier
+policy_rules:
+  - id: policy_rule:content-artifact-ingest
+    label: content_artifact:ingest
+    action: ingest
+    allowed_roles:
+      - role:service-principal
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:parse-once-content-artifact
+    resource: content_artifact
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:content-artifact-interpret
+    label: content_artifact:interpret
+    action: interpret
+    allowed_roles:
+      - role:service-principal
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:parse-once-content-artifact
+    resource: content_artifact
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:content-artifact-read
+    label: content_artifact:read
+    action: read
+    allowed_roles:
+      - role:service-principal
+      - role:tenant-member
+    related_nodes:
+      - capability:authorization-enforcement
+      - endpoint:content-artifact-get
+    resource: content_artifact
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:fact-slot-commit
+    label: fact_slot:commit
+    action: commit
+    allowed_roles:
+      - role:service-principal
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+    resource: fact_slot
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:fact-slot-read
+    label: fact_slot:read
+    action: read
+    allowed_roles:
+      - role:service-principal
+      - role:tenant-member
+    related_nodes:
+      - capability:authorization-enforcement
+      - endpoint:fact-get
+    resource: fact_slot
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:review-task-annotate
+    label: review_task:annotate
+    action: annotate
+    allowed_roles:
+      - role:reviewer
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - endpoint:review-decisions-submit
+    resource: review_task
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:review-task-read
+    label: review_task:read
+    action: read
+    allowed_roles:
+      - role:reviewer
+      - role:tenant-member
+    related_nodes:
+      - capability:authorization-enforcement
+      - endpoint:review-item-get
+    resource: review_task
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+roles:
+  - id: role:reviewer
+    label: Reviewer
+    notes: Verified user principal; reviews evidence in the native Review Panel as its own session principal
+      and may annotate review tasks in scope; annotation is not canonical approval (sections 111.2, 125).
+    related_nodes:
+      - entity:principal
+      - entity:review-decision
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  - id: role:service-principal
+    label: ServicePrincipal
+    notes: Worker identity for ingestion and the commit proof; commits facts in the fixture scope; never
+      annotates.
+    related_nodes:
+      - entity:principal
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+  - id: role:tenant-member
+    label: TenantMember
+    notes: Verified user principal with a current membership in a tenant and knowledge base; reads content
+      artifacts, review tasks, and facts in that scope.
+    related_nodes:
+      - entity:principal
+    source_docs:
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+schemas:
+  - id: schema:assertion-admission-result-v1
+    label: Assertion Admission Result V1
+    path: planning-mds/schemas/assertion-admission-result-v1.schema.json
+    notes: F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and
+      producer activation not claimed.
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
+          and source eligibility guards; runtime proof pending.
+    related_nodes:
+      - adr:0075
+      - capability:structural-assertion-admission
+      - entity:assertion
+  - id: schema:assertion-record-v2
+    label: Assertion Candidate V2
+    path: planning-mds/schemas/assertion-record-v2.schema.json
+    notes: F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and
+      producer activation not claimed.
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
+          and source eligibility guards; runtime proof pending.
+    related_nodes:
+      - adr:0075
+      - capability:versioned-assertion-semantics
+      - entity:assertion
+  - id: schema:authx-kernel
+    label: AuthXKernelV1
+    path: planning-mds/schemas/authx-kernel.schema.json
+    related_nodes:
+      - adr:0061
+      - adr:0062
+      - entity:delegation
+      - entity:principal
+      - entity:resource-scope
+  - id: schema:canonical-commit-request
+    label: CanonicalCommitRequest
+    path: planning-mds/schemas/canonical-commit-request.schema.json
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+  - id: schema:canonical-commit-response
+    label: CanonicalCommitResponse
+    path: planning-mds/schemas/canonical-commit-response.schema.json
+    related_nodes:
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-commit
+  - id: schema:commercial-pc-example
+    label: Commercial P&C teaching records
+    path: planning-mds/schemas/commercial-pc-example.schema.json
+    notes: Schema and reference checks for synthetic contractor-account records under proposed ADR-0070
+      (one account per organization, designated parent accounts, percentage ownership, organization hierarchy,
+      one owning account per policy, broker of record per account), scoped party roles, product composition,
+      exact source lineage, ADR-0064 valid-time kinds with unknown bounds, and a two-time endorsement.
+      Not a production import/API schema or feature acceptance. RDF/OWL/SHACL/query expectations are executed
+      by capability:semantic-example-validation; existing GL fixture evidence does not qualify this bundle.
+    related_nodes:
+      - adr:0064
+      - adr:0070
+      - entity:account
+      - entity:insurance-party
+      - entity:insurance-party-role-assignment
+      - entity:ontology-release
+      - entity:ownership-interest
+      - entity:policy-term
+      - glossary_term:insurance-product-composition
+    source_docs:
+      - planning-mds/architecture/commercial-pc-example-handoff.md
+      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+  - id: schema:content-artifact-manifest
+    label: ContentArtifactManifest
+    path: planning-mds/schemas/content-artifact-manifest.schema.json
+    related_nodes:
+      - capability:parse-once-content-artifact
+      - entity:content-artifact
+  - id: schema:content-artifact-manifest-read
+    label: Content Artifact Manifest Read
+    path: planning-mds/schemas/content-artifact-manifest-read.schema.json
+    related_nodes:
+      - adr:0073
+      - capability:versioned-content-contracts
+      - endpoint:content-artifact-get
+  - id: schema:content-artifact-manifest-v2
+    label: Content Artifact Manifest V2
+    path: planning-mds/schemas/content-artifact-manifest-v2.schema.json
+    related_nodes:
+      - adr:0073
+      - capability:versioned-content-contracts
+      - entity:content-artifact
+  - id: schema:content-records-v2
+    label: Content Records V2
+    path: planning-mds/schemas/content-records-v2.schema.json
+    related_nodes:
+      - adr:0073
+      - capability:versioned-content-contracts
+      - entity:content-block
+      - entity:content-table
+      - entity:content-table-cell
+  - id: schema:document-date-record
+    label: Document Date Record
+    path: planning-mds/schemas/document-date-record.schema.json
+    related_nodes:
+      - adr:0073
+      - capability:document-date-provenance
+      - entity:document-date-candidate
+      - entity:document-date-selection
+  - id: schema:fact-answer-v1
+    label: Fact Answer V1
+    path: planning-mds/schemas/fact-answer-v1.schema.json
+    notes: F0007 answer envelope stored in canonical_fact_version.value for identity-v1 slots; Phase B
+      approved by operator 2026-11-09; runtime implementation not claimed.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in
+          feature run 2026-11-09-b94cfa12, formal acceptance pending.'
+    related_nodes:
+      - adr:0077
+      - capability:typed-fact-answer
+      - entity:canonical-fact-version
+  - id: schema:fact-slot-key-v1
+    label: FactSlot Key V1
+    path: planning-mds/schemas/fact-slot-key-v1.schema.json
+    notes: F0007 internal slot-resolution request design contract; Phase B approved by operator 2026-11-09.
+      Not an HTTP payload; runtime implementation not claimed.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in
+          feature run 2026-11-09-b94cfa12, formal acceptance pending.'
+    related_nodes:
+      - adr:0077
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
+  - id: schema:fact-slot-resolution-result-v1
+    label: FactSlot Resolution Result V1
+    path: planning-mds/schemas/fact-slot-resolution-result-v1.schema.json
+    notes: F0007 server-computed resolution outcome design contract; Phase B approved by operator 2026-11-09;
+      runtime implementation not claimed.
+    rationale:
+      - adr: adr:0077
+        section: Decision
+        summary: 'Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1
+          carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in
+          feature run 2026-11-09-b94cfa12, formal acceptance pending.'
+    related_nodes:
+      - adr:0077
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
+  - id: schema:interpretation-output-manifest
+    label: Interpretation Output Manifest
+    path: planning-mds/schemas/interpretation-output-manifest.schema.json
+    related_nodes:
+      - adr:0073
+      - capability:versioned-content-contracts
+      - entity:semantic-interpretation-run
+  - id: schema:interpretation-result
+    label: InterpretationResult
+    path: planning-mds/schemas/interpretation-result.schema.json
+    related_nodes:
+      - capability:semantic-interpretation-run
+      - entity:semantic-interpretation-run
+  - id: schema:interpretation-result-v2
+    label: Interpretation Result V2
+    path: planning-mds/schemas/interpretation-result-v2.schema.json
+    notes: F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and
+      producer activation not claimed.
+    rationale:
+      - adr: adr:0075
+        section: Decision
+        summary: Proposed F0006 design preserves legacy records and requires scoped structural admission
+          and source eligibility guards; runtime proof pending.
+    related_nodes:
+      - adr:0075
+      - capability:versioned-assertion-semantics
+      - entity:assertion
+  - id: schema:problem-details
+    label: ProblemDetails
+    path: planning-mds/schemas/problem-details.schema.json
+    related_nodes:
+      - api:brain-api
+      - capability:runtime-roots-and-toolchain
+  - id: schema:review-decision
+    label: ReviewDecision
+    path: planning-mds/schemas/review-decision.schema.json
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - entity:review-decision
+  - id: schema:semantic-example
+    label: SemanticExample
+    path: planning-mds/schemas/semantic-example.schema.json
+    related_nodes:
+      - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
+      - entity:guideline-rule-version
+  - id: schema:semantic-execution-trace
+    label: SemanticExecutionTraceBundle
+    path: planning-mds/schemas/semantic-execution-trace.schema.json
+    notes: Draft contract under proposed ADR-0071 for a recorded execution trace (summary, bounded projection,
+      ordered events with attribution). Validates the synthetic EX-OBS-001/002 fixtures embedded in examples/graph-observatory-2d-options.html.
+      Not an API contract until F0036/F0038 or F0041 Phase B binds it.
+    related_nodes:
+      - adr:0046
+      - adr:0071
+      - adr:0072
+workflows:
+  - id: workflow:canonical-commit
+    label: Canonical commit lifecycle
+    rationale:
+      - adr: adr:0008
+        section: Decision
+        summary: Authorize, lock, validate ranges, split intervals, commit facts with audit and outbox
+          in one transaction, then project idempotently (sections 109.2, 109.3).
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+      - entity:canonical-fact-version
+      - entity:outbox-event
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
+    states:
+      - id: state:canonical-commit:proposed
+        label: Proposed
+        transitions_to:
+          - state:canonical-commit:authorized
+          - state:canonical-commit:rejected
+      - id: state:canonical-commit:authorized
+        label: Authorized
+        transitions_to:
+          - state:canonical-commit:committed
+      - id: state:canonical-commit:committed
+        label: Committed
+        transitions_to:
+          - state:canonical-commit:projected
+      - id: state:canonical-commit:projected
+        label: Projected
+        transitions_to: []
+      - id: state:canonical-commit:rejected
+        label: Rejected
+        transitions_to: []
+  - id: workflow:guideline-assessment
+    label: Guideline assessment lifecycle
+    rationale:
+      - adr: adr:0056
+        section: Decision
+        summary: Bounded on-demand assessment. Request validity, rule-release availability, and authorization
+          are resolved before any business outcome is disclosed; the comparison itself is deterministic
+          exact-decimal arithmetic over accepted canonical facts read from one consistent snapshot, with
+          no model call.
+      - adr: adr:0026
+        section: Decision
+        summary: The recorded result carries the exact input fact versions it derived from, so the derivation
+          is reconstructable without re-running interpretation.
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+      - capability:grounded-gl-guideline-assessment
+      - entity:assessment-record
+      - entity:canonical-fact-version
+      - entity:guideline-rule-version
+    source_docs:
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0002-evaluate-accepted-facts.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md
+      - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+    states:
+      - id: state:guideline-assessment:requested
+        label: Requested
+        transitions_to:
+          - state:guideline-assessment:authorized
+          - state:guideline-assessment:rejected
+      - id: state:guideline-assessment:rejected
+        label: Rejected
+        transitions_to: []
+      - id: state:guideline-assessment:authorized
+        label: Authorized
+        transitions_to:
+          - state:guideline-assessment:snapshot-resolved
+          - state:guideline-assessment:denied
+      - id: state:guideline-assessment:denied
+        label: Denied
+        transitions_to: []
+      - id: state:guideline-assessment:snapshot-resolved
+        label: Snapshot resolved
+        transitions_to:
+          - state:guideline-assessment:evaluated
+      - id: state:guideline-assessment:evaluated
+        label: Evaluated
+        transitions_to:
+          - state:guideline-assessment:recorded
+      - id: state:guideline-assessment:recorded
+        label: Recorded
+        transitions_to: []
+  - id: workflow:human-review
+    label: Human review round trip
+    rationale:
+      - adr: adr:0057
+        section: Boundary
+        summary: Nebula renders the evidence and owns the decision inside one trust boundary; a stale
+          assertion version reopens the item instead of applying (sections 75, 111.1, 125).
+      - adr: adr:0058
+        section: Proposed decision
+        summary: Evidence that cannot be re-anchored blocks the decision with EVIDENCE_UNRESOLVED rather
+          than resolving to an approximate region (section 125.4).
+    related_nodes:
+      - capability:evidence-review-round-trip
+      - entity:review-decision
+      - entity:review-item
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
+    states:
+      - id: state:human-review:open
+        label: Open
+        transitions_to:
+          - state:human-review:in-review
+      - id: state:human-review:in-review
+        label: In review
+        transitions_to:
+          - state:human-review:decided
+          - state:human-review:stale
+          - state:human-review:blocked
+      - id: state:human-review:stale
+        label: Stale assertion version
+        transitions_to:
+          - state:human-review:in-review
+      - id: state:human-review:blocked
+        label: Evidence unresolved
+        transitions_to:
+          - state:human-review:in-review
+      - id: state:human-review:decided
+        label: Decided
+        transitions_to: []
+  - id: workflow:ingestion-interpretation
+    label: Ingestion and interpretation lifecycle
+    rationale:
+      - adr: adr:0003
+        section: Decision
+        summary: Each document version is parsed once; interpretation runs read the persisted artifact
+          and a failed page yields a partial run, never a negative assertion (sections 5, 86, 108.3).
+    related_nodes:
+      - capability:parse-once-content-artifact
+      - capability:semantic-interpretation-run
+      - entity:content-artifact
+      - entity:semantic-interpretation-run
+    source_docs:
+      - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+    states:
+      - id: state:ingestion-interpretation:received
+        label: Received
+        transitions_to:
+          - state:ingestion-interpretation:parsed
+          - state:ingestion-interpretation:failed
+      - id: state:ingestion-interpretation:parsed
+        label: Parsed once
+        transitions_to:
+          - state:ingestion-interpretation:interpreted
+          - state:ingestion-interpretation:partial
+      - id: state:ingestion-interpretation:partial
+        label: Partially interpreted
+        transitions_to:
+          - state:ingestion-interpretation:interpreted
+      - id: state:ingestion-interpretation:interpreted
+        label: Interpreted
+        transitions_to: []
+      - id: state:ingestion-interpretation:failed
+        label: Failed
+        transitions_to: []

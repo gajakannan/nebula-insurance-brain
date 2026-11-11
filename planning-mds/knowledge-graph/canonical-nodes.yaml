@@ -1907,6 +1907,19 @@ migrations:
       - capability:factslot-identity-resolution
       - entity:fact-slot
       - entity:fact-slot-qualifier
+  - id: migration:f0007-identity-guard
+    label: F0007 complete identity guard (revision 0013)
+    path: engine/migrations/versions/0013_f0007_identity_guard.py
+    notes: Follow-up to immutable0012. Locks fact_slot, refuses existing malformed identities with count
+      and limited slot IDs only, and installs a complete legacy-or-v1 CHECK requiring TRUE. No evidence
+      repair, deletion, ownership change, new grants or RLS. Downgrade restores the exact0012 guard without
+      rewriting rows. Owned PostgreSQL tests cover NULL fields, partial legacy, uniqueness, refusal and
+      byte-identical pilot/identity upgrade-downgrade-upgrade.
+    related_nodes:
+      - adr:0077
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
+      - migration:f0007-factslot-identity
 policy_rules:
   - id: policy_rule:content-artifact-ingest
     label: content_artifact:ingest

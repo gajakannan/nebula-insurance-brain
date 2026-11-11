@@ -1,0 +1,145 @@
+id: feature:F0007
+name: FactSlot model
+path: planning-mds/features/F0007-factslot-model
+status: in-progress
+registry_section: Active
+phase: v0.1A
+roadmap_section: Now
+roadmap_order: 6
+rationale: Reopened for seven independent audit findings; remediation run 2026-11-09-81798e61. Prior completion
+  2026-11-09-b94cfa12 remains preserved pending renewed validation and closeout.
+validation_gate: Remediation requires member-value identity, decimal round-trip/resource bounds, NULL-safe identity
+  DDL, atomic scope reads, reconciled evidence inventory and fresh reviews.
+depends_on:
+- feature:F0002
+- feature:F0003
+- feature:F0006
+governed_by:
+- adr:0006
+- adr:0066
+- adr:0039
+- adr:0038
+- adr:0042
+- adr:0061
+- adr:0077
+notes:
+- 'Requirement-ownership amendment 2026-11-08 - Carry master blueprint 107.4 and ADR-0039 into the PRD: information
+  state (eight states) is separate from the value, NOT_FOUND/NOT_STATED carry the exact scope searched, and access
+  denial is never an information state. Values use qualified money (exact decimal, ISO 4217 currency, basis) and
+  scoped identifiers (scheme, type, value).'
+- 'Requirement-ownership amendment 2026-11-08 - Carry 109.1: define FactSlot identity beyond the first scalar example
+  (multi-valued, qualified and relationship slots). FactSlot keys are the predicate key referenced by the ADR-0038
+  SourceAuthorityPolicy owned by F0018.'
+- Requirement-ownership amendment 2026-11-08 - New tenant-owned tables bind child rows and foreign keys to tenant
+  ownership and follow the ADR-0042 row-security pattern settled in F0018 Phase B.
+- 'Plan run 2026-11-09-60865e32 G1 decisions: F0007 binds ownership only and hands the RLS inventory (fact_slot,
+  fact_slot_qualifier) to F0018; predicate keys are opaque and versioned with a minimal sys namespace; display-name
+  precedence is deferred to F0017/F0023.'
+- 'Phase B (Proposed ADR-0077): MULTI members are child fact_slot rows so the ADR-0008 exclusion applies per member
+  with no DDL on the F0008-owned canonical_fact_version; answers use the fact-answer/v1 envelope in its value for
+  identity-v1 slots only. Pilot slots stay legacy and the pilot GET contract is unchanged.'
+- As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/kg-reconciliation.md;
+  archive path/status and generated trackers are PM G8 ownership.
+- 'G3 security review fixed SEC-F7-01 (name evidence READ before reason), SEC-F7-02 (T-08 on the answer read path)
+  and SEC-F7-03 (cross-KB evidence oracle). Residual: slot restrictions fixed at creation (F0018 re-derivation);
+  envelope DB backstop (F0008); name-hook per-slot authorization cost is a design note for F0017/F0023.'
+- Operator authorized targeted remediation of review findings; the prior archive is reopened, with no new producer,
+  route, permission or ontology scope.
+affects:
+- capability:factslot-identity-resolution
+- capability:typed-fact-answer
+- capability:bitemporal-canonical-commit
+- entity:fact-slot
+- entity:fact-slot-qualifier
+- entity:canonical-fact-version
+- endpoint:fact-commit
+uses_api_contract:
+- api:brain-api
+uses_schema:
+- schema:fact-slot-key-v1
+- schema:fact-answer-v1
+- schema:fact-slot-resolution-result-v1
+- schema:canonical-commit-request
+- schema:problem-details
+story_mappings:
+- id: story:F0007-S0001
+  path: planning-mds/features/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md
+  affects:
+  - capability:factslot-identity-resolution
+  - entity:fact-slot
+  - entity:fact-slot-qualifier
+  uses_schema:
+  - schema:fact-slot-key-v1
+  - schema:fact-slot-resolution-result-v1
+  governed_by:
+  - adr:0077
+  - adr:0006
+- id: story:F0007-S0002
+  path: planning-mds/features/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md
+  affects:
+  - capability:factslot-identity-resolution
+  - entity:fact-slot
+  uses_schema:
+  - schema:fact-slot-key-v1
+  - schema:fact-slot-resolution-result-v1
+  governed_by:
+  - adr:0077
+  - adr:0006
+- id: story:F0007-S0003
+  path: planning-mds/features/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md
+  affects:
+  - capability:typed-fact-answer
+  - entity:canonical-fact-version
+  uses_schema:
+  - schema:fact-answer-v1
+  governed_by:
+  - adr:0077
+  - adr:0006
+  - adr:0039
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0007-S0004
+  path: planning-mds/features/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md
+  affects:
+  - capability:typed-fact-answer
+  - capability:factslot-identity-resolution
+  uses_schema:
+  - schema:fact-answer-v1
+  - schema:fact-slot-key-v1
+  governed_by:
+  - adr:0077
+  - adr:0006
+  - adr:0039
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0007-S0005
+  path: planning-mds/features/F0007-factslot-model/F0007-S0005-define-name-factslots.md
+  affects:
+  - capability:factslot-identity-resolution
+  - capability:typed-fact-answer
+  - entity:fact-slot
+  uses_schema:
+  - schema:fact-slot-key-v1
+  - schema:fact-answer-v1
+  governed_by:
+  - adr:0077
+  - adr:0006
+  - adr:0066
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0007-S0006
+  path: planning-mds/features/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md
+  affects:
+  - entity:fact-slot
+  - entity:fact-slot-qualifier
+  - capability:bitemporal-canonical-commit
+  uses_schema:
+  - schema:canonical-commit-request
+  governed_by:
+  - adr:0077
+  - adr:0006
+  - adr:0061
+  uses_api_contract:
+  - api:brain-api
+completion_state: 'In Progress: review remediation authorized by operator; prior completion challenged by audit
+  2026-11-09-8b8456df.'

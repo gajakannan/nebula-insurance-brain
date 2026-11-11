@@ -118,35 +118,22 @@ class AuthorizedFactSlots:
             except LookupError as exc:
                 raise SlotNotFound(str(slot_id)) from exc
 
+        async def scope_reads(answer: FactAnswer) -> Sequence[ResourceKey]:
+            if answer.scope is None:
+                return ()
+            return (ResourceKey(ResourceType.CONTENT_ARTIFACT, answer.scope.content_artifact_id),)
+
         try:
-            await self.authorize_scope_reads(
-                principal, slot_id, valid_at=valid_at, known_at=known_at, trace_id=trace_id
-            )
             return await self._execution.read(
-                principal, _slot_key(slot_id), Action.READ, trace_id=trace_id, load=load
+                principal,
+                _slot_key(slot_id),
+                Action.READ,
+                trace_id=trace_id,
+                load=load,
+                additional_reads=scope_reads,
             )
         except AuthorizationDenied as exc:
             raise SlotNotFound(str(slot_id)) from exc
-
-    async def authorize_scope_reads(
-        self,
-        principal: Principal,
-        slot_id: UUID,
-        *,
-        valid_at: datetime,
-        known_at: datetime,
-        trace_id: str,
-    ) -> None:
-        """T-08: an answer's absence scope (pages, blocks) is shown only to a reader
-        who may read the scope's artifact. Raises `AuthorizationDenied` otherwise."""
-
-        async def nothing(_decision: AuthorizationDecision) -> None:
-            return None
-
-        for key in await self._answers.scope_read_keys(
-            slot_id, valid_at=valid_at, known_at=known_at
-        ):
-            await self._execution.read(principal, key, Action.READ, trace_id=trace_id, load=nothing)
 
     async def current_names(
         self,

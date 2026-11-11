@@ -189,9 +189,9 @@ jobs:
           --cov=brain_persistence --cov-fail-under=80
           --cov-report=term-missing --cov-report=xml:engine/coverage/persistence.xml -q
       # F0007 FactSlot identity (ADR-0077): owned databases per test, real concurrency,
-      # ownership keys/triggers, migration 0012 up/down/up on deterministic pilot rows,
+      # ownership keys/triggers, migrations 0012/0013 on deterministic pilot rows,
       # and the answer carrier through POST /facts/{id}/commits.
-      - name: Prove F0007 FactSlot identity, answers and migration 0012 (>=80% brain_factslots)
+      - name: Prove F0007 FactSlot identity, protected answers and migrations (>=80% brain_factslots)
         timeout-minutes: 10
         env:
           BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@localhost:5432/brain
@@ -199,6 +199,8 @@ jobs:
           engine/.venv/bin/python -m pytest
           engine/packages/brain-factslots/tests
           engine/tests/integration/test_factslot_migration.py
+          engine/tests/integration/test_factslot_identity_guard_migration.py
+          engine/tests/integration/test_factslot_authorized_reads.py
           engine/tests/integration/test_factslot_resolution.py
           engine/tests/integration/test_factslot_ownership.py
           engine/tests/integration/test_factslot_answers.py

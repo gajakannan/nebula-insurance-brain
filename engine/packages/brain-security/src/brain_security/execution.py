@@ -363,7 +363,11 @@ class AuthorizationExecution:
         load: Callable[[AuthorizationDecision], Awaitable[T]],
         requested: RequestedScope = NO_FILTER,
         delegation_id: UUID | None = None,
+        additional_reads: Callable[[T], Awaitable[Sequence[ResourceKey]]] | None = None,
     ) -> T:
+        """Load once under the primary lock, then authorize dependencies derived
+        from that exact private payload before auditing and returning it. All
+        authority/resource locks remain held until the single final commit."""
         evaluated = await self._guarded_decide(
             authenticated, [key], action, requested, trace_id, delegation_id
         )
@@ -378,8 +382,36 @@ class AuthorizationExecution:
         except Exception:
             await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
             raise
+        if additional_reads is not None:
+            # WHY: a separate scope read would commit and release the current
+            # authority locks before returning the answer. Deriving keys from
+            # this exact payload also prevents authorizing one version's scope
+            # and then returning a freshly selected, different version.
+            try:
+                source_keys = sorted(set(await additional_reads(payload)))
+                source_evaluated = (
+                    await self._guarded_decide(
+                        authenticated, source_keys, Action.READ, requested, trace_id, delegation_id
+                    )
+                    if source_keys
+                    else []
+                )
+            except Exception:
+                await self._persist_fresh(
+                    [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
+                )
+                raise
+            evaluated.extend(source_evaluated)
+            if not all(e.decision.allowed for e in evaluated):
+                raise await self._deny(evaluated)
+            evaluated = self._recheck_all(evaluated)
+            if not all(e.decision.allowed for e in evaluated):
+                raise await self._deny(evaluated)
         try:
-            await self._store.append_decision(decision.with_outcome(OperationOutcome.SUCCEEDED))
+            for item in evaluated:
+                await self._store.append_decision(
+                    item.decision.with_outcome(OperationOutcome.SUCCEEDED)
+                )
             await self._store.commit()
         except Exception as exc:  # noqa: BLE001 - no payload leaves without durable audit
             await self._safe_rollback()

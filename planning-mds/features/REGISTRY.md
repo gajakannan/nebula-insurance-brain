@@ -99,7 +99,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:archived -->
 | Feature ID | Name | Archived Date | Evidence Reentry Date | Folder |
 |------------|------|---------------|-----------------------|--------|
-| F0007 | FactSlot model | 2026-11-09 |  | `archive/F0007-factslot-model/` |
+| F0007 | FactSlot model | 2026-11-10 |  | `archive/F0007-factslot-model/` |
 | F0006 | Assertion plane + origin + interpretation basis | 2026-11-05 |  | `archive/F0006-assertion-plane-origin-and-interpretation-basis/` |
 | F0005 | One-time document ingestion | 2026-10-28 |  | `archive/F0005-one-time-docling-ingestion/` |
 | F0004 | Content artifact model | 2026-10-21 |  | `archive/F0004-content-artifact-model/` |

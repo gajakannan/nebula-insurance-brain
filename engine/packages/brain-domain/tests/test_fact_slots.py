@@ -6,6 +6,8 @@ Expectations come from ADR-0077 D1-D6, ADR-0039 and the F0007 worked examples.
 from __future__ import annotations
 
 import hashlib
+import subprocess
+import sys
 from uuid import UUID, uuid4
 
 import pytest
@@ -93,6 +95,72 @@ def test_canonical_decimal_rejects(raw):
     with pytest.raises(ValueRejected) as rejected:
         canonical_decimal(raw)
     assert rejected.value.reason == ValueReason.DECIMAL_INVALID
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("1E+63", "1" + "0" * 63),
+        ("-1E+62", "-1" + "0" * 62),
+        ("1E-62", "0." + "0" * 61 + "1"),
+        ("-1E-61", "-0." + "0" * 60 + "1"),
+    ],
+)
+@pytest.mark.parametrize("kind", [ValueType.MONEY, ValueType.DECIMAL])
+def test_decimal_boundary_answers_are_closed_under_canonical_round_trip(raw, expected, kind):
+    value = (
+        {"type": "money", "amount": raw, "currency": "USD"}
+        if kind == ValueType.MONEY
+        else {"type": "decimal", "value": raw}
+    )
+    answer = parse_answer(
+        {"answer_contract": "fact-answer/v1", "state": "PRESENT", "value": value},
+        value_type=kind,
+    )
+    canonical = answer.to_json()
+    assert len(expected) == 64
+    assert canonical["value"]["amount" if kind == ValueType.MONEY else "value"] == expected
+    assert stored_answer(canonical).to_json() == canonical
+    assert canonical_decimal(expected) == expected
+
+
+@pytest.mark.parametrize("raw", ["1E+64", "-1E+63", "1E-63", "-1E-62"])
+@pytest.mark.parametrize("kind", [ValueType.MONEY, ValueType.DECIMAL])
+def test_expanded_decimal_answer_over_64_characters_is_rejected(raw, kind):
+    value = (
+        {"type": "money", "amount": raw, "currency": "USD"}
+        if kind == ValueType.MONEY
+        else {"type": "decimal", "value": raw}
+    )
+    with pytest.raises(FactAnswerRejected) as rejected:
+        parse_answer(
+            {"answer_contract": "fact-answer/v1", "state": "PRESENT", "value": value},
+            value_type=kind,
+        )
+    assert rejected.value.reason == AnswerReason.DECIMAL_INVALID
+
+
+def test_extreme_decimal_exponents_are_rejected_before_expansion():
+    # A capped child makes the resource bound executable without risking the
+    # test process; the contract requires a named rejection, never MemoryError.
+    probe = """
+import resource
+from brain_domain.fact_values import ValueRejected, canonical_decimal
+resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024, 128 * 1024 * 1024))
+for value in ('1e999999999', '1e-999999999'):
+    try:
+        canonical_decimal(value)
+    except ValueRejected as error:
+        assert error.reason.value == 'DECIMAL_INVALID'
+    else:
+        raise AssertionError('an oversized decimal was accepted')
+print('bounded named rejection')
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", probe], capture_output=True, text=True, timeout=5, check=False
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "bounded named rejection"
 
 
 def test_jcs_matches_rfc8785_for_the_f0007_subset():

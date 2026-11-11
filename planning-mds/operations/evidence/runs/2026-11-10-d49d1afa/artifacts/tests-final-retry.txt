@@ -1,0 +1,40 @@
+........................................................................ [ 19%]
+........................................................................ [ 39%]
+........................................................................ [ 58%]
+........................................................................ [ 78%]
+........................................................................ [ 97%]
+.........                                                                [100%]
+=============================== warnings summary ===============================
+packages/brain-security/tests/test_verification.py::test_symmetric_algorithm_confusion_is_rejected
+  /opt/venv/lib/python3.14/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 19 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/integration/test_factslot_migration.py: 8 warnings
+tests/integration/test_factslot_identity_guard_migration.py: 24 warnings
+tests/integration/test_factslot_authorized_reads.py: 2 warnings
+tests/integration/test_factslot_resolution.py: 19 warnings
+tests/integration/test_factslot_ownership.py: 5 warnings
+tests/integration/test_factslot_answers.py: 39 warnings
+tests/integration/test_factslot_names.py: 7 warnings
+tests/integration/test_assertion_migration.py: 21 warnings
+tests/integration/test_job_event_reason_migration.py: 22 warnings
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Name                                                                Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------------------------------------
+engine/packages/brain-factslots/src/brain_factslots/__init__.py         6      0   100%
+engine/packages/brain-factslots/src/brain_factslots/answers.py         90      2    98%   88-89
+engine/packages/brain-factslots/src/brain_factslots/names.py           41      0   100%
+engine/packages/brain-factslots/src/brain_factslots/ports.py           44      0   100%
+engine/packages/brain-factslots/src/brain_factslots/predicates.py      29      0   100%
+engine/packages/brain-factslots/src/brain_factslots/resolution.py     154      0   100%
+engine/packages/brain-factslots/src/brain_factslots/service.py         65      4    94%   64, 82, 118-119
+-------------------------------------------------------------------------------------------------
+TOTAL                                                                 429      6    99%
+Required test coverage of 80% reached. Total coverage: 98.60%
+369 passed, 148 warnings in 76.08s (0:01:16)

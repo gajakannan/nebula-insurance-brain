@@ -1,0 +1,150 @@
+latest {
+  "schema_version": 1,
+  "run_id": "2026-11-09-81798e61",
+  "feature_id": "F0007",
+  "status": "approved",
+  "manifest_path": "planning-mds/operations/evidence/runs/2026-11-09-81798e61/evidence-manifest.json",
+  "run_path": "planning-mds/operations/evidence/runs/2026-11-09-81798e61"
+}
+
+{
+  "feature_id": "F0007",
+  "run_id": "2026-11-09-81798e61",
+  "status": "approved",
+  "feature_state": "Archived",
+  "feature_path_at_closeout": "planning-mds/features/archive/F0007-factslot-model",
+  "required_roles": [
+    "Quality Engineer",
+    "Code Reviewer",
+    "Security Reviewer",
+    "DevOps",
+    "Architect"
+  ],
+  "role_results": {
+    "Architect": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g0-assembly-plan-validation.md",
+        "architect-implementation-review.md"
+      ],
+      "verdict_artifact": "architect-implementation-review.md"
+    },
+    "Quality Engineer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "test-plan.md",
+        "test-execution-report.md",
+        "coverage-report.md"
+      ],
+      "verdict_artifact": "test-execution-report.md"
+    },
+    "DevOps": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g1-runtime-preflight.md",
+        "deployability-check.md"
+      ],
+      "verdict_artifact": "deployability-check.md"
+    },
+    "Code Reviewer": {
+      "required": true,
+      "result": "APPROVED",
+      "required_artifacts": [
+        "code-review-report.md"
+      ],
+      "verdict_artifact": "code-review-report.md"
+    },
+    "Security Reviewer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "security-review-report.md"
+      ],
+      "verdict_artifact": "security-review-report.md"
+    }
+  },
+  "security_scans": {
+    "dependency": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/dependency-engine.json",
+      "waiver": null
+    },
+    "secrets": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/secrets.sarif",
+      "waiver": null
+    },
+    "sast": {
+      "ran": true,
+      "result": "findings",
+      "artifact": "artifacts/security/sast.sarif",
+      "waiver": null,
+      "triage_artifact": "artifacts/security-source-review.md"
+    },
+    "dast": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/dast/api-scan.json",
+      "waiver": null
+    }
+  },
+  "waivers": {},
+  "gate_results": {
+    "assembly_plan_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g0-assembly-plan-validation.md"
+    },
+    "runtime_preflight": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g1-runtime-preflight.md"
+    },
+    "self_review": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g2-self-review.md"
+    },
+    "deployability": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "deployability-check.md"
+    },
+    "approval": {
+      "required": true,
+      "result": "APPROVED",
+      "artifact": "gate-decisions.md",
+      "mitigation_tokens": []
+    },
+    "signoff": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "signoff-ledger.md"
+    },
+    "candidate_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "feature-action-execution.md"
+    },
+    "kg_reconciliation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "kg-reconciliation.md"
+    },
+    "pm_closeout": {
+      "required": true,
+      "result": "APPROVED",
+      "artifact": "pm-closeout.md"
+    },
+    "tracker_sync": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "lifecycle-gates.log"
+    }
+  }
+}

@@ -548,6 +548,7 @@ features:
       - entity:canonical-fact-version
       - entity:fact-slot
       - entity:fact-slot-qualifier
+      - migration:f0007-identity-guard
     depends_on:
       - feature:F0002
       - feature:F0003
@@ -567,6 +568,8 @@ features:
         answer read path) and SEC-F7-03 (cross-KB evidence oracle). Residual: slot restrictions fixed
         at creation (F0018 re-derivation); envelope DB backstop (F0008); name-hook per-slot authorization
         cost is a design note for F0017/F0023.'
+      - Operator authorized targeted remediation of review findings; the prior archive is reopened, with
+        no new producer, route, permission or ontology scope.
       - 'Phase B (Proposed ADR-0077): MULTI members are child fact_slot rows so the ADR-0008 exclusion
         applies per member with no DDL on the F0008-owned canonical_fact_version; answers use the fact-answer/v1
         envelope in its value for identity-v1 slots only. Pilot slots stay legacy and the pilot GET contract
@@ -574,6 +577,10 @@ features:
       - 'Plan run 2026-11-09-60865e32 G1 decisions: F0007 binds ownership only and hands the RLS inventory
         (fact_slot, fact_slot_qualifier) to F0018; predicate keys are opaque and versioned with a minimal
         sys namespace; display-name precedence is deferred to F0017/F0023.'
+      - 'Remediation closeout2026-11-10: canonical member identity enforced; numeric total64 bounds prechecked;
+        additive0013 refuses malformed rows; exact payload scopes share one current-authority UoW. Current
+        evidence2026-11-09-81798e61; original final Neuron test inventory reconciled; old completion retained
+        as superseded history.'
       - 'Requirement-ownership amendment 2026-11-08 - Carry 109.1: define FactSlot identity beyond the
         first scalar example (multi-valued, qualified and relationship slots). FactSlot keys are the predicate
         key referenced by the ADR-0038 SourceAuthorityPolicy owned by F0018.'

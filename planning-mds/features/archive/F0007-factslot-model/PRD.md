@@ -4,7 +4,7 @@
 **Feature Name:** FactSlot model
 **Priority:** Critical
 **Phase:** MVP — v0.1A
-**Status:** Phase A and Phase B approved 2026-11-09 (`approve-phase-a`, `approve-phase-b`); implementation not started
+**Status:** Done / Archived — seven audit findings repaired and approved in remediation run `2026-11-09-81798e61`
 **Plan Run:** `2026-11-09-60865e32` (A+B, new)
 
 ## Feature Statement
@@ -101,7 +101,7 @@ Use the verified principal and typed resource scope from F0002. Slot creation re
 
 ## Dependencies
 
-Direct delivered foundations: [F0002](../../archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md) (tenant entity identity, principals, authorization, audit), [F0003](../../archive/F0003-postgresql-persistence/README.md) (PostgreSQL, table ownership, safe schema evolution), [F0006](../../archive/F0006-assertion-plane-origin-and-interpretation-basis/README.md) (assertion and name-claim admission). The F0001 pilot supplies the existing `fact_slot`, commit and read paths.
+Direct delivered foundations: [F0002](../F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md) (tenant entity identity, principals, authorization, audit), [F0003](../F0003-postgresql-persistence/README.md) (PostgreSQL, table ownership, safe schema evolution), [F0006](../F0006-assertion-plane-origin-and-interpretation-basis/README.md) (assertion and name-claim admission). The F0001 pilot supplies the existing `fact_slot`, commit and read paths.
 
 Downstream consumers: F0008, F0013, F0017, F0018, F0065 (direct `depends_on`), plus F0011, F0014, F0016, F0020, F0023, F0024 under ADR-0039. Their undelivered implementations do not block F0007. Dependency evidence and audit-pending notes live in the plan run's `artifact-trace.md`.
 

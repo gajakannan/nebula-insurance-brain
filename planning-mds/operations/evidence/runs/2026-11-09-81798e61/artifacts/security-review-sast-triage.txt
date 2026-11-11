@@ -1,0 +1,122 @@
+[
+  {
+    "rule": "python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text",
+    "message": {
+      "text": "sqlalchemy.text passes the constructed SQL statement to the database mostly unchanged. This means that the usual SQL injection protections are not applied and this function is vulnerable to SQL injection if user input can reach here. Use normal SQLAlchemy operators (such as `or_()`, `and_()`, etc.) to construct SQL."
+    },
+    "locations": [
+      {
+        "physicalLocation": {
+          "artifactLocation": {
+            "uri": "engine/migrations/versions/0013_f0007_identity_guard.py",
+            "uriBaseId": "%SRCROOT%"
+          },
+          "region": {
+            "endColumn": 85,
+            "endLine": 70,
+            "snippet": {
+              "text": "    malformed = bind.execute(text(f\"SELECT count(*) FROM fact_slot WHERE {invalid}\")).scalar_one()"
+            },
+            "startColumn": 30,
+            "startLine": 70
+          }
+        }
+      }
+    ]
+  },
+  {
+    "rule": "python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text",
+    "message": {
+      "text": "sqlalchemy.text passes the constructed SQL statement to the database mostly unchanged. This means that the usual SQL injection protections are not applied and this function is vulnerable to SQL injection if user input can reach here. Use normal SQLAlchemy operators (such as `or_()`, `and_()`, etc.) to construct SQL."
+    },
+    "locations": [
+      {
+        "physicalLocation": {
+          "artifactLocation": {
+            "uri": "engine/migrations/versions/0013_f0007_identity_guard.py",
+            "uriBaseId": "%SRCROOT%"
+          },
+          "region": {
+            "endColumn": 83,
+            "endLine": 73,
+            "snippet": {
+              "text": "            text(f\"SELECT id FROM fact_slot WHERE {invalid} ORDER BY id LIMIT 10\")"
+            },
+            "startColumn": 13,
+            "startLine": 73
+          }
+        }
+      }
+    ]
+  }
+]
+PASS: XSLT Injection [90017]
+PASS: Server Side Code Injection [90019]
+PASS: Remote OS Command Injection [90020]
+PASS: XPath Injection [90021]
+PASS: Application Error Disclosure [90022]
+PASS: XML External Entity Attack [90023]
+PASS: Generic Padding Oracle [90024]
+PASS: SOAP Action Spoofing [90026]
+PASS: SOAP XML Injection [90029]
+PASS: WSDL File Detection [90030]
+PASS: Loosely Scoped Cookie [90033]
+PASS: Cloud Metadata Potentially Exposed [90034]
+PASS: Server Side Template Injection [90035]
+PASS: Server Side Template Injection (Blind) [90036]
+PASS: Remote OS Command Injection (Time Based) [90037]
+FAIL-NEW: 0	FAIL-INPROG: 0	WARN-NEW: 0	WARN-INPROG: 0	INFO: 0	IGNORE: 0	PASS: 113
+
+Removed owned validation database: f0007_remediation_9d371de83b72
+    41	"""
+    42	
+    43	IDENTITY_SHAPE = r"""
+    44	  (identity_version IS NULL AND slot_role IS NULL AND predicate_key IS NULL
+    45	     AND predicate_release_ref IS NULL AND cardinality IS NULL AND object_entity_id IS NULL
+    46	     AND parent_slot_id IS NULL AND member_key IS NULL AND fingerprint_version IS NULL
+    47	     AND identity_fingerprint IS NULL AND created_by IS NULL)
+    48	  OR (identity_version IS NOT NULL AND identity_version = 1
+    49	     AND fingerprint_version IS NOT NULL AND fingerprint_version = 1
+    50	     AND created_by IS NOT NULL AND slot_role IS NOT NULL
+    51	     AND identity_fingerprint IS NOT NULL AND identity_fingerprint ~ '^[0-9a-f]{64}$'
+    52	     AND predicate_key IS NOT NULL
+    53	     AND predicate_key ~ '^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+    54	     AND predicate_release_ref IS NOT NULL AND length(predicate_release_ref) > 0
+    55	     AND slot_type = predicate_key AND cardinality IS NOT NULL
+    56	     AND cardinality IN ('SINGLE','MULTI','RELATIONSHIP')
+    57	     AND ((slot_role = 'SLOT' AND parent_slot_id IS NULL AND member_key IS NULL
+    58	            AND ((cardinality = 'RELATIONSHIP') = (object_entity_id IS NOT NULL)))
+    59	       OR (slot_role = 'MEMBER' AND cardinality = 'MULTI' AND parent_slot_id IS NOT NULL
+    60	            AND member_key IS NOT NULL AND length(member_key) > 0 AND object_entity_id IS NULL)))
+    61	"""
+    62	
+    63	
+    64	def upgrade() -> None:
+    65	    bind = op.get_bind()
+    66	    # WHY: hold the same lock through validation and replacement so another
+    67	    # writer cannot insert an invalid shape between the scan and the new CHECK.
+    68	    bind.execute(text("LOCK TABLE fact_slot IN ACCESS EXCLUSIVE MODE"))
+    69	    invalid = f"({IDENTITY_SHAPE}) IS NOT TRUE"
+    70	    malformed = bind.execute(text(f"SELECT count(*) FROM fact_slot WHERE {invalid}")).scalar_one()
+    71	    if malformed:
+    72	        identifiers = bind.execute(
+    73	            text(f"SELECT id FROM fact_slot WHERE {invalid} ORDER BY id LIMIT 10")
+    74	        ).scalars()
+    75	        samples = ", ".join(str(slot_id) for slot_id in identifiers)
+    76	        raise RuntimeError(
+    77	            f"0013 upgrade refused: {malformed} malformed fact_slot identity rows; "
+    78	            f"sample slot IDs: {samples}. No rows modified; explicit governed repair required."
+    79	        )
+    80	    op.execute("ALTER TABLE fact_slot DROP CONSTRAINT ck_fact_slot_identity")
+    81	    op.execute(
+    82	        f"ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity "
+    83	        f"CHECK (({IDENTITY_SHAPE}) IS TRUE)"
+    84	    )
+    85	    log.info("0013 identity guard installed; existing FactSlot rows preserved")
+    86	
+    87	
+    88	def downgrade() -> None:
+    89	    op.execute("ALTER TABLE fact_slot DROP CONSTRAINT ck_fact_slot_identity")
+    90	    op.execute(
+    91	        f"ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity CHECK ({PREVIOUS_CHECK})"
+    92	    )

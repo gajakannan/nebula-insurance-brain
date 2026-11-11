@@ -9,9 +9,10 @@
 
 **Date:** 2026-11-09
 **Owner:** Architect
-**Design review:** F0007 Phase B approved by operator token `approve-phase-b` on 2026-11-09, plan run `2026-11-09-60865e32`. Formal ADR acceptance remains pending the runtime proofs below.
+**Design review:** F0007 Phase B approved by operator token `approve-phase-b` on 2026-11-09, plan run `2026-11-09-60865e32`. Formal ADR acceptance remains pending the operator's decision on the recorded runtime proofs below.
 **Formal acceptance:** requires the PostgreSQL migration, concurrent-resolution, ownership, carrier-validation and pilot-regression proofs listed in the F0007 assembly plan. Plan approval alone is not runtime acceptance.
-**Proof evidence:** all five proof gates below have runtime evidence from F0007 feature run `2026-11-09-b94cfa12` (2026-11-09; see that run's `architect-implementation-review.md`). The status stays Proposed until the operator records formal acceptance.
+**Proof evidence:** the current F0007 remediation run is `2026-11-09-81798e61`, which supersedes `2026-11-09-b94cfa12` and includes the regression proofs for the five gates below. The status stays Proposed because the operator has approved implementation and closeout but has not recorded formal ADR acceptance. Record acceptance, or an explicit deferral, before F0008 Phase B. ADR-0039 and ADR-0066 retain their own broader acceptance gates; F0007 does not accept them by implication.
+**Acceptance review:** the [five-gate proof map and proposed disposition](../../operations/evidence/runs/2026-11-10-d49d1afa/adr-acceptance-proposal.md) identify the current tests and passing PR CI. The operator's formal decision is pending; PR #44 is explicitly held unmerged.
 **Refines:** [ADR-0006](ADR-0006-factslot-defines-canonical-semantic-identity.md) (Accepted) beyond its first scalar example. Implements the F0007 share of [ADR-0039](ADR-0039-typed-insurance-values-and-completeness.md) decisions 1–5 and [ADR-0066](ADR-0066-names-are-time-bounded-claims.md) §1/§1a/§2. Does not accept those Proposed ADRs and does not implement ADR-0039 decision 6 (package completeness, F0014).
 
 ## Context
@@ -72,6 +73,7 @@ An identity-v1 slot is `(tenant, knowledge base, subject entity, predicate key, 
 - **Cardinality:** `SINGLE`, `MULTI` or `RELATIONSHIP`, fixed at creation from the predicate contract. An unknown value is `CARDINALITY_INVALID`.
 - **Members:** a MULTI slot is a header. Each member is a child `fact_slot` row (`parent_slot_id`, `member_key`). The member key is the canonical encoding of the member value or member entity.
 - **Versions:** they attach to the member row. The unchanged ADR-0008 exclusion on `slot_id` therefore applies per member, with no DDL on `canonical_fact_version`. A commit addressed to a MULTI header is rejected with `MULTI_SLOT_REQUIRES_MEMBER`.
+- **Member-value invariant:** a `PRESENT` answer on a MEMBER must canonicalize under the pinned predicate contract to its immutable `member_key`. A mismatch is rejected with `MEMBER_VALUE_MISMATCH` before any write; equivalent normalized spellings are accepted. A different canonical value must resolve its own member slot.
 - **Relationships:** a RELATIONSHIP slot includes `object_entity_id` in its identity. The object must be a tenant entity associated with the slot's KB; otherwise the result is `RELATIONSHIP_OBJECT_OUT_OF_SCOPE`.
 
 ```text
@@ -98,6 +100,7 @@ fact_slot_qualifier (slot, name, type, canonical value)  ×N per slot
   - The currency must be an ISO 4217 alphabetic code from a pinned, versioned list, or the result is `CURRENCY_INVALID`.
   - A basis is required where the predicate requires it (`BASIS_REQUIRED`).
   - Any conversion marker is `CONVERTED_MONEY_UNSUPPORTED`.
+- **Decimal bounds:** decimal values and money amounts have the same 64-character total limit on input and canonical output. Canonical length is checked before exponent expansion allocates padding. Every accepted canonical value can be loaded and canonicalized again unchanged.
 - **Identifiers:**
   - An identifier is `(scheme, identifier_type, value[, effective])`, with server-computed `normalized_value` from a versioned normalization table.
   - `fein` strips hyphens and requires nine digits. Every other type defaults to NFC only.
@@ -123,18 +126,20 @@ fact_slot_qualifier (slot, name, type, canonical value)  ×N per slot
 - **Who may create:** creating a slot or member runs inside `AuthorizationExecution.mutate` over the source content artifacts with the existing `content_artifact:interpret` action, so only ServicePrincipal holds it today. Authorization precedes every validation detail.
 - **Restrictions on the new slot:** its `resource_access` row is provisioned in the same unit of work. Classifications and source ACLs are the union of its sources', and `parent_chain` and `dependency_keys` are the sources. This follows ADR-0042 decision 4, under which derived results inherit restrictions.
 - **Commits:** they keep `fact_slot:commit`. Absence-scope artifacts and name-evidence assertions join the commit's `additional_reads`, so an unauthorized scope is denied before any missingness detail (threat T-08).
+- **Reads:** scope-dependent reads derive their additional READ keys from the exact privately loaded answer, then authorize, recheck and audit all keys in the same current-authority unit of work before returning it. Selecting an answer separately to discover its scope is insufficient.
 - **Audit:** each creation writes one operational audit event (`fact_slot_created` / `fact_slot_member_created`) naming actor, tenant, KB, slot and fingerprint version.
 
 ### D8. Ownership now, RLS in F0018; legacy preserved
 
 - **Migration `0012`:** additive. It adds nullable identity columns to `fact_slot`, with a NULL `identity_version` marking a legacy slot, and creates `fact_slot_qualifier`.
+- **Identity guard `0013`:** leaves released migration `0012` unchanged and requires the complete legacy-or-v1 identity shape to evaluate `IS TRUE`, so missing required fields cannot pass through SQL NULL semantics. It locks `fact_slot` while checking existing rows and replacing the constraint, refuses malformed rows without repair, and restores the original `0012` guard on downgrade.
 - **Composite keys:**
   - qualifiers and members bind to `fact_slot (id, tenant_id, knowledge_base_id)`;
   - the subject and object of identity-v1 rows bind to `entity_knowledge_base`. The subject binding uses a generated column that is NULL for legacy rows, so legacy rows are not retro-checked.
 - **Triggers:** a trigger rejects any change to identity columns, including NULL to value, so a legacy row can never acquire a fabricated identity. Qualifier rows are append-only.
 - **Legacy `slot_type` values:** no mapping is created. They stay legacy-only, and a later explicit mapping belongs to F0012/F0013.
 - **RLS inventory:** `fact_slot` and `fact_slot_qualifier` are handed to F0018. F0007 enables no RLS and adds no `BYPASSRLS`, superuser or owner shortcut.
-- **Downgrade:** refuses while identity-v1 or qualifier rows exist.
+- **Downgrading below `0012`:** refuses while identity-v1 or qualifier rows exist.
 
 ## Alternatives Considered
 
@@ -182,3 +187,7 @@ fact_slot_qualifier (slot, name, type, canonical value)  ×N per slot
 - [F0007 assembly plan](../../features/archive/F0007-factslot-model/feature-assembly-plan.md)
 - Schemas: `planning-mds/schemas/fact-slot-key-v1.schema.json`, `fact-answer-v1.schema.json`, `fact-slot-resolution-result-v1.schema.json`
 - Examples: EX-OWN-003, EX-SEM-008
+
+## Review remediation history
+
+Operator-authorized run `2026-11-09-81798e61` tightened the member-value, decimal-bound, identity-guard and protected-read rules. On 2026-11-10 those rules were folded into D4, D5, D7 and D8 in response to plan-review finding PR-M1. This clarification preserves the Proposed status and the operator's separate formal acceptance decision.

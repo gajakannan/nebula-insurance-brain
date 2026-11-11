@@ -1,0 +1,89 @@
+# F0007 Code Reviewer planning readiness audit
+
+## Buildability Challenge
+
+The plan names the backend packages, migration, predicate registry, canonical identity rules, source authorization, commit policy and downstream ownership clearly enough to locate the intended work. Backend, QE, Security and DevOps handoffs are inferable; no build-critical owner is missing. No UI is justified, and F0018 row security / F0008 temporal semantics and database envelope enforcement / F0017-F0023 display precedence are explicit handoffs rather than accidental omissions. The per-feature assembly plan was read as completion context; it is not required as a planning deliverable.
+
+One concrete clarification is needed at the identity/answer boundary: ADR-0077 D4 (`:73`–`:74`) defines a MULTI member key from its value/entity and D6 (`:117`) defines a name member key from the normalized name, while D5's answer validation (`:94`) specifies generic envelope validation without stating that a PRESENT member answer must retain that member key. The implementation handoff's `Answer Validation at the Existing Commit` section lists contract/state, scope, type and value-detail checks but no member-key equality check. A competent builder needs an explicit invariant, a named mismatch rejection and negative test expectations here. The completed implementation's Critical CR-AUDIT-01 confirms the missing check is consequential; `test_factslot_answers.py:382`–`:399` even asserts success for a mismatched value.
+
+**Readiness recommendation for this clarification:** High, Architect-owned contract detail, with Backend/QE implementation and regression ownership. The primary auditor should reconcile this with the Architect's readiness findings rather than count the same identity defect twice. There is no separate missing-owner blocker.
+
+The original plan's malformed-row shape SQL is reviewed by the Architect lane, which owns its NULL-semantics finding. Decimal bounds and round-trip behavior are reviewed there and by Security. Required plan approval, story, tracker, KG and template validation are owned by the primary auditor.
+
+## Evidence and limits
+
+Direct sources read: all six story summaries/ACs consulted as needed; archived PRD and assembly-plan contract sections; ADR-0077 D1–D8; source in brain-domain, brain-factslots, brain-persistence, migration0012 and changed temporal/API integration; representative unit and PostgreSQL test source; original manifest-cited code review report. New feature-audit evidence `2026-11-09-8b8456df/artifacts/code-member-identity-repro.txt` demonstrates the consequential boundary gap. Audit notes and generated command evidence only were written; planning and completion artifacts were not repaired.
+# F0007 Code Reviewer completion audit
+
+Reviewed current commit `fa8fc1d` against `ff0a619`, archived F0007 stories, ADR-0077, source and representative unit/integration tests. Original completion run: `2026-11-09-b94cfa12`. This fresh audit did not edit implementation, tests, plans or original evidence.
+
+## Decision
+
+**FIX CRITICAL FIRST.** A completed feature cannot pass with the member identity defect below. The primary auditor owns the combined FR4 decision and fresh validation summary.
+
+## CR-AUDIT-01 — Critical — PRESENT answers can change the value that defines an immutable MULTI member
+
+- **Location:** `engine/packages/brain-factslots/src/brain_factslots/answers.py:102` and `:106`–`:116`.
+- **Contract:** `F0007-S0002-distinguish-single-multi-and-relationship-slots.md:24` derives each member identity from its normalized value/entity; ADR-0077 D4 (`:73`–`:74`) says the member key encodes that value/entity, and D6 (`:117`) defines normalized name as the name-member key. `brain_domain/fact_slots.py:196` implements the canonical `member_key` function.
+- **Trigger:** Resolve a MULTI member for entity A, then commit a PRESENT `entity_ref` to a different entity B in the same KB. The answer policy only checks that B belongs to the KB. The same issue affects the deployed system predicates: resolve `sys:hasTradeName@v1` with member key `acme restoration`, then submit a PRESENT name `Zed Services` with eligible evidence.
+- **Observed:** Both submissions are accepted and canonicalized. The immutable member key remains A / `acme restoration`, while its answer names B / `zed services`.
+- **Impact:** Two different member slots can carry the same accepted member value, and a version addressed to A can describe B. Resolution still returns the old immutable key, so deduplication and per-member temporal close semantics no longer describe the stored answer. This affects the core S0002 member identity requirement and production `sys` name members; it does not depend on adding future ontology predicates.
+- **Reproduction:** `artifacts/code-member-identity-repro.txt` records direct execution of the actual resolver and answer policy using the repository's in-memory `FactSlotStore` fake. `artifacts/code-member-identity-repro.py` preserves the source. No database or product file was mutated.
+- **Existing test gap:** `engine/tests/integration/test_factslot_answers.py:382`–`:399` creates a member for a fresh insured entity, commits a different entity (`w.subject`) to it, and explicitly expects HTTP 201. The test encodes the defect instead of exercising member identity consistency. High aggregate line coverage cannot establish this invariant.
+- **Remediation:** When a PRESENT answer targets a MEMBER slot, derive its member key with the slot's pinned predicate contract and require equality with `StoredSlot.member_key` before the commit writes. Define a named rejection and add negative tests for entity references, names and identifier/value-derived members; preserve positive tests for differently formatted values whose canonical key is equal. A changed member value must resolve/use its own member slot. Owner: Backend Developer + Architect (rejection contract) + QE (test correction). Fix before renewed feature closeout.
+
+## Review dimensions
+
+| Dimension | Assessment |
+|---|---|
+| Correctness | Critical member/answer identity inconsistency confirmed. Decimal round-trip and migration NULL checks are independently owned by the Architect lane; exponent allocation is owned by Security. |
+| Clean architecture | Domain remains pure; application ports and persistence adapters follow SOLUTION-PATTERNS. Temporal integration adds a protocol rather than an outward package dependency. |
+| SOLID / boundaries | No additional blocking finding in inspected services. |
+| Test quality / coverage | Existing entity-member acceptance test asserts corrupt semantics; add negative invariant tests. Primary QE owns full AC disposition and raw coverage reconciliation. |
+| Error handling | Named reason mapping is present, but the missing member mismatch guard has no rejection outcome. |
+| Performance | Name hook performs per-slot authorization; already disclosed as a design handoff to F0017/F0023. No new finding here. |
+| Readability / naming | New application source passes the framework code-quality scan: no TODO/FIXME, overlong lines or oversized files. |
+| AC mapping | This lane directly challenges S0002 AC3 and S0005 member identity. It does not substitute for primary PM/QE's 39-AC matrix. |
+| Over/under-engineering | No additional actionable finding. |
+
+## Validation and routing evidence
+
+- `artifacts/code-quality.txt`: PASS.
+- `artifacts/code-member-identity-repro.txt`: confirmed mismatched entity and system-name members accepted.
+- `artifacts/code-diff-impact.txt`: read-only KG impact output; affected nodes: assertion-eligibility-guards, backup-and-restore, bitemporal-canonical-commit, durable-authorization-decisions, factslot-identity-resolution, runtime-roots-and-toolchain, typed-fact-answer, versioned-assertion-semantics, fact-slot-qualifier, f0007-factslot-identity migration.
+- `artifacts/code-risk.txt`: factslot-identity-resolution risk score 3, routine band; bus-factor guidance asks for primary owner acknowledgement. Owner identity is the original PR author; this routing signal is not a new integrity defect.
+- Primary auditor runs required closeout/KG/template/tracker validators and fresh unit baseline. This lane does not claim a fresh PostgreSQL suite run.
+
+## Self-review
+
+Rechecked the code location, contract and test lines. The reproduction uses an authorized owner tuple and eligible name evidence, so the result is not a missing-authorization artifact. It calls the same answer policy wired in HTTP commits (`brain_api/routes/facts.py:122`–`:123`). The finding does not assume that every relationship answer must equal `object_entity_id`; relationship contracts may define a separate value type.
+[
+  {
+    "probe": "canonical-roundtrip",
+    "kind": "money",
+    "input": "1E+64",
+    "canonical_length": 65,
+    "reload": "ValueRejected: DECIMAL_INVALID"
+  },
+  {
+    "probe": "canonical-roundtrip",
+    "kind": "decimal",
+    "input": "1E+64",
+    "canonical_length": 65,
+    "reload": "ValueRejected: DECIMAL_INVALID"
+  },
+  {
+    "probe": "v1-null-fingerprint",
+    "exit_code": 1,
+    "result": "",
+    "stderr": "time=\"2026-11-09T23:18:59-05:00\" level=warning msg=\"The \\\"AUTHENTIK_SECRET_KEY\\\" variable is not set. Defaulting to a blank string.\"\ntime=\"2026-11-09T23:18:59-05:00\" level=warning msg=\"The \\\"AUTHENTIK_BOOTSTRAP_PASSWORD\\\" variable is not set. Defaulting to a blank string.\"\ntime=\"2026-11-09T23:18:59-05:00\" level=warning msg=\"The \\\"AUTHENTIK_SECRET_KEY\\\" variable is not set. Defaulting to a blank string.\"\ntime=\"2026-11-09T23:18:59-05:00\" level=warning msg=\"The \\\"AUTHENTIK_BOOTSTRAP_PASSWORD\\\" variable is not set. Defaulting to a blank string.\"\npermission denied while trying to connect to the docker API at unix:///var/run/docker.sock",
+    "sql": "WITH candidate AS (SELECT 1::smallint AS identity_version, 'SLOT'::text AS slot_role,\n'test:foo@v1'::text AS predicate_key, 'registry/1'::text AS predicate_release_ref,\n'SINGLE'::text AS cardinality, NULL::uuid AS object_entity_id,\nNULL::uuid AS parent_slot_id, NULL::text AS member_key,\n1::smallint AS fingerprint_version, NULL::text AS identity_fingerprint,\n'11111111-1111-1111-1111-111111111111'::uuid AS created_by,\n'test:foo@v1'::text AS slot_type), evaluated AS (SELECT (\n  (identity_version IS NULL AND slot_role IS NULL AND predicate_key IS NULL\n     AND predicate_release_ref IS NULL AND cardinality IS NULL AND object_entity_id IS NULL\n     AND parent_slot_id IS NULL AND member_key IS NULL AND fingerprint_version IS NULL\n     AND identity_fingerprint IS NULL AND created_by IS NULL)\n  OR (identity_version = 1 AND fingerprint_version = 1 AND created_by IS NOT NULL\n     AND identity_fingerprint ~ '^[0-9a-f]{64}$'\n     AND predicate_key ~ '^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'\n     AND length(predicate_release_ref) > 0 AND slot_type = predicate_key\n     AND cardinality IN ('SINGLE','MULTI','RELATIONSHIP')\n     AND ((slot_role = 'SLOT' AND parent_slot_id IS NULL AND member_key IS NULL\n            AND ((cardinality = 'RELATIONSHIP') = (object_entity_id IS NOT NULL)))\n       OR (slot_role = 'MEMBER' AND cardinality = 'MULTI' AND parent_slot_id IS NOT NULL\n            AND length(member_key) > 0 AND object_entity_id IS NULL)))) AS check_result FROM candidate) SELECT check_result IS NULL AS check_returns_unknown, check_result IS NOT FALSE AS postgres_check_accepts FROM evaluated;"
+  },
+  {
+    "probe": "null-version-nonlegacy-fields",
+    "exit_code": 1,
+    "result": "",
+    "stderr": "time=\"2026-11-09T23:18:59-05:00\" level=warning msg=\"The \\\"AUTHENTIK_SECRET_KEY\\\" variable is not set. Defaulting to a blank string.\"\ntime=\"2026-11-09T23:18:59-05:00\" level=warning msg=\"The \\\"AUTHENTIK_BOOTSTRAP_PASSWORD\\\" variable is not set. Defaulting to a blank string.\"\ntime=\"2026-11-09T23:18:59-05:00\" level=warning msg=\"The \\\"AUTHENTIK_SECRET_KEY\\\" variable is not set. Defaulting to a blank string.\"\ntime=\"2026-11-09T23:18:59-05:00\" level=warning msg=\"The \\\"AUTHENTIK_BOOTSTRAP_PASSWORD\\\" variable is not set. Defaulting to a blank string.\"\npermission denied while trying to connect to the docker API at unix:///var/run/docker.sock",
+    "sql": "WITH candidate AS (SELECT NULL::smallint AS identity_version, 'SLOT'::text AS slot_role,\n'test:foo@v1'::text AS predicate_key, 'registry/1'::text AS predicate_release_ref,\n'SINGLE'::text AS cardinality, NULL::uuid AS object_entity_id,\nNULL::uuid AS parent_slot_id, NULL::text AS member_key,\n1::smallint AS fingerprint_version, repeat('a',64)::text AS identity_fingerprint,\n'11111111-1111-1111-1111-111111111111'::uuid AS created_by,\n'test:foo@v1'::text AS slot_type), evaluated AS (SELECT (\n  (identity_version IS NULL AND slot_role IS NULL AND predicate_key IS NULL\n     AND predicate_release_ref IS NULL AND cardinality IS NULL AND object_entity_id IS NULL\n     AND parent_slot_id IS NULL AND member_key IS NULL AND fingerprint_version IS NULL\n     AND identity_fingerprint IS NULL AND created_by IS NULL)\n  OR (identity_version = 1 AND fingerprint_version = 1 AND created_by IS NOT NULL\n     AND identity_fingerprint ~ '^[0-9a-f]{64}$'\n     AND predicate_key ~ '^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'\n     AND length(predicate_release_ref) > 0 AND slot_type = predicate_key\n     AND cardinality IN ('SINGLE','MULTI','RELATIONSHIP')\n     AND ((slot_role = 'SLOT' AND parent_slot_id IS NULL AND member_key IS NULL\n            AND ((cardinality = 'RELATIONSHIP') = (object_entity_id IS NOT NULL)))\n       OR (slot_role = 'MEMBER' AND cardinality = 'MULTI' AND parent_slot_id IS NOT NULL\n            AND length(member_key) > 0 AND object_entity_id IS NULL)))) AS check_result FROM candidate) SELECT check_result IS NULL AS check_returns_unknown, check_result IS NOT FALSE AS postgres_check_accepts FROM evaluated;"
+  }
+]

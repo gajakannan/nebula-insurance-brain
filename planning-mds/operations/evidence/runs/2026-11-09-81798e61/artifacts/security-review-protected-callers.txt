@@ -1,0 +1,198 @@
+engine/packages/brain-factslots/src/brain_factslots/service.py:99:                additional_reads=evidence_reads,
+engine/packages/brain-factslots/src/brain_factslots/service.py:127:            return await self._execution.read(
+engine/packages/brain-factslots/src/brain_factslots/service.py:133:                additional_reads=scope_reads,
+engine/packages/brain-factslots/src/brain_factslots/service.py:159:                fact = await self._execution.read(
+engine/packages/brain-factslots/src/brain_factslots/answers.py:134:    async def scope_read_keys(
+engine/packages/brain-factslots/src/brain_factslots/answers.py:144:        return await self.scope_keys_for_value(slot_id, stored)
+engine/packages/brain-factslots/src/brain_factslots/answers.py:146:    async def scope_keys_for_value(
+engine/apps/api/src/brain_api/routes/content.py:73:    body = await execution.read(
+engine/apps/api/src/brain_api/routes/content.py:102:    data = await execution.read(
+engine/apps/api/src/brain_api/routes/reviews.py:101:    return await execution.read(
+engine/apps/api/src/brain_api/routes/reviews.py:181:        additional_reads=source_keys,
+engine/apps/api/src/brain_api/routes/facts.py:86:        return await answers.scope_keys_for_value(fact_slot_id, version.value)
+engine/apps/api/src/brain_api/routes/facts.py:88:    version = await execution.read(
+engine/apps/api/src/brain_api/routes/facts.py:95:        additional_reads=scope_reads,
+engine/apps/api/src/brain_api/routes/facts.py:171:            additional_reads=source_keys,
+
+def _aware(value: datetime) -> datetime:
+    """SQLite drops tzinfo; every stored instant is UTC by construction."""
+    return value if value.tzinfo is not None else value.replace(tzinfo=UTC)
+
+
+def resource_key_from_json(item: dict[str, str]) -> ResourceKey:
+    return ResourceKey(ResourceType(item["type"]), UUID(item["id"]))
+
+
+# --- the shared synchronous queries ----------------------------------------------------
+
+
+def current_policy_release(session: Session) -> str | None:
+    row = session.execute(
+        select(PolicyReleasePointerRow.release_id)
+        .where(PolicyReleasePointerRow.id == POINTER_ID)
+        .with_for_update(read=True)
+    ).first()
+    return row.release_id if row is not None else None
+
+
+def peek_delegation(session: Session, delegation_id: UUID) -> Delegation | None:
+    row = session.get(DelegationRow, delegation_id, populate_existing=True)
+    return delegation_from_row(row) if row is not None else None
+
+
+def lock_delegation(session: Session, delegation_id: UUID) -> Delegation | None:
+    row = session.execute(
+        select(DelegationRow)
+        .where(DelegationRow.id == delegation_id)
+        .with_for_update(read=True)
+        .execution_options(populate_existing=True)
+    ).scalar_one_or_none()
+    return delegation_from_row(row) if row is not None else None
+
+
+def lock_authority(
+    session: Session, principal_ids: Sequence[UUID]
+) -> dict[UUID, PrincipalAuthority]:
+    result: dict[UUID, PrincipalAuthority] = {}
+    for principal_id in sorted(set(principal_ids), key=str):
+        authority = session.execute(
+            select(PrincipalAuthorityRow.revision)
+            .where(PrincipalAuthorityRow.principal_id == principal_id)
+            .with_for_update(read=True)
+        ).first()
+        principal = session.execute(
+            select(PrincipalRow)
+            .where(PrincipalRow.id == principal_id)
+            .execution_options(populate_existing=True)
+        ).scalar_one_or_none()
+        if authority is None or principal is None:
+            continue
+        result[principal_id] = PrincipalAuthority(principal_from_row(principal), authority.revision)
+    return result
+
+
+def scope_slices(session: Session, principal_id: UUID) -> tuple[ScopeSlice, ...]:
+    rows = session.execute(
+        select(MembershipRow, KnowledgeBaseRow.workspace_id)
+        .join(
+            KnowledgeBaseRow,
+        approval_ref=approval_ref,
+        affected_ids=[principal_id, knowledge_base_id],
+    )
+    return membership_id
+
+
+def revoke_membership(
+    session: Session,
+    membership_id: UUID,
+    *,
+    operator_id: UUID,
+    approval_ref: str,
+    at: datetime,
+    expected_grant_revision: int | None = None,
+) -> int:
+    """Revoke under the authority lock; returns the new authority revision (S0003 AC4/AC7)."""
+    membership = session.get(MembershipRow, membership_id, populate_existing=True)
+    if membership is None:
+        raise OwnershipConflict("membership does not exist")
+    authority = _lock_authority(session, membership.principal_id)
+    membership = session.execute(
+        select(MembershipRow)
+        .where(MembershipRow.id == membership_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).scalar_one()
+    if expected_grant_revision is not None and membership.grant_revision != expected_grant_revision:
+        raise RevisionConflict("membership revision changed")
+    if membership.revoked_at is not None:
+        return authority.revision
+    before = authority.revision
+    authority.revision = before + 1
+    membership.revoked_at = at
+    membership.grant_revision = authority.revision
+    session.flush()
+    record_operational_event(
+        session,
+        event_type="membership_revoked",
+        actor_id=operator_id,
+        resource_type="membership",
+        resource_id=membership_id,
+        at=at,
+        before_revision=before,
+   354	        return [recheck(e, self._policy, at) for e in evaluated]
+   355	
+   356	    async def read(
+   357	        self,
+   358	        authenticated: Principal,
+   359	        key: ResourceKey,
+   360	        action: str,
+   361	        *,
+   362	        trace_id: str,
+   363	        load: Callable[[AuthorizationDecision], Awaitable[T]],
+   364	        requested: RequestedScope = NO_FILTER,
+   365	        delegation_id: UUID | None = None,
+   366	        additional_reads: Callable[[T], Awaitable[Sequence[ResourceKey]]] | None = None,
+   367	    ) -> T:
+   368	        """Load once under the primary lock, then authorize dependencies derived
+   369	        from that exact private payload before auditing and returning it. All
+   370	        authority/resource locks remain held until the single final commit."""
+   371	        evaluated = await self._guarded_decide(
+   372	            authenticated, [key], action, requested, trace_id, delegation_id
+   373	        )
+   374	        if not evaluated[0].decision.allowed:
+   375	            raise await self._deny(evaluated)
+   376	        evaluated = self._recheck_all(evaluated)
+   377	        if not evaluated[0].decision.allowed:
+   378	            raise await self._deny(evaluated)
+   379	        decision = evaluated[0].decision
+   380	        try:
+   381	            payload = await load(decision)
+   382	        except Exception:
+   383	            await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
+   384	            raise
+   385	        if additional_reads is not None:
+   386	            # WHY: a separate scope read would commit and release the current
+   387	            # authority locks before returning the answer. Deriving keys from
+   388	            # this exact payload also prevents authorizing one version's scope
+   389	            # and then returning a freshly selected, different version.
+   390	            try:
+   391	                source_keys = sorted(set(await additional_reads(payload)))
+   392	                source_evaluated = (
+   393	                    await self._guarded_decide(
+   394	                        authenticated, source_keys, Action.READ, requested, trace_id, delegation_id
+   395	                    )
+   396	                    if source_keys
+   397	                    else []
+   398	                )
+   399	            except Exception:
+   400	                await self._persist_fresh(
+   401	                    [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
+   402	                )
+   403	                raise
+   404	            evaluated.extend(source_evaluated)
+   405	            if not all(e.decision.allowed for e in evaluated):
+   406	                raise await self._deny(evaluated)
+   407	            evaluated = self._recheck_all(evaluated)
+   408	            if not all(e.decision.allowed for e in evaluated):
+   409	                raise await self._deny(evaluated)
+   410	        try:
+   411	            for item in evaluated:
+   412	                await self._store.append_decision(
+   413	                    item.decision.with_outcome(OperationOutcome.SUCCEEDED)
+   414	                )
+   415	            await self._store.commit()
+   416	        except Exception as exc:  # noqa: BLE001 - no payload leaves without durable audit
+   417	            await self._safe_rollback()
+   418	            raise AuthorizationUnavailable("read audit could not be persisted") from exc
+   419	        return payload
+   420	
+   421	    async def mutate(
+   422	        self,
+   423	        authenticated: Principal,
+   424	        keys: Sequence[ResourceKey],
+   425	        action: str,
+   426	        *,
+   427	        trace_id: str,
+   428	        operation: Callable[[Sequence[AuthorizationDecision]], Awaitable[T]],
+   429	        requested: RequestedScope = NO_FILTER,
+   430	        delegation_id: UUID | None = None,

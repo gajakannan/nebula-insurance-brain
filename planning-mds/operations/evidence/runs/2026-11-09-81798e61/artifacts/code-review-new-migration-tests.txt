@@ -1,0 +1,569 @@
+"""Require a complete legacy/v1 FactSlot identity shape (F0007 review FR-H2).
+
+Revision 0012 is already shipped and stays unchanged. Its CHECK allowed SQL
+UNKNOWN for incomplete v1 rows. This follow-up admits only TRUE, refuses any
+existing malformed rows without repairing them, and preserves all data on both
+upgrade and downgrade. No RLS, grants, ownership keys or version rows change.
+
+Revision ID: 0013
+Revises: 0012
+"""
+
+import logging
+from collections.abc import Sequence
+
+from alembic import op
+from sqlalchemy import text
+
+revision: str = "0013"
+down_revision: str | None = "0012"
+branch_labels: Sequence[str] | str | None = None
+depends_on: Sequence[str] | str | None = None
+
+log = logging.getLogger("alembic.runtime.migration")
+
+# WHY: migration history is immutable. The old expression is frozen here so a
+# downgrade restores exactly 0012's semantics without importing mutable code.
+PREVIOUS_CHECK = r"""
+  (identity_version IS NULL AND slot_role IS NULL AND predicate_key IS NULL
+     AND predicate_release_ref IS NULL AND cardinality IS NULL AND object_entity_id IS NULL
+     AND parent_slot_id IS NULL AND member_key IS NULL AND fingerprint_version IS NULL
+     AND identity_fingerprint IS NULL AND created_by IS NULL)
+  OR (identity_version = 1 AND fingerprint_version = 1 AND created_by IS NOT NULL
+     AND identity_fingerprint ~ '^[0-9a-f]{64}$'
+     AND predicate_key ~ '^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+     AND length(predicate_release_ref) > 0 AND slot_type = predicate_key
+     AND cardinality IN ('SINGLE','MULTI','RELATIONSHIP')
+     AND ((slot_role = 'SLOT' AND parent_slot_id IS NULL AND member_key IS NULL
+            AND ((cardinality = 'RELATIONSHIP') = (object_entity_id IS NOT NULL)))
+       OR (slot_role = 'MEMBER' AND cardinality = 'MULTI' AND parent_slot_id IS NOT NULL
+            AND length(member_key) > 0 AND object_entity_id IS NULL)))
+"""
+
+IDENTITY_SHAPE = r"""
+  (identity_version IS NULL AND slot_role IS NULL AND predicate_key IS NULL
+     AND predicate_release_ref IS NULL AND cardinality IS NULL AND object_entity_id IS NULL
+     AND parent_slot_id IS NULL AND member_key IS NULL AND fingerprint_version IS NULL
+     AND identity_fingerprint IS NULL AND created_by IS NULL)
+  OR (identity_version IS NOT NULL AND identity_version = 1
+     AND fingerprint_version IS NOT NULL AND fingerprint_version = 1
+     AND created_by IS NOT NULL AND slot_role IS NOT NULL
+     AND identity_fingerprint IS NOT NULL AND identity_fingerprint ~ '^[0-9a-f]{64}$'
+     AND predicate_key IS NOT NULL
+     AND predicate_key ~ '^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+     AND predicate_release_ref IS NOT NULL AND length(predicate_release_ref) > 0
+     AND slot_type = predicate_key AND cardinality IS NOT NULL
+     AND cardinality IN ('SINGLE','MULTI','RELATIONSHIP')
+     AND ((slot_role = 'SLOT' AND parent_slot_id IS NULL AND member_key IS NULL
+            AND ((cardinality = 'RELATIONSHIP') = (object_entity_id IS NOT NULL)))
+       OR (slot_role = 'MEMBER' AND cardinality = 'MULTI' AND parent_slot_id IS NOT NULL
+            AND member_key IS NOT NULL AND length(member_key) > 0 AND object_entity_id IS NULL)))
+"""
+
+
+def upgrade() -> None:
+    bind = op.get_bind()
+    # WHY: hold the same lock through validation and replacement so another
+    # writer cannot insert an invalid shape between the scan and the new CHECK.
+    bind.execute(text("LOCK TABLE fact_slot IN ACCESS EXCLUSIVE MODE"))
+    invalid = f"({IDENTITY_SHAPE}) IS NOT TRUE"
+    malformed = bind.execute(text(f"SELECT count(*) FROM fact_slot WHERE {invalid}")).scalar_one()
+    if malformed:
+        identifiers = bind.execute(
+            text(f"SELECT id FROM fact_slot WHERE {invalid} ORDER BY id LIMIT 10")
+        ).scalars()
+        samples = ", ".join(str(slot_id) for slot_id in identifiers)
+        raise RuntimeError(
+            f"0013 upgrade refused: {malformed} malformed fact_slot identity rows; "
+            f"sample slot IDs: {samples}. No rows modified; explicit governed repair required."
+        )
+    op.execute("ALTER TABLE fact_slot DROP CONSTRAINT ck_fact_slot_identity")
+    op.execute(
+        f"ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity "
+        f"CHECK (({IDENTITY_SHAPE}) IS TRUE)"
+    )
+    log.info("0013 identity guard installed; existing FactSlot rows preserved")
+
+
+def downgrade() -> None:
+    op.execute("ALTER TABLE fact_slot DROP CONSTRAINT ck_fact_slot_identity")
+    op.execute(
+        f"ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity CHECK ({PREVIOUS_CHECK})"
+    )
+"""F0007 review remediation: identity shapes are enforced by PostgreSQL itself.
+
+Each test owns a disposable database. Migration 0013 never repairs or deletes a
+malformed 0012 row; an operator must resolve it explicitly before retrying.
+"""
+
+from __future__ import annotations
+
+from uuid import UUID, uuid4
+
+import psycopg
+import pytest
+from alembic import command
+from brain_testing import fixtures
+from brain_testing.factslots import seed_subject
+from engine.tests.fixtures.factslots import harness
+from engine.tests.integration import test_factslot_migration as pilot
+from psycopg import sql
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+_clean_fact_tables = harness._clean_fact_tables
+database = harness.database
+
+
+def _upgrade(revision: str) -> None:
+    command.upgrade(harness.configuration(), revision)
+
+
+def _downgrade(revision: str) -> None:
+    command.downgrade(harness.configuration(), revision)
+
+
+def _owner(url: str) -> tuple[UUID, UUID, UUID, UUID]:
+    engine = create_engine(url.replace("postgresql://", "postgresql+psycopg://"))
+    try:
+        with Session(engine) as session, session.begin():
+            tenant, kb = uuid4(), uuid4()
+            fixtures.seed_scope(session, tenant, kb)
+            principal = fixtures.seed_principal(
+                session, issuer="urn:f0007:identity-guard", subject=str(uuid4())
+            )
+            entity = seed_subject(session, tenant, [kb])
+            return tenant, kb, entity, principal.id
+    finally:
+        engine.dispose()
+
+
+def _slot(owner: tuple[UUID, UUID, UUID, UUID], **changes: object) -> dict[str, object]:
+    tenant, kb, entity, principal = owner
+    row: dict[str, object] = {
+        "id": uuid4(),
+        "entity_id": entity,
+        "slot_type": "test:hasAggregateLimit@v1",
+        "tenant_id": tenant,
+        "knowledge_base_id": kb,
+        "identity_version": 1,
+        "slot_role": "SLOT",
+        "predicate_key": "test:hasAggregateLimit@v1",
+        "predicate_release_ref": "f0007-fixtures/1",
+        "cardinality": "SINGLE",
+        "object_entity_id": None,
+        "parent_slot_id": None,
+        "member_key": None,
+        "fingerprint_version": 1,
+        "identity_fingerprint": uuid4().hex * 2,
+        "created_by": principal,
+    }
+    row.update(changes)
+    return row
+
+
+def _insert(url: str, row: dict[str, object]) -> None:
+    with psycopg.connect(url) as connection:
+        connection.execute(
+            sql.SQL("INSERT INTO fact_slot ({}) VALUES ({})").format(
+                sql.SQL(", ").join(map(sql.Identifier, row)),
+                sql.SQL(", ").join(sql.Placeholder() for _ in row),
+            ),
+            list(row.values()),
+        )
+
+
+def _rows(url: str) -> dict[str, list[str]]:
+    with psycopg.connect(url) as connection:
+        return {
+            table: [
+                row[0]
+                for row in connection.execute(
+                    sql.SQL("SELECT to_jsonb(t)::text FROM {} t ORDER BY to_jsonb(t)::text").format(
+                        sql.Identifier(table)
+                    )
+                )
+            ]
+            for table in (
+                "fact_slot",
+                "fact_slot_qualifier",
+                "canonical_fact_version",
+                "canonical_commit",
+                "canonical_fact_change",
+                "outbox_event",
+            )
+        }
+
+
+def _revision_and_guard(url: str) -> tuple[str, str]:
+    with psycopg.connect(url) as connection:
+        revision = connection.execute("SELECT version_num FROM alembic_version").fetchone()[0]
+        guard = connection.execute(
+            "SELECT pg_get_constraintdef(oid) FROM pg_constraint "
+            "WHERE conname = 'ck_fact_slot_identity' AND conrelid = 'fact_slot'::regclass"
+        ).fetchone()[0]
+        return revision, guard
+
+
+def test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes(database):
+    _upgrade("0011")
+    pilot._seed_pilot(database)
+    _upgrade("0012")
+    owner = _owner(database)
+    _insert(database, _slot(owner))
+    header = _slot(owner, cardinality="MULTI")
+    _insert(database, header)
+    _insert(
+        database,
+        _slot(
+            owner,
+            cardinality="MULTI",
+            slot_role="MEMBER",
+            parent_slot_id=header["id"],
+            member_key="a",
+        ),
+    )
+    _insert(database, _slot(owner, cardinality="RELATIONSHIP", object_entity_id=owner[2]))
+    with psycopg.connect(database) as connection:
+        connection.execute(
+            "INSERT INTO fact_slot_qualifier VALUES "
+            "(%s, %s, %s, 'basis', 'code', '\"USD\"', now())",
+            (header["id"], owner[0], owner[1]),
+        )
+    before = _rows(database)
+    original_guard = _revision_and_guard(database)[1]
+
+    _upgrade("0013")
+    assert _rows(database) == before
+    revision, strict_guard = _revision_and_guard(database)
+    assert revision == "0013" and "IS TRUE" in strict_guard
+    _downgrade("0012")
+    assert _rows(database) == before
+    assert _revision_and_guard(database) == ("0012", original_guard)
+    _upgrade("0013")
+    assert _rows(database) == before
+    assert _revision_and_guard(database) == ("0013", strict_guard)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "identity_version",
+        "slot_role",
+        "predicate_key",
+        "predicate_release_ref",
+        "cardinality",
+        "fingerprint_version",
+        "identity_fingerprint",
+        "created_by",
+    ],
+)
+def test_0013_rejects_each_missing_mandatory_v1_field(database, field):
+    _upgrade("0013")
+    owner = _owner(database)
+    before = _rows(database)
+    with pytest.raises(psycopg.errors.CheckViolation, match="ck_fact_slot_identity"):
+        _insert(database, _slot(owner, **{field: None}))
+    assert _rows(database) == before
+
+
+def test_0013_rejects_null_member_key_and_relationship_without_object(database):
+    _upgrade("0013")
+    owner = _owner(database)
+    header = _slot(owner, cardinality="MULTI")
+    _insert(database, header)
+    before = _rows(database)
+    with pytest.raises(psycopg.errors.CheckViolation, match="ck_fact_slot_identity"):
+        _insert(
+            database,
+            _slot(owner, cardinality="MULTI", slot_role="MEMBER", parent_slot_id=header["id"]),
+        )
+    with pytest.raises(psycopg.errors.CheckViolation, match="ck_fact_slot_identity"):
+        _insert(database, _slot(owner, cardinality="RELATIONSHIP"))
+    assert _rows(database) == before
+
+
+@pytest.mark.parametrize("populated_field", ["slot_role", "identity_fingerprint", "created_by"])
+def test_0013_rejects_partially_populated_legacy_rows(database, populated_field):
+    _upgrade("0013")
+    owner = _owner(database)
+    row = _slot(owner)
+    populated_value = row[populated_field]
+    for field in (
+        "identity_version",
+        "slot_role",
+        "predicate_key",
+        "predicate_release_ref",
+        "cardinality",
+        "object_entity_id",
+        "parent_slot_id",
+        "member_key",
+        "fingerprint_version",
+        "identity_fingerprint",
+        "created_by",
+    ):
+        row[field] = None
+    row[populated_field] = populated_value
+    before = _rows(database)
+    with pytest.raises(psycopg.errors.CheckViolation, match="ck_fact_slot_identity"):
+        _insert(database, row)
+    assert _rows(database) == before
+
+
+def test_0013_preserves_fingerprint_uniqueness(database):
+    _upgrade("0013")
+    owner = _owner(database)
+    first = _slot(owner)
+    _insert(database, first)
+    before = _rows(database)
+    with pytest.raises(psycopg.errors.UniqueViolation, match="uq_fact_slot_identity"):
+        _insert(database, _slot(owner, identity_fingerprint=first["identity_fingerprint"]))
+    assert _rows(database) == before
+
+
+@pytest.mark.parametrize("missing_field", ["identity_fingerprint", "identity_version"])
+def test_0013_refuses_existing_malformed_0012_rows_without_changing_data(database, missing_field):
+    _upgrade("0011")
+    pilot._seed_pilot(database)
+    _upgrade("0012")
+    owner = _owner(database)
+    malformed = _slot(owner, **{missing_field: None})
+    _insert(database, malformed)  # The shipped 0012 CHECK admitted UNKNOWN.
+    before = _rows(database)
+    old_revision_guard = _revision_and_guard(database)
+
+    with pytest.raises(RuntimeError, match="0013 upgrade refused.*1 malformed") as rejected:
+        _upgrade("0013")
+    assert str(malformed["id"]) in str(rejected.value)
+    assert str(owner[2]) not in str(rejected.value)  # no subject/value details in diagnostics
+    assert _rows(database) == before
+    assert _revision_and_guard(database) == old_revision_guard
+"""Payload-derived protected reads retain one authority/audit transaction."""
+
+from __future__ import annotations
+
+from datetime import timedelta
+
+import pytest
+from brain_domain.authx import Action, OperationOutcome, ResourceType
+from brain_security.execution import (
+    AuthorizationDenied,
+    AuthorizationExecution,
+    AuthorizationUnavailable,
+    PrincipalAuthority,
+)
+
+
+class ReadStore:
+    """Authority fake with an explicit commit boundary and recorded decisions."""
+
+    def __init__(self, build, policy):  # type: ignore[no-untyped-def]
+        self.owner = build.scope()
+        self.user = build.principal()
+        self.release_id = policy.release.release_id
+        self.authority = PrincipalAuthority(self.user, 4)
+        self.slices = (build.grant(self.owner, "TenantMember"),)
+        self.slot = build.envelope(self.owner, ResourceType.FACT_SLOT)
+        self.scope = build.envelope(self.owner, classifications=("restricted",))
+        self.resources = {self.slot.key: self.slot, self.scope.key: self.scope}
+        self.pending = []
+        self.committed = []
+        self.commits = 0
+        self.fail_commit = False
+        self.hydrated = []
+        self.revocation = None
+
+    def current_policy_release(self):  # type: ignore[no-untyped-def]
+        return self.release_id
+
+    def peek_delegation(self, delegation_id):  # type: ignore[no-untyped-def]
+        return None
+
+    def lock_authority(self, principal_ids):  # type: ignore[no-untyped-def]
+        return {self.user.id: self.authority}
+
+    def lock_delegation(self, delegation_id):  # type: ignore[no-untyped-def]
+        return None
+
+    def scope_slices(self, principal_id):  # type: ignore[no-untyped-def]
+        return self.slices
+
+    def hydrate(self, key, *, require_record=True):  # type: ignore[no-untyped-def]
+        self.hydrated.append(key)
+        return self.resources.get(key)
+
+    async def run_sync(self, callback):  # type: ignore[no-untyped-def]
+        return callback(self)
+
+    async def append_decision(self, decision):  # type: ignore[no-untyped-def]
+        self.pending.append(decision)
+
+    async def commit(self):  # type: ignore[no-untyped-def]
+        if self.fail_commit:
+            raise OSError("synthetic audit failure")
+        self.committed.extend(self.pending)
+        self.pending = []
+        self.commits += 1
+        if self.revocation is not None:
+            self.revocation()
+
+    async def rollback(self):  # type: ignore[no-untyped-def]
+        self.pending = []
+
+
+async def test_exact_payload_dependencies_share_one_successful_commit(build, policy):
+    store = ReadStore(build, policy)
+    execution = AuthorizationExecution(store, policy, policy.release, clock=lambda: build.now)
+    selected = {"scope": store.scope.key, "pages": [7, 8]}
+    loads = []
+
+    async def load(decision):
+        assert decision.resource == store.slot.key and store.commits == 0
+        loads.append(True)
+        return selected
+
+    async def scope_reads(payload):
+        assert payload is selected and store.commits == 0
+        return [payload["scope"], payload["scope"]]
+
+    def revoke_after_locks_release():
+        store.authority = PrincipalAuthority(store.user, 5)
+        store.slices = (build.grant(store.owner, "TenantMember", classifications=("internal",)),)
+
+    store.revocation = revoke_after_locks_release
+    result = await execution.read(
+        store.user,
+        store.slot.key,
+        Action.READ,
+        trace_id="group",
+        load=load,
+        additional_reads=scope_reads,
+    )
+    assert result is selected and loads == [True] and store.commits == 1
+    assert {d.resource for d in store.committed} == {store.slot.key, store.scope.key}
+    assert {d.grant_revision for d in store.committed} == {4}
+    assert all(d.operation_outcome == OperationOutcome.SUCCEEDED for d in store.committed)
+    # Revocation after the completed transaction affects the next operation.
+    with pytest.raises(AuthorizationDenied):
+        await execution.read(store.user, store.scope.key, Action.READ, trace_id="next", load=load)
+
+
+async def test_denied_scope_returns_no_payload_and_audits_both_decisions(build, policy):
+    store = ReadStore(build, policy)
+    store.slices = (build.grant(store.owner, "TenantMember", classifications=("internal",)),)
+    execution = AuthorizationExecution(store, policy, policy.release, clock=lambda: build.now)
+
+    async def load(_decision):
+        return {"scope": store.scope.key}
+
+    async def scopes(payload):
+        return [payload["scope"]]
+
+    with pytest.raises(AuthorizationDenied) as denied:
+        await execution.read(
+            store.user,
+            store.slot.key,
+            Action.READ,
+            trace_id="denied",
+            load=load,
+            additional_reads=scopes,
+        )
+    assert denied.value.decision.resource == store.scope.key
+    assert store.commits == 1
+    assert {d.resource: d.operation_outcome for d in store.committed} == {
+        store.slot.key: OperationOutcome.FAILED,
+        store.scope.key: OperationOutcome.DENIED,
+    }
+
+
+async def test_denied_primary_does_not_load_or_discover_scope(build, policy):
+    store = ReadStore(build, policy)
+    store.slices = (build.grant(store.owner, "Reviewer"),)
+    execution = AuthorizationExecution(store, policy, policy.release, clock=lambda: build.now)
+
+    async def forbidden(_payload):
+        pytest.fail("denied primary must not load a payload or discover its scope")
+
+    with pytest.raises(AuthorizationDenied):
+        await execution.read(
+            store.user,
+            store.slot.key,
+            Action.READ,
+            trace_id="primary",
+            load=forbidden,
+            additional_reads=forbidden,
+        )
+    assert store.scope.key not in store.hydrated
+    assert len(store.committed) == 1
+
+
+async def test_scope_discovery_failure_audits_failed_primary(build, policy):
+    store = ReadStore(build, policy)
+    execution = AuthorizationExecution(store, policy, policy.release, clock=lambda: build.now)
+
+    async def load(_decision):
+        return {"scope": store.scope.key}
+
+    async def unavailable(_payload):
+        raise LookupError("scope ownership metadata unavailable")
+
+    with pytest.raises(LookupError):
+        await execution.read(
+            store.user,
+            store.slot.key,
+            Action.READ,
+            trace_id="failed",
+            load=load,
+            additional_reads=unavailable,
+        )
+    assert [d.operation_outcome for d in store.committed] == [OperationOutcome.FAILED]
+
+
+async def test_expiry_during_private_load_is_rechecked_before_release(build, policy):
+    store = ReadStore(build, policy)
+    store.slices = (
+        build.grant(store.owner, "TenantMember", expires_at=build.now + timedelta(seconds=1)),
+    )
+    instant = [build.now]
+    execution = AuthorizationExecution(store, policy, policy.release, clock=lambda: instant[0])
+
+    async def load(_decision):
+        return {"scope": store.scope.key}
+
+    async def scopes(payload):
+        instant[0] = build.now + timedelta(seconds=2)
+        return [payload["scope"]]
+
+    with pytest.raises(AuthorizationDenied):
+        await execution.read(
+            store.user,
+            store.slot.key,
+            Action.READ,
+            trace_id="expired",
+            load=load,
+            additional_reads=scopes,
+        )
+    assert not any(d.operation_outcome == OperationOutcome.SUCCEEDED for d in store.committed)
+
+
+async def test_group_audit_failure_never_returns_the_private_payload(build, policy):
+    store = ReadStore(build, policy)
+    store.fail_commit = True
+    execution = AuthorizationExecution(store, policy, policy.release, clock=lambda: build.now)
+
+    async def load(_decision):
+        return {"scope": store.scope.key}
+
+    async def scopes(payload):
+        return [payload["scope"]]
+
+    with pytest.raises(AuthorizationUnavailable):
+        await execution.read(
+            store.user,
+            store.slot.key,
+            Action.READ,
+            trace_id="audit",
+            load=load,
+            additional_reads=scopes,
+        )
+    assert store.committed == [] and store.pending == [] and store.commits == 0

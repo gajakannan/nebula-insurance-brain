@@ -1,0 +1,96 @@
+import json
+from pathlib import Path
+import re
+import subprocess
+
+root=Path('/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain')
+run=root/'planning-mds/operations/evidence/runs/2026-11-09-81798e61'
+raw=json.loads((run/'artifacts/coverage/engine-full-final.json').read_text())
+records=[]
+for path,cov in raw['files'].items():
+    path='engine/'+path.split('/engine/',1)[1] if '/engine/' in path else path
+    if not path.startswith('engine/') or '/src/' not in path:continue
+    diff=subprocess.check_output(['git','diff','--no-ext-diff','--unified=0','fa8fc1d','--',path],cwd=root,text=True)
+    lines=set()
+    for start,count in re.findall(r'^@@ .* \+(\d+)(?:,(\d+))? @@',diff,re.M):
+        lines.update(range(int(start),int(start)+int(count or 1)))
+    executable=set(cov['executed_lines'])|set(cov['missing_lines'])
+    changed=lines&executable
+    if not changed:continue
+    covered=changed&set(cov['executed_lines'])
+    records.append(dict(file=path,changed_executable=len(changed),covered=len(covered),missing=sorted(changed-covered)))
+total=sum(x['changed_executable'] for x in records)
+covered=sum(x['covered'] for x in records)
+summary=dict(base='fa8fc1d',source='artifacts/coverage/engine-full-final.json',files=records,changed_executable_lines=total,covered=covered,percent=100*covered/total,excluded='Migration behavior is proven by real PostgreSQL tests; source line coverage measures application src/ only.')
+(run/'artifacts/coverage/changed-code-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+print(json.dumps(summary,indent=2))
+assert summary['percent']>=80
+# F0007 — FactSlot model — Status
+
+**Overall Status:** Done / Archived after remediation, 2026-11-10; current run `2026-11-09-81798e61`, operator G4 approval recorded.
+**Last Updated:** 2026-11-10
+**Plan Run:** `2026-11-09-60865e32` (A+B, new)
+**Phase A:** Approved 2026-11-09 (`approve-phase-a`, G3 PASS)
+**Phase B:** Approved 2026-11-09 (`approve-phase-b`; assembly plan, ADR-0077, three design schemas)
+**Implementation:** Remediation completed in `2026-11-09-81798e61`; original completed run `2026-11-09-b94cfa12` retained as superseded history.
+
+## Story Checklist
+
+| Story | Title | Status |
+|---|---|---|
+| F0007-S0001 | Resolve stable FactSlot identity | Done |
+| F0007-S0002 | Distinguish single, multi-valued and relationship slots | Done |
+| F0007-S0003 | Carry information state separately from value | Done |
+| F0007-S0004 | Type money and identifiers | Done |
+| F0007-S0005 | Define name FactSlots | Done |
+| F0007-S0006 | Preserve pilot slots and ownership | Done |
+
+## Story × Role Progress
+
+Current remediation run: all implementation, reviewer and operator approval gates are complete. Original completion and collected pre-approval rows below are append-only history.
+
+| Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
+|---|---|---|---|---|---|---|---|---|
+| F0007-S0001 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0002 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0003 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0004 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0005 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0006 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+
+Frontend and AI are out of scope: F0007 has no UI and no model call. The Architect set the required roles at Phase B (below).
+
+## Required Role Matrix
+
+Set by the Architect at Phase B (G5), 2026-11-09.
+
+| Role | Required | Why Required | Set By | Date |
+|---|---|---|---|---|
+| Quality Engineer | Yes | 39 ACs need independent PostgreSQL, concurrency and negative-fixture evidence | Architect | 2026-11-09 |
+# F0007 — FactSlot model
+
+**Feature ID:** F0007
+**Feature Name:** FactSlot model
+**Priority:** Critical
+**Phase:** MVP — v0.1A
+**Status:** Done / Archived — seven audit findings repaired and approved in remediation run `2026-11-09-81798e61`
+**Plan Run:** `2026-11-09-60865e32` (A+B, new)
+
+## Feature Statement
+
+**As a** persistence engineer, business reviewer and GL underwriter
+**I want** every semantic question the Brain answers about a subject to have one stable, typed identity whose answer states its information state separately from its value
+**So that** distinct limits, insureds and names never share or split an answer, and "not found here" is never read as "does not exist".
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| [F0007-S0001](F0007-S0001-resolve-stable-factslot-identity.md) | Resolve stable FactSlot identity | Done |
+| [F0007-S0002](F0007-S0002-distinguish-single-multi-and-relationship-slots.md) | Distinguish single, multi-valued and relationship slots | Done |
+| [F0007-S0003](F0007-S0003-carry-information-state-separately-from-value.md) | Carry information state separately from value | Done |
+| [F0007-S0004](F0007-S0004-type-money-and-identifiers.md) | Type money and identifiers | Done |
+| [F0007-S0005](F0007-S0005-define-name-factslots.md) | Define name FactSlots | Done |
+| [F0007-S0006](F0007-S0006-preserve-pilot-slots-and-ownership.md) | Preserve pilot slots and ownership | Done |
+
+**Total Stories:** 6

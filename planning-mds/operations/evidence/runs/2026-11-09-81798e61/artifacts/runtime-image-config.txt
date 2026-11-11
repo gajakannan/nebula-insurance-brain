@@ -1,0 +1,151 @@
+name: brain-f0006-5a00b0ff
+services:
+  engine-validation:
+    image: brain-f0006-engine:2026-11-02-5a00b0ff
+    build:
+      context: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+      dockerfile: planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/Dockerfile
+      target: engine-runtime
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+    tmpfs:
+      - /app/brain/content:uid=1000,gid=1000,mode=0700
+    environment:
+      HOME: /tmp
+      XDG_CACHE_HOME: /tmp/.cache
+      BRAIN_DATABASE_URL: postgresql+asyncpg://brain:brain@postgres:5432/brain_f0006_runtime
+      BRAIN_WORKER_DATABASE_URL: postgresql+psycopg://brain:brain@postgres:5432/brain_f0006_runtime
+    command: [python, -m, uvicorn, 'brain_api.app:app', --host, 0.0.0.0, --port, '8000']
+    healthcheck:
+      test: [CMD, python, -c, "import json,urllib.request; r=json.load(urllib.request.urlopen('http://localhost:8000/health',timeout=5)); assert r['status']=='ok' and r['storage']=='ok'"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+    networks: [dependencies]
+  neuron-validation:
+    image: brain-f0006-neuron:2026-11-02-5a00b0ff
+    build:
+      context: /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain
+      dockerfile: planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/artifacts/runtime/Dockerfile
+      target: neuron-runtime
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+    environment:
+      HOME: /tmp
+      XDG_CACHE_HOME: /tmp/.cache
+      HF_HOME: /tmp/huggingface
+      BRAIN_WORKER_DATABASE_URL: postgresql+psycopg://brain:brain@postgres:5432/brain_f0006_runtime
+    command: [python, -c, "from threading import Event; Event().wait()"]
+    healthcheck:
+      test: [CMD, python, -c, "import brain_worker,brain_contracts,brain_extraction,brain_ingestion"]
+      interval: 5s
+      timeout: 30s
+      retries: 12
+    networks: [dependencies]
+networks:
+  dependencies:
+    external: true
+    name: nebula-insurance-brain_default
+FROM brain-f0005-engine:2026-10-25-4020923b AS engine-build
+USER root
+COPY engine /app/brain/engine
+RUN uv sync --locked --directory /app/brain/engine
+
+FROM brain-f0005-engine:2026-10-25-4020923b AS engine-runtime
+COPY --from=engine-build /opt/venv /opt/venv
+COPY --from=engine-build /app/brain/engine /app/brain/engine
+USER 1000:1000
+
+FROM brain-f0005-neuron:2026-10-25-4020923b AS neuron-build
+USER root
+COPY engine /app/brain/engine
+COPY neuron /app/brain/neuron
+RUN uv sync --locked --directory /app/brain/neuron
+
+FROM brain-f0005-neuron:2026-10-25-4020923b AS neuron-runtime
+COPY --from=neuron-build /opt/venv /opt/venv
+COPY --from=neuron-build /app/brain/engine /app/brain/engine
+COPY --from=neuron-build /app/brain/neuron /app/brain/neuron
+USER 1000:1000
+"""Create only this run's dedicated runtime DB; preserve historical databases."""
+import os
+from pathlib import Path
+
+import psycopg
+from alembic import command
+from alembic.config import Config
+from psycopg import sql
+
+name = "brain_f0006_runtime"
+with psycopg.connect("postgresql://brain:brain@postgres:5432/postgres", autocommit=True) as connection:
+    if not connection.execute("SELECT 1 FROM pg_database WHERE datname=%s", (name,)).fetchone():
+        connection.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
+with psycopg.connect(f"postgresql://brain:brain@postgres:5432/{name}", autocommit=True) as connection:
+    connection.execute("CREATE EXTENSION IF NOT EXISTS btree_gist")
+os.environ["BRAIN_DATABASE_URL"] = f"postgresql+psycopg://brain:brain@postgres:5432/{name}"
+config = Config("engine/migrations/alembic.ini")
+config.set_main_option("script_location", str(Path("engine/migrations").resolve()))
+command.upgrade(config, "head")
+print("Dedicated F0006 runtime database ready at migration 0011")
+"""Real dump/restore drill in unique databases; no application parser or repair."""
+
+from __future__ import annotations
+
+import json
+import os
+import runpy
+import subprocess
+import sys
+from pathlib import Path
+from uuid import uuid4
+
+import pytest
+from brain_content.checkpoints import CheckpointStore
+from brain_content.dates import DocumentDateValue
+from brain_content.outputs import PipelineIdentity
+from brain_content.validation import ArtifactIntegrityError
+from brain_persistence.models import Assertion, AssertionEvidence
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+PRODUCT = Path(__file__).resolve().parents[3]
+_helpers = runpy.run_path(str(Path(__file__).with_name("test_content_migration_states.py")))
+database = _helpers["database"]
+publication = _helpers["publication"]
+date_services = _helpers["date_services"]
+_clean_fact_tables = _helpers["_clean_fact_tables"]
+ControlledHumanVerifier = _helpers["ControlledHumanVerifier"]
+content_basis = _helpers["content_basis"]
+_snapshot = runpy.run_path(str(PRODUCT / "scripts/ops/verify_content.py"))["snapshot"]
+_backup = runpy.run_path(str(PRODUCT / "scripts/ops/backup_inventory.py"))
+
+
+@pytest.mark.parametrize("publication", [1, 2], indirect=True)
+async def test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage(
+    date_services, database, tmp_path
+):
+    services, actor, human, bundle, publisher = date_services
+    verifier = ControlledHumanVerifier(human, bundle.manifest.version_id)
+    async with services(human_selections=verifier) as service:
+        candidate = await service.append_candidate(
+            actor,
+            artifact_id=bundle.key.artifact_id,
+            date=DocumentDateValue(precision="DAY", value="2024-02-29"),
+            basis=content_basis(bundle),
+            supersedes_id=None,
+            idempotency_key="restore-date",
+            trace_id="restore-date",
+        )
+        selected = await service.select(
+            actor,
+            artifact_id=bundle.key.artifact_id,
+            candidate_id=candidate.id,
+            expected_selection_id=None,
+            human_decision_id=verifier.selection(candidate.id),
+            reason="controlled restore fixture",
+            idempotency_key="restore-select",
+            trace_id="restore-select",
+        )
+        await service.select(

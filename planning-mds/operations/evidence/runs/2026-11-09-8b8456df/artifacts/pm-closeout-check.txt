@@ -1,0 +1,287 @@
+# F0007 — FactSlot model — Status
+
+**Overall Status:** Done. Archived 2026-11-09 after feature run `2026-11-09-b94cfa12` (G0-G8; operator approval at G4).
+**Last Updated:** 2026-11-09
+**Plan Run:** `2026-11-09-60865e32` (A+B, new)
+**Phase A:** Approved 2026-11-09 (`approve-phase-a`, G3 PASS)
+**Phase B:** Approved 2026-11-09 (`approve-phase-b`; assembly plan, ADR-0077, three design schemas)
+**Implementation:** Feature run `2026-11-09-b94cfa12`: Done 2026-11-09
+
+## Story Checklist
+
+| Story | Title | Status |
+|---|---|---|
+| F0007-S0001 | Resolve stable FactSlot identity | Done |
+| F0007-S0002 | Distinguish single, multi-valued and relationship slots | Done |
+| F0007-S0003 | Carry information state separately from value | Done |
+| F0007-S0004 | Type money and identifiers | Done |
+| F0007-S0005 | Define name FactSlots | Done |
+| F0007-S0006 | Preserve pilot slots and ownership | Done |
+
+## Story × Role Progress
+
+| Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
+|---|---|---|---|---|---|---|---|---|
+| F0007-S0001 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0002 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0003 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0004 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0005 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+| F0007-S0006 | done | not-in-scope | not-in-scope | done | PASS | PASS | done | done |
+
+Frontend and AI are out of scope: F0007 has no UI and no model call. The Architect set the required roles at Phase B (below).
+
+## Required Role Matrix
+
+Set by the Architect at Phase B (G5), 2026-11-09.
+
+| Role | Required | Why Required | Set By | Date |
+|---|---|---|---|---|
+| Quality Engineer | Yes | 39 ACs need independent PostgreSQL, concurrency and negative-fixture evidence | Architect | 2026-11-09 |
+| Code Reviewer | Yes | New application package, migration and commit-path change | Architect | 2026-11-09 |
+| Security Reviewer | Yes | Ownership keys, derived restrictions, non-disclosing denial (T-08) and RLS handoff | Architect | 2026-11-09 |
+| DevOps | Yes | Additive migration 0012 with up/down/up proof on seeded pilot data | Architect | 2026-11-09 |
+| Architect | Yes | Identity, legacy compatibility and ADR-0077 proof gates | Architect | 2026-11-09 |
+
+## Story Signoff Provenance
+
+Append-only history. The PM records the required reviewers' verdicts during the feature action.
+
+| Story | Role | Reviewer | Verdict | Evidence | Date | Notes |
+|---|---|---|---|---|---|---|
+| F0007-S0001 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0001 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0002 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0003 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0004 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0005 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+| F0007-S0006 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md` | 2026-11-09 | PM verified role evidence after the G4 operator approval |
+
+## Closeout Summary (PM, 2026-11-09)
+
+- **Delivered:** all six stories and all 39 ACs, with PostgreSQL evidence in run `2026-11-09-b94cfa12`:
+  - KB-owned slot identity with authoritative qualifier rows;
+  - SINGLE, MULTI and RELATIONSHIP slots, with members as child slots;
+  - the `fact-answer/v1` carrier;
+  - exact money and scheme-scoped identifiers;
+  - the four system name predicates and the precedence-free hook;
+  - additive migration 0012 with ownership keys and triggers;
+  - the RLS inventory handed to F0018.
+- **Tests:**
+  - 819/819 engine tests on an owned database at head;
+  - 151/151 in the F0007 CI step (`brain_factslots` 98.6%);
+  - neuron 264 passed, 41 CI-equivalent skips;
+  - changed-line coverage 99.0%.
+- **Defects found and fixed:**
+  - a naive `created_at` binding;
+  - the backup inventory reading columns that later migrations add (it already failed on `main` because of 0011);
+  - an F0006 test that hard-coded head `0011`;
+  - at G3: SEC-F7-01 (name evidence READ before any reason), SEC-F7-02 (T-08 on the read path) and SEC-F7-03 (cross-KB evidence oracle).
+- **Residual risks:**
+  - The answer envelope is service-enforced; F0008 owns the database backstop.
+  - Slot restrictions are fixed at creation; F0018 owns re-derivation.
+  - The name hook authorizes per slot; a design note for F0017/F0023.
+  - ADR-0077 is still Proposed, with all five proof gates evidenced. Formal acceptance is the operator's call.
+- **Deferrals:** none. Every story is Done; the handoffs are owned by F0008, F0011, F0012/F0013, F0016, F0017/F0023, F0018, F0020 and F0026.
+
+## Clarifications (G1, 2026-11-09)
+
+1. **Row security:** F0007 binds new rows to tenant/KB ownership with composite keys and immutability triggers. F0018 Phase B designs and enables RLS on all tenant-owned tables, F0007's included.
+2. **Predicate identity:** an opaque, versioned predicate key with a minimal F0007 system-predicate set (the four name predicates plus test fixtures). F0012/F0013 register real predicates.
+3. **Display name:** F0007 provides the hook only. The order of preference is an open decision owned by F0017/F0023.
+# PM Closeout — F0007-factslot-model run 2026-11-09-b94cfa12
+
+- Role: Product Manager (role switch; `agents/product-manager/SKILL.md` read)
+- Reviewer: Claude (Opus 5.5) / Product Manager
+- Date: 2026-11-09
+
+## Final Story Status
+
+| Story | Final Status | Evidence | Notes |
+|-------|--------------|----------|-------|
+| F0007-S0001 | Done | test-execution-report.md / code-review-report.md / security-review-report.md | 7/7 ACs; concurrency, collision, cross-KB non-disclosure |
+| F0007-S0002 | Done | test-execution-report.md / code-review-report.md | 6/6 ACs; members as child slots, per-member exclusion |
+| F0007-S0003 | Done | test-execution-report.md / security-review-report.md | 7/7 ACs; T-08 on commit and read (SEC-F7-02 fixed) |
+| F0007-S0004 | Done | test-execution-report.md / code-review-report.md | 7/7 ACs; exact money, scheme-scoped identifiers |
+| F0007-S0005 | Done | test-execution-report.md / security-review-report.md | 5/5 ACs; real F0006 v2 evidence (SEC-F7-01/03 fixed) |
+| F0007-S0006 | Done | deployability-check.md / architect-implementation-review.md | 7/7 ACs; pilot byte-equality across up/down/up; RLS inventory |
+
+I verified the STATUS.md Story × Role Progress matrix. Every required cell is done or PASS, Frontend and AI are not in scope, and the Overall column is Done for all six stories, consistent with the Story Checklist. STATUS provenance holds 30 rows: six stories × five required roles, each with a reviewer, ISO date and run-folder evidence.
+
+## Archive Decision
+
+All six stories are Done, with no remaining blocking work, so the feature is archived.
+
+- **Moved:** `planning-mds/features/F0007-factslot-model/` → `planning-mds/features/archive/F0007-factslot-model/`.
+- **Links repaired:** relative links inside the folder, including the schema paths in `contract-examples.json`, were updated for the extra level. A link check found 0 unresolved targets.
+- **References repointed:** BLUEPRINT, data-model, ADR-0077, the umbrella assembly plan and `examples/source-authority-and-information-state.md`.
+- **Orphaned Story Rule:** satisfied. No story is Not Started or In Progress.
+
+## Deferred Follow-ups
+
+None of these is an F0007 deliverable. Each was handed off by ADR-0077 or the assembly plan:
+
+| Follow-up | Owner |
+|---|---|
+| Database backstop for the answer envelope; per-member temporal close; state supersession | F0008 |
+| Runtime schema publication | F0011 |
+| Predicate registry; explicit legacy `slot_type` mapping | F0012/F0013 |
+| Producing absence scopes; resolver adoption | F0016 |
+| Display precedence and aliases (name-hook per-slot authorization cost noted for its caller) | F0017/F0023 |
+| RLS on the handed inventory; restriction re-derivation; SourceAuthorityPolicy | F0018 |
+| HTTP return of states | F0020 |
+| Isolation proof | F0026 |
+
+- **ADR-0077:** the status stays Proposed, with all five proof gates evidenced. Formal acceptance is an operator decision and is recorded in BLUEPRINT §6.
+
+## Recommendation Acceptances
+
+None required. No role verdict is `WITH RECOMMENDATIONS`: Code Review APPROVED, Security PASS, QE PASS, DevOps PASS, Architect PASS. No coverage, validator-defect or custom waiver was used.
+
+## Tracker Updates
+
+- **`kg-source/features/F0007.yaml`:** path set to the archive; status `archived-done`; registry Archived; roadmap Completed; rationale, validation gate, completion state, `archived_date` and story paths updated. Compiled into REGISTRY.md (Archived row) and ROADMAP.md (Completed row). Now lane empty again.
+- **ROADMAP.md:** "Last Reviewed" line updated.
+- **BLUEPRINT.md:**
+  - §3.3 inventory: F0007 Done / Archived, six stories Done;
+  - §4.14 heading and as-built paragraph;
+  - §6 current position.
+- **`architecture/feature-assembly-plan.md`:** F0007 row now reads Done / Archived.
+- **ADR-0077:** a proof-evidence line; the status is unchanged.
+- **Feature folder:** STATUS (Done, Closeout Summary, provenance), README (Archived 2026-11-09), GETTING-STARTED, acceptance checklist, story files (Done).
+- **STORY-INDEX.md:** regenerated (43 stories). No trailing hard-break artifacts.
+- **Knowledge graph:** the G7 graph was verified. The PM authored no binding or node shard; the pre-move G7 delta was an Architect action, recorded in `kg-reconciliation.md`.
+
+## Validator Results
+
+These run through `run-gate.py --stage G8` after this checkpoint is attested:
+
+- compile
+- `patch-prior-manifest.py`, then the `latest-run.json` write
+- `validate.py --write-coverage-report`
+- `validate.py --check-drift`
+- `capture-run-telemetry.py`
+- `validate-feature-evidence.py --stage closeout`
+- `validate-trackers.py`
+- plain `validate.py`
+
+The results are recorded in `lifecycle-gates.log`, `gate-state.json` and the README validation summary.
+
+## Result
+
+APPROVED
+# Signoff Ledger — F0007-factslot-model run 2026-11-09-b94cfa12
+
+- Owner: Product Manager
+- Recorded by: Claude (Opus 5.5) / Product Manager
+- Date: 2026-11-09
+- Basis: G4 operator approval (`gate-decisions.md`); each verdict cross-checked against its role report in this run folder.
+
+## Required Role Matrix
+
+Echoes the STATUS.md `Required Role Matrix`, set by the Architect at Phase B.
+
+| Role | Required |
+|------|----------|
+| Quality Engineer | Yes |
+| Code Reviewer | Yes |
+| Security Reviewer | Yes |
+| DevOps | Yes |
+| Architect | Yes |
+
+## Current Signoff State
+
+Latest passing row per (story, role), matching the STATUS.md `Story Signoff Provenance` table.
+
+```text
+- F0007-S0001 / Quality Engineer: PASS by Claude (Opus 5.5) / Quality Engineer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md)
+- F0007-S0001 / Code Reviewer: APPROVED by Claude (Opus 5.5) / Code Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md)
+- F0007-S0001 / Security Reviewer: PASS by Claude (Opus 5.5) / Security Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md)
+- F0007-S0001 / DevOps: PASS by Claude (Opus 5.5) / DevOps on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md)
+- F0007-S0001 / Architect: PASS by Claude (Opus 5.5) / Architect on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md)
+- F0007-S0002 / Quality Engineer: PASS by Claude (Opus 5.5) / Quality Engineer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md)
+- F0007-S0002 / Code Reviewer: APPROVED by Claude (Opus 5.5) / Code Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md)
+- F0007-S0002 / Security Reviewer: PASS by Claude (Opus 5.5) / Security Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md)
+- F0007-S0002 / DevOps: PASS by Claude (Opus 5.5) / DevOps on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md)
+- F0007-S0002 / Architect: PASS by Claude (Opus 5.5) / Architect on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md)
+- F0007-S0003 / Quality Engineer: PASS by Claude (Opus 5.5) / Quality Engineer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md)
+- F0007-S0003 / Code Reviewer: APPROVED by Claude (Opus 5.5) / Code Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md)
+- F0007-S0003 / Security Reviewer: PASS by Claude (Opus 5.5) / Security Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md)
+- F0007-S0003 / DevOps: PASS by Claude (Opus 5.5) / DevOps on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md)
+- F0007-S0003 / Architect: PASS by Claude (Opus 5.5) / Architect on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md)
+- F0007-S0004 / Quality Engineer: PASS by Claude (Opus 5.5) / Quality Engineer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md)
+- F0007-S0004 / Code Reviewer: APPROVED by Claude (Opus 5.5) / Code Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md)
+- F0007-S0004 / Security Reviewer: PASS by Claude (Opus 5.5) / Security Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md)
+- F0007-S0004 / DevOps: PASS by Claude (Opus 5.5) / DevOps on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md)
+- F0007-S0004 / Architect: PASS by Claude (Opus 5.5) / Architect on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md)
+- F0007-S0005 / Quality Engineer: PASS by Claude (Opus 5.5) / Quality Engineer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md)
+- F0007-S0005 / Code Reviewer: APPROVED by Claude (Opus 5.5) / Code Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md)
+- F0007-S0005 / Security Reviewer: PASS by Claude (Opus 5.5) / Security Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md)
+- F0007-S0005 / DevOps: PASS by Claude (Opus 5.5) / DevOps on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md)
+- F0007-S0005 / Architect: PASS by Claude (Opus 5.5) / Architect on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md)
+- F0007-S0006 / Quality Engineer: PASS by Claude (Opus 5.5) / Quality Engineer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/test-execution-report.md)
+- F0007-S0006 / Code Reviewer: APPROVED by Claude (Opus 5.5) / Code Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/code-review-report.md)
+- F0007-S0006 / Security Reviewer: PASS by Claude (Opus 5.5) / Security Reviewer on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/security-review-report.md)
+- F0007-S0006 / DevOps: PASS by Claude (Opus 5.5) / DevOps on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/deployability-check.md)
+- F0007-S0006 / Architect: PASS by Claude (Opus 5.5) / Architect on 2026-11-09 (planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/architect-implementation-review.md)
+```
+
+## Recommendation Acceptances
+
+None required. No role verdict is `WITH RECOMMENDATIONS`. The Security findings SEC-F7-01/02/03 were fixed and re-tested before G4, and the Code Review has no open recommendation.
+
+## Waivers And Omissions
+
+- Waivers: none.
+- Omissions (non-required artifacts, `manifest.omissions[]`):
+  - `frontend-developer-report.md` and `ux-audit-report.md`: `frontend_in_scope=false`; F0007 adds no `experience/` path or UI.
+  - `ai-engineer-report.md`: no `neuron/` code, model, prompt or MCP change. The `neuron/uv.lock` change only adds the editable engine test-support package.
+
+## Result
+
+PASS
+# F0007 acceptance criteria checklist
+
+**Status:** All 39 criteria evidenced in feature run `2026-11-09-b94cfa12`; code review APPROVED, security PASS, operator approval at G4, closed at G8 (2026-11-09).
+**Total:** 39 acceptance criteria across six stories. A checkbox records observed implementation evidence, not planning completeness. The per-AC test mapping is in the run's `test-plan.md`.
+
+| Story | Criteria | Observed runtime evidence (run `2026-11-09-b94cfa12`) | State |
+|---|---|---|---|
+| S0001 | AC1–AC7 (7) | `test_factslot_resolution.py`: 6-way concurrent resolve gives one slot and one qualifier set; order and normalization fixtures; forced collision rejected without merge; omitted vs null; cross-KB slots and 404 denial; predicate-key rejection with zero rows; creation audit; identity UPDATE rejected | Evidence recorded |
+| S0002 | AC1–AC6 (6) | `test_factslot_resolution.py` and `test_factslot_ownership.py`: cardinality conflict and invalid; SINGLE overlap still hits the ADR-0008 exclusion; two insureds give two members and a duplicate resolves; out-of-KB relationship object; member A change leaves member B untouched; named rejections | Evidence recorded |
+| S0003 | AC1–AC7 (7) | `test_factslot_answers.py`: nine states accepted, others rejected; state/value mismatch; scope required and owned; unread slot is `NOT_PROCESSED`; EX-OWN-003 through `POST /facts/{id}/commits`; unreadable scope gives 404 before any reason; audit and zero versions on rejection | Evidence recorded |
+| S0004 | AC1–AC7 (7) | `test_factslot_answers.py` and `test_factslot_resolution.py`: float, currency, basis and conversion rejections; `1000000`/`1000000.00`/`1E+6` equal; exact PostgreSQL round trips; two-carrier `GL-1001`; FEIN forms equal; money qualifier identity; denial before detail | Evidence recorded |
+| S0005 | AC1–AC5 (5) | `test_factslot_names.py` with a real admitted F0006 v2 assertion: system cardinalities; EX-SEM-008 same-slot rename; evidence required; KB A trade name invisible in KB B; precedence-free hook with no alias rows | Evidence recorded |
+| S0006 | AC1–AC7 (7) | `test_factslot_migration.py` and `test_factslot_ownership.py`: `pilot-before.json` byte-equal across up/down/up; legacy rows unfabricated; existing suites pass (816 engine tests); composite-FK and trigger negatives as the application role; RLS inventory (this folder's GETTING-STARTED); downgrade refusal | Evidence recorded |
+
+- [x] Every story criterion has an observed test/result reference in the feature action's evidence package.
+- [x] Changed-code coverage is at least 80% (98.9%), and real PostgreSQL paths are exercised.
+- [x] Rejected identities, carriers and values have zero prohibited rows.
+- [x] Pilot slots, fact versions and evidence are unchanged.
+- [x] Existing permission grants and routes remain as specified in the PRD (no Casbin, route or grant change).
+- [x] Obligations owned by F0008, F0011, F0016, F0017 and F0018 are not reported as delivered by F0007.
+
+Requirements review happened at plan G3, and architecture review with KG exit checks at plan G5. The feature run's G3 reviews, G4 approval, G5 signoff and G8 closeout are complete.

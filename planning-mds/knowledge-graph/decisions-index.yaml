@@ -1,16 +1,22 @@
 version: 0
-generated_at: '2026-11-10T02:45:35+00:00'
 summary:
-  total_decisions: 16
+  total_decisions: 22
   by_kind:
     DECISION: 0
     SUPERSEDES: 0
     TRADEOFF: 0
-    WHY: 16
-  resolved_node_count: 9
-  resolved_symbol_count: 13
+    WHY: 22
+  resolved_node_count: 11
+  resolved_symbol_count: 18
   ambiguous_count: 0
 decisions:
+- id: decision:engine-apps-api-src-brain-api-routes-facts-l83-why
+  file: engine/apps/api/src/brain_api/routes/facts.py
+  line: 83
+  kind: WHY
+  text: authorize the scope of this exact payload in the slot read's UoW.
+  resolved_node: capability:durable-authorization-decisions
+  resolved_symbol: symbol:capability-durable-authorization-decisions:facts.get-fact
 - id: decision:engine-migrations-versions-0011-f0006-assertion-semantics-l269-why
   file: engine/migrations/versions/0011_f0006_assertion_semantics.py
   line: 269
@@ -18,6 +24,19 @@ decisions:
   text: old binaries cannot represent v2 rows; rollback must retain evidence.
   resolved_node: capability:versioned-assertion-semantics
   resolved_symbol: symbol:capability-versioned-assertion-semantics:0011-f0006-assertion-semantics.downgrade
+- id: decision:engine-migrations-versions-0013-f0007-identity-guard-l25-why
+  file: engine/migrations/versions/0013_f0007_identity_guard.py
+  line: 25
+  kind: WHY
+  text: migration history is immutable. The old expression is frozen here so a
+  resolved_node: migration:f0007-identity-guard
+- id: decision:engine-migrations-versions-0013-f0007-identity-guard-l66-why
+  file: engine/migrations/versions/0013_f0007_identity_guard.py
+  line: 66
+  kind: WHY
+  text: hold the same lock through validation and replacement so another
+  resolved_node: migration:f0007-identity-guard
+  resolved_symbol: symbol:migration-f0007-identity-guard:0013-f0007-identity-guard.upgrade
 - id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l126-why
   file: engine/packages/brain-contracts/src/brain_contracts/assertions.py
   line: 126
@@ -32,6 +51,20 @@ decisions:
   text: the offline JSON Schema checks impose exact wire types before decoding.
   resolved_node: capability:semantic-interpretation-run
   resolved_symbol: symbol:capability-semantic-interpretation-run:assertions.strict-model
+- id: decision:engine-packages-brain-domain-src-brain-domain-fact-values-l161-why
+  file: engine/packages/brain-domain/src/brain_domain/fact_values.py
+  line: 161
+  kind: WHY
+  text: exponent text is short even when its expanded value is enormous.
+  resolved_node: capability:typed-fact-answer
+  resolved_symbol: symbol:capability-typed-fact-answer:fact-values.canonical-decimal
+- id: decision:engine-packages-brain-factslots-src-brain-factslots-answers-l104-why
+  file: engine/packages/brain-factslots/src/brain_factslots/answers.py
+  line: 104
+  kind: WHY
+  text: a member's immutable identity is derived from its value; a
+  resolved_node: capability:typed-fact-answer
+  resolved_symbol: symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
 - id: decision:engine-packages-brain-persistence-src-brain-persistence-assertions-l87-why
   file: engine/packages/brain-persistence/src/brain_persistence/assertions.py
   line: 87
@@ -60,9 +93,16 @@ decisions:
   text: select only the owner columns. AuthX reconciliation runs between
   resolved_node: capability:structural-tenancy-and-entity-identity
   resolved_symbol: symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-owner
-- id: decision:engine-packages-brain-security-src-brain-security-execution-l414-why
+- id: decision:engine-packages-brain-security-src-brain-security-execution-l386-why
   file: engine/packages/brain-security/src/brain_security/execution.py
-  line: 414
+  line: 386
+  kind: WHY
+  text: a separate scope read would commit and release the current
+  resolved_node: capability:durable-authorization-decisions
+  resolved_symbol: symbol:capability-durable-authorization-decisions:authorization-execution.read
+- id: decision:engine-packages-brain-security-src-brain-security-execution-l446-why
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 446
   kind: WHY
   text: source access joins this mutation's UoW. Calling the read
   resolved_node: capability:durable-authorization-decisions

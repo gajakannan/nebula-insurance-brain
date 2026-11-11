@@ -1,0 +1,232 @@
+[project]
+name = "brain-engine-workspace"
+version = "0.0.0"
+description = "uv workspace root for the engine/ runtime (F0001-S0001). No source of its own; see apps/api and packages/*."
+requires-python = ">=3.13"
+dependencies = ["brain-api", "brain-content", "brain-persistence", "brain-domain", "brain-security", "brain-review", "brain-temporal", "brain-worker", "brain-assertions", "brain-factslots"]
+
+[tool.uv]
+package = false
+exclude-newer = "7 days"
+
+[tool.uv.sources]
+brain-api = { workspace = true }
+brain-content = { workspace = true }
+brain-persistence = { workspace = true }
+brain-domain = { workspace = true }
+brain-security = { workspace = true }
+brain-review = { workspace = true }
+brain-temporal = { workspace = true }
+brain-worker = { workspace = true }
+brain-assertions = { workspace = true }
+brain-factslots = { workspace = true }
+brain-contracts = { workspace = true }
+brain-testing = { workspace = true }
+
+[tool.uv.workspace]
+members = ["apps/*", "packages/*"]
+
+[dependency-groups]
+dev = [
+  "brain-testing",
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pytest-asyncio>=0.24",
+  "httpx2>=2.12",
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "alembic>=1.13",
+  "types-PyYAML>=6.0",
+  "aiosqlite>=0.20",
+  "psycopg[binary]>=3.2",
+  "jsonschema>=4.23",
+]
+
+[tool.pytest.ini_options]
+# Every package (apps/api, packages/*) ships its own tests/ directory — the default
+# prepend import mode collides on the shared bare module name "tests" once more than
+# one is collected in the same run. importlib mode keys each module by file path.
+addopts = "--import-mode=importlib"
+# F0006 integration suites import `engine.tests.fixtures`; expose the repo root
+# so they collect from engine/ (runtime-suites) and the repo root (runtime-stack).
+pythonpath = [".."]
+asyncio_mode = "auto"
+"""In-memory `FactSlotStore` for unit tests. PostgreSQL behaviour (concurrency,
+keys, triggers, migration) is proven in `engine/tests/integration/test_factslot_*`."""
+
+from __future__ import annotations
+
+from collections.abc import AsyncIterator, Mapping, Sequence
+from contextlib import asynccontextmanager
+from copy import deepcopy
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any
+from uuid import UUID, uuid4
+
+import pytest
+from brain_domain.authx import AuthorizationDecision, ResourceKey
+from brain_domain.fact_slots import (
+    CanonicalQualifier,
+    PredicateContract,
+    SlotIdentity,
+    SlotRole,
+)
+from brain_domain.fact_values import NameEvidence
+from brain_factslots.ports import StoredSlot
+
+
+@dataclass
+class MemoryStore:
+    entities: set[tuple[UUID, UUID, UUID]] = field(default_factory=set)
+    slots: dict[UUID, StoredSlot] = field(default_factory=dict)
+    qualifier_rows: dict[UUID, tuple[CanonicalQualifier, ...]] = field(default_factory=dict)
+    access: dict[UUID, tuple[tuple[ResourceKey, ...], UUID | None]] = field(default_factory=dict)
+    events: list[tuple[str, UUID]] = field(default_factory=list)
+    artifacts: dict[UUID, tuple[UUID, UUID]] = field(default_factory=dict)
+    evidence: dict[UUID, tuple[UUID, tuple[UUID, UUID], tuple[UUID, ...]]] = field(
+        default_factory=dict
+    )
+    answers: dict[UUID, Mapping[str, Any]] = field(default_factory=dict)
+
+    @asynccontextmanager
+    async def atomic(self) -> AsyncIterator[None]:
+        saved = deepcopy((self.slots, self.qualifier_rows, self.access, self.events))
+        try:
+            yield
+        except BaseException:
+            self.slots, self.qualifier_rows, self.access, self.events = saved
+            raise
+
+    async def entity_in_kb(self, tenant_id, knowledge_base_id, entity_id):  # type: ignore[no-untyped-def]
+        return (tenant_id, knowledge_base_id, entity_id) in self.entities
+
+    async def insert_or_get(
+        self,
+        identity: SlotIdentity,
+        *,
+        fingerprint: str,
+        contract: PredicateContract,
+        role: SlotRole,
+        actor_id: UUID,
+        at: datetime,
+    ):  # type: ignore[no-untyped-def]
+        for slot in self.slots.values():
+            if (slot.tenant_id, slot.knowledge_base_id, slot.identity_fingerprint) == (
+                identity.tenant_id,
+                identity.knowledge_base_id,
+                fingerprint,
+            ):
+                return slot, False
+        slot = StoredSlot(
+            id=uuid4(),
+            tenant_id=identity.tenant_id,
+            knowledge_base_id=identity.knowledge_base_id,
+            subject_entity_id=identity.subject_entity_id,
+            slot_type=str(identity.predicate_key),
+            identity_version=1,
+            slot_role=role,
+            predicate_key=str(identity.predicate_key),
+            predicate_release_ref=contract.release_ref,
+            cardinality=contract.checked_cardinality(),
+            object_entity_id=identity.object_entity_id,
+            parent_slot_id=identity.parent_slot_id,
+            member_key=identity.member_key,
+            fingerprint_version=1,
+            identity_fingerprint=fingerprint,
+        )
+        self.slots[slot.id] = slot
+        return slot, True
+
+    async def qualifiers(self, slot_id):  # type: ignore[no-untyped-def]
+        return self.qualifier_rows.get(slot_id, ())
+
+    async def insert_qualifiers(self, slot, qualifiers, at):  # type: ignore[no-untyped-def]
+        self.qualifier_rows[slot.id] = tuple(qualifiers)
+
+    async def provision_access(self, slot, *, sources, inherit_from, actor_id, at):  # type: ignore[no-untyped-def]
+        self.access[slot.id] = (tuple(sources), inherit_from)
+
+    async def record_created(
+        self,
+        slot,
+        *,
+        event_type,
+        actor_id,
+        at,  # type: ignore[no-untyped-def]
+        decision: AuthorizationDecision | None,
+    ):
+        self.events.append((event_type, slot.id))
+
+    async def slot(self, slot_id):  # type: ignore[no-untyped-def]
+        return self.slots.get(slot_id)
+
+# Working in Nebula Insurance Brain
+
+Read `planning-mds/BLUEPRINT.md` for process, scope, technology, and phase status. Architectural intent comes from `planning-mds/architecture/master-blueprint.md` and its governing ADRs. Feature-specific accepted requirements live in their feature folders. Report conflicts between these sources; do not invent product rules.
+
+## Repository boundaries
+
+- Keep product requirements, insurance terminology, review criteria, and validation scripts here. Generic framework mechanisms belong in the sibling `nebula-agents` repository.
+- Framework sessions start in that sibling repository. Always pass this repository's absolute path as `--product-root`, or set `NEBULA_PRODUCT_ROOT` explicitly. Do not rely on a default product or the shell's current directory.
+- `BOUNDARY-POLICY.md` in the framework describes the separation of framework and product content. It is not an insurance regulatory policy.
+- Runtime directories and proof harnesses named in a plan may not exist yet. Distinguish a proposed implementation path from a required existing planning artifact.
+
+## Planning and knowledge graph
+
+- Keep the blueprint, feature status, and trackers aligned under `planning-mds/features/TRACKER-GOVERNANCE.md`.
+- Edit `planning-mds/kg-source/**` as the authored graph source. Generate projections and tracker tables with `scripts/kg/compile.py`; do not hand-edit generated regions.
+- Use KG lookup for routing. Inspect the source planning artifacts before making readiness judgments.
+- KG coverage means a feature has retrieval mappings, including planning-only stubs. It does not imply a PRD, completed Phase B, approval, or implementation; read status and mapping notes before making readiness claims.
+- Honor `.agentignore` for broad searches. Read exact evidence references when a review requires them.
+- Proposed ADRs stay proposed until their stated proof and acceptance conditions are met. Structural readiness checks do not settle them.
+
+## Local validation
+
+From this repository, run:
+
+```bash
+python3 scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0001
+python3 scripts/validation/validate_plan_readiness.py --plan-scope project --target project
+python3 scripts/run-lifecycle-gates.py
+```
+
+The readiness validator emits JSON and exits 0 for a structurally valid plan, 1 for failed checks, and 2 for invalid invocation. Architectural adequacy remains a reviewer decision. During `plan-review`, also read `docs/plan-review-checklist.md` and cite actual planning evidence for findings.
+
+## Semantic examples
+
+For each introduced or changed concept, maintain its glossary definition, worked example, boundary case, and owning feature/story/contract links in `planning-mds/examples/README.md`. Reuse the continuing EX-GL-001 case where it fits. Label synthetic/illustrative outputs and future delivery phases explicitly. Validate structured examples; runtime delivery must add actual reproduction evidence and keep development examples outside the frozen holdout.
+version: 1
+instructions:
+  - path: docs/agent-instructions.md
+  - path: docs/plan-review-checklist.md
+    actions: [plan-review]
+checks:
+  - id: plan-readiness
+    action: plan-review
+    stage: PR2
+    event: before_stage_complete
+    argv:
+      - python3
+      - "{NEBULA_PRODUCT_ROOT}/scripts/validation/validate_plan_readiness.py"
+      - --product-root
+      - "{NEBULA_PRODUCT_ROOT}"
+      - --plan-scope
+      - "{PLAN_SCOPE}"
+      - --target
+      - "{TARGET}"
+    cwd: product
+    timeout_seconds: 60
+    inputs:
+      - planning-mds/BLUEPRINT.md
+      - planning-mds/architecture/*.md
+      - planning-mds/architecture/decisions/*.md
+      - planning-mds/security/*.md
+      - planning-mds/api/**/*
+      - planning-mds/schemas/**/*
+      - planning-mds/features/**/*.md
+      - planning-mds/examples/**/*
+      - planning-mds/domain/glossary.md
+      - docs/agent-instructions.md
+      - docs/plan-review-checklist.md
+      - scripts/validation/**/*.py

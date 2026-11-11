@@ -1,0 +1,192 @@
+   138	    """One canonical decimal text: no exponent, no trailing fractional zeros, `-0`
+   139	    becomes `0`. `1E+6`, `1000000.00` and `1000000` all become `1000000`.
+   140	
+   141	    Input and canonical output are limited to 64 total characters, including
+   142	    sign and decimal point, so every emitted form can be read back. Digits are
+   143	    handled exactly, never through a float or a precision-limited Decimal context.
+   144	    """
+   145	    if not isinstance(raw, str) or len(raw) > DECIMAL_MAX_INPUT or not _DECIMAL.match(raw):
+   146	        raise ValueRejected(ValueReason.DECIMAL_INVALID)
+   147	    try:
+   148	        sign, digit_tuple, exponent = Decimal(raw).as_tuple()
+   149	    except InvalidOperation as exc:  # pragma: no cover - the pattern admits only finite forms
+   150	        raise ValueRejected(ValueReason.DECIMAL_INVALID) from exc
+   151	    assert isinstance(exponent, int)
+   152	    digits = list(digit_tuple)
+   153	    while len(digits) > 1 and digits[0] == 0:
+   154	        digits.pop(0)
+   155	    if all(d == 0 for d in digits):
+   156	        return "0"
+   157	    while exponent < 0 and digits[-1] == 0:
+   158	        digits.pop()
+   159	        exponent += 1
+   160	    text = "".join(str(d) for d in digits)
+   161	    # WHY: exponent text is short even when its expanded value is enormous.
+   162	    # Bound the total canonical size before allocating any exponent-sized string.
+   163	    if exponent >= 0:
+   164	        body_length = len(text) + exponent
+   165	    elif -exponent >= len(text):
+   166	        body_length = 2 - exponent
+   167	    else:
+   168	        body_length = len(text) + 1
+   169	    if body_length + sign > DECIMAL_MAX_CANONICAL:
+   170	        raise ValueRejected(ValueReason.DECIMAL_INVALID)
+   171	    if exponent >= 0:
+   172	        body = text + "0" * exponent
+   173	    elif -exponent >= len(text):
+   174	        body = "0." + "0" * (-exponent - len(text)) + text
+   175	    else:
+   176	        body = text[:exponent] + "." + text[exponent:]
+   177	    return ("-" if sign else "") + body
+   178	
+   179	
+   180	@cache
+    94	            value_type=contract.value_type,
+    95	            basis_required=contract.basis_required,
+    96	            multi_header=slot.multi_header,
+    97	        )
+    98	        if answer.scope is not None:
+    99	            owner = await self._store.artifact_owner(answer.scope.content_artifact_id)
+   100	            if owner != slot.owner:
+   101	                raise FactAnswerRejected(AnswerReason.ABSENCE_SCOPE_OUT_OF_SCOPE)
+   102	        if answer.value is not None:
+   103	            await self._check_value_detail(slot, answer)
+   104	            # WHY: a member's immutable identity is derived from its value; a
+   105	            # different canonical value must resolve its own member slot.
+   106	            if (
+   107	                slot.slot_role == SlotRole.MEMBER
+   108	                and member_key(answer.value, contract) != slot.member_key
+   109	            ):
+   110	                raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
+   111	        return answer.to_json()
+   112	
+   113	    async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
+   114	        assert answer.value is not None
+   115	        name = answer.name
+   116	        if name is not None and not await self._store.name_evidence_eligible(
+   117	            name.evidence, slot.owner
+   118	        ):
+   119	            raise FactAnswerRejected(AnswerReason.NAME_EVIDENCE_REQUIRED)
+   120	        if answer.value.value_type == ValueType.ENTITY_REF and not await self._store.entity_in_kb(
+   121	            slot.tenant_id, slot.knowledge_base_id, UUID(str(answer.value.identity))
+   122	        ):
+   123	            raise FactAnswerRejected(AnswerReason.RELATIONSHIP_OBJECT_OUT_OF_SCOPE)
+   124	
+   125	
+   356	    async def read(
+   357	        self,
+   358	        authenticated: Principal,
+   359	        key: ResourceKey,
+   360	        action: str,
+   361	        *,
+   362	        trace_id: str,
+   363	        load: Callable[[AuthorizationDecision], Awaitable[T]],
+   364	        requested: RequestedScope = NO_FILTER,
+   365	        delegation_id: UUID | None = None,
+   366	        additional_reads: Callable[[T], Awaitable[Sequence[ResourceKey]]] | None = None,
+   367	    ) -> T:
+   368	        """Load once under the primary lock, then authorize dependencies derived
+   369	        from that exact private payload before auditing and returning it. All
+   370	        authority/resource locks remain held until the single final commit."""
+   371	        evaluated = await self._guarded_decide(
+   372	            authenticated, [key], action, requested, trace_id, delegation_id
+   373	        )
+   374	        if not evaluated[0].decision.allowed:
+   375	            raise await self._deny(evaluated)
+   376	        evaluated = self._recheck_all(evaluated)
+   377	        if not evaluated[0].decision.allowed:
+   378	            raise await self._deny(evaluated)
+   379	        decision = evaluated[0].decision
+   380	        try:
+   381	            payload = await load(decision)
+   382	        except Exception:
+   383	            await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
+   384	            raise
+   385	        if additional_reads is not None:
+   386	            # WHY: a separate scope read would commit and release the current
+   387	            # authority locks before returning the answer. Deriving keys from
+   388	            # this exact payload also prevents authorizing one version's scope
+   389	            # and then returning a freshly selected, different version.
+   390	            try:
+   391	                source_keys = sorted(set(await additional_reads(payload)))
+   392	                source_evaluated = (
+   393	                    await self._guarded_decide(
+   394	                        authenticated, source_keys, Action.READ, requested, trace_id, delegation_id
+   395	                    )
+   396	                    if source_keys
+   397	                    else []
+   398	                )
+   399	            except Exception:
+   400	                await self._persist_fresh(
+   401	                    [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
+   402	                )
+   403	                raise
+   404	            evaluated.extend(source_evaluated)
+   405	            if not all(e.decision.allowed for e in evaluated):
+   406	                raise await self._deny(evaluated)
+   407	            evaluated = self._recheck_all(evaluated)
+   408	            if not all(e.decision.allowed for e in evaluated):
+   409	                raise await self._deny(evaluated)
+   410	        try:
+   411	            for item in evaluated:
+   412	                await self._store.append_decision(
+   413	                    item.decision.with_outcome(OperationOutcome.SUCCEEDED)
+   414	                )
+   415	            await self._store.commit()
+   416	        except Exception as exc:  # noqa: BLE001 - no payload leaves without durable audit
+   417	            await self._safe_rollback()
+   418	            raise AuthorizationUnavailable("read audit could not be persisted") from exc
+   419	        return payload
+   420	
+   421	    async def mutate(
+   422	        self,
+   423	        authenticated: Principal,
+   424	        keys: Sequence[ResourceKey],
+   425	        action: str,
+   426	        *,
+   427	        trace_id: str,
+   428	        operation: Callable[[Sequence[AuthorizationDecision]], Awaitable[T]],
+   429	        requested: RequestedScope = NO_FILTER,
+   430	        delegation_id: UUID | None = None,
+    65	    bind = op.get_bind()
+    66	    # WHY: hold the same lock through validation and replacement so another
+    67	    # writer cannot insert an invalid shape between the scan and the new CHECK.
+    68	    bind.execute(text("LOCK TABLE fact_slot IN ACCESS EXCLUSIVE MODE"))
+    69	    invalid = f"({IDENTITY_SHAPE}) IS NOT TRUE"
+    70	    malformed = bind.execute(text(f"SELECT count(*) FROM fact_slot WHERE {invalid}")).scalar_one()
+    71	    if malformed:
+    72	        identifiers = bind.execute(
+    73	            text(f"SELECT id FROM fact_slot WHERE {invalid} ORDER BY id LIMIT 10")
+    74	        ).scalars()
+    75	        samples = ", ".join(str(slot_id) for slot_id in identifiers)
+    76	        raise RuntimeError(
+    77	            f"0013 upgrade refused: {malformed} malformed fact_slot identity rows; "
+    78	            f"sample slot IDs: {samples}. No rows modified; explicit governed repair required."
+    79	        )
+    80	    op.execute("ALTER TABLE fact_slot DROP CONSTRAINT ck_fact_slot_identity")
+    81	    op.execute(
+    82	        f"ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity "
+    83	        f"CHECK (({IDENTITY_SHAPE}) IS TRUE)"
+    84	    )
+    85	    log.info("0013 identity guard installed; existing FactSlot rows preserved")
+    86	
+    87	
+    88	def downgrade() -> None:
+    89	    op.execute("ALTER TABLE fact_slot DROP CONSTRAINT ck_fact_slot_identity")
+    90	    op.execute(
+    91	        f"ALTER TABLE fact_slot ADD CONSTRAINT ck_fact_slot_identity CHECK ({PREVIOUS_CHECK})"
+    92	    )
+engine/packages/brain-security/tests/test_payload_reads.py:74:async def test_exact_payload_dependencies_share_one_successful_commit(build, policy):
+engine/packages/brain-security/tests/test_payload_reads.py:111:async def test_denied_scope_returns_no_payload_and_audits_both_decisions(build, policy):
+engine/packages/brain-security/tests/test_payload_reads.py:139:async def test_denied_primary_does_not_load_or_discover_scope(build, policy):
+engine/packages/brain-security/tests/test_payload_reads.py:160:async def test_scope_discovery_failure_audits_failed_primary(build, policy):
+engine/packages/brain-security/tests/test_payload_reads.py:182:async def test_expiry_during_private_load_is_rechecked_before_release(build, policy):
+engine/packages/brain-security/tests/test_payload_reads.py:209:async def test_group_audit_failure_never_returns_the_private_payload(build, policy):
+engine/tests/integration/test_factslot_authorized_reads.py:66:async def test_http_authorizes_the_scope_of_the_exact_selected_payload(slot_world, monkeypatch):
+engine/tests/integration/test_factslot_authorized_reads.py:96:async def test_revocation_waits_for_slot_scope_and_payload_read_to_commit(slot_world):
+engine/tests/integration/test_factslot_identity_guard_migration.py:116:def test_0013_up_down_up_preserves_pilot_and_all_valid_identity_shapes(database):
+engine/tests/integration/test_factslot_identity_guard_migration.py:169:def test_0013_rejects_each_missing_mandatory_v1_field(database, field):
+engine/tests/integration/test_factslot_identity_guard_migration.py:178:def test_0013_rejects_null_member_key_and_relationship_without_object(database):
+engine/tests/integration/test_factslot_identity_guard_migration.py:195:def test_0013_rejects_partially_populated_legacy_rows(database, populated_field):
+engine/tests/integration/test_factslot_identity_guard_migration.py:221:def test_0013_preserves_fingerprint_uniqueness(database):
+engine/tests/integration/test_factslot_identity_guard_migration.py:233:def test_0013_refuses_existing_malformed_0012_rows_without_changing_data(database, missing_field):

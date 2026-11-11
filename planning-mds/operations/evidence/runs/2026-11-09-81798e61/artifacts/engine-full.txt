@@ -1,0 +1,161 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+INFO  [alembic.runtime.migration] Running upgrade 0011 -> 0012, F0007 FactSlot identity: additive identity columns and qualifier rows (ADR-0077 D8).
+INFO  [alembic.runtime.migration] 0012 preflight: uq_fact_slot_owner present; 0 legacy fact_slot rows kept
+INFO  [alembic.runtime.migration] Running upgrade 0012 -> 0013, Require a complete legacy/v1 FactSlot identity shape (F0007 review FR-H2).
+INFO  [alembic.runtime.migration] 0013 identity guard installed; existing FactSlot rows preserved
+Owned migrated validation database: f0007_remediation_a90a0833a976
+........................................................................ [  8%]
+........................................................................ [ 16%]
+........................................................................ [ 24%]
+........................................................................ [ 33%]
+........................................................................ [ 41%]
+........................................................................ [ 49%]
+........................................................................ [ 58%]
+........................................................................ [ 66%]
+........................................................................ [ 74%]
+...........................................................FF........... [ 82%]
+........................................................................ [ 91%]
+...................F.................................................... [ 99%]
+....                                                                     [100%]
+=================================== FAILURES ===================================
+__ test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[1] ___
+
+date_services = (<function date_services.<locals>.service at 0x7b4e128eb530>, Principal(id=UUID('d47080f5-47c1-4f82-8569-91c823d96b84'...ocks=(), tables=(), layout=()), <brain_worker.content_publication.AuthorizedContentPublisher object at 0x7b4e12bd3cb0>)
+database = 'postgresql://brain:brain@postgres:5432/f0004_8a6cc79f_migration_0891af102f00'
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_dump_and_isolated_restore0')
+
+>   ???
+E   AssertionError: {"database_revision": "0013", "verified_artifacts": 1, "verified_runs": 1, "unreferenced_objects": 1, "status": "verified"}
+E     /app/brain/scripts/ops/backup.sh: line 27: docker: command not found
+E     
+E   assert 127 == 0
+E    +  where 127 = CompletedProcess(args=['bash', '/app/brain/scripts/ops/backup.sh'], returncode=127, stdout='{"database_revision": "001...objects": 1, "status": "verified"}\n', stderr='/app/brain/scripts/ops/backup.sh: line 27: docker: command not found\n').returncode
+
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/tests/integration/test_content_restore_v2.py:135: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+INFO  [alembic.runtime.migration] Running upgrade 0011 -> 0012, F0007 FactSlot identity: additive identity columns and qualifier rows (ADR-0077 D8).
+INFO  [alembic.runtime.migration] 0012 preflight: uq_fact_slot_owner present; 0 legacy fact_slot rows kept
+INFO  [alembic.runtime.migration] Running upgrade 0012 -> 0013, Require a complete legacy/v1 FactSlot identity shape (F0007 review FR-H2).
+INFO  [alembic.runtime.migration] 0013 identity guard installed; existing FactSlot rows preserved
+__ test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[2] ___
+
+date_services = (<function date_services.<locals>.service at 0x7b4e264e2090>, Principal(id=UUID('833d1027-859f-43aa-8de5-0eac7323bcb8'...], unavailable_reason=None),)), <brain_worker.content_publication.AuthorizedContentPublisher object at 0x7b4e1ba57b60>)
+database = 'postgresql://brain:brain@postgres:5432/f0004_8a6cc79f_migration_2d89b3cb735c'
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_dump_and_isolated_restore1')
+
+>   ???
+E   AssertionError: {"database_revision": "0013", "verified_artifacts": 1, "verified_runs": 1, "unreferenced_objects": 1, "status": "verified"}
+E     /app/brain/scripts/ops/backup.sh: line 27: docker: command not found
+E     
+E   assert 127 == 0
+E    +  where 127 = CompletedProcess(args=['bash', '/app/brain/scripts/ops/backup.sh'], returncode=127, stdout='{"database_revision": "001...objects": 1, "status": "verified"}\n', stderr='/app/brain/scripts/ops/backup.sh: line 27: docker: command not found\n').returncode
+
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/tests/integration/test_content_restore_v2.py:135: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+INFO  [alembic.runtime.migration] Running upgrade 0009 -> 0010, F0005 expand-only: four more job failure reasons (Code Review H1/M1, 2026-10-27).
+INFO  [alembic.runtime.migration] Running upgrade 0010 -> 0011, F0006 additive versioned assertion semantics and immutable evidence.
+INFO  [alembic.runtime.migration] Running upgrade 0011 -> 0012, F0007 FactSlot identity: additive identity columns and qualifier rows (ADR-0077 D8).
+INFO  [alembic.runtime.migration] 0012 preflight: uq_fact_slot_owner present; 0 legacy fact_slot rows kept
+INFO  [alembic.runtime.migration] Running upgrade 0012 -> 0013, Require a complete legacy/v1 FactSlot identity shape (F0007 review FR-H2).
+INFO  [alembic.runtime.migration] 0013 identity guard installed; existing FactSlot rows preserved
+_______ test_backup_and_isolated_restore_preserve_reason_column_and_rows _______
+
+database = 'postgresql://brain:brain@postgres:5432/f0004_8a6cc79f_migration_15738d807934'
+tmp_path = PosixPath('/tmp/pytest-of-unknown/pytest-1/test_backup_and_isolated_resto0')
+
+>   ???
+E   AssertionError: {"database_revision": "0009", "verified_artifacts": 0, "verified_runs": 0, "unreferenced_objects": 0, "status": "verified"}
+E     /app/brain/scripts/ops/backup.sh: line 27: docker: command not found
+E     
+E   assert 127 == 0
+E    +  where 127 = CompletedProcess(args=['bash', '/app/brain/scripts/ops/backup.sh'], returncode=127, stdout='{"database_revision": "000...objects": 0, "status": "verified"}\n', stderr='/app/brain/scripts/ops/backup.sh: line 27: docker: command not found\n').returncode
+
+/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/engine/tests/integration/test_job_event_reason_migration.py:179: AssertionError
+----------------------------- Captured stderr call -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, content and interpretation
+INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, principals audit and review
+INFO  [alembic.runtime.migration] Running upgrade 0002 -> 0003, fact slots and commits
+INFO  [alembic.runtime.migration] Running upgrade 0003 -> 0004, Fenced document jobs and a completion outbox.
+INFO  [alembic.runtime.migration] Running upgrade 0004 -> 0005, F0002 tenancy and AuthX substrate — expand (ADR-0061/0062).
+INFO  [alembic.runtime.migration] Running upgrade 0005 -> 0006, F0002 tenancy and AuthX — validate and constrain (ADR-0061).
+INFO  [alembic.runtime.migration] Running upgrade 0006 -> 0007, F0002 database safeguards (BLUEPRINT §4.11; operator scope amendment at G4, 2026-09-28).
+INFO  [alembic.runtime.migration] Running upgrade 0007 -> 0008, F0004 additive content contracts, indexes and append-only date history.
+INFO  [alembic.runtime.migration] Running upgrade 0008 -> 0009, F0005 expand-only failure reason on document job events.
+=============================== warnings summary ===============================
+../../opt/venv/lib/python3.14/site-packages/starlette/testclient.py:53
+  /opt/venv/lib/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+packages/brain-security/tests/test_verification.py::test_symmetric_algorithm_confusion_is_rejected
+  /opt/venv/lib/python3.14/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 19 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/integration/test_assertion_admission.py: 25 warnings
+tests/integration/test_assertion_authority_projection.py: 9 warnings
+tests/integration/test_assertion_consumers.py: 16 warnings
+tests/integration/test_assertion_migration.py: 21 warnings
+tests/integration/test_assertion_ownership.py: 15 warnings
+tests/integration/test_authx_migration.py: 13 warnings
+tests/integration/test_content_migration_states.py: 37 warnings
+tests/integration/test_content_restore_v2.py: 3 warnings
+tests/integration/test_factslot_answers.py: 39 warnings
+tests/integration/test_factslot_authorized_reads.py: 2 warnings
+tests/integration/test_factslot_identity_guard_migration.py: 24 warnings
+tests/integration/test_factslot_migration.py: 8 warnings
+tests/integration/test_factslot_names.py: 7 warnings
+tests/integration/test_factslot_ownership.py: 5 warnings
+tests/integration/test_factslot_resolution.py: 19 warnings
+tests/integration/test_job_event_reason_migration.py: 22 warnings
+  /opt/venv/lib/python3.14/site-packages/alembic/config.py:604: DeprecationWarning: No path_separator found in configuration; falling back to legacy splitting on spaces, commas, and colons for prepend_sys_path.  Consider adding path_separator=os to Alembic config.
+    util.warn_deprecated(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Coverage XML written to file /evidence/artifacts/coverage/engine-full.xml
+Coverage JSON written to file /evidence/artifacts/coverage/engine-full.json
+=========================== short test summary info ============================
+FAILED engine/tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[1]
+FAILED engine/tests/integration/test_content_restore_v2.py::test_dump_and_isolated_restore_preserve_bytes_indexes_and_date_lineage[2]
+FAILED engine/tests/integration/test_job_event_reason_migration.py::test_backup_and_isolated_restore_preserve_reason_column_and_rows
+3 failed, 865 passed, 267 warnings in 172.51s (0:02:52)
+Removed owned validation database: f0007_remediation_a90a0833a976

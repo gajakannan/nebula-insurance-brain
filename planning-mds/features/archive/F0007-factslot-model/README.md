@@ -1,7 +1,8 @@
 # F0007 — FactSlot model
 
-**Status:** Done / Archived (feature run `2026-11-09-b94cfa12`)
-**Archived:** 2026-11-09
+**Status:** Done / Archived — remediation run `2026-11-09-81798e61`, operator approved 2026-11-10
+**Prior archive:** 2026-11-09
+**Archived after remediation:** 2026-11-10
 **Phase:** v0.1A
 **Roadmap:** Completed
 
@@ -83,12 +84,12 @@ flowchart LR
 
 | ID | Title | Status |
 |----|-------|--------|
-| [F0007-S0001](F0007-S0001-resolve-stable-factslot-identity.md) | Resolve stable FactSlot identity | Not Started |
-| [F0007-S0002](F0007-S0002-distinguish-single-multi-and-relationship-slots.md) | Distinguish single, multi-valued and relationship slots | Not Started |
-| [F0007-S0003](F0007-S0003-carry-information-state-separately-from-value.md) | Carry information state separately from value | Not Started |
-| [F0007-S0004](F0007-S0004-type-money-and-identifiers.md) | Type money and identifiers | Not Started |
-| [F0007-S0005](F0007-S0005-define-name-factslots.md) | Define name FactSlots | Not Started |
-| [F0007-S0006](F0007-S0006-preserve-pilot-slots-and-ownership.md) | Preserve pilot slots and ownership | Not Started |
+| [F0007-S0001](F0007-S0001-resolve-stable-factslot-identity.md) | Resolve stable FactSlot identity | Done |
+| [F0007-S0002](F0007-S0002-distinguish-single-multi-and-relationship-slots.md) | Distinguish single, multi-valued and relationship slots | Done |
+| [F0007-S0003](F0007-S0003-carry-information-state-separately-from-value.md) | Carry information state separately from value | Done |
+| [F0007-S0004](F0007-S0004-type-money-and-identifiers.md) | Type money and identifiers | Done |
+| [F0007-S0005](F0007-S0005-define-name-factslots.md) | Define name FactSlots | Done |
+| [F0007-S0006](F0007-S0006-preserve-pilot-slots-and-ownership.md) | Preserve pilot slots and ownership | Done |
 
 **Total Stories:** 6
 

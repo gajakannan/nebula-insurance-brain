@@ -43,6 +43,7 @@ bindings:
     tests:
     - engine/packages/brain-domain/tests/test_fact_slots.py
     - engine/tests/integration/test_factslot_answers.py
+    - engine/tests/integration/test_factslot_authorized_reads.py
 - id: entity:fact-slot-qualifier
   paths:
     architecture:
@@ -57,3 +58,9 @@ bindings:
     - engine/tests/integration/test_factslot_migration.py
     - engine/tests/fixtures/factslots/pilot-seed.sql
     - engine/tests/fixtures/factslots/pilot-before.json
+- id: migration:f0007-identity-guard
+  paths:
+    backend:
+    - engine/migrations/versions/0013_f0007_identity_guard.py
+    tests:
+    - engine/tests/integration/test_factslot_identity_guard_migration.py
