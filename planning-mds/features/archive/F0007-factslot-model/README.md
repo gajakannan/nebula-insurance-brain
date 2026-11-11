@@ -26,7 +26,7 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - [PRD](PRD.md): scope, data requirements, access rules, and the G1 clarifications from 2026-11-09
 - [Personas](personas.md) and [acceptance checklist](acceptance-criteria-checklist.md) (39 ACs)
 - [STATUS](STATUS.md): plan run `2026-11-09-60865e32` (A+B, new)
-- [Feature assembly plan](feature-assembly-plan.md) and Proposed [ADR-0077](../../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md): Phase B design approved by operator 2026-11-09
+- [Feature assembly plan](feature-assembly-plan.md) and [ADR-0077] (Accepted 2026-11-10)(../../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md): Phase B design approved by operator 2026-11-09
 - [Worked examples](worked-examples.md), [contract examples](contract-examples.json) and [GETTING-STARTED](GETTING-STARTED.md)
 - Design schemas: [fact-slot-key-v1](../../../schemas/fact-slot-key-v1.schema.json), [fact-answer-v1](../../../schemas/fact-answer-v1.schema.json), [fact-slot-resolution-result-v1](../../../schemas/fact-slot-resolution-result-v1.schema.json)
 

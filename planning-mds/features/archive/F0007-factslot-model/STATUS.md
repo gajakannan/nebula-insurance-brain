@@ -166,7 +166,7 @@ Append-only history. Rows for `2026-11-09-b94cfa12` are prior completion provena
   - The answer envelope is service-enforced; F0008 owns the database backstop.
   - Slot restrictions are fixed at creation; F0018 owns re-derivation.
   - The name hook authorizes per slot; a design note for F0017/F0023.
-  - ADR-0077 is still Proposed, with all five proof gates evidenced. Formal acceptance is the operator's call.
+  - ADR-0077 accepted by the operator on 2026-11-10 on the five-gate proof map; ADR-0039 and ADR-0066 remain Proposed with downstream proof owners.
 - **Deferrals:** none. Every story is Done; the handoffs are owned by F0008, F0011, F0012/F0013, F0016, F0017/F0023, F0018, F0020 and F0026.
 
 ## Clarifications (G1, 2026-11-09)
