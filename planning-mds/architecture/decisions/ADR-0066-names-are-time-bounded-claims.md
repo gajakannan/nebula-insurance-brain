@@ -9,6 +9,8 @@
 
 **Date:** 2026-09-25
 **Direction authorized by:** Operator, 2026-09-25. Formal acceptance waits for the proof gates below.
+**Owner:** Architect
+**F0007 review disposition (2026-11-10, PR-M1):** retaining Proposed is intentional. F0007 proves evidence-backed, KB-owned name FactSlots and current-name isolation, but does not deliver the temporal close, identifier-first resolution, shared-name review pairs, arrival-order metrics, alias search or entity display required by this ADR's full proof gates. The remaining proofs span F0008/F0019 (temporal changes), F0017 (resolution and review pairs), F0023 (entity display) and F0026 (arrival-order precision/recall qualification), with F0006/F0016 admission and run-outcome evidence under ADR-0065. Their architecture closeout must revisit formal acceptance; F0007 completion and acceptance of ADR-0077 do not accept this broader ADR.
 **Would refine:** [ADR-0006](ADR-0006-factslot-defines-canonical-semantic-identity.md) (names become FactSlots) and [ADR-0025](ADR-0025-deterministic-er-ships-before-probabilistic-er.md) (the role names play in resolution)
 **Source:** Master blueprint sections 53, 70, 78 (`entity_alias`). Informed by Utopia decision 0041 and its identity design (see References).
 
