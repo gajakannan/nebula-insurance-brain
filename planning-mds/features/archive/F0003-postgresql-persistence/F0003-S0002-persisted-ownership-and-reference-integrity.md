@@ -5,7 +5,7 @@
 **Title:** Enforce persisted ownership and reference integrity  
 **Priority:** Critical  
 **Phase:** v0.1A  
-**Status:** Not Started
+**Status:** Done
 
 ## User Story
 

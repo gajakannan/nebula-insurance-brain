@@ -1,11 +1,11 @@
 version: 0
 summary:
-  canonical_nodes: 220
-  features_mapped: 14
-  stories_mapped: 43
-  features_excluded: 55
+  canonical_nodes: 223
+  features_mapped: 15
+  stories_mapped: 47
+  features_excluded: 54
   features_uncovered: 0
-  code_bindings: 51
+  code_bindings: 54
   symbol_count: 2161
   bound_symbol_count: 2161
   decision_count: 22
@@ -25,6 +25,7 @@ coverage:
   - feature:F0024
   - feature:F0030
   - feature:F0062
+  - feature:F0064
   - feature:F0065
   excluded_features:
   - id: feature:F0008
@@ -277,11 +278,6 @@ coverage:
     reason: Planned feature reserved from master blueprint section 95; no PRD, stories,
       or implementation to bind yet. The plan action removes this exclusion at Phase
       B.
-  - id: feature:F0064
-    path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption
-    reason: Reserved adoption tracking entry; candidate tooling changes await lifecycle
-      review and coordinated release, with no approved runtime scope or canonical
-      bindings asserted.
   - id: feature:F0066
     path: planning-mds/features/F0066-open-statement-extraction-and-signature-alignment
     reason: Planned feature added by the 2026-09-25 ADR-0063 amendment; no PRD, stories,
@@ -341,6 +337,10 @@ coverage:
   - story:F0007-S0004
   - story:F0007-S0005
   - story:F0007-S0006
+  - story:F0064-S0001
+  - story:F0064-S0002
+  - story:F0064-S0003
+  - story:F0064-S0004
   - story:F0065-S0001
   - story:F0065-S0002
   - story:F0065-S0003
@@ -372,7 +372,7 @@ freshness:
       source_count: 5
       last_modified: '2026-11-09'
       source_hash: 2330b8c53fcf3adf
-      hotspot_rank: 20
+      hotspot_rank: 21
       hotspot_score: 0.01
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -449,7 +449,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-09'
       source_hash: 56f19f841715fe2e
-      hotspot_rank: 26
+      hotspot_rank: 27
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -462,7 +462,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-11'
       source_hash: 5634c48c56bf3072
-      hotspot_rank: 38
+      hotspot_rank: 41
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -475,7 +475,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-11'
       source_hash: 5634c48c56bf3072
-      hotspot_rank: 39
+      hotspot_rank: 42
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -488,7 +488,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-11'
       source_hash: 5634c48c56bf3072
-      hotspot_rank: 40
+      hotspot_rank: 43
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -508,7 +508,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-11'
       source_hash: 5634c48c56bf3072
-      hotspot_rank: 41
+      hotspot_rank: 44
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -521,7 +521,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-11'
       source_hash: 5634c48c56bf3072
-      hotspot_rank: 42
+      hotspot_rank: 45
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -541,8 +541,8 @@ freshness:
       source_count: 2
       last_modified: '2026-11-11'
       source_hash: 648cd86d30ec2623
-      hotspot_rank: 22
-      hotspot_score: 0.0
+      hotspot_rank: 23
+      hotspot_score: 0.01
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
@@ -608,7 +608,7 @@ freshness:
       source_count: 6
       last_modified: '2026-11-11'
       source_hash: e549750fdafaa571
-      hotspot_rank: 30
+      hotspot_rank: 32
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -834,7 +834,7 @@ freshness:
       source_count: 3
       last_modified: '2026-10-01'
       source_hash: 22ac2ba7985198ff
-      hotspot_rank: 28
+      hotspot_rank: 29
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -846,7 +846,7 @@ freshness:
       source_count: 2
       last_modified: '2026-11-09'
       source_hash: 4cbacad1f77d2396
-      hotspot_rank: 19
+      hotspot_rank: 20
       hotspot_score: 0.01
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -870,7 +870,7 @@ freshness:
       source_count: 2
       last_modified: '2026-10-01'
       source_hash: eb45b6d6964b4893
-      hotspot_rank: 46
+      hotspot_rank: 49
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -883,7 +883,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-09'
       source_hash: 89439e1bc6f7650a
-      hotspot_rank: 35
+      hotspot_rank: 38
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -896,7 +896,7 @@ freshness:
       source_count: 3
       last_modified: '2026-10-01'
       source_hash: 22ac2ba7985198ff
-      hotspot_rank: 27
+      hotspot_rank: 28
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -908,7 +908,7 @@ freshness:
       source_count: 2
       last_modified: '2026-10-01'
       source_hash: eb45b6d6964b4893
-      hotspot_rank: 34
+      hotspot_rank: 37
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -920,7 +920,7 @@ freshness:
       source_count: 2
       last_modified: '2026-10-29'
       source_hash: 31694300f2b99810
-      hotspot_rank: 21
+      hotspot_rank: 22
       hotspot_score: 0.01
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -933,7 +933,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-10'
       source_hash: de316706301b5a8a
-      hotspot_rank: 15
+      hotspot_rank: 16
       hotspot_score: 0.02
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -959,7 +959,7 @@ freshness:
       last_modified: '2026-11-11'
       source_hash: b6c4940fa65056b1
       hotspot_rank: 6
-      hotspot_score: 0.06
+      hotspot_score: 0.07
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
@@ -973,7 +973,7 @@ freshness:
       source_count: 5
       last_modified: '2026-11-09'
       source_hash: 5c3b76a89511b136
-      hotspot_rank: 36
+      hotspot_rank: 39
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -994,7 +994,7 @@ freshness:
       source_count: 2
       last_modified: '2026-11-09'
       source_hash: f3c0cbef9fd3a073
-      hotspot_rank: 23
+      hotspot_rank: 24
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1044,6 +1044,18 @@ freshness:
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
+    capability:plan-readiness-validation:
+      source_paths:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+      source_count: 2
+      last_modified: '2026-11-11'
+      source_hash: b60c2e4394238bf0
+      hotspot_rank: 30
+      hotspot_score: 0.0
+      primary_owner: gajapathi.kannan@live.com
+      primary_owner_pct: 100
+      bus_factor_flag: true
     capability:postgresql-persistence-contract:
       source_paths:
       - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md
@@ -1052,9 +1064,34 @@ freshness:
       - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
       - planning-mds/features/archive/F0003-postgresql-persistence/feature-assembly-plan.md
       source_count: 5
-      last_modified: '2026-10-07'
-      source_hash: 2e8cd0baf9e0f18e
-      hotspot_rank: 49
+      last_modified: '2026-11-11'
+      source_hash: 4d5454774d9c2675
+      hotspot_rank: 52
+      hotspot_score: 0.0
+      primary_owner: gajapathi.kannan@live.com
+      primary_owner_pct: 100
+      bus_factor_flag: true
+    capability:project-check-ci-enforcement:
+      source_paths:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+      source_count: 2
+      last_modified: '2026-11-11'
+      source_hash: a31ceed42110beb2
+      hotspot_rank: 19
+      hotspot_score: 0.01
+      primary_owner: gajapathi.kannan@live.com
+      primary_owner_pct: 100
+      bus_factor_flag: true
+    capability:project-context-manifest:
+      source_paths:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+      source_count: 3
+      last_modified: '2026-11-11'
+      source_hash: 8db21954dc01b0c1
+      hotspot_rank: 33
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1078,7 +1115,7 @@ freshness:
       source_count: 2
       last_modified: '2026-10-12'
       source_hash: 3be0a8bd3a33f989
-      hotspot_rank: 24
+      hotspot_rank: 25
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1104,7 +1141,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-09'
       source_hash: 081198dd16c8456e
-      hotspot_rank: 37
+      hotspot_rank: 40
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1129,7 +1166,7 @@ freshness:
       source_count: 2
       last_modified: '2026-10-29'
       source_hash: eb45b6d6964b4893
-      hotspot_rank: 25
+      hotspot_rank: 26
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1142,7 +1179,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-11'
       source_hash: 8794c64197908331
-      hotspot_rank: 16
+      hotspot_rank: 15
       hotspot_score: 0.02
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1180,7 +1217,7 @@ freshness:
       source_count: 3
       last_modified: '2026-11-11'
       source_hash: 9485915ccd2dcffe
-      hotspot_rank: 32
+      hotspot_rank: 35
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1192,7 +1229,7 @@ freshness:
       source_count: 2
       last_modified: '2026-11-11'
       source_hash: 4bbf0ad685a719e7
-      hotspot_rank: 33
+      hotspot_rank: 36
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1236,7 +1273,7 @@ freshness:
       source_count: 1
       last_modified: '2026-10-29'
       source_hash: 8ac66a09a0fe38a1
-      hotspot_rank: 31
+      hotspot_rank: 34
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1247,7 +1284,7 @@ freshness:
       source_count: 1
       last_modified: '2026-10-29'
       source_hash: cea5cfa7e261bc94
-      hotspot_rank: 44
+      hotspot_rank: 47
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1258,7 +1295,7 @@ freshness:
       source_count: 1
       last_modified: '2026-11-10'
       source_hash: 46b6a5a62192ef52
-      hotspot_rank: 29
+      hotspot_rank: 31
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1269,7 +1306,7 @@ freshness:
       source_count: 1
       last_modified: '2026-11-11'
       source_hash: 4bec3690357f8665
-      hotspot_rank: 43
+      hotspot_rank: 46
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1850,7 +1887,7 @@ freshness:
       source_count: 1
       last_modified: '2026-10-29'
       source_hash: 7c59760a24be4993
-      hotspot_rank: 47
+      hotspot_rank: 50
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1867,7 +1904,7 @@ freshness:
       source_count: 1
       last_modified: '2026-10-29'
       source_hash: 08812fb39b0c5646
-      hotspot_rank: 48
+      hotspot_rank: 51
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1878,7 +1915,7 @@ freshness:
       source_count: 1
       last_modified: '2026-10-22'
       source_hash: f70329e8b62fb0c9
-      hotspot_rank: 50
+      hotspot_rank: 53
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1889,7 +1926,7 @@ freshness:
       source_count: 1
       last_modified: '2026-10-29'
       source_hash: c605fe46ba0f484f
-      hotspot_rank: 51
+      hotspot_rank: 54
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -1918,7 +1955,7 @@ freshness:
       source_count: 1
       last_modified: '2026-10-22'
       source_hash: 14d8bc3f66aa12a9
-      hotspot_rank: 45
+      hotspot_rank: 48
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
@@ -2018,8 +2055,8 @@ freshness:
       - planning-mds/features/archive/F0003-postgresql-persistence/feature-assembly-plan.md
       - planning-mds/features/archive/F0003-postgresql-persistence/personas.md
       source_count: 11
-      last_modified: '2026-10-07'
-      source_hash: 81132b7e92a0da4f
+      last_modified: '2026-11-11'
+      source_hash: 31c941a372fc6fa1
     feature:F0004:
       source_paths:
       - planning-mds/features/archive/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md
@@ -2056,8 +2093,8 @@ freshness:
       - planning-mds/features/archive/F0005-one-time-docling-ingestion/feature-assembly-plan.md
       - planning-mds/features/archive/F0005-one-time-docling-ingestion/synthetic-comparison.json
       source_count: 13
-      last_modified: '2026-10-29'
-      source_hash: 081261728a977c89
+      last_modified: '2026-11-11'
+      source_hash: b7b197f107b91651
     feature:F0006:
       source_paths:
       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md
@@ -2133,6 +2170,20 @@ freshness:
       source_count: 1
       last_modified: '2026-10-08'
       source_hash: def1dffef29d08c9
+    feature:F0064:
+      source_paths:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/GETTING-STARTED.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/README.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/STATUS.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/feature-assembly-plan.md
+      source_count: 9
+      last_modified: '2026-11-12'
+      source_hash: 0279347356d89c91
     feature:F0065:
       source_paths:
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
@@ -2233,26 +2284,26 @@ freshness:
       source_paths:
       - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md
       source_count: 1
-      last_modified: '2026-10-07'
-      source_hash: c8ba3c0f11ad3f88
+      last_modified: '2026-11-11'
+      source_hash: 320adeaa6798ea2b
     story:F0003-S0002:
       source_paths:
       - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md
       source_count: 1
-      last_modified: '2026-10-07'
-      source_hash: 3a450f58ae5f767e
+      last_modified: '2026-11-11'
+      source_hash: 0fc574c0dad2e15f
     story:F0003-S0003:
       source_paths:
       - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md
       source_count: 1
-      last_modified: '2026-10-07'
-      source_hash: 35701ffc41c3b073
+      last_modified: '2026-11-11'
+      source_hash: e0cd5438d93e65be
     story:F0003-S0004:
       source_paths:
       - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
       source_count: 1
-      last_modified: '2026-10-07'
-      source_hash: 94eecd582150e280
+      last_modified: '2026-11-11'
+      source_hash: 0ee0a8f70edaef22
     story:F0004-S0001:
       source_paths:
       - planning-mds/features/archive/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md
@@ -2281,32 +2332,32 @@ freshness:
       source_paths:
       - planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md
       source_count: 1
-      last_modified: '2026-10-29'
-      source_hash: 976c0f74facea4f1
+      last_modified: '2026-11-11'
+      source_hash: e5eda37f514b5b34
     story:F0005-S0002:
       source_paths:
       - planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md
       source_count: 1
-      last_modified: '2026-10-29'
-      source_hash: 402d9b6aad7b76e1
+      last_modified: '2026-11-11'
+      source_hash: c979921014b77c91
     story:F0005-S0003:
       source_paths:
       - planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md
       source_count: 1
-      last_modified: '2026-10-29'
-      source_hash: f41035fe4d302f1e
+      last_modified: '2026-11-11'
+      source_hash: f69dd8fff22e255e
     story:F0005-S0004:
       source_paths:
       - planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md
       source_count: 1
-      last_modified: '2026-10-29'
-      source_hash: 41b86bb52bc6d6cf
+      last_modified: '2026-11-11'
+      source_hash: 364cd7e8e38f485f
     story:F0005-S0005:
       source_paths:
       - planning-mds/features/archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md
       source_count: 1
-      last_modified: '2026-10-29'
-      source_hash: 84a8041205945695
+      last_modified: '2026-11-11'
+      source_hash: 87de56d34612e874
     story:F0006-S0001:
       source_paths:
       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md
@@ -2373,6 +2424,30 @@ freshness:
       source_count: 1
       last_modified: '2026-11-11'
       source_hash: 84100dd5eec48e43
+    story:F0064-S0001:
+      source_paths:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
+      source_count: 1
+      last_modified: '2026-11-11'
+      source_hash: 9af37d8737d2337a
+    story:F0064-S0002:
+      source_paths:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
+      source_count: 1
+      last_modified: '2026-11-11'
+      source_hash: 573688f65f7fb5d5
+    story:F0064-S0003:
+      source_paths:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
+      source_count: 1
+      last_modified: '2026-11-11'
+      source_hash: 23e456f7e5cb5fb5
+    story:F0064-S0004:
+      source_paths:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
+      source_count: 1
+      last_modified: '2026-11-11'
+      source_hash: 0bb2556fdf45eaf1
     story:F0065-S0001:
       source_paths:
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
@@ -2727,12 +2802,38 @@ freshness:
       source_count: 96
       last_modified: '2026-11-10'
       source_hash: f6d4943b9b97584a
+    capability:plan-readiness-validation:
+      source_paths:
+      - scripts/validation/tests/test_plan_readiness.py
+      - scripts/kg/validate_plan_compliance.py
+      - scripts/validation/validate_plan_readiness.py
+      source_count: 3
+      last_modified: '2026-09-11'
+      source_hash: 06864707561285e9
     capability:postgresql-persistence-contract:
       source_paths:
       - engine/tests/integration/test_persistence_contract.py
       source_count: 1
       last_modified: '2026-10-07'
       source_hash: 67fa06fa58d20ad9
+    capability:project-check-ci-enforcement:
+      source_paths:
+      - CONTRIBUTING.md
+      - docs/framework-adoption.md
+      - planning-mds/framework-adoption-plan.md
+      - .github/workflows/ci-gates.yml
+      - nebula.code-workspace
+      source_count: 5
+      last_modified: '2026-11-11'
+      source_hash: 7481f8cc41fb1ab8
+    capability:project-context-manifest:
+      source_paths:
+      - .nebula-project.yaml
+      - docs/agent-instructions.md
+      - docs/plan-review-checklist.md
+      source_count: 3
+      last_modified: '2026-10-29'
+      source_hash: 3a139d52af857d23
     capability:runtime-roots-and-toolchain:
       source_paths:
       - engine/apps/api/src/brain_api/app.py

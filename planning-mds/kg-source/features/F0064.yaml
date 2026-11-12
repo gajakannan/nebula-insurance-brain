@@ -4,9 +4,37 @@ path: planning-mds/features/F0064-repository-instructions-and-planning-check-ado
 status: planned
 registry_section: Planned
 phase: Repository Tooling
-roadmap_section: Next
-roadmap_order: 64
-rationale: Adopt the generic project extension contract with Brain-local guidance, review criteria, and structural planning checks. User-requested repository tooling; does not alter F0001 or the master blueprint's runtime epic inventory.
-validation_gate: Local fixtures and project-wide checks pass through the shared executor; framework release is published and blueprint/CI pins match; Git source-control tools select the child repository.
-coverage_excluded:
-  reason: Reserved adoption tracking entry; candidate tooling changes await lifecycle review and coordinated release, with no approved runtime scope or canonical bindings asserted.
+roadmap_section: Now
+roadmap_order: 3
+rationale: 'Retroactive closeout (2026-11-10 roadmap review): the tooling was delivered 2026-09-07 (nebula-agents
+  PR #91 at c218bf1, Brain PR #1) and runs through the shared executor at the current pin, but has no PRD, stories,
+  KG bindings or feature evidence (plan-review 2026-10-30-ff4c758d L1). Document the delivered scope, bind it in
+  the KG, re-verify and close out. Repository tooling; not part of the runtime epic inventory.'
+validation_gate: PRD and stories describe only delivered scope; KG bindings for the project manifest and its checks
+  compile; project checks re-run green through the shared executor at the pin recorded in CI and BLUEPRINT section
+  0; PM closeout and archive transition pass tracker validation.
+notes:
+- 'G1 2026-11-10 (plan run 2026-11-10-819c4124): scope is Brain-side only; the framework project-extension mechanism is nebula-agents framework F0009, consumed at the pin and not re-proven here.'
+- 'G1 2026-11-10: native host adapters (Claude Code, Codex, Hermes) and the native cockpit are an explicit non-goal; the supported path is the shared CLI with an explicit product root.'
+- 'G1 2026-11-10: the operator chose fix-everything-first; no re-verification defect may be deferred, including framework-side defects that require a pin advance.'
+affects:
+- capability:project-context-manifest
+- capability:plan-readiness-validation
+- capability:project-check-ci-enforcement
+story_mappings:
+- id: story:F0064-S0001
+  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
+  affects:
+  - capability:project-context-manifest
+- id: story:F0064-S0002
+  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
+  affects:
+  - capability:project-context-manifest
+- id: story:F0064-S0003
+  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
+  affects:
+  - capability:plan-readiness-validation
+- id: story:F0064-S0004
+  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
+  affects:
+  - capability:project-check-ci-enforcement

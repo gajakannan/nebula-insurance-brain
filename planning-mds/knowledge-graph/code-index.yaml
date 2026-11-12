@@ -209,10 +209,33 @@ node_bindings:
         - neuron/tests/integration/test_live_conversion_qualification.py
         - neuron/tests/support/fault_proxy.py
         - neuron/tests/support/relationship_probe.py
+  - id: capability:plan-readiness-validation
+    paths:
+      tests:
+        - scripts/validation/tests/test_plan_readiness.py
+      validation:
+        - scripts/kg/validate_plan_compliance.py
+        - scripts/validation/validate_plan_readiness.py
   - id: capability:postgresql-persistence-contract
     paths:
       backend:
         - engine/tests/integration/test_persistence_contract.py
+  - id: capability:project-check-ci-enforcement
+    paths:
+      docs:
+        - CONTRIBUTING.md
+        - docs/framework-adoption.md
+        - planning-mds/framework-adoption-plan.md
+      infra:
+        - .github/workflows/ci-gates.yml
+        - nebula.code-workspace
+  - id: capability:project-context-manifest
+    paths:
+      config:
+        - .nebula-project.yaml
+      docs:
+        - docs/agent-instructions.md
+        - docs/plan-review-checklist.md
   - id: capability:runtime-roots-and-toolchain
     paths:
       backend:

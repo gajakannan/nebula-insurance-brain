@@ -223,6 +223,14 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0003-S0003](features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) - Done
   - [F0003-S0004](features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) - Done
 
+**Repository tooling (Now — retroactive closeout)**
+
+- [F0064 — Repository instructions and planning-check adoption](features/F0064-repository-instructions-and-planning-check-adoption/README.md) - Planned (tooling delivered 2026-09-07; plan run `2026-11-10-819c4124`; Phase A approved, Phase B pending review)
+  - [F0064-S0001](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) — Not Started
+  - [F0064-S0002](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) — Not Started
+  - [F0064-S0003](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Not Started
+  - [F0064-S0004](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Not Started
+
 **v0.1A (Next)**
 
 - [F0004 — Content artifact model](features/archive/F0004-content-artifact-model/README.md) - Done (four stories; feature run 2026-10-17-8a6cc79f; G4 approved 2026-10-21)
@@ -230,12 +238,12 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0004-S0002](features/archive/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) - Done
   - [F0004-S0003](features/archive/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md) - Done
   - [F0004-S0004](features/archive/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md) - Done
-- [F0005 — One-time document ingestion](features/archive/F0005-one-time-docling-ingestion/README.md) - Planned
-  - [F0005-S0001](features/archive/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) — In Progress
-  - [F0005-S0002](features/archive/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) — In Progress
-  - [F0005-S0003](features/archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) — In Progress
-  - [F0005-S0004](features/archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) — In Progress — synthetic comparison complete; live comparison planned
-  - [F0005-S0005](features/archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) — Not Started
+- [F0005 — One-time document ingestion](features/archive/F0005-one-time-docling-ingestion/README.md) - Done / Archived (2026-10-28; feature run `2026-10-25-4020923b`; Graph dense rejected, direct-baseline stays default)
+  - [F0005-S0001](features/archive/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) — Done
+  - [F0005-S0002](features/archive/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) — Done
+  - [F0005-S0003](features/archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) — Done
+  - [F0005-S0004](features/archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) — Done — evaluated and rejected (S0004-AC7)
+  - [F0005-S0005](features/archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) — Done
 - [F0006 — Assertion plane + origin + interpretation basis](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/README.md) - Done / Archived (2026-11-05; feature run `2026-11-02-5a00b0ff`; SEC-01 trusted-local-fixture mitigation accepted)
   - [F0006-S0001](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md) — Done
   - [F0006-S0002](features/archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md) — Done
@@ -268,7 +276,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned
 - [F0022 — Document 360 + native evidence review panel + parent/classification and reviewer authority](features/F0022-document-360-and-native-evidence-review/README.md) - Planned
 - [F0023 — Minimal Entity 360](features/F0023-minimal-entity-360/README.md) - Planned
-- [F0065 — Grounded GL guideline assessment](features/F0065-grounded-gl-guideline-assessment/README.md) - Planned (six stories and draft contracts authored; review and implementation pending)
+- [F0065 — Grounded GL guideline assessment](features/F0065-grounded-gl-guideline-assessment/README.md) - Planned (Phase A and B approved 2026-10-29, plan run `2026-10-28-5f9c6d6f`; plan-review `2026-10-30-ff4c758d` H1–H3 need targeted rework before implementation)
   - [F0065-S0001](features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md) - Not Started
   - [F0065-S0002](features/F0065-grounded-gl-guideline-assessment/F0065-S0002-evaluate-accepted-facts.md) - Not Started
   - [F0065-S0003](features/F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md) - Not Started
@@ -280,6 +288,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 
 **v0.1C (Later)**
 
+- [F0069 — Constrained policy question (chat with this policy)](features/F0069-constrained-policy-question/README.md) - Planned (added 2026-11-08)
 - [F0026 — v0.1 hardening + Golden Corpus workflow + AuthX negative tests and policy parity](features/F0026-v0-1-hardening-golden-corpus-and-authx-tests/README.md) - Planned
 
 **v0.2A (Later)**
@@ -530,9 +539,9 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 Current position (2026-11-10): F0001 to F0007 are done and archived. F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
 
-1. Choose the Now feature(s) in `kg-source/features/*.yaml` (`roadmap_section: Now`), then recompile.
+1. Now (2026-11-10 roadmap review): F0008 (bitemporal canonical facts) and F0011 (JSON Schema contract system) run as two parallel lanes, each through `plan` → `plan-review` → `feature`; F0064 takes a retroactive documentation and closeout pass. F0021 is pulled into Next as an independent UI lane for the first free Now slot.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
-3. For F0012, run the `plan` action as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
+3. After F0011 completes, run the `plan` action for F0012 as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
 4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.
 
 

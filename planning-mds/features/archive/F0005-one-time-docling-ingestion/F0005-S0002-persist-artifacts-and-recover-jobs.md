@@ -10,7 +10,7 @@
 
 **Phase:** MVP — v0.1A
 
-**Status:** In Progress
+**Status:** Done
 
 ## User Story
 

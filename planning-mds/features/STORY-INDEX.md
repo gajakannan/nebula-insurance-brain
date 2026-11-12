@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 43
+**Total Stories:** 47
 
 ---
 
@@ -92,6 +92,17 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0064 — Repository instructions and planning-check adoption
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0064-S0001](./F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) | Declare the product manifest | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0002](./F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) | Provide agent instructions and the review checklist | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0003](./F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) | Validate plan-readiness structure | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0004](./F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) | Enforce checks in CI and document setup | Medium | Infrastructure | Dana the Platform Engineer |
+
+---
+
 ## F0065 — Grounded GL guideline assessment
 
 | Story ID | Title | Priority | Phase | Persona |
@@ -109,7 +120,7 @@ Auto-generated index of all user stories across feature folders.
 
 | Phase | Count |
 |-------|-------|
-| Infrastructure | 7 |
+| Infrastructure | 11 |
 | MVP | 17 |
 | MVP — v0.1A | 9 |
 | v0.1A | 4 |
@@ -123,6 +134,7 @@ Auto-generated index of all user stories across feature folders.
 |----------|-------|
 | Critical | 24 |
 | High | 19 |
+| Medium | 4 |
 
 ---
 

@@ -5,7 +5,7 @@
 **Title:** Evolve the schema without losing accepted state  
 **Priority:** High  
 **Phase:** v0.1A  
-**Status:** Not Started
+**Status:** Done
 
 ## User Story
 
