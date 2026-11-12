@@ -223,6 +223,14 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0003-S0003](features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) - Done
   - [F0003-S0004](features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) - Done
 
+**Repository tooling (Now — retroactive closeout)**
+
+- [F0064 — Repository instructions and planning-check adoption](features/F0064-repository-instructions-and-planning-check-adoption/README.md) - Planned (tooling delivered 2026-09-07; plan run `2026-11-10-819c4124`; Phase A approved, Phase B pending review)
+  - [F0064-S0001](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) — Not Started
+  - [F0064-S0002](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) — Not Started
+  - [F0064-S0003](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Not Started
+  - [F0064-S0004](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Not Started
+
 **v0.1A (Next)**
 
 - [F0004 — Content artifact model](features/archive/F0004-content-artifact-model/README.md) - Done (four stories; feature run 2026-10-17-8a6cc79f; G4 approved 2026-10-21)

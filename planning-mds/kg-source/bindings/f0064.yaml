@@ -1,0 +1,25 @@
+# F0064 Phase B (plan run 2026-11-10-819c4124): retroactive bindings for tooling delivered 2026-09-07.
+bindings:
+- id: capability:project-context-manifest
+  paths:
+    config:
+    - .nebula-project.yaml
+    docs:
+    - docs/agent-instructions.md
+    - docs/plan-review-checklist.md
+- id: capability:plan-readiness-validation
+  paths:
+    validation:
+    - scripts/validation/validate_plan_readiness.py
+    - scripts/kg/validate_plan_compliance.py
+    tests:
+    - scripts/validation/tests/test_plan_readiness.py
+- id: capability:project-check-ci-enforcement
+  paths:
+    infra:
+    - .github/workflows/ci-gates.yml
+    - nebula.code-workspace
+    docs:
+    - CONTRIBUTING.md
+    - docs/framework-adoption.md
+    - planning-mds/framework-adoption-plan.md

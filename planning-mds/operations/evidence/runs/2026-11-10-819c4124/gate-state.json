@@ -1,0 +1,90 @@
+{
+  "action": "plan",
+  "contract_version": "2026-07-11",
+  "project_context": {
+    "action": "plan",
+    "manifest_hash": "dedbcb948fd89e3e2dce365347f322db03bcd479b5d5823095e2ef2773c3e089",
+    "product_root": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+    "scope": {
+      "plan_scope": "feature",
+      "target": "F0064"
+    }
+  },
+  "run_id": "2026-11-10-819c4124",
+  "schema_version": 1,
+  "stages": {
+    "G1": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G2": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G3": {
+      "attestations": [
+        {
+          "acknowledged_preconditions": [],
+          "actor": "operator",
+          "checkpoint_id": "approve-phase-a",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "0defa93746773d8b3aed5a401bdff1e40b481ef68803efdbce6bb3e555749d5d"
+            }
+          ],
+          "note": "Operator token approve-phase-a recorded in gate-decisions.md",
+          "role": "product-manager",
+          "timestamp": "2026-11-10T23:16:11-05:00"
+        }
+      ],
+      "completed_operations": [
+        "checkpoint:approve-phase-a",
+        "approve-plan-phase-a"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G4": {
+      "attestations": [],
+      "completed_operations": [
+        "kg-compile",
+        "kg-check-drift"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G5": {
+      "attestations": [],
+      "completed_operations": [
+        "validate-stories",
+        "generate-story-index",
+        "validate-trackers",
+        "kg-write-coverage",
+        "kg-check-drift-exit",
+        "kg-check-reproducible",
+        "validate-templates"
+      ],
+      "pending_checkpoint": {
+        "description": "User reviews architecture; the Architect records the explicit approval token in gate-decisions.md after exit validation is green. Make any approval-status edits to planning artifacts (STATUS/README/PRD/assembly plan/ADR/kg-source shard), attest, then re-run G5 so the post-approval operations refresh the KG.",
+        "id": "approve-phase-b",
+        "produces": [
+          "phase-b-approved"
+        ],
+        "requires": [
+          "gate-decisions.md"
+        ]
+      },
+      "project_checks": {},
+      "status": "pending-checkpoint"
+    }
+  }
+}

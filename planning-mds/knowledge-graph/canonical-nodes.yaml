@@ -763,6 +763,17 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
       - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
+  - id: capability:plan-readiness-validation
+    label: Structural plan-readiness validation
+    notes: Deterministic structural validator for Brain planning packages (feature, feature-set and project
+      scopes) with a JSON result and exit codes 0 pass, 1 findings, 2 invalid invocation. Checks artifacts,
+      required sections, the review checklist, the registry and resolvable planning links; future runtime
+      paths are allowed. Semantic adequacy stays reviewer judgment.
+    related_nodes:
+      - capability:project-context-manifest
+    source_docs:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md
   - id: capability:postgresql-persistence-contract
     label: PostgreSQL persistence contract and migration boundary
     notes: Shared PostgreSQL 18 persistence boundary. Preserves existing migration and identifier history,
@@ -796,6 +807,31 @@ capabilities:
       - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md
       - planning-mds/features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md
       - planning-mds/features/archive/F0003-postgresql-persistence/feature-assembly-plan.md
+  - id: capability:project-check-ci-enforcement
+    label: Project-check CI enforcement and setup guidance
+    notes: The framework-validators CI job fails closed at a framework revision without project-extension
+      support, resolves the product context, and runs the declared checks through the shared executor
+      at project scope, preserving evidence on failure. The CI ref and BLUEPRINT section 0 pin are advanced
+      together (manual rule). Contributor, workspace and adoption documents record setup and status.
+    related_nodes:
+      - capability:plan-readiness-validation
+      - capability:project-context-manifest
+    source_docs:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+  - id: capability:project-context-manifest
+    label: Project context manifest and local review guidance
+    notes: Version-1 `.nebula-project.yaml` declaring the Brain's agent instructions, the plan-review
+      checklist, and the required plan-readiness check at plan-review PR2. Resolved by the framework project-extension
+      mechanism (nebula-agents framework F0009) at the pinned revision; Brain review text never lives
+      in the framework.
+    related_nodes:
+      - capability:plan-readiness-validation
+      - capability:project-check-ci-enforcement
+    source_docs:
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
+      - planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md
   - id: capability:runtime-roots-and-toolchain
     label: Runtime roots and toolchain
     notes: engine/ and neuron/ uv workspaces, FastAPI application factory with /health, Alembic, lint

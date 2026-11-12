@@ -13,5 +13,28 @@ rationale: 'Retroactive closeout (2026-11-10 roadmap review): the tooling was de
 validation_gate: PRD and stories describe only delivered scope; KG bindings for the project manifest and its checks
   compile; project checks re-run green through the shared executor at the pin recorded in CI and BLUEPRINT section
   0; PM closeout and archive transition pass tracker validation.
-coverage_excluded:
-  reason: Reserved adoption tracking entry; candidate tooling changes await lifecycle review and coordinated release, with no approved runtime scope or canonical bindings asserted.
+notes:
+- 'G1 2026-11-10 (plan run 2026-11-10-819c4124): scope is Brain-side only; the framework project-extension mechanism is nebula-agents framework F0009, consumed at the pin and not re-proven here.'
+- 'G1 2026-11-10: native host adapters (Claude Code, Codex, Hermes) and the native cockpit are an explicit non-goal; the supported path is the shared CLI with an explicit product root.'
+- 'G1 2026-11-10: the operator chose fix-everything-first; no re-verification defect may be deferred, including framework-side defects that require a pin advance.'
+affects:
+- capability:project-context-manifest
+- capability:plan-readiness-validation
+- capability:project-check-ci-enforcement
+story_mappings:
+- id: story:F0064-S0001
+  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
+  affects:
+  - capability:project-context-manifest
+- id: story:F0064-S0002
+  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
+  affects:
+  - capability:project-context-manifest
+- id: story:F0064-S0003
+  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
+  affects:
+  - capability:plan-readiness-validation
+- id: story:F0064-S0004
+  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
+  affects:
+  - capability:project-check-ci-enforcement
