@@ -233,21 +233,12 @@ jobs:
           neuron/.venv/bin/python -m pytest
           neuron/tests/integration/test_content_worker_v2.py
           neuron/tests/integration/test_worker_cli_enqueue.py -q -rs
-      # Server liveness does not imply that the worker has applied the custom blueprint.
-      - name: Wait for OIDC application readiness (up to 180s)
-        timeout-minutes: 4
-        run: |
-          deadline=$((SECONDS + 180))
-          while (( SECONDS < deadline )); do
-            status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
-              --connect-timeout 2 --max-time 5 \
-              http://localhost:9010/application/o/brain/.well-known/openid-configuration)" || status=unreachable
-            echo "OIDC discovery HTTP status: $status"
-            if [[ "$status" == "200" ]]; then exit 0; fi
-            sleep 5
-          done
-          echo "::error::OIDC application did not become ready within 180s"
-          exit 1
+      # Server liveness does not imply that the worker has applied the custom blueprint,
+      # and the worker can stall mid-queue while still healthy. The script restarts a
+      # silent worker and applies the blueprint synchronously (at most twice).
+      - name: Wait for OIDC application readiness (up to 300s, recovers a stalled worker)
+        timeout-minutes: 8
+        run: scripts/dev/wait_for_oidc.sh
       - name: Verify the two seeded tenant principals and the service client (retries the
           blueprint-application race documented in GETTING-STARTED)
         run: |
@@ -272,7 +263,8 @@ jobs:
         if: failure()
         run: |
           docker compose ps -a
-          docker compose logs --no-color --tail 200 postgres authentik-server authentik-worker
+          docker compose logs --no-color --tail 200 postgres authentik-server
+          docker compose logs --no-color --tail 500 authentik-worker
       - name: Tear down
         if: always()
         run: docker compose down -v
