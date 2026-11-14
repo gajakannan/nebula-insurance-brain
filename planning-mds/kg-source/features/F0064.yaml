@@ -1,15 +1,14 @@
 id: feature:F0064
 name: Repository instructions and planning-check adoption
-path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption
-status: planned
-registry_section: Planned
+path: planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption
+status: archived-done
+registry_section: Archived
 phase: Repository Tooling
-roadmap_section: Now
-roadmap_order: 3
-rationale: 'Retroactive closeout (2026-11-10 roadmap review): the tooling was delivered 2026-09-07 (nebula-agents
-  PR #91 at c218bf1, Brain PR #1) and runs through the shared executor at the current pin, but has no PRD, stories,
-  KG bindings or feature evidence (plan-review 2026-10-30-ff4c758d L1). Document the delivered scope, bind it in
-  the KG, re-verify and close out. Repository tooling; not part of the runtime epic inventory.'
+roadmap_section: Completed
+roadmap_order: 7
+rationale: 'Completed 2026-11-14 in feature run 2026-11-14-3325803a: the repository tooling delivered 2026-09-07 (nebula-agents
+  PR #91 at c218bf1, Brain PR #1) now has a PRD, stories, KG bindings and feature evidence (closes plan-review 2026-10-30-ff4c758d
+  L1). Repository tooling; not part of the runtime epic inventory.'
 validation_gate: PRD and stories describe only delivered scope; KG bindings for the project manifest and its checks
   compile; project checks re-run green through the shared executor at the pin recorded in CI and BLUEPRINT section
   0; PM closeout and archive transition pass tracker validation.
@@ -17,25 +16,30 @@ notes:
 - 'G1 2026-11-10 (plan run 2026-11-10-819c4124): scope is Brain-side only; the framework project-extension mechanism is nebula-agents framework F0009, consumed at the pin and not re-proven here.'
 - 'G1 2026-11-10: native host adapters (Claude Code, Codex, Hermes) and the native cockpit are an explicit non-goal; the supported path is the shared CLI with an explicit product root.'
 - 'G1 2026-11-10: the operator chose fix-everything-first; no re-verification defect may be deferred, including framework-side defects that require a pin advance.'
-- 'Plan approvals: Phase A 2026-11-10 (approve-phase-a, G3); Phase B 2026-11-14 (approve-phase-b, G5). Stories remain Not Started until the feature run re-verifies them.'
+- 'Plan approvals: Phase A 2026-11-10 (approve-phase-a, G3); Phase B 2026-11-14 (approve-phase-b, G5).'
+- 'Closed out 2026-11-14 in feature run 2026-11-14-3325803a (operator G4 approve, PR #49): 23/23 ACs re-verified at pin d90bbb6; 0 tooling defects; 3 stale doc statements and review CR-1 repaired; no pin advance needed. All four stories Done; archived.'
 affects:
 - capability:project-context-manifest
 - capability:plan-readiness-validation
 - capability:project-check-ci-enforcement
 story_mappings:
 - id: story:F0064-S0001
-  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
+  path: planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
   affects:
   - capability:project-context-manifest
 - id: story:F0064-S0002
-  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
+  path: planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
   affects:
   - capability:project-context-manifest
 - id: story:F0064-S0003
-  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
+  path: planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
   affects:
   - capability:plan-readiness-validation
 - id: story:F0064-S0004
-  path: planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
+  path: planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
   affects:
   - capability:project-check-ci-enforcement
+completion_state: All four stories Done; 23/23 ACs re-verified at framework pin d90bbb6 in feature run 2026-11-14-3325803a;
+  0 tooling defects, 3 stale documentation statements and review finding CR-1 repaired; QE, Code Reviewer and DevOps
+  signoff complete; CI green on PR #49.
+archived_date: '2026-11-14'

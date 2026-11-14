@@ -86,7 +86,7 @@ Not applicable: local CLI and CI tooling with no server-side authorization. Anyo
 ## Dependencies
 
 - `nebula-agents` project-extension support (framework F0009) at the pinned revision `d90bbb6`.
-- No Brain runtime feature dependency. Tracker governance per [TRACKER-GOVERNANCE.md](../TRACKER-GOVERNANCE.md).
+- No Brain runtime feature dependency. Tracker governance per [TRACKER-GOVERNANCE.md](../../TRACKER-GOVERNANCE.md).
 
 ## Related Stories
 
@@ -101,6 +101,6 @@ Already enabled on `main` since 2026-09-07. Closeout changes no default behavior
 
 ## Source Traceability
 
-- Design and delivery record: [framework adoption plan](../../framework-adoption-plan.md); rollout record: `docs/framework-adoption.md`.
+- Design and delivery record: [framework adoption plan](../../../framework-adoption-plan.md); rollout record: `docs/framework-adoption.md`.
 - Finding: plan-review `2026-10-30-ff4c758d` L1. Roadmap decision: 2026-11-10 review (Now, retroactive closeout).
 - G1 decisions: run `2026-11-10-819c4124` `gate-decisions.md`.

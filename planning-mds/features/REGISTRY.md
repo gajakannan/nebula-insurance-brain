@@ -86,7 +86,6 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | F0061 | Advanced retrieval | Planned | v0.4+ | `F0061-advanced-retrieval/` |
 | F0062 | Advanced reasoners | Planned | v0.4+ | `F0062-advanced-reasoners/` |
 | F0063 | Future DSL | Planned | v0.4+ | `F0063-future-dsl/` |
-| F0064 | Repository instructions and planning-check adoption | Planned | Repository Tooling | `F0064-repository-instructions-and-planning-check-adoption/` |
 | F0065 | Grounded GL guideline assessment | Planned | v0.1B | `F0065-grounded-gl-guideline-assessment/` |
 | F0066 | Open-statement extraction + signature alignment | Planned | v0.2B | `F0066-open-statement-extraction-and-signature-alignment/` |
 | F0067 | Graph Observatory | Planned | v0.2B | `F0067-graph-observatory/` |
@@ -99,6 +98,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:archived -->
 | Feature ID | Name | Archived Date | Evidence Reentry Date | Folder |
 |------------|------|---------------|-----------------------|--------|
+| F0064 | Repository instructions and planning-check adoption | 2026-11-14 |  | `archive/F0064-repository-instructions-and-planning-check-adoption/` |
 | F0007 | FactSlot model | 2026-11-10 |  | `archive/F0007-factslot-model/` |
 | F0006 | Assertion plane + origin + interpretation basis | 2026-11-05 |  | `archive/F0006-assertion-plane-origin-and-interpretation-basis/` |
 | F0005 | One-time document ingestion | 2026-10-28 |  | `archive/F0005-one-time-docling-ingestion/` |
