@@ -4,7 +4,7 @@
 **Feature Name:** Repository instructions and planning-check adoption
 **Priority:** Medium
 **Phase:** Infrastructure — Repository Tooling (outside the master blueprint section 95 runtime epics)
-**Status:** Planned — tooling delivered 2026-09-07; retroactive planning, re-verification and closeout in progress
+**Status:** Planned — tooling delivered 2026-09-07; Phase A and B approved (2026-11-10, 2026-11-14); re-verification and closeout in the feature run
 **Plan Run:** `2026-11-10-819c4124` (A+B, existing)
 
 ## Feature Statement

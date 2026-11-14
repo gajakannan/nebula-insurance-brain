@@ -1,10 +1,10 @@
 # F0064 — Repository instructions and planning-check adoption — Status
 
-**Overall Status:** Draft — retroactive planning (tooling delivered 2026-09-07)
-**Last Updated:** 2026-11-10
+**Overall Status:** Planned — Phase A and B approved 2026-11-14; feature run (re-verification and closeout) next. Tooling delivered 2026-09-07
+**Last Updated:** 2026-11-14
 **Plan Run:** `2026-11-10-819c4124` (A+B, existing)
 **Phase A:** Approved 2026-11-10 (`approve-phase-a`, G3 PASS)
-**Phase B:** Drafted — [assembly plan](feature-assembly-plan.md), three capability nodes and bindings; pending operator review (G5)
+**Phase B:** Approved 2026-11-14 (`approve-phase-b`, G5; [assembly plan](feature-assembly-plan.md), three capability nodes and bindings)
 **Implementation:** Delivered 2026-09-07 (Brain PR #1, `nebula-agents` PR #91 at `c218bf1`). Re-verification at pin `d90bbb6` happens in the feature run.
 
 ## G1 Decisions (2026-11-10)

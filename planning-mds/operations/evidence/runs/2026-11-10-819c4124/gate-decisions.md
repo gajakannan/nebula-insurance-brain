@@ -74,3 +74,31 @@ No ADR, API, schema, permission or runtime file was created.
 
 - `hint.py` is silent for root-level paths by design; `lookup.py` by capability ID resolves them.
 - Pin agreement stays a manual check (accepted with Phase A).
+
+## Explicit Phase B Approval
+
+- **Checkpoint:** `approve-phase-b` (G5)
+- **Operator token:** `approve-phase-b`
+- **Source:** operator reply in the plan session, given after the G5 review package was summarized: the assembly plan, three capability nodes and bindings, the role matrix, four review points and two known trade-offs
+- **Recorded by:** Architect (Claude)
+- **Recorded at:** 2026-11-14T17:04:17+00:00
+- **Precondition met:** all seven G5 pre-checkpoint exit operations completed in declared order with exit 0, and the driver paused at `approve-phase-b`.
+- **Scope approved:** the verification-only F0064 Phase B design for four stories and 23 ACs, including the four review points and two known trade-offs listed above.
+
+**Approval-status edits made before attestation:**
+
+- feature STATUS, README, PRD and assembly plan;
+- the BLUEPRINT §3.3 line;
+- the F0064 feature shard approval note.
+
+**Unchanged:**
+
+- All four stories remain Not Started; they are verified in the feature run.
+- No ADR, API, schema or runtime file is created.
+- The feature shard's `validation_gate` is unchanged.
+
+**Next:**
+
+- This approval evidence is frozen for attestation.
+- G5 resumes with the post-approval KG refresh, tracker validation and approve-plan.py.
+- No planning-source edit follows the final refresh.
