@@ -5,7 +5,7 @@
 **Title:** Enforce checks in CI and document setup
 **Priority:** Medium
 **Phase:** Infrastructure
-**Status:** In Progress
+**Status:** Done
 
 ## User Story
 
@@ -19,12 +19,12 @@ Delivered 2026-09-07 in the `framework-validators` job of `.github/workflows/ci-
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** The `framework-validators` job checks out the framework at the pinned `ref:`. It fails with an explicit error when `agents/scripts/project_checks.py` is absent, runs `project_context.py --action plan-review --json`, and runs `project_checks.py --action plan-review --plan-scope project --target project` with a generated run ID. It uploads that run's evidence folder even when the check fails.
-- [ ] **AC2:** The CI `ref:` and the framework pin in BLUEPRINT section 0 name the same full commit SHA.
-- [ ] **AC3:** In a temporary copy of the repository with one checklist rule removed, the shared executor at project scope exits non-zero and records a failing `plan-readiness` result whose findings include `BRAIN-CHECKLIST`. The real working tree is not modified.
-- [ ] **AC4:** CI on the F0064 closeout PR passes every job, including the project-extension steps.
-- [ ] **AC5:** `CONTRIBUTING.md` documents per-clone setup (hooks path, explicit product root, local validation commands), and every script path it names exists. `nebula.code-workspace` lists the Brain and `nebula-agents` folders with paths that resolve from the workspace file.
-- [ ] **AC6:** `docs/framework-adoption.md` and `planning-mds/framework-adoption-plan.md` state the current status (rollout complete, current pin, F0064 closeout). They retain the 2026-09-07 publication record as dated history and make no claim that hygiene or rollout steps remain pending.
+- [x] **AC1:** The `framework-validators` job checks out the framework at the pinned `ref:`. It fails with an explicit error when `agents/scripts/project_checks.py` is absent, runs `project_context.py --action plan-review --json`, and runs `project_checks.py --action plan-review --plan-scope project --target project` with a generated run ID. It uploads that run's evidence folder even when the check fails.
+- [x] **AC2:** The CI `ref:` and the framework pin in BLUEPRINT section 0 name the same full commit SHA.
+- [x] **AC3:** In a temporary copy of the repository with one checklist rule removed, the shared executor at project scope exits non-zero and records a failing `plan-readiness` result whose findings include `BRAIN-CHECKLIST`. The real working tree is not modified.
+- [x] **AC4:** CI on the F0064 closeout PR passes every job, including the project-extension steps.
+- [x] **AC5:** `CONTRIBUTING.md` documents per-clone setup (hooks path, explicit product root, local validation commands), and every script path it names exists. `nebula.code-workspace` lists the Brain and `nebula-agents` folders with paths that resolve from the workspace file.
+- [x] **AC6:** `docs/framework-adoption.md` and `planning-mds/framework-adoption-plan.md` state the current status (rollout complete, current pin, F0064 closeout). They retain the 2026-09-07 publication record as dated history and make no claim that hygiene or rollout steps remain pending.
 
 **Edge cases:**
 
@@ -61,15 +61,15 @@ An automated CI guard for pin agreement (G3 assumption in the PRD), native host 
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Edge cases handled
-- [ ] Permissions enforced (N/A — CI tooling)
-- [ ] Audit/timeline logged (N/A — CI artifacts serve as the record)
-- [ ] Tests pass
-- [ ] Documentation updated (if needed)
-- [ ] Story filename matches `Story ID` prefix (`F{NNNN}-S{NNNN}-...`)
-- [ ] Story index regenerated if story file was added/renamed/moved
+- [x] Acceptance criteria met
+- [x] Edge cases handled
+- [x] Permissions enforced (N/A — CI tooling)
+- [x] Audit/timeline logged (N/A — CI artifacts serve as the record)
+- [x] Tests pass
+- [x] Documentation updated (if needed)
+- [x] Story filename matches `Story ID` prefix (`F{NNNN}-S{NNNN}-...`)
+- [x] Story index regenerated if story file was added/renamed/moved
 
 ## Review Provenance
 
-Recorded in the parent feature `STATUS.md` (`Required Signoff Roles (Set in Planning)` and `Story Signoff Provenance`).
+Recorded in the parent feature `STATUS.md` (`Required Role Matrix` and `Story Signoff Provenance`).

@@ -223,13 +223,13 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0003-S0003](features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) - Done
   - [F0003-S0004](features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) - Done
 
-**Repository tooling (Now — retroactive closeout)**
+**Repository tooling (Completed)**
 
-- [F0064 — Repository instructions and planning-check adoption](features/F0064-repository-instructions-and-planning-check-adoption/README.md) - Planned (tooling delivered 2026-09-07; plan run `2026-11-10-819c4124`; Phase A and B approved, feature run next)
-  - [F0064-S0001](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) — Not Started
-  - [F0064-S0002](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) — Not Started
-  - [F0064-S0003](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Not Started
-  - [F0064-S0004](features/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Not Started
+- [F0064 — Repository instructions and planning-check adoption](features/archive/F0064-repository-instructions-and-planning-check-adoption/README.md) - Done / Archived 2026-11-14 (tooling delivered 2026-09-07; plan run `2026-11-10-819c4124`; feature run `2026-11-14-3325803a`)
+  - [F0064-S0001](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) — Done
+  - [F0064-S0002](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) — Done
+  - [F0064-S0003](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Done
+  - [F0064-S0004](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Done
 
 **v0.1A (Next)**
 
@@ -539,7 +539,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 Current position (2026-11-10): F0001 to F0007 are done and archived. F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
 
-1. Now (2026-11-10 roadmap review): F0008 (bitemporal canonical facts) and F0011 (JSON Schema contract system) run as two parallel lanes, each through `plan` → `plan-review` → `feature`; F0064 takes a retroactive documentation and closeout pass. F0021 is pulled into Next as an independent UI lane for the first free Now slot.
+1. Now (2026-11-10 roadmap review): F0008 (bitemporal canonical facts) and F0011 (JSON Schema contract system) run as two parallel lanes, each through `plan` → `plan-review` → `feature`; the F0064 retroactive closeout completed on 2026-11-14 (feature run `2026-11-14-3325803a`, archived). F0021 is pulled into Next as an independent UI lane for the first free Now slot.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
 3. After F0011 completes, run the `plan` action for F0012 as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
 4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.

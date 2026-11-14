@@ -19,7 +19,7 @@ The pin has since advanced. The current pin is `d90bbb6fc70dffcfa6d70379d42015e8
 
 The Brain adoption candidate was published as PR #1 from `codex/brain-project-adoption-20260907` and merged on 2026-09-07. Local validation continues to work independently of the framework checkout.
 
-Native host adapters have not been tested. Use the shared CLI with explicit root arguments; the current native cockpit does not propagate a separate product selection. Structural check results do not replace a PR0–PR4 review or amend the approved F0001 runtime scope.
+Native host adapters and the native cockpit are an explicit non-goal (F0064 G1 decision 2, 2026-11-10); the cockpit does not propagate a separate product selection. Use the shared CLI with explicit root arguments. Structural check results do not replace a PR0–PR4 review or amend the approved F0001 runtime scope.
 
 Git itself reports the local changes. For a source-control UI, select this repository as the project root, or open `nebula.code-workspace` in an editor that supports VS Code multi-root workspaces. The parent `nebula/` is not a Git repository. This clone's `.githooks` and `merge.ours` driver are configured; each new clone needs the setup commands in CONTRIBUTING.
 

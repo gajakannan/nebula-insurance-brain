@@ -5,7 +5,7 @@
 **Title:** Declare the product manifest
 **Priority:** Medium
 **Phase:** Infrastructure
-**Status:** In Progress
+**Status:** Done
 
 ## User Story
 
@@ -19,11 +19,11 @@ Delivered 2026-09-07 (Brain PR #1). The placeholders were renamed from `{PRODUCT
 
 ## Acceptance Criteria
 
-- [ ] **AC1:** `.nebula-project.yaml` declares `version: 1`, the instructions `docs/agent-instructions.md` (all actions) and `docs/plan-review-checklist.md` (`plan-review` only), and exactly one check, `plan-readiness`, at action `plan-review`, stage `PR2`, event `before_stage_complete`, with `cwd: product` and `timeout_seconds: 60`.
-- [ ] **AC2:** The check `argv` uses only the placeholders `{NEBULA_PRODUCT_ROOT}`, `{PLAN_SCOPE}` and `{TARGET}`, and it invokes `scripts/validation/validate_plan_readiness.py` with `--product-root`, `--plan-scope` and `--target`. No shell string is evaluated.
-- [ ] **AC3:** From the framework root at `d90bbb6`, `python3 agents/scripts/project_context.py --product-root <brain> --action plan-review --json` exits 0 and lists, in order, `planning-mds/BLUEPRINT.md`, `docs/agent-instructions.md` and `docs/plan-review-checklist.md`, each with a SHA-256. With `--action plan`, the checklist is absent and the other two remain.
-- [ ] **AC4:** `project_checks.py --list` for `plan-review` at project scope resolves the single `plan-readiness` check without an unresolved-placeholder error.
-- [ ] **AC5:** Every declared `inputs` pattern matches at least one tracked file. Every file the validator reads (blueprint, instructions, checklist, governing sources, registry and feature planning files) falls under a declared pattern, so an edit to any of them invalidates a prior check result.
+- [x] **AC1:** `.nebula-project.yaml` declares `version: 1`, the instructions `docs/agent-instructions.md` (all actions) and `docs/plan-review-checklist.md` (`plan-review` only), and exactly one check, `plan-readiness`, at action `plan-review`, stage `PR2`, event `before_stage_complete`, with `cwd: product` and `timeout_seconds: 60`.
+- [x] **AC2:** The check `argv` uses only the placeholders `{NEBULA_PRODUCT_ROOT}`, `{PLAN_SCOPE}` and `{TARGET}`, and it invokes `scripts/validation/validate_plan_readiness.py` with `--product-root`, `--plan-scope` and `--target`. No shell string is evaluated.
+- [x] **AC3:** From the framework root at `d90bbb6`, `python3 agents/scripts/project_context.py --product-root <brain> --action plan-review --json` exits 0 and lists, in order, `planning-mds/BLUEPRINT.md`, `docs/agent-instructions.md` and `docs/plan-review-checklist.md`, each with a SHA-256. With `--action plan`, the checklist is absent and the other two remain.
+- [x] **AC4:** `project_checks.py --list` for `plan-review` at project scope resolves the single `plan-readiness` check without an unresolved-placeholder error.
+- [x] **AC5:** Every declared `inputs` pattern matches at least one tracked file. Every file the validator reads (blueprint, instructions, checklist, governing sources, registry and feature planning files) falls under a declared pattern, so an edit to any of them invalidates a prior check result.
 
 **Edge cases:**
 
@@ -60,15 +60,15 @@ Framework resolver internals, additional extension points, native host adapters.
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Edge cases handled
-- [ ] Permissions enforced (N/A — local configuration, no server-side authorization)
-- [ ] Audit/timeline logged (N/A — no runtime events)
-- [ ] Tests pass
-- [ ] Documentation updated (if needed)
-- [ ] Story filename matches `Story ID` prefix (`F{NNNN}-S{NNNN}-...`)
-- [ ] Story index regenerated if story file was added/renamed/moved
+- [x] Acceptance criteria met
+- [x] Edge cases handled
+- [x] Permissions enforced (N/A — local configuration, no server-side authorization)
+- [x] Audit/timeline logged (N/A — no runtime events)
+- [x] Tests pass
+- [x] Documentation updated (if needed)
+- [x] Story filename matches `Story ID` prefix (`F{NNNN}-S{NNNN}-...`)
+- [x] Story index regenerated if story file was added/renamed/moved
 
 ## Review Provenance
 
-Recorded in the parent feature `STATUS.md` (`Required Signoff Roles (Set in Planning)` and `Story Signoff Provenance`).
+Recorded in the parent feature `STATUS.md` (`Required Role Matrix` and `Story Signoff Provenance`).

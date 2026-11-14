@@ -96,10 +96,10 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0064-S0001](./F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) | Declare the product manifest | Medium | Infrastructure | Dana the Platform Engineer |
-| [F0064-S0002](./F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) | Provide agent instructions and the review checklist | Medium | Infrastructure | Dana the Platform Engineer |
-| [F0064-S0003](./F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) | Validate plan-readiness structure | Medium | Infrastructure | Dana the Platform Engineer |
-| [F0064-S0004](./F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) | Enforce checks in CI and document setup | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0001](./archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) | Declare the product manifest | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0002](./archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) | Provide agent instructions and the review checklist | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0003](./archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) | Validate plan-readiness structure | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0004](./archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) | Enforce checks in CI and document setup | Medium | Infrastructure | Dana the Platform Engineer |
 
 ---
 
