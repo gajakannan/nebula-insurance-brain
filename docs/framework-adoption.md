@@ -13,9 +13,9 @@ Instruction discovery requires an explicitly selected product root. Required loc
 
 ## Rollout status
 
-Rollout is complete. The framework extension change was published as `nebula-agents` PR #91 and squash-merged to its `main` on 2026-09-07 as `c218bf1776f509a30f71967a1ee79879caa9a000`. That revision carries `agents/scripts/project_checks.py` and `agents/scripts/project_context.py`, so the checks declared in `.nebula-project.yaml` run through the shared executor rather than only as standalone scripts.
+Rollout is complete, and the Brain-side deliverables were re-verified and closed out as F0064 (see the [feature registry](../planning-mds/features/REGISTRY.md); plan run `2026-11-10-819c4124`, feature run `2026-11-14-3325803a`). The framework extension change was published as `nebula-agents` PR #91 and squash-merged to its `main` on 2026-09-07 as `c218bf1776f509a30f71967a1ee79879caa9a000`. That revision carries `agents/scripts/project_checks.py` and `agents/scripts/project_context.py`, so the checks declared in `.nebula-project.yaml` run through the shared executor rather than only as standalone scripts.
 
-Both pins now name that commit: `ref:` in `.github/workflows/ci-gates.yml` and the framework binding in `planning-mds/BLUEPRINT.md` section 0. Advance the two together; CI keeps an explicit compatibility gate that fails closed at a revision without project-extension support rather than silently skipping required checks.
+The pin has since advanced. The current pin is `d90bbb6fc70dffcfa6d70379d42015e895a49fa0` (2026-11-05), and both places name it: the `ref:` in `.github/workflows/ci-gates.yml` and the framework binding in `planning-mds/BLUEPRINT.md` section 0. BLUEPRINT section 0 is authoritative for the current value. Advance the two together. CI has an explicit compatibility gate that fails closed at a revision without project-extension support instead of silently skipping required checks.
 
 The Brain adoption candidate was published as PR #1 from `codex/brain-project-adoption-20260907` and merged on 2026-09-07. Local validation continues to work independently of the framework checkout.
 
@@ -27,4 +27,4 @@ Git itself reports the local changes. For a source-control UI, select this repos
 
 The framework changes were prepared on `codex/project-extensions-20260907` (local commit `9a68f7a9c6ba9a0b13d2b5814e06b7fed055e836`). Git transport was unavailable in the authoring session, so publication was deferred rather than abandoned; it was subsequently completed from an environment with working transport. `nebula-agents` PR #91 merged that branch to `main` as `c218bf1776f509a30f71967a1ee79879caa9a000`, and Brain PR #1 merged `codex/brain-project-adoption-20260907` to this repository's `main`. The unreferenced API object created during the failed attempt (`3a6f7f21b513f834ef4b7c1418d51cb8f849956a`) is not a release pin and is not referenced by anything.
 
-Remaining local hygiene: each sibling checkout should be switched to `main` and fast-forwarded from `origin/main`. The `nebula-agents` clone is still on `codex/project-extensions-20260907`, and its local `main` remains at the superseded `4eaf7b3`. Do not merge the pre-squash publication histories back into `main`; delete those branches once each clone is verified against remote `main`.
+Local hygiene is complete (verified 2026-11-14): both sibling clones track `origin/main`, and the pre-squash publication branches named above no longer exist in either clone.

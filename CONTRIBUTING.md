@@ -23,7 +23,7 @@ These are the planning-tool dependencies; the future application runtime require
 .venv/bin/python -m pytest scripts/validation/tests
 ```
 
-The copied KG tooling suite is separate: `.venv/bin/python -m pytest scripts/kg/tests`. Existing failures in framework-specific lookup fixtures are tracked in the adoption plan and do not represent completed runtime features.
+The copied KG tooling suite is separate: `.venv/bin/python -m pytest scripts/kg/tests`. It passes in full (verified 2026-11-14 during the F0064 re-verification).
 
 For framework checks, set the product identity and run from the sibling framework:
 

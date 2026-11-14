@@ -5,7 +5,7 @@
 **Title:** Declare the product manifest
 **Priority:** Medium
 **Phase:** Infrastructure
-**Status:** Not Started
+**Status:** In Progress
 
 ## User Story
 

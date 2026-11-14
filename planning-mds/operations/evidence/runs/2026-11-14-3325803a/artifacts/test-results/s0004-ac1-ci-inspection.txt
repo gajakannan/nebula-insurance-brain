@@ -1,0 +1,7 @@
+F0064-S0004 AC1/AC2: inspection of .github/workflows/ci-gates.yml at fcb249d (job framework-validators, lines 298-348)
+- L304-308  framework checkout: repository gajakannan/nebula-agents, ref d90bbb6fc70dffcfa6d70379d42015e895a49fa0 (full SHA)
+- L322-328  fail-closed guard: exits 1 with ::error:: when framework/agents/scripts/project_checks.py is absent
+- L329-331  context resolution: project_context.py --product-root ../product --action plan-review --json
+- L332-341  shared executor: run_id "$(date -u +%F)-<token_hex(4)>" exported to GITHUB_OUTPUT; project_checks.py --action plan-review --plan-scope project --target project --run-id
+- L342-348  evidence upload: if: always() && run_id != '' ; path product/planning-mds/operations/evidence/runs/<run_id>/
+AC2: BLUEPRINT.md section 0 line 33 names d90bbb6fc70dffcfa6d70379d42015e895a49fa0, the same full SHA as L307 (see g1-preflight.txt).

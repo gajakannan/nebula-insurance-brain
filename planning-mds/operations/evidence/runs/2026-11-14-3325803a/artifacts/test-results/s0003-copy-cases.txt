@@ -1,0 +1,72 @@
+== AC2 exit 1: F0064 PRD 'Dependencies' section emptied in copy
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "fail",
+  "findings": [
+    {
+      "rule_id": "BRAIN-SECTIONS",
+      "message": "Missing or placeholder section: Dependencies",
+      "path": "planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md"
+    }
+  ]
+}
+exit=1
+
+== AC4a: F0009 (folder without PRD.md) flipped Planned->Active in copy registry: expect it selected (missing PRD finding)
+34:| F0009 | Provenance + human-correction lineage | Active | v0.1A | `F0009-provenance-and-human-correction-lineage/` |
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "fail",
+  "findings": [
+    {
+      "rule_id": "BRAIN-ARTIFACT",
+      "message": "Required planning artifact is missing.",
+      "path": "planning-mds/features/F0009-provenance-and-human-correction-lineage/STATUS.md"
+    },
+    {
+      "rule_id": "BRAIN-ARTIFACT",
+      "message": "Required planning artifact is missing.",
+      "path": "planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md"
+    },
+    {
+      "rule_id": "BRAIN-SECTIONS",
+      "message": "Missing or placeholder section: Feature Statement",
+      "path": "planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md"
+    },
+    {
+      "rule_id": "BRAIN-SECTIONS",
+      "message": "Missing or placeholder section: Scope & Boundaries",
+      "path": "planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md"
+    },
+    {
+      "rule_id": "BRAIN-SECTIONS",
+      "message": "Missing or placeholder section: Acceptance Criteria Overview",
+      "path": "planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md"
+    },
+    {
+      "rule_id": "BRAIN-SECTIONS",
+      "message": "Missing or placeholder section: Dependencies",
+      "path": "planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md"
+    },
+    {
+      "rule_id": "BRAIN-STORIES",
+      "message": "Planned feature has no story artifacts.",
+      "path": "planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md"
+    }
+  ]
+}
+exit=1
+
+== AC4b: archived F0001 PRD.md deleted in copy: expect archived feature not selected (still pass)
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "pass",
+  "findings": []
+}
+exit=0
+
+== AC4c: selected set at project scope on HEAD (introspection)
+selected: ['F0064', 'F0065']
