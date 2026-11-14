@@ -1,0 +1,36 @@
+PASS AC1 version == 1 — 1
+PASS AC1 two instructions in order — ['docs/agent-instructions.md', 'docs/plan-review-checklist.md']
+PASS AC1 agent-instructions applies to all actions — {'path': 'docs/agent-instructions.md'}
+PASS AC1 checklist restricted to plan-review — ['plan-review']
+PASS AC1 exactly one check — 1
+PASS AC1 check.id == 'plan-readiness' — 'plan-readiness'
+PASS AC1 check.action == 'plan-review' — 'plan-review'
+PASS AC1 check.stage == 'PR2' — 'PR2'
+PASS AC1 check.event == 'before_stage_complete' — 'before_stage_complete'
+PASS AC1 check.cwd == 'product' — 'product'
+PASS AC1 check.timeout_seconds == 60 — 60
+PASS AC2 argv is a list of strings
+PASS AC2 argv[0] is python3 — ['python3']
+PASS AC2 argv[1] ends with scripts/validation/validate_plan_readiness.py — ['{NEBULA_PRODUCT_ROOT}/scripts/validation/validate_plan_readiness.py']
+PASS AC2 argv carries --product-root
+PASS AC2 argv carries --plan-scope
+PASS AC2 argv carries --target
+PASS AC2 placeholder set == {NEBULA_PRODUCT_ROOT, PLAN_SCOPE, TARGET} — ['NEBULA_PRODUCT_ROOT', 'PLAN_SCOPE', 'TARGET']
+PASS AC2 no shell evaluation token in argv — []
+PASS AC2 no shell/command string key — ['action', 'argv', 'cwd', 'event', 'id', 'inputs', 'stage', 'timeout_seconds']
+PASS AC5 pattern matches a tracked file: planning-mds/BLUEPRINT.md — 1 tracked
+PASS AC5 pattern matches a tracked file: planning-mds/architecture/*.md — 12 tracked
+PASS AC5 pattern matches a tracked file: planning-mds/architecture/decisions/*.md — 77 tracked
+PASS AC5 pattern matches a tracked file: planning-mds/security/*.md — 6 tracked
+PASS AC5 pattern matches a tracked file: planning-mds/api/**/* — 1 tracked
+PASS AC5 pattern matches a tracked file: planning-mds/schemas/**/* — 25 tracked
+PASS AC5 pattern matches a tracked file: planning-mds/features/**/*.md — 175 tracked
+PASS AC5 pattern matches a tracked file: planning-mds/examples/**/* — 72 tracked
+PASS AC5 pattern matches a tracked file: planning-mds/domain/glossary.md — 1 tracked
+PASS AC5 pattern matches a tracked file: docs/agent-instructions.md — 1 tracked
+PASS AC5 pattern matches a tracked file: docs/plan-review-checklist.md — 1 tracked
+PASS AC5 pattern matches a tracked file: scripts/validation/**/*.py — 8 tracked
+PASS AC5 eight governing sources enumerated — ['planning-mds/BLUEPRINT.md', 'planning-mds/architecture/master-blueprint.md', 'planning-mds/architecture/decisions/ADR-0010-provenance-is-mandatory.md', 'planning-mds/architecture/decisions/ADR-0003-one-time-content-extraction.md', 'planning-mds/architecture/decisions/ADR-0007-full-bitemporality.md', 'planning-mds/security/authorization-review.md', 'planning-mds/features/TRACKER-GOVERNANCE.md', 'planning-mds/examples/README.md']
+PASS AC5 every validator read (88 files) is under a declared pattern — []
+
+SUMMARY PASS: 0 failed

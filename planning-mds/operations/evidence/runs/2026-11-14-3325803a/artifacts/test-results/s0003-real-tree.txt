@@ -1,0 +1,99 @@
+== AC1 + NFE (project scope, timed)
+### .venv/bin/python scripts/validation/validate_plan_readiness.py --plan-scope project --target project
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "pass",
+  "findings": []
+}
+exit=0
+
+wall_seconds=0.046
+
+== AC2 invalid invocations (expect exit 2, BRAIN-INVOCATION)
+### .venv/bin/python scripts/validation/validate_plan_readiness.py --plan-scope project --target F0001
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "fail",
+  "findings": [
+    {
+      "rule_id": "BRAIN-INVOCATION",
+      "message": "Project scope requires target 'project'.",
+      "path": "planning-mds/BLUEPRINT.md"
+    }
+  ]
+}
+exit=2
+
+### .venv/bin/python scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0001,F0002
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "fail",
+  "findings": [
+    {
+      "rule_id": "BRAIN-INVOCATION",
+      "message": "Scope does not match the requested targets.",
+      "path": "planning-mds/BLUEPRINT.md"
+    }
+  ]
+}
+exit=2
+
+### .venv/bin/python scripts/validation/validate_plan_readiness.py --plan-scope feature-set --target F0001,F0001
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "fail",
+  "findings": [
+    {
+      "rule_id": "BRAIN-INVOCATION",
+      "message": "Targets must be distinct feature IDs.",
+      "path": "planning-mds/BLUEPRINT.md"
+    }
+  ]
+}
+exit=2
+
+### .venv/bin/python scripts/validation/validate_plan_readiness.py --plan-scope feature --target F01
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "fail",
+  "findings": [
+    {
+      "rule_id": "BRAIN-INVOCATION",
+      "message": "Targets must be distinct feature IDs.",
+      "path": "planning-mds/BLUEPRINT.md"
+    }
+  ]
+}
+exit=2
+
+== AC5 compliance entry point
+### .venv/bin/python scripts/kg/validate_plan_compliance.py planning-mds/features/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "pass",
+  "findings": []
+}
+exit=0
+
+### .venv/bin/python scripts/kg/validate_plan_compliance.py README.md
+Provide an existing plan inside this product's feature tree.
+exit=2
+
+== AC6 own package
+### .venv/bin/python scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0064
+{
+  "schema_version": 1,
+  "check_id": "plan-readiness",
+  "status": "pass",
+  "findings": []
+}
+exit=0
+
+== AC7
+AC7 PASS: TOTAL 3865 tracked files byte-identical; git status unchanged

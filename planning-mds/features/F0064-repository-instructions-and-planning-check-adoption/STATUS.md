@@ -1,6 +1,6 @@
 # F0064 — Repository instructions and planning-check adoption — Status
 
-**Overall Status:** Planned — Phase A and B approved 2026-11-14; feature run (re-verification and closeout) next. Tooling delivered 2026-09-07
+**Overall Status:** In Progress — feature run `2026-11-14-3325803a` (re-verification and closeout) under way. Tooling delivered 2026-09-07
 **Last Updated:** 2026-11-14
 **Plan Run:** `2026-11-10-819c4124` (A+B, existing)
 **Phase A:** Approved 2026-11-10 (`approve-phase-a`, G3 PASS)
@@ -17,21 +17,21 @@
 
 | Story | Title | Status |
 |-------|-------|--------|
-| F0064-S0001 | Declare the product manifest | Not Started |
-| F0064-S0002 | Provide agent instructions and the review checklist | Not Started |
-| F0064-S0003 | Validate plan-readiness structure | Not Started |
-| F0064-S0004 | Enforce checks in CI and document setup | Not Started |
+| F0064-S0001 | Declare the product manifest | In Progress |
+| F0064-S0002 | Provide agent instructions and the review checklist | In Progress |
+| F0064-S0003 | Validate plan-readiness structure | In Progress |
+| F0064-S0004 | Enforce checks in CI and document setup | In Progress |
 
 ## Story × Role Progress
 
 | Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
 |-------|---------|----------|----|----|-------------|----------|--------|---------|
-| F0064-S0001 | — | — | — | ⬜ | ⬜ | — | ⬜ | ⬜ Not Started |
-| F0064-S0002 | — | — | — | ⬜ | ⬜ | — | ⬜ | ⬜ Not Started |
-| F0064-S0003 | — | — | — | ⬜ | ⬜ | — | ⬜ | ⬜ Not Started |
-| F0064-S0004 | — | — | — | ⬜ | ⬜ | — | ⬜ | ⬜ Not Started |
+| F0064-S0001 | not-in-scope | not-in-scope | not-in-scope | done | not-started | not-in-scope | done | in-progress |
+| F0064-S0002 | not-in-scope | not-in-scope | not-in-scope | done | not-started | not-in-scope | done | in-progress |
+| F0064-S0003 | not-in-scope | not-in-scope | not-in-scope | done | not-started | not-in-scope | done | in-progress |
+| F0064-S0004 | not-in-scope | not-in-scope | not-in-scope | in-progress | not-started | not-in-scope | in-progress | in-progress |
 
-Backend, Frontend and AI are not in scope: no runtime code, UI or model call. The Architect confirms the role matrix at Phase B.
+Backend, Frontend and AI are not in scope: there is no runtime code, UI or model call. Security is not in scope (Security Reviewer not required, see below). S0004 QA and DevOps stay in progress until CI on the closeout PR (AC4) is green. Updated live during feature run `2026-11-14-3325803a`.
 
 ## Required Signoff Roles (Set in Planning)
 

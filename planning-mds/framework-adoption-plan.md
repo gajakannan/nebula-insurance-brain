@@ -1,7 +1,9 @@
 # Plan: Repo-specific instructions and checks
 
-Status: Local implementation verified; lifecycle review and release/pin coordination pending.
+Status: Delivered 2026-09-07; closed out by F0064 (plan run 2026-11-10-819c4124)
 Date: 2026-09-07 (design authored 2026-09-06)
+
+> **Historical record (note added 2026-11-14).** The sections below describe the design and the 2026-09-07 rollout as they stood then. Statements that something is pending, blocked or outstanding were true on that date and are kept unchanged as history. Since then, publication completed (`nebula-agents` PR #91 at `c218bf1`, Brain PR #1), the framework pin advanced to the value recorded in [BLUEPRINT.md](BLUEPRINT.md) section 0, local hygiene finished, and the copied KG test suite (`scripts/kg/tests`) passes in full. F0064 feature run `2026-11-14-3325803a` re-verified the Brain-side deliverables. Native host adapters remain an explicit non-goal (F0064 G1 decision 2). Current status is in [framework adoption](../docs/framework-adoption.md).
 
 The goal is to let each product own its instructions, review criteria, and scripts while `nebula-agents` supplies a reusable way to discover them and run required checks. Instructions are the first deliverable. Hooks provide automatic execution where a local check must affect a gate result.
 

@@ -20,9 +20,9 @@ What remains is lifecycle fidelity, not tooling (plan-review `2026-10-30-ff4c758
 
 | ID | Title | Status |
 |----|-------|--------|
-| [F0064-S0001](F0064-S0001-declare-product-manifest.md) | Declare the product manifest | Not Started |
-| [F0064-S0002](F0064-S0002-provide-agent-instructions-and-review-checklist.md) | Provide agent instructions and the review checklist | Not Started |
-| [F0064-S0003](F0064-S0003-validate-plan-readiness-structure.md) | Validate plan-readiness structure | Not Started |
-| [F0064-S0004](F0064-S0004-enforce-checks-in-ci-and-document-setup.md) | Enforce checks in CI and document setup | Not Started |
+| [F0064-S0001](F0064-S0001-declare-product-manifest.md) | Declare the product manifest | In Progress |
+| [F0064-S0002](F0064-S0002-provide-agent-instructions-and-review-checklist.md) | Provide agent instructions and the review checklist | In Progress |
+| [F0064-S0003](F0064-S0003-validate-plan-readiness-structure.md) | Validate plan-readiness structure | In Progress |
+| [F0064-S0004](F0064-S0004-enforce-checks-in-ci-and-document-setup.md) | Enforce checks in CI and document setup | In Progress |
 
 **Total Stories:** 4

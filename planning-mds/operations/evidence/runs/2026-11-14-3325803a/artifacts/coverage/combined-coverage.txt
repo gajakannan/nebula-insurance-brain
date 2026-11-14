@@ -1,0 +1,16 @@
+11 passed in 0.61s
+cli [--plan-scope project --target project] exit=0
+cli [--plan-scope project --target F0001] exit=2
+cli [--plan-scope feature --target F0001,F0002] exit=2
+cli [--plan-scope feature-set --target F0001,F0001] exit=2
+cli [--plan-scope feature --target F01] exit=2
+cli [--plan-scope feature --target F0064] exit=0
+cli [--plan-scope feature-set --target F0064,F0065] exit=0
+cli [--plan-scope feature --target F9999] exit=1
+copy missing-rule exit=1
+copy active-no-prd exit=1
+Name                                            Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------------------------
+scripts/validation/validate_plan_readiness.py     127     12     62     10    88%   21, 38, 57, 61-62, 65, 68, 82-83, 123, 127, 129
+-------------------------------------------------------------------------------------------
+TOTAL                                             127     12     62     10    88%
