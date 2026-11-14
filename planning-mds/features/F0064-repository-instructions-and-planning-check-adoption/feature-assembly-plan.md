@@ -2,7 +2,7 @@
 
 **Created:** 2026-11-10
 **Author:** Architect Agent
-**Status:** Draft — Phase B of plan run `2026-11-10-819c4124`
+**Status:** Approved 2026-11-14 (`approve-phase-b`) — Phase B of plan run `2026-11-10-819c4124`
 
 > Infrastructure variant of the assembly template: the tooling already exists. Each step is a re-verification of delivered behavior at framework pin `d90bbb6`, with exact commands, expected results and the repair rule. The entity, DTO, Casbin, timeline, HTTP, serialization and DI sections do not apply: there is no runtime code, endpoint, permission or persisted product data.
 

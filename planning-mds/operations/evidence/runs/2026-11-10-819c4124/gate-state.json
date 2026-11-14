@@ -63,7 +63,22 @@
       "status": "completed"
     },
     "G5": {
-      "attestations": [],
+      "attestations": [
+        {
+          "acknowledged_preconditions": [],
+          "actor": "gajakannan",
+          "checkpoint_id": "approve-phase-b",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "7c7b7b1f0f6735cdb5b5e1176f58fb8419d1ec47ce46170f7e5217126e6076b9"
+            }
+          ],
+          "note": "operator token approve-phase-b in plan session 2026-11-14T17:04:17+00:00",
+          "role": "architect",
+          "timestamp": "2026-11-14T12:04:40-05:00"
+        }
+      ],
       "completed_operations": [
         "validate-stories",
         "generate-story-index",
@@ -71,20 +86,18 @@
         "kg-write-coverage",
         "kg-check-drift-exit",
         "kg-check-reproducible",
-        "validate-templates"
+        "validate-templates",
+        "checkpoint:approve-phase-b",
+        "kg-compile-post-approval",
+        "kg-write-coverage-post-approval",
+        "kg-check-reproducible-post-approval",
+        "kg-validate-post-approval",
+        "validate-trackers-post-approval",
+        "approve-plan"
       ],
-      "pending_checkpoint": {
-        "description": "User reviews architecture; the Architect records the explicit approval token in gate-decisions.md after exit validation is green. Make any approval-status edits to planning artifacts (STATUS/README/PRD/assembly plan/ADR/kg-source shard), attest, then re-run G5 so the post-approval operations refresh the KG.",
-        "id": "approve-phase-b",
-        "produces": [
-          "phase-b-approved"
-        ],
-        "requires": [
-          "gate-decisions.md"
-        ]
-      },
+      "pending_checkpoint": null,
       "project_checks": {},
-      "status": "pending-checkpoint"
+      "status": "completed"
     }
   }
 }

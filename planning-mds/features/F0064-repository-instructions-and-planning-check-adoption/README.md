@@ -1,6 +1,6 @@
 # F0064 — Repository instructions and planning-check adoption
 
-**Status:** Planned — tooling delivered 2026-09-07; retroactive plan run `2026-11-10-819c4124` in progress (Phase A approved 2026-11-10; Phase B drafted, pending G5 review).
+**Status:** Planned — tooling delivered 2026-09-07; retroactive plan run `2026-11-10-819c4124` complete (Phase A approved 2026-11-10, Phase B approved 2026-11-14); re-verification feature run next.
 **Phase:** Repository Tooling
 **Roadmap:** Now (retroactive closeout, 2026-11-10 roadmap review)
 
