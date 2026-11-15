@@ -27,7 +27,7 @@ Integration checkpoints held:
 
 | Role | Self-review checklist | Result |
 |---|---|---|
-| Quality Engineer | Test plan complete; every AC executed with saved evidence; negatives only on copies; real-tree non-mutation proven; coverage measured (88%) | PASS |
+| Quality Engineer | Test plan complete; every AC executed with saved evidence; negatives only on copies; real-tree non-mutation proven; coverage measured (88% combined coverage (83.87% branch, 90.55% statement)) | PASS |
 | DevOps | Toolchain preflight; CI job and pin contract inspected; no deployment-config change; CI run on PR #49 | PASS |
 | Documentation author | The three repairs state the current facts, keep dated history, and use links that survive the archive move | PASS |
 | Backend / Frontend / AI | Not in scope | n/a |
