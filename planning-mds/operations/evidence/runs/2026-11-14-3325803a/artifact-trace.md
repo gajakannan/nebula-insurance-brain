@@ -20,7 +20,7 @@
 ## Generated Evidence
 
 - `artifacts/test-results/` — S0001 (`s0001-*`), S0002 (`s0002-*`), S0003 (`s0003-*`, including AC7 tree hashes), S0004 (`s0004-*`, including `s0004-ac3-copy-run/` from the executor run on the broken copy), `g1-preflight.txt`, `tree-hash.py`, the post-edit and pre-commit validator outputs, and the `hint.py` output
-- `artifacts/coverage/` — combined (88%) and fixture-only (68%) branch coverage of `validate_plan_readiness.py`, with the reproducible script
+- `artifacts/coverage/` — combined (88.36%: 83.87% branch, 90.55% statement) and fixture-only (68% combined) coverage of `validate_plan_readiness.py`, with the reproducible script
 - `artifacts/diffs/changed-files.txt`, `artifacts/diffs/doc-repairs.diff`
 - `artifacts/gates/` — `run-gate.py` output per stage
 - CI: PR #49 checks (S0004 AC4), URL recorded in `test-execution-report.md`

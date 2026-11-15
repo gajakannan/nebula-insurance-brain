@@ -1,0 +1,100 @@
+{
+  "target": {
+    "status": "archived-done",
+    "id": "feature:F0064",
+    "path": "planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption",
+    "affects": [
+      "capability:plan-readiness-validation",
+      "capability:project-check-ci-enforcement",
+      "capability:project-context-manifest"
+    ],
+    "notes": [
+      "Closed out 2026-11-14 in feature run 2026-11-14-3325803a (operator G4 approve, PR #49): 23/23 ACs re-verified at pin d90bbb6; 0 tooling defects; 3 stale doc statements and review CR-1 repaired; no pin advance needed. All four stories Done; archived.",
+      "G1 2026-11-10 (plan run 2026-11-10-819c4124): scope is Brain-side only; the framework project-extension mechanism is nebula-agents framework F0009, consumed at the pin and not re-proven here.",
+      "G1 2026-11-10: native host adapters (Claude Code, Codex, Hermes) and the native cockpit are an explicit non-goal; the supported path is the shared CLI with an explicit product root.",
+      "G1 2026-11-10: the operator chose fix-everything-first; no re-verification defect may be deferred, including framework-side defects that require a pin advance.",
+      "Plan approvals: Phase A 2026-11-10 (approve-phase-a, G3); Phase B 2026-11-14 (approve-phase-b, G5)."
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:plan-readiness-validation",
+      "label": "Structural plan-readiness validation",
+      "notes": "Deterministic structural validator for Brain planning packages (feature, feature-set and project scopes) with a JSON result and exit codes 0 pass, 1 findings, 2 invalid invocation. Checks artifacts, required sections, the review checklist, the registry and resolvable planning links; future runtime paths are allowed. Semantic adequacy stays reviewer judgment.",
+      "related_nodes": [
+        "capability:project-context-manifest"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md",
+        "planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "tests": [
+          "scripts/validation/tests/test_plan_readiness.py"
+        ],
+        "validation": [
+          "scripts/kg/validate_plan_compliance.py",
+          "scripts/validation/validate_plan_readiness.py"
+        ]
+      }
+    },
+    {
+      "id": "capability:project-check-ci-enforcement",
+      "label": "Project-check CI enforcement and setup guidance",
+      "notes": "The framework-validators CI job fails closed at a framework revision without project-extension support, resolves the product context, and runs the declared checks through the shared executor at project scope, preserving evidence on failure. The CI ref and BLUEPRINT section 0 pin are advanced together (manual rule). Contributor, workspace and adoption documents record setup and status.",
+      "related_nodes": [
+        "capability:plan-readiness-validation",
+        "capability:project-context-manifest"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md",
+        "planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "docs": [
+          "CONTRIBUTING.md",
+          "docs/framework-adoption.md",
+          "planning-mds/framework-adoption-plan.md"
+        ],
+        "infra": [
+          ".github/workflows/ci-gates.yml",
+          "nebula.code-workspace"
+        ]
+      }
+    },
+    {
+      "id": "capability:project-context-manifest",
+      "label": "Project context manifest and local review guidance",
+      "notes": "Version-1 `.nebula-project.yaml` declaring the Brain's agent instructions, the plan-review checklist, and the required plan-readiness check at plan-review PR2. Resolved by the framework project-extension mechanism (nebula-agents framework F0009) at the pinned revision; Brain review text never lives in the framework.",
+      "related_nodes": [
+        "capability:plan-readiness-validation",
+        "capability:project-check-ci-enforcement"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md",
+        "planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md",
+        "planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "config": [
+          ".nebula-project.yaml"
+        ],
+        "docs": [
+          "docs/agent-instructions.md",
+          "docs/plan-review-checklist.md"
+        ]
+      }
+    }
+  ]
+}

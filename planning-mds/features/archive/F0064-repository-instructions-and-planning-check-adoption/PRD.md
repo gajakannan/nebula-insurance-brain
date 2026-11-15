@@ -4,7 +4,7 @@
 **Feature Name:** Repository instructions and planning-check adoption
 **Priority:** Medium
 **Phase:** Infrastructure — Repository Tooling (outside the master blueprint section 95 runtime epics)
-**Status:** Planned — tooling delivered 2026-09-07; Phase A and B approved (2026-11-10, 2026-11-14); re-verification and closeout in the feature run
+**Status:** Done / Archived 2026-11-14 — tooling delivered 2026-09-07; Phase A and B approved (2026-11-10, 2026-11-14); re-verified and closed out in feature run `2026-11-14-3325803a` (PRs #49, #50)
 **Plan Run:** `2026-11-10-819c4124` (A+B, existing)
 
 ## Feature Statement
@@ -43,15 +43,15 @@ The adoption shipped outside the feature lifecycle, so the repository cannot ans
 
 ## Personas
 
-- Dana the Platform Engineer — `../../examples/personas/platform-engineer.md`. Owns CI, pins and repository setup; runs framework actions with an explicit product root.
+- Dana the Platform Engineer — `../../../examples/personas/platform-engineer.md`. Owns CI, pins and repository setup; runs framework actions with an explicit product root.
 
 ## Acceptance Criteria Overview
 
-- [ ] The manifest validates and resolves the intended instructions and check at the pinned framework revision (S0001).
-- [ ] The instructions and checklist name resolvable governing sources, and no Brain review text is copied into the framework (S0002).
-- [ ] The validator honours its output and exit-code contract across feature, feature-set and project scopes, and its fixtures pass (S0003).
-- [ ] CI fails closed without project-extension support, runs the declared check through the shared executor, and keeps the pin agreement; a deliberately broken plan fails the check (S0004).
-- [ ] Contributor and adoption documents describe the current state (S0004).
+- [x] The manifest validates and resolves the intended instructions and check at the pinned framework revision (S0001).
+- [x] The instructions and checklist name resolvable governing sources, and no Brain review text is copied into the framework (S0002).
+- [x] The validator honours its output and exit-code contract across feature, feature-set and project scopes, and its fixtures pass (S0003).
+- [x] CI fails closed without project-extension support, runs the declared check through the shared executor, and keeps the pin agreement; a deliberately broken plan fails the check (S0004).
+- [x] Contributor and adoption documents describe the current state (S0004).
 
 ## UX / Screens
 

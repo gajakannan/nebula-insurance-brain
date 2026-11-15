@@ -18,7 +18,7 @@ Independence note: the same session coordinated the run and reviews it. The revi
 - [x] Backend complete — not in scope (no runtime code)
 - [x] Frontend complete — not in scope (no UI)
 - [x] AI layer complete — not in scope
-- [x] Tests complete — 63 validation tests and 189 KG tests pass; 23/23 ACs evidenced; validator branch coverage 88%
+- [x] Tests complete — 63 validation tests and 189 KG tests pass; 23/23 ACs evidenced; validator 88% combined coverage (83.87% branch, 90.55% statement)
 - [x] Can be deployed independently — documentation-only change set; reverting is the rollback
 
 ## Review Dimensions
@@ -51,7 +51,7 @@ Independence note: the same session coordinated the run and reviews it. The revi
 - [x] Clean architecture respected (product/framework boundary intact)
 - [x] SOLID principles followed (n/a: no code)
 - [x] SOLUTION-PATTERNS.md applied (n/a: no runtime pattern touched)
-- [x] Test coverage ≥80% for feature logic (88% on the verified validator; no changed executable lines)
+- [x] Test coverage ≥80% for feature logic (88% combined coverage (83.87% branch, 90.55% statement) on the verified validator; no changed executable lines)
 
 ## Acceptance Criteria
 

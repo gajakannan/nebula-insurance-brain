@@ -14,6 +14,7 @@ This is the `feature` action for F0064, a retroactive re-verification and closeo
 - `action-context.md`, `artifact-trace.md`, `gate-decisions.md`, `commands.log`, `lifecycle-gates.log`
 - G0 `g0-assembly-plan-validation.md`; G1 `g1-runtime-preflight.md`
 - G2 `g2-self-review.md`, `test-plan.md`, `test-execution-report.md`, `coverage-report.md`, `deployability-check.md`, `g2-deployability-check.md`
+- Post-closeout: `post-closeout-corrections.md` (feature-review `2026-11-14-7cba50ff` findings PM-02, QE-L1, QE-L2)
 - Raw evidence: `artifacts/test-results/`, `artifacts/coverage/`, `artifacts/diffs/`, `artifacts/gates/`
 - Later gates add `code-review-report.md`, `signoff-ledger.md`, `feature-action-execution.md`, `kg-reconciliation.md` and `pm-closeout.md`
 

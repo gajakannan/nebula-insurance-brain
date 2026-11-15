@@ -79,7 +79,7 @@ None. Under G1 decision 3, no defect found by re-verification may be deferred.
 ## Closeout Summary (PM, 2026-11-14)
 
 - **Scope delivered:** the four stories, re-verified (23/23 ACs plus the S0001 edge case and the S0003 NFE) at framework pin `d90bbb6`, feature run `2026-11-14-3325803a`, PR #49.
-- **Tests:** `scripts/validation/tests` 63 passed (11 plan-readiness fixtures); `scripts/kg/tests` 189 passed. Validator branch coverage 88%. CI on PR #49 passed 7/7 checks, including the project-extension steps.
+- **Tests:** `scripts/validation/tests` 63 passed (11 plan-readiness fixtures); `scripts/kg/tests` 189 passed. Validator coverage: 88.36% combined (83.87% branch, 90.55% statement). CI on PR #49 passed 7/7 checks, including the project-extension steps.
 - **Defects:** 0 in the delivered tooling. Three stale documentation statements were repaired (adoption status, adoption-plan header, CONTRIBUTING KG claim), plus code-review CR-1 (native-host wording). No framework change or pin advance was needed.
 - **Reviews:** QE PASS, Code Reviewer APPROVED, DevOps PASS. Security Reviewer and Architect not required. Operator G4 `approve` on 2026-11-14.
 - **Residual risk:** pin agreement between CI and BLUEPRINT section 0 remains a documented manual rule (PRD assumption). An automated guard is out of scope.

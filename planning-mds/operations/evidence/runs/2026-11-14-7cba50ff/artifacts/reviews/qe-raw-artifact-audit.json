@@ -1,0 +1,142 @@
+{
+  "checks": [
+    {
+      "check": "S0001AC3 plan deterministic",
+      "passed": true,
+      "details": {
+        "paths": [
+          "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0001-context-plan-run1.json",
+          "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0001-context-plan-run2.json"
+        ],
+        "sha256": [
+          "dfb4a0f3516e86ad3e638b26573ddbfe3abb521826e5b6d00a00a3d87b8e4104",
+          "dfb4a0f3516e86ad3e638b26573ddbfe3abb521826e5b6d00a00a3d87b8e4104"
+        ]
+      }
+    },
+    {
+      "check": "S0001AC3 plan ordered instructions",
+      "passed": true,
+      "details": {
+        "paths": [
+          "planning-mds/BLUEPRINT.md",
+          "docs/agent-instructions.md"
+        ],
+        "manifest_hash": "dedbcb948fd89e3e2dce365347f322db03bcd479b5d5823095e2ef2773c3e089"
+      }
+    },
+    {
+      "check": "S0001AC3 plan-review deterministic",
+      "passed": true,
+      "details": {
+        "paths": [
+          "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0001-context-plan-review-run1.json",
+          "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0001-context-plan-review-run2.json"
+        ],
+        "sha256": [
+          "ac3c817d0c1dbfa164bea5a446223a77b826c8aa57a49db1204092c125277b26",
+          "ac3c817d0c1dbfa164bea5a446223a77b826c8aa57a49db1204092c125277b26"
+        ]
+      }
+    },
+    {
+      "check": "S0001AC3 plan-review ordered instructions",
+      "passed": true,
+      "details": {
+        "paths": [
+          "planning-mds/BLUEPRINT.md",
+          "docs/agent-instructions.md",
+          "docs/plan-review-checklist.md"
+        ],
+        "manifest_hash": "dedbcb948fd89e3e2dce365347f322db03bcd479b5d5823095e2ef2773c3e089"
+      }
+    },
+    {
+      "check": "S0001AC4 list",
+      "passed": true,
+      "details": {
+        "count": 1,
+        "check_ids": [
+          "plan-readiness"
+        ]
+      }
+    },
+    {
+      "check": "s0003-ac7 tracked hashes byte-identical",
+      "passed": true,
+      "details": {
+        "before": "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0003-ac7-hash-before.txt",
+        "after": "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0003-ac7-hash-after.txt",
+        "lines": 3866,
+        "sha256": "16eb40a86e8e0b5a4c6dfd6ba11f2e6dfd0a41526572348040f9052f8f6b5166"
+      }
+    },
+    {
+      "check": "s0004-ac3 tracked hashes byte-identical",
+      "passed": true,
+      "details": {
+        "before": "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0004-ac3-hash-before.txt",
+        "after": "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0004-ac3-hash-after.txt",
+        "lines": 3866,
+        "sha256": "16eb40a86e8e0b5a4c6dfd6ba11f2e6dfd0a41526572348040f9052f8f6b5166"
+      }
+    },
+    {
+      "check": "S0003AC7 git status identical",
+      "passed": true,
+      "details": {
+        "before": "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0003-ac7-status-before.txt",
+        "after": "planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0003-ac7-status-after.txt"
+      }
+    },
+    {
+      "check": "cross-story manifest hash",
+      "passed": true,
+      "details": {
+        "manifest_hash": "dedbcb948fd89e3e2dce365347f322db03bcd479b5d5823095e2ef2773c3e089",
+        "executor_manifest_hash": "dedbcb948fd89e3e2dce365347f322db03bcd479b5d5823095e2ef2773c3e089"
+      }
+    },
+    {
+      "check": "S0004AC3 fail-closed negative",
+      "passed": true,
+      "details": {
+        "exit_code": 1,
+        "result": {
+          "schema_version": 1,
+          "check_id": "plan-readiness",
+          "status": "fail",
+          "findings": [
+            {
+              "rule_id": "BRAIN-CHECKLIST",
+              "message": "Required local review criterion missing: BRAIN-EXAMPLES",
+              "path": "docs/plan-review-checklist.md"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "check": "coverage floor",
+      "passed": true,
+      "details": {
+        "totals": {
+          "covered_lines": 115,
+          "num_statements": 127,
+          "percent_covered": 88.35978835978835,
+          "percent_covered_display": "88",
+          "missing_lines": 12,
+          "excluded_lines": 0,
+          "num_branches": 62,
+          "num_partial_branches": 10,
+          "covered_branches": 52,
+          "missing_branches": 10
+        },
+        "statement_percent": 90.55118110236221,
+        "branch_percent": 83.87096774193549,
+        "combined_percent": 88.35978835978835
+      }
+    }
+  ],
+  "all_pass": true
+}
