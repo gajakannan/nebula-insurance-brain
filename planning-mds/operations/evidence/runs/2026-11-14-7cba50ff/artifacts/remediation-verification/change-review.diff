@@ -1,0 +1,318 @@
+diff --git a/planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md b/planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+index ce36e3e..a1e0027 100644
+--- a/planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md
++++ b/planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+@@ -4,7 +4,7 @@
+ **Feature Name:** Repository instructions and planning-check adoption
+ **Priority:** Medium
+ **Phase:** Infrastructure — Repository Tooling (outside the master blueprint section 95 runtime epics)
+-**Status:** Planned — tooling delivered 2026-09-07; Phase A and B approved (2026-11-10, 2026-11-14); re-verification and closeout in the feature run
++**Status:** Done / Archived 2026-11-14 — tooling delivered 2026-09-07; Phase A and B approved (2026-11-10, 2026-11-14); re-verified and closed out in feature run `2026-11-14-3325803a` (PRs #49, #50)
+ **Plan Run:** `2026-11-10-819c4124` (A+B, existing)
+ 
+ ## Feature Statement
+@@ -43,15 +43,15 @@ The adoption shipped outside the feature lifecycle, so the repository cannot ans
+ 
+ ## Personas
+ 
+-- Dana the Platform Engineer — `../../examples/personas/platform-engineer.md`. Owns CI, pins and repository setup; runs framework actions with an explicit product root.
++- Dana the Platform Engineer — `../../../examples/personas/platform-engineer.md`. Owns CI, pins and repository setup; runs framework actions with an explicit product root.
+ 
+ ## Acceptance Criteria Overview
+ 
+-- [ ] The manifest validates and resolves the intended instructions and check at the pinned framework revision (S0001).
+-- [ ] The instructions and checklist name resolvable governing sources, and no Brain review text is copied into the framework (S0002).
+-- [ ] The validator honours its output and exit-code contract across feature, feature-set and project scopes, and its fixtures pass (S0003).
+-- [ ] CI fails closed without project-extension support, runs the declared check through the shared executor, and keeps the pin agreement; a deliberately broken plan fails the check (S0004).
+-- [ ] Contributor and adoption documents describe the current state (S0004).
++- [x] The manifest validates and resolves the intended instructions and check at the pinned framework revision (S0001).
++- [x] The instructions and checklist name resolvable governing sources, and no Brain review text is copied into the framework (S0002).
++- [x] The validator honours its output and exit-code contract across feature, feature-set and project scopes, and its fixtures pass (S0003).
++- [x] CI fails closed without project-extension support, runs the declared check through the shared executor, and keeps the pin agreement; a deliberately broken plan fails the check (S0004).
++- [x] Contributor and adoption documents describe the current state (S0004).
+ 
+ ## UX / Screens
+ 
+diff --git a/planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/STATUS.md b/planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/STATUS.md
+index cd80122..6d24729 100644
+--- a/planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/STATUS.md
++++ b/planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/STATUS.md
+@@ -79,7 +79,7 @@ None. Under G1 decision 3, no defect found by re-verification may be deferred.
+ ## Closeout Summary (PM, 2026-11-14)
+ 
+ - **Scope delivered:** the four stories, re-verified (23/23 ACs plus the S0001 edge case and the S0003 NFE) at framework pin `d90bbb6`, feature run `2026-11-14-3325803a`, PR #49.
+-- **Tests:** `scripts/validation/tests` 63 passed (11 plan-readiness fixtures); `scripts/kg/tests` 189 passed. Validator branch coverage 88%. CI on PR #49 passed 7/7 checks, including the project-extension steps.
++- **Tests:** `scripts/validation/tests` 63 passed (11 plan-readiness fixtures); `scripts/kg/tests` 189 passed. Validator coverage: 88.36% combined (83.87% branch, 90.55% statement). CI on PR #49 passed 7/7 checks, including the project-extension steps.
+ - **Defects:** 0 in the delivered tooling. Three stale documentation statements were repaired (adoption status, adoption-plan header, CONTRIBUTING KG claim), plus code-review CR-1 (native-host wording). No framework change or pin advance was needed.
+ - **Reviews:** QE PASS, Code Reviewer APPROVED, DevOps PASS. Security Reviewer and Architect not required. Operator G4 `approve` on 2026-11-14.
+ - **Residual risk:** pin agreement between CI and BLUEPRINT section 0 remains a documented manual rule (PRD assumption). An automated guard is out of scope.
+diff --git a/planning-mds/kg-source/features/F0064.yaml b/planning-mds/kg-source/features/F0064.yaml
+index bffad2f..a90fee8 100644
+--- a/planning-mds/kg-source/features/F0064.yaml
++++ b/planning-mds/kg-source/features/F0064.yaml
+@@ -17,7 +17,7 @@ notes:
+ - 'G1 2026-11-10: native host adapters (Claude Code, Codex, Hermes) and the native cockpit are an explicit non-goal; the supported path is the shared CLI with an explicit product root.'
+ - 'G1 2026-11-10: the operator chose fix-everything-first; no re-verification defect may be deferred, including framework-side defects that require a pin advance.'
+ - 'Plan approvals: Phase A 2026-11-10 (approve-phase-a, G3); Phase B 2026-11-14 (approve-phase-b, G5).'
+-- 'Closed out 2026-11-14 in feature run 2026-11-14-3325803a (operator G4 approve, PR #49): 23/23 ACs re-verified at pin d90bbb6; 0 tooling defects; 3 stale doc statements and review CR-1 repaired; no pin advance needed. All four stories Done; archived.'
++- 'Closed out 2026-11-14 in feature run 2026-11-14-3325803a (operator G4 approve; verification PR #49, closeout PR #50): 23/23 ACs re-verified at pin d90bbb6; 0 tooling defects; 3 stale doc statements and review CR-1 repaired; no pin advance needed. All four stories Done; archived.'
+ affects:
+ - capability:project-context-manifest
+ - capability:plan-readiness-validation
+@@ -41,5 +41,5 @@ story_mappings:
+   - capability:project-check-ci-enforcement
+ completion_state: All four stories Done; 23/23 ACs re-verified at framework pin d90bbb6 in feature run 2026-11-14-3325803a;
+   0 tooling defects, 3 stale documentation statements and review finding CR-1 repaired; QE, Code Reviewer and DevOps
+-  signoff complete; CI green on PR #49.
++  signoff complete; CI green on PR #49 (verification) and PR #50 (final closeout head abe5045).
+ archived_date: '2026-11-14'
+diff --git a/planning-mds/knowledge-graph/coverage-report.yaml b/planning-mds/knowledge-graph/coverage-report.yaml
+index b5d9717..aaae798 100644
+--- a/planning-mds/knowledge-graph/coverage-report.yaml
++++ b/planning-mds/knowledge-graph/coverage-report.yaml
+@@ -1049,8 +1049,8 @@ freshness:
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+       source_count: 2
+-      last_modified: '2026-11-14'
+-      source_hash: 977b55cc65e87735
++      last_modified: '2026-11-15'
++      source_hash: 378f8b9ba44228f7
+       hotspot_rank: 30
+       hotspot_score: 0.0
+       primary_owner: gajapathi.kannan@live.com
+@@ -1076,8 +1076,8 @@ freshness:
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+       source_count: 2
+-      last_modified: '2026-11-14'
+-      source_hash: c343cfa4e0adfc24
++      last_modified: '2026-11-15'
++      source_hash: 33df6366b3b4a3f0
+       hotspot_rank: 17
+       hotspot_score: 0.02
+       primary_owner: gajapathi.kannan@live.com
+@@ -1089,8 +1089,8 @@ freshness:
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+       source_count: 3
+-      last_modified: '2026-11-14'
+-      source_hash: 15d72bb17b9c2c78
++      last_modified: '2026-11-15'
++      source_hash: 95a85c717b64664e
+       hotspot_rank: 33
+       hotspot_score: 0.0
+       primary_owner: gajapathi.kannan@live.com
+@@ -2182,8 +2182,8 @@ freshness:
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/STATUS.md
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/feature-assembly-plan.md
+       source_count: 9
+-      last_modified: '2026-11-14'
+-      source_hash: c194f0af28bc52d7
++      last_modified: '2026-11-15'
++      source_hash: 292a66312ec8ccbe
+     feature:F0065:
+       source_paths:
+       - planning-mds/features/F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md
+diff --git a/planning-mds/knowledge-graph/feature-mappings.yaml b/planning-mds/knowledge-graph/feature-mappings.yaml
+index cd2edfe..6bdd04d 100644
+--- a/planning-mds/knowledge-graph/feature-mappings.yaml
++++ b/planning-mds/knowledge-graph/feature-mappings.yaml
+@@ -811,9 +811,9 @@ features:
+       - capability:project-check-ci-enforcement
+       - capability:project-context-manifest
+     notes:
+-      - 'Closed out 2026-11-14 in feature run 2026-11-14-3325803a (operator G4 approve, PR #49): 23/23
+-        ACs re-verified at pin d90bbb6; 0 tooling defects; 3 stale doc statements and review CR-1 repaired;
+-        no pin advance needed. All four stories Done; archived.'
++      - 'Closed out 2026-11-14 in feature run 2026-11-14-3325803a (operator G4 approve; verification PR
++        #49, closeout PR #50): 23/23 ACs re-verified at pin d90bbb6; 0 tooling defects; 3 stale doc statements
++        and review CR-1 repaired; no pin advance needed. All four stories Done; archived.'
+       - 'G1 2026-11-10 (plan run 2026-11-10-819c4124): scope is Brain-side only; the framework project-extension
+         mechanism is nebula-agents framework F0009, consumed at the pin and not re-proven here.'
+       - 'G1 2026-11-10: native host adapters (Claude Code, Codex, Hermes) and the native cockpit are an
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/README.md b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/README.md
+index fb67385..106746b 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/README.md
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/README.md
+@@ -14,6 +14,7 @@ This is the `feature` action for F0064, a retroactive re-verification and closeo
+ - `action-context.md`, `artifact-trace.md`, `gate-decisions.md`, `commands.log`, `lifecycle-gates.log`
+ - G0 `g0-assembly-plan-validation.md`; G1 `g1-runtime-preflight.md`
+ - G2 `g2-self-review.md`, `test-plan.md`, `test-execution-report.md`, `coverage-report.md`, `deployability-check.md`, `g2-deployability-check.md`
++- Post-closeout: `post-closeout-corrections.md` (feature-review `2026-11-14-7cba50ff` findings PM-02, QE-L1, QE-L2)
+ - Raw evidence: `artifacts/test-results/`, `artifacts/coverage/`, `artifacts/diffs/`, `artifacts/gates/`
+ - Later gates add `code-review-report.md`, `signoff-ledger.md`, `feature-action-execution.md`, `kg-reconciliation.md` and `pm-closeout.md`
+ 
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifact-trace.md b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifact-trace.md
+index c558634..9dd1f1f 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifact-trace.md
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifact-trace.md
+@@ -20,7 +20,7 @@
+ ## Generated Evidence
+ 
+ - `artifacts/test-results/` — S0001 (`s0001-*`), S0002 (`s0002-*`), S0003 (`s0003-*`, including AC7 tree hashes), S0004 (`s0004-*`, including `s0004-ac3-copy-run/` from the executor run on the broken copy), `g1-preflight.txt`, `tree-hash.py`, the post-edit and pre-commit validator outputs, and the `hint.py` output
+-- `artifacts/coverage/` — combined (88%) and fixture-only (68%) branch coverage of `validate_plan_readiness.py`, with the reproducible script
++- `artifacts/coverage/` — combined (88.36%: 83.87% branch, 90.55% statement) and fixture-only (68% combined) coverage of `validate_plan_readiness.py`, with the reproducible script
+ - `artifacts/diffs/changed-files.txt`, `artifacts/diffs/doc-repairs.diff`
+ - `artifacts/gates/` — `run-gate.py` output per stage
+ - CI: PR #49 checks (S0004 AC4), URL recorded in `test-execution-report.md`
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/post-closeout-validation.txt b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/post-closeout-validation.txt
+new file mode 100644
+index 0000000..c3778cb
+--- /dev/null
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/post-closeout-validation.txt
+@@ -0,0 +1,14 @@
++compile exit=0
++write-coverage exit=0
++[PASS] knowledge-graph integrity checks passed.
++validate exit=0
++[PASS] knowledge-graph integrity checks passed.
++reproducibility: OK — committed generated files == compile(source); git policy consistent
++  "status": "pass",
++readiness F0064 exit=0
++[SUMMARY] PASSED (4 gate(s))
++Feature evidence validation passed.
++Summary: validated=1, skipped_pre_contract_archived=0, skipped_active_done_pre_contract=0, skipped_retired_abandoned=0, skipped_retired_superseded=0
++closeout exit=0
++  result: PASS
++✅ Story validation PASSED - No issues found!
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0004-ac4-ci-checks-pr50.txt b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0004-ac4-ci-checks-pr50.txt
+new file mode 100644
+index 0000000..8577b89
+--- /dev/null
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/artifacts/test-results/s0004-ac4-ci-checks-pr50.txt
+@@ -0,0 +1,8 @@
++PR #50 final closeout head: abe5045f785bf4aea4c6dfa09783cc145d2cf1b7 merged as 6acd80560c0bc486bf9a7b28041631f907c2e901
++experience	pass	23s	https://github.com/gajakannan/nebula-insurance-brain/actions/runs/43652089357/job/132622579924	
++framework-validators	pass	16s	https://github.com/gajakannan/nebula-insurance-brain/actions/runs/43652089357/job/132622580186	
++product-gates	pass	53s	https://github.com/gajakannan/nebula-insurance-brain/actions/runs/43652089357/job/132622580198	
++reproducibility	pass	10s	https://github.com/gajakannan/nebula-insurance-brain/actions/runs/43652085631/job/132622567753	
++reproducibility	pass	14s	https://github.com/gajakannan/nebula-insurance-brain/actions/runs/43652089362/job/132622579715	
++runtime-stack	pass	9m56s	https://github.com/gajakannan/nebula-insurance-brain/actions/runs/43652089357/job/132622580141	
++runtime-suites	pass	6m2s	https://github.com/gajakannan/nebula-insurance-brain/actions/runs/43652089357/job/132622580190	
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/code-review-report.md b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/code-review-report.md
+index 1dba318..152f8a8 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/code-review-report.md
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/code-review-report.md
+@@ -18,7 +18,7 @@ Independence note: the same session coordinated the run and reviews it. The revi
+ - [x] Backend complete — not in scope (no runtime code)
+ - [x] Frontend complete — not in scope (no UI)
+ - [x] AI layer complete — not in scope
+-- [x] Tests complete — 63 validation tests and 189 KG tests pass; 23/23 ACs evidenced; validator branch coverage 88%
++- [x] Tests complete — 63 validation tests and 189 KG tests pass; 23/23 ACs evidenced; validator 88% combined coverage (83.87% branch, 90.55% statement)
+ - [x] Can be deployed independently — documentation-only change set; reverting is the rollback
+ 
+ ## Review Dimensions
+@@ -51,7 +51,7 @@ Independence note: the same session coordinated the run and reviews it. The revi
+ - [x] Clean architecture respected (product/framework boundary intact)
+ - [x] SOLID principles followed (n/a: no code)
+ - [x] SOLUTION-PATTERNS.md applied (n/a: no runtime pattern touched)
+-- [x] Test coverage ≥80% for feature logic (88% on the verified validator; no changed executable lines)
++- [x] Test coverage ≥80% for feature logic (88% combined coverage (83.87% branch, 90.55% statement) on the verified validator; no changed executable lines)
+ 
+ ## Acceptance Criteria
+ 
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/coverage-report.md b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/coverage-report.md
+index 4e0ef1e..bc1dae7 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/coverage-report.md
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/coverage-report.md
+@@ -9,16 +9,16 @@ Role: Quality Engineer (Claude Opus 5.5). Date: 2026-11-14.
+ | Backend (`engine/`) | 0 | n/a | Not in scope |
+ | Frontend (`experience/`) | 0 | n/a | Not in scope |
+ | AI (`neuron/`) | 0 | n/a | Not in scope |
+-| Repository tooling under verification: `scripts/validation/validate_plan_readiness.py` | 0 changed (delivered 2026-09-07) | **88% branch coverage** (127 statements, 62 branches) | Above the contract floor |
++| Repository tooling under verification: `scripts/validation/validate_plan_readiness.py` | 0 changed (delivered 2026-09-07) | **88.36% combined coverage**: 83.87% branch (52/62), 90.55% statement (115/127) | Above the contract floor |
+ 
+-This run changes no executable code; only Markdown documentation and planning files changed (`artifacts/diffs/changed-files.txt`). Coverage was therefore measured on the delivered validator that S0003 verifies. The measurement combines the fixture suite with the S0003 CLI invocations: the real tree, the four invalid invocations, feature and feature-set targets, an unregistered target, and copies with a missing checklist rule or an Active row without a PRD. The fixture suite alone covers 68%, because it calls `validate()` directly and bypasses `main()`, the exit-code contract that the CLI runs exercise.
++This run changes no executable code; only Markdown documentation and planning files changed (`artifacts/diffs/changed-files.txt`). Coverage was therefore measured on the delivered validator that S0003 verifies. The measurement combines the fixture suite with the S0003 CLI invocations: the real tree, the four invalid invocations, feature and feature-set targets, an unregistered target, and copies with a missing checklist rule or an Active row without a PRD. The fixture suite alone covers 68% (combined statement and branch measure), because it calls `validate()` directly and bypasses `main()`, the exit-code contract that the CLI runs exercise.
+ 
+ Uncovered lines 21, 38, 57, 61–62, 65, 68, 82–83, 123, 127 and 129 are defensive error branches: path escape, empty artifact, a malformed or duplicate checklist row, an unknown owner, an invalid registry entry, and link-escape or external-link handling. They were read and found consistent with the S0003 contract. No waiver is needed.
+ 
+ ## Raw Artifact Paths
+ 
+ - `artifacts/coverage/combined-coverage.sh` — reproducible measurement script (coverage 7.10.7 and pytest 9.0.3 through `uv run --no-project`; the repository `.venv` is untouched)
+-- `artifacts/coverage/combined-coverage.txt` / `combined-coverage.json` — combined report (88%)
++- `artifacts/coverage/combined-coverage.txt` / `combined-coverage.json` — combined report (88.36% combined; 83.87% branch, 90.55% statement)
+ - `artifacts/coverage/validator-coverage.txt` / `validator-coverage.json` — fixture-only report (68%)
+ 
+ ## Result
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/feature-action-execution.md b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/feature-action-execution.md
+index 096e79d..5d2a854 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/feature-action-execution.md
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/feature-action-execution.md
+@@ -9,13 +9,13 @@ Coordinator: Claude Opus 5.5. NEBULA_PRODUCT_ROOT `/home/gajap/uSandbox/repos/ne
+ | Setup | — | done | `init-run.py`; no concurrent feature-completion run (only the approved plan run `2026-11-10-819c4124`); RUN_ID_PRIOR null |
+ | G0 | Architect | PASS | Approved Phase B assembly plan used as-is (`clean`). Two validator failures were fixed in-run before the pass: a missing diff artifact, and run-folder paths in the diff |
+ | G1 | DevOps | PASS | Toolchain preflight (not runtime-bearing). One failure was fixed before the pass: the G1 gate-decision row was missing |
+-| G2 | QE + DevOps | PASS | 23/23 ACs, edge case and NFE. Three stale doc statements repaired; 0 tooling defects. Coverage 88%. Commit `db723d5`, CI 7/7 green (AC4). Self-review headings fixed before the gate |
++| G2 | QE + DevOps | PASS | 23/23 ACs, edge case and NFE. Three stale doc statements repaired; 0 tooling defects. Coverage 88% combined coverage (83.87% branch, 90.55% statement). Commit `db723d5`, CI 7/7 green (AC4). Self-review headings fixed before the gate |
+ | G3 | Code Reviewer | PASS | APPROVED; CR-1 (Low) fixed and re-verified. Security not required |
+ | G4 | User | APPROVED | Explicit `approve`; gate_policy standard = ACCEPTABLE |
+ | G5 | Product Manager | PASS | 3 roles × 4 stories with run-scoped provenance. One failure was fixed before the pass: the STATUS heading renamed to `Required Role Matrix`, and a non-changed path mention reworded in the code-review report |
+ | G6 | QE | PASS | This candidate validation |
+-| G7 | Architect | — | KG reconciliation (next) |
+-| G8 | Product Manager | — | Closeout, archive, supersession, publish (next) |
++| G7 | Architect | PASS | No binding delta; 14 Phase B-bound symbols indexed (see `kg-reconciliation.md`; row completed post-closeout, see `post-closeout-corrections.md`) |
++| G8 | Product Manager | APPROVED | Archived; `latest-run.json` written; closeout validators pass (see `pm-closeout.md`; row completed post-closeout) |
+ 
+ ## Candidate State
+ 
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/g2-self-review.md b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/g2-self-review.md
+index 03887a5..38fa76d 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/g2-self-review.md
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/g2-self-review.md
+@@ -27,7 +27,7 @@ Integration checkpoints held:
+ 
+ | Role | Self-review checklist | Result |
+ |---|---|---|
+-| Quality Engineer | Test plan complete; every AC executed with saved evidence; negatives only on copies; real-tree non-mutation proven; coverage measured (88%) | PASS |
++| Quality Engineer | Test plan complete; every AC executed with saved evidence; negatives only on copies; real-tree non-mutation proven; coverage measured (88% combined coverage (83.87% branch, 90.55% statement)) | PASS |
+ | DevOps | Toolchain preflight; CI job and pin contract inspected; no deployment-config change; CI run on PR #49 | PASS |
+ | Documentation author | The three repairs state the current facts, keep dated history, and use links that survive the archive move | PASS |
+ | Backend / Frontend / AI | Not in scope | n/a |
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/gate-decisions.md b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/gate-decisions.md
+index 490f461..5b5a2d5 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/gate-decisions.md
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/gate-decisions.md
+@@ -13,3 +13,5 @@ Explicit user decision: `approve`, received in the current conversation via the
+ | G6 | PASS | Claude / QE | 2026-11-14 | Pre-closeout candidate: G0–G5 evidence present and passing; changed_paths populated; booleans match path classes; omissions recorded; scoped trackers pass | None |
+ | G7 | PASS | Claude / Architect role switch | 2026-11-14 | No binding delta (changed docs already bound); 14 Phase B-bound symbols indexed; no new canonical nodes; compile, symbols, decisions and drift pass; coverage deferred to G8 | None |
+ | G8 | APPROVED | Claude / Product Manager after explicit user G4 | 2026-11-14 | archive-move checkpoint: G7 graph verified (compile and drift pass after the move); trackers, shard and BLUEPRINT updated; folder archived; first completion run, so nothing to supersede | None |
++
++Post-closeout corrigendum (2026-11-14, after feature-review `2026-11-14-7cba50ff`): the G2 row's "Validator branch coverage 88%" is the combined statement-and-branch figure (88.36%). Branch coverage is 83.87% and statement coverage is 90.55%, all above the floor. The G2 decision is unchanged. Final closeout CI ran on PR #50, not PR #49. See `post-closeout-corrections.md`.
+diff --git a/planning-mds/operations/evidence/runs/2026-11-14-3325803a/post-closeout-corrections.md b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/post-closeout-corrections.md
+new file mode 100644
+index 0000000..fcb0718
+--- /dev/null
++++ b/planning-mds/operations/evidence/runs/2026-11-14-3325803a/post-closeout-corrections.md
+@@ -0,0 +1,30 @@
++# Post-Closeout Corrections — F0064 run 2026-11-14-3325803a
++
++Date: 2026-11-14. Author: Claude Opus 5.5, acting for the original lifecycle owners (PM, QE). Trigger: feature-review run `2026-11-14-7cba50ff` (verdict TRULY DONE; 4 Low findings). These corrections change no verdict, gate result or AC disposition.
++
++`pm-closeout.md`, `signoff-ledger.md` and `kg-reconciliation.md` are hash-attested at the G8 `archive-move` checkpoint, so they stay byte-identical. Where they are wrong, this note is the correction. Non-attested reports were corrected in place, with each change listed below.
++
++## PM-02 — final closeout CI provenance
++
++- **What was wrong:** `pm-closeout.md` (Validator Results) says CI on the closeout commit is re-checked on PR #49. PR #49 (head `db723d5`, merged as `45117ba`) was squash-merged mid-run, so the closeout commit landed in **PR #50** instead (head `abe5045f785bf4aea4c6dfa09783cc145d2cf1b7`, merged as `6acd80560c0bc486bf9a7b28041631f907c2e901`).
++- **Correction:** S0004 AC4 is satisfied at both heads. PR #49: `artifacts/test-results/s0004-ac4-ci-checks-run1.txt` and `s0004-ac4-ci-framework-validators.txt`. PR #50: `artifacts/test-results/s0004-ac4-ci-checks-pr50.txt`, where all 7 checks pass (CI Gates run 43652089357 and KG reproducibility run 43652089362). The review run's `artifacts/ci-pr50-jobs.json` records framework-validators job 132622580186, with project-extension steps 8–11 succeeding.
++- **Also corrected:** the feature shard `kg-source/features/F0064.yaml` (closing note, `completion_state`) now names both PRs.
++
++## QE-L1 — coverage label
++
++- **What was wrong:** "88% branch coverage" was coverage.py's combined statement-and-branch `Cover` figure. From `artifacts/coverage/combined-coverage.json` the actual values are 115/127 statements (90.55%), 52/62 branches (**83.87%**) and 88.36% combined. All three exceed the 80% floor, so the G2 result is unchanged.
++- **Corrected in place:** `coverage-report.md`, `code-review-report.md`, `g2-self-review.md`, `artifact-trace.md`, `feature-action-execution.md`, and the archived feature `STATUS.md` closeout summary. The historical G2 row in `gate-decisions.md` is left as recorded; its corrigendum is appended below that table.
++
++## QE-L2 — failed-attempt gate diagnostics
++
++- **What was lost:** the first G0 (twice), G1 and G5 `run-gate.py` attempts wrote to `artifacts/gates/g0.txt`, `g1.txt` and `g5.txt`. The passing rerun overwrote each file, so the failed attempts' driver output is gone. This cannot be recovered and is not reconstructed here.
++- **What survives:** exit codes in `lifecycle-gates.log` and `commands.log`. The validator diagnoses were also captured by direct `validate-feature-evidence.py` reruns in this session, and are summarized in `README.md` (Validation Summary) and `feature-action-execution.md`: missing diff artifact; run-folder paths in the diff; missing G1 decision row; STATUS heading `Required Role Matrix`; unchanged-path mention in `code-review-report.md`. Those summaries are narrative, not preserved raw output.
++- **Process fix:** later runs write each gate attempt to a distinct, attempt-numbered output file (as G8 already did: `g8-1.txt`, `g8-2.txt`, `g8-3.txt`).
++
++## Stale G7/G8 rows in the G6 timeline
++
++`feature-action-execution.md` was a G6 snapshot, and its G7/G8 rows still read "— (next)". They now record the actual outcomes, with pointers to `kg-reconciliation.md` and `pm-closeout.md`. This was not one of the review's findings; it was noticed while checking the review.
++
++## Validation
++
++After these edits: `validate-feature-evidence.py --stage closeout`, scoped `validate-trackers.py`, plain `validate.py` (after the coverage refresh), `--check-drift`, and `validate_plan_readiness.py --plan-scope feature --target F0064` all pass. Outputs: `artifacts/test-results/post-closeout-validation.txt`.
