@@ -409,3 +409,21 @@ erDiagram
 ```
 
 A document-local reference is not a canonical Entity. An admission name claim is not a canonical name FactSlot. Proposed ontology/time stores are not claimed as existing FK targets: the scoped time resolver rejects unavailable references, and release identifiers remain pinned opaque contract values until their owning features validate them. Source selectors/origins are server-computed immutable snapshots; no supplied eligibility flag is authoritative. The existing assertion version counter may still increment for stale-review detection, while original claim/evidence fields and new extension/reference/name tables reject mutation.
+
+
+## F0008 bitemporal version contract (Phase B design 2026-11-16)
+
+Plan run `2026-11-16-208a1193`. Proposed [ADR-0078](decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) and the [assembly plan](../features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, CHECKs and triggers. These are proposed migration targets (0014), not claims about the current schema.
+
+- **`canonical_fact_version`** gains nullable `fact-temporal/v1` columns, all NULL for legacy rows:
+  - `temporal_contract`, `temporal_kind`;
+  - per-bound granularity and IANA zone;
+  - `valid_from_basis`, `valid_to_state`;
+  - `attested_from`, `attested_through` and `attested_to`, each a value and a precision;
+  - `validity_unknown_from`;
+  - a composite-owned `split_of_version_id`.
+- **Unchanged:** the `valid`/`recorded` ranges and the ADR-0008 exclusion. An `UNKNOWN` end closes `valid` at the end of the `attested_to` period.
+- **Close-only:** triggers allow only a single close of an open recorded upper bound. DELETE and TRUNCATE are refused, and `canonical_fact_change` is append-only.
+- **Envelope backstop:** a CHECK and the insert trigger enforce the `fact-answer/v1` state/value predicate for identity-v1 slots.
+- **Relationships:** RELATIONSHIP slot versions live in this table. The §78 `canonical_relationship_version` table is not created.
+- **No new tables.** The RLS inventory (F0018) is unchanged.

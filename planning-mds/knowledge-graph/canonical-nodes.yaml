@@ -411,6 +411,19 @@ adrs:
       - capability:typed-fact-answer
       - entity:fact-slot
       - entity:fact-slot-qualifier
+  - id: adr:0078
+    label: Bitemporal Version Contract and Close-Only Immutability (Proposed)
+    path: planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md
+    related_nodes:
+      - adr:0007
+      - adr:0008
+      - adr:0039
+      - adr:0064
+      - adr:0077
+      - capability:bitemporal-canonical-commit
+      - capability:temporal-fact-resolution
+      - entity:canonical-fact-version
+      - schema:fact-temporal-v1
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -479,10 +492,15 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:bitemporal-canonical-commit
     label: Bitemporal canonical commit
-    notes: Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals,
+    notes: 'Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals,
       explicit change reasons, and facts plus audit plus outbox in one transaction (ADR-0007, ADR-0008,
-      ADR-0009).
+      ADR-0009). F0008 Phase B design (Proposed ADR-0078, plan run 2026-11-16-208a1193; runtime not claimed)
+      adds the fact-temporal/v1 contract for identity-v1 slots: per-bound precision and zone, OPEN/BOUNDED/UNKNOWN
+      ends with attestation bounds, start-basis and state guards, close-only immutability triggers, remainder
+      lineage and the fact-answer envelope backstop.'
     related_nodes:
+      - adr:0078
+      - capability:temporal-fact-resolution
       - endpoint:fact-commit
       - endpoint:fact-get
       - entity:canonical-fact-version
@@ -490,8 +508,10 @@ capabilities:
       - entity:outbox-event
       - schema:canonical-commit-request
       - schema:canonical-commit-response
+      - schema:fact-temporal-v1
       - workflow:canonical-commit
     source_docs:
+      - planning-mds/features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
   - id: capability:bounded-delegation
@@ -939,6 +959,32 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:temporal-fact-resolution
+    label: Temporal fact resolution
+    notes: 'Planned (F0008 Phase B design approved 2026-11-17, plan run 2026-11-16-208a1193): two-coordinate
+      reader over canonical fact versions returning the version, validity-unknown (unknown-end window
+      or before an attestation floor) or NOT_PROCESSED for identity-v1 slots; the existing GET adds a
+      temporal block and a validity-unknown 200 variant, no-version stays 404 (F0020 owns HTTP states).
+      Runtime implementation not claimed.'
+    rationale:
+      - adr: adr:0078
+        section: Decision
+        summary: D9 read resolution order and authorization under current grants.
+      - adr: adr:0007
+        section: Decision
+        summary: Canonical facts maintain both valid and recorded periods.
+    related_nodes:
+      - adr:0007
+      - adr:0078
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+      - endpoint:fact-get
+      - entity:canonical-fact-version
+      - schema:fact-temporal-v1
+    source_docs:
+      - planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
+      - planning-mds/features/F0008-bitemporal-canonical-facts/PRD.md
+      - planning-mds/features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
   - id: capability:typed-fact-answer
     label: Typed fact answer carrier
     notes: 'Implemented (F0007 run 2026-11-09-b94cfa12) fact-answer/v1 envelope for identity-v1 slots:
@@ -1274,14 +1320,21 @@ entities:
     label: Canonical fact version
     notes: Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references,
       commit id, and the four separately stored timestamps; overlap prevented by a two-range GiST exclusion.
+      F0008 design (Proposed ADR-0078) adds nullable fact-temporal/v1 columns (granularity/zone per bound,
+      start basis, end state, attestation dates, validity_unknown_from, split_of_version_id) and close-only
+      immutability triggers; RELATIONSHIP slot versions live here (no separate relationship-version table).
     related_entities:
       - entity:fact-slot
       - entity:outbox-event
     related_nodes:
+      - adr:0078
       - capability:bitemporal-canonical-commit
+      - capability:temporal-fact-resolution
       - schema:canonical-commit-response
+      - schema:fact-temporal-v1
     source_docs:
       - planning-mds/architecture/master-blueprint.md
+      - planning-mds/features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
   - id: entity:content-artifact
     label: Content artifact
@@ -2219,6 +2272,24 @@ schemas:
       - adr:0077
       - capability:factslot-identity-resolution
       - entity:fact-slot
+  - id: schema:fact-temporal-v1
+    label: Fact Temporal V1
+    path: planning-mds/schemas/fact-temporal-v1.schema.json
+    notes: F0008 design contract for the valid-time commit block, the stored version temporal block and
+      the validity-unknown read (Proposed ADR-0078); Phase B approved 2026-11-17; runtime implementation
+      not claimed.
+    rationale:
+      - adr: adr:0078
+        section: Decision
+        summary: 'Proposed F0008 design: per-bound granularity and IANA zone, OPEN/BOUNDED/UNKNOWN ends
+          with attestation from F0004 date selections, start basis guards, close-only immutability and
+          validity-unknown reads.'
+    related_nodes:
+      - adr:0078
+      - capability:bitemporal-canonical-commit
+      - capability:temporal-fact-resolution
+      - entity:canonical-fact-version
+      - schema:canonical-commit-request
   - id: schema:interpretation-output-manifest
     label: Interpretation Output Manifest
     path: planning-mds/schemas/interpretation-output-manifest.schema.json

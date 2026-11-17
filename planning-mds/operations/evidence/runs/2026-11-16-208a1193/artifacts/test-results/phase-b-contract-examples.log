@@ -1,0 +1,21 @@
+PASS C01 expected_valid=True got_valid=True :: S0001 AC4 / S0003 AC1: endorsement start DAY America/Chicago, TEMPLATE_FIELD, OPEN
+PASS C02 expected_valid=True got_valid=True :: S0001 AC3 EX-SEM-003: MINUTE start Etc/GMT+6
+PASS C03 expected_valid=True got_valid=True :: S0001 AC5: BOUNDED end with a different granularity
+PASS C04 expected_valid=True got_valid=True :: S0002 AC2 EX-SEM-004: UNKNOWN end with ending evidence and attestation zone
+PASS C05 expected_valid=True got_valid=True :: S0002 AC4 EX-PC-014: unknown start floored by the server
+PASS C06 expected_valid=True got_valid=True :: S0002 AC6: echoed attestation (equality checked by the service)
+PASS C07 expected_valid=True got_valid=True :: S0007 AC3: legacy pilot request shape still valid
+PASS N01 expected_valid=False got_valid=False :: S0001 AC1: missing granularity
+PASS N02 expected_valid=False got_valid=False :: S0001 AC1: unknown granularity WEEK
+PASS N03 expected_valid=False got_valid=False :: S0002 AC1: UNKNOWN end without ending evidence
+PASS N04 expected_valid=False got_valid=False :: S0002 AC1: OPEN end with an end bound
+PASS N05 expected_valid=False got_valid=False :: S0002 AC1: BOUNDED without valid_to
+PASS N06 expected_valid=False got_valid=False :: S0005 AC1: known start without basis
+PASS N07 expected_valid=False got_valid=False :: S0005 AC1 / ADR-0078 D4: caller may not claim ATTESTATION_FLOOR
+PASS N08 expected_valid=False got_valid=False :: S0002 AC4: unknown start without attestation zone
+PASS N09 expected_valid=False got_valid=False :: S0005 AC1: model confidence is not an input
+PASS N10 expected_valid=False got_valid=False :: ADR-0078 D1: temporal block together with pilot valid_from
+PASS R01 expected_valid=True got_valid=True :: S0006 AC5: UNKNOWN-end version as read back (EX-SEM-004)
+PASS R02 expected_valid=True got_valid=True :: S0006 AC3: validity-unknown before an attestation floor (EX-PC-014-B), no value
+PASS R03 expected_valid=False got_valid=False :: S0006 AC3: validity-unknown must not carry a value
+20 cases, 0 failures

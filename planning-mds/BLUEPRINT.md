@@ -257,7 +257,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0007-S0004](features/archive/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) — Done
   - [F0007-S0005](features/archive/F0007-factslot-model/F0007-S0005-define-name-factslots.md) — Done
   - [F0007-S0006](features/archive/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) — Done
-- [F0008 — Bitemporal canonical facts](features/F0008-bitemporal-canonical-facts/README.md) - Planned
+- [F0008 — Bitemporal canonical facts](features/F0008-bitemporal-canonical-facts/README.md) - Planned (Phase A approved 2026-11-16, plan run `2026-11-16-208a1193`; seven stories [S0001](features/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md)–[S0007](features/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md), 46 ACs; Phase B approved 2026-11-17)
 - [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
 - [F0011 — JSON Schema contract system](features/F0011-json-schema-contract-system/README.md) - Planned
@@ -390,7 +390,7 @@ Performance, availability, scalability, and security targets are proposed gates 
 ### 4.7 Architecture Artifacts
 
 - `architecture/master-blueprint.md` — full baseline
-- `architecture/decisions/` — ADR-0001 to ADR-0076 (Accepted architecture and Proposed contracts; ADR-0060 (Docling-Graph) was Rejected on 2026-11-08; ADR-0038/0039/0042/0043/0051/0052/0053 have operator decisions recorded (2026-11-08) and stay Proposed until proven; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8; ADR-0071 and ADR-0072 propose the semantic execution trace contract and the read-only Graph Observatory boundary, see `architecture/graph-observatory-design.md`)
+- `architecture/decisions/` — ADR-0001 to ADR-0078 (Accepted architecture and Proposed contracts; ADR-0060 (Docling-Graph) was Rejected on 2026-11-08; ADR-0038/0039/0042/0043/0051/0052/0053 have operator decisions recorded (2026-11-08) and stay Proposed until proven; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8; ADR-0071 and ADR-0072 propose the semantic execution trace contract and the read-only Graph Observatory boundary, see `architecture/graph-observatory-design.md`; ADR-0077 is Accepted (F0007); ADR-0078 proposes the F0008 bitemporal version contract, section 4.15)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
@@ -516,6 +516,21 @@ Feature run `2026-11-09-b94cfa12` implemented the design: domain modules in `bra
 - a foreign evidence assertion is indistinguishable from a missing one.
 
 ADR-0077 was accepted by the operator on 2026-11-10; ADR-0039 and ADR-0066 stay Proposed.
+
+---
+
+### 4.15 F0008 bitemporal version contract (Phase B design 2026-11-16, approved 2026-11-17)
+
+Plan run `2026-11-16-208a1193`. The [assembly plan](features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md) and Proposed [ADR-0078](architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) define the design:
+
+- **Precision and zone:** each valid-time bound stores a granularity and an IANA zone. Truncation is checked in the service and authoritatively in a database trigger. The caller applies document conventions.
+- **Ends and attestation:** `OPEN`, `BOUNDED` or `UNKNOWN`. An unknown end closes the integrity range at the end of its `attested_to` period (the ADR-0064 option). The attestation dates come from F0004 date selections, never from clocks. An unknown start is floored at `attested_from`, or refused when no evidence is dated.
+- **Immutability:** closing an open recorded interval is the only permitted update. Triggers refuse every other UPDATE, DELETE and TRUNCATE, and `canonical_fact_change` is append-only. Remainders keep their predecessor's payload, evidence and timestamps.
+- **Guards:** a grade-`C` or attestation-floor start closes nothing. A `PRESENT` value closes only to `PRESENT` or `EXPLICIT_NEGATIVE`. An end revision is not a succession.
+- **Reads:** an internal two-coordinate reader returns the version, validity-unknown or `NOT_PROCESSED`. The existing GET adds a `temporal` block and a validity-unknown 200 variant, and a coordinate with no version stays 404.
+- **Relationships:** RELATIONSHIP slots are versioned in the same table, and no separate relationship-version table is created.
+
+No new route, grant, table or UI is added. Migration 0014 is additive with a guarded downgrade. ADR-0064 and ADR-0039 remain Proposed.
 
 ---
 

@@ -1,13 +1,20 @@
 id: entity:canonical-fact-version
 label: Canonical fact version
-notes: Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references, commit
-  id, and the four separately stored timestamps; overlap prevented by a two-range GiST exclusion.
+notes: Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references, commit id, and the
+  four separately stored timestamps; overlap prevented by a two-range GiST exclusion. F0008 design (Proposed ADR-0078) adds
+  nullable fact-temporal/v1 columns (granularity/zone per bound, start basis, end state, attestation dates, validity_unknown_from,
+  split_of_version_id) and close-only immutability triggers; RELATIONSHIP slot versions live here (no separate relationship-version
+  table).
 source_docs:
 - F0001/F0001-S0005-proof-bitemporal-commit.md
 - planning-mds/architecture/master-blueprint.md
+- F0008/feature-assembly-plan.md
 related_nodes:
 - capability:bitemporal-canonical-commit
 - schema:canonical-commit-response
+- adr:0078
+- schema:fact-temporal-v1
+- capability:temporal-fact-resolution
 related_entities:
 - entity:fact-slot
 - entity:outbox-event
