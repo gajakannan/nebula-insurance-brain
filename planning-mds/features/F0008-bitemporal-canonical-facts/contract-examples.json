@@ -1,0 +1,651 @@
+{
+  "description": "F0008 Phase B contract examples (plan run 2026-11-16-208a1193). Structural cases only; the service and database checks (truncation in zone, attestation derivation, guards) are proven in the feature action. Instants are synthetic; development fixtures stay outside the frozen holdout.",
+  "cases": [
+    {
+      "id": "C01",
+      "target": "commit_request",
+      "valid": true,
+      "covers": "S0001 AC4 / S0003 AC1: endorsement start DAY America/Chicago, TEMPLATE_FIELD, OPEN",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "OPEN"
+        }
+      }
+    },
+    {
+      "id": "C02",
+      "target": "commit_request",
+      "valid": true,
+      "covers": "S0001 AC3 EX-SEM-003: MINUTE start Etc/GMT+6",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-07-01T06:01:00Z",
+            "granularity": "MINUTE",
+            "zone": "Etc/GMT+6"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "OPEN"
+        }
+      }
+    },
+    {
+      "id": "C03",
+      "target": "commit_request",
+      "valid": true,
+      "covers": "S0001 AC5: BOUNDED end with a different granularity",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "HUMAN",
+          "valid_to_state": "BOUNDED",
+          "valid_to": {
+            "instant": "2027-01-01T06:01:00Z",
+            "granularity": "MINUTE",
+            "zone": "Etc/GMT+6"
+          }
+        }
+      }
+    },
+    {
+      "id": "C04",
+      "target": "commit_request",
+      "valid": true,
+      "covers": "S0002 AC2 EX-SEM-004: UNKNOWN end with ending evidence and attestation zone",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "UNKNOWN",
+          "ending_evidence_refs": [
+            "6f1c2b2e-1d5a-4c55-9a3e-0b9f0c1a2d01"
+          ],
+          "attestation_zone": "America/Chicago"
+        }
+      }
+    },
+    {
+      "id": "C05",
+      "target": "commit_request",
+      "valid": true,
+      "covers": "S0002 AC4 EX-PC-014: unknown start floored by the server",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": null,
+          "valid_to_state": "OPEN",
+          "attestation_zone": "America/Chicago"
+        }
+      }
+    },
+    {
+      "id": "C06",
+      "target": "commit_request",
+      "valid": true,
+      "covers": "S0002 AC6: echoed attestation (equality checked by the service)",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": null,
+          "valid_to_state": "OPEN",
+          "attestation_zone": "America/Chicago",
+          "expected_attestation": {
+            "attested_from": {
+              "value": "2025-12-15",
+              "precision": "DAY"
+            },
+            "attested_through": {
+              "value": "2025-12-15",
+              "precision": "DAY"
+            },
+            "attested_to": null
+          }
+        }
+      }
+    },
+    {
+      "id": "C07",
+      "target": "commit_request",
+      "valid": true,
+      "covers": "S0007 AC3: legacy pilot request shape still valid",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "valid_from": "2026-06-01T00:00:00Z",
+        "valid_to": null
+      }
+    },
+    {
+      "id": "N01",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0001 AC1: missing granularity",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "OPEN"
+        }
+      }
+    },
+    {
+      "id": "N02",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0001 AC1: unknown granularity WEEK",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "WEEK",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "OPEN"
+        }
+      }
+    },
+    {
+      "id": "N03",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0002 AC1: UNKNOWN end without ending evidence",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "UNKNOWN",
+          "attestation_zone": "America/Chicago"
+        }
+      }
+    },
+    {
+      "id": "N04",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0002 AC1: OPEN end with an end bound",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "OPEN",
+          "valid_to": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          }
+        }
+      }
+    },
+    {
+      "id": "N05",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0002 AC1: BOUNDED without valid_to",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "BOUNDED"
+        }
+      }
+    },
+    {
+      "id": "N06",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0005 AC1: known start without basis",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_to_state": "OPEN"
+        }
+      }
+    },
+    {
+      "id": "N07",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0005 AC1 / ADR-0078 D4: caller may not claim ATTESTATION_FLOOR",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "ATTESTATION_FLOOR",
+          "valid_to_state": "OPEN"
+        }
+      }
+    },
+    {
+      "id": "N08",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0002 AC4: unknown start without attestation zone",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": null,
+          "valid_to_state": "OPEN"
+        }
+      }
+    },
+    {
+      "id": "N09",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "S0005 AC1: model confidence is not an input",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "MENTION_B",
+          "valid_to_state": "OPEN",
+          "confidence": 0.97
+        }
+      }
+    },
+    {
+      "id": "N10",
+      "target": "commit_request",
+      "valid": false,
+      "covers": "ADR-0078 D1: temporal block together with pilot valid_from",
+      "instance": {
+        "value": {
+          "answer_contract": "fact-answer/v1",
+          "state": "PRESENT",
+          "value": {
+            "kind": "money",
+            "amount": "5000000",
+            "currency": "USD"
+          }
+        },
+        "evidence_refs": [
+          "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f"
+        ],
+        "source_received_at": "2026-06-12T14:00:00Z",
+        "artifact_created_at": "2026-06-12T14:05:00Z",
+        "assertion_created_at": "2026-06-12T14:10:00Z",
+        "idempotency_key": "f0008-example-0001",
+        "temporal": {
+          "contract": "fact-temporal/v1",
+          "valid_from": {
+            "instant": "2026-06-01T05:00:00Z",
+            "granularity": "DAY",
+            "zone": "America/Chicago"
+          },
+          "valid_from_basis": "TEMPLATE_FIELD",
+          "valid_to_state": "OPEN"
+        },
+        "valid_from": "2026-06-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "R01",
+      "target": "version_temporal",
+      "valid": true,
+      "covers": "S0006 AC5: UNKNOWN-end version as read back (EX-SEM-004)",
+      "instance": {
+        "contract": "fact-temporal/v1",
+        "temporal_kind": "STATE",
+        "valid_from": {
+          "instant": "2026-01-01T06:00:00Z",
+          "granularity": "DAY",
+          "zone": "America/Chicago"
+        },
+        "valid_from_basis": "TEMPLATE_FIELD",
+        "valid_to_state": "UNKNOWN",
+        "valid_to": {
+          "instant": "2026-08-03T05:00:00Z",
+          "granularity": "DAY",
+          "zone": "America/Chicago"
+        },
+        "attested_from": {
+          "value": "2026-06-01",
+          "precision": "DAY"
+        },
+        "attested_through": {
+          "value": "2026-06-01",
+          "precision": "DAY"
+        },
+        "attested_to": {
+          "value": "2026-08-02",
+          "precision": "DAY"
+        },
+        "validity_unknown_from": "2026-06-02T05:00:00Z",
+        "split_of_version_id": null
+      }
+    },
+    {
+      "id": "R02",
+      "target": "validity_unknown_read",
+      "valid": true,
+      "covers": "S0006 AC3: validity-unknown before an attestation floor (EX-PC-014-B), no value",
+      "instance": {
+        "fact_slot_id": "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f",
+        "validity": "UNKNOWN",
+        "reason": "BEFORE_ATTESTATION_FLOOR",
+        "version_id": "6f1c2b2e-1d5a-4c55-9a3e-0b9f0c1a2d01"
+      }
+    },
+    {
+      "id": "R03",
+      "target": "validity_unknown_read",
+      "valid": false,
+      "covers": "S0006 AC3: validity-unknown must not carry a value",
+      "instance": {
+        "fact_slot_id": "0b3c5d7e-2a4b-4c6d-8e0f-1a2b3c4d5e6f",
+        "validity": "UNKNOWN",
+        "reason": "UNKNOWN_END_WINDOW",
+        "version_id": "6f1c2b2e-1d5a-4c55-9a3e-0b9f0c1a2d01",
+        "value": {
+          "state": "PRESENT"
+        }
+      }
+    }
+  ]
+}

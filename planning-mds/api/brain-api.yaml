@@ -10,7 +10,7 @@ info:
     unchanged. F0002 runtime is approved in its archived feature evidence. F0004 proposes dual-version verified
     content reads and integrity/unavailable responses; those refinements received Phase B design approval on 2026-10-16;
     implementation proof remains required.'
-  version: 0.4.0
+  version: 0.5.0
   contact:
     name: Nebula Insurance Brain
 servers:
@@ -213,11 +213,17 @@ paths:
           format: date-time
       responses:
         '200':
-          description: The single version whose valid and recorded ranges contain both coordinates
+          description: The single version whose valid and recorded ranges contain both coordinates. F0008 design
+            (Proposed ADR-0078; runtime not claimed) adds an optional temporal block to FactVersion and, for identity-v1
+            slots only, an additive FactValidityUnknown variant for a coordinate inside an unknown-end window or before
+            an attestation-floor start; no value is returned in that variant. A coordinate with no version still returns
+            404; HTTP exposure of NOT_PROCESSED remains with F0020.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FactVersion'
+                oneOf:
+                - $ref: '#/components/schemas/FactVersion'
+                - $ref: '#/components/schemas/FactValidityUnknown'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -250,6 +256,12 @@ paths:
         name-evidence sources join the same-UoW source READ checks. A PRESENT member answer must retain its
         immutable canonical member key. Decimal input and canonical output are bounded to 64 total characters;
         oversized exponent expansions are rejected before allocation. Legacy pilot slots are unchanged.
+        F0008 Phase B design (Proposed ADR-0078; runtime not claimed): identity-v1 slots require the
+        fact-temporal/v1 block (per-bound granularity and IANA zone, end state OPEN/BOUNDED/UNKNOWN, start
+        basis); attestation bounds are derived from F0004 document-date selections on the evidence. Split
+        remainders keep their predecessor's payload, evidence and timestamps. Only closing an open recorded
+        interval may update a historical version (database-enforced). Grade-C or attestation-floor starts and
+        non-PRESENT states cannot close a PRESENT value. Legacy pilot slots keep the pilot request shape.
       operationId: commitFact
       tags:
       - Facts
@@ -294,7 +306,9 @@ paths:
             (identity-v1 slots only) adds the lowercase answer-rejection codes listed in ADR-0077 D5 (for example
             state_value_mismatch, absence_scope_required, money_float_rejected, name_evidence_required,
             member_value_mismatch, decimal_invalid) with no
-            detail text.
+            detail text. F0008 design (Proposed ADR-0078) adds temporal_fields_required, granularity_invalid,
+            time_zone_invalid, bound_not_truncated, end_state_invalid, start_unattested, attestation_mismatch,
+            start_basis_invalid, succession_start_unanchored and state_supersession_refused.
           content:
             application/problem+json:
               schema:
@@ -407,7 +421,8 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
     Conflict:
-      description: Stale expected version or concurrent commit
+      description: Stale expected version or concurrent commit. F0008 design maps an ADR-0008 exclusion violation
+        to code temporal_conflict (retryable; no rows written).
       content:
         application/json:
           schema:
@@ -652,6 +667,14 @@ components:
         canonical_accepted_at:
           type: string
           format: date-time
+        temporal:
+          description: F0008 design (Proposed ADR-0078). Present for temporal-v1 versions only; absent for legacy
+            pilot versions.
+          $ref: ../schemas/fact-temporal-v1.schema.json#/$defs/version_temporal
+    FactValidityUnknown:
+      description: F0008 design (Proposed ADR-0078). Identity-v1 slots only. The coordinate lies inside an
+        unknown-end window or before an attestation-floor start; no value is disclosed.
+      $ref: ../schemas/fact-temporal-v1.schema.json#/$defs/validity_unknown_read
     TimeRange:
       type: object
       additionalProperties: false

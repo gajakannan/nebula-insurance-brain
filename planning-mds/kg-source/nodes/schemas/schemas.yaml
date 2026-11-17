@@ -190,3 +190,19 @@ schemas:
   - capability:factslot-identity-resolution
   - entity:fact-slot
   - adr:0077
+- id: schema:fact-temporal-v1
+  label: Fact Temporal V1
+  path: planning-mds/schemas/fact-temporal-v1.schema.json
+  notes: F0008 design contract for the valid-time commit block, the stored version temporal block and the validity-unknown
+    read (Proposed ADR-0078); Phase B approved 2026-11-17; runtime implementation not claimed.
+  rationale:
+  - adr: adr:0078
+    section: Decision
+    summary: 'Proposed F0008 design: per-bound granularity and IANA zone, OPEN/BOUNDED/UNKNOWN ends with attestation
+      from F0004 date selections, start basis guards, close-only immutability and validity-unknown reads.'
+  related_nodes:
+  - capability:bitemporal-canonical-commit
+  - capability:temporal-fact-resolution
+  - entity:canonical-fact-version
+  - schema:canonical-commit-request
+  - adr:0078

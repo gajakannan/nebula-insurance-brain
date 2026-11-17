@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 47
+**Total Stories:** 54
 
 ---
 
@@ -92,6 +92,20 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0008 — Bitemporal canonical facts
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0008-S0001](./F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md) | Record valid-time precision and zone | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0002](./F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md) | Distinguish open, bounded and unknown ends | Critical | MVP | Rosa the Business Reviewer |
+| [F0008-S0003](./F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md) | Split intervals and close recorded time | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0008-S0004](./F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md) | Enforce temporal integrity under concurrency | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0008-S0005](./F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md) | Guard succession by start basis and state | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0006](./F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md) | Resolve facts at a valid and recorded coordinate | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0007](./F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md) | Preserve pilot versions through migration | High | MVP | Ingrid the Persistence Engineer |
+
+---
+
 ## F0064 — Repository instructions and planning-check adoption
 
 | Story ID | Title | Priority | Phase | Persona |
@@ -121,7 +135,7 @@ Auto-generated index of all user stories across feature folders.
 | Phase | Count |
 |-------|-------|
 | Infrastructure | 11 |
-| MVP | 17 |
+| MVP | 24 |
 | MVP — v0.1A | 9 |
 | v0.1A | 4 |
 | v0.1B | 6 |
@@ -132,8 +146,8 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
-| Critical | 24 |
-| High | 19 |
+| Critical | 30 |
+| High | 20 |
 | Medium | 4 |
 
 ---

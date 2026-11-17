@@ -3,18 +3,15 @@ name: Bitemporal canonical facts
 path: planning-mds/features/F0008-bitemporal-canonical-facts
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
 phase: v0.1A
 roadmap_section: Now
 roadmap_order: 1
-rationale: 'Now (2026-11-10 roadmap review): every dependency is done (F0003, F0007), and it heads the temporal/commit
-  critical path F0008 → F0009 → F0010 → F0018 → F0019/F0020 → F0025. Full bitemporality with database-level overlap
-  integrity is a section 115.4 pre-build proof and is required before the endorsement slice (sections 14, 15, 109.2).'
-validation_gate: Plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with
-  owner and date); feature run closes G0–G8 with the section 115.4 bitemporal proof cases (retroactive and concurrent
-  changes, interval splitting, distinct received and accepted times) passing on PostgreSQL.
+rationale: 'Now (2026-11-10 roadmap review): every dependency is done (F0003, F0007), and it heads the temporal/commit critical
+  path F0008 → F0009 → F0010 → F0018 → F0019/F0020 → F0025. Full bitemporality with database-level overlap integrity is a
+  section 115.4 pre-build proof and is required before the endorsement slice (sections 14, 15, 109.2).'
+validation_gate: Plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner and
+  date); feature run closes G0–G8 with the section 115.4 bitemporal proof cases (retroactive and concurrent changes, interval
+  splitting, distinct received and accepted times) passing on PostgreSQL.
 depends_on:
 - feature:F0003
 - feature:F0007
@@ -22,7 +19,122 @@ governed_by:
 - adr:0007
 - adr:0008
 - adr:0064
+- adr:0039
+- adr:0077
+- adr:0078
 notes:
-- Cedar Bridge EX-PC-006/014 (planning-mds/architecture/commercial-pc-example-handoff.md) exercise ADR-0064 kinds, attestation bounds, an unknown start and an UNKNOWN end; teaching fixtures for the PRD, not acceptance evidence.
-- Requirement-ownership amendment 2026-11-08 - The ADR-0039 information state is versioned bitemporally
-  like a value; a later NOT_STATED or EXPLICIT_NEGATIVE supersedes NOT_PROCESSED without erasing it.
+- Cedar Bridge EX-PC-006/014 (planning-mds/architecture/commercial-pc-example-handoff.md) exercise ADR-0064 kinds, attestation
+  bounds, an unknown start and an UNKNOWN end; teaching fixtures for the PRD, not acceptance evidence.
+- Requirement-ownership amendment 2026-11-08 - The ADR-0039 information state is versioned bitemporally like a value; a later
+  NOT_STATED or EXPLICIT_NEGATIVE supersedes NOT_PROCESSED without erasing it.
+- 'Plan run 2026-11-16-208a1193 G1 decisions: store the start basis (template field or human date = grade A; grade C cannot
+  close); a PRESENT value closes only to PRESENT or EXPLICIT_NEGATIVE; an unknown start with undated evidence is refused (START_UNATTESTED);
+  the caller supplies an IANA zone per bound.'
+- 'Phase B operator decisions 2026-11-16: reads before an attestation floor are validity-unknown (EX-PC-014-B); information
+  states are exposed by the internal reader, the GET is additive and a no-version coordinate stays 404 (F0020 owns HTTP states).'
+- 'Phase B approved 2026-11-17 (Proposed ADR-0078): fact-temporal/v1 columns on canonical_fact_version, an UNKNOWN end closing the exclusion range
+  at the end of the attested_to period, close-only immutability triggers, remainder lineage, an envelope backstop and an additive
+  migration 0014; RELATIONSHIP slot versions share the table. Runtime not claimed.'
+affects:
+- capability:bitemporal-canonical-commit
+- capability:temporal-fact-resolution
+- entity:canonical-fact-version
+- endpoint:fact-commit
+- endpoint:fact-get
+uses_api_contract:
+- api:brain-api
+uses_schema:
+- schema:fact-temporal-v1
+- schema:canonical-commit-request
+- schema:canonical-commit-response
+- schema:fact-answer-v1
+- schema:problem-details
+story_mappings:
+- id: story:F0008-S0001
+  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md
+  affects:
+  - capability:bitemporal-canonical-commit
+  - entity:canonical-fact-version
+  uses_schema:
+  - schema:fact-temporal-v1
+  - schema:canonical-commit-request
+  governed_by:
+  - adr:0078
+  - adr:0064
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0008-S0002
+  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md
+  affects:
+  - capability:bitemporal-canonical-commit
+  - capability:temporal-fact-resolution
+  - entity:canonical-fact-version
+  uses_schema:
+  - schema:fact-temporal-v1
+  governed_by:
+  - adr:0078
+  - adr:0064
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0008-S0003
+  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md
+  affects:
+  - capability:bitemporal-canonical-commit
+  - entity:canonical-fact-version
+  uses_schema:
+  - schema:canonical-commit-response
+  governed_by:
+  - adr:0078
+  - adr:0007
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0008-S0004
+  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md
+  affects:
+  - capability:bitemporal-canonical-commit
+  - entity:canonical-fact-version
+  uses_schema:
+  - schema:fact-answer-v1
+  governed_by:
+  - adr:0078
+  - adr:0008
+  - adr:0077
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0008-S0005
+  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md
+  affects:
+  - capability:bitemporal-canonical-commit
+  uses_schema:
+  - schema:fact-temporal-v1
+  - schema:fact-answer-v1
+  governed_by:
+  - adr:0078
+  - adr:0064
+  - adr:0039
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0008-S0006
+  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
+  affects:
+  - capability:temporal-fact-resolution
+  - entity:canonical-fact-version
+  uses_schema:
+  - schema:fact-temporal-v1
+  governed_by:
+  - adr:0078
+  - adr:0007
+  uses_api_contract:
+  - api:brain-api
+- id: story:F0008-S0007
+  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md
+  affects:
+  - capability:bitemporal-canonical-commit
+  - entity:canonical-fact-version
+  uses_schema:
+  - schema:canonical-commit-request
+  governed_by:
+  - adr:0078
+  - adr:0077
+  uses_api_contract:
+  - api:brain-api

@@ -1,10 +1,14 @@
 id: capability:bitemporal-canonical-commit
 label: Bitemporal canonical commit
-notes: Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals, explicit change
-  reasons, and facts plus audit plus outbox in one transaction (ADR-0007, ADR-0008, ADR-0009).
+notes: 'Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals, explicit change reasons,
+  and facts plus audit plus outbox in one transaction (ADR-0007, ADR-0008, ADR-0009). F0008 Phase B design (Proposed ADR-0078,
+  plan run 2026-11-16-208a1193; runtime not claimed) adds the fact-temporal/v1 contract for identity-v1 slots: per-bound precision
+  and zone, OPEN/BOUNDED/UNKNOWN ends with attestation bounds, start-basis and state guards, close-only immutability triggers,
+  remainder lineage and the fact-answer envelope backstop.'
 source_docs:
 - F0001/F0001-S0005-proof-bitemporal-commit.md
 - F0001/PRD.md
+- F0008/feature-assembly-plan.md
 related_nodes:
 - entity:fact-slot
 - entity:canonical-fact-version
@@ -14,3 +18,6 @@ related_nodes:
 - workflow:canonical-commit
 - endpoint:fact-commit
 - endpoint:fact-get
+- adr:0078
+- schema:fact-temporal-v1
+- capability:temporal-fact-resolution

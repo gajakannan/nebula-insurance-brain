@@ -1,8 +1,9 @@
 # F0008 — Bitemporal canonical facts
 
-**Status:** Planned
+**Status:** Planned (Phase A approved 2026-11-16; Phase B approved 2026-11-17)
 **Phase:** v0.1A
 **Roadmap:** Now (2026-11-10 roadmap review)
+**Plan Run:** `2026-11-16-208a1193` (A+B, new)
 
 ## Overview
 
@@ -19,14 +20,79 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 
 ## Documents
 
-The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0008.yaml`.
+- [PRD](PRD.md): scope, G1 decisions, assumptions A1–A4 and dependencies
+- [Personas](personas.md): Ingrid, Rosa, Priya and Mateo (existing personas)
+- [Acceptance criteria checklist](acceptance-criteria-checklist.md): 46 ACs across seven stories
+- [STATUS](STATUS.md): story and role progress and the G1 clarifications
+
+- [Feature assembly plan](feature-assembly-plan.md): Phase B design (migration 0014, the v1 commit and read algorithms, the validation matrix)
+- [GETTING-STARTED](GETTING-STARTED.md): file map and gotchas
+- [Contract examples](contract-examples.json): 20 structural cases for `fact-temporal/v1`
+- [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (Proposed) and [`fact-temporal-v1.schema.json`](../../schemas/fact-temporal-v1.schema.json)
+
+The feature shard is `planning-mds/kg-source/features/F0008.yaml`.
+
+## Proposed Data Model (ER)
+
+```mermaid
+erDiagram
+    FACT_SLOT ||--o{ CANONICAL_FACT_VERSION : versions
+    CANONICAL_FACT_VERSION ||--o{ CANONICAL_FACT_VERSION : split_of_version
+    CANONICAL_FACT_VERSION ||--o{ CANONICAL_FACT_CHANGE : from_version
+    CANONICAL_FACT_VERSION ||--o{ CANONICAL_FACT_CHANGE : to_version
+    CANONICAL_COMMIT ||--o{ CANONICAL_FACT_VERSION : writes
+    ASSERTION }o--o{ CANONICAL_FACT_VERSION : evidence
+    DOCUMENT_VERSION ||--o{ DOCUMENT_DATE_SELECTION : dated_by
+    CANONICAL_FACT_VERSION {
+        uuid id
+        tstzrange valid "exclusion with recorded per slot"
+        tstzrange recorded "close-only update"
+        smallint temporal_contract "NULL legacy or 1"
+        text temporal_kind "STATE now"
+        text valid_from_granularity
+        text valid_from_zone
+        text valid_from_basis
+        text valid_to_state "OPEN BOUNDED UNKNOWN"
+        text valid_to_granularity
+        text valid_to_zone
+        varchar attested_from_value
+        varchar attested_through_value
+        varchar attested_to_value
+        timestamptz validity_unknown_from
+        uuid split_of_version_id
+    }
+```
+
+## Component View
+
+```mermaid
+flowchart LR
+    API["POST/GET /facts (brain_api)"] --> AUTH["AuthorizationExecution (F0002)"]
+    AUTH --> CS["CanonicalCommitService v1 path"]
+    CS --> FAP["FactAnswerPolicy (F0007)"]
+    CS --> BV["bounds: zone + truncation"]
+    CS --> AT["attestation: evidence -> date selection (F0004)"]
+    CS --> G["guards: start basis, state"]
+    CS --> REPO["SqlAlchemyFactCommitRepository"]
+    REPO --> DB[("canonical_fact_version + triggers + GiST exclusion")]
+    API --> RD["TemporalFactReader"]
+    RD --> DB
+```
+
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
+| [F0008-S0001](F0008-S0001-record-valid-time-precision-and-zone.md) | Record valid-time precision and zone | Not Started |
+| [F0008-S0002](F0008-S0002-distinguish-open-bounded-and-unknown-ends.md) | Distinguish open, bounded and unknown ends | Not Started |
+| [F0008-S0003](F0008-S0003-split-intervals-and-close-recorded-time.md) | Split intervals and close recorded time | Not Started |
+| [F0008-S0004](F0008-S0004-enforce-temporal-integrity-under-concurrency.md) | Enforce temporal integrity under concurrency | Not Started |
+| [F0008-S0005](F0008-S0005-guard-succession-by-start-basis-and-state.md) | Guard succession by start basis and state | Not Started |
+| [F0008-S0006](F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md) | Resolve facts at a valid and recorded coordinate | Not Started |
+| [F0008-S0007](F0008-S0007-preserve-pilot-versions-through-migration.md) | Preserve pilot versions through migration | Not Started |
 
-**Total Stories:** 0
+**Total Stories:** 7
 
 ## Statements, time, and governance scope amendment (2026-09-25)
 

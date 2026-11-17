@@ -98,7 +98,7 @@ This glossary keeps the semantic kernel vocabulary and the insurance vocabulary 
 
 ### Canonical Relationship Version
 **Type:** Entity
-**Definition:** A bitemporal accepted relationship between two entities (14, 15)
+**Definition:** A bitemporal accepted relationship between two entities (14, 15). Under ADR-0077/ADR-0078 it is a version of a RELATIONSHIP FactSlot stored in `canonical_fact_version`; master blueprint §78's separate `canonical_relationship_version` table is not created
 
 ### Derivation
 **Type:** Entity
@@ -370,6 +370,10 @@ These definitions come from the 2026-09-25 architecture amendments, which were i
 | Valid-time precision | The granularity stored on each valid-time bound, with values truncated to it | "July 2026" is month precision, not July 1 | F0008 |
 | Unknown end | `valid_to_state = UNKNOWN` with `attested_to`: the fact ended, but the source gives no date; distinct from an open end | EX-SEM-004: "no longer on the account"; [EX-PC-014](../examples/commercial-pc-account/cases.md#ex-pc-014--unknown-start-and-unknown-end): the yard | F0008 |
 | Temporal kind | A property's declared `STATE`, `EVENT`, or `ETERNAL`, which normalizes writes and reads | A loss occurrence is an `EVENT`; a limit is a `STATE` | F0012/F0013 |
+| Start basis | How a version's valid-time start was obtained: `TEMPLATE_FIELD` or `HUMAN` (grade `A`), `MENTION_A/B/C`, or server-assigned `ATTESTATION_FLOOR`; only an anchored start may close a predecessor | A template effective date is `TEMPLATE_FIELD`; a guessed date is grade `C` and closes nothing | F0008 (ADR-0078) |
+| Attestation floor | An unknown start placed at the earliest selected document date among the evidence, never earlier; reads before it are validity-unknown | EX-PC-014: the yard fact starts at 2025-12-15 | F0008 (ADR-0078) |
+| Validity-unknown read | A two-coordinate read that falls inside an unknown-end window or before an attestation floor; it returns no value and is not an ADR-0039 information state | EX-SEM-004 at 2026-07-15 | F0008 (ADR-0078) |
+| Close-only immutability | The rule that the only permitted update to a canonical fact version is closing its open recorded interval, enforced by database triggers | A correction closes and replaces; it never rewrites the old row | F0008 (ADR-0078) |
 | Admission check | A server-side structural check on interpretation output before persistence: the quote is in the block, names are in their quote, time words are in their quote; offsets are computed by the server | EX-SEM-005b: a fabricated quote is dropped | F0006/F0016 |
 | Interpretation drop | A persisted record of a rejected, malformed, truncated, or uninterpreted item with its reason code; drops make a run `PARTIAL` and feed `NOT_PROCESSED` | `QUOTE_NOT_IN_SOURCE`, `BLOCK_UNINTERPRETED` | F0016/F0022 |
 | Text origin | How a block's words were obtained: `STATED`, `OCR`, `TRANSCRIBED`, or `DESCRIBED`; described-only evidence cannot supersede a fact | EX-SEM-006: a chart description versus the SOV table | F0004 |

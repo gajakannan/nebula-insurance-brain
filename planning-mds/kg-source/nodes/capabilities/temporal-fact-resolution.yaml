@@ -1,0 +1,25 @@
+id: capability:temporal-fact-resolution
+label: Temporal fact resolution
+notes: 'Planned (F0008 Phase B design approved 2026-11-17, plan run 2026-11-16-208a1193): two-coordinate reader over canonical fact versions
+  returning the version, validity-unknown (unknown-end window or before an attestation floor) or NOT_PROCESSED for
+  identity-v1 slots; the existing GET adds a temporal block and a validity-unknown 200 variant, no-version stays 404
+  (F0020 owns HTTP states). Runtime implementation not claimed.'
+source_docs:
+- F0008/feature-assembly-plan.md
+- F0008/PRD.md
+- F0008/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
+rationale:
+- adr: adr:0078
+  section: Decision
+  summary: D9 read resolution order and authorization under current grants.
+- adr: adr:0007
+  section: Decision
+  summary: Canonical facts maintain both valid and recorded periods.
+related_nodes:
+- adr:0078
+- adr:0007
+- entity:canonical-fact-version
+- schema:fact-temporal-v1
+- endpoint:fact-get
+- capability:bitemporal-canonical-commit
+- capability:authorization-enforcement
