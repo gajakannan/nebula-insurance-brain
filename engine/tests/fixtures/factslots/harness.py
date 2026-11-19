@@ -149,10 +149,22 @@ class FactSlotWorld:
     async def commit(self, slot_id: UUID, value: dict, *, principal=None, valid_from=None):  # type: ignore[no-untyped-def]
         now = datetime.now(UTC)
         start = valid_from or now - timedelta(days=1)
+        time_shape: dict[str, object] = {"valid_from": start.isoformat(), "valid_to": None}
+        if self.scalar("SELECT identity_version FROM fact_slot WHERE id = %s", slot_id) == 1:
+            # F0008 S0007 AC3: identity-v1 slots take the fact-temporal/v1 block. The
+            # start keeps this helper's meaning, truncated to a UTC day.
+            day = start.astimezone(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+            time_shape = {
+                "temporal": {
+                    "contract": "fact-temporal/v1",
+                    "valid_from": {"instant": day.isoformat(), "granularity": "DAY", "zone": "UTC"},
+                    "valid_from_basis": "TEMPLATE_FIELD",
+                    "valid_to_state": "OPEN",
+                }
+            }
         body = {
             "value": value,
-            "valid_from": start.isoformat(),
-            "valid_to": None,
+            **time_shape,
             "change_reason": None,
             "evidence_refs": [],
             "review_decision_id": None,

@@ -7,6 +7,8 @@ from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
+from brain_domain.temporal import EndState, VersionTemporal
+
 
 class ChangeReason(StrEnum):
     SUPERSEDED = "superseded"
@@ -31,11 +33,13 @@ class FactSlot:
 class CommitProposal:
     """One canonical-commit proposal (master blueprint section 109.2,
     F0001-S0005). Matches `planning-mds/schemas/canonical-commit-request
-    .schema.json`."""
+    .schema.json`: legacy pilot slots send `valid_from`/`valid_to`, and
+    identity-v1 slots send the raw `fact-temporal/v1` block in `temporal`, which
+    the commit service parses so that each refusal has its own code (F0008)."""
 
     slot_id: UUID
     value: Mapping[str, Any]
-    valid_from: datetime
+    valid_from: datetime | None
     valid_to: datetime | None
     change_reason: ChangeReason | None
     evidence_refs: tuple[UUID, ...]
@@ -45,6 +49,7 @@ class CommitProposal:
     assertion_created_at: datetime
     expected_current_version_id: UUID | None
     idempotency_key: str
+    temporal: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,3 +75,19 @@ class FactVersion:
     evidence_refs: tuple[UUID, ...]
     commit_id: UUID
     canonical_accepted_at: datetime
+    # F0008 (S0003 AC3, S0006 AC5): remainders copy these from their predecessor,
+    # and the read returns them. `temporal` is None for a legacy pilot version.
+    review_decision_id: UUID | None = None
+    source_received_at: datetime | None = None
+    artifact_created_at: datetime | None = None
+    assertion_created_at: datetime | None = None
+    temporal: VersionTemporal | None = None
+    ending_evidence_refs: tuple[UUID, ...] = ()
+
+    @property
+    def valid_to_state(self) -> EndState:
+        """S0007 AC2: a legacy row has no stored end state, so a NULL upper bound
+        reads as OPEN and a finite one as BOUNDED. Nothing is invented."""
+        if self.temporal is not None:
+            return self.temporal.valid_to_state
+        return EndState.OPEN if self.valid_end is None else EndState.BOUNDED

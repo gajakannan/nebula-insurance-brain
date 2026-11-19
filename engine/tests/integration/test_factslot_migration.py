@@ -120,7 +120,9 @@ async def test_s0006_ac1_ac6_up_down_up_keeps_pilot_rows_identical(database):
     assert _snapshot(database) == before
     with psycopg.connect(database) as connection:
         assert connection.execute("SELECT to_regclass('fact_slot_qualifier') IS NULL").fetchone()[0]
-    _upgrade("head")
+    # F0008: pinned to F0007's head. 0014 adds canonical_fact_version columns by
+    # design; test_temporal_migration.py proves the pilot rows across that cycle.
+    _upgrade("0013")
     assert _snapshot(database) == before
 
 

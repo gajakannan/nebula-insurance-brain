@@ -71,6 +71,26 @@ class FactAnswerRejectedApiError(UnprocessableError):
         self.code = code
 
 
+class TemporalRejectedApiError(UnprocessableError):
+    """F0008 (ADR-0078): a fact-temporal/v1 refusal. `code` is the lowercase
+    reason; the response carries no detail text and nothing was written."""
+
+    title = "Temporal Commit Rejected"
+
+    def __init__(self, code: str) -> None:
+        super().__init__(None)
+        self.code = code
+
+
+class TemporalBlockUnsupportedApiError(BrainError):
+    """A fact-temporal/v1 block was sent to a legacy pilot slot, which keeps the
+    pilot request shape (ADR-0078 D1)."""
+
+    status_code = status.HTTP_400_BAD_REQUEST
+    code = "invalid_request"
+    title = "Invalid Request"
+
+
 class InvalidRangeApiError(BrainError):
     """Empty or null `valid` range on a commit proposal (F0001-S0005)."""
 
@@ -95,6 +115,15 @@ class ConcurrentCommitApiError(BrainError):
     status_code = status.HTTP_409_CONFLICT
     code = "concurrent_commit"
     title = "Concurrent Commit"
+
+
+class TemporalConflictApiError(BrainError):
+    """F0008 (ADR-0078 D6): the exclusion constraint (`23P01`) refused an
+    overlapping version. Retryable; the unit of work wrote no row."""
+
+    status_code = status.HTTP_409_CONFLICT
+    code = "temporal_conflict"
+    title = "Temporal Conflict"
 
 
 class ServiceUnavailableError(BrainError):

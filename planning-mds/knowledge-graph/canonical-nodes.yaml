@@ -497,7 +497,11 @@ capabilities:
       ADR-0009). F0008 Phase B design (Proposed ADR-0078, plan run 2026-11-16-208a1193; runtime not claimed)
       adds the fact-temporal/v1 contract for identity-v1 slots: per-bound precision and zone, OPEN/BOUNDED/UNKNOWN
       ends with attestation bounds, start-basis and state guards, close-only immutability triggers, remainder
-      lineage and the fact-answer envelope backstop.'
+      lineage and the fact-answer envelope backstop. As built (feature run 2026-11-17-1a4ae2f0): the commit
+      service branches on the slot identity version; v1 path parses and validates bounds, derives attestation
+      from F0004 selections, applies D8 guards (end revision is not succession) and writes lineage remainders;
+      the legacy path keeps the pilot shape with predecessor timestamps and review linkage on remainders;
+      migration 0014.'
     related_nodes:
       - adr:0078
       - capability:temporal-fact-resolution
@@ -511,9 +515,9 @@ capabilities:
       - schema:fact-temporal-v1
       - workflow:canonical-commit
     source_docs:
-      - planning-mds/features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+      - planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
   - id: capability:bounded-delegation
     label: Bounded delegation
     notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): server-owned expiring delegation bound to
@@ -965,7 +969,9 @@ capabilities:
       reader over canonical fact versions returning the version, validity-unknown (unknown-end window
       or before an attestation floor) or NOT_PROCESSED for identity-v1 slots; the existing GET adds a
       temporal block and a validity-unknown 200 variant, no-version stays 404 (F0020 owns HTTP states).
-      Runtime implementation not claimed.'
+      As built (feature run 2026-11-17-1a4ae2f0): brain_temporal.reader.TemporalFactReader over the repository
+      resolve_at/next_version_after queries; attesting documents join the GET additional reads so dates
+      of unreadable documents are never disclosed (whole-read 404).'
     rationale:
       - adr: adr:0078
         section: Decision
@@ -982,9 +988,9 @@ capabilities:
       - entity:canonical-fact-version
       - schema:fact-temporal-v1
     source_docs:
-      - planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
-      - planning-mds/features/F0008-bitemporal-canonical-facts/PRD.md
-      - planning-mds/features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
+      - planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
+      - planning-mds/features/archive/F0008-bitemporal-canonical-facts/PRD.md
+      - planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
   - id: capability:typed-fact-answer
     label: Typed fact answer carrier
     notes: 'Implemented (F0007 run 2026-11-09-b94cfa12) fact-answer/v1 envelope for identity-v1 slots:
@@ -1323,6 +1329,8 @@ entities:
       F0008 design (Proposed ADR-0078) adds nullable fact-temporal/v1 columns (granularity/zone per bound,
       start basis, end state, attestation dates, validity_unknown_from, split_of_version_id) and close-only
       immutability triggers; RELATIONSHIP slot versions live here (no separate relationship-version table).
+      As built by migration 0014 (feature run 2026-11-17-1a4ae2f0); ending evidence refs are stored in
+      the evidence JSONB as ending_refs.
     related_entities:
       - entity:fact-slot
       - entity:outbox-event
@@ -1334,8 +1342,8 @@ entities:
       - schema:fact-temporal-v1
     source_docs:
       - planning-mds/architecture/master-blueprint.md
-      - planning-mds/features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
+      - planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
   - id: entity:content-artifact
     label: Content artifact
     notes: 'Immutable parse-once bundle for one document version: docling-document.json, normalized.md,
@@ -2008,6 +2016,20 @@ migrations:
       - capability:factslot-identity-resolution
       - entity:fact-slot
       - migration:f0007-factslot-identity
+  - id: migration:f0008-bitemporal-contract
+    label: F0008 fact-temporal/v1 contract and close-only immutability (revision 0014, additive)
+    path: engine/migrations/versions/0014_f0008_bitemporal_contract.py
+    notes: Adds 16 nullable fact-temporal/v1 columns to canonical_fact_version (temporal_contract NULL
+      marks a legacy version; nothing backfilled), CHECKs for each shape, a composite split-lineage self-FK
+      and a partial index. A BEFORE INSERT trigger binds the contract to the slot identity version, checks
+      zones against pg_timezone_names and truncation with date_trunc in zone, and backs the fact-answer/v1
+      envelope. Close-only UPDATE, no DELETE or TRUNCATE on versions; canonical_fact_change append-only.
+      Preflight refuses a bad identity-v1 envelope; downgrade refuses while v1 or lineage rows exist.
+      No table, role, grant, RLS, BYPASSRLS or SECURITY DEFINER.
+    related_nodes:
+      - adr:0078
+      - capability:bitemporal-canonical-commit
+      - entity:canonical-fact-version
 policy_rules:
   - id: policy_rule:content-artifact-ingest
     label: content_artifact:ingest

@@ -10,7 +10,7 @@
 **Date:** 2026-11-16
 **Owner:** Architect
 **Design review:** F0008 Phase B, plan run `2026-11-16-208a1193`. Approved by the operator token `approve-phase-b` on 2026-11-17, including the D8 end-revision clarification. The ADR stays Proposed.
-**Formal acceptance:** requires the PostgreSQL proofs listed under [Proof gates](#proof-gates-before-acceptance), run in the F0008 feature action. Plan approval alone is not runtime acceptance.
+**Formal acceptance:** requires the PostgreSQL proofs listed under [Proof gates](#proof-gates-before-acceptance), run in the F0008 feature action. Plan approval alone is not runtime acceptance. Feature run `2026-11-17-1a4ae2f0` (2026-11-18) met all six proof gates ([architect review](../../operations/evidence/runs/2026-11-17-1a4ae2f0/architect-implementation-review.md)); acceptance remains an operator decision.
 **Refines:**
 - [ADR-0007](ADR-0007-full-bitemporality.md) and [ADR-0008](ADR-0008-database-level-temporal-integrity.md), both Accepted. This ADR keeps the two-range exclusion and settles the §109.2 open questions.
 - [ADR-0064](ADR-0064-time-interpretation-and-valid-time-precision.md) §5 and §7, Proposed. This ADR implements their F0008 storage share and adopts ADR-0064's recommended representation of an unknown end.
@@ -181,7 +181,9 @@ These guards run in the service after the lock and before any effect, against ov
   An end revision changes only the end, for example `OPEN` → `UNKNOWN` (EX-PC-014) or `OPEN` → `BOUNDED`. It closes and replaces that version without the start-basis guard, because its start closes nothing. Any other difference makes it a succession, and the guard applies.
 - **Information state.** If a predecessor's envelope state is `PRESENT`, the successor's state must be `PRESENT` or `EXPLICIT_NEGATIVE`; otherwise the commit is refused with `state_supersession_refused`. A predecessor that is not `PRESENT` may be closed by any state.
 
-Each refusal is audited as a commit refusal with its reason code and writes no fact row. F0018 later routes refusals to review and adds §54 source authority.
+Each refusal is audited as a commit refusal and writes no fact row. F0018 later routes refusals to review and adds §54 source authority.
+
+*Feature G0 note (run `2026-11-17-1a4ae2f0`, 2026-11-17):* the refusal is audited through the existing F0002 durable decision, with `operation_outcome = failed`, and its reason code is returned as the 422 problem `code`. The AuthX decision record has no business-reason field, so durable persistence of the reason code per refusal moves to F0018 together with review routing.
 
 ### D9. Reads
 
@@ -255,6 +257,6 @@ All of these run on PostgreSQL 18 in the F0008 feature action.
 ## References
 
 - Master blueprint §§14, 15, 16, 78, 87, 107.4, 109.2, 115.4.
-- [F0008 assembly plan](../../features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md).
+- [F0008 assembly plan](../../features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md).
 - [`fact-temporal-v1.schema.json`](../../schemas/fact-temporal-v1.schema.json).
 - Examples: [EX-SEM-003/004](../../examples/statements-time-and-governance.md#time-interpretation), [EX-PC-006/014](../../examples/commercial-pc-account/cases.md#ex-pc-014--unknown-start-and-unknown-end).

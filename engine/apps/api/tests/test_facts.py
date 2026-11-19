@@ -131,6 +131,9 @@ async def client(rsa_key: rsa.RSAPrivateKey):
         yield test_client
 
     async with session_factory() as session:
+        # F0008 (ADR-0078 D5): the version and change tables refuse TRUNCATE.
+        # Test cleanup alone bypasses that as a superuser; app roles cannot.
+        await session.execute(text("SET LOCAL session_replication_role = replica"))
         await session.execute(
             text(
                 "TRUNCATE TABLE outbox_event, canonical_fact_change, canonical_fact_version, "

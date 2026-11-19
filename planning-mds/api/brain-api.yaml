@@ -667,6 +667,30 @@ components:
         canonical_accepted_at:
           type: string
           format: date-time
+        review_decision_id:
+          description: F0008 (S0006 AC5), additive. Review linkage; a split remainder keeps its predecessor's.
+          type:
+          - string
+          - 'null'
+          format: uuid
+        source_received_at:
+          description: F0008 (S0003 AC6, S0006 AC5), additive. A remainder keeps its predecessor's value.
+          type:
+          - string
+          - 'null'
+          format: date-time
+        artifact_created_at:
+          description: F0008 (S0006 AC5), additive.
+          type:
+          - string
+          - 'null'
+          format: date-time
+        assertion_created_at:
+          description: F0008 (S0006 AC5), additive.
+          type:
+          - string
+          - 'null'
+          format: date-time
         temporal:
           description: F0008 design (Proposed ADR-0078). Present for temporal-v1 versions only; absent for legacy
             pilot versions.

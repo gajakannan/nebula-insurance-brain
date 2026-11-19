@@ -1,5 +1,8 @@
-# F0008 planning bindings (plan run 2026-11-16-208a1193). Architecture and schema paths only; code paths are
-# bound by the Architect at feature G7. Feature-folder documents are covered by the feature shard's path.
+# F0008 bindings. Planning paths from plan run 2026-11-16-208a1193; as-built code paths added by
+# the Architect at feature G7, run 2026-11-17-1a4ae2f0. New files are bound by literal path
+# because wildcard bindings resolve only against git-tracked files. Feature-folder documents are
+# not bound here: the feature shard's path covers them across the G8 archive move. The commit-side
+# code joins the existing capability:bitemporal-canonical-commit record in bindings/f0001.yaml.
 bindings:
 - id: capability:temporal-fact-resolution
   paths:
@@ -7,3 +10,21 @@ bindings:
     - planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md
     schemas:
     - planning-mds/schemas/fact-temporal-v1.schema.json
+    backend:
+    - engine/packages/brain-temporal/src/brain_temporal/reader.py
+    - engine/apps/api/src/brain_api/routes/facts.py
+    - engine/apps/api/src/brain_api/schemas/facts.py
+    tests:
+    - engine/tests/integration/test_temporal_reads.py
+- id: entity:canonical-fact-version
+  paths:
+    backend:
+    - engine/packages/brain-persistence/src/brain_persistence/models.py
+    tests:
+    - engine/tests/integration/test_temporal_immutability.py
+- id: migration:f0008-bitemporal-contract
+  paths:
+    backend:
+    - engine/migrations/versions/0014_f0008_bitemporal_contract.py
+    tests:
+    - engine/tests/integration/test_temporal_migration.py

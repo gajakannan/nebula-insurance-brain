@@ -1,19 +1,19 @@
 version: 0
-generated_at: '2026-11-14T23:07:57+00:00'
+generated_at: '2026-11-18T12:49:57+00:00'
 summary:
-  total_decisions: 22
+  total_decisions: 23
   by_kind:
     DECISION: 0
     SUPERSEDES: 0
     TRADEOFF: 0
-    WHY: 22
-  resolved_node_count: 11
-  resolved_symbol_count: 18
+    WHY: 23
+  resolved_node_count: 12
+  resolved_symbol_count: 19
   ambiguous_count: 0
 decisions:
-- id: decision:engine-apps-api-src-brain-api-routes-facts-l83-why
+- id: decision:engine-apps-api-src-brain-api-routes-facts-l116-why
   file: engine/apps/api/src/brain_api/routes/facts.py
-  line: 83
+  line: 116
   kind: WHY
   text: authorize the scope of this exact payload in the slot read's UoW.
   resolved_node: capability:durable-authorization-decisions
@@ -38,6 +38,13 @@ decisions:
   text: hold the same lock through validation and replacement so another
   resolved_node: migration:f0007-identity-guard
   resolved_symbol: symbol:migration-f0007-identity-guard:0013-f0007-identity-guard.upgrade
+- id: decision:engine-migrations-versions-0014-f0008-bitemporal-contract-l301-why
+  file: engine/migrations/versions/0014_f0008_bitemporal_contract.py
+  line: 301
+  kind: WHY
+  text: hold the lock from the scan through the new constraints so no writer can
+  resolved_node: migration:f0008-bitemporal-contract
+  resolved_symbol: symbol:migration-f0008-bitemporal-contract:0014-f0008-bitemporal-contract.preflight
 - id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l126-why
   file: engine/packages/brain-contracts/src/brain_contracts/assertions.py
   line: 126

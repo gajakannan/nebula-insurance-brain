@@ -261,8 +261,10 @@ async def test_s0002_ac3_ac5_members_carry_independent_versions(slot_world):
         m2.member_slot_id,
     )
     # A change addressed to member A (EX-SLOT-003) touches no row of member B.
+    # F0008 G1 decision 2 (ADR-0078 D8): a PRESENT answer closes only to PRESENT or
+    # EXPLICIT_NEGATIVE, so the member change uses EXPLICIT_NEGATIVE.
     change = await w.commit(
-        m1.member_slot_id, {"answer_contract": ENVELOPE, "state": "NOT_APPLICABLE"}
+        m1.member_slot_id, {"answer_contract": ENVELOPE, "state": "EXPLICIT_NEGATIVE"}
     )
     assert change.status_code == 201
     assert (

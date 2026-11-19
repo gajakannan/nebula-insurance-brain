@@ -96,13 +96,13 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0008-S0001](./F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md) | Record valid-time precision and zone | Critical | MVP | Priya the GL Underwriter |
-| [F0008-S0002](./F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md) | Distinguish open, bounded and unknown ends | Critical | MVP | Rosa the Business Reviewer |
-| [F0008-S0003](./F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md) | Split intervals and close recorded time | Critical | MVP | Ingrid the Persistence Engineer |
-| [F0008-S0004](./F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md) | Enforce temporal integrity under concurrency | Critical | MVP | Ingrid the Persistence Engineer |
-| [F0008-S0005](./F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md) | Guard succession by start basis and state | Critical | MVP | Priya the GL Underwriter |
-| [F0008-S0006](./F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md) | Resolve facts at a valid and recorded coordinate | Critical | MVP | Priya the GL Underwriter |
-| [F0008-S0007](./F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md) | Preserve pilot versions through migration | High | MVP | Ingrid the Persistence Engineer |
+| [F0008-S0001](./archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md) | Record valid-time precision and zone | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0002](./archive/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md) | Distinguish open, bounded and unknown ends | Critical | MVP | Rosa the Business Reviewer |
+| [F0008-S0003](./archive/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md) | Split intervals and close recorded time | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0008-S0004](./archive/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md) | Enforce temporal integrity under concurrency | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0008-S0005](./archive/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md) | Guard succession by start basis and state | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0006](./archive/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md) | Resolve facts at a valid and recorded coordinate | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0007](./archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md) | Preserve pilot versions through migration | High | MVP | Ingrid the Persistence Engineer |
 
 ---
 

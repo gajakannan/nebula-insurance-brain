@@ -411,9 +411,9 @@ erDiagram
 A document-local reference is not a canonical Entity. An admission name claim is not a canonical name FactSlot. Proposed ontology/time stores are not claimed as existing FK targets: the scoped time resolver rejects unavailable references, and release identifiers remain pinned opaque contract values until their owning features validate them. Source selectors/origins are server-computed immutable snapshots; no supplied eligibility flag is authoritative. The existing assertion version counter may still increment for stale-review detection, while original claim/evidence fields and new extension/reference/name tables reject mutation.
 
 
-## F0008 bitemporal version contract (Phase B design 2026-11-16)
+## F0008 bitemporal version contract (implemented by migration 0014, 2026-11-18)
 
-Plan run `2026-11-16-208a1193`. Proposed [ADR-0078](decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) and the [assembly plan](../features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, CHECKs and triggers. These are proposed migration targets (0014), not claims about the current schema.
+Plan run `2026-11-16-208a1193`. Proposed [ADR-0078](decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) and the [assembly plan](../features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md#data-model-and-database-integrity) define exact columns, CHECKs and triggers. Migration 0014 implements them (feature run `2026-11-17-1a4ae2f0`); ending evidence refs are stored in the version's `evidence` JSONB as `ending_refs`.
 
 - **`canonical_fact_version`** gains nullable `fact-temporal/v1` columns, all NULL for legacy rows:
   - `temporal_contract`, `temporal_kind`;

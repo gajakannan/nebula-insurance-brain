@@ -18,6 +18,17 @@ from brain_domain.review import (
     ReviewItemStatus,
     ReviewItemType,
 )
+from brain_domain.temporal import (
+    TEMPORAL_CONTRACT_VERSION,
+    Bound,
+    DatePrecision,
+    DocumentDate,
+    EndState,
+    Granularity,
+    StartBasis,
+    TemporalKind,
+    VersionTemporal,
+)
 from brain_security.audit import AuditEventRepository
 from brain_temporal.outbox import OutboxEvent
 from brain_temporal.ranges import TimeRange
@@ -25,13 +36,16 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import Range
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from brain_persistence import content_models as content_tables
 from brain_persistence.authx import audit_timestamp
 from brain_persistence.models import (
     Assertion,
+    AssertionEvidence,
     AuditEventRow,
     CanonicalCommitRow,
     CanonicalFactChangeRow,
     CanonicalFactVersionRow,
+    ContentArtifact,
     FactSlotRow,
     OutboxEventRow,
     ReviewDecisionRow,
@@ -356,6 +370,65 @@ def _from_pg_range(value: Range) -> TimeRange:
     return TimeRange(start=value.lower, end=value.upper)
 
 
+def _document_date(value: str | None, precision: str | None) -> DocumentDate | None:
+    if value is None or precision is None:
+        return None
+    return DocumentDate(value, DatePrecision(precision))
+
+
+def _bound(instant: datetime | None, granularity: str | None, zone: str | None) -> Bound | None:
+    if instant is None or granularity is None or zone is None:
+        return None
+    return Bound(instant, Granularity(granularity), zone)
+
+
+def _temporal_from_row(row: CanonicalFactVersionRow, valid: TimeRange) -> VersionTemporal | None:
+    if row.temporal_contract is None:
+        return None
+    assert row.temporal_kind is not None and row.valid_to_state is not None
+    return VersionTemporal(
+        kind=TemporalKind(row.temporal_kind),
+        valid_from=_bound(valid.start, row.valid_from_granularity, row.valid_from_zone),
+        valid_from_basis=StartBasis(row.valid_from_basis) if row.valid_from_basis else None,
+        valid_to_state=EndState(row.valid_to_state),
+        valid_to=_bound(valid.end, row.valid_to_granularity, row.valid_to_zone),
+        attested_from=_document_date(row.attested_from_value, row.attested_from_precision),
+        attested_through=_document_date(row.attested_through_value, row.attested_through_precision),
+        attested_to=_document_date(row.attested_to_value, row.attested_to_precision),
+        validity_unknown_from=row.validity_unknown_from,
+        split_of_version_id=row.split_of_version_id,
+    )
+
+
+def _temporal_columns(temporal: VersionTemporal | None) -> dict[str, object]:
+    if temporal is None:
+        return {}
+
+    def date_columns(prefix: str, value: DocumentDate | None) -> dict[str, object]:
+        return {
+            f"{prefix}_value": value.value if value else None,
+            f"{prefix}_precision": value.precision.value if value else None,
+        }
+
+    return {
+        "temporal_contract": TEMPORAL_CONTRACT_VERSION,
+        "temporal_kind": temporal.kind.value,
+        "valid_from_granularity": temporal.valid_from.granularity.value
+        if temporal.valid_from
+        else None,
+        "valid_from_zone": temporal.valid_from.zone if temporal.valid_from else None,
+        "valid_from_basis": temporal.valid_from_basis.value if temporal.valid_from_basis else None,
+        "valid_to_state": temporal.valid_to_state.value,
+        "valid_to_granularity": temporal.valid_to.granularity.value if temporal.valid_to else None,
+        "valid_to_zone": temporal.valid_to.zone if temporal.valid_to else None,
+        **date_columns("attested_from", temporal.attested_from),
+        **date_columns("attested_through", temporal.attested_through),
+        **date_columns("attested_to", temporal.attested_to),
+        "validity_unknown_from": temporal.validity_unknown_from,
+        "split_of_version_id": temporal.split_of_version_id,
+    }
+
+
 def _fact_version_from_row(row: CanonicalFactVersionRow) -> FactVersion:
     valid = _from_pg_range(row.valid)
     recorded = _from_pg_range(row.recorded)
@@ -371,6 +444,12 @@ def _fact_version_from_row(row: CanonicalFactVersionRow) -> FactVersion:
         evidence_refs=tuple(UUID(e) for e in row.evidence.get("refs", [])),
         commit_id=row.commit_id,
         canonical_accepted_at=row.canonical_accepted_at,
+        review_decision_id=row.review_decision_id,
+        source_received_at=row.source_received_at,
+        artifact_created_at=row.artifact_created_at,
+        assertion_created_at=row.assertion_created_at,
+        temporal=_temporal_from_row(row, valid),
+        ending_evidence_refs=tuple(UUID(e) for e in row.evidence.get("ending_refs", [])),
     )
 
 
@@ -442,6 +521,119 @@ class SqlAlchemyFactCommitRepository:
         ).first()
         return (row.tenant_id, row.knowledge_base_id) if row is not None else None
 
+    async def slot_identity_version(self, slot_id: UUID) -> int | None:
+        """F0007 identity version: 1, or None for a legacy pilot slot (ADR-0078 D1)."""
+        return await self._session.scalar(
+            select(FactSlotRow.identity_version).where(FactSlotRow.id == slot_id)
+        )
+
+    async def evidence_document_dates(
+        self, refs: Sequence[UUID], *, authorized_scope: tuple[UUID, UUID]
+    ) -> dict[UUID, DocumentDate | None]:
+        """ADR-0078 D4: evidence -> content artifact -> document version -> the
+        current F0004 date selection (highest sequence). A current selection that
+        clears the date (no candidate) leaves the document undated, as the F0004
+        read does. Refs outside the authorized scope, or not registered as
+        assertion evidence, are undated. No clock is consulted."""
+        if not refs:
+            return {}
+        tenant_id, knowledge_base_id = authorized_scope
+        evidence = (
+            await self._session.execute(
+                select(AssertionEvidence.id, ContentArtifact.document_version_id)
+                .join(ContentArtifact, ContentArtifact.id == AssertionEvidence.artifact_id)
+                .where(
+                    AssertionEvidence.id.in_(refs),
+                    AssertionEvidence.tenant_id == tenant_id,
+                    AssertionEvidence.knowledge_base_id == knowledge_base_id,
+                    ContentArtifact.tenant_id == tenant_id,
+                    ContentArtifact.knowledge_base_id == knowledge_base_id,
+                )
+            )
+        ).all()
+        versions = {row.document_version_id for row in evidence}
+        selections = content_tables.document_date_selection
+        candidates = content_tables.document_date_candidate
+        latest = (
+            select(
+                selections.c.document_version_id,
+                selections.c.candidate_id,
+                func.row_number()
+                .over(
+                    partition_by=selections.c.document_version_id,
+                    order_by=selections.c.sequence.desc(),
+                )
+                .label("rank"),
+            )
+            .where(
+                selections.c.document_version_id.in_(versions),
+                selections.c.tenant_id == tenant_id,
+                selections.c.knowledge_base_id == knowledge_base_id,
+            )
+            .subquery()
+        )
+        dated = (
+            (
+                await self._session.execute(
+                    select(
+                        latest.c.document_version_id,
+                        candidates.c.date_value,
+                        candidates.c.date_precision,
+                    )
+                    .join(candidates, candidates.c.id == latest.c.candidate_id)
+                    .where(latest.c.rank == 1)
+                )
+            ).all()
+            if versions
+            else []
+        )
+        by_version = {
+            row.document_version_id: DocumentDate(row.date_value, DatePrecision(row.date_precision))
+            for row in dated
+        }
+        found = {row.id: by_version.get(row.document_version_id) for row in evidence}
+        return {ref: found.get(ref) for ref in refs}
+
+    async def evidence_artifact_keys(
+        self, refs: Sequence[UUID], *, scope: tuple[UUID, UUID]
+    ) -> tuple[ResourceKey, ...]:
+        """Content artifacts behind evidence refs, for the GET's attestation READ
+        checks (ADR-0078 D4, the F0007 SEC-F7-02 pattern)."""
+        if not refs:
+            return ()
+        rows = (
+            await self._session.execute(
+                select(AssertionEvidence.artifact_id).where(
+                    AssertionEvidence.id.in_(refs),
+                    AssertionEvidence.tenant_id == scope[0],
+                    AssertionEvidence.knowledge_base_id == scope[1],
+                )
+            )
+        ).scalars()
+        return tuple(
+            ResourceKey(ResourceType.CONTENT_ARTIFACT, artifact_id)
+            for artifact_id in sorted(set(rows), key=str)
+        )
+
+    async def next_version_after(
+        self, slot_id: UUID, *, valid_after: datetime, known_as_of: datetime
+    ) -> FactVersion | None:
+        """ADR-0078 D9 step 2: the version visible at `known_as_of` with the
+        smallest lower valid bound strictly after `valid_after`."""
+        row = (
+            await self._session.execute(
+                select(CanonicalFactVersionRow)
+                .where(
+                    CanonicalFactVersionRow.slot_id == slot_id,
+                    CanonicalFactVersionRow.recorded.op("@>")(known_as_of),
+                    func.lower(CanonicalFactVersionRow.valid) > valid_after,
+                )
+                .order_by(func.lower(CanonicalFactVersionRow.valid))
+                .limit(1)
+            )
+        ).scalar_one_or_none()
+        return _fact_version_from_row(row) if row is not None else None
+
     async def current_versions(self, slot_id: UUID) -> tuple[FactVersion, ...]:
         rows = (
             (
@@ -498,7 +690,16 @@ class SqlAlchemyFactCommitRepository:
         artifact_created_at: datetime,
         assertion_created_at: datetime,
         canonical_accepted_at: datetime,
+        temporal: VersionTemporal | None = None,
+        split_of_version_id: UUID | None = None,
+        ending_evidence_refs: tuple[UUID, ...] = (),
     ) -> None:
+        evidence: dict[str, list[str]] = {"refs": [str(e) for e in evidence_refs]}
+        if ending_evidence_refs:
+            evidence["ending_refs"] = [str(e) for e in ending_evidence_refs]
+        columns = _temporal_columns(temporal)
+        if split_of_version_id is not None:
+            columns["split_of_version_id"] = split_of_version_id
         self._session.add(
             CanonicalFactVersionRow(
                 id=version_id,
@@ -509,13 +710,14 @@ class SqlAlchemyFactCommitRepository:
                 valid=_to_pg_range(valid),
                 recorded=_to_pg_range(recorded),
                 change_reason=change_reason.value if change_reason else None,
-                evidence={"refs": [str(e) for e in evidence_refs]},
+                evidence=evidence,
                 review_decision_id=review_decision_id,
                 commit_id=commit_id,
                 source_received_at=source_received_at,
                 artifact_created_at=artifact_created_at,
                 assertion_created_at=assertion_created_at,
                 canonical_accepted_at=canonical_accepted_at,
+                **columns,
             )
         )
         await self._session.flush()
