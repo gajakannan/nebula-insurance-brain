@@ -1,0 +1,34 @@
+session:
+  run_id: null
+  mode: null
+decisions:
+- decision_id: 0
+  timestamp: '2026-11-17T09:48:41+00:00'
+  summary: F0007 harness commit helper sends a fact-temporal/v1 block; S0007 AC5 read as behaviour-unchanged because the literal
+    reading contradicts AC3
+  topic: plan-story-reconcile
+  supersedes: []
+  files_affected:
+  - planning-mds/features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
+  - engine/tests/fixtures/factslots/harness.py
+  rationale: AC3 (operator assumption A1) refuses pilot-shaped requests to identity-v1 slots; plan wins over story text
+- decision_id: 1
+  timestamp: '2026-11-17T09:48:41+00:00'
+  summary: Refusal audit uses the F0002 failed-outcome decision; durable reason-code persistence deferred to F0018
+  topic: adr-0078-d8-audit
+  supersedes: []
+  rationale: AuthX decision record has no business-reason field; adding one changes the F0002 contract
+- decision_id: 2
+  timestamp: '2026-11-17T10:03:17+00:00'
+  summary: 'Two F0007 tests adjusted to F0008 semantics: member change uses EXPLICIT_NEGATIVE (G1 decision 2); F0007 migration
+    up/down/up pinned to 0013'
+  topic: plan-story-reconcile
+  supersedes: []
+  files_affected:
+  - engine/tests/integration/test_factslot_ownership.py
+  - engine/tests/integration/test_factslot_migration.py
+  rationale: Approved F0008 rules refuse PRESENT->NOT_APPLICABLE; 0014 adds columns the F0007 snapshot hashes. Intent of both
+    tests is kept
+files_touched: []
+open_questions: []
+escalations: []

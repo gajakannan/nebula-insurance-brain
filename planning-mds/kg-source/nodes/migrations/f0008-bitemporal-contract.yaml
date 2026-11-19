@@ -1,0 +1,14 @@
+id: migration:f0008-bitemporal-contract
+label: F0008 fact-temporal/v1 contract and close-only immutability (revision 0014, additive)
+path: engine/migrations/versions/0014_f0008_bitemporal_contract.py
+notes: Adds 16 nullable fact-temporal/v1 columns to canonical_fact_version (temporal_contract NULL marks a
+  legacy version; nothing backfilled), CHECKs for each shape, a composite split-lineage self-FK and a partial
+  index. A BEFORE INSERT trigger binds the contract to the slot identity version, checks zones against
+  pg_timezone_names and truncation with date_trunc in zone, and backs the fact-answer/v1 envelope. Close-only
+  UPDATE, no DELETE or TRUNCATE on versions; canonical_fact_change append-only. Preflight refuses a bad
+  identity-v1 envelope; downgrade refuses while v1 or lineage rows exist. No table, role, grant, RLS,
+  BYPASSRLS or SECURITY DEFINER.
+related_nodes:
+- capability:bitemporal-canonical-commit
+- entity:canonical-fact-version
+- adr:0078

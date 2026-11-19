@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime
 from uuid import UUID, uuid4
 
 import pytest
 from brain_domain.facts import ChangeReason, FactVersion
+from brain_domain.temporal import DocumentDate, VersionTemporal
 from brain_temporal.ranges import TimeRange
 
 
@@ -22,14 +24,26 @@ class FakeFactCommitRepository:
         self.lock_calls = 0
         self.source_checks: list[dict] = []
         self.source_error: Exception | None = None
+        # F0008: identity-v1 slots and evidence document dates (ADR-0078 D1/D4).
+        self.v1_slots: set[UUID] = set()
+        self.document_dates: dict[UUID, DocumentDate | None] = {}
+        self.split_of: dict[UUID, UUID | None] = {}
 
     async def require_commit_sources(self, **kwargs) -> None:
         self.source_checks.append(kwargs)
         if self.source_error is not None:
             raise self.source_error
 
-    def seed_slot(self, slot_id: UUID) -> None:
+    def seed_slot(self, slot_id: UUID, *, identity_v1: bool = False) -> None:
         self.slots.add(slot_id)
+        if identity_v1:
+            self.v1_slots.add(slot_id)
+
+    async def slot_identity_version(self, slot_id: UUID) -> int | None:
+        return 1 if slot_id in self.v1_slots else None
+
+    async def evidence_document_dates(self, refs, *, authorized_scope):  # type: ignore[no-untyped-def]
+        return {ref: self.document_dates.get(ref) for ref in refs}
 
     def seed_version(self, version: FactVersion) -> None:
         self.versions[version.id] = version
@@ -48,20 +62,7 @@ class FakeFactCommitRepository:
         )
 
     async def close_recorded(self, version_id: UUID, at: datetime) -> None:
-        old = self.versions[version_id]
-        self.versions[version_id] = FactVersion(
-            id=old.id,
-            fact_slot_id=old.fact_slot_id,
-            value=old.value,
-            valid_start=old.valid_start,
-            valid_end=old.valid_end,
-            recorded_start=old.recorded_start,
-            recorded_end=at,
-            change_reason=old.change_reason,
-            evidence_refs=old.evidence_refs,
-            commit_id=old.commit_id,
-            canonical_accepted_at=old.canonical_accepted_at,
-        )
+        self.versions[version_id] = replace(self.versions[version_id], recorded_end=at)
 
     async def insert_version(
         self,
@@ -81,6 +82,9 @@ class FakeFactCommitRepository:
         artifact_created_at: datetime,
         assertion_created_at: datetime,
         canonical_accepted_at: datetime,
+        temporal: VersionTemporal | None = None,
+        split_of_version_id: UUID | None = None,
+        ending_evidence_refs: tuple[UUID, ...] = (),
     ) -> None:
         self.versions[version_id] = FactVersion(
             id=version_id,
@@ -94,7 +98,14 @@ class FakeFactCommitRepository:
             evidence_refs=evidence_refs,
             commit_id=commit_id,
             canonical_accepted_at=canonical_accepted_at,
+            review_decision_id=review_decision_id,
+            source_received_at=source_received_at,
+            artifact_created_at=artifact_created_at,
+            assertion_created_at=assertion_created_at,
+            temporal=temporal,
+            ending_evidence_refs=ending_evidence_refs,
         )
+        self.split_of[version_id] = split_of_version_id
 
     @property
     def scope(self) -> tuple[UUID, UUID]:

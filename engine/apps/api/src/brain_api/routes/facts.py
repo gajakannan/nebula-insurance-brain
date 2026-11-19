@@ -13,17 +13,24 @@ from brain_domain.authx import (
     ResourceType,
 )
 from brain_domain.fact_answers import FactAnswerRejected
-from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
+from brain_domain.facts import ChangeReason, CommitProposal, CommitResult
 from brain_domain.principal import Principal
+from brain_domain.temporal import TemporalRejected
 from brain_factslots.answers import FactAnswerPolicy, FactAnswerReader
 from brain_factslots.ports import PredicateContractRegistry
 from brain_persistence.fact_slots import SqlAlchemyFactSlotStore
 from brain_persistence.repositories import SqlAlchemyFactCommitRepository
 from brain_security.execution import AuthorizationExecution
-from brain_temporal.commit import CanonicalCommitService, FactSlotNotFound, StaleVersionError
+from brain_temporal.commit import (
+    CanonicalCommitService,
+    FactSlotNotFound,
+    LegacyTemporalUnsupported,
+    StaleVersionError,
+)
 from brain_temporal.ranges import InvalidRangeError
+from brain_temporal.reader import Resolved, TemporalFactReader, ValidityUnknown
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from brain_api.deps import (
@@ -40,8 +47,18 @@ from brain_api.errors import (
     InvalidRangeApiError,
     NotFoundError,
     StaleVersionApiError,
+    TemporalBlockUnsupportedApiError,
+    TemporalConflictApiError,
+    TemporalRejectedApiError,
 )
-from brain_api.schemas.facts import CommitProposalIn, CommitResponseOut, FactVersionOut
+from brain_api.schemas.facts import (
+    CommitProposalIn,
+    CommitResponseOut,
+    FactValidityUnknownOut,
+    FactVersionOut,
+)
+
+EXCLUSION_VIOLATION = "23P01"
 
 router = APIRouter(prefix="/facts", tags=["Facts"])
 
@@ -50,7 +67,18 @@ def _slot(fact_slot_id: UUID) -> ResourceKey:
     return ResourceKey(ResourceType.FACT_SLOT, fact_slot_id)
 
 
-@router.get("/{fact_slot_id}", response_model=FactVersionOut)
+def _sqlstate(exc: DBAPIError) -> str | None:
+    original = getattr(exc, "orig", None)
+    for name in ("sqlstate", "pgcode"):
+        code = getattr(original, name, None)
+        if isinstance(code, str):
+            return code
+    cause = getattr(original, "__cause__", None)
+    code = getattr(cause, "sqlstate", None)
+    return code if isinstance(code, str) else None
+
+
+@router.get("/{fact_slot_id}", response_model=FactVersionOut | FactValidityUnknownOut)
 async def get_fact(
     fact_slot_id: UUID,
     valid_as_of: datetime | None = Query(default=None, alias="validAsOf"),
@@ -58,10 +86,15 @@ async def get_fact(
     principal: Principal = Depends(current_principal),
     execution: AuthorizationExecution = Depends(get_authorization_execution),
     session: AsyncSession = Depends(get_db_session),
-) -> FactVersionOut:
+) -> FactVersionOut | FactValidityUnknownOut:
     """Business valid/known coordinates select history only; authorization always
-    uses current enforcement time and current grants (S0003 AC4)."""
+    uses current enforcement time and current grants (S0003 AC4, ADR-0053).
+
+    F0008 (ADR-0078 D9): the internal reader resolves the coordinate. A
+    validity-unknown result is an additive 200 with no value; a coordinate with
+    no version keeps the pilot 404 (HTTP states stay with F0020)."""
     repository = SqlAlchemyFactCommitRepository(session)
+    reader = TemporalFactReader(repository)
     answers = FactAnswerReader(SqlAlchemyFactSlotStore(session))
     now = datetime.now(UTC)
     requested = RequestedScope(
@@ -71,21 +104,38 @@ async def get_fact(
         business_known_as_of=known_as_of,
     )
 
-    async def load(_decision: AuthorizationDecision) -> FactVersion:
-        version = await repository.resolve_at(
-            fact_slot_id, valid_as_of=valid_as_of or now, known_as_of=known_as_of or now
+    async def load(_decision: AuthorizationDecision) -> Resolved | ValidityUnknown:
+        result = await reader.resolve(
+            fact_slot_id, valid_at=valid_as_of or now, known_at=known_as_of or now
         )
-        if version is None:
+        if not isinstance(result, Resolved | ValidityUnknown):
             raise NotFoundError()
-        return version
+        return result
 
-    async def scope_reads(version: FactVersion) -> Sequence[ResourceKey]:
+    async def scope_reads(result: Resolved | ValidityUnknown) -> Sequence[ResourceKey]:
         # WHY: authorize the scope of this exact payload in the slot read's UoW.
         # A prior independent read commits and releases authority locks, and a
         # second version selection could return a different, unchecked scope.
-        return await answers.scope_keys_for_value(fact_slot_id, version.value)
+        version = result.version
+        keys: list[ResourceKey] = []
+        if isinstance(result, Resolved):
+            keys.extend(await answers.scope_keys_for_value(fact_slot_id, version.value))
+        temporal = version.temporal
+        if temporal is not None and (
+            temporal.attested_from or temporal.attested_through or temporal.attested_to
+        ):
+            # ADR-0078 D4: the documents whose dates are disclosed must be readable;
+            # otherwise the whole read is the non-disclosing 404 (SEC-F7-02).
+            slot = await repository.get_slot(fact_slot_id)
+            assert slot is not None
+            keys.extend(
+                await repository.evidence_artifact_keys(
+                    (*version.evidence_refs, *version.ending_evidence_refs), scope=slot
+                )
+            )
+        return sorted(set(keys), key=lambda k: (k.type.value, str(k.id)))
 
-    version = await execution.read(
+    result = await execution.read(
         principal,
         _slot(fact_slot_id),
         Action.READ,
@@ -94,7 +144,9 @@ async def get_fact(
         requested=requested,
         additional_reads=scope_reads,
     )
-    return FactVersionOut.from_domain(version)
+    if isinstance(result, ValidityUnknown):
+        return FactValidityUnknownOut.from_domain(result)
+    return FactVersionOut.from_domain(result.version)
 
 
 @router.post("/{fact_slot_id}/commits", response_model=CommitResponseOut, status_code=201)
@@ -130,6 +182,7 @@ async def commit_fact(
         assertion_created_at=proposal_in.assertion_created_at,
         expected_current_version_id=proposal_in.expected_current_version_id,
         idempotency_key=proposal_in.idempotency_key,
+        temporal=proposal_in.temporal,
     )
 
     evidence_keys: set[ResourceKey] = set()
@@ -155,11 +208,27 @@ async def commit_fact(
         )
 
     async def source_keys() -> Sequence[ResourceKey]:
+        # F0008: ending evidence joins the same-UoW source READ checks (D4).
         evidence_keys.update(
-            await repository.commit_source_keys(proposal.evidence_refs, proposal.review_decision_id)
+            await repository.commit_source_keys(
+                (*proposal.evidence_refs, *_ending_refs(proposal_in.temporal)),
+                proposal.review_decision_id,
+            )
         )
-        answer_keys = await answer_policy.source_keys(fact_slot_id, proposal.value)
-        return sorted(evidence_keys | set(answer_keys))
+        answer_keys = set(await answer_policy.source_keys(fact_slot_id, proposal.value))
+        if proposal_in.temporal is not None:
+            # F0008 (ADR-0078 D4, S0002): every document whose date can attest this
+            # version must be readable by the committer, so no refusal code can
+            # reveal the date of a document the caller cannot read (T-08).
+            slot = await repository.get_slot(fact_slot_id)
+            if slot is not None:
+                answer_keys.update(
+                    await repository.evidence_artifact_keys(
+                        (*proposal.evidence_refs, *_ending_refs(proposal_in.temporal)),
+                        scope=slot,
+                    )
+                )
+        return sorted(evidence_keys | answer_keys)
 
     try:
         result = await execution.mutate(
@@ -174,6 +243,10 @@ async def commit_fact(
         raise AssertionIneligibleApiError() from exc
     except FactAnswerRejected as exc:
         raise FactAnswerRejectedApiError(exc.code) from exc
+    except TemporalRejected as exc:
+        raise TemporalRejectedApiError(exc.code.value) from exc
+    except LegacyTemporalUnsupported as exc:
+        raise TemporalBlockUnsupportedApiError() from exc
     except InvalidRangeError as exc:
         raise InvalidRangeApiError(str(exc)) from exc
     except StaleVersionError as exc:
@@ -183,5 +256,27 @@ async def commit_fact(
     except IntegrityError as exc:
         # The GiST exclusion constraint is the backstop if the row lock somehow
         # didn't serialize a concurrent commit on this slot (F0001-S0005 AC).
-        raise ConcurrentCommitApiError(str(exc)) from exc
+        # F0008 (ADR-0078 D6): `23P01` is the retryable temporal_conflict.
+        if _sqlstate(exc) == EXCLUSION_VIOLATION:
+            raise TemporalConflictApiError() from exc
+        # No database text crosses to the client: constraint messages can quote the
+        # failing row (F0008 G3 security review).
+        raise ConcurrentCommitApiError(None) from exc
     return CommitResponseOut.from_domain(result)
+
+
+def _ending_refs(temporal: object) -> tuple[UUID, ...]:
+    """Well-formed ending refs for the source READ check. A malformed block is
+    refused with its reason code inside the operation, after authorization."""
+    if not isinstance(temporal, dict):
+        return ()
+    refs = temporal.get("ending_evidence_refs")
+    if not isinstance(refs, list):
+        return ()
+    parsed: list[UUID] = []
+    for ref in refs:
+        try:
+            parsed.append(UUID(str(ref)))
+        except ValueError:
+            return ()
+    return tuple(parsed)

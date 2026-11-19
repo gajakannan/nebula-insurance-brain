@@ -257,7 +257,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0007-S0004](features/archive/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) — Done
   - [F0007-S0005](features/archive/F0007-factslot-model/F0007-S0005-define-name-factslots.md) — Done
   - [F0007-S0006](features/archive/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) — Done
-- [F0008 — Bitemporal canonical facts](features/F0008-bitemporal-canonical-facts/README.md) - Planned (Phase A approved 2026-11-16, plan run `2026-11-16-208a1193`; seven stories [S0001](features/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md)–[S0007](features/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md), 46 ACs; Phase B approved 2026-11-17)
+- [F0008 — Bitemporal canonical facts](features/archive/F0008-bitemporal-canonical-facts/README.md) - Planned (Phase A approved 2026-11-16, plan run `2026-11-16-208a1193`; seven stories [S0001](features/archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md)–[S0007](features/archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md), 46 ACs; Phase B approved 2026-11-17)
 - [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
 - [F0011 — JSON Schema contract system](features/F0011-json-schema-contract-system/README.md) - Planned
@@ -519,9 +519,9 @@ ADR-0077 was accepted by the operator on 2026-11-10; ADR-0039 and ADR-0066 stay 
 
 ---
 
-### 4.15 F0008 bitemporal version contract (Phase B design 2026-11-16, approved 2026-11-17)
+### 4.15 F0008 bitemporal version contract (Phase B approved 2026-11-17; implemented and archived 2026-11-18)
 
-Plan run `2026-11-16-208a1193`. The [assembly plan](features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md) and Proposed [ADR-0078](architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) define the design:
+Plan run `2026-11-16-208a1193`. The [assembly plan](features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md) and Proposed [ADR-0078](architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) define the design:
 
 - **Precision and zone:** each valid-time bound stores a granularity and an IANA zone. Truncation is checked in the service and authoritatively in a database trigger. The caller applies document conventions.
 - **Ends and attestation:** `OPEN`, `BOUNDED` or `UNKNOWN`. An unknown end closes the integrity range at the end of its `attested_to` period (the ADR-0064 option). The attestation dates come from F0004 date selections, never from clocks. An unknown start is floored at `attested_from`, or refused when no evidence is dated.
@@ -531,6 +531,8 @@ Plan run `2026-11-16-208a1193`. The [assembly plan](features/F0008-bitemporal-ca
 - **Relationships:** RELATIONSHIP slots are versioned in the same table, and no separate relationship-version table is created.
 
 No new route, grant, table or UI is added. Migration 0014 is additive with a guarded downgrade. ADR-0064 and ADR-0039 remain Proposed.
+
+Feature run `2026-11-17-1a4ae2f0` implemented the design and was approved by the operator at G4 on 2026-11-18. It delivers migration 0014, `brain_domain.temporal`, `brain_temporal` bounds/attestation/commit/reader and the additive `/facts` changes. All 46 ACs and the six ADR-0078 proof gates pass on PostgreSQL 18 (1081 engine tests; 98.0% changed-line coverage). ADR-0078 stays Proposed until the operator accepts it. SEC-F8-02 (the application connects as a superuser) and refusal reason persistence move to F0018. Evidence: [PM closeout](operations/evidence/runs/2026-11-17-1a4ae2f0/pm-closeout.md).
 
 ---
 
@@ -552,9 +554,9 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Current position (2026-11-10): F0001 to F0007 are done and archived. F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
+Current position (2026-11-18): F0001 to F0008 are done and archived (F0008 feature run `2026-11-17-1a4ae2f0`, approved 2026-11-18). F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
 
-1. Now (2026-11-10 roadmap review): F0008 (bitemporal canonical facts) and F0011 (JSON Schema contract system) run as two parallel lanes, each through `plan` → `plan-review` → `feature`; the F0064 retroactive closeout completed on 2026-11-14 (feature run `2026-11-14-3325803a`, archived). F0021 is pulled into Next as an independent UI lane for the first free Now slot.
+1. Now (2026-11-10 roadmap review): F0008 (bitemporal canonical facts) is done and archived (2026-11-18); F0011 (JSON Schema contract system) continues through `plan` → `plan-review` → `feature`, renumbering its migration after 0014; the F0064 retroactive closeout completed on 2026-11-14 (feature run `2026-11-14-3325803a`, archived). F0021 is pulled into Next as an independent UI lane for the first free Now slot.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
 3. After F0011 completes, run the `plan` action for F0012 as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
 4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.

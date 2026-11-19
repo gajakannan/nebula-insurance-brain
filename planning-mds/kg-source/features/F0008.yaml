@@ -1,17 +1,13 @@
 id: feature:F0008
 name: Bitemporal canonical facts
-path: planning-mds/features/F0008-bitemporal-canonical-facts
-status: planned
-registry_section: Planned
+path: planning-mds/features/archive/F0008-bitemporal-canonical-facts
+status: archived-done
+registry_section: Archived
 phase: v0.1A
-roadmap_section: Now
-roadmap_order: 1
-rationale: 'Now (2026-11-10 roadmap review): every dependency is done (F0003, F0007), and it heads the temporal/commit critical
-  path F0008 → F0009 → F0010 → F0018 → F0019/F0020 → F0025. Full bitemporality with database-level overlap integrity is a
-  section 115.4 pre-build proof and is required before the endorsement slice (sections 14, 15, 109.2).'
-validation_gate: Plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner and
-  date); feature run closes G0–G8 with the section 115.4 bitemporal proof cases (retroactive and concurrent changes, interval
-  splitting, distinct received and accepted times) passing on PostgreSQL.
+roadmap_section: Completed
+roadmap_order: 8
+rationale: 'Completed 2026-11-18 in feature run 2026-11-17-1a4ae2f0: fact-temporal/v1 contract, close-only immutability and the two-coordinate reader delivered with migration 0014; all seven stories Done.'
+validation_gate: 'G0-G8 governed feature run 2026-11-17-1a4ae2f0; explicit operator G4 approval; five required role signoffs; 46/46 ACs; 1081 engine tests pass; 98.0% changed-line coverage; all six ADR-0078 proof gates met on PostgreSQL 18.'
 depends_on:
 - feature:F0003
 - feature:F0007
@@ -35,12 +31,16 @@ notes:
 - 'Phase B approved 2026-11-17 (Proposed ADR-0078): fact-temporal/v1 columns on canonical_fact_version, an UNKNOWN end closing the exclusion range
   at the end of the attested_to period, close-only immutability triggers, remainder lineage, an envelope backstop and an additive
   migration 0014; RELATIONSHIP slot versions share the table. Runtime not claimed.'
+- As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/kg-reconciliation.md;
+  archive path/status and generated trackers are PM G8 ownership.
+- 'Closeout 2026-11-18 (PM G8): archived; SEC-F8-02 (superuser app connection) and refusal reason persistence deferred to F0018; ADR-0078 proof gates met, acceptance pending operator.'
 affects:
 - capability:bitemporal-canonical-commit
 - capability:temporal-fact-resolution
 - entity:canonical-fact-version
 - endpoint:fact-commit
 - endpoint:fact-get
+- migration:f0008-bitemporal-contract
 uses_api_contract:
 - api:brain-api
 uses_schema:
@@ -51,7 +51,7 @@ uses_schema:
 - schema:problem-details
 story_mappings:
 - id: story:F0008-S0001
-  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md
+  path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md
   affects:
   - capability:bitemporal-canonical-commit
   - entity:canonical-fact-version
@@ -64,7 +64,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0008-S0002
-  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md
+  path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md
   affects:
   - capability:bitemporal-canonical-commit
   - capability:temporal-fact-resolution
@@ -77,7 +77,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0008-S0003
-  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md
+  path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md
   affects:
   - capability:bitemporal-canonical-commit
   - entity:canonical-fact-version
@@ -89,7 +89,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0008-S0004
-  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md
+  path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md
   affects:
   - capability:bitemporal-canonical-commit
   - entity:canonical-fact-version
@@ -102,7 +102,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0008-S0005
-  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md
+  path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md
   affects:
   - capability:bitemporal-canonical-commit
   uses_schema:
@@ -115,7 +115,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0008-S0006
-  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
+  path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
   affects:
   - capability:temporal-fact-resolution
   - entity:canonical-fact-version
@@ -127,7 +127,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0008-S0007
-  path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md
+  path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md
   affects:
   - capability:bitemporal-canonical-commit
   - entity:canonical-fact-version
@@ -138,3 +138,6 @@ story_mappings:
   - adr:0077
   uses_api_contract:
   - api:brain-api
+completion_state: All seven stories Done; 46/46 ACs and the six ADR-0078 proof gates met on PostgreSQL 18; no open
+  blocking findings. ADR-0078 stays Proposed pending operator acceptance.
+archived_date: '2026-11-18'

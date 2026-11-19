@@ -3,7 +3,9 @@ label: Temporal fact resolution
 notes: 'Planned (F0008 Phase B design approved 2026-11-17, plan run 2026-11-16-208a1193): two-coordinate reader over canonical fact versions
   returning the version, validity-unknown (unknown-end window or before an attestation floor) or NOT_PROCESSED for
   identity-v1 slots; the existing GET adds a temporal block and a validity-unknown 200 variant, no-version stays 404
-  (F0020 owns HTTP states). Runtime implementation not claimed.'
+  (F0020 owns HTTP states). As built (feature run 2026-11-17-1a4ae2f0): brain_temporal.reader.TemporalFactReader
+  over the repository resolve_at/next_version_after queries; attesting documents join the GET additional reads
+  so dates of unreadable documents are never disclosed (whole-read 404).'
 source_docs:
 - F0008/feature-assembly-plan.md
 - F0008/PRD.md

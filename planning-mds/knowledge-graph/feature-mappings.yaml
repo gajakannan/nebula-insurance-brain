@@ -590,15 +590,16 @@ features:
       - schema:fact-slot-key-v1
       - schema:fact-slot-resolution-result-v1
       - schema:problem-details
-  - status: planned
+  - status: archived-done
     id: feature:F0008
-    path: planning-mds/features/F0008-bitemporal-canonical-facts
+    path: planning-mds/features/archive/F0008-bitemporal-canonical-facts
     affects:
       - capability:bitemporal-canonical-commit
       - capability:temporal-fact-resolution
       - endpoint:fact-commit
       - endpoint:fact-get
       - entity:canonical-fact-version
+      - migration:f0008-bitemporal-contract
     depends_on:
       - feature:F0003
       - feature:F0007
@@ -610,9 +611,13 @@ features:
       - adr:0077
       - adr:0078
     notes:
+      - As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/kg-reconciliation.md;
+        archive path/status and generated trackers are PM G8 ownership.
       - Cedar Bridge EX-PC-006/014 (planning-mds/architecture/commercial-pc-example-handoff.md) exercise
         ADR-0064 kinds, attestation bounds, an unknown start and an UNKNOWN end; teaching fixtures for
         the PRD, not acceptance evidence.
+      - 'Closeout 2026-11-18 (PM G8): archived; SEC-F8-02 (superuser app connection) and refusal reason
+        persistence deferred to F0018; ADR-0078 proof gates met, acceptance pending operator.'
       - 'Phase B approved 2026-11-17 (Proposed ADR-0078): fact-temporal/v1 columns on canonical_fact_version,
         an UNKNOWN end closing the exclusion range at the end of the attested_to period, close-only immutability
         triggers, remainder lineage, an envelope backstop and an additive migration 0014; RELATIONSHIP
@@ -1381,7 +1386,7 @@ stories:
       - schema:canonical-commit-request
   - id: story:F0008-S0001
     feature: feature:F0008
-    path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md
+    path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md
     affects:
       - capability:bitemporal-canonical-commit
       - entity:canonical-fact-version
@@ -1395,7 +1400,7 @@ stories:
       - schema:fact-temporal-v1
   - id: story:F0008-S0002
     feature: feature:F0008
-    path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md
+    path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md
     affects:
       - capability:bitemporal-canonical-commit
       - capability:temporal-fact-resolution
@@ -1409,7 +1414,7 @@ stories:
       - schema:fact-temporal-v1
   - id: story:F0008-S0003
     feature: feature:F0008
-    path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md
+    path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md
     affects:
       - capability:bitemporal-canonical-commit
       - entity:canonical-fact-version
@@ -1422,7 +1427,7 @@ stories:
       - schema:canonical-commit-response
   - id: story:F0008-S0004
     feature: feature:F0008
-    path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md
+    path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md
     affects:
       - capability:bitemporal-canonical-commit
       - entity:canonical-fact-version
@@ -1436,7 +1441,7 @@ stories:
       - schema:fact-answer-v1
   - id: story:F0008-S0005
     feature: feature:F0008
-    path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md
+    path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md
     affects:
       - capability:bitemporal-canonical-commit
     governed_by:
@@ -1450,7 +1455,7 @@ stories:
       - schema:fact-temporal-v1
   - id: story:F0008-S0006
     feature: feature:F0008
-    path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
+    path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
     affects:
       - capability:temporal-fact-resolution
       - entity:canonical-fact-version
@@ -1463,7 +1468,7 @@ stories:
       - schema:fact-temporal-v1
   - id: story:F0008-S0007
     feature: feature:F0008
-    path: planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md
+    path: planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md
     affects:
       - capability:bitemporal-canonical-commit
       - entity:canonical-fact-version

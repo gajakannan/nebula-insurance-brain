@@ -425,6 +425,26 @@ class CanonicalFactVersionRow(Base):
     artifact_created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     assertion_created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     canonical_accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # F0008 fact-temporal/v1 columns (migration 0014, ADR-0078). All NULL on a
+    # legacy pilot version; CHECKs and triggers in 0014 are the enforcement point.
+    temporal_contract: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    temporal_kind: Mapped[str | None] = mapped_column(nullable=True)
+    valid_from_granularity: Mapped[str | None] = mapped_column(nullable=True)
+    valid_from_zone: Mapped[str | None] = mapped_column(nullable=True)
+    valid_from_basis: Mapped[str | None] = mapped_column(nullable=True)
+    valid_to_state: Mapped[str | None] = mapped_column(nullable=True)
+    valid_to_granularity: Mapped[str | None] = mapped_column(nullable=True)
+    valid_to_zone: Mapped[str | None] = mapped_column(nullable=True)
+    attested_from_value: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    attested_from_precision: Mapped[str | None] = mapped_column(nullable=True)
+    attested_through_value: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    attested_through_precision: Mapped[str | None] = mapped_column(nullable=True)
+    attested_to_value: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    attested_to_precision: Mapped[str | None] = mapped_column(nullable=True)
+    validity_unknown_from: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    split_of_version_id: Mapped[uuid.UUID | None] = mapped_column(_UUIDVariant, nullable=True)
 
 
 class CanonicalFactChangeRow(Base):
