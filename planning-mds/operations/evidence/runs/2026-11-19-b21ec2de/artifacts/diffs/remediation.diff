@@ -1,0 +1,562 @@
+diff --git a/engine/apps/api/src/brain_api/schemas/facts.py b/engine/apps/api/src/brain_api/schemas/facts.py
+index 651bc7b..560ef9d 100644
+--- a/engine/apps/api/src/brain_api/schemas/facts.py
++++ b/engine/apps/api/src/brain_api/schemas/facts.py
+@@ -6,7 +6,13 @@ from uuid import UUID
+ 
+ from brain_domain.facts import CommitResult, FactVersion
+ from brain_temporal.reader import ValidityUnknown
+-from pydantic import BaseModel, ConfigDict, model_validator
++from pydantic import (
++    BaseModel,
++    ConfigDict,
++    SerializerFunctionWrapHandler,
++    model_serializer,
++    model_validator,
++)
+ 
+ ChangeReasonLiteral = Literal[
+     "superseded", "corrected", "retracted", "expired", "invalidated", "merged", "split"
+@@ -44,14 +50,43 @@ class CommitProposalIn(BaseModel):
+         return self
+ 
+ 
++def _omit_absent(data: dict[str, Any], *keys: str) -> dict[str, Any]:
++    """The contract says these fields are absent, not null, when they do not apply."""
++    for key in keys:
++        if data.get(key) is None:
++            data.pop(key, None)
++    return data
++
++
++class CommitVersionOut(BaseModel):
++    """F0008 S0002 AC7: one version written by a fact-temporal/v1 commit."""
++
++    model_config = ConfigDict(extra="forbid")
++
++    fact_version_id: UUID
++    temporal: dict[str, Any] | None = None
++
++    @model_serializer(mode="wrap")
++    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
++        # A legacy remainder on an identity-v1 slot has no temporal block.
++        return _omit_absent(handler(self), "temporal")
++
++
+ class CommitResponseOut(BaseModel):
+-    """Matches `planning-mds/schemas/canonical-commit-response.schema.json`."""
++    """Matches `planning-mds/schemas/canonical-commit-response.schema.json`.
++    `versions` is present only for a fact-temporal/v1 commit (F0008 S0002 AC7);
++    a legacy pilot commit keeps the pilot response shape."""
+ 
+     model_config = ConfigDict(extra="forbid")
+ 
+     commit_id: UUID
+     fact_version_ids: list[UUID]
+     canonical_accepted_at: datetime
++    versions: list[CommitVersionOut] | None = None
++
++    @model_serializer(mode="wrap")
++    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
++        return _omit_absent(handler(self), "versions")
+ 
+     @classmethod
+     def from_domain(cls, result: CommitResult) -> CommitResponseOut:
+@@ -59,6 +94,14 @@ class CommitResponseOut(BaseModel):
+             commit_id=result.commit_id,
+             fact_version_ids=list(result.fact_version_ids),
+             canonical_accepted_at=result.canonical_accepted_at,
++            versions=[
++                CommitVersionOut(
++                    fact_version_id=version_id,
++                    temporal=temporal.to_json() if temporal is not None else None,
++                )
++                for version_id, temporal in result.version_temporals
++            ]
++            or None,
+         )
+ 
+ 
+@@ -83,6 +126,11 @@ class FactVersionOut(BaseModel):
+     assertion_created_at: datetime | None = None
+     temporal: dict[str, Any] | None = None
+ 
++    @model_serializer(mode="wrap")
++    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
++        # FR-ARCH-M1: `temporal` is absent for a legacy pilot version, never null.
++        return _omit_absent(handler(self), "temporal")
++
+     @classmethod
+     def from_domain(cls, version: FactVersion) -> FactVersionOut:
+         return cls(
+diff --git a/engine/migrations/versions/0015_f0008_split_lineage_same_slot.py b/engine/migrations/versions/0015_f0008_split_lineage_same_slot.py
+new file mode 100644
+index 0000000..4745f39
+--- /dev/null
++++ b/engine/migrations/versions/0015_f0008_split_lineage_same_slot.py
+@@ -0,0 +1,79 @@
++"""F0008 review remediation: split lineage stays within one slot (FR-ARCH-L2).
++
++Revision 0014 checks that a split remainder's predecessor exists, and its
++composite self-FK pins tenant and knowledge base, but nothing tied the
++predecessor to the same slot. The commit service never writes a cross-slot
++split; this adds the database guard so a direct insert cannot either, which
++F0009 lineage depends on.
++
++Additive: one SECURITY INVOKER function and one BEFORE INSERT trigger. The
++preflight refuses the upgrade if an existing row already crosses slots, and
++repairs nothing. Downgrade drops only what this revision adds.
++
++Revision ID: 0015
++Revises: 0014
++"""
++
++import logging
++from collections.abc import Sequence
++
++from alembic import op
++from sqlalchemy import text
++
++revision: str = "0015"
++down_revision: str | None = "0014"
++branch_labels: Sequence[str] | str | None = None
++depends_on: Sequence[str] | str | None = None
++
++log = logging.getLogger("alembic.runtime.migration")
++
++TABLE = "canonical_fact_version"
++TRIGGER = "trg_canonical_fact_version_v1_split_slot"
++FUNCTION = "brain_cfv_split_same_slot"
++
++GUARD = f"""
++CREATE FUNCTION {FUNCTION}() RETURNS trigger
++LANGUAGE plpgsql SECURITY INVOKER SET search_path = pg_catalog, public AS $$
++BEGIN
++    IF NEW.split_of_version_id IS NOT NULL AND NOT EXISTS (
++        SELECT 1 FROM public.canonical_fact_version p
++         WHERE p.id = NEW.split_of_version_id AND p.slot_id = NEW.slot_id) THEN
++        RAISE EXCEPTION 'canonical_fact_version: split lineage crosses slots'
++            USING ERRCODE = 'check_violation';
++    END IF;
++    RETURN NEW;
++END
++$$
++"""
++
++CROSSING = (
++    f"FROM {TABLE} v JOIN {TABLE} p ON p.id = v.split_of_version_id WHERE p.slot_id <> v.slot_id"
++)
++
++
++def upgrade() -> None:
++    bind = op.get_bind()
++    # WHY: hold the lock from the scan through the new trigger.
++    bind.execute(text(f"LOCK TABLE {TABLE} IN SHARE ROW EXCLUSIVE MODE"))
++    count = bind.execute(text(f"SELECT count(*) {CROSSING}")).scalar_one()
++    if count:
++        sample = ", ".join(
++            str(i)
++            for i in bind.execute(text(f"SELECT v.id {CROSSING} ORDER BY v.id LIMIT 10")).scalars()
++        )
++        raise RuntimeError(
++            f"0015 upgrade refused: {count} versions name a split predecessor in another slot; "
++            f"sample version IDs: {sample}. No rows modified; governed repair required."
++        )
++    op.execute(GUARD)
++    # Named after 0014's insert guard so it fires after it (BEFORE triggers run by name).
++    op.execute(
++        f"CREATE TRIGGER {TRIGGER} BEFORE INSERT ON {TABLE} "
++        f"FOR EACH ROW EXECUTE FUNCTION {FUNCTION}()"
++    )
++    log.info("0015 split-lineage same-slot guard installed")
++
++
++def downgrade() -> None:
++    op.execute(f"DROP TRIGGER {TRIGGER} ON {TABLE}")
++    op.execute(f"DROP FUNCTION {FUNCTION}()")
+diff --git a/engine/packages/brain-domain/src/brain_domain/facts.py b/engine/packages/brain-domain/src/brain_domain/facts.py
+index 459399f..02e6ad0 100644
+--- a/engine/packages/brain-domain/src/brain_domain/facts.py
++++ b/engine/packages/brain-domain/src/brain_domain/facts.py
+@@ -57,6 +57,10 @@ class CommitResult:
+     commit_id: UUID
+     fact_version_ids: tuple[UUID, ...]
+     canonical_accepted_at: datetime
++    # F0008 S0002 AC7: the temporal block of each version a fact-temporal/v1 commit
++    # wrote, in `fact_version_ids` order. None marks a legacy remainder. Empty for
++    # a legacy pilot commit, whose response keeps the pilot shape.
++    version_temporals: tuple[tuple[UUID, VersionTemporal | None], ...] = ()
+ 
+ 
+ @dataclass(frozen=True, slots=True)
+diff --git a/engine/packages/brain-temporal/src/brain_temporal/commit.py b/engine/packages/brain-temporal/src/brain_temporal/commit.py
+index 5f9b8da..08d7f66 100644
+--- a/engine/packages/brain-temporal/src/brain_temporal/commit.py
++++ b/engine/packages/brain-temporal/src/brain_temporal/commit.py
+@@ -285,6 +285,7 @@ class CanonicalCommitService:
+         superseded: list[UUID],
+         version_ids: list[UUID],
+         now: datetime,
++        temporals: dict[UUID, VersionTemporal | None] | None = None,
+     ) -> CommitResult:
+         reason = proposal.change_reason or ChangeReason.SUPERSEDED
+         sources: list[UUID | None] = list(superseded) or [None]
+@@ -305,7 +306,12 @@ class CanonicalCommitService:
+             },
+         )
+         return CommitResult(
+-            commit_id=commit_id, fact_version_ids=tuple(version_ids), canonical_accepted_at=now
++            commit_id=commit_id,
++            fact_version_ids=tuple(version_ids),
++            canonical_accepted_at=now,
++            version_temporals=(
++                tuple((v, temporals.get(v)) for v in version_ids) if temporals is not None else ()
++            ),
+         )
+ 
+     # --- legacy pilot path ------------------------------------------------
+@@ -478,6 +484,7 @@ class CanonicalCommitService:
+         version_ids: list[UUID] = []
+         superseded: list[UUID] = []
+         remainder_links: list[tuple[UUID, UUID]] = []
++        temporals: dict[UUID, VersionTemporal | None] = {}
+         for existing in overlapping:
+             await self._repository.close_recorded(existing.id, now)
+             superseded.append(existing.id)
+@@ -495,6 +502,7 @@ class CanonicalCommitService:
+                     lineage=True,
+                 )
+                 version_ids.append(remainder_id)
++                temporals[remainder_id] = piece.temporal
+                 remainder_links.append((existing.id, remainder_id))
+ 
+         new_version_id = uuid4()
+@@ -518,6 +526,7 @@ class CanonicalCommitService:
+             ending_evidence_refs=temporal.ending_evidence_refs,
+         )
+         version_ids.append(new_version_id)
++        temporals[new_version_id] = new_temporal
+         for from_id, to_id in remainder_links:
+             await self._repository.insert_change(
+                 reason=ChangeReason.SPLIT,
+@@ -534,6 +543,7 @@ class CanonicalCommitService:
+             superseded=superseded,
+             version_ids=version_ids,
+             now=now,
++            temporals=temporals,
+         )
+ 
+     @staticmethod
+diff --git a/engine/packages/brain-temporal/tests/test_contract_examples.py b/engine/packages/brain-temporal/tests/test_contract_examples.py
+index d26a115..40317f5 100644
+--- a/engine/packages/brain-temporal/tests/test_contract_examples.py
++++ b/engine/packages/brain-temporal/tests/test_contract_examples.py
+@@ -54,6 +54,7 @@ def _registry() -> Registry:
+     for name in (
+         "fact-temporal-v1",
+         "canonical-commit-request",
++        "canonical-commit-response",
+         "fact-answer-v1",
+     ):
+         schema = json.loads((SCHEMAS / f"{name}.schema.json").read_text())
+@@ -135,3 +136,41 @@ def test_runtime_read_shapes_validate_against_the_schema() -> None:
+         "temporal": temporal.to_json(),
+     }
+     assert not list(_validator("validity_unknown_read").iter_errors(read))
++
++
++def test_runtime_commit_response_validates_for_v1_and_legacy() -> None:
++    """S0002 AC7 remediation: the v1 response carries `versions[].temporal`; a legacy
++    remainder entry and a legacy pilot response omit what does not apply."""
++    from brain_domain.facts import CommitResult
++
++    from brain_api.schemas.facts import CommitResponseOut
++
++    response = json.loads((SCHEMAS / "canonical-commit-response.schema.json").read_text())
++    validator = jsonschema.Draft202012Validator(response, registry=REGISTRY)
++    temporal = VersionTemporal(
++        kind=TemporalKind.STATE,
++        valid_from=Bound(datetime(2026, 1, 1, 6, tzinfo=UTC), Granularity.DAY, "America/Chicago"),
++        valid_from_basis=StartBasis.TEMPLATE_FIELD,
++        valid_to_state=EndState.OPEN,
++        valid_to=None,
++        attested_from=None,
++        attested_through=None,
++        attested_to=None,
++        validity_unknown_from=None,
++        split_of_version_id=None,
++    )
++    legacy_remainder, new = uuid4(), uuid4()
++    v1 = CommitResponseOut.from_domain(
++        CommitResult(
++            uuid4(),
++            (legacy_remainder, new),
++            datetime.now(UTC),
++            ((legacy_remainder, None), (new, temporal)),
++        )
++    ).model_dump(mode="json")
++    assert not list(validator.iter_errors(v1))
++    assert "temporal" not in v1["versions"][0]
++    pilot = CommitResponseOut.from_domain(
++        CommitResult(uuid4(), (uuid4(),), datetime.now(UTC))
++    ).model_dump(mode="json")
++    assert not list(validator.iter_errors(pilot)) and "versions" not in pilot
+diff --git a/engine/tests/integration/test_temporal_concurrency.py b/engine/tests/integration/test_temporal_concurrency.py
+index d41b0f5..c2e6ad1 100644
+--- a/engine/tests/integration/test_temporal_concurrency.py
++++ b/engine/tests/integration/test_temporal_concurrency.py
+@@ -83,6 +83,14 @@ async def test_s0004_ac1_racing_commits_leave_one_answer_per_coordinate(world):
+     assert checked >= 200 and overlapping == 0
+     # Each winner wrote exactly one commit audit and one outbox event; losers none.
+     assert audit_successes(w, slot) == 2
++    # Amended S0004 AC1 (operator, 2026-11-18): each loser writes no successful commit
++    # audit, and its authorization decision is durably recorded with outcome `failed`
++    # (the F0002 guarantee that every authorization decision is audited).
++    assert w.scalar(
++        "SELECT count(*) FROM audit_event WHERE resource_id = %s AND action = 'commit' "
++        "AND operation_outcome = 'failed'",
++        slot,
++    ) == len(losers)
+     assert (
+         w.scalar(
+             "SELECT count(*) FROM outbox_event o JOIN canonical_commit c ON c.id = o.commit_id "
+diff --git a/engine/tests/integration/test_temporal_immutability.py b/engine/tests/integration/test_temporal_immutability.py
+index 67e0d34..574a60b 100644
+--- a/engine/tests/integration/test_temporal_immutability.py
++++ b/engine/tests/integration/test_temporal_immutability.py
+@@ -298,3 +298,29 @@ async def test_s0004_ac6_cross_scope_rows_are_refused_by_composite_keys(world, t
+                 (uuid4(), version),
+             )
+     assert w.counts() == before
++
++
++async def test_fr_arch_l2_split_lineage_cannot_cross_slots(world):
++    """Review remediation (migration 0015): a remainder's predecessor must be in its
++    own slot, even for a direct insert that bypasses the service."""
++    w = world
++    slot, version = await _seeded(w)
++    other = await w.slot()
++    assert (
++        await w.commit_v1(other, money("1"), start=bound("2026-01-01T06:00:00Z"))
++    ).status_code == 201
++    template = w.versions(other)[0]["id"]
++    with psycopg.connect(w.url) as connection, pytest.raises(psycopg.errors.CheckViolation):
++        connection.execute(
++            "INSERT INTO canonical_fact_version (id, slot_id, tenant_id, knowledge_base_id, "
++            "value, valid, recorded, evidence, commit_id, source_received_at, "
++            "artifact_created_at, assertion_created_at, canonical_accepted_at, "
++            "temporal_contract, temporal_kind, valid_from_granularity, valid_from_zone, "
++            "valid_from_basis, valid_to_state, split_of_version_id) SELECT gen_random_uuid(), "
++            "slot_id, tenant_id, knowledge_base_id, value, '[2031-01-01 06:00:00+00,)', "
++            "recorded, evidence, commit_id, source_received_at, artifact_created_at, "
++            "assertion_created_at, canonical_accepted_at, 1, 'STATE', 'DAY', "
++            "'America/Chicago', 'HUMAN', 'OPEN', %s FROM canonical_fact_version WHERE id = %s",
++            (version, template),
++        )
++    assert len(w.versions(other)) == 1
+diff --git a/engine/tests/integration/test_temporal_migration.py b/engine/tests/integration/test_temporal_migration.py
+index f16afeb..69eb1c2 100644
+--- a/engine/tests/integration/test_temporal_migration.py
++++ b/engine/tests/integration/test_temporal_migration.py
+@@ -268,3 +268,62 @@ def test_s0007_ac6_no_route_is_added():
+ 
+     paths = sorted(p for p in create_app().openapi()["paths"] if p.startswith("/facts"))
+     assert paths == ["/facts/{fact_slot_id}", "/facts/{fact_slot_id}/commits"]
++
++
++async def test_0015_preflight_refuses_cross_slot_lineage_and_cycles_cleanly(database):
++    """Review remediation (FR-ARCH-L2): 0015 refuses to install over an existing
++    cross-slot split, repairs nothing, and its downgrade drops only its own guard."""
++    _seed(database)
++    _upgrade("0014")
++    w = h.TemporalWorld(database)
++    try:
++        a, b = await w.slot(), await w.slot()
++        for slot in (a, b):
++            response = await w.commit_v1(
++                slot,
++                money("1"),
++                start=bound("2026-01-01T06:00:00Z"),
++                end_state="BOUNDED",
++                end=bound("2027-01-01T06:00:00Z"),
++            )
++            assert response.status_code == 201, response.text
++        pred = w.scalar("SELECT id FROM canonical_fact_version WHERE slot_id = %s", b)
++        with psycopg.connect(database) as connection:
++            crossing = connection.execute(
++                "INSERT INTO canonical_fact_version (id, slot_id, tenant_id, knowledge_base_id, "
++                "value, valid, recorded, evidence, commit_id, source_received_at, "
++                "artifact_created_at, assertion_created_at, canonical_accepted_at, "
++                "temporal_contract, temporal_kind, valid_from_granularity, valid_from_zone, "
++                "valid_from_basis, valid_to_state, split_of_version_id) SELECT "
++                "gen_random_uuid(), slot_id, tenant_id, knowledge_base_id, value, "
++                "'[2031-01-01 06:00:00+00,)', recorded, evidence, commit_id, "
++                "source_received_at, artifact_created_at, assertion_created_at, "
++                "canonical_accepted_at, 1, 'STATE', 'DAY', 'America/Chicago', 'HUMAN', 'OPEN', "
++                "%s FROM canonical_fact_version WHERE slot_id = %s RETURNING id",
++                (pred, a),
++            ).fetchone()[0]
++    finally:
++        await w.close()
++    before = _snapshot(database)
++    with pytest.raises(Exception) as refused:
++        _upgrade("0015")
++    assert "0015 upgrade refused: 1 versions" in str(refused.value)
++    assert str(crossing) in str(refused.value)
++    assert _snapshot(database) == before
++    with psycopg.connect(database) as connection:
++        assert connection.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0014"
++        # Test-only governed repair: superuser replica mode bypasses the 0014 no-delete trigger.
++        connection.execute("SET session_replication_role = replica")
++        connection.execute("DELETE FROM canonical_fact_version WHERE id = %s", (crossing,))
++    _upgrade("head")
++    _downgrade("0014")
++    with psycopg.connect(database) as connection:
++        triggers = {
++            r[0]
++            for r in connection.execute(
++                "SELECT tgname FROM pg_trigger WHERE tgrelid = 'canonical_fact_version'::regclass"
++            )
++        }
++    assert "trg_canonical_fact_version_v1_split_slot" not in triggers
++    assert "trg_canonical_fact_version_v1_insert" in triggers
++    _upgrade("head")
+diff --git a/engine/tests/integration/test_temporal_reads.py b/engine/tests/integration/test_temporal_reads.py
+index 72f6311..62ace26 100644
+--- a/engine/tests/integration/test_temporal_reads.py
++++ b/engine/tests/integration/test_temporal_reads.py
+@@ -300,8 +300,11 @@ async def test_legacy_slot_reads_keep_pilot_behaviour(world):
+     body["valid_from"] = "2026-01-01T00:00:00Z"
+     created = await w.post(legacy, body)
+     assert created.status_code == 201, created.text
++    # S0002 AC7 / S0007 AC3: a legacy pilot commit keeps the pilot response shape.
++    assert set(created.json()) == {"commit_id", "fact_version_ids", "canonical_accepted_at"}
+     read = await w.read(legacy, "2026-03-01T00:00:00Z")
+-    assert read.status_code == 200 and read.json()["temporal"] is None
++    # FR-ARCH-M1: the contract says `temporal` is absent for a legacy version, never null.
++    assert read.status_code == 200 and "temporal" not in read.json()
+     assert (await w.read(legacy, "2025-03-01T00:00:00Z")).status_code == 404
+     # A temporal block is not accepted on a legacy slot.
+     refused = await w.post(legacy, w.body({"amount": 2}, start=bound("2026-06-01T05:00:00Z")))
+diff --git a/engine/tests/integration/test_temporal_v1_commit.py b/engine/tests/integration/test_temporal_v1_commit.py
+index c270c1e..44d5fa6 100644
+--- a/engine/tests/integration/test_temporal_v1_commit.py
++++ b/engine/tests/integration/test_temporal_v1_commit.py
+@@ -764,3 +764,43 @@ async def test_service_refusal_is_raised_before_any_effect(world):
+     assert exc.value.code is TemporalReason.STATE_SUPERSESSION_REFUSED
+     assert w.counts() == before
+     assert datetime.now(UTC) > h.at("2026-06-14T00:00:00Z")
++
++
++async def test_s0002_ac7_commit_response_returns_temporal_metadata(world):
++    """S0002 AC7 (remediation 2026-11-18): the commit response returns, per version
++    written, the end state, attestation dates and start marker, in
++    `fact_version_ids` order. A remainder carries its own block and lineage."""
++    w = world
++    slot = await w.slot()
++    positive, note = w.evidence(("2026-06-01", "DAY")), w.evidence(("2026-08-02", "DAY"))
++    first = await w.commit_v1(
++        slot, money("2000000"), start=bound("2026-01-01T06:00:00Z"), evidence=[positive]
++    )
++    assert first.status_code == 201, first.text
++    (only,) = first.json()["versions"]
++    assert only["fact_version_id"] == first.json()["fact_version_ids"][0]
++    assert only["temporal"]["valid_to_state"] == "OPEN"
++    assert only["temporal"]["valid_from_basis"] == "TEMPLATE_FIELD"
++    assert only["temporal"]["attested_from"] == {"value": "2026-06-01", "precision": "DAY"}
++
++    second = await w.commit_v1(
++        slot,
++        money("5000000"),
++        start=bound("2026-03-01T06:00:00Z"),
++        evidence=[positive],
++        end_state="UNKNOWN",
++        attestation_zone=CHICAGO,
++        ending=[note],
++    )
++    assert second.status_code == 201, second.text
++    body = second.json()
++    assert [v["fact_version_id"] for v in body["versions"]] == body["fact_version_ids"]
++    remainder, new = body["versions"]
++    assert remainder["temporal"]["valid_to_state"] == "BOUNDED"
++    assert remainder["temporal"]["split_of_version_id"] == only["fact_version_id"]
++    assert new["temporal"]["valid_to_state"] == "UNKNOWN"
++    assert new["temporal"]["attested_to"] == {"value": "2026-08-02", "precision": "DAY"}
++    assert new["temporal"]["split_of_version_id"] is None
++    # The response matches what the read returns for the same version.
++    read = await w.read(slot, "2026-04-01T12:00:00Z")
++    assert read.json()["temporal"] == new["temporal"]
+diff --git a/planning-mds/api/brain-api.yaml b/planning-mds/api/brain-api.yaml
+index 0245d45..8e67c59 100644
+--- a/planning-mds/api/brain-api.yaml
++++ b/planning-mds/api/brain-api.yaml
+@@ -262,6 +262,8 @@ paths:
+         remainders keep their predecessor's payload, evidence and timestamps. Only closing an open recorded
+         interval may update a historical version (database-enforced). Grade-C or attestation-floor starts and
+         non-PRESENT states cannot close a PRESENT value. Legacy pilot slots keep the pilot request shape.
++        F0008 remediation (S0002 AC7): a fact-temporal/v1 commit response adds `versions` with each written
++        version's temporal block; a legacy pilot commit response is unchanged.
+       operationId: commitFact
+       tags:
+       - Facts
+diff --git a/planning-mds/schemas/canonical-commit-response.schema.json b/planning-mds/schemas/canonical-commit-response.schema.json
+index 4baf26f..3490cb5 100644
+--- a/planning-mds/schemas/canonical-commit-response.schema.json
++++ b/planning-mds/schemas/canonical-commit-response.schema.json
+@@ -2,13 +2,51 @@
+   "$schema": "https://json-schema.org/draft/2020-12/schema",
+   "$id": "https://nebula.local/schemas/canonical-commit-response.schema.json",
+   "title": "CanonicalCommitResponse",
+-  "description": "Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005).",
++  "description": "Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005). F0008 (S0002 AC7, remediation run 2026-11-18-bce4909b): a fact-temporal/v1 commit adds `versions`, one entry per written version in `fact_version_ids` order, carrying its temporal block; a legacy pilot commit omits it.",
+   "type": "object",
+   "additionalProperties": false,
+-  "required": ["commit_id", "fact_version_ids", "canonical_accepted_at"],
++  "required": [
++    "commit_id",
++    "fact_version_ids",
++    "canonical_accepted_at"
++  ],
+   "properties": {
+-    "commit_id": { "type": "string", "format": "uuid" },
+-    "fact_version_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "format": "uuid" } },
+-    "canonical_accepted_at": { "type": "string", "format": "date-time" }
++    "commit_id": {
++      "type": "string",
++      "format": "uuid"
++    },
++    "fact_version_ids": {
++      "type": "array",
++      "minItems": 1,
++      "items": {
++        "type": "string",
++        "format": "uuid"
++      }
++    },
++    "canonical_accepted_at": {
++      "type": "string",
++      "format": "date-time"
++    },
++    "versions": {
++      "type": "array",
++      "minItems": 1,
++      "items": {
++        "type": "object",
++        "additionalProperties": false,
++        "required": [
++          "fact_version_id"
++        ],
++        "properties": {
++          "fact_version_id": {
++            "type": "string",
++            "format": "uuid"
++          },
++          "temporal": {
++            "description": "Absent for a legacy remainder on an identity-v1 slot.",
++            "$ref": "fact-temporal-v1.schema.json#/$defs/version_temporal"
++          }
++        }
++      }
++    }
+   }
+ }

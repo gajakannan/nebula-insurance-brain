@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Protocol
@@ -33,6 +33,18 @@ from brain_temporal.ranges import TimeRange, split_remainder
 
 class FactSlotNotFound(Exception):
     pass
+
+
+DisclosureCheck = Callable[[tuple[FactVersion, ...]], Awaitable[None]]
+"""Verifies, before any effect, that the caller may read the attesting documents of
+predecessors whose dates the commit response will return (SEC-F8-NEW-01). It raises
+to refuse the commit."""
+
+
+def returns_attestation(temporal: VersionTemporal | None) -> bool:
+    return temporal is not None and any(
+        (temporal.attested_from, temporal.attested_through, temporal.attested_to)
+    )
 
 
 class StaleVersionError(Exception):
@@ -197,6 +209,7 @@ class CanonicalCommitService:
         authorized_scope: tuple[UUID, UUID],
         authorization_decision_id: UUID | None,
         source_access: SourceAccessProof | None = None,
+        disclosure_check: DisclosureCheck | None = None,
     ) -> CommitResult:
         locked = await self._repository.lock_slot(proposal.slot_id)
         if locked is None or locked != authorized_scope:
@@ -214,6 +227,7 @@ class CanonicalCommitService:
             scope=locked,
             authorization_decision_id=authorization_decision_id,
             source_access=source_access,
+            disclosure_check=disclosure_check,
         )
 
     # --- shared helpers --------------------------------------------------
@@ -249,7 +263,9 @@ class CanonicalCommitService:
         lineage: bool,
     ) -> UUID:
         """S0003 AC3: a remainder keeps its predecessor's value, evidence, review
-        linkage and four timestamps. Only its valid cut and recorded start are new.
+        linkage and three source timestamps (`source_received_at`,
+        `artifact_created_at`, `assertion_created_at`). Its valid cut and its
+        `canonical_accepted_at`, where its recorded interval starts, are new.
         Pilot rows written before F0008 have no stored timestamps on the domain
         object, so the proposal's values are the fallback for those alone."""
         remainder_id = uuid4()
@@ -408,6 +424,7 @@ class CanonicalCommitService:
         scope: tuple[UUID, UUID],
         authorization_decision_id: UUID | None,
         source_access: SourceAccessProof | None,
+        disclosure_check: DisclosureCheck | None = None,
     ) -> CommitResult:
         # Step 2: contract checks. A pilot-shaped request is refused (S0007 AC3).
         if proposal.temporal is None or proposal.valid_from is not None:
@@ -455,6 +472,19 @@ class CanonicalCommitService:
 
         # Step 9: guards (D8). A refusal writes no row.
         end_revision = self._guard(value, placement, attestation, overlapping)
+
+        # SEC-F8-NEW-01: a remainder repeats its predecessor's attestation dates, and
+        # the response returns them. The caller must be able to read the documents
+        # behind those dates; the check runs before any effect.
+        if disclosure_check is not None and not end_revision:
+            disclosed = tuple(
+                existing
+                for existing in overlapping
+                if returns_attestation(existing.temporal)
+                and self._remainders(existing, new_valid, placement)
+            )
+            if disclosed:
+                await disclosure_check(disclosed)
 
         new_temporal = VersionTemporal(
             kind=TemporalKind.STATE,

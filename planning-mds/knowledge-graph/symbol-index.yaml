@@ -1,12 +1,12 @@
 version: 0
-generated_at: '2026-11-20T02:21:45+00:00'
+generated_at: '2026-11-20T03:40:25+00:00'
 summary:
-  total_symbols: 2431
+  total_symbols: 2446
   by_language:
     python:
-      files: 226
-      parsed: 9
-      cached: 217
+      files: 227
+      parsed: 6
+      cached: 221
     typescript:
       files: 8
       parsed: 0
@@ -582,6 +582,7 @@ symbols:
   language: python
   end_line: 453
   callers:
+  - symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.current-attesting-artifact-keys
   - symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.current-versions
   - symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.next-version-after
   - symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.resolve-at
@@ -651,7 +652,7 @@ symbols:
   signature: class SqlAlchemyFactCommitRepository
   visibility: public
   language: python
-  end_line: 769
+  end_line: 803
   callers:
   - symbol:capability-assertion-eligibility-guards:test-assertion-authority-projection.test-source-discovery-selects-only-linkage-metadata
   - symbol:capability-assertion-eligibility-guards:test-assertion-consumers.commit
@@ -662,11 +663,11 @@ symbols:
   kind: class
   name: SqlAlchemyOutboxReader
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 772
+  line: 806
   signature: class SqlAlchemyOutboxReader
   visibility: public
   language: python
-  end_line: 806
+  end_line: 840
   callers: []
   callees: []
 - id: symbol:capability-assertion-eligibility-guards:repositories.sql-alchemy-review-item-repository
@@ -955,12 +956,12 @@ symbols:
   kind: method
   name: close_recorded
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 652
+  line: 686
   signature: 'async def close_recorded(self, version_id: UUID, at: datetime)'
   visibility: public
   language: python
   container: SqlAlchemyFactCommitRepository
-  end_line: 656
+  end_line: 690
   callers: []
   callees:
   - symbol:capability-assertion-eligibility-guards:repositories.to-pg-range
@@ -983,17 +984,33 @@ symbols:
   - symbol:capability-assertion-eligibility-guards:test-assertion-consumers.test-source-authority-cannot-be-copied-or-reused
   callees:
   - symbol:capability-assertion-eligibility-guards:assertions.discover-sources
+- id: symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.current-attesting-artifact-keys
+  node: capability:assertion-eligibility-guards
+  kind: method
+  name: current_attesting_artifact_keys
+  file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
+  line: 618
+  signature: 'async def current_attesting_artifact_keys(self, slot_id: UUID, *, scope:
+    tuple[UUID, UUID], valid_from: datetime | None, valid_to: datetime | None)'
+  visibility: public
+  language: python
+  container: SqlAlchemyFactCommitRepository
+  end_line: 650
+  callers: []
+  callees:
+  - symbol:capability-assertion-eligibility-guards:repositories.fact-version-from-row
+  - symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.evidence-artifact-keys
 - id: symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.current-versions
   node: capability:assertion-eligibility-guards
   kind: method
   name: current_versions
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 637
+  line: 671
   signature: 'async def current_versions(self, slot_id: UUID)'
   visibility: public
   language: python
   container: SqlAlchemyFactCommitRepository
-  end_line: 650
+  end_line: 684
   callers: []
   callees:
   - symbol:capability-assertion-eligibility-guards:repositories.fact-version-from-row
@@ -1009,7 +1026,8 @@ symbols:
   language: python
   container: SqlAlchemyFactCommitRepository
   end_line: 616
-  callers: []
+  callers:
+  - symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.current-attesting-artifact-keys
   callees: []
 - id: symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.evidence-document-dates
   node: capability:assertion-eligibility-guards
@@ -1058,13 +1076,13 @@ symbols:
   kind: method
   name: insert_change
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 725
+  line: 759
   signature: 'async def insert_change(self, *, reason: ChangeReason, from_version_id:
     UUID | None, to_version_id: UUID, tenant_id: UUID, knowledge_base_id: UUID)'
   visibility: public
   language: python
   container: SqlAlchemyFactCommitRepository
-  end_line: 744
+  end_line: 778
   callers: []
   callees: []
 - id: symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.insert-version
@@ -1072,7 +1090,7 @@ symbols:
   kind: method
   name: insert_version
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 675
+  line: 709
   signature: 'async def insert_version(self, *, version_id: UUID, slot_id: UUID, tenant_id:
     UUID, knowledge_base_id: UUID, value: dict, valid: TimeRange, recorded: TimeRange,
     change_reason: ChangeReason | None, evidence_refs: tuple[UUID, ...], review_decision_id:
@@ -1083,7 +1101,7 @@ symbols:
   visibility: public
   language: python
   container: SqlAlchemyFactCommitRepository
-  end_line: 723
+  end_line: 757
   callers: []
   callees:
   - symbol:capability-assertion-eligibility-guards:repositories.temporal-columns
@@ -1106,13 +1124,13 @@ symbols:
   kind: method
   name: next_version_after
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 618
+  line: 652
   signature: 'async def next_version_after(self, slot_id: UUID, *, valid_after: datetime,
     known_as_of: datetime)'
   visibility: public
   language: python
   container: SqlAlchemyFactCommitRepository
-  end_line: 635
+  end_line: 669
   callers: []
   callees:
   - symbol:capability-assertion-eligibility-guards:repositories.fact-version-from-row
@@ -1121,13 +1139,13 @@ symbols:
   kind: method
   name: register_commit
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 746
+  line: 780
   signature: 'async def register_commit(self, *, commit_id: UUID, tenant_id: UUID,
     knowledge_base_id: UUID, authorization_decision_id: UUID | None, at: datetime)'
   visibility: public
   language: python
   container: SqlAlchemyFactCommitRepository
-  end_line: 765
+  end_line: 799
   callers: []
   callees: []
 - id: symbol:capability-assertion-eligibility-guards:sql-alchemy-fact-commit-repository.require-commit-sources
@@ -1152,13 +1170,13 @@ symbols:
   kind: method
   name: resolve_at
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 658
+  line: 692
   signature: 'async def resolve_at(self, slot_id: UUID, *, valid_as_of: datetime,
     known_as_of: datetime)'
   visibility: public
   language: python
   container: SqlAlchemyFactCommitRepository
-  end_line: 673
+  end_line: 707
   callers: []
   callees:
   - symbol:capability-assertion-eligibility-guards:repositories.fact-version-from-row
@@ -1196,12 +1214,12 @@ symbols:
   kind: method
   name: write_outbox
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 767
+  line: 801
   signature: 'async def write_outbox(self, commit_id: UUID, payload: dict)'
   visibility: public
   language: python
   container: SqlAlchemyFactCommitRepository
-  end_line: 769
+  end_line: 803
   callers: []
   callees: []
 - id: symbol:capability-assertion-eligibility-guards:sql-alchemy-outbox-reader.init
@@ -1209,12 +1227,12 @@ symbols:
   kind: method
   name: __init__
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 775
+  line: 809
   signature: 'def __init__(self, session: AsyncSession)'
   visibility: private
   language: python
   container: SqlAlchemyOutboxReader
-  end_line: 776
+  end_line: 810
   callers:
   - symbol:capability-assertion-eligibility-guards:assertion-ineligible.init
   callees: []
@@ -1223,12 +1241,12 @@ symbols:
   kind: method
   name: mark_processed
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 802
+  line: 836
   signature: 'async def mark_processed(self, event_id: UUID, *, processed_at: datetime)'
   visibility: public
   language: python
   container: SqlAlchemyOutboxReader
-  end_line: 806
+  end_line: 840
   callers: []
   callees:
   - symbol:capability-assertion-eligibility-guards:sql-alchemy-review-item-repository.get
@@ -1237,12 +1255,12 @@ symbols:
   kind: method
   name: unprocessed
   file: engine/packages/brain-persistence/src/brain_persistence/repositories.py
-  line: 778
+  line: 812
   signature: 'async def unprocessed(self, limit: int=100)'
   visibility: public
   language: python
   container: SqlAlchemyOutboxReader
-  end_line: 800
+  end_line: 834
   callers: []
   callees: []
 - id: symbol:capability-assertion-eligibility-guards:sql-alchemy-review-item-repository.create-corrected-assertion
@@ -4292,13 +4310,13 @@ symbols:
   kind: method
   name: _canonical_value
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 221
+  line: 235
   signature: 'async def _canonical_value(self, proposal: CommitProposal, scope: tuple[UUID,
     UUID])'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 231
+  end_line: 245
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4309,14 +4327,14 @@ symbols:
   kind: method
   name: commit
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 193
+  line: 205
   signature: 'async def commit(self, proposal: CommitProposal, *, authorized_scope:
     tuple[UUID, UUID], authorization_decision_id: UUID | None, source_access: SourceAccessProof
-    | None=None)'
+    | None=None, disclosure_check: DisclosureCheck | None=None)'
   visibility: public
   language: python
   container: CanonicalCommitService
-  end_line: 217
+  end_line: 231
   callers:
   - symbol:capability-bitemporal-canonical-commit:temporal-world.commit-at
   - symbol:capability-bitemporal-canonical-commit:test-commit.test-empty-range-is-rejected-before-any-write
@@ -4337,6 +4355,8 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-state-guard
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d9-resolution-order
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-legacy-path-remainders-keep-predecessor-timestamps
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0007-ac3-pilot-shape-to-identity-v1-slot-is-refused
   callees:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
@@ -4352,14 +4372,14 @@ symbols:
   kind: method
   name: _commit_legacy
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 319
+  line: 335
   signature: 'async def _commit_legacy(self, proposal: CommitProposal, *, scope: tuple[UUID,
     UUID], authorization_decision_id: UUID | None, source_access: SourceAccessProof
     | None)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 400
+  end_line: 416
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees:
@@ -4387,14 +4407,14 @@ symbols:
   kind: method
   name: _commit_v1
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 404
+  line: 420
   signature: 'async def _commit_v1(self, proposal: CommitProposal, *, scope: tuple[UUID,
     UUID], authorization_decision_id: UUID | None, source_access: SourceAccessProof
-    | None)'
+    | None, disclosure_check: DisclosureCheck | None=None)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 547
+  end_line: 577
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees:
@@ -4410,6 +4430,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.remainder
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.remainders
   - symbol:capability-bitemporal-canonical-commit:commit.range
+  - symbol:capability-bitemporal-canonical-commit:commit.returns-attestation
   - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.close-recorded
   - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.evidence-document-dates
   - symbol:capability-bitemporal-canonical-commit:fact-commit-repository.insert-change
@@ -4431,12 +4452,12 @@ symbols:
   kind: method
   name: _current
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 233
+  line: 247
   signature: 'async def _current(self, proposal: CommitProposal)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 238
+  end_line: 252
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4449,14 +4470,14 @@ symbols:
   kind: method
   name: _finish
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 278
+  line: 294
   signature: 'async def _finish(self, *, proposal: CommitProposal, scope: tuple[UUID,
     UUID], commit_id: UUID, new_version_id: UUID, superseded: list[UUID], version_ids:
     list[UUID], now: datetime, temporals: dict[UUID, VersionTemporal | None] | None=None)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 315
+  end_line: 331
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4470,13 +4491,13 @@ symbols:
   kind: method
   name: _guard
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 568
+  line: 598
   signature: 'def _guard(self, value: Mapping[str, Any], placement: Placement, attestation:
     Attestation, overlapping: list[FactVersion])'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 590
+  end_line: 620
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
   callees:
@@ -4488,13 +4509,13 @@ symbols:
   kind: method
   name: __init__
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 182
+  line: 194
   signature: 'def __init__(self, repository: FactCommitRepository, *, clock: Callable[[],
     datetime] | None=None, answer_policy: CommitAnswerPolicy | None=None)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 191
+  end_line: 203
   callers:
   - symbol:capability-bitemporal-canonical-commit:temporal-rejected.init
   - symbol:capability-bitemporal-canonical-commit:temporal-world.init
@@ -4505,13 +4526,13 @@ symbols:
   kind: method
   name: _is_end_revision
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 550
+  line: 580
   signature: 'def _is_end_revision(value: Mapping[str, Any], placement: Placement,
     attestation: Attestation, predecessor: FactVersion)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 566
+  end_line: 596
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.guard
   callees:
@@ -4521,14 +4542,14 @@ symbols:
   kind: method
   name: _remainder
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 240
+  line: 254
   signature: 'async def _remainder(self, *, predecessor: FactVersion, piece: _Write,
     proposal: CommitProposal, scope: tuple[UUID, UUID], commit_id: UUID, now: datetime,
     lineage: bool)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 276
+  end_line: 292
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4541,13 +4562,13 @@ symbols:
   kind: method
   name: _remainders
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 593
+  line: 623
   signature: 'def _remainders(predecessor: FactVersion, new_valid: TimeRange, placement:
     Placement)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 649
+  end_line: 679
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
   callees:
@@ -4560,13 +4581,13 @@ symbols:
   kind: method
   name: canonical_value
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 54
+  line: 66
   signature: 'async def canonical_value(self, slot_id: UUID, value: Mapping[str, Any],
     *, authorized_scope: tuple[UUID, UUID])'
   visibility: public
   language: python
   container: CommitAnswerPolicy
-  end_line: 60
+  end_line: 72
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.canonical-value
   callees: []
@@ -4575,11 +4596,11 @@ symbols:
   kind: class
   name: CanonicalCommitService
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 167
+  line: 179
   signature: class CanonicalCommitService
   visibility: public
   language: python
-  end_line: 649
+  end_line: 679
   callers:
   - symbol:capability-bitemporal-canonical-commit:temporal-world.commit-at
   - symbol:capability-bitemporal-canonical-commit:test-commit.test-empty-range-is-rejected-before-any-write
@@ -4596,11 +4617,11 @@ symbols:
   kind: class
   name: CommitAnswerPolicy
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 48
+  line: 60
   signature: class CommitAnswerPolicy
   visibility: public
   language: python
-  end_line: 60
+  end_line: 72
   callers: []
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:commit.fact-commit-repository
@@ -4608,11 +4629,11 @@ symbols:
   kind: class
   name: FactCommitRepository
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 63
+  line: 75
   signature: class FactCommitRepository
   visibility: public
   language: python
-  end_line: 143
+  end_line: 155
   callers: []
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:commit.fact-slot-not-found
@@ -4633,11 +4654,11 @@ symbols:
   kind: class
   name: LegacyTemporalUnsupported
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 43
+  line: 55
   signature: class LegacyTemporalUnsupported
   visibility: public
   language: python
-  end_line: 45
+  end_line: 57
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   callees: []
@@ -4646,27 +4667,40 @@ symbols:
   kind: function
   name: _range
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 146
+  line: 158
   signature: 'def _range(version: FactVersion)'
   visibility: private
   language: python
-  end_line: 147
+  end_line: 159
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.remainders
   callees:
   - symbol:capability-bitemporal-canonical-commit:ranges.time-range
+- id: symbol:capability-bitemporal-canonical-commit:commit.returns-attestation
+  node: capability:bitemporal-canonical-commit
+  kind: function
+  name: returns_attestation
+  file: engine/packages/brain-temporal/src/brain_temporal/commit.py
+  line: 44
+  signature: 'def returns_attestation(temporal: VersionTemporal | None)'
+  visibility: public
+  language: python
+  end_line: 47
+  callers:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
+  callees: []
 - id: symbol:capability-bitemporal-canonical-commit:commit.same-answer
   node: capability:bitemporal-canonical-commit
   kind: function
   name: _same_answer
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 155
+  line: 167
   signature: 'def _same_answer(a: Mapping[str, Any], b: Mapping[str, Any])'
   visibility: private
   language: python
-  end_line: 156
+  end_line: 168
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.is-end-revision
   callees: []
@@ -4675,11 +4709,11 @@ symbols:
   kind: class
   name: StaleVersionError
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 38
+  line: 50
   signature: class StaleVersionError
   visibility: public
   language: python
-  end_line: 40
+  end_line: 52
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.current
   callees: []
@@ -4688,11 +4722,11 @@ symbols:
   kind: function
   name: _state
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 150
+  line: 162
   signature: 'def _state(value: Mapping[str, Any])'
   visibility: private
   language: python
-  end_line: 152
+  end_line: 164
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.guard
   callees: []
@@ -4701,11 +4735,11 @@ symbols:
   kind: class
   name: _Write
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 160
+  line: 172
   signature: class _Write
   visibility: private
   language: python
-  end_line: 164
+  end_line: 176
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.remainders
@@ -4849,12 +4883,12 @@ symbols:
   kind: method
   name: close_recorded
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 98
+  line: 110
   signature: 'async def close_recorded(self, version_id: UUID, at: datetime)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 98
+  end_line: 110
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4864,12 +4898,12 @@ symbols:
   kind: method
   name: current_versions
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 94
+  line: 106
   signature: 'async def current_versions(self, slot_id: UUID)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 96
+  end_line: 108
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.current
   callees: []
@@ -4878,13 +4912,13 @@ symbols:
   kind: method
   name: evidence_document_dates
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 87
+  line: 99
   signature: 'async def evidence_document_dates(self, refs: tuple[UUID, ...], *, authorized_scope:
     tuple[UUID, UUID])'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 92
+  end_line: 104
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
   callees: []
@@ -4893,13 +4927,13 @@ symbols:
   kind: method
   name: insert_change
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 123
+  line: 135
   signature: 'async def insert_change(self, *, reason: ChangeReason, from_version_id:
     UUID | None, to_version_id: UUID, tenant_id: UUID, knowledge_base_id: UUID)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 131
+  end_line: 143
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.finish
@@ -4909,7 +4943,7 @@ symbols:
   kind: method
   name: insert_version
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 100
+  line: 112
   signature: 'async def insert_version(self, *, version_id: UUID, slot_id: UUID, tenant_id:
     UUID, knowledge_base_id: UUID, value: dict, valid: TimeRange, recorded: TimeRange,
     change_reason: ChangeReason | None, evidence_refs: tuple[UUID, ...], review_decision_id:
@@ -4920,7 +4954,7 @@ symbols:
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 121
+  end_line: 133
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4931,12 +4965,12 @@ symbols:
   kind: method
   name: lock_slot
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 76
+  line: 88
   signature: 'async def lock_slot(self, slot_id: UUID)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 80
+  end_line: 92
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -4945,13 +4979,13 @@ symbols:
   kind: method
   name: register_commit
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 133
+  line: 145
   signature: 'async def register_commit(self, *, commit_id: UUID, tenant_id: UUID,
     knowledge_base_id: UUID, authorization_decision_id: UUID | None, at: datetime)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 141
+  end_line: 153
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4961,14 +4995,14 @@ symbols:
   kind: method
   name: require_commit_sources
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 64
+  line: 76
   signature: 'async def require_commit_sources(self, *, evidence_refs: tuple[UUID,
     ...], review_decision_id: UUID | None, authorized_scope: tuple[UUID, UUID], closes_existing:
     bool, source_access: SourceAccessProof | None)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 74
+  end_line: 86
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4978,12 +5012,12 @@ symbols:
   kind: method
   name: slot_identity_version
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 82
+  line: 94
   signature: 'async def slot_identity_version(self, slot_id: UUID)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 85
+  end_line: 97
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees: []
@@ -4992,12 +5026,12 @@ symbols:
   kind: method
   name: write_outbox
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 143
+  line: 155
   signature: 'async def write_outbox(self, commit_id: UUID, payload: dict)'
   visibility: public
   language: python
   container: FactCommitRepository
-  end_line: 143
+  end_line: 155
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.finish
   callees: []
@@ -5416,6 +5450,8 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-source-refusal-precedes-a-temporal-refusal
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-state-guard
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d9-resolution-order
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.section-87
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0001-ac1-ac2-invalid-bounds-are-refused-and-write-nothing
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0001-ac2-chicago-midnight-is-accepted
@@ -6157,6 +6193,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d5-right-remainder-of-an-unknown-end-clips-its-window
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-end-revision-replaces-whole-and-unanchored-succession-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d9-resolution-order
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:temporal.end-state
   node: capability:bitemporal-canonical-commit
@@ -6713,6 +6750,8 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d5-right-remainder-of-an-unknown-end-clips-its-window
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d9-resolution-order
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-legacy-path-remainders-keep-predecessor-timestamps
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:test-commit.dt
   node: capability:bitemporal-canonical-commit
@@ -7664,6 +7703,8 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-source-refusal-precedes-a-temporal-refusal
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-state-guard
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d9-resolution-order
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:test-temporal-service.clock
   node: capability:bitemporal-canonical-commit
@@ -7711,6 +7752,8 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-state-guard
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d9-resolution-order
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-legacy-path-remainders-keep-predecessor-timestamps
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0007-ac3-pilot-shape-to-identity-v1-slot-is-refused
   callees:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
@@ -7759,6 +7802,8 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-source-refusal-precedes-a-temporal-refusal
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d8-state-guard
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d9-resolution-order
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.section-87
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0001-ac1-ac2-invalid-bounds-are-refused-and-write-nothing
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0001-ac2-chicago-midnight-is-accepted
@@ -7797,6 +7842,8 @@ symbols:
   is_test: true
   callers:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.commit
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
   callees:
   - symbol:capability-bitemporal-canonical-commit:test-bounds.utc
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.utc
@@ -8039,6 +8086,51 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-bounds.utc
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.commit
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.utc
+- id: symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  node: capability:bitemporal-canonical-commit
+  kind: function
+  name: test_sec_f8_new_01_disclosure_check_sees_dated_predecessors_before_any_write
+  file: engine/packages/brain-temporal/tests/test_temporal_service.py
+  line: 442
+  signature: async def test_sec_f8_new_01_disclosure_check_sees_dated_predecessors_before_any_write(service,
+    repository, v1_slot, clock)
+  visibility: public
+  language: python
+  end_line: 476
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  - symbol:capability-bitemporal-canonical-commit:harness.money
+  - symbol:capability-bitemporal-canonical-commit:temporal.document-date
+  - symbol:capability-bitemporal-canonical-commit:test-bounds.utc
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.block
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.commit
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.money
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.proposal
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.utc
+- id: symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
+  node: capability:bitemporal-canonical-commit
+  kind: function
+  name: test_sec_f8_new_01_disclosure_check_skips_undated_predecessors
+  file: engine/packages/brain-temporal/tests/test_temporal_service.py
+  line: 479
+  signature: async def test_sec_f8_new_01_disclosure_check_skips_undated_predecessors(service,
+    repository, v1_slot, clock)
+  visibility: public
+  language: python
+  end_line: 495
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
+  - symbol:capability-bitemporal-canonical-commit:harness.money
+  - symbol:capability-bitemporal-canonical-commit:test-bounds.utc
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.block
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.commit
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.money
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.proposal
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.utc
 - id: symbol:capability-bitemporal-canonical-commit:test-temporal-service.utc
   node: capability:bitemporal-canonical-commit
   kind: function
@@ -8067,6 +8159,8 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d5-right-remainder-of-an-unknown-end-clips-its-window
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-d9-resolution-order
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-legacy-path-remainders-keep-predecessor-timestamps
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-sees-dated-predecessors-before-any-write
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.test-sec-f8-new-01-disclosure-check-skips-undated-predecessors
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:test-temporal-service.v1-slot
   node: capability:bitemporal-canonical-commit
@@ -12753,27 +12847,42 @@ symbols:
     session: AsyncSession=Depends(get_db_session), registry: PredicateContractRegistry=Depends(get_predicate_registry))'
   visibility: public
   language: python
-  end_line: 265
+  end_line: 291
   callers: []
   callees:
   - symbol:capability-durable-authorization-decisions:assertion-repository.source-keys
   - symbol:capability-durable-authorization-decisions:authority-store.commit
   - symbol:capability-durable-authorization-decisions:authorization-execution.mutate
+  - symbol:capability-durable-authorization-decisions:facts.conservative-window
   - symbol:capability-durable-authorization-decisions:facts.ending-refs
   - symbol:capability-durable-authorization-decisions:facts.slot
   - symbol:capability-durable-authorization-decisions:facts.sqlstate
   - symbol:capability-durable-authorization-decisions:fake-store.commit
   - symbol:capability-durable-authorization-decisions:read-store.commit
+- id: symbol:capability-durable-authorization-decisions:facts.conservative-window
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: _conservative_window
+  file: engine/apps/api/src/brain_api/routes/facts.py
+  line: 321
+  signature: 'def _conservative_window(temporal: object)'
+  visibility: private
+  language: python
+  end_line: 332
+  callers:
+  - symbol:capability-durable-authorization-decisions:facts.commit-fact
+  callees:
+  - symbol:capability-durable-authorization-decisions:facts.instant-of
 - id: symbol:capability-durable-authorization-decisions:facts.ending-refs
   node: capability:durable-authorization-decisions
   kind: function
   name: _ending_refs
   file: engine/apps/api/src/brain_api/routes/facts.py
-  line: 268
+  line: 294
   signature: 'def _ending_refs(temporal: object)'
   visibility: private
   language: python
-  end_line: 282
+  end_line: 308
   callers:
   - symbol:capability-durable-authorization-decisions:facts.commit-fact
   callees:
@@ -12797,6 +12906,19 @@ symbols:
   - symbol:capability-durable-authorization-decisions:assertion-write-service.read
   - symbol:capability-durable-authorization-decisions:authorization-execution.read
   - symbol:capability-durable-authorization-decisions:facts.slot
+- id: symbol:capability-durable-authorization-decisions:facts.instant-of
+  node: capability:durable-authorization-decisions
+  kind: function
+  name: _instant_of
+  file: engine/apps/api/src/brain_api/routes/facts.py
+  line: 311
+  signature: 'def _instant_of(bound: object)'
+  visibility: private
+  language: python
+  end_line: 318
+  callers:
+  - symbol:capability-durable-authorization-decisions:facts.conservative-window
+  callees: []
 - id: symbol:capability-durable-authorization-decisions:facts.slot
   node: capability:durable-authorization-decisions
   kind: function
@@ -35444,6 +35566,71 @@ symbols:
   callers:
   - symbol:capability-temporal-fact-resolution:temporal-fact-reader.resolve
   callees: []
+- id: symbol:capability-temporal-fact-resolution:test-facts-temporal-helpers.test-bounded-window-uses-both-instants
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: test_bounded_window_uses_both_instants
+  file: engine/apps/api/tests/test_facts_temporal_helpers.py
+  line: 18
+  signature: def test_bounded_window_uses_both_instants()
+  visibility: public
+  language: python
+  end_line: 22
+  is_test: true
+  callers: []
+  callees: []
+- id: symbol:capability-temporal-fact-resolution:test-facts-temporal-helpers.test-ending-refs-parses-only-well-formed-lists
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: test_ending_refs_parses_only_well_formed_lists
+  file: engine/apps/api/tests/test_facts_temporal_helpers.py
+  line: 57
+  signature: def test_ending_refs_parses_only_well_formed_lists()
+  visibility: public
+  language: python
+  end_line: 62
+  is_test: true
+  callers: []
+  callees: []
+- id: symbol:capability-temporal-fact-resolution:test-facts-temporal-helpers.test-instant-of-rejects-non-strings
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: test_instant_of_rejects_non_strings
+  file: engine/apps/api/tests/test_facts_temporal_helpers.py
+  line: 52
+  signature: def test_instant_of_rejects_non_strings()
+  visibility: public
+  language: python
+  end_line: 54
+  is_test: true
+  callers: []
+  callees: []
+- id: symbol:capability-temporal-fact-resolution:test-facts-temporal-helpers.test-open-and-unknown-ends-are-unbounded
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: test_open_and_unknown_ends_are_unbounded
+  file: engine/apps/api/tests/test_facts_temporal_helpers.py
+  line: 32
+  signature: 'def test_open_and_unknown_ends_are_unbounded(temporal: dict)'
+  visibility: public
+  language: python
+  end_line: 33
+  is_test: true
+  callers: []
+  callees: []
+- id: symbol:capability-temporal-fact-resolution:test-facts-temporal-helpers.test-unknown-or-malformed-start-widens-to-unbounded
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: test_unknown_or_malformed_start_widens_to_unbounded
+  file: engine/apps/api/tests/test_facts_temporal_helpers.py
+  line: 47
+  signature: 'def test_unknown_or_malformed_start_widens_to_unbounded(temporal: object)'
+  visibility: public
+  language: python
+  end_line: 49
+  is_test: true
+  callers: []
+  callees: []
 - id: symbol:capability-temporal-fact-resolution:test-temporal-reads.amount
   node: capability:temporal-fact-resolution
   kind: function
@@ -35462,6 +35649,21 @@ symbols:
   - symbol:capability-temporal-fact-resolution:test-temporal-reads.test-s0006-ac4-half-open-boundaries
   - symbol:capability-temporal-fact-resolution:test-temporal-reads.test-s0006-ac6-default-coordinates-and-malformed-ones
   - symbol:capability-temporal-fact-resolution:test-temporal-reads.test-s0006-ac7-revoked-grant-is-denied-at-every-coordinate
+  callees: []
+- id: symbol:capability-temporal-fact-resolution:test-temporal-reads.restricted-predecessor
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: _restricted_predecessor
+  file: engine/tests/integration/test_temporal_reads.py
+  line: 314
+  signature: async def _restricted_predecessor(w, *, end=None)
+  visibility: private
+  language: python
+  end_line: 328
+  is_test: true
+  callers:
+  - symbol:capability-temporal-fact-resolution:test-temporal-reads.test-sec-f8-new-01-commit-refused-when-predecessor-dates-are-unreadable
+  - symbol:capability-temporal-fact-resolution:test-temporal-reads.test-sec-f8-new-01-non-overlapping-commit-needs-no-predecessor-read
   callees: []
 - id: symbol:capability-temporal-fact-resolution:test-temporal-reads.section-87
   node: capability:temporal-fact-resolution
@@ -35641,6 +35843,48 @@ symbols:
   callees:
   - symbol:capability-temporal-fact-resolution:test-temporal-reads.amount
   - symbol:capability-temporal-fact-resolution:test-temporal-reads.section-87
+- id: symbol:capability-temporal-fact-resolution:test-temporal-reads.test-sec-f8-new-01-commit-refused-when-predecessor-dates-are-unreadable
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: test_sec_f8_new_01_commit_refused_when_predecessor_dates_are_unreadable
+  file: engine/tests/integration/test_temporal_reads.py
+  line: 331
+  signature: async def test_sec_f8_new_01_commit_refused_when_predecessor_dates_are_unreadable(world)
+  visibility: public
+  language: python
+  end_line: 358
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-temporal-fact-resolution:test-temporal-reads.restricted-predecessor
+- id: symbol:capability-temporal-fact-resolution:test-temporal-reads.test-sec-f8-new-01-non-overlapping-commit-needs-no-predecessor-read
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: test_sec_f8_new_01_non_overlapping_commit_needs_no_predecessor_read
+  file: engine/tests/integration/test_temporal_reads.py
+  line: 361
+  signature: async def test_sec_f8_new_01_non_overlapping_commit_needs_no_predecessor_read(world)
+  visibility: public
+  language: python
+  end_line: 373
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-temporal-fact-resolution:test-temporal-reads.restricted-predecessor
+- id: symbol:capability-temporal-fact-resolution:test-temporal-reads.test-sec-f8-new-01-unchecked-predecessor-is-a-retryable-conflict
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: test_sec_f8_new_01_unchecked_predecessor_is_a_retryable_conflict
+  file: engine/tests/integration/test_temporal_reads.py
+  line: 376
+  signature: async def test_sec_f8_new_01_unchecked_predecessor_is_a_retryable_conflict(world,
+    monkeypatch)
+  visibility: public
+  language: python
+  end_line: 405
+  is_test: true
+  callers: []
+  callees: []
 - id: symbol:capability-temporal-fact-resolution:validity-unknown.temporal
   node: capability:temporal-fact-resolution
   kind: method

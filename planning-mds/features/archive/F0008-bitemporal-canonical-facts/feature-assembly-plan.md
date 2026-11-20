@@ -45,7 +45,7 @@ It adds no route, grant, UI, producer or model call. It covers seven stories and
 | `canonical_fact_version`, two-range GiST exclusion | `engine/migrations/versions/0003_fact_slots_and_commits.py` | Kept. New columns, CHECKs and triggers in 0014. The exclusion DDL is unchanged. |
 | Ownership composite keys, owner immutability | 0006, 0007 | Kept. The new triggers sit alongside them. |
 | `TimeRange`, `split_remainder` | `engine/packages/brain-temporal/src/brain_temporal/ranges.py` | Extended to bounds with granularity and zone. `split_remainder` is kept for legacy rows. |
-| `CanonicalCommitService.commit` | `brain_temporal/commit.py` | Branches on the slot's temporal contract. The v1 path validates, applies guards, writes remainders with predecessor lineage and records change rows to remainders. **Pilot defect fixed for v1 and legacy:** remainders take the predecessor's four timestamps, not the proposal's (S0003 AC3). |
+| `CanonicalCommitService.commit` | `brain_temporal/commit.py` | Branches on the slot's temporal contract. The v1 path validates, applies guards, writes remainders with predecessor lineage and records change rows to remainders. **Pilot defect fixed for v1 and legacy:** remainders take the predecessor's three source timestamps (`source_received_at`, `artifact_created_at`, `assertion_created_at`), not the proposal's, and the new `canonical_accepted_at` (S0003 AC3). |
 | `FactCommitRepository` and `SqlAlchemyFactCommitRepository` | `brain_persistence/repositories.py` | `insert_version` takes a `VersionTemporal`. New methods: `evidence_document_dates`, `slot_temporal_contract`, `versions_visible_at`. `close_recorded` is unchanged and is the only UPDATE. |
 | `resolve_at` | `brain_persistence/repositories.py` | Kept for the pilot. The new `TemporalFactReader` in `brain_temporal/reader.py` implements ADR-0078 D9. |
 | `GET /facts/{id}`, `POST /facts/{id}/commits` | `engine/apps/api/src/brain_api/routes/facts.py`, `schemas/facts.py` | Additive `temporal` input and output. `FactValidityUnknown` variant. Exception mapping for the new 422 codes and 409 `temporal_conflict`. |
@@ -340,7 +340,7 @@ The Architect recorded these implementation details at feature G0. None changes 
 4. **Trigger names and firing order.** PostgreSQL fires BEFORE triggers in name order. The new triggers are named `trg_canonical_fact_version_v1_insert`, `trg_canonical_fact_version_v1_close_only`, `trg_canonical_fact_version_v1_no_delete`, `trg_canonical_fact_version_v1_no_truncate`, `trg_canonical_fact_change_v1_append_only` and `trg_canonical_fact_change_v1_no_truncate` (a row trigger and a statement trigger cannot share one definition), so the 0007 `..._owner_immutable` trigger still fires first and existing ownership negatives keep their error. The functions are `brain_cfv_v1_insert_guard()`, `brain_cfv_close_only()` and `brain_refuse_mutation()`.
 5. **Refusal audit (D8).** A guard or temporal refusal raises inside the `mutate` operation. The existing F0002 path rolls back and durably records the commit decision with `operation_outcome = failed`, which is the same mechanism as F0007 answer rejections. The reason code is returned as the 422 problem `code`. The AuthX decision record has no field for a business reason, and adding one would change the F0002 AuthX contract. Durable per-refusal reason persistence therefore moves to F0018, which routes refusals to review. ADR-0078 D8 gets a note to this effect.
 6. **Read timestamps (S0006 AC5).** `FactVersion` gains optional `review_decision_id`, `source_received_at`, `artifact_created_at` and `assertion_created_at`, and the optional `temporal` block. `brain-api.yaml` `FactVersion` lists the four as optional properties. The runtime pilot field names (`valid_start`, `valid_end`, `recorded_start`, `recorded_end`) are kept. The existing contract drift, where `brain-api.yaml` describes `valid`/`recorded` objects, predates F0008 and is out of scope; it is logged as a follow-up.
-7. **Remainder review linkage (S0003 AC3).** The pilot wrote `review_decision_id = NULL` on remainders. Both the v1 and legacy paths now copy the predecessor's `review_decision_id`, together with the four timestamps.
+7. **Remainder review linkage (S0003 AC3).** The pilot wrote `review_decision_id = NULL` on remainders. Both the v1 and legacy paths now copy the predecessor's `review_decision_id`, together with its three source timestamps; `canonical_accepted_at` is the new acceptance.
 8. **Fault injection (S0003 AC7).** The test wraps the repository so `write_outbox` raises after the fact rows are flushed, then counts rows from that commit in every table.
 9. **Migration lineage.** The sole head is `0013`, and no remote branch carries a `0014` (F0011 is still Planned). `0014_f0008_bitemporal_contract.py` takes `down_revision = "0013"`.
 10. **CI.** A new `ci-gates.yml` step runs the F0008 suites against owned databases with a coverage floor on `brain_temporal`.
@@ -363,6 +363,14 @@ Also in this run:
 - The prior run's evidence labels (PM-L1, PM-L2, SEC-L1, QE-L1) are corrected through errata in this run. The superseded evidence is not rewritten.
 
 No route, grant, table or UI is added.
+
+## Second Remediation (run `2026-11-19-8cfcd0ff`, 2026-11-19)
+
+Review `2026-11-19-b21ec2de` found SEC-F8-NEW-01 (High). Remainders repeat their predecessor's attestation dates, and the new commit response returns them, but no READ check covered the predecessor's documents. Operator decision (2026-11-19): refuse the whole commit with the non-disclosing 404.
+
+- **Up front:** the commit route adds, to the same-UoW READ checks, the documents behind the dates of every current temporal-v1 version that the proposal could split (`current_attesting_artifact_keys`, over a conservative valid-time window). An unreadable one denies the commit (404) before any effect.
+- **After the slot lock:** the service passes the predecessors whose dates the response would return to a `disclosure_check`. A document that escaped the up-front check (a version committed concurrently in between) refuses the commit with the retryable 409 `stale_version`.
+- **Lows:** the plan and docstring wording on remainder timestamps (R2-ARCH-L1); the STATUS and BLUEPRINT pointers (PM2-L2); NUL-safe changed-path inventory (PM2-L1); runtime preflight recorded before the regression (QE2-L1).
 
 ## Knowledge-Graph Binding Plan
 

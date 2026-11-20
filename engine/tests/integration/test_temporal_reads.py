@@ -309,3 +309,97 @@ async def test_legacy_slot_reads_keep_pilot_behaviour(world):
     # A temporal block is not accepted on a legacy slot.
     refused = await w.post(legacy, w.body({"amount": 2}, start=bound("2026-06-01T05:00:00Z")))
     assert refused.status_code == 400
+
+
+async def _restricted_predecessor(w, *, end=None):  # type: ignore[no-untyped-def]
+    """A version on `w.a` attested only by a restricted document."""
+    slot = await w.slot()
+    secret = w.evidence(("2026-01-05", "DAY"), classifications=("restricted",))
+    kwargs = {"end_state": "BOUNDED", "end": bound(end)} if end else {}
+    created = await w.commit_v1(
+        slot, money("2000000"), start=bound("2026-01-01T06:00:00Z"), evidence=[secret], **kwargs
+    )
+    assert created.status_code == 201, created.text
+    with Session(w.sync_engine) as session, session.begin():
+        limited = fixtures.seed_principal(session, issuer="urn:f0008:test", subject=f"l-{uuid4()}")
+        fixtures.seed_grant(
+            session, limited.id, *w.a.scope, "ServicePrincipal", classifications=("internal",)
+        )
+    return slot, limited
+
+
+async def test_sec_f8_new_01_commit_refused_when_predecessor_dates_are_unreadable(world):
+    """SEC-F8-NEW-01 (operator decision 2026-11-19): a remainder would repeat its
+    predecessor's attestation date in the commit response, so a committer who cannot
+    read that document is refused the whole commit with the non-disclosing 404."""
+    w = world
+    slot, limited = await _restricted_predecessor(w)
+    readable = w.evidence(("2026-06-01", "DAY"))
+    before = w.counts()
+    refused = await w.commit_v1(
+        slot,
+        money("5000000"),
+        start=bound("2026-06-01T05:00:00Z"),
+        evidence=[readable],
+        principal=limited,
+    )
+    missing = await w.read(uuid4(), "2026-03-01T00:00:00Z", principal=limited)
+    assert refused.status_code == 404 and refused.json()["code"] == "not_found"
+    assert "2026-01-05" not in refused.text
+    volatile = {"instance": None, "traceId": None}
+    assert refused.json() | volatile == missing.json() | volatile
+    assert w.counts() == before
+    # A principal who can read the document gets the full response.
+    allowed = await w.commit_v1(
+        slot, money("5000000"), start=bound("2026-06-01T05:00:00Z"), evidence=[readable]
+    )
+    assert allowed.status_code == 201, allowed.text
+    remainder = allowed.json()["versions"][0]["temporal"]
+    assert remainder["attested_from"] == {"value": "2026-01-05", "precision": "DAY"}
+
+
+async def test_sec_f8_new_01_non_overlapping_commit_needs_no_predecessor_read(world):
+    """The up-front check covers only versions the proposal could split."""
+    w = world
+    slot, limited = await _restricted_predecessor(w, end="2026-03-01T06:00:00Z")
+    response = await w.commit_v1(
+        slot,
+        money("5000000"),
+        start=bound("2026-06-01T05:00:00Z"),
+        evidence=[w.evidence(("2026-06-01", "DAY"))],
+        principal=limited,
+    )
+    assert response.status_code == 201, response.text
+    assert "2026-01-05" not in response.text
+
+
+async def test_sec_f8_new_01_unchecked_predecessor_is_a_retryable_conflict(world, monkeypatch):
+    """A predecessor whose documents escaped the up-front check (committed between
+    that check and the slot lock) refuses the commit with 409 stale_version and
+    returns no date."""
+    from brain_persistence.repositories import SqlAlchemyFactCommitRepository
+
+    w = world
+    slot = await w.slot()
+    secret = w.evidence(("2026-01-05", "DAY"))
+    created = await w.commit_v1(
+        slot, money("2000000"), start=bound("2026-01-01T06:00:00Z"), evidence=[secret]
+    )
+    assert created.status_code == 201, created.text
+
+    async def nothing_current(self, slot_id, **kwargs):  # type: ignore[no-untyped-def]
+        return ()  # simulate the predecessor appearing after the up-front check
+
+    monkeypatch.setattr(
+        SqlAlchemyFactCommitRepository, "current_attesting_artifact_keys", nothing_current
+    )
+    before = w.counts()
+    response = await w.commit_v1(
+        slot,
+        money("5000000"),
+        start=bound("2026-06-01T05:00:00Z"),
+        evidence=[w.evidence(("2026-06-01", "DAY"))],
+    )
+    assert response.status_code == 409 and response.json()["code"] == "stale_version"
+    assert "2026-01-05" not in response.text
+    assert w.counts() == before
