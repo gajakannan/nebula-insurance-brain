@@ -1,0 +1,56 @@
+[
+  {
+    "id": "SEC-F8-NEW-01",
+    "severity": "high",
+    "owner": "security",
+    "title": "New commit response returns predecessor temporal metadata without corresponding predecessor-source READ checks",
+    "raw": [
+      "engine/apps/api/src/brain_api/routes/facts.py:210",
+      "engine/packages/brain-temporal/src/brain_temporal/commit.py:505",
+      "engine/apps/api/src/brain_api/schemas/facts.py:97"
+    ],
+    "mitigation": "Proposed, not accepted: enforce current READ authority for every source behind returned predecessor/remainder metadata, or restrict the response to metadata the caller is allowed to receive; prove differing-source-readability behavior.",
+    "target_date": null,
+    "acceptance": null
+  },
+  {
+    "id": "R2-ARCH-L1",
+    "severity": "low",
+    "owner": "architect",
+    "title": "Four-copied-timestamps wording remains in the assembly plan and docstring",
+    "raw": [
+      "planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md:48",
+      "engine/packages/brain-temporal/src/brain_temporal/commit.py:251"
+    ]
+  },
+  {
+    "id": "QE2-L1",
+    "severity": "low",
+    "owner": "quality-engineer",
+    "title": "Recorded runtime preflight does not precede the full-suite start",
+    "raw": [
+      "planning-mds/operations/evidence/runs/2026-11-18-bce4909b/artifacts/test-results/full-engine-regression.xml:1",
+      "planning-mds/operations/evidence/runs/2026-11-18-bce4909b/commands.log:4"
+    ]
+  },
+  {
+    "id": "PM2-L1",
+    "severity": "low",
+    "owner": "product-manager",
+    "title": "Current manifest splits four space-containing filenames into nonexistent paths",
+    "raw": [
+      "planning-mds/operations/evidence/runs/2026-11-18-bce4909b/evidence-manifest.json",
+      "artifacts/diffs/manifest-inventory-drift.json"
+    ]
+  },
+  {
+    "id": "PM2-L2",
+    "severity": "low",
+    "owner": "product-manager",
+    "title": "Feature Run shortcut and blueprint planning label remain stale",
+    "raw": [
+      "planning-mds/features/archive/F0008-bitemporal-canonical-facts/STATUS.md:9",
+      "planning-mds/BLUEPRINT.md:260"
+    ]
+  }
+]

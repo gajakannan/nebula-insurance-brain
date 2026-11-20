@@ -437,3 +437,59 @@ async def test_d9_resolution_order(service, repository, v1_slot, clock):
     assert (
         await legacy.resolve(v1_slot, valid_at=utc("2026-07-15T12:00:00Z"), known_at=known) is None
     )
+
+
+async def test_sec_f8_new_01_disclosure_check_sees_dated_predecessors_before_any_write(
+    service, repository, v1_slot, clock
+):
+    dated = uuid4()
+    repository.document_dates[dated] = DocumentDate("2026-01-05", DatePrecision.DAY)
+    await commit(
+        service,
+        repository,
+        v1_slot,
+        money("2"),
+        block(),
+        clock,
+        "2026-01-10T00:00:00Z",
+        evidence=(dated,),
+    )
+    seen: list[tuple[FactVersion, ...]] = []
+
+    class Refused(Exception):
+        pass
+
+    async def check(predecessors: tuple[FactVersion, ...]) -> None:
+        seen.append(predecessors)
+        raise Refused()
+
+    clock[0] = utc("2026-06-14T00:00:00Z")
+    before = dict(repository.versions)
+    with pytest.raises(Refused):
+        await service.commit(
+            proposal(v1_slot, money("5"), block("2026-06-01T05:00:00Z")),
+            authorized_scope=repository.scope,
+            authorization_decision_id=None,
+            disclosure_check=check,
+        )
+    assert [v.evidence_refs for v in seen[0]] == [(dated,)]
+    assert repository.versions == before and len(repository.commits) == 1
+
+
+async def test_sec_f8_new_01_disclosure_check_skips_undated_predecessors(
+    service, repository, v1_slot, clock
+):
+    calls: list[int] = []
+
+    async def check(predecessors):  # type: ignore[no-untyped-def]
+        calls.append(len(predecessors))
+
+    await commit(service, repository, v1_slot, money("2"), block(), clock, "2026-01-10T00:00:00Z")
+    clock[0] = utc("2026-06-14T00:00:00Z")
+    await service.commit(
+        proposal(v1_slot, money("5"), block("2026-06-01T05:00:00Z")),
+        authorized_scope=repository.scope,
+        authorization_decision_id=None,
+        disclosure_check=check,
+    )
+    assert calls == []  # the predecessor carried no attestation date

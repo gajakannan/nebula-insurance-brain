@@ -615,6 +615,40 @@ class SqlAlchemyFactCommitRepository:
             for artifact_id in sorted(set(rows), key=str)
         )
 
+    async def current_attesting_artifact_keys(
+        self,
+        slot_id: UUID,
+        *,
+        scope: tuple[UUID, UUID],
+        valid_from: datetime | None,
+        valid_to: datetime | None,
+    ) -> tuple[ResourceKey, ...]:
+        """SEC-F8-NEW-01: the documents behind the attestation dates of current
+        temporal-v1 versions whose valid range meets the window `[valid_from,
+        valid_to)` (None is unbounded). A commit whose response could repeat those
+        dates in remainders must READ-check them in its own unit of work."""
+        query = select(CanonicalFactVersionRow).where(
+            CanonicalFactVersionRow.slot_id == slot_id,
+            func.upper_inf(CanonicalFactVersionRow.recorded),
+            CanonicalFactVersionRow.temporal_contract.is_not(None),
+        )
+        rows = (await self._session.execute(query)).scalars().all()
+        refs: list[UUID] = []
+        for row in rows:
+            version = _fact_version_from_row(row)
+            temporal = version.temporal
+            if temporal is None or not any(
+                (temporal.attested_from, temporal.attested_through, temporal.attested_to)
+            ):
+                continue
+            if valid_to is not None and version.valid_start >= valid_to:
+                continue
+            end = version.valid_end
+            if valid_from is not None and end is not None and end <= valid_from:
+                continue
+            refs.extend((*version.evidence_refs, *version.ending_evidence_refs))
+        return await self.evidence_artifact_keys(tuple(dict.fromkeys(refs)), scope=scope)
+
     async def next_version_after(
         self, slot_id: UUID, *, valid_after: datetime, known_as_of: datetime
     ) -> FactVersion | None:

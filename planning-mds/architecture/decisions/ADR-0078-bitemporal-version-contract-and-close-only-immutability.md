@@ -124,7 +124,7 @@ An unknown start (`valid_from` null) works as follows:
 
 Upload, receipt, artifact, assertion and acceptance times are never consulted.
 
-The ending evidence joins the existing F0006 same-unit-of-work source READ checks. On read, the attesting document versions join the GET's `additional_reads` (the F0007 SEC-F7-02 pattern). A principal who cannot read them receives the non-disclosing 404 and does not get a redacted answer.
+The ending evidence joins the existing F0006 same-unit-of-work source READ checks. On read, the attesting document versions join the GET's `additional_reads` (the F0007 SEC-F7-02 pattern). A principal who cannot read them receives the non-disclosing 404 and does not get a redacted answer. The commit response follows the same rule (remediation run `2026-11-19-8cfcd0ff`, SEC-F8-NEW-01). Remainder entries repeat their predecessor's attestation dates, so the documents behind those dates join the commit's same-UoW READ checks. An unreadable one refuses the whole commit with the 404; a predecessor committed concurrently after that check yields the retryable 409 `stale_version`.
 
 ### D5. The §109.2 algorithm with close-only immutability
 

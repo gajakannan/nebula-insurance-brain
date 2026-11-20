@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "feature_id": "F0008",
+  "feature_run_id": "2026-11-18-bce4909b",
+  "review_run_id": "2026-11-19-b21ec2de",
+  "code": {"critical": 0, "high": 0, "medium": 0, "low": 0},
+  "security": {"critical": 0, "high": 1, "medium": 0, "low": 0},
+  "findings": [
+    {
+      "id": "SEC-F8-NEW-01",
+      "severity": "high",
+      "owner": "security",
+      "title": "Returned predecessor temporal metadata lacks corresponding artifact READ checks",
+      "basis": "source-supported missing output authorization; runtime disclosure not proven",
+      "runtime_proven": false,
+      "remediation_owners": ["Backend Developer", "Architect"],
+      "verification_owners": ["Security", "Quality Engineer"],
+      "accepted_mitigation": null,
+      "target_date": null,
+      "disposition": "pending owning-lifecycle correction or verification and documented acceptance",
+      "raw_references": [
+        "engine/packages/brain-temporal/src/brain_temporal/commit.py:505",
+        "engine/packages/brain-temporal/src/brain_temporal/commit.py:622",
+        "engine/packages/brain-temporal/src/brain_temporal/commit.py:644",
+        "engine/apps/api/src/brain_api/schemas/facts.py:97",
+        "engine/packages/brain-domain/src/brain_domain/temporal.py:192",
+        "engine/apps/api/src/brain_api/routes/facts.py:115",
+        "engine/apps/api/src/brain_api/routes/facts.py:210",
+        "engine/apps/api/src/brain_api/routes/facts.py:234",
+        "engine/apps/api/src/brain_api/routes/facts.py:265",
+        "engine/packages/brain-factslots/src/brain_factslots/resolution.py:238",
+        "engine/tests/integration/test_temporal_reads.py:248",
+        "engine/tests/integration/test_temporal_reads.py:268",
+        "engine/tests/integration/test_temporal_v1_commit.py:769"
+      ],
+      "limitation": "Runtime verification was blocked by automated safeguards; no retry, replacement boundary probe, database operation or executable exploit fixture was performed by this lane."
+    }
+  ],
+  "prior_dispositions": {
+    "CR-F8-01": "fixed in current source, contract, amended scope and POST assertions",
+    "FR-ARCH-M1": "fixed selective legacy omission",
+    "QE-M1": "AC amended and failed-decision count asserted",
+    "FR-ARCH-L2": "same-slot migration guard added; raw execution owned by Architect/QE",
+    "SEC-F8-L1": "current labels findings-triaged match raw scans; prior-run errata retained",
+    "SEC-F8-02": "carried accepted Low; not new severity count"
+  },
+  "self_review": "FR3 source citations, raw scan results, test limits and runtime uncertainty checked; no protected writes"
+}

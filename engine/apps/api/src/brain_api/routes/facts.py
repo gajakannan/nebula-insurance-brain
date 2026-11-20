@@ -13,7 +13,7 @@ from brain_domain.authx import (
     ResourceType,
 )
 from brain_domain.fact_answers import FactAnswerRejected
-from brain_domain.facts import ChangeReason, CommitProposal, CommitResult
+from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
 from brain_domain.principal import Principal
 from brain_domain.temporal import TemporalRejected
 from brain_factslots.answers import FactAnswerPolicy, FactAnswerReader
@@ -200,11 +200,28 @@ async def commit_fact(
             if d.resource in evidence_keys
             or not (d.action == Action.READ and d.resource.type == ResourceType.CONTENT_ARTIFACT)
         ]
+        readable = {d.resource for d in decisions if d.action == Action.READ and d.allowed}
+        scope = (decision.scope.tenant_id, decision.scope.knowledge_base_id)
+
+        async def disclosure_check(predecessors: tuple[FactVersion, ...]) -> None:
+            # SEC-F8-NEW-01: remainders repeat their predecessors' attestation dates
+            # in the response. Their documents were READ-checked up front (an
+            # unreadable one already refused the commit with the non-disclosing 404).
+            # A document missing here belongs to a version committed concurrently
+            # after that check, so the commit is a retryable 409 and returns nothing.
+            refs = tuple(
+                ref for v in predecessors for ref in (*v.evidence_refs, *v.ending_evidence_refs)
+            )
+            needed = set(await repository.evidence_artifact_keys(refs, scope=scope))
+            if not needed <= readable:
+                raise StaleVersionError("attesting documents changed concurrently")
+
         return await service.commit(
             proposal,
-            authorized_scope=(decision.scope.tenant_id, decision.scope.knowledge_base_id),
+            authorized_scope=scope,
             authorization_decision_id=decision.decision_id,
             source_access=repository.source_access_proof(evidence_reads),
+            disclosure_check=disclosure_check,
         )
 
     async def source_keys() -> Sequence[ResourceKey]:
@@ -226,6 +243,15 @@ async def commit_fact(
                     await repository.evidence_artifact_keys(
                         (*proposal.evidence_refs, *_ending_refs(proposal_in.temporal)),
                         scope=slot,
+                    )
+                )
+                # SEC-F8-NEW-01: documents behind the dates of any current version
+                # the proposal could split. The window is a superset of the real
+                # overlap (an unknown start or end is treated as unbounded).
+                window_from, window_to = _conservative_window(proposal_in.temporal)
+                answer_keys.update(
+                    await repository.current_attesting_artifact_keys(
+                        fact_slot_id, scope=slot, valid_from=window_from, valid_to=window_to
                     )
                 )
         return sorted(evidence_keys | answer_keys)
@@ -280,3 +306,27 @@ def _ending_refs(temporal: object) -> tuple[UUID, ...]:
         except ValueError:
             return ()
     return tuple(parsed)
+
+
+def _instant_of(bound: object) -> datetime | None:
+    if not isinstance(bound, dict) or not isinstance(bound.get("instant"), str):
+        return None
+    try:
+        value = datetime.fromisoformat(bound["instant"].replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return value if value.tzinfo is not None else None
+
+
+def _conservative_window(temporal: object) -> tuple[datetime | None, datetime | None]:
+    """A valid-time window that contains every range the commit can place. An
+    unknown or malformed start or end widens it (None is unbounded)."""
+    if not isinstance(temporal, dict):
+        return None, None
+    start = _instant_of(temporal.get("valid_from"))
+    end = (
+        _instant_of(temporal.get("valid_to"))
+        if temporal.get("valid_to_state") == "BOUNDED"
+        else None
+    )
+    return start, end
