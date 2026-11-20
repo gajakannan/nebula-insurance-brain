@@ -2,13 +2,51 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://nebula.local/schemas/canonical-commit-response.schema.json",
   "title": "CanonicalCommitResponse",
-  "description": "Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005).",
+  "description": "Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005). F0008 (S0002 AC7, remediation run 2026-11-18-bce4909b): a fact-temporal/v1 commit adds `versions`, one entry per written version in `fact_version_ids` order, carrying its temporal block; a legacy pilot commit omits it.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["commit_id", "fact_version_ids", "canonical_accepted_at"],
+  "required": [
+    "commit_id",
+    "fact_version_ids",
+    "canonical_accepted_at"
+  ],
   "properties": {
-    "commit_id": { "type": "string", "format": "uuid" },
-    "fact_version_ids": { "type": "array", "minItems": 1, "items": { "type": "string", "format": "uuid" } },
-    "canonical_accepted_at": { "type": "string", "format": "date-time" }
+    "commit_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "fact_version_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "canonical_accepted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "versions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fact_version_id"
+        ],
+        "properties": {
+          "fact_version_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "temporal": {
+            "description": "Absent for a legacy remainder on an identity-v1 slot.",
+            "$ref": "fact-temporal-v1.schema.json#/$defs/version_temporal"
+          }
+        }
+      }
+    }
   }
 }

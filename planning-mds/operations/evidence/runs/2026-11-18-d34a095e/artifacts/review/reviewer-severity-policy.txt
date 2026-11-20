@@ -1,0 +1,46 @@
+- Do not require markers for self-explanatory code; comments must explain rationale, not restate mechanics.
+- If markers changed, verify `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --regenerate-decisions --check-decisions` passes.
+
+### 13. Hotspot, Ownership, and Bus-Factor Gating
+- When `{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/coverage-report.yaml` carries Phase 3 freshness signals, consult them for each canonical node the PR touches before approval.
+- If a touched node has `hotspot_rank` ≤ 5 (or `hotspot_score` ≥ 0.80), require explicit second-reviewer evidence on the PR. Approving without it is a **High** severity finding.
+- If a touched node has `bus_factor_flag: true`, require acknowledgement from `primary_owner` on the PR. Missing acknowledgement is a **High** severity finding.
+- Thresholds and customers/orders examples live in `agents/architect/references/hotspot-review-guide.md`.
+- Hotspot signals are decision aids, not authority — they never override raw artifact or design judgment.
+
+### 14. Risk Score Gating
+- For each canonical node the PR touches, run `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/risk.py <node-id>` (or `--file <changed-path>` / `--symbol <name>` for narrower scope) and record the score in the review notes.
+- If the score lands in the **high** band (`kg.risk` ≥ 7), require an additional reviewer beyond the PR author. Approving without that second reviewer is a **High** severity finding.
+- If the score lands in the **critical** band (`kg.risk` ≥ 9), require an explicit `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/workstate.py decision --topic risk-acknowledgement` entry referenced from the PR description before merge. Missing acknowledgement is a **High** severity finding.
+- Apply each `reviewer_recommendations[]` entry from `risk.py` as a checklist item — Phase 4 is a roll-up over the Phase 1–3 gates, not a replacement for them.
+- Weights, bands, and customers/orders examples live in `agents/architect/references/risk-scoring-guide.md`. Per `solution-ontology.yaml.authority.precedence`, the score never overrides raw artifact judgment.
+
+## Review Workflow
+
+### Step 1: Gather Context
+Read in this order before touching the code:
+1. The user story and acceptance criteria
+2. `{NEBULA_PRODUCT_ROOT}/planning-mds/architecture/SOLUTION-PATTERNS.md` — the patterns this project follows
+3. If ontology coverage exists, run `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py <feature-or-story-id>` or `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py --file <changed-path>` to scope the review
+4. The code changes
+5. The test files
+6. If planning docs changed: `{NEBULA_PRODUCT_ROOT}/planning-mds/features/TRACKER-GOVERNANCE.md` plus tracker files touched in the diff
+
+### Step 2: Run Available Scripts (Feedback Loop)
+```bash
+# Code quality scan — TODOs, line length, file size
+python agents/code-reviewer/scripts/check-code-quality.py <path>
+
+# Optional helpers (run when applicable)
+sh agents/code-reviewer/scripts/check-lint.sh
+sh agents/code-reviewer/scripts/check-pr-size.sh --base main --max 500
+sh agents/code-reviewer/scripts/check-test-coverage.sh --min 80 --auto
+# Tracker consistency (when planning docs changed)
+python3 agents/product-manager/scripts/validate-trackers.py
+```
+
+Use `--strict` with `check-lint.sh` when frontend linting is expected to exist.
+
+1. Run each applicable script
+2. If a script fails or reports issues → record findings with severity
+3. If script output is ambiguous → re-run with different flags or inspect manually

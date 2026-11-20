@@ -1,6 +1,6 @@
 # F0008 — Bitemporal canonical facts
 
-**Status:** Done / Archived — feature run `2026-11-17-1a4ae2f0`, operator approved 2026-11-18
+**Status:** Done / Archived — remediation run `2026-11-18-bce4909b`, operator approved 2026-11-19 (original completion `2026-11-17-1a4ae2f0` superseded)
 **Archived:** 2026-11-18
 **Phase:** v0.1A
 **Roadmap:** Completed

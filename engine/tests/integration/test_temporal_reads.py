@@ -300,8 +300,11 @@ async def test_legacy_slot_reads_keep_pilot_behaviour(world):
     body["valid_from"] = "2026-01-01T00:00:00Z"
     created = await w.post(legacy, body)
     assert created.status_code == 201, created.text
+    # S0002 AC7 / S0007 AC3: a legacy pilot commit keeps the pilot response shape.
+    assert set(created.json()) == {"commit_id", "fact_version_ids", "canonical_accepted_at"}
     read = await w.read(legacy, "2026-03-01T00:00:00Z")
-    assert read.status_code == 200 and read.json()["temporal"] is None
+    # FR-ARCH-M1: the contract says `temporal` is absent for a legacy version, never null.
+    assert read.status_code == 200 and "temporal" not in read.json()
     assert (await w.read(legacy, "2025-03-01T00:00:00Z")).status_code == 404
     # A temporal block is not accepted on a legacy slot.
     refused = await w.post(legacy, w.body({"amount": 2}, start=bound("2026-06-01T05:00:00Z")))

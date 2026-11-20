@@ -1,0 +1,621 @@
+339c9209385290247c01d1eea97a7c2c8b47fada
+M	.github/workflows/ci-gates.yml
+M	engine/apps/api/src/brain_api/errors.py
+M	engine/apps/api/src/brain_api/routes/facts.py
+M	engine/apps/api/src/brain_api/schemas/facts.py
+M	engine/apps/api/tests/test_facts.py
+A	engine/migrations/versions/0014_f0008_bitemporal_contract.py
+M	engine/packages/brain-domain/src/brain_domain/facts.py
+A	engine/packages/brain-domain/src/brain_domain/temporal.py
+M	engine/packages/brain-persistence/src/brain_persistence/models.py
+M	engine/packages/brain-persistence/src/brain_persistence/repositories.py
+A	engine/packages/brain-temporal/src/brain_temporal/attestation.py
+A	engine/packages/brain-temporal/src/brain_temporal/bounds.py
+M	engine/packages/brain-temporal/src/brain_temporal/commit.py
+A	engine/packages/brain-temporal/src/brain_temporal/reader.py
+M	engine/packages/brain-temporal/tests/conftest.py
+A	engine/packages/brain-temporal/tests/test_bounds.py
+A	engine/packages/brain-temporal/tests/test_contract_examples.py
+A	engine/packages/brain-temporal/tests/test_temporal_service.py
+M	engine/tests/fixtures/factslots/harness.py
+A	engine/tests/fixtures/temporal/harness.py
+M	engine/tests/integration/conftest.py
+M	engine/tests/integration/test_factslot_migration.py
+M	engine/tests/integration/test_factslot_ownership.py
+A	engine/tests/integration/test_temporal_concurrency.py
+A	engine/tests/integration/test_temporal_immutability.py
+A	engine/tests/integration/test_temporal_migration.py
+A	engine/tests/integration/test_temporal_reads.py
+A	engine/tests/integration/test_temporal_v1_commit.py
+M	engine/tests/security/conftest.py
+M	planning-mds/BLUEPRINT.md
+M	planning-mds/api/brain-api.yaml
+M	planning-mds/architecture/data-model.md
+M	planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md
+M	planning-mds/architecture/feature-assembly-plan.md
+M	planning-mds/examples/README.md
+D	planning-mds/features/F0008-bitemporal-canonical-facts/STATUS.md
+D	planning-mds/features/F0008-bitemporal-canonical-facts/personas.md
+M	planning-mds/features/REGISTRY.md
+M	planning-mds/features/ROADMAP.md
+M	planning-mds/features/STORY-INDEX.md
+R088	planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md
+R089	planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md
+R089	planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md
+R088	planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md
+R087	planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md
+R086	planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md
+R086	planning-mds/features/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md
+R096	planning-mds/features/F0008-bitemporal-canonical-facts/GETTING-STARTED.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/GETTING-STARTED.md
+R092	planning-mds/features/F0008-bitemporal-canonical-facts/PRD.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/PRD.md
+R079	planning-mds/features/F0008-bitemporal-canonical-facts/README.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/README.md
+A	planning-mds/features/archive/F0008-bitemporal-canonical-facts/STATUS.md
+R060	planning-mds/features/F0008-bitemporal-canonical-facts/acceptance-criteria-checklist.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/acceptance-criteria-checklist.md
+R100	planning-mds/features/F0008-bitemporal-canonical-facts/contract-examples.json	planning-mds/features/archive/F0008-bitemporal-canonical-facts/contract-examples.json
+R084	planning-mds/features/F0008-bitemporal-canonical-facts/feature-assembly-plan.md	planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md
+A	planning-mds/features/archive/F0008-bitemporal-canonical-facts/personas.md
+M	planning-mds/kg-source/bindings/f0001.yaml
+M	planning-mds/kg-source/bindings/f0008-planning.yaml
+M	planning-mds/kg-source/features/F0008.yaml
+M	planning-mds/kg-source/nodes/capabilities/bitemporal-canonical-commit.yaml
+M	planning-mds/kg-source/nodes/capabilities/temporal-fact-resolution.yaml
+M	planning-mds/kg-source/nodes/entities/canonical-fact-version.yaml
+A	planning-mds/kg-source/nodes/migrations/f0008-bitemporal-contract.yaml
+M	planning-mds/knowledge-graph/canonical-nodes.yaml
+M	planning-mds/knowledge-graph/code-index.yaml
+M	planning-mds/knowledge-graph/coverage-report.yaml
+M	planning-mds/knowledge-graph/decisions-index.yaml
+M	planning-mds/knowledge-graph/feature-mappings.yaml
+M	planning-mds/knowledge-graph/symbol-index.yaml
+M	planning-mds/knowledge-graph/unbound-but-referenced.yaml
+A	planning-mds/operations/evidence/features/F0008-bitemporal-canonical-facts/latest-run.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/README.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/action-context.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/architect-implementation-review.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifact-trace.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/coverage/changed-code-summary.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/coverage/engine-coverage.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/coverage/engine-coverage.xml
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/coverage/g2-engine-coverage.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/coverage/g2-engine-coverage.xml
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/coverage/g3-engine-coverage.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/coverage/g3-engine-coverage.xml
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/coverage/measure_changed_coverage.py
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/diffs/changed-files.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/dast/api-scan.html
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/dast/api-scan.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/dast/run-dast.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/dast/run-dast.sh
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/dast/uvicorn.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/dast/zap.out
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/dependency-engine.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/dependency-engine.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/engine-requirements.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/sast/sast-semgrep-20261117-052012.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/sast/sast-semgrep-20261117-052244.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/sast/sast-semgrep-20261117-052244.sarif
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/sast/sast-semgrep-20261117-052326.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/sast/sast-semgrep-20261117-052326.sarif
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/scan-targets.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/secrets/secrets-gitleaks-20261117-052305.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/secrets/secrets-gitleaks-20261117-052305.sarif
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/secrets/secrets-gitleaks-20261117-052326.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/secrets/secrets-gitleaks-20261117-052326.sarif
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/command-output/g1-baseline-regression.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/command-output/g1-shared-db-upgrade-head.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/command-output/g2-full-engine-regression.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/command-output/g2-migration-cycle.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/command-output/g3-full-engine-regression.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/g0-migration-lineage.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/g1-baseline-regression.xml
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/g1-compose-ps.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/g1-tzdata-versions.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/g2-full-engine-regression.xml
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/g3-full-engine-regression.xml
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/g4-gate-policy.txt
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/workstate.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/code-review-report.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/commands.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/coverage-report.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/deployability-check.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/evidence-manifest.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/feature-action-execution.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/g0-assembly-plan-validation.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/g1-runtime-preflight.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/g2-deployability-check.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/g2-self-review.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/gate-decisions.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/gate-state.json
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/kg-reconciliation.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/lifecycle-gates.log
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/pm-closeout.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/security-review-report.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/signoff-ledger.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/test-execution-report.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/test-plan.md
+A	planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/token-usage.json
+?? planning-mds/operations/evidence/runs/2026-11-18-a3709ba0/
+?? planning-mds/operations/evidence/runs/2026-11-18-d34a095e/
+{
+  "target": {
+    "status": "archived-done",
+    "id": "feature:F0008",
+    "path": "planning-mds/features/archive/F0008-bitemporal-canonical-facts",
+    "affects": [
+      "capability:bitemporal-canonical-commit",
+      "capability:temporal-fact-resolution",
+      "endpoint:fact-commit",
+      "endpoint:fact-get",
+      "entity:canonical-fact-version",
+      "migration:f0008-bitemporal-contract"
+    ],
+    "depends_on": [
+      "feature:F0003",
+      "feature:F0007"
+    ],
+    "governed_by": [
+      "adr:0007",
+      "adr:0008",
+      "adr:0039",
+      "adr:0064",
+      "adr:0077",
+      "adr:0078"
+    ],
+    "notes": [
+      "As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/kg-reconciliation.md; archive path/status and generated trackers are PM G8 ownership.",
+      "Cedar Bridge EX-PC-006/014 (planning-mds/architecture/commercial-pc-example-handoff.md) exercise ADR-0064 kinds, attestation bounds, an unknown start and an UNKNOWN end; teaching fixtures for the PRD, not acceptance evidence.",
+      "Closeout 2026-11-18 (PM G8): archived; SEC-F8-02 (superuser app connection) and refusal reason persistence deferred to F0018; ADR-0078 proof gates met, acceptance pending operator.",
+      "Phase B approved 2026-11-17 (Proposed ADR-0078): fact-temporal/v1 columns on canonical_fact_version, an UNKNOWN end closing the exclusion range at the end of the attested_to period, close-only immutability triggers, remainder lineage, an envelope backstop and an additive migration 0014; RELATIONSHIP slot versions share the table. Runtime not claimed.",
+      "Phase B operator decisions 2026-11-16: reads before an attestation floor are validity-unknown (EX-PC-014-B); information states are exposed by the internal reader, the GET is additive and a no-version coordinate stays 404 (F0020 owns HTTP states).",
+      "Plan run 2026-11-16-208a1193 G1 decisions: store the start basis (template field or human date = grade A; grade C cannot close); a PRESENT value closes only to PRESENT or EXPLICIT_NEGATIVE; an unknown start with undated evidence is refused (START_UNATTESTED); the caller supplies an IANA zone per bound.",
+      "Requirement-ownership amendment 2026-11-08 - The ADR-0039 information state is versioned bitemporally like a value; a later NOT_STATED or EXPLICIT_NEGATIVE supersedes NOT_PROCESSED without erasing it."
+    ],
+    "uses_api_contract": [
+      "api:brain-api"
+    ],
+    "uses_schema": [
+      "schema:canonical-commit-request",
+      "schema:canonical-commit-response",
+      "schema:fact-answer-v1",
+      "schema:fact-temporal-v1",
+      "schema:problem-details"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:bitemporal-canonical-commit",
+      "label": "Bitemporal canonical commit",
+      "notes": "Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals, explicit change reasons, and facts plus audit plus outbox in one transaction (ADR-0007, ADR-0008, ADR-0009). F0008 Phase B design (Proposed ADR-0078, plan run 2026-11-16-208a1193; runtime not claimed) adds the fact-temporal/v1 contract for identity-v1 slots: per-bound precision and zone, OPEN/BOUNDED/UNKNOWN ends with attestation bounds, start-basis and state guards, close-only immutability triggers, remainder lineage and the fact-answer envelope backstop. As built (feature run 2026-11-17-1a4ae2f0): the commit service branches on the slot identity version; v1 path parses and validates bounds, derives attestation from F0004 selections, applies D8 guards (end revision is not succession) and writes lineage remainders; the legacy path keeps the pilot shape with predecessor timestamps and review linkage on remainders; migration 0014.",
+      "related_nodes": [
+        "adr:0078",
+        "capability:temporal-fact-resolution",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "entity:canonical-fact-version",
+        "entity:fact-slot",
+        "entity:outbox-event",
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "schema:fact-temporal-v1",
+        "workflow:canonical-commit"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md",
+        "planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "backend": [
+          "engine/migrations/versions/0003_fact_slots_and_commits.py",
+          "engine/packages/brain-domain/src/brain_domain/temporal.py",
+          "engine/packages/brain-temporal/src/**",
+          "engine/packages/brain-temporal/src/brain_temporal/attestation.py",
+          "engine/packages/brain-temporal/src/brain_temporal/bounds.py",
+          "engine/packages/brain-temporal/src/brain_temporal/commit.py"
+        ],
+        "tests": [
+          "engine/apps/api/tests/test_facts.py",
+          "engine/packages/brain-temporal/tests/**",
+          "engine/packages/brain-temporal/tests/test_bounds.py",
+          "engine/packages/brain-temporal/tests/test_contract_examples.py",
+          "engine/packages/brain-temporal/tests/test_temporal_service.py",
+          "engine/tests/fixtures/temporal/harness.py",
+          "engine/tests/integration/test_temporal_concurrency.py",
+          "engine/tests/integration/test_temporal_v1_commit.py"
+        ]
+      }
+    },
+    {
+      "id": "capability:temporal-fact-resolution",
+      "label": "Temporal fact resolution",
+      "notes": "Planned (F0008 Phase B design approved 2026-11-17, plan run 2026-11-16-208a1193): two-coordinate reader over canonical fact versions returning the version, validity-unknown (unknown-end window or before an attestation floor) or NOT_PROCESSED for identity-v1 slots; the existing GET adds a temporal block and a validity-unknown 200 variant, no-version stays 404 (F0020 owns HTTP states). As built (feature run 2026-11-17-1a4ae2f0): brain_temporal.reader.TemporalFactReader over the repository resolve_at/next_version_after queries; attesting documents join the GET additional reads so dates of unreadable documents are never disclosed (whole-read 404).",
+      "rationale": [
+        {
+          "adr": "adr:0078",
+          "section": "Decision",
+          "summary": "D9 read resolution order and authorization under current grants."
+        },
+        {
+          "adr": "adr:0007",
+          "section": "Decision",
+          "summary": "Canonical facts maintain both valid and recorded periods."
+        }
+      ],
+      "related_nodes": [
+        "adr:0007",
+        "adr:0078",
+        "capability:authorization-enforcement",
+        "capability:bitemporal-canonical-commit",
+        "endpoint:fact-get",
+        "entity:canonical-fact-version",
+        "schema:fact-temporal-v1"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md",
+        "planning-mds/features/archive/F0008-bitemporal-canonical-facts/PRD.md",
+        "planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md"
+        ],
+        "backend": [
+          "engine/apps/api/src/brain_api/routes/facts.py",
+          "engine/apps/api/src/brain_api/schemas/facts.py",
+          "engine/packages/brain-temporal/src/brain_temporal/reader.py"
+        ],
+        "schemas": [
+          "planning-mds/schemas/fact-temporal-v1.schema.json"
+        ],
+        "tests": [
+          "engine/tests/integration/test_temporal_reads.py"
+        ]
+      }
+    },
+    {
+      "id": "endpoint:fact-commit",
+      "label": "POST /facts/{factSlotId}/commits",
+      "method": "POST",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "capability:authorization-enforcement",
+        "capability:bitemporal-canonical-commit"
+      ],
+      "resource": "fact_slot",
+      "route": "/facts/{factSlotId}/commits",
+      "source_docs": [
+        "planning-mds/api/brain-api.yaml",
+        "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+      ],
+      "_kind": "endpoint"
+    },
+    {
+      "id": "endpoint:fact-get",
+      "label": "GET /facts/{factSlotId}",
+      "method": "GET",
+      "related_nodes": [
+        "capability:authorization-enforcement",
+        "capability:bitemporal-canonical-commit"
+      ],
+      "resource": "fact_slot",
+      "route": "/facts/{factSlotId}",
+      "source_docs": [
+        "planning-mds/api/brain-api.yaml"
+      ],
+      "_kind": "endpoint"
+    },
+    {
+      "id": "entity:canonical-fact-version",
+      "label": "Canonical fact version",
+      "notes": "Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references, commit id, and the four separately stored timestamps; overlap prevented by a two-range GiST exclusion. F0008 design (Proposed ADR-0078) adds nullable fact-temporal/v1 columns (granularity/zone per bound, start basis, end state, attestation dates, validity_unknown_from, split_of_version_id) and close-only immutability triggers; RELATIONSHIP slot versions live here (no separate relationship-version table). As built by migration 0014 (feature run 2026-11-17-1a4ae2f0); ending evidence refs are stored in the evidence JSONB as ending_refs.",
+      "related_entities": [
+        "entity:fact-slot",
+        "entity:outbox-event"
+      ],
+      "related_nodes": [
+        "adr:0078",
+        "capability:bitemporal-canonical-commit",
+        "capability:temporal-fact-resolution",
+        "schema:canonical-commit-response",
+        "schema:fact-temporal-v1"
+      ],
+      "source_docs": [
+        "planning-mds/architecture/master-blueprint.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md",
+        "planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md"
+      ],
+      "_kind": "entity",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-persistence/src/brain_persistence/models.py"
+        ],
+        "tests": [
+          "engine/tests/integration/test_temporal_immutability.py"
+        ]
+      }
+    },
+    {
+      "id": "migration:f0008-bitemporal-contract",
+      "label": "F0008 fact-temporal/v1 contract and close-only immutability (revision 0014, additive)",
+      "path": "engine/migrations/versions/0014_f0008_bitemporal_contract.py",
+      "notes": "Adds 16 nullable fact-temporal/v1 columns to canonical_fact_version (temporal_contract NULL marks a legacy version; nothing backfilled), CHECKs for each shape, a composite split-lineage self-FK and a partial index. A BEFORE INSERT trigger binds the contract to the slot identity version, checks zones against pg_timezone_names and truncation with date_trunc in zone, and backs the fact-answer/v1 envelope. Close-only UPDATE, no DELETE or TRUNCATE on versions; canonical_fact_change append-only. Preflight refuses a bad identity-v1 envelope; downgrade refuses while v1 or lineage rows exist. No table, role, grant, RLS, BYPASSRLS or SECURITY DEFINER.",
+      "related_nodes": [
+        "adr:0078",
+        "capability:bitemporal-canonical-commit",
+        "entity:canonical-fact-version"
+      ],
+      "_kind": "migration",
+      "code_paths": {
+        "backend": [
+          "engine/migrations/versions/0014_f0008_bitemporal_contract.py"
+        ],
+        "tests": [
+          "engine/tests/integration/test_temporal_migration.py"
+        ]
+      }
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0007",
+      "label": "Full Bitemporality",
+      "path": "planning-mds/architecture/decisions/ADR-0007-full-bitemporality.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0008",
+      "label": "Database-Level Temporal Integrity",
+      "path": "planning-mds/architecture/decisions/ADR-0008-database-level-temporal-integrity.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0039",
+      "label": "Typed Insurance Values and Completeness",
+      "path": "planning-mds/architecture/decisions/ADR-0039-typed-insurance-values-and-completeness.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0064",
+      "label": "Time Interpretation and Valid-Time Precision",
+      "path": "planning-mds/architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md",
+      "related_nodes": [
+        "adr:0007",
+        "adr:0008",
+        "adr:0039",
+        "entity:canonical-fact-version",
+        "entity:semantic-interpretation-run"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0077",
+      "label": "FactSlot Identity and Typed Answer Carriers (Accepted 2026-11-10)",
+      "path": "planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md",
+      "related_nodes": [
+        "adr:0006",
+        "adr:0039",
+        "adr:0066",
+        "capability:factslot-identity-resolution",
+        "capability:typed-fact-answer",
+        "entity:fact-slot",
+        "entity:fact-slot-qualifier"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0078",
+      "label": "Bitemporal Version Contract and Close-Only Immutability (Proposed)",
+      "path": "planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md",
+      "related_nodes": [
+        "adr:0007",
+        "adr:0008",
+        "adr:0039",
+        "adr:0064",
+        "adr:0077",
+        "capability:bitemporal-canonical-commit",
+        "capability:temporal-fact-resolution",
+        "entity:canonical-fact-version",
+        "schema:fact-temporal-v1"
+      ],
+      "_kind": "adr"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:canonical-commit-request",
+      "label": "CanonicalCommitRequest",
+      "path": "planning-mds/schemas/canonical-commit-request.schema.json",
+      "related_nodes": [
+        "capability:bitemporal-canonical-commit",
+        "endpoint:fact-commit"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:canonical-commit-response",
+      "label": "CanonicalCommitResponse",
+      "path": "planning-mds/schemas/canonical-commit-response.schema.json",
+      "related_nodes": [
+        "capability:bitemporal-canonical-commit",
+        "endpoint:fact-commit"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-answer-v1",
+      "label": "Fact Answer V1",
+      "path": "planning-mds/schemas/fact-answer-v1.schema.json",
+      "notes": "F0007 answer envelope stored in canonical_fact_version.value for identity-v1 slots; Phase B approved by operator 2026-11-09; runtime implementation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:typed-fact-answer",
+        "entity:canonical-fact-version"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-temporal-v1",
+      "label": "Fact Temporal V1",
+      "path": "planning-mds/schemas/fact-temporal-v1.schema.json",
+      "notes": "F0008 design contract for the valid-time commit block, the stored version temporal block and the validity-unknown read (Proposed ADR-0078); Phase B approved 2026-11-17; runtime implementation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0078",
+          "section": "Decision",
+          "summary": "Proposed F0008 design: per-bound granularity and IANA zone, OPEN/BOUNDED/UNKNOWN ends with attestation from F0004 date selections, start basis guards, close-only immutability and validity-unknown reads."
+        }
+      ],
+      "related_nodes": [
+        "adr:0078",
+        "capability:bitemporal-canonical-commit",
+        "capability:temporal-fact-resolution",
+        "entity:canonical-fact-version",
+        "schema:canonical-commit-request"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:problem-details",
+      "label": "ProblemDetails",
+      "path": "planning-mds/schemas/problem-details.schema.json",
+      "related_nodes": [
+        "api:brain-api",
+        "capability:runtime-roots-and-toolchain"
+      ],
+      "_kind": "schema"
+    }
+  ],
+  "uses_api_contract": [
+    {
+      "id": "api:brain-api",
+      "label": "Nebula Insurance Brain API",
+      "path": "planning-mds/api/brain-api.yaml",
+      "related_nodes": [
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:health",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get"
+      ],
+      "_kind": "api_contract"
+    }
+  ],
+  "depends_on": [
+    {
+      "status": "archived-done",
+      "id": "feature:F0003",
+      "path": "planning-mds/features/archive/F0003-postgresql-persistence",
+      "affects": [
+        "capability:bitemporal-canonical-commit",
+        "capability:postgresql-persistence-contract",
+        "capability:structural-tenancy-and-entity-identity",
+        "entity:assertion",
+        "entity:audit-event",
+        "entity:canonical-fact-version",
+        "entity:content-artifact",
+        "entity:fact-slot",
+        "entity:knowledge-base",
+        "entity:membership",
+        "entity:outbox-event",
+        "entity:principal",
+        "entity:review-decision",
+        "entity:review-item",
+        "entity:semantic-interpretation-run",
+        "entity:tenant",
+        "entity:workspace",
+        "workflow:canonical-commit"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002"
+      ],
+      "governed_by": [
+        "adr:0002",
+        "adr:0003",
+        "adr:0007",
+        "adr:0008",
+        "adr:0009",
+        "adr:0010",
+        "adr:0030",
+        "adr:0059"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0007",
+      "path": "planning-mds/features/archive/F0007-factslot-model",
+      "affects": [
+        "capability:bitemporal-canonical-commit",
+        "capability:factslot-identity-resolution",
+        "capability:typed-fact-answer",
+        "endpoint:fact-commit",
+        "entity:canonical-fact-version",
+        "entity:fact-slot",
+        "entity:fact-slot-qualifier",
+        "migration:f0007-identity-guard"
+      ],
+      "depends_on": [
+        "feature:F0002",
+        "feature:F0003",
+        "feature:F0006"
+      ],
+      "governed_by": [
+        "adr:0006",
+        "adr:0038",
+        "adr:0039",
+        "adr:0042",
+        "adr:0061",
+        "adr:0066",
+        "adr:0077"
+      ],
+      "notes": [
+        "As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-09-b94cfa12/kg-reconciliation.md; archive path/status and generated trackers are PM G8 ownership.",
+        "G3 security review fixed SEC-F7-01 (name evidence READ before reason), SEC-F7-02 (T-08 on the answer read path) and SEC-F7-03 (cross-KB evidence oracle). Residual: slot restrictions fixed at creation (F0018 re-derivation); envelope DB backstop (F0008); name-hook per-slot authorization cost is a design note for F0017/F0023.",
+        "Operator authorized targeted remediation of review findings; the prior archive is reopened, with no new producer, route, permission or ontology scope.",
+        "Phase B (Proposed ADR-0077): MULTI members are child fact_slot rows so the ADR-0008 exclusion applies per member with no DDL on the F0008-owned canonical_fact_version; answers use the fact-answer/v1 envelope in its value for identity-v1 slots only. Pilot slots stay legacy and the pilot GET contract is unchanged.",
+        "Plan run 2026-11-09-60865e32 G1 decisions: F0007 binds ownership only and hands the RLS inventory (fact_slot, fact_slot_qualifier) to F0018; predicate keys are opaque and versioned with a minimal sys namespace; display-name precedence is deferred to F0017/F0023.",
+        "Remediation closeout2026-11-10: canonical member identity enforced; numeric total64 bounds prechecked; additive0013 refuses malformed rows; exact payload scopes share one current-authority UoW. Current evidence2026-11-09-81798e61; original final Neuron test inventory reconciled; old completion retained as superseded history.",
+        "Requirement-ownership amendment 2026-11-08 - Carry 109.1: define FactSlot identity beyond the first scalar example (multi-valued, qualified and relationship slots). FactSlot keys are the predicate key referenced by the ADR-0038 SourceAuthorityPolicy owned by F0018.",
+        "Requirement-ownership amendment 2026-11-08 - Carry master blueprint 107.4 and ADR-0039 into the PRD: information state (eight states) is separate from the value, NOT_FOUND/NOT_STATED carry the exact scope searched, and access denial is never an information state. Values use qualified money (exact decimal, ISO 4217 currency, basis) and scoped identifiers (scheme, type, value).",
+        "Requirement-ownership amendment 2026-11-08 - New tenant-owned tables bind child rows and foreign keys to tenant ownership and follow the ADR-0042 row-security pattern settled in F0018 Phase B."
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:canonical-commit-request",
+        "schema:fact-answer-v1",
+        "schema:fact-slot-key-v1",
+        "schema:fact-slot-resolution-result-v1",
+        "schema:problem-details"
+      ],
+      "_kind": "feature"
+    }
+  ]
+}

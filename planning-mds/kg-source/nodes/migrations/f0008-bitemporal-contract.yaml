@@ -7,7 +7,8 @@ notes: Adds 16 nullable fact-temporal/v1 columns to canonical_fact_version (temp
   pg_timezone_names and truncation with date_trunc in zone, and backs the fact-answer/v1 envelope. Close-only
   UPDATE, no DELETE or TRUNCATE on versions; canonical_fact_change append-only. Preflight refuses a bad
   identity-v1 envelope; downgrade refuses while v1 or lineage rows exist. No table, role, grant, RLS,
-  BYPASSRLS or SECURITY DEFINER.
+  BYPASSRLS or SECURITY DEFINER. Revision 0015 (remediation run 2026-11-18-bce4909b) adds a BEFORE INSERT
+  guard binding split_of_version_id to the same slot, with a refusing preflight.
 related_nodes:
 - capability:bitemporal-canonical-commit
 - entity:canonical-fact-version

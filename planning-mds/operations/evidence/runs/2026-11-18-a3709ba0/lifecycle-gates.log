@@ -1,0 +1,56 @@
+
+### FR2
+Command: python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0008 --stage closeout
+Stage: FR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### FR2
+Command: python3 agents/product-manager/scripts/validate-trackers.py
+Stage: FR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### FR2
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-symbols
+Stage: FR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### FR2
+Command: python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift
+Stage: FR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### FR2
+Command: python3 agents/scripts/validate_templates.py
+Stage: FR2
+Exit Code: 0
+Result: PASS
+Output References: -
+Skipped Gates: -
+
+### FR2
+Command: python3 agents/product-manager/scripts/generate-story-index.py --product-root {NEBULA_PRODUCT_ROOT} <scratch copy of planning-mds/features> (currency check; diff vs committed STORY-INDEX.md)
+Stage: FR2
+Exit Code: 0
+Result: PASS (0-line diff)
+Output References: artifacts/diffs/fr2-story-index-currency.diff
+Skipped Gates: -
+
+### FR4
+Command: python3 agents/scripts/gate_policy.py --profile review-family --variant feature --code-critical 0 --code-high 0 --security-critical 0 --security-high 0 --domain requirements:0:0 --domain architecture:0:0 --domain test-evidence:0:0 --domain deployability:0:0
+Stage: FR4
+Exit Code: 0
+Result: TRULY DONE
+Output References: artifacts/test-results/fr4-gate-policy.txt
+Skipped Gates: -

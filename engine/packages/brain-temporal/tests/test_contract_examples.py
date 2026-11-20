@@ -54,6 +54,7 @@ def _registry() -> Registry:
     for name in (
         "fact-temporal-v1",
         "canonical-commit-request",
+        "canonical-commit-response",
         "fact-answer-v1",
     ):
         schema = json.loads((SCHEMAS / f"{name}.schema.json").read_text())
@@ -135,3 +136,41 @@ def test_runtime_read_shapes_validate_against_the_schema() -> None:
         "temporal": temporal.to_json(),
     }
     assert not list(_validator("validity_unknown_read").iter_errors(read))
+
+
+def test_runtime_commit_response_validates_for_v1_and_legacy() -> None:
+    """S0002 AC7 remediation: the v1 response carries `versions[].temporal`; a legacy
+    remainder entry and a legacy pilot response omit what does not apply."""
+    from brain_domain.facts import CommitResult
+
+    from brain_api.schemas.facts import CommitResponseOut
+
+    response = json.loads((SCHEMAS / "canonical-commit-response.schema.json").read_text())
+    validator = jsonschema.Draft202012Validator(response, registry=REGISTRY)
+    temporal = VersionTemporal(
+        kind=TemporalKind.STATE,
+        valid_from=Bound(datetime(2026, 1, 1, 6, tzinfo=UTC), Granularity.DAY, "America/Chicago"),
+        valid_from_basis=StartBasis.TEMPLATE_FIELD,
+        valid_to_state=EndState.OPEN,
+        valid_to=None,
+        attested_from=None,
+        attested_through=None,
+        attested_to=None,
+        validity_unknown_from=None,
+        split_of_version_id=None,
+    )
+    legacy_remainder, new = uuid4(), uuid4()
+    v1 = CommitResponseOut.from_domain(
+        CommitResult(
+            uuid4(),
+            (legacy_remainder, new),
+            datetime.now(UTC),
+            ((legacy_remainder, None), (new, temporal)),
+        )
+    ).model_dump(mode="json")
+    assert not list(validator.iter_errors(v1))
+    assert "temporal" not in v1["versions"][0]
+    pilot = CommitResponseOut.from_domain(
+        CommitResult(uuid4(), (uuid4(),), datetime.now(UTC))
+    ).model_dump(mode="json")
+    assert not list(validator.iter_errors(pilot)) and "versions" not in pilot

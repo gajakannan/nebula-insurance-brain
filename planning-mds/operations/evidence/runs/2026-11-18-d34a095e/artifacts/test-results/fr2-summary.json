@@ -1,0 +1,59 @@
+{
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "Feature evidence \u2014 closeout",
+      "command": "python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --feature F0008 --stage closeout",
+      "exit_code": 0,
+      "result": "PASS",
+      "artifact": "artifacts/test-results/fr2-operation-results.json#fr2-validate-closeout",
+      "summary": "Required validator completed successfully; driver completion and original command result agree."
+    },
+    {
+      "name": "Trackers (driver)",
+      "command": "python3 agents/product-manager/scripts/validate-trackers.py",
+      "exit_code": 0,
+      "result": "PASS",
+      "artifact": "artifacts/test-results/fr2-operation-results.json#fr2-validate-trackers",
+      "summary": "Required validator completed successfully; driver completion and original command result agree."
+    },
+    {
+      "name": "KG symbols",
+      "command": "python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-symbols",
+      "exit_code": 0,
+      "result": "PASS",
+      "artifact": "artifacts/test-results/fr2-operation-results.json#fr2-kg-check-symbols",
+      "summary": "Required validator completed successfully; driver completion and original command result agree."
+    },
+    {
+      "name": "KG drift",
+      "command": "python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift",
+      "exit_code": 0,
+      "result": "PASS",
+      "artifact": "artifacts/test-results/fr2-operation-results.json#fr2-kg-check-drift",
+      "summary": "Required validator completed successfully; driver completion and original command result agree."
+    },
+    {
+      "name": "Framework templates",
+      "command": "python3 agents/scripts/validate_templates.py",
+      "exit_code": 0,
+      "result": "PASS",
+      "artifact": "artifacts/test-results/fr2-operation-results.json#fr2-validate-templates",
+      "summary": "Required validator completed successfully; driver completion and original command result agree."
+    },
+    {
+      "name": "Story-index currency",
+      "exit_code": 0,
+      "result": "PASS",
+      "artifact": "artifacts/test-results/fr2-story-index-currency.json",
+      "summary": "54 stories; byte-identical index, zero diff lines; canonical index untouched."
+    },
+    {
+      "name": "Trackers (explicit absolute root)",
+      "exit_code": 0,
+      "result": "PASS",
+      "artifact": "artifacts/test-results/fr2-explicit-trackers.txt",
+      "summary": "0 errors, 0 warnings; PASS."
+    }
+  ]
+}

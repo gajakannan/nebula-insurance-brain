@@ -764,3 +764,43 @@ async def test_service_refusal_is_raised_before_any_effect(world):
     assert exc.value.code is TemporalReason.STATE_SUPERSESSION_REFUSED
     assert w.counts() == before
     assert datetime.now(UTC) > h.at("2026-06-14T00:00:00Z")
+
+
+async def test_s0002_ac7_commit_response_returns_temporal_metadata(world):
+    """S0002 AC7 (remediation 2026-11-18): the commit response returns, per version
+    written, the end state, attestation dates and start marker, in
+    `fact_version_ids` order. A remainder carries its own block and lineage."""
+    w = world
+    slot = await w.slot()
+    positive, note = w.evidence(("2026-06-01", "DAY")), w.evidence(("2026-08-02", "DAY"))
+    first = await w.commit_v1(
+        slot, money("2000000"), start=bound("2026-01-01T06:00:00Z"), evidence=[positive]
+    )
+    assert first.status_code == 201, first.text
+    (only,) = first.json()["versions"]
+    assert only["fact_version_id"] == first.json()["fact_version_ids"][0]
+    assert only["temporal"]["valid_to_state"] == "OPEN"
+    assert only["temporal"]["valid_from_basis"] == "TEMPLATE_FIELD"
+    assert only["temporal"]["attested_from"] == {"value": "2026-06-01", "precision": "DAY"}
+
+    second = await w.commit_v1(
+        slot,
+        money("5000000"),
+        start=bound("2026-03-01T06:00:00Z"),
+        evidence=[positive],
+        end_state="UNKNOWN",
+        attestation_zone=CHICAGO,
+        ending=[note],
+    )
+    assert second.status_code == 201, second.text
+    body = second.json()
+    assert [v["fact_version_id"] for v in body["versions"]] == body["fact_version_ids"]
+    remainder, new = body["versions"]
+    assert remainder["temporal"]["valid_to_state"] == "BOUNDED"
+    assert remainder["temporal"]["split_of_version_id"] == only["fact_version_id"]
+    assert new["temporal"]["valid_to_state"] == "UNKNOWN"
+    assert new["temporal"]["attested_to"] == {"value": "2026-08-02", "precision": "DAY"}
+    assert new["temporal"]["split_of_version_id"] is None
+    # The response matches what the read returns for the same version.
+    read = await w.read(slot, "2026-04-01T12:00:00Z")
+    assert read.json()["temporal"] == new["temporal"]

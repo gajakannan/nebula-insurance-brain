@@ -57,6 +57,10 @@ class CommitResult:
     commit_id: UUID
     fact_version_ids: tuple[UUID, ...]
     canonical_accepted_at: datetime
+    # F0008 S0002 AC7: the temporal block of each version a fact-temporal/v1 commit
+    # wrote, in `fact_version_ids` order. None marks a legacy remainder. Empty for
+    # a legacy pilot commit, whose response keeps the pilot shape.
+    version_temporals: tuple[tuple[UUID, VersionTemporal | None], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

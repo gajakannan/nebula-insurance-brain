@@ -25,7 +25,7 @@ ADR-0064 §5 and EX-SEM-004. `valid_to_state` is `OPEN` (still holds), `BOUNDED`
 - [x] **AC4:** A commit whose start is unknown and whose evidence includes at least one dated document is stored with its start floored at `attested_from` (the earliest selected document date) and marked as an attestation floor. A read before `attested_from` returns validity-unknown with no value (EX-PC-014-B). It never returns a version reaching back to minus infinity. *(Amended at Phase B 2026-11-16 with operator approval; previously "returns no version".)*
 - [x] **AC5:** A commit whose start is unknown and whose evidence has no selected document date is refused with `START_UNATTESTED` and writes nothing. Upload, receipt and acceptance times are never used as a substitute (ADR-0064 §8).
 - [x] **AC6:** `attested_from` and `attested_to` come from F0004 document-date selections on the evidence, not from the caller. A caller-supplied value that disagrees with the selected dates is refused with `ATTESTATION_MISMATCH`.
-- [x] **AC7:** The commit response and the fact read return `valid_to_state`, `attested_from`, `attested_to` and the start marker, so `OPEN`, `BOUNDED` and `UNKNOWN` are distinguishable without inspecting null bounds.
+- [x] **AC7:** The commit response and the fact read return `valid_to_state`, `attested_from`, `attested_to` and the start marker, so `OPEN`, `BOUNDED` and `UNKNOWN` are distinguishable without inspecting null bounds. *(Remediation run `2026-11-18-bce4909b`, operator-approved 2026-11-18 after review `2026-11-18-d34a095e` CR-F8-01: the commit response carries this as `versions[].temporal`.)*
 
 ## Interaction Contract
 

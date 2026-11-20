@@ -24,7 +24,7 @@ F0003 assigned `canonical_fact_version` to F0008 and requires safe schema evolut
 - [x] **AC3:** Legacy pilot slots keep accepting the pilot commit request shape, with pilot behaviour and the S0003 immutability rule. Identity-v1 slots require the new fields (Assumption A1). A pilot-shaped request to an identity-v1 slot is rejected with `TEMPORAL_FIELDS_REQUIRED`, and nothing is written.
 - [x] **AC4:** Upgrade → downgrade → upgrade on a database seeded with pilot versions and F0007 identity-v1 versions preserves the AC1 snapshot. A downgrade refuses to run while any version uses a field the old schema cannot hold, and names the blocking rows.
 - [x] **AC5:** The existing F0001 bitemporal and F0007 answer test suites pass unchanged after the migration.
-- [x] **AC6:** The migration adds no grant, role or route. The API change is limited to additive commit-request and read-response fields.
+- [x] **AC6:** The migration adds no grant, role or route. The API change is limited to additive commit-request, commit-response and read-response fields. *(Amended in remediation run `2026-11-18-bce4909b`, operator-approved 2026-11-18, to admit S0002 AC7's commit-response metadata.)*
 
 ## Interaction Contract
 
