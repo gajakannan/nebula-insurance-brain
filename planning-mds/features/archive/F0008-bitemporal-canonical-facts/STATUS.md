@@ -1,11 +1,11 @@
 # F0008 — Bitemporal canonical facts — Status
 
-**Overall Status:** Done / Archived, 2026-11-18. Feature run `2026-11-17-1a4ae2f0` was approved by the operator at G4 on 2026-11-18.
-**Last Updated:** 2026-11-17
+**Overall Status:** Done / Archived after remediation, 2026-11-19. Current run `2026-11-18-bce4909b` was approved by the operator at G4. The prior completion `2026-11-17-1a4ae2f0` is retained as superseded history.
+**Last Updated:** 2026-11-19
 **Plan Run:** `2026-11-16-208a1193` (A+B, new)
 **Phase A:** Approved 2026-11-16 (`approve-phase-a`, G3 PASS)
 **Phase B:** Approved 2026-11-17 (`approve-phase-b`, G5)
-**Implementation:** Done — feature run `2026-11-17-1a4ae2f0` (G0–G8), operator G4 approval 2026-11-18
+**Implementation:** Remediation completed in `2026-11-18-bce4909b` after review `2026-11-18-d34a095e`; the original completion `2026-11-17-1a4ae2f0` is retained as superseded history.
 **Feature Run:** `2026-11-17-1a4ae2f0`
 
 ## Story Checklist
@@ -48,7 +48,7 @@ Set by the Architect at Phase B (G5), 2026-11-16.
 
 ## Story Signoff Provenance
 
-Append-only history. The PM records the required reviewers' verdicts during the feature action.
+Append-only history. Rows for `2026-11-17-1a4ae2f0` are the prior completion provenance, superseded by review `2026-11-18-d34a095e`. Rows for `2026-11-18-bce4909b` belong to the current remediation run.
 
 | Story | Role | Reviewer | Verdict | Evidence | Date | Notes |
 |---|---|---|---|---|---|---|
@@ -87,6 +87,76 @@ Append-only history. The PM records the required reviewers' verdicts during the 
 | F0008-S0007 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS WITH RECOMMENDATIONS | `planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/security-review-report.md` | 2026-11-18 | PM verified role evidence after the G4 operator approval; SEC-F8-02 (Low) deferred to F0018, accepted by the operator at G4 |
 | F0008-S0007 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/deployability-check.md` | 2026-11-18 | PM verified role evidence after the G4 operator approval |
 | F0008-S0007 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/architect-implementation-review.md` | 2026-11-18 | PM verified role evidence after the G4 operator approval |
+| F0008-S0001 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0001 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0001 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0001 | DevOps | Claude (Opus 5.5) / DevOps | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0001 | Architect | Claude (Opus 5.5) / Architect | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0002 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0002 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0002 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0002 | DevOps | Claude (Opus 5.5) / DevOps | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0002 | Architect | Claude (Opus 5.5) / Architect | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0003 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0003 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0003 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0003 | DevOps | Claude (Opus 5.5) / DevOps | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0003 | Architect | Claude (Opus 5.5) / Architect | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0004 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0004 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0004 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0004 | DevOps | Claude (Opus 5.5) / DevOps | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0004 | Architect | Claude (Opus 5.5) / Architect | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0005 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0005 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0005 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0005 | DevOps | Claude (Opus 5.5) / DevOps | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0005 | Architect | Claude (Opus 5.5) / Architect | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0006 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0006 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0006 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0006 | DevOps | Claude (Opus 5.5) / DevOps | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0006 | Architect | Claude (Opus 5.5) / Architect | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0007 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0007 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0007 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0007 | DevOps | Claude (Opus 5.5) / DevOps | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0007 | Architect | Claude (Opus 5.5) / Architect | PENDING | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/g0-assembly-plan-validation.md` | 2026-11-18 | Remediation run opened after review 2026-11-18-d34a095e (NOT DONE); prior PASS row superseded pending fresh verdict |
+| F0008-S0001 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/test-execution-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0001 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/code-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0001 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS WITH RECOMMENDATIONS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/security-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19; carried SEC-F8-02 (Low) deferred to F0018 |
+| F0008-S0001 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/deployability-check.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0001 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/architect-implementation-review.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0002 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/test-execution-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0002 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/code-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0002 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS WITH RECOMMENDATIONS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/security-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19; carried SEC-F8-02 (Low) deferred to F0018 |
+| F0008-S0002 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/deployability-check.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0002 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/architect-implementation-review.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0003 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/test-execution-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0003 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/code-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0003 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS WITH RECOMMENDATIONS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/security-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19; carried SEC-F8-02 (Low) deferred to F0018 |
+| F0008-S0003 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/deployability-check.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0003 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/architect-implementation-review.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0004 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/test-execution-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0004 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/code-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0004 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS WITH RECOMMENDATIONS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/security-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19; carried SEC-F8-02 (Low) deferred to F0018 |
+| F0008-S0004 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/deployability-check.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0004 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/architect-implementation-review.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0005 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/test-execution-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0005 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/code-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0005 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS WITH RECOMMENDATIONS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/security-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19; carried SEC-F8-02 (Low) deferred to F0018 |
+| F0008-S0005 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/deployability-check.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0005 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/architect-implementation-review.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0006 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/test-execution-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0006 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/code-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0006 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS WITH RECOMMENDATIONS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/security-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19; carried SEC-F8-02 (Low) deferred to F0018 |
+| F0008-S0006 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/deployability-check.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0006 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/architect-implementation-review.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0007 | Quality Engineer | Claude (Opus 5.5) / Quality Engineer | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/test-execution-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0007 | Code Reviewer | Claude (Opus 5.5) / Code Reviewer | APPROVED | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/code-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0007 | Security Reviewer | Claude (Opus 5.5) / Security Reviewer | PASS WITH RECOMMENDATIONS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/security-review-report.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19; carried SEC-F8-02 (Low) deferred to F0018 |
+| F0008-S0007 | DevOps | Claude (Opus 5.5) / DevOps | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/deployability-check.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
+| F0008-S0007 | Architect | Claude (Opus 5.5) / Architect | PASS | `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/architect-implementation-review.md` | 2026-11-19 | Current role verdict after remediation; operator G4 approval 2026-11-19 |
 
 ## Clarifications (G1, 2026-11-16)
 
@@ -124,4 +194,23 @@ Append-only history. The PM records the required reviewers' verdicts during the 
 - **ADRs:** all ADR-0078 proof gates are met, but acceptance is an operator decision and the ADR stays Proposed. ADR-0064 and ADR-0039 stay Proposed.
 - **Not delivered by F0008** (owned elsewhere): F0009 lineage use, F0010 change-reason vocabulary, F0016 mention grades, F0018 review routing, RLS and refusal reasons, F0019/F0025 endorsements, F0020 HTTP states, F0022 date selection producer, F0012/F0013 `temporal_kind` activation.
 - **Evidence:** `planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/pm-closeout.md`.
+
+## Remediation Closeout Summary (PM, 2026-11-19)
+
+- **Run:** `2026-11-18-bce4909b` (G0–G8). The operator decided the remediation scope on 2026-11-18 and approved at G4 on 2026-11-19. It supersedes `2026-11-17-1a4ae2f0`.
+- **Resolved:**
+  - CR-F8-01: the commit response returns `versions[].temporal` (S0002 AC7); S0007 AC6 amended.
+  - FR-ARCH-M1: a legacy read omits `temporal`.
+  - QE-M1: S0004 AC1 amended, keeping the F0002 failed-decision audit.
+  - FR-ARCH-L2: migration 0015 adds the same-slot lineage guard.
+  - FR-ARCH-L1: ADR prose.
+  - PM-M1: F0018 handoffs recorded.
+  - PM-L1, PM-L2, SEC-L1, QE-L1: corrected through `prior-run-errata.md`.
+- **Tests:** full engine run 1085/0/0; changed-line coverage 100%; all 46 ACs (as amended) evidenced.
+- **Framework:** the G6/G7 reentry defect was fixed upstream (nebula-agents PR #101) rather than waived.
+- **Residual:**
+  - SEC-F8-02 → F0018 (operator-accepted).
+  - ADR-0078 acceptance (operator decision).
+  - F0011 renumbers its migration after 0015.
+- **Evidence:** `planning-mds/operations/evidence/runs/2026-11-18-bce4909b/pm-closeout.md`.
 

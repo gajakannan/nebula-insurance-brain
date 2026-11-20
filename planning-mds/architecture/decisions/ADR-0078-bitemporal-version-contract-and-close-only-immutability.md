@@ -108,7 +108,7 @@ The exclusion constraint's DDL is unchanged. EX-SEM-004 and EX-PC-014 follow fro
 
 The attestation dates are derived from the evidence:
 
-- **Source of dates:** evidence assertion → content artifact → document version → the current F0004 `document_date_selection`, meaning the highest sequence that is not a clear.
+- **Source of dates:** evidence assertion → content artifact → document version → the current F0004 `document_date_selection`, meaning the highest sequence. If that selection is a clear, the document is undated, as in the F0004 read; an earlier date is never resurrected.
 - **Stored form:** each date is stored as `(value varchar(10), precision YEAR|MONTH|DAY)` in `attested_from`, `attested_through` and `attested_to`.
 - **`attested_from`:** the earliest period start among the positive evidence.
 - **`attested_through`:** the latest period end among the positive evidence.
@@ -141,10 +141,12 @@ Inside the existing unit of work and slot lock, the commit service runs these st
 
 Each remainder:
 
-- copies the predecessor's value, evidence, review linkage, the four timestamps, `temporal_kind`, start basis and attestation, and its uncut bound;
+- copies the predecessor's value, evidence, review linkage, the three source timestamps (`source_received_at`, `artifact_created_at`, `assertion_created_at`), `temporal_kind`, start basis and attestation, and its uncut bound;
 - takes the cut bound from the successor's corresponding bound (instant, granularity and zone);
 - sets `split_of_version_id`;
-- starts its own recorded interval at the new `canonical_accepted_at`.
+- takes the new `canonical_accepted_at`, where its own recorded interval starts.
+
+A BEFORE INSERT trigger added by migration 0015 (remediation run `2026-11-18-bce4909b`) also requires `split_of_version_id` to name a version in the same slot.
 
 A remainder that ends at the successor's start is `BOUNDED`. A remainder after a `BOUNDED` successor keeps the predecessor's end state and attestation, and its `validity_unknown_from` is clipped to its own range. Change rows link each closed version to the new version, with the proposal's reason, and to each of its remainders, with reason `split`.
 

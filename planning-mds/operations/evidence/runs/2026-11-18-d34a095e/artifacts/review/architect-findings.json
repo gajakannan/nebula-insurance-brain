@@ -1,0 +1,25 @@
+[
+  {
+    "id": "FR-ARCH-M1",
+    "severity": "medium",
+    "owner": "architect",
+    "title": "Legacy GET emits temporal:null against the new object-only schema",
+    "raw_refs": ["planning-mds/api/brain-api.yaml:694", "planning-mds/schemas/fact-temporal-v1.schema.json:101", "engine/apps/api/src/brain_api/schemas/facts.py:84", "engine/apps/api/src/brain_api/schemas/facts.py:104", "engine/apps/api/src/brain_api/routes/facts.py:81", "engine/tests/integration/test_temporal_reads.py:304"],
+    "diagnostic": "artifacts/review/architect-temporal-null-schema.json"
+  },
+  {
+    "id": "FR-ARCH-L1",
+    "severity": "low",
+    "owner": "architect",
+    "title": "ADR prose conflicts with current date-selection and remainder timestamp behavior",
+    "raw_refs": ["planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md:111", "planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md:144", "engine/packages/brain-persistence/src/brain_persistence/repositories.py:533", "engine/packages/brain-temporal/src/brain_temporal/commit.py:268", "planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md:24"]
+  },
+  {
+    "id": "FR-ARCH-L2",
+    "severity": "low",
+    "owner": "architect",
+    "title": "Database remainder lineage does not bind the predecessor to the same slot",
+    "raw_refs": ["engine/migrations/versions/0014_f0008_bitemporal_contract.py:175", "engine/migrations/versions/0014_f0008_bitemporal_contract.py:331"],
+    "limitations": "Static guard analysis; no live direct-insert reproduction. The normal service path selects the correct slot predecessor."
+  }
+]

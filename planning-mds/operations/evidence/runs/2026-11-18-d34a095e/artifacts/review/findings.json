@@ -1,0 +1,72 @@
+[
+  {
+    "id": "CR-F8-01",
+    "severity": "critical",
+    "owner": "code-reviewer",
+    "title": "Commit response cannot satisfy S0002 AC7; conflicting API scope has no recorded reconciliation",
+    "raw": "engine/apps/api/src/brain_api/schemas/facts.py:47; engine/apps/api/src/brain_api/routes/facts.py:152; planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md:28"
+  },
+  {
+    "id": "FR-ARCH-M1",
+    "severity": "medium",
+    "owner": "architect",
+    "title": "Legacy GET emits temporal:null against the new object-only contract",
+    "raw": "planning-mds/api/brain-api.yaml:694; engine/apps/api/src/brain_api/schemas/facts.py:84; engine/tests/integration/test_temporal_reads.py:304"
+  },
+  {
+    "id": "QE-M1",
+    "severity": "medium",
+    "owner": "quality-engineer",
+    "title": "Concurrency proof counts only successful audit rows; literal zero-audit loser criterion remains unresolved",
+    "raw": "planning-mds/features/archive/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md:22; engine/tests/integration/test_temporal_concurrency.py:52; engine/packages/brain-security/src/brain_security/execution.py:480"
+  },
+  {
+    "id": "PM-M1",
+    "severity": "medium",
+    "owner": "product-manager",
+    "title": "Exact F0018 carry-overs are absent from receiving planning inputs; current refusal-reason wording is stale",
+    "raw": "planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/pm-closeout.md:30; planning-mds/kg-source/features/F0018.yaml:31"
+  },
+  {
+    "id": "FR-ARCH-L1",
+    "severity": "low",
+    "owner": "architect",
+    "title": "ADR prose conflicts with current date-selection and remainder timestamp semantics",
+    "raw": "planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md:111; engine/packages/brain-persistence/src/brain_persistence/repositories.py:533; engine/packages/brain-temporal/src/brain_temporal/commit.py:268"
+  },
+  {
+    "id": "FR-ARCH-L2",
+    "severity": "low",
+    "owner": "architect",
+    "title": "Direct-insert predecessor lineage lacks same-slot binding",
+    "raw": "engine/migrations/versions/0014_f0008_bitemporal_contract.py:175; engine/migrations/versions/0014_f0008_bitemporal_contract.py:331"
+  },
+  {
+    "id": "QE-L1",
+    "severity": "low",
+    "owner": "quality-engineer",
+    "title": "Supplemental repeat/no-database execution claims and report dates lack their cited raw support",
+    "raw": "planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/test-execution-report.md:24; planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/commands.log:16; planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/test-results/g3-full-engine-regression.xml:1"
+  },
+  {
+    "id": "PM-L1",
+    "severity": "low",
+    "owner": "product-manager",
+    "title": "Manifest changed_paths inventory differs from the actual locked diff",
+    "raw": "planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/evidence-manifest.json:15; artifacts/diffs/manifest-scope-drift.json"
+  },
+  {
+    "id": "PM-L2",
+    "severity": "low",
+    "owner": "product-manager",
+    "title": "Feature status Last Updated predates recorded closeout",
+    "raw": "planning-mds/features/archive/F0008-bitemporal-canonical-facts/STATUS.md:4"
+  },
+  {
+    "id": "SEC-F8-L1",
+    "severity": "low",
+    "owner": "security",
+    "title": "Manifest SAST clean label hides seven safely triaged raw findings",
+    "raw": "planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/evidence-manifest.json:318; planning-mds/operations/evidence/runs/2026-11-17-1a4ae2f0/artifacts/security/sast/sast-semgrep-20261117-052326.sarif#/runs/0/results"
+  }
+]

@@ -37,7 +37,7 @@ No new screen or route. A reviewer resolves refusals through later review featur
 
 ## Data Requirements
 
-Start basis enum on each version. Information state from the F0007 envelope. Refusal reason codes in the audit.
+Start basis enum on each version. Information state from the F0007 envelope. Refusal reason codes: F0008 returns them as the 422 problem `code` and audits each refusal as a `failed` authorization decision; durable per-refusal reason persistence is deferred to F0018 (ADR-0078 D8 note).
 
 ## Role-Based Visibility
 

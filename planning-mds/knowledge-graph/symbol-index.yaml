@@ -1,12 +1,12 @@
 version: 0
-generated_at: '2026-11-18T12:49:55+00:00'
+generated_at: '2026-11-20T02:21:45+00:00'
 summary:
-  total_symbols: 2420
+  total_symbols: 2431
   by_language:
     python:
-      files: 225
-      parsed: 25
-      cached: 200
+      files: 226
+      parsed: 9
+      cached: 217
     typescript:
       files: 8
       parsed: 0
@@ -4352,14 +4352,14 @@ symbols:
   kind: method
   name: _commit_legacy
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 313
+  line: 319
   signature: 'async def _commit_legacy(self, proposal: CommitProposal, *, scope: tuple[UUID,
     UUID], authorization_decision_id: UUID | None, source_access: SourceAccessProof
     | None)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 394
+  end_line: 400
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees:
@@ -4387,14 +4387,14 @@ symbols:
   kind: method
   name: _commit_v1
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 398
+  line: 404
   signature: 'async def _commit_v1(self, proposal: CommitProposal, *, scope: tuple[UUID,
     UUID], authorization_decision_id: UUID | None, source_access: SourceAccessProof
     | None)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 537
+  end_line: 547
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit
   callees:
@@ -4452,11 +4452,11 @@ symbols:
   line: 278
   signature: 'async def _finish(self, *, proposal: CommitProposal, scope: tuple[UUID,
     UUID], commit_id: UUID, new_version_id: UUID, superseded: list[UUID], version_ids:
-    list[UUID], now: datetime)'
+    list[UUID], now: datetime, temporals: dict[UUID, VersionTemporal | None] | None=None)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 309
+  end_line: 315
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-legacy
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
@@ -4470,13 +4470,13 @@ symbols:
   kind: method
   name: _guard
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 558
+  line: 568
   signature: 'def _guard(self, value: Mapping[str, Any], placement: Placement, attestation:
     Attestation, overlapping: list[FactVersion])'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 580
+  end_line: 590
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
   callees:
@@ -4505,13 +4505,13 @@ symbols:
   kind: method
   name: _is_end_revision
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 540
+  line: 550
   signature: 'def _is_end_revision(value: Mapping[str, Any], placement: Placement,
     attestation: Attestation, predecessor: FactVersion)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 556
+  end_line: 566
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.guard
   callees:
@@ -4541,13 +4541,13 @@ symbols:
   kind: method
   name: _remainders
   file: engine/packages/brain-temporal/src/brain_temporal/commit.py
-  line: 583
+  line: 593
   signature: 'def _remainders(predecessor: FactVersion, new_valid: TimeRange, placement:
     Placement)'
   visibility: private
   language: python
   container: CanonicalCommitService
-  end_line: 639
+  end_line: 649
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
   callees:
@@ -4579,7 +4579,7 @@ symbols:
   signature: class CanonicalCommitService
   visibility: public
   language: python
-  end_line: 639
+  end_line: 649
   callers:
   - symbol:capability-bitemporal-canonical-commit:temporal-world.commit-at
   - symbol:capability-bitemporal-canonical-commit:test-commit.test-empty-range-is-rejected-before-any-write
@@ -5378,6 +5378,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac2-ac3-ac7-ex-sem-004-prior-carrier
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-attestation-is-derived-and-a-disagreeing-echo-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-receipt-and-acceptance-times-are-never-attestation
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac7-commit-response-returns-temporal-metadata
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac2-correction-splits-again-and-links-every-closed-version
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac4-non-overlapping-intervals-are-not-touched
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac2-anchored-bases-close-and-split
@@ -5429,6 +5430,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac5-unknown-start-with-undated-evidence-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-attestation-is-derived-and-a-disagreeing-echo-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-receipt-and-acceptance-times-are-never-attestation
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac7-commit-response-returns-temporal-metadata
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac2-correction-splits-again-and-links-every-closed-version
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac4-non-overlapping-intervals-are-not-touched
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac2-anchored-bases-close-and-split
@@ -5453,6 +5455,7 @@ symbols:
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.init
   - symbol:capability-bitemporal-canonical-commit:fake-outbox-reader.seed
+  - symbol:capability-bitemporal-canonical-commit:test-contract-examples.test-runtime-commit-response-validates-for-v1-and-legacy
   - symbol:capability-bitemporal-canonical-commit:test-facts.make-token
   - symbol:capability-bitemporal-canonical-commit:test-outbox.test-replay-after-a-partial-run-only-processes-what-remains-unprocessed
   - symbol:capability-bitemporal-canonical-commit:test-outbox.test-run-once-processes-all-unprocessed-events
@@ -5883,6 +5886,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac5-unknown-start-with-undated-evidence-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-attestation-is-derived-and-a-disagreeing-echo-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-receipt-and-acceptance-times-are-never-attestation
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac7-commit-response-returns-temporal-metadata
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac2-anchored-bases-close-and-split
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac3-end-revision-of-a-floored-start-is-not-a-succession
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac3-mention-c-and-floor-cannot-succeed-but-may-stand-alone
@@ -5913,6 +5917,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac5-unknown-start-with-undated-evidence-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-attestation-is-derived-and-a-disagreeing-echo-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-receipt-and-acceptance-times-are-never-attestation
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac7-commit-response-returns-temporal-metadata
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac3-end-revision-of-a-floored-start-is-not-a-succession
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac3-mention-c-and-floor-cannot-succeed-but-may-stand-alone
   callees:
@@ -5979,6 +5984,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0001-ac5-start-and-end-granularities-are-independent
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac2-ac3-ac7-ex-sem-004-prior-carrier
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac4-unknown-start-is-floored-and-never-reaches-minus-infinity
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac7-commit-response-returns-temporal-metadata
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac2-correction-splits-again-and-links-every-closed-version
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac4-ex-own-003-states-supersede-and-stay-readable
   callees:
@@ -6036,6 +6042,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac5-unknown-start-with-undated-evidence-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-attestation-is-derived-and-a-disagreeing-echo-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-receipt-and-acceptance-times-are-never-attestation
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac7-commit-response-returns-temporal-metadata
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac4-non-overlapping-intervals-are-not-touched
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac2-anchored-bases-close-and-split
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac3-end-revision-of-a-floored-start-is-not-a-succession
@@ -6115,6 +6122,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-bounds.test-s0001-dst-boundaries-in-chicago
   - symbol:capability-bitemporal-canonical-commit:test-bounds.test-s0002-ac2-ex-sem-004-unknown-end-window
   - symbol:capability-bitemporal-canonical-commit:test-bounds.test-s0002-ac4-unknown-start-is-floored-at-attested-from
+  - symbol:capability-bitemporal-canonical-commit:test-contract-examples.test-runtime-commit-response-validates-for-v1-and-legacy
   - symbol:capability-bitemporal-canonical-commit:test-contract-examples.test-runtime-read-shapes-validate-against-the-schema
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:temporal.date-precision
@@ -6278,6 +6286,7 @@ symbols:
   callers:
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.commit-v1
   - symbol:capability-bitemporal-canonical-commit:canonical-commit-service.remainders
+  - symbol:capability-bitemporal-canonical-commit:test-contract-examples.test-runtime-commit-response-validates-for-v1-and-legacy
   - symbol:capability-bitemporal-canonical-commit:test-contract-examples.test-runtime-read-shapes-validate-against-the-schema
   callees: []
 - id: symbol:capability-bitemporal-canonical-commit:test-bounds.block
@@ -6909,20 +6918,36 @@ symbols:
   signature: def _registry()
   visibility: private
   language: python
-  end_line: 62
+  end_line: 63
   is_test: true
   callers: []
   callees: []
+- id: symbol:capability-bitemporal-canonical-commit:test-contract-examples.test-runtime-commit-response-validates-for-v1-and-legacy
+  node: capability:bitemporal-canonical-commit
+  kind: function
+  name: test_runtime_commit_response_validates_for_v1_and_legacy
+  file: engine/packages/brain-temporal/tests/test_contract_examples.py
+  line: 141
+  signature: def test_runtime_commit_response_validates_for_v1_and_legacy()
+  visibility: public
+  language: python
+  end_line: 176
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:harness.now
+  - symbol:capability-bitemporal-canonical-commit:temporal.bound
+  - symbol:capability-bitemporal-canonical-commit:temporal.version-temporal
 - id: symbol:capability-bitemporal-canonical-commit:test-contract-examples.test-runtime-parser-agrees-with-the-case
   node: capability:bitemporal-canonical-commit
   kind: function
   name: test_runtime_parser_agrees_with_the_case
   file: engine/packages/brain-temporal/tests/test_contract_examples.py
-  line: 92
+  line: 93
   signature: 'def test_runtime_parser_agrees_with_the_case(case: dict)'
   visibility: public
   language: python
-  end_line: 112
+  end_line: 113
   is_test: true
   callers: []
   callees:
@@ -6933,11 +6958,11 @@ symbols:
   kind: function
   name: test_runtime_read_shapes_validate_against_the_schema
   file: engine/packages/brain-temporal/tests/test_contract_examples.py
-  line: 115
+  line: 116
   signature: def test_runtime_read_shapes_validate_against_the_schema()
   visibility: public
   language: python
-  end_line: 137
+  end_line: 138
   is_test: true
   callers: []
   callees:
@@ -6952,11 +6977,11 @@ symbols:
   kind: function
   name: test_schema_agrees_with_the_case
   file: engine/packages/brain-temporal/tests/test_contract_examples.py
-  line: 82
+  line: 83
   signature: 'def test_schema_agrees_with_the_case(case: dict)'
   visibility: public
   language: python
-  end_line: 84
+  end_line: 85
   is_test: true
   callers: []
   callees:
@@ -6966,11 +6991,11 @@ symbols:
   kind: function
   name: test_twenty_cases_are_present
   file: engine/packages/brain-temporal/tests/test_contract_examples.py
-  line: 77
+  line: 78
   signature: def test_twenty_cases_are_present()
   visibility: public
   language: python
-  end_line: 78
+  end_line: 79
   is_test: true
   callers: []
   callees: []
@@ -6979,11 +7004,11 @@ symbols:
   kind: function
   name: _validator
   file: engine/packages/brain-temporal/tests/test_contract_examples.py
-  line: 70
+  line: 71
   signature: 'def _validator(target: str)'
   visibility: private
   language: python
-  end_line: 74
+  end_line: 75
   is_test: true
   callers:
   - symbol:capability-bitemporal-canonical-commit:test-contract-examples.test-runtime-read-shapes-validate-against-the-schema
@@ -7509,12 +7534,12 @@ symbols:
   kind: function
   name: test_d6_exclusion_violation_maps_to_temporal_conflict
   file: engine/tests/integration/test_temporal_concurrency.py
-  line: 225
+  line: 233
   signature: async def test_d6_exclusion_violation_maps_to_temporal_conflict(world,
     monkeypatch)
   visibility: public
   language: python
-  end_line: 244
+  end_line: 252
   is_test: true
   callers: []
   callees:
@@ -7528,12 +7553,12 @@ symbols:
   kind: function
   name: test_other_integrity_errors_do_not_echo_database_text
   file: engine/tests/integration/test_temporal_concurrency.py
-  line: 247
+  line: 255
   signature: async def test_other_integrity_errors_do_not_echo_database_text(world,
     monkeypatch)
   visibility: public
   language: python
-  end_line: 265
+  end_line: 273
   is_test: true
   callers: []
   callees:
@@ -7551,7 +7576,7 @@ symbols:
   signature: async def test_s0004_ac1_racing_commits_leave_one_answer_per_coordinate(world)
   visibility: public
   language: python
-  end_line: 107
+  end_line: 115
   is_test: true
   callers: []
   callees:
@@ -7568,11 +7593,11 @@ symbols:
   kind: function
   name: test_s0004_ac1_unconditional_racers_serialize_without_overlap
   file: engine/tests/integration/test_temporal_concurrency.py
-  line: 110
+  line: 118
   signature: async def test_s0004_ac1_unconditional_racers_serialize_without_overlap(world)
   visibility: public
   language: python
-  end_line: 124
+  end_line: 132
   is_test: true
   callers: []
   callees:
@@ -7588,11 +7613,11 @@ symbols:
   kind: function
   name: test_s0004_ac3_multi_members_commit_concurrently_and_independently
   file: engine/tests/integration/test_temporal_concurrency.py
-  line: 127
+  line: 135
   signature: async def test_s0004_ac3_multi_members_commit_concurrently_and_independently(world)
   visibility: public
   language: python
-  end_line: 184
+  end_line: 192
   is_test: true
   callers: []
   callees:
@@ -7604,11 +7629,11 @@ symbols:
   kind: function
   name: test_s0004_ac4_relationship_slot_obeys_the_same_exclusion_and_close
   file: engine/tests/integration/test_temporal_concurrency.py
-  line: 187
+  line: 195
   signature: async def test_s0004_ac4_relationship_slot_obeys_the_same_exclusion_and_close(world)
   visibility: public
   language: python
-  end_line: 222
+  end_line: 230
   is_test: true
   callers: []
   callees:
@@ -7748,6 +7773,7 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac5-unknown-start-with-undated-evidence-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-attestation-is-derived-and-a-disagreeing-echo-is-refused
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac6-receipt-and-acceptance-times-are-never-attestation
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac7-commit-response-returns-temporal-metadata
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac2-correction-splits-again-and-links-every-closed-version
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac4-non-overlapping-intervals-are-not-touched
   - symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0005-ac2-anchored-bases-close-and-split
@@ -8411,6 +8437,26 @@ symbols:
   - symbol:capability-bitemporal-canonical-commit:temporal-world.evidence
   - symbol:capability-bitemporal-canonical-commit:temporal-world.slot
   - symbol:capability-bitemporal-canonical-commit:temporal-world.versions
+  - symbol:capability-bitemporal-canonical-commit:test-temporal-service.money
+- id: symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0002-ac7-commit-response-returns-temporal-metadata
+  node: capability:bitemporal-canonical-commit
+  kind: function
+  name: test_s0002_ac7_commit_response_returns_temporal_metadata
+  file: engine/tests/integration/test_temporal_v1_commit.py
+  line: 769
+  signature: async def test_s0002_ac7_commit_response_returns_temporal_metadata(world)
+  visibility: public
+  language: python
+  end_line: 806
+  is_test: true
+  callers: []
+  callees:
+  - symbol:capability-bitemporal-canonical-commit:harness.bound
+  - symbol:capability-bitemporal-canonical-commit:harness.money
+  - symbol:capability-bitemporal-canonical-commit:temporal-world.commit-v1
+  - symbol:capability-bitemporal-canonical-commit:temporal-world.evidence
+  - symbol:capability-bitemporal-canonical-commit:temporal-world.read
+  - symbol:capability-bitemporal-canonical-commit:temporal-world.slot
   - symbol:capability-bitemporal-canonical-commit:test-temporal-service.money
 - id: symbol:capability-bitemporal-canonical-commit:test-temporal-v1-commit.test-s0003-ac1-ac6-retroactive-endorsement-splits-and-keeps-distinct-times
   node: capability:bitemporal-canonical-commit
@@ -35086,12 +35132,12 @@ symbols:
   kind: method
   name: _one_time_shape
   file: engine/apps/api/src/brain_api/schemas/facts.py
-  line: 38
+  line: 44
   signature: def _one_time_shape(self)
   visibility: private
   language: python
   container: CommitProposalIn
-  end_line: 44
+  end_line: 50
   callers: []
   callees: []
 - id: symbol:capability-temporal-fact-resolution:commit-response-out.from-domain
@@ -35099,25 +35145,54 @@ symbols:
   kind: method
   name: from_domain
   file: engine/apps/api/src/brain_api/schemas/facts.py
-  line: 57
+  line: 92
   signature: 'def from_domain(cls, result: CommitResult)'
   visibility: public
   language: python
   container: CommitResponseOut
-  end_line: 62
+  end_line: 105
   callers: []
-  callees: []
+  callees:
+  - symbol:capability-temporal-fact-resolution:facts.commit-version-out
+- id: symbol:capability-temporal-fact-resolution:commit-response-out.serialize
+  node: capability:temporal-fact-resolution
+  kind: method
+  name: _serialize
+  file: engine/apps/api/src/brain_api/schemas/facts.py
+  line: 88
+  signature: 'def _serialize(self, handler: SerializerFunctionWrapHandler)'
+  visibility: private
+  language: python
+  container: CommitResponseOut
+  end_line: 89
+  callers: []
+  callees:
+  - symbol:capability-temporal-fact-resolution:facts.omit-absent
+- id: symbol:capability-temporal-fact-resolution:commit-version-out.serialize
+  node: capability:temporal-fact-resolution
+  kind: method
+  name: _serialize
+  file: engine/apps/api/src/brain_api/schemas/facts.py
+  line: 70
+  signature: 'def _serialize(self, handler: SerializerFunctionWrapHandler)'
+  visibility: private
+  language: python
+  container: CommitVersionOut
+  end_line: 72
+  callers: []
+  callees:
+  - symbol:capability-temporal-fact-resolution:facts.omit-absent
 - id: symbol:capability-temporal-fact-resolution:fact-validity-unknown-out.from-domain
   node: capability:temporal-fact-resolution
   kind: method
   name: from_domain
   file: engine/apps/api/src/brain_api/schemas/facts.py
-  line: 121
+  line: 169
   signature: 'def from_domain(cls, result: ValidityUnknown)'
   visibility: public
   language: python
   container: FactValidityUnknownOut
-  end_line: 127
+  end_line: 175
   callers: []
   callees: []
 - id: symbol:capability-temporal-fact-resolution:fact-version-out.from-domain
@@ -35125,24 +35200,38 @@ symbols:
   kind: method
   name: from_domain
   file: engine/apps/api/src/brain_api/schemas/facts.py
-  line: 87
+  line: 135
   signature: 'def from_domain(cls, version: FactVersion)'
   visibility: public
   language: python
   container: FactVersionOut
-  end_line: 105
+  end_line: 153
   callers: []
   callees: []
+- id: symbol:capability-temporal-fact-resolution:fact-version-out.serialize
+  node: capability:temporal-fact-resolution
+  kind: method
+  name: _serialize
+  file: engine/apps/api/src/brain_api/schemas/facts.py
+  line: 130
+  signature: 'def _serialize(self, handler: SerializerFunctionWrapHandler)'
+  visibility: private
+  language: python
+  container: FactVersionOut
+  end_line: 132
+  callers: []
+  callees:
+  - symbol:capability-temporal-fact-resolution:facts.omit-absent
 - id: symbol:capability-temporal-fact-resolution:facts.commit-proposal-in
   node: capability:temporal-fact-resolution
   kind: class
   name: CommitProposalIn
   file: engine/apps/api/src/brain_api/schemas/facts.py
-  line: 16
+  line: 22
   signature: class CommitProposalIn
   visibility: public
   language: python
-  end_line: 44
+  end_line: 50
   callers: []
   callees: []
 - id: symbol:capability-temporal-fact-resolution:facts.commit-response-out
@@ -35150,23 +35239,36 @@ symbols:
   kind: class
   name: CommitResponseOut
   file: engine/apps/api/src/brain_api/schemas/facts.py
-  line: 47
+  line: 75
   signature: class CommitResponseOut
   visibility: public
   language: python
-  end_line: 62
+  end_line: 105
   callers: []
+  callees: []
+- id: symbol:capability-temporal-fact-resolution:facts.commit-version-out
+  node: capability:temporal-fact-resolution
+  kind: class
+  name: CommitVersionOut
+  file: engine/apps/api/src/brain_api/schemas/facts.py
+  line: 61
+  signature: class CommitVersionOut
+  visibility: public
+  language: python
+  end_line: 72
+  callers:
+  - symbol:capability-temporal-fact-resolution:commit-response-out.from-domain
   callees: []
 - id: symbol:capability-temporal-fact-resolution:facts.fact-validity-unknown-out
   node: capability:temporal-fact-resolution
   kind: class
   name: FactValidityUnknownOut
   file: engine/apps/api/src/brain_api/schemas/facts.py
-  line: 108
+  line: 156
   signature: class FactValidityUnknownOut
   visibility: public
   language: python
-  end_line: 127
+  end_line: 175
   callers: []
   callees: []
 - id: symbol:capability-temporal-fact-resolution:facts.fact-version-out
@@ -35174,12 +35276,27 @@ symbols:
   kind: class
   name: FactVersionOut
   file: engine/apps/api/src/brain_api/schemas/facts.py
-  line: 65
+  line: 108
   signature: class FactVersionOut
   visibility: public
   language: python
-  end_line: 105
+  end_line: 153
   callers: []
+  callees: []
+- id: symbol:capability-temporal-fact-resolution:facts.omit-absent
+  node: capability:temporal-fact-resolution
+  kind: function
+  name: _omit_absent
+  file: engine/apps/api/src/brain_api/schemas/facts.py
+  line: 53
+  signature: 'def _omit_absent(data: dict[str, Any], *keys: str)'
+  visibility: private
+  language: python
+  end_line: 58
+  callers:
+  - symbol:capability-temporal-fact-resolution:commit-response-out.serialize
+  - symbol:capability-temporal-fact-resolution:commit-version-out.serialize
+  - symbol:capability-temporal-fact-resolution:fact-version-out.serialize
   callees: []
 - id: symbol:capability-temporal-fact-resolution:reader.not-processed
   node: capability:temporal-fact-resolution
@@ -35415,7 +35532,7 @@ symbols:
   signature: async def test_legacy_slot_reads_keep_pilot_behaviour(world)
   visibility: public
   language: python
-  end_line: 308
+  end_line: 311
   is_test: true
   callers: []
   callees: []
@@ -39611,6 +39728,7 @@ symbols:
   is_test: true
   callers:
   - symbol:entity-canonical-fact-version:test-temporal-immutability.test-d1-identity-v1-slot-refuses-a-legacy-row-that-is-not-a-legacy-remainder
+  - symbol:entity-canonical-fact-version:test-temporal-immutability.test-fr-arch-l2-split-lineage-cannot-cross-slots
   - symbol:entity-canonical-fact-version:test-temporal-immutability.test-s0003-ac5-delete-and-truncate-are-refused-and-changes-are-append-only
   - symbol:entity-canonical-fact-version:test-temporal-immutability.test-s0003-ac5-the-single-close-succeeds-and-cannot-be-reopened-or-moved
   - symbol:entity-canonical-fact-version:test-temporal-immutability.test-s0003-ac5-update-of-any-column-but-the-open-recorded-bound-is-refused
@@ -39628,6 +39746,20 @@ symbols:
   visibility: public
   language: python
   end_line: 254
+  is_test: true
+  callers: []
+  callees:
+  - symbol:entity-canonical-fact-version:test-temporal-immutability.seeded
+- id: symbol:entity-canonical-fact-version:test-temporal-immutability.test-fr-arch-l2-split-lineage-cannot-cross-slots
+  node: entity:canonical-fact-version
+  kind: function
+  name: test_fr_arch_l2_split_lineage_cannot_cross_slots
+  file: engine/tests/integration/test_temporal_immutability.py
+  line: 303
+  signature: async def test_fr_arch_l2_split_lineage_cannot_cross_slots(world)
+  visibility: public
+  language: python
+  end_line: 326
   is_test: true
   callers: []
   callees:
@@ -40244,6 +40376,32 @@ symbols:
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.upgrade
   callees:
   - symbol:migration-f0008-bitemporal-contract:0014-f0008-bitemporal-contract.preflight
+- id: symbol:migration-f0008-bitemporal-contract:0015-f0008-split-lineage-same-slot.downgrade
+  node: migration:f0008-bitemporal-contract
+  kind: function
+  name: downgrade
+  file: engine/migrations/versions/0015_f0008_split_lineage_same_slot.py
+  line: 77
+  signature: def downgrade()
+  visibility: public
+  language: python
+  end_line: 79
+  callers:
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.downgrade
+  callees: []
+- id: symbol:migration-f0008-bitemporal-contract:0015-f0008-split-lineage-same-slot.upgrade
+  node: migration:f0008-bitemporal-contract
+  kind: function
+  name: upgrade
+  file: engine/migrations/versions/0015_f0008_split_lineage_same_slot.py
+  line: 54
+  signature: def upgrade()
+  visibility: public
+  language: python
+  end_line: 74
+  callers:
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.upgrade
+  callees: []
 - id: symbol:migration-f0008-bitemporal-contract:test-temporal-migration.downgrade
   node: migration:f0008-bitemporal-contract
   kind: function
@@ -40256,10 +40414,12 @@ symbols:
   end_line: 66
   is_test: true
   callers:
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-0015-preflight-refuses-cross-slot-lineage-and-cycles-cleanly
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-s0007-ac1-ac2-ac4-ac6-up-down-up-keeps-every-version-identical
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-s0007-ac4-downgrade-refuses-while-v1-rows-exist-and-names-them
   callees:
   - symbol:migration-f0008-bitemporal-contract:0014-f0008-bitemporal-contract.downgrade
+  - symbol:migration-f0008-bitemporal-contract:0015-f0008-split-lineage-same-slot.downgrade
 - id: symbol:migration-f0008-bitemporal-contract:test-temporal-migration.f0007-v1-versions
   node: migration:f0008-bitemporal-contract
   kind: function
@@ -40288,6 +40448,7 @@ symbols:
   end_line: 110
   is_test: true
   callers:
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-0015-preflight-refuses-cross-slot-lineage-and-cycles-cleanly
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-d7-upgrade-preflight-refuses-a-bad-identity-v1-envelope
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-s0007-ac1-ac2-ac4-ac6-up-down-up-keeps-every-version-identical
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-s0007-ac4-downgrade-refuses-while-v1-rows-exist-and-names-them
@@ -40305,10 +40466,28 @@ symbols:
   end_line: 97
   is_test: true
   callers:
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-0015-preflight-refuses-cross-slot-lineage-and-cycles-cleanly
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-d7-upgrade-preflight-refuses-a-bad-identity-v1-envelope
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-s0007-ac1-ac2-ac4-ac6-up-down-up-keeps-every-version-identical
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-s0007-ac4-downgrade-refuses-while-v1-rows-exist-and-names-them
   callees: []
+- id: symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-0015-preflight-refuses-cross-slot-lineage-and-cycles-cleanly
+  node: migration:f0008-bitemporal-contract
+  kind: function
+  name: test_0015_preflight_refuses_cross_slot_lineage_and_cycles_cleanly
+  file: engine/tests/integration/test_temporal_migration.py
+  line: 273
+  signature: async def test_0015_preflight_refuses_cross_slot_lineage_and_cycles_cleanly(database)
+  visibility: public
+  language: python
+  end_line: 329
+  is_test: true
+  callers: []
+  callees:
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.downgrade
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.seed
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.snapshot
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.upgrade
 - id: symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-d7-upgrade-preflight-refuses-a-bad-identity-v1-envelope
   node: migration:f0008-bitemporal-contract
   kind: function
@@ -40388,8 +40567,10 @@ symbols:
   is_test: true
   callers:
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.seed
+  - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-0015-preflight-refuses-cross-slot-lineage-and-cycles-cleanly
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-d7-upgrade-preflight-refuses-a-bad-identity-v1-envelope
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-s0007-ac1-ac2-ac4-ac6-up-down-up-keeps-every-version-identical
   - symbol:migration-f0008-bitemporal-contract:test-temporal-migration.test-s0007-ac4-downgrade-refuses-while-v1-rows-exist-and-names-them
   callees:
   - symbol:migration-f0008-bitemporal-contract:0014-f0008-bitemporal-contract.upgrade
+  - symbol:migration-f0008-bitemporal-contract:0015-f0008-split-lineage-same-slot.upgrade

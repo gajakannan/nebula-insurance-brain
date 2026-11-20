@@ -97,7 +97,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:archived -->
 | Feature ID | Name | Archived Date | Evidence Reentry Date | Folder |
 |------------|------|---------------|-----------------------|--------|
-| F0008 | Bitemporal canonical facts | 2026-11-18 |  | `archive/F0008-bitemporal-canonical-facts/` |
+| F0008 | Bitemporal canonical facts | 2026-11-19 |  | `archive/F0008-bitemporal-canonical-facts/` |
 | F0064 | Repository instructions and planning-check adoption | 2026-11-14 |  | `archive/F0064-repository-instructions-and-planning-check-adoption/` |
 | F0007 | FactSlot model | 2026-11-10 |  | `archive/F0007-factslot-model/` |
 | F0006 | Assertion plane + origin + interpretation basis | 2026-11-05 |  | `archive/F0006-assertion-plane-origin-and-interpretation-basis/` |

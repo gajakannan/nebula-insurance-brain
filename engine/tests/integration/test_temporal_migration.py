@@ -268,3 +268,62 @@ def test_s0007_ac6_no_route_is_added():
 
     paths = sorted(p for p in create_app().openapi()["paths"] if p.startswith("/facts"))
     assert paths == ["/facts/{fact_slot_id}", "/facts/{fact_slot_id}/commits"]
+
+
+async def test_0015_preflight_refuses_cross_slot_lineage_and_cycles_cleanly(database):
+    """Review remediation (FR-ARCH-L2): 0015 refuses to install over an existing
+    cross-slot split, repairs nothing, and its downgrade drops only its own guard."""
+    _seed(database)
+    _upgrade("0014")
+    w = h.TemporalWorld(database)
+    try:
+        a, b = await w.slot(), await w.slot()
+        for slot in (a, b):
+            response = await w.commit_v1(
+                slot,
+                money("1"),
+                start=bound("2026-01-01T06:00:00Z"),
+                end_state="BOUNDED",
+                end=bound("2027-01-01T06:00:00Z"),
+            )
+            assert response.status_code == 201, response.text
+        pred = w.scalar("SELECT id FROM canonical_fact_version WHERE slot_id = %s", b)
+        with psycopg.connect(database) as connection:
+            crossing = connection.execute(
+                "INSERT INTO canonical_fact_version (id, slot_id, tenant_id, knowledge_base_id, "
+                "value, valid, recorded, evidence, commit_id, source_received_at, "
+                "artifact_created_at, assertion_created_at, canonical_accepted_at, "
+                "temporal_contract, temporal_kind, valid_from_granularity, valid_from_zone, "
+                "valid_from_basis, valid_to_state, split_of_version_id) SELECT "
+                "gen_random_uuid(), slot_id, tenant_id, knowledge_base_id, value, "
+                "'[2031-01-01 06:00:00+00,)', recorded, evidence, commit_id, "
+                "source_received_at, artifact_created_at, assertion_created_at, "
+                "canonical_accepted_at, 1, 'STATE', 'DAY', 'America/Chicago', 'HUMAN', 'OPEN', "
+                "%s FROM canonical_fact_version WHERE slot_id = %s RETURNING id",
+                (pred, a),
+            ).fetchone()[0]
+    finally:
+        await w.close()
+    before = _snapshot(database)
+    with pytest.raises(Exception) as refused:
+        _upgrade("0015")
+    assert "0015 upgrade refused: 1 versions" in str(refused.value)
+    assert str(crossing) in str(refused.value)
+    assert _snapshot(database) == before
+    with psycopg.connect(database) as connection:
+        assert connection.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0014"
+        # Test-only governed repair: superuser replica mode bypasses the 0014 no-delete trigger.
+        connection.execute("SET session_replication_role = replica")
+        connection.execute("DELETE FROM canonical_fact_version WHERE id = %s", (crossing,))
+    _upgrade("head")
+    _downgrade("0014")
+    with psycopg.connect(database) as connection:
+        triggers = {
+            r[0]
+            for r in connection.execute(
+                "SELECT tgname FROM pg_trigger WHERE tgrelid = 'canonical_fact_version'::regclass"
+            )
+        }
+    assert "trg_canonical_fact_version_v1_split_slot" not in triggers
+    assert "trg_canonical_fact_version_v1_insert" in triggers
+    _upgrade("head")

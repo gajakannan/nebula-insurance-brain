@@ -285,6 +285,7 @@ class CanonicalCommitService:
         superseded: list[UUID],
         version_ids: list[UUID],
         now: datetime,
+        temporals: dict[UUID, VersionTemporal | None] | None = None,
     ) -> CommitResult:
         reason = proposal.change_reason or ChangeReason.SUPERSEDED
         sources: list[UUID | None] = list(superseded) or [None]
@@ -305,7 +306,12 @@ class CanonicalCommitService:
             },
         )
         return CommitResult(
-            commit_id=commit_id, fact_version_ids=tuple(version_ids), canonical_accepted_at=now
+            commit_id=commit_id,
+            fact_version_ids=tuple(version_ids),
+            canonical_accepted_at=now,
+            version_temporals=(
+                tuple((v, temporals.get(v)) for v in version_ids) if temporals is not None else ()
+            ),
         )
 
     # --- legacy pilot path ------------------------------------------------
@@ -478,6 +484,7 @@ class CanonicalCommitService:
         version_ids: list[UUID] = []
         superseded: list[UUID] = []
         remainder_links: list[tuple[UUID, UUID]] = []
+        temporals: dict[UUID, VersionTemporal | None] = {}
         for existing in overlapping:
             await self._repository.close_recorded(existing.id, now)
             superseded.append(existing.id)
@@ -495,6 +502,7 @@ class CanonicalCommitService:
                     lineage=True,
                 )
                 version_ids.append(remainder_id)
+                temporals[remainder_id] = piece.temporal
                 remainder_links.append((existing.id, remainder_id))
 
         new_version_id = uuid4()
@@ -518,6 +526,7 @@ class CanonicalCommitService:
             ending_evidence_refs=temporal.ending_evidence_refs,
         )
         version_ids.append(new_version_id)
+        temporals[new_version_id] = new_temporal
         for from_id, to_id in remainder_links:
             await self._repository.insert_change(
                 reason=ChangeReason.SPLIT,
@@ -534,6 +543,7 @@ class CanonicalCommitService:
             superseded=superseded,
             version_ids=version_ids,
             now=now,
+            temporals=temporals,
         )
 
     @staticmethod

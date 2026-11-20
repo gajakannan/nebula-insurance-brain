@@ -6,7 +6,13 @@ from uuid import UUID
 
 from brain_domain.facts import CommitResult, FactVersion
 from brain_temporal.reader import ValidityUnknown
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    SerializerFunctionWrapHandler,
+    model_serializer,
+    model_validator,
+)
 
 ChangeReasonLiteral = Literal[
     "superseded", "corrected", "retracted", "expired", "invalidated", "merged", "split"
@@ -44,14 +50,43 @@ class CommitProposalIn(BaseModel):
         return self
 
 
+def _omit_absent(data: dict[str, Any], *keys: str) -> dict[str, Any]:
+    """The contract says these fields are absent, not null, when they do not apply."""
+    for key in keys:
+        if data.get(key) is None:
+            data.pop(key, None)
+    return data
+
+
+class CommitVersionOut(BaseModel):
+    """F0008 S0002 AC7: one version written by a fact-temporal/v1 commit."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    fact_version_id: UUID
+    temporal: dict[str, Any] | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # A legacy remainder on an identity-v1 slot has no temporal block.
+        return _omit_absent(handler(self), "temporal")
+
+
 class CommitResponseOut(BaseModel):
-    """Matches `planning-mds/schemas/canonical-commit-response.schema.json`."""
+    """Matches `planning-mds/schemas/canonical-commit-response.schema.json`.
+    `versions` is present only for a fact-temporal/v1 commit (F0008 S0002 AC7);
+    a legacy pilot commit keeps the pilot response shape."""
 
     model_config = ConfigDict(extra="forbid")
 
     commit_id: UUID
     fact_version_ids: list[UUID]
     canonical_accepted_at: datetime
+    versions: list[CommitVersionOut] | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        return _omit_absent(handler(self), "versions")
 
     @classmethod
     def from_domain(cls, result: CommitResult) -> CommitResponseOut:
@@ -59,6 +94,14 @@ class CommitResponseOut(BaseModel):
             commit_id=result.commit_id,
             fact_version_ids=list(result.fact_version_ids),
             canonical_accepted_at=result.canonical_accepted_at,
+            versions=[
+                CommitVersionOut(
+                    fact_version_id=version_id,
+                    temporal=temporal.to_json() if temporal is not None else None,
+                )
+                for version_id, temporal in result.version_temporals
+            ]
+            or None,
         )
 
 
@@ -82,6 +125,11 @@ class FactVersionOut(BaseModel):
     artifact_created_at: datetime | None = None
     assertion_created_at: datetime | None = None
     temporal: dict[str, Any] | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
+        # FR-ARCH-M1: `temporal` is absent for a legacy pilot version, never null.
+        return _omit_absent(handler(self), "temporal")
 
     @classmethod
     def from_domain(cls, version: FactVersion) -> FactVersionOut:

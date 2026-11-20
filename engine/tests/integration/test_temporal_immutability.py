@@ -298,3 +298,29 @@ async def test_s0004_ac6_cross_scope_rows_are_refused_by_composite_keys(world, t
                 (uuid4(), version),
             )
     assert w.counts() == before
+
+
+async def test_fr_arch_l2_split_lineage_cannot_cross_slots(world):
+    """Review remediation (migration 0015): a remainder's predecessor must be in its
+    own slot, even for a direct insert that bypasses the service."""
+    w = world
+    slot, version = await _seeded(w)
+    other = await w.slot()
+    assert (
+        await w.commit_v1(other, money("1"), start=bound("2026-01-01T06:00:00Z"))
+    ).status_code == 201
+    template = w.versions(other)[0]["id"]
+    with psycopg.connect(w.url) as connection, pytest.raises(psycopg.errors.CheckViolation):
+        connection.execute(
+            "INSERT INTO canonical_fact_version (id, slot_id, tenant_id, knowledge_base_id, "
+            "value, valid, recorded, evidence, commit_id, source_received_at, "
+            "artifact_created_at, assertion_created_at, canonical_accepted_at, "
+            "temporal_contract, temporal_kind, valid_from_granularity, valid_from_zone, "
+            "valid_from_basis, valid_to_state, split_of_version_id) SELECT gen_random_uuid(), "
+            "slot_id, tenant_id, knowledge_base_id, value, '[2031-01-01 06:00:00+00,)', "
+            "recorded, evidence, commit_id, source_received_at, artifact_created_at, "
+            "assertion_created_at, canonical_accepted_at, 1, 'STATE', 'DAY', "
+            "'America/Chicago', 'HUMAN', 'OPEN', %s FROM canonical_fact_version WHERE id = %s",
+            (version, template),
+        )
+    assert len(w.versions(other)) == 1

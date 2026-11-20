@@ -83,6 +83,14 @@ async def test_s0004_ac1_racing_commits_leave_one_answer_per_coordinate(world):
     assert checked >= 200 and overlapping == 0
     # Each winner wrote exactly one commit audit and one outbox event; losers none.
     assert audit_successes(w, slot) == 2
+    # Amended S0004 AC1 (operator, 2026-11-18): each loser writes no successful commit
+    # audit, and its authorization decision is durably recorded with outcome `failed`
+    # (the F0002 guarantee that every authorization decision is audited).
+    assert w.scalar(
+        "SELECT count(*) FROM audit_event WHERE resource_id = %s AND action = 'commit' "
+        "AND operation_outcome = 'failed'",
+        slot,
+    ) == len(losers)
     assert (
         w.scalar(
             "SELECT count(*) FROM outbox_event o JOIN canonical_commit c ON c.id = o.commit_id "

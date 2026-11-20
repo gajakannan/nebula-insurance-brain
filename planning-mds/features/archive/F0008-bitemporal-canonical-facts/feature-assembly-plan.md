@@ -345,6 +345,25 @@ The Architect recorded these implementation details at feature G0. None changes 
 9. **Migration lineage.** The sole head is `0013`, and no remote branch carries a `0014` (F0011 is still Planned). `0014_f0008_bitemporal_contract.py` takes `down_revision = "0013"`.
 10. **CI.** A new `ci-gates.yml` step runs the F0008 suites against owned databases with a coverage floor on `brain_temporal`.
 
+## Review Remediation (run `2026-11-18-bce4909b`, 2026-11-18)
+
+Independent feature review `2026-11-18-d34a095e` returned NOT DONE, and closeout audit `2026-11-18-a3709ba0` raised overlapping findings. The operator authorized targeted remediation on 2026-11-18 and made three decisions:
+
+| Finding | Decision | Change |
+|---|---|---|
+| CR-F8-01 (Critical): the commit response lacked S0002 AC7 metadata | Implement in the response | `CommitResult.version_temporals`; `CommitResponseOut.versions[]` with each written version's `temporal` block in `fact_version_ids` order; `canonical-commit-response.schema.json` gains optional `versions`; S0007 AC6 amended to admit additive commit-response fields. A legacy pilot response is unchanged. |
+| QE-M1: S0004 AC1 said losers write "no audit row" | Amend the AC, keep the F0002 audit | AC1 now says losers write no fact, change, commit or outbox row and no successful commit audit, and that the `failed` authorization decision is recorded. The test asserts the failed count equals the losers. |
+| FR-ARCH-L2: the lineage FK lacked a same-slot binding | Fix now | Migration `0015_f0008_split_lineage_same_slot.py`: a BEFORE INSERT trigger requires the split predecessor to be in the same slot, with a preflight that refuses existing crossings. F0011 renumbers after 0015. |
+
+Also in this run:
+
+- FR-ARCH-M1: a legacy read omits `temporal` instead of returning `null`.
+- FR-ARCH-L1: the ADR-0078 D4/D5 prose now matches the clear semantics and the three copied source timestamps.
+- PM-M1: the F0018 handoffs are recorded in F0018's README and KG shard, and S0005 notes the deferral.
+- The prior run's evidence labels (PM-L1, PM-L2, SEC-L1, QE-L1) are corrected through errata in this run. The superseded evidence is not rewritten.
+
+No route, grant, table or UI is added.
+
 ## Knowledge-Graph Binding Plan
 
 The Architect owns this plan. G4 compiles it.

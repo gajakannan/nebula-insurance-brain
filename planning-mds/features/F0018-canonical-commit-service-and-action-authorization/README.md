@@ -19,6 +19,13 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - Phase B settles the ADR-0042 authorization envelope and the PostgreSQL row-security pattern for tenant-owned tables, tested under the real application and worker roles (F0026 proves isolation).
 - Carry master blueprint 88 hooks - outbox events reserve AGE projection IDs (F0034 implements) and the commit records derivation dependencies for derived results. Record ADR-0043 deletion and revocation events with tombstones.
 
+## F0008 handoffs (recorded 2026-11-18, remediation run `2026-11-18-bce4909b`)
+
+F0008 closed with two obligations assigned to F0018. Plan them in F0018 Phase A.
+
+1. **SEC-F8-02 — non-superuser application role.** Locally and in CI the API connects as `brain`, a superuser, which can set `session_replication_role = replica` and skip the ADR-0078 D5 immutability triggers. F0018 introduces the application role (with RLS) under which those triggers must hold. Owner: Architect + DevOps. Severity Low, operator-accepted at F0008 G4.
+2. **Durable refusal reason codes.** F0008 returns each temporal refusal as a 422 `code` and audits it as a `failed` authorization decision, but the AuthX decision record has no business-reason field. F0018 persists the reason per refusal together with routing refusals to review (ADR-0078 D8 note).
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0018.yaml`.
