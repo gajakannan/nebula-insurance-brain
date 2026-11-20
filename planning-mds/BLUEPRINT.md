@@ -554,11 +554,17 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 
 ## 6) Next Step Guidance
 
-Current position (2026-11-19): F0001 to F0008 are done and archived (F0008 second remediation run `2026-11-19-8cfcd0ff`, approved 2026-11-19). F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
+Current position (2026-11-20): F0001 to F0008 are done and archived; ADR-0078 was accepted on 2026-11-19 (F0008 second remediation run `2026-11-19-8cfcd0ff`, approved 2026-11-19). F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
 
-1. Now (2026-11-10 roadmap review): F0008 (bitemporal canonical facts) is done and archived (2026-11-18); F0011 (JSON Schema contract system) continues through `plan` → `plan-review` → `feature`, renumbering its migration after 0015; the F0064 retroactive closeout completed on 2026-11-14 (feature run `2026-11-14-3325803a`, archived). F0021 is pulled into Next as an independent UI lane for the first free Now slot.
+1. Now (2026-11-20 roadmap review, after F0008 closed): four lanes.
+   - **F0011** (JSON Schema contract system) continues through `plan` → `plan-review` → `feature`, numbering its migration after 0015.
+   - **F0009** (provenance + human-correction lineage) is dependency-ready and heads the temporal/commit path F0009 → F0010 → F0018.
+   - **F0012** (foundation ontology) is planned alongside F0011, and its feature run starts after F0011 completes.
+   - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.
+
+   Next is reordered by dependency readiness: F0010, F0013, F0014, F0017, F0015, F0016. Each lane runs `plan-review` before its feature action.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
-3. After F0011 completes, run the `plan` action for F0012 as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
+3. Run the `plan` action for F0012 alongside F0011 (its feature run waits for F0011), as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
 4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.
 
 
