@@ -294,3 +294,6 @@ Append-only history. Rows for `2026-11-17-1a4ae2f0` are the prior completion pro
 - **Residual (unchanged):** SEC-F8-02 → F0018; ADR-0078 acceptance (operator); F0011 renumbers after 0015.
 - **Evidence:** `planning-mds/operations/evidence/runs/2026-11-19-8cfcd0ff/pm-closeout.md`.
 
+## ADR Acceptance (2026-11-19)
+
+The operator accepted ADR-0078 on 2026-11-19, on the six-gate proof map in decision run `2026-11-19-12422004`, after run `2026-11-19-8cfcd0ff` merged as #58. ADR-0064 and ADR-0039 remain Proposed.

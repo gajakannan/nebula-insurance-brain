@@ -2,15 +2,16 @@
 
 ## Status
 
-- [x] Proposed
-- [ ] Accepted
+- [ ] Proposed
+- [x] Accepted
 - [ ] Superseded
 - [ ] Rejected
 
 **Date:** 2026-11-16
 **Owner:** Architect
-**Design review:** F0008 Phase B, plan run `2026-11-16-208a1193`. Approved by the operator token `approve-phase-b` on 2026-11-17, including the D8 end-revision clarification. The ADR stays Proposed.
-**Formal acceptance:** requires the PostgreSQL proofs listed under [Proof gates](#proof-gates-before-acceptance), run in the F0008 feature action. Plan approval alone is not runtime acceptance. Feature run `2026-11-17-1a4ae2f0` (2026-11-18) met all six proof gates ([architect review](../../operations/evidence/runs/2026-11-17-1a4ae2f0/architect-implementation-review.md)); acceptance remains an operator decision.
+**Accepted:** 2026-11-19 by the operator, on the six-gate proof map in [`adr-acceptance-proposal.md`](../../operations/evidence/runs/2026-11-19-12422004/adr-acceptance-proposal.md), after F0008 feature run `2026-11-19-8cfcd0ff` merged to `main` as `388aa17` (#58). ADR-0064 and ADR-0039 remain Proposed; this acceptance does not accept them.
+**Design review:** F0008 Phase B, plan run `2026-11-16-208a1193`. Approved by the operator token `approve-phase-b` on 2026-11-17, including the D8 end-revision clarification. Formal acceptance was recorded on 2026-11-19 (see **Accepted**).
+**Formal acceptance:** requires the PostgreSQL proofs listed under [Proof gates](#proof-gates-before-acceptance), run in the F0008 feature action. Plan approval alone is not runtime acceptance. Feature run `2026-11-17-1a4ae2f0` (2026-11-18) met all six proof gates ([architect review](../../operations/evidence/runs/2026-11-17-1a4ae2f0/architect-implementation-review.md)), and the remediation runs `2026-11-18-bce4909b` and `2026-11-19-8cfcd0ff` re-proved them. The operator accepted the ADR on 2026-11-19.
 **Refines:**
 - [ADR-0007](ADR-0007-full-bitemporality.md) and [ADR-0008](ADR-0008-database-level-temporal-integrity.md), both Accepted. This ADR keeps the two-range exclusion and settles the §109.2 open questions.
 - [ADR-0064](ADR-0064-time-interpretation-and-valid-time-precision.md) §5 and §7, Proposed. This ADR implements their F0008 storage share and adopts ADR-0064's recommended representation of an unknown end.
