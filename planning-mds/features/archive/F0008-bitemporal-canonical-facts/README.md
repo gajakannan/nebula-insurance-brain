@@ -29,7 +29,7 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - [Feature assembly plan](feature-assembly-plan.md): Phase B design (migration 0014, the v1 commit and read algorithms, the validation matrix)
 - [GETTING-STARTED](GETTING-STARTED.md): file map and gotchas
 - [Contract examples](contract-examples.json): 20 structural cases for `fact-temporal/v1`
-- [ADR-0078](../../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (Proposed) and [`fact-temporal-v1.schema.json`](../../../schemas/fact-temporal-v1.schema.json)
+- [ADR-0078](../../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (Accepted 2026-11-19) and [`fact-temporal-v1.schema.json`](../../../schemas/fact-temporal-v1.schema.json)
 
 The feature shard is `planning-mds/kg-source/features/F0008.yaml`.
 
