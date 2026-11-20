@@ -2,7 +2,7 @@
 
 **Status:** Planned
 **Phase:** v0.1B
-**Roadmap:** Next (pulled forward from Later in the 2026-11-10 roadmap review)
+**Roadmap:** Now (2026-11-20 roadmap review; pulled forward from Later on 2026-11-10)
 
 ## Overview
 
