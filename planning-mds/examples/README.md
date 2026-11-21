@@ -57,6 +57,23 @@ Documentation/development examples remain outside the frozen evaluation holdout.
 | Obligations versus observed facts | [EX-FUTURE-003](future-semantics.md#normative-obligation) | F0052, v0.3 |
 | Hypothetical assumptions versus canonical state | [EX-FUTURE-004](future-semantics.md#hypothetical-scenario) | F0053, v0.3 |
 
+## F0011 structural-contract carry-in
+
+The F0011 plan reuses these existing definitions and synthetic worked/
+boundary examples. Its runtime fixtures and cross-language results remain to be
+produced by the feature action; the examples do not establish new value semantics.
+
+| Contract boundary | Definition and worked/boundary examples | Owning story and existing contract |
+|-------------------|-----------------------------------------|-----------------------------------|
+| Nine information states; scoped absence versus explicit negative and missing endorsement | [Glossary](../domain/glossary.md#information-state), [EX-OWN-002/003](source-authority-and-information-state.md#ex-own-002--listed-endorsement-not-supplied), [F0007 worked cases](../features/archive/F0007-factslot-model/contract-examples.json) | [F0011-S0002](../features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md), [fact-answer/v1](../schemas/fact-answer-v1.schema.json); completeness/display stays F0014/F0023 |
+| Exact money and identifiers scoped by scheme/type | [Glossary](../domain/glossary.md#qualified-money), [EX-GL-001](neurosymbolic-gl/README.md) and [CASE-01/02/03/09/10](neurosymbolic-gl/cases.md), [F0007 positive/failure cases](../features/archive/F0007-factslot-model/contract-examples.json) | [F0011-S0003](../features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md), [fact-slot-key-v1 definitions](../schemas/fact-slot-key-v1.schema.json); predicate semantics/resolution stays F0013/F0017 |
+
+F0011 [synthetic contract cases](../features/F0011-json-schema-contract-system/contract-examples.json)
+use the [case inventory schema](../schemas/schema-conformance-cases-v1.schema.json).
+They distinguish structural shape from currency/basis/interval/normalization domain
+refusals. Only local planning-schema expectations are checked here; full runtime
+conformance and consumer proof remain required by [ADR-0079](../architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md).
+
 ## Governed retrieval coverage
 
 Definitions: [retrieval glossary](../domain/glossary.md#governed-evidence-retrieval). All EX-RET cases are synthetic, illustrative development examples; no runtime or measured quality claim. Owning features remain Planned and bind story IDs/reproduction evidence during their own plan actions.

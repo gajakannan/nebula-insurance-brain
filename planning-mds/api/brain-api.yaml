@@ -10,7 +10,7 @@ info:
     unchanged. F0002 runtime is approved in its archived feature evidence. F0004 proposes dual-version verified
     content reads and integrity/unavailable responses; those refinements received Phase B design approval on 2026-10-16;
     implementation proof remains required.'
-  version: 0.5.0
+  version: 0.6.0
   contact:
     name: Nebula Insurance Brain
 servers:
@@ -239,6 +239,14 @@ paths:
           $ref: '#/components/responses/NotFound'
         '503':
           $ref: '#/components/responses/AuthorizationUnavailable'
+        '500':
+          description: Internal normalized-carrier or response-schema invariant failed; the operation is refused before
+            an outer mutation commits. Public code contract_invariant_failed, with no schema pointer, payload value or protected
+            source detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
       x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
         constraints, bounded delegation and durable audit; no client-supplied trusted context.'
   /facts/{factSlotId}/commits:
@@ -317,6 +325,14 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
         '503':
           $ref: '#/components/responses/AuthorizationUnavailable'
+        '500':
+          description: Internal normalized-carrier or response-schema invariant failed; the operation is refused before
+            an outer mutation commits. Public code contract_invariant_failed, with no schema pointer, payload value or protected
+            source detail.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
       x-authorization-contract: 'F0002: trusted resource hydration, current complete grant slices, mandatory parent/classification/source/dependency
         constraints, bounded delegation and durable audit; no client-supplied trusted context.'
   /content/{artifactId}/files/{path}:
@@ -622,81 +638,9 @@ components:
           type: integer
           minimum: 0
     FactVersion:
-      type: object
-      additionalProperties: false
-      required:
-      - id
-      - fact_slot_id
-      - value
-      - valid
-      - recorded
-      - canonical_accepted_at
-      - commit_id
-      properties:
-        id:
-          type: string
-          format: uuid
-        fact_slot_id:
-          type: string
-          format: uuid
-        value:
-          type: object
-        valid:
-          $ref: '#/components/schemas/TimeRange'
-        recorded:
-          $ref: '#/components/schemas/TimeRange'
-        change_reason:
-          type:
-          - string
-          - 'null'
-          enum:
-          - superseded
-          - corrected
-          - retracted
-          - expired
-          - invalidated
-          - merged
-          - split
-          - null
-        evidence_refs:
-          type: array
-          items:
-            type: string
-            format: uuid
-        commit_id:
-          type: string
-          format: uuid
-        canonical_accepted_at:
-          type: string
-          format: date-time
-        review_decision_id:
-          description: F0008 (S0006 AC5), additive. Review linkage; a split remainder keeps its predecessor's.
-          type:
-          - string
-          - 'null'
-          format: uuid
-        source_received_at:
-          description: F0008 (S0003 AC6, S0006 AC5), additive. A remainder keeps its predecessor's value.
-          type:
-          - string
-          - 'null'
-          format: date-time
-        artifact_created_at:
-          description: F0008 (S0006 AC5), additive.
-          type:
-          - string
-          - 'null'
-          format: date-time
-        assertion_created_at:
-          description: F0008 (S0006 AC5), additive.
-          type:
-          - string
-          - 'null'
-          format: date-time
-        temporal:
-          description: F0008 (ADR-0078, Accepted). Present for temporal-v1 versions only; absent for legacy
-            pilot versions.
-          $ref: ../schemas/fact-temporal-v1.schema.json#/$defs/version_temporal
+      description: F0011 contract consolidation documents the shipped flat FactVersionOut timestamps; no runtime response
+        change. Phase B design approved by operator 2026-11-20; runtime implementation pending.
+      $ref: ../schemas/fact-version-read-v1.schema.json
     FactValidityUnknown:
       description: F0008 (ADR-0078, Accepted). Identity-v1 slots only. The coordinate lies inside an
         unknown-end window or before an attestation-floor start; no value is disclosed.
@@ -716,6 +660,19 @@ components:
           - string
           - 'null'
           format: date-time
+    FactAnswerV1:
+      $ref: ../schemas/fact-answer-v1.schema.json
+      description: Published source-owned F0007 state-plus-value carrier; no new route or runtime shape.
+    InformationStateV1:
+      $ref: ../schemas/information-state-v1.schema.json
+      description: F0011 publication alias of the shipped nine-state enum; access denial is not a state.
+    QualifiedMoneyV1:
+      $ref: ../schemas/qualified-money-v1.schema.json
+      description: F0011 publication alias of shipped exact decimal money with original currency and optional predicate
+        basis.
+    ScopedIdentifierV1:
+      $ref: ../schemas/scoped-identifier-v1.schema.json
+      description: F0011 publication alias of shipped scheme/type/value identifiers.
 x-authx-kernel-contract:
   schema: ../schemas/authx-kernel.schema.json
   authority: server-derived-only
@@ -724,3 +681,11 @@ x-authx-kernel-contract:
   policy: existing pilot roles; membership AND action AND actual resource restrictions AND delegation ceiling
   audit-failure: 503; no protected content or successful mutation
   denial: 404 for inaccessible resources; 401 for invalid credentials
+x-f0011-contract-system:
+  status: Phase B design approved by operator 2026-11-20; runtime not implemented
+  bundle: brain-contracts/v1
+  profile: nebula-json-schema/1
+  authority: planning-mds/schemas authored -> generated schemas/contracts/v1 -> installed brain_contracts resources
+  new_routes: false
+  compatibility: Preserve existing reader selection, payloads, refusal codes and current source READ order; no schema
+    validity grants authorization.

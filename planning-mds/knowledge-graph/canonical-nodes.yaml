@@ -424,6 +424,12 @@ adrs:
       - capability:temporal-fact-resolution
       - entity:canonical-fact-version
       - schema:fact-temporal-v1
+  - id: adr:0079
+    label: Offline Schema Bundle and Cross-Language Conformance
+    path: planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md
+    related_nodes:
+      - capability:cross-language-contract-validation
+      - capability:offline-contract-bundle
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -572,6 +578,24 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:cross-language-contract-validation
+    label: Cross-language structural contract conformance
+    notes: Planning design only, run 2026-11-20-ccb1bd39. Phase A and Phase B approved by operator on
+      2026-11-20; runtime proof and independent plan-review remain required. No production implementation
+      binding is claimed.
+    rationale:
+      - adr: adr:0079
+        section: Decision
+        summary: One authored structural schema source compiles into offline immutable resources and checked
+          language/metadata/API consumers without changing existing domain or authority boundaries.
+    related_nodes:
+      - adr:0013
+      - adr:0079
+      - schema:schema-bundle-manifest-v1
+      - schema:schema-conformance-cases-v1
+    source_docs:
+      - planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+      - planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
   - id: capability:current-resource-scope
     label: Current resource scope
     notes: 'Implemented in F0002 (run 2026-09-27-bb7c8d1d): complete grant slices (role + parent selectors
@@ -736,6 +760,24 @@ capabilities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:offline-contract-bundle
+    label: Offline versioned structural contract bundle
+    notes: Planning design only, run 2026-11-20-ccb1bd39. Phase A and Phase B approved by operator on
+      2026-11-20; runtime proof and independent plan-review remain required. No production implementation
+      binding is claimed.
+    rationale:
+      - adr: adr:0079
+        section: Decision
+        summary: One authored structural schema source compiles into offline immutable resources and checked
+          language/metadata/API consumers without changing existing domain or authority boundaries.
+    related_nodes:
+      - adr:0013
+      - adr:0079
+      - schema:schema-bundle-manifest-v1
+      - schema:schema-conformance-cases-v1
+    source_docs:
+      - planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+      - planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
   - id: capability:ontology-release-compatibility
     label: Ontology release compatibility analysis
     notes: Proposed contract and future tooling, not implemented. Historical reproducibility uses pinned
@@ -2313,6 +2355,16 @@ schemas:
       - capability:temporal-fact-resolution
       - entity:canonical-fact-version
       - schema:canonical-commit-request
+  - id: schema:fact-version-read-v1
+    path: planning-mds/schemas/fact-version-read-v1.schema.json
+    related_nodes:
+      - adr:0013
+      - adr:0079
+  - id: schema:information-state-v1
+    path: planning-mds/schemas/information-state-v1.schema.json
+    related_nodes:
+      - adr:0013
+      - adr:0079
   - id: schema:interpretation-output-manifest
     label: Interpretation Output Manifest
     path: planning-mds/schemas/interpretation-output-manifest.schema.json
@@ -2346,12 +2398,32 @@ schemas:
     related_nodes:
       - api:brain-api
       - capability:runtime-roots-and-toolchain
+  - id: schema:qualified-money-v1
+    path: planning-mds/schemas/qualified-money-v1.schema.json
+    related_nodes:
+      - adr:0013
+      - adr:0079
   - id: schema:review-decision
     label: ReviewDecision
     path: planning-mds/schemas/review-decision.schema.json
     related_nodes:
       - capability:evidence-review-round-trip
       - entity:review-decision
+  - id: schema:schema-bundle-manifest-v1
+    path: planning-mds/schemas/schema-bundle-manifest-v1.schema.json
+    related_nodes:
+      - adr:0013
+      - adr:0079
+  - id: schema:schema-conformance-cases-v1
+    path: planning-mds/schemas/schema-conformance-cases-v1.schema.json
+    related_nodes:
+      - adr:0013
+      - adr:0079
+  - id: schema:scoped-identifier-v1
+    path: planning-mds/schemas/scoped-identifier-v1.schema.json
+    related_nodes:
+      - adr:0013
+      - adr:0079
   - id: schema:semantic-example
     label: SemanticExample
     path: planning-mds/schemas/semantic-example.schema.json

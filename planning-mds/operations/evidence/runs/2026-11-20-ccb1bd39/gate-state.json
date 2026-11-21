@@ -1,0 +1,103 @@
+{
+  "action": "plan",
+  "contract_version": "2026-07-11",
+  "project_context": {
+    "action": "plan",
+    "manifest_hash": "dedbcb948fd89e3e2dce365347f322db03bcd479b5d5823095e2ef2773c3e089",
+    "product_root": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+    "scope": {
+      "plan_scope": "feature",
+      "target": "F0011"
+    }
+  },
+  "run_id": "2026-11-20-ccb1bd39",
+  "schema_version": 1,
+  "stages": {
+    "G1": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G2": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G3": {
+      "attestations": [
+        {
+          "acknowledged_preconditions": [],
+          "actor": "Codex / Product Manager recording operator approval",
+          "checkpoint_id": "approve-phase-a",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "9e6870fb05ed2aed8dcd41b13bd0fb88e5ce1cd559d9fc63efa0bb98c1b07ab3"
+            }
+          ],
+          "note": "Operator replied approve to the Phase A review request; canonical checkpoint approve-phase-a recorded with exact response.",
+          "role": "product-manager",
+          "timestamp": "2026-11-20T18:05:04-05:00"
+        }
+      ],
+      "completed_operations": [
+        "checkpoint:approve-phase-a",
+        "approve-plan-phase-a"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G4": {
+      "attestations": [],
+      "completed_operations": [
+        "kg-compile",
+        "kg-check-drift"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "G5": {
+      "attestations": [
+        {
+          "acknowledged_preconditions": [],
+          "actor": "Codex / Architect recording operator approval",
+          "checkpoint_id": "approve-phase-b",
+          "evidence": [
+            {
+              "path": "gate-decisions.md",
+              "sha256": "8b29079e679df58eeba9c9568ecb669cd5ccd99578394806a1650370107a98b9"
+            }
+          ],
+          "note": "Exact operator token approve-phase-b received after green ordered exit checks; all approval-status edits completed before attestation.",
+          "role": "architect",
+          "timestamp": "2026-11-20T20:26:41-05:00"
+        }
+      ],
+      "completed_operations": [
+        "validate-stories",
+        "generate-story-index",
+        "validate-trackers",
+        "kg-write-coverage",
+        "kg-check-drift-exit",
+        "kg-check-reproducible",
+        "validate-templates",
+        "checkpoint:approve-phase-b",
+        "kg-compile-post-approval",
+        "kg-write-coverage-post-approval",
+        "kg-check-reproducible-post-approval",
+        "kg-validate-post-approval",
+        "validate-trackers-post-approval",
+        "approve-plan"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    }
+  }
+}
