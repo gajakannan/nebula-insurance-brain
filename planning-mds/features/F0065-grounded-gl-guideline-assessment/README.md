@@ -8,6 +8,12 @@ A bounded neurosymbolic workflow interprets a policy into evidence-backed assert
 
 Read the [worked example](../../examples/neurosymbolic-gl/README.md), [PRD](PRD.md), [assessment contract](assessment-contract.md), [assembly plan](feature-assembly-plan.md), [getting started](GETTING-STARTED.md), and [status](STATUS.md). Proposed [ADR-0056](../../architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md) records the proof obligations.
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- The approved plan (2026-10-29) predates F0007/F0008. In the scheduled targeted plan rework (plan-review H1–H3), bind assessment inputs to the `fact-answer/v1` states, so that only `PRESENT` values evaluate and other states yield an explicit outcome, and to exact decimal-string money with currency and basis. Bind them also to ADR-0078 D9 reads for the time basis. This note does not change the approved PRD.
+
 ## Stories
 
 | ID | Title | Status |

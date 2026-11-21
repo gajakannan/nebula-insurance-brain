@@ -16,6 +16,13 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 
 - **Dependencies:** F0006, F0007, F0013 (previously F0001).
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- FactSlot subjects are `entity_identity`/`entity_knowledge_base` rows. A RELATIONSHIP slot's identity includes its object entity (ADR-0077 D1/D4), so merge design must say what happens to slots keyed on a merged entity without rewriting close-only versions.
+- Identifiers are `(scheme, identifier_type, value)` with server normalization, and equality includes the scheme (ADR-0077 D5). Display precedence and aliases over the four `sys` name predicates are F0017/F0023 (ADR-0077 consequences).
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0017.yaml`.

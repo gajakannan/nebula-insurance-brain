@@ -17,6 +17,12 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - **Dependencies:** F0020, F0021 (previously F0001).
 - Display ADR-0039 information states and an incomplete-package notice (the missing exclusion endorsement case is ADR-0039 formal acceptance).
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- Display the `fact-answer/v1` states (no value unless `PRESENT`), per-bound granularity, `UNKNOWN` ends and attestation dates (ADR-0077 D5, ADR-0078 D2–D4). Display precedence for name predicates is shared with F0017.
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0023.yaml`.

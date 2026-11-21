@@ -24,6 +24,12 @@ Reserved by the 2026-11-08 blueprint requirement-ownership amendment (operator d
 
 No conversation tree, branching, attachments, free-form retrieval, conversation graph, learning or promotion (F0037 to F0042). No agent actions or writes.
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- Answers read `fact-answer/v1`. Non-`PRESENT` states drive abstention or a scoped "not found / not stated" answer citing the absence scope (ADR-0077 D5). Time basis follows ADR-0078 D9, including validity-unknown.
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, stories and assembly plan are authored by this feature's Phase A/B plan actions. This folder reserves the identifier and carries requirements; no plan approval or runtime delivery is claimed. Authored shard: `planning-mds/kg-source/features/F0069.yaml`.

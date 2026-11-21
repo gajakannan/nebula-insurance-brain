@@ -31,6 +31,13 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - **Dependencies:** F0011 (previously F0001).
 - Carry master blueprint 67: concept labels are language-tagged label metadata on one canonical concept ID; translation never duplicates knowledge. ADR-0045 decision direction recorded 2026-11-08; F0012 is its proving feature.
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- Activate `temporal_kind` (`EVENT`/`ETERNAL`) through predicate contracts. F0008 writes `STATE` only, and the CHECK shapes are reserved without DDL (ADR-0078 D10).
+- Register real predicates in the `PredicateContractRegistry` (`<namespace>:<localName>@v<major>`) and map the legacy pilot predicates. Until then every non-`sys` namespace is `PREDICATE_UNREGISTERED` (ADR-0077 D2).
+
 ## Documents
 
 ### Commercial P&C teaching expansion (2026-10-08)
