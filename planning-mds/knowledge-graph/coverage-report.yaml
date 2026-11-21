@@ -1,11 +1,11 @@
 version: 0
 summary:
-  canonical_nodes: 227
-  features_mapped: 16
-  stories_mapped: 54
-  features_excluded: 53
+  canonical_nodes: 236
+  features_mapped: 17
+  stories_mapped: 60
+  features_excluded: 52
   features_uncovered: 0
-  code_bindings: 57
+  code_bindings: 59
   symbol_count: 2446
   bound_symbol_count: 2446
   decision_count: 24
@@ -20,6 +20,7 @@ coverage:
   - feature:F0006
   - feature:F0007
   - feature:F0008
+  - feature:F0011
   - feature:F0012
   - feature:F0013
   - feature:F0015
@@ -36,11 +37,6 @@ coverage:
       B.
   - id: feature:F0010
     path: planning-mds/features/F0010-change-and-retraction-semantics
-    reason: Planned feature reserved from master blueprint section 95; no PRD, stories,
-      or implementation to bind yet. The plan action removes this exclusion at Phase
-      B.
-  - id: feature:F0011
-    path: planning-mds/features/F0011-json-schema-contract-system
     reason: Planned feature reserved from master blueprint section 95; no PRD, stories,
       or implementation to bind yet. The plan action removes this exclusion at Phase
       B.
@@ -340,6 +336,12 @@ coverage:
   - story:F0008-S0005
   - story:F0008-S0006
   - story:F0008-S0007
+  - story:F0011-S0001
+  - story:F0011-S0002
+  - story:F0011-S0003
+  - story:F0011-S0004
+  - story:F0011-S0005
+  - story:F0011-S0006
   - story:F0064-S0001
   - story:F0064-S0002
   - story:F0064-S0003
@@ -911,6 +913,13 @@ freshness:
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
+    capability:cross-language-contract-validation:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+      - planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-11-21'
+      source_hash: 540ab051f1fc7bd6
     capability:current-resource-scope:
       source_paths:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
@@ -1022,6 +1031,13 @@ freshness:
       primary_owner: gajapathi.kannan@live.com
       primary_owner_pct: 100
       bus_factor_flag: true
+    capability:offline-contract-bundle:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+      - planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
+      source_count: 2
+      last_modified: '2026-11-21'
+      source_hash: 540ab051f1fc7bd6
     capability:ontology-release-compatibility:
       source_paths:
       - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
@@ -1238,8 +1254,8 @@ freshness:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
       - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
       source_count: 3
-      last_modified: '2026-11-20'
-      source_hash: 7d004f7ac86da74c
+      last_modified: '2026-11-21'
+      source_hash: c30c04d90b9a251b
       hotspot_rank: 38
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
@@ -1250,8 +1266,8 @@ freshness:
       - planning-mds/api/brain-api.yaml
       - planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-11-20'
-      source_hash: 5d0b930129368135
+      last_modified: '2026-11-21'
+      source_hash: c11db02a2269eeb8
       hotspot_rank: 39
       hotspot_score: 0.0
       primary_owner: gajapathi.kannan@live.com
@@ -1262,34 +1278,34 @@ freshness:
       - planning-mds/api/brain-api.yaml
       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-11-20'
-      source_hash: 0c9556b7eab30a02
+      last_modified: '2026-11-21'
+      source_hash: fd3486fa8865cdda
     endpoint:fact-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-11-20'
-      source_hash: dfa3b0d5e8846f3e
+      last_modified: '2026-11-21'
+      source_hash: 5edc3ab5fb0c0ee3
     endpoint:health:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-11-20'
-      source_hash: dfa3b0d5e8846f3e
+      last_modified: '2026-11-21'
+      source_hash: 5edc3ab5fb0c0ee3
     endpoint:review-decisions-submit:
       source_paths:
       - planning-mds/api/brain-api.yaml
       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-11-20'
-      source_hash: 0c9556b7eab30a02
+      last_modified: '2026-11-21'
+      source_hash: fd3486fa8865cdda
     endpoint:review-item-get:
       source_paths:
       - planning-mds/api/brain-api.yaml
       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
       source_count: 2
-      last_modified: '2026-11-20'
-      source_hash: 0c9556b7eab30a02
+      last_modified: '2026-11-21'
+      source_hash: fd3486fa8865cdda
     migration:f0004-content-contract:
       source_paths:
       - engine/migrations/versions/0008_f0004_content_contract.py
@@ -1877,6 +1893,12 @@ freshness:
       source_count: 1
       last_modified: '2026-11-20'
       source_hash: e8709c7ebbf83041
+    adr:0079:
+      source_paths:
+      - planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md
+      source_count: 1
+      last_modified: '2026-11-21'
+      source_hash: fbdb4dd37ca461f8
     schema:assertion-admission-result-v1:
       source_paths:
       - planning-mds/schemas/assertion-admission-result-v1.schema.json
@@ -1995,6 +2017,18 @@ freshness:
       source_count: 1
       last_modified: '2026-11-20'
       source_hash: 55749c33ea325105
+    schema:fact-version-read-v1:
+      source_paths:
+      - planning-mds/schemas/fact-version-read-v1.schema.json
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: f7e68767285be7a5
+    schema:information-state-v1:
+      source_paths:
+      - planning-mds/schemas/information-state-v1.schema.json
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: e1a7e301f6f112df
     schema:interpretation-output-manifest:
       source_paths:
       - planning-mds/schemas/interpretation-output-manifest.schema.json
@@ -2024,12 +2058,36 @@ freshness:
       source_count: 1
       last_modified: '2026-09-06'
       source_hash: 57442310e69b38bc
+    schema:qualified-money-v1:
+      source_paths:
+      - planning-mds/schemas/qualified-money-v1.schema.json
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: 389738d3011ec39c
     schema:review-decision:
       source_paths:
       - planning-mds/schemas/review-decision.schema.json
       source_count: 1
       last_modified: '2026-09-09'
       source_hash: 3a07e0d452fb4362
+    schema:schema-bundle-manifest-v1:
+      source_paths:
+      - planning-mds/schemas/schema-bundle-manifest-v1.schema.json
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: bffe5de9c06d84be
+    schema:schema-conformance-cases-v1:
+      source_paths:
+      - planning-mds/schemas/schema-conformance-cases-v1.schema.json
+      source_count: 1
+      last_modified: '2026-11-21'
+      source_hash: 66a9704dbffad3ef
+    schema:scoped-identifier-v1:
+      source_paths:
+      - planning-mds/schemas/scoped-identifier-v1.schema.json
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: 0e983cb6c3814dca
     schema:semantic-example:
       source_paths:
       - planning-mds/schemas/semantic-example.schema.json
@@ -2046,8 +2104,8 @@ freshness:
       source_paths:
       - planning-mds/api/brain-api.yaml
       source_count: 1
-      last_modified: '2026-11-20'
-      source_hash: dfa3b0d5e8846f3e
+      last_modified: '2026-11-21'
+      source_hash: 5edc3ab5fb0c0ee3
   mappings:
     feature:F0001:
       source_paths:
@@ -2200,6 +2258,28 @@ freshness:
       source_count: 15
       last_modified: '2026-11-20'
       source_hash: 1f8811359c973a20
+    feature:F0011:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
+      - planning-mds/features/F0011-json-schema-contract-system/GETTING-STARTED.md
+      - planning-mds/features/F0011-json-schema-contract-system/PRD.md
+      - planning-mds/features/F0011-json-schema-contract-system/README.md
+      - planning-mds/features/F0011-json-schema-contract-system/STATUS.md
+      - planning-mds/features/F0011-json-schema-contract-system/acceptance-criteria-checklist.md
+      - planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+      - planning-mds/features/F0011-json-schema-contract-system/contract-examples.json
+      - planning-mds/features/F0011-json-schema-contract-system/contract-inventory.yaml
+      - planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
+      - planning-mds/features/F0011-json-schema-contract-system/personas.md
+      - planning-mds/features/F0011-json-schema-contract-system/schema-validation-profile.yaml
+      source_count: 17
+      last_modified: '2026-11-21'
+      source_hash: df7636742d6bacff
     feature:F0012:
       source_paths:
       - planning-mds/features/F0012-foundation-ontology/README.md
@@ -2532,6 +2612,42 @@ freshness:
       source_count: 1
       last_modified: '2026-11-20'
       source_hash: 79e6a3411ed67afe
+    story:F0011-S0001:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: c1689638388415e4
+    story:F0011-S0002:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: 0559038f8264144f
+    story:F0011-S0003:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: 25ff5c26e0a77221
+    story:F0011-S0004:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: f7455c07029b7c49
+    story:F0011-S0005:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: f949391affdceef2
+    story:F0011-S0006:
+      source_paths:
+      - planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
+      source_count: 1
+      last_modified: '2026-11-20'
+      source_hash: d82ea1efff2a1f91
     story:F0064-S0001:
       source_paths:
       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
@@ -2686,6 +2802,17 @@ freshness:
       source_count: 5
       last_modified: '2026-10-01'
       source_hash: 590eec7310f6ab42
+    capability:cross-language-contract-validation:
+      source_paths:
+      - planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md
+      - planning-mds/schemas/fact-version-read-v1.schema.json
+      - planning-mds/schemas/information-state-v1.schema.json
+      - planning-mds/schemas/qualified-money-v1.schema.json
+      - planning-mds/schemas/schema-conformance-cases-v1.schema.json
+      - planning-mds/schemas/scoped-identifier-v1.schema.json
+      source_count: 6
+      last_modified: '2026-11-21'
+      source_hash: 12419723a137e7a5
     capability:current-resource-scope:
       source_paths:
       - engine/packages/brain-persistence/src/brain_persistence/authx.py
@@ -2800,6 +2927,13 @@ freshness:
       source_count: 8
       last_modified: '2026-10-29'
       source_hash: 1450c4523d5ecdcd
+    capability:offline-contract-bundle:
+      source_paths:
+      - planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md
+      - planning-mds/schemas/schema-bundle-manifest-v1.schema.json
+      source_count: 2
+      last_modified: '2026-11-21'
+      source_hash: 7bb2931843990b0c
     capability:ontology-release-compatibility:
       source_paths:
       - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md

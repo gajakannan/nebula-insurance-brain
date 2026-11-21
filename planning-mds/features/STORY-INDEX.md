@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 54
+**Total Stories:** 60
 
 ---
 
@@ -106,6 +106,19 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0011 — JSON Schema contract system
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0011-S0001](./F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md) | Resolve versioned offline contracts | High | MVP | Dana the Platform Engineer |
+| [F0011-S0002](./F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md) | Validate information state and scoped absence | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0003](./F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) | Validate qualified money and scoped identifiers | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0004](./F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md) | Prove cross-language contract conformance | High | MVP | Dana the Platform Engineer |
+| [F0011-S0005](./F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md) | Preserve existing consumer contracts | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0006](./F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md) | Verify reproducible contract delivery | High | MVP | Dana the Platform Engineer |
+
+---
+
 ## F0064 — Repository instructions and planning-check adoption
 
 | Story ID | Title | Priority | Phase | Persona |
@@ -135,7 +148,7 @@ Auto-generated index of all user stories across feature folders.
 | Phase | Count |
 |-------|-------|
 | Infrastructure | 11 |
-| MVP | 24 |
+| MVP | 30 |
 | MVP — v0.1A | 9 |
 | v0.1A | 4 |
 | v0.1B | 6 |
@@ -147,7 +160,7 @@ Auto-generated index of all user stories across feature folders.
 | Priority | Count |
 |----------|-------|
 | Critical | 30 |
-| High | 20 |
+| High | 26 |
 | Medium | 4 |
 
 ---

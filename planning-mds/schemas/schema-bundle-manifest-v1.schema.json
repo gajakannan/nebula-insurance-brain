@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/schema-bundle-manifest-v1.schema.json",
+  "title": "SchemaBundleManifestV1",
+  "description": "Design of the generated runtime bundle manifest. Tool output only: resource identities, deterministic digests and the pinned toolchain; no business/tenant records and no remote retrieval instructions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bundle",
+    "profile",
+    "resources",
+    "toolchain"
+  ],
+  "properties": {
+    "bundle": {
+      "const": "brain-contracts/v1"
+    },
+    "profile": {
+      "const": "nebula-json-schema/1"
+    },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*\\.schema\\.json$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "builder",
+        "python",
+        "jsonschema",
+        "referencing",
+        "pydantic",
+        "datamodel_code_generator",
+        "ajv",
+        "ajv_formats",
+        "jsonc_parser"
+      ],
+      "properties": {
+        "builder": {
+          "type": "string",
+          "minLength": 1
+        },
+        "python": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jsonschema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "referencing": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pydantic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "datamodel_code_generator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ajv": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ajv_formats": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jsonc_parser": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

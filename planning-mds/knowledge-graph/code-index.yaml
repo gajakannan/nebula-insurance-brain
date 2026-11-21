@@ -80,6 +80,16 @@ node_bindings:
         - engine/packages/brain-security/src/brain_security/verification.py
       infra:
         - config/authx-identity-profile.yaml
+  - id: capability:cross-language-contract-validation
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md
+      schemas:
+        - planning-mds/schemas/fact-version-read-v1.schema.json
+        - planning-mds/schemas/information-state-v1.schema.json
+        - planning-mds/schemas/qualified-money-v1.schema.json
+        - planning-mds/schemas/schema-conformance-cases-v1.schema.json
+        - planning-mds/schemas/scoped-identifier-v1.schema.json
   - id: capability:current-resource-scope
     paths:
       backend:
@@ -171,6 +181,12 @@ node_bindings:
       tests:
         - neuron/packages/brain-ingestion/tests/test_worker_guard.py
         - neuron/tests/support/fault_proxy.py
+  - id: capability:offline-contract-bundle
+    paths:
+      architecture:
+        - planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md
+      schemas:
+        - planning-mds/schemas/schema-bundle-manifest-v1.schema.json
   - id: capability:ontology-release-compatibility
     paths:
       architecture:

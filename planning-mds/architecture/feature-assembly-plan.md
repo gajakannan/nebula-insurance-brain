@@ -21,3 +21,5 @@ F0067 reads the resulting trace events later; it does not gate emission. F0068 a
 
 | F0007 | [FactSlot model](../features/archive/F0007-factslot-model/feature-assembly-plan.md) | Done / Archived 2026-11-10 — approved remediation run `2026-11-09-81798e61`; all seven findings resolved; additive0013; current raw regression/review evidence |
 | F0008 | [Bitemporal canonical facts](../features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md) | Done / archived 2026-11-19 (second remediation run `2026-11-19-8cfcd0ff`; earlier `2026-11-18-bce4909b`, `2026-11-17-1a4ae2f0`); migrations 0014–0015 implemented; ADR-0078 proof gates met, still Proposed |
+
+| F0011 | [JSON Schema contract system](../features/F0011-json-schema-contract-system/feature-assembly-plan.md) | Phase A and Phase B approved in plan run `2026-11-20-ccb1bd39`; six stories/41 ACs; offline shared bundle and source-gated cross-language conformance; no runtime yet |

@@ -12,10 +12,6 @@ coverage:
       path: planning-mds/features/F0010-change-and-retraction-semantics
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
         to bind yet. The plan action removes this exclusion at Phase B.
-    - id: feature:F0011
-      path: planning-mds/features/F0011-json-schema-contract-system
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0014
       path: planning-mds/features/F0014-document-profile-model
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -646,6 +642,70 @@ features:
       - schema:fact-answer-v1
       - schema:fact-temporal-v1
       - schema:problem-details
+  - status: planned
+    id: feature:F0011
+    path: planning-mds/features/F0011-json-schema-contract-system
+    affects:
+      - capability:bitemporal-canonical-commit
+      - capability:cross-language-contract-validation
+      - capability:offline-contract-bundle
+      - capability:typed-fact-answer
+      - capability:versioned-assertion-semantics
+      - capability:versioned-content-contracts
+      - endpoint:fact-commit
+      - endpoint:fact-get
+    depends_on:
+      - feature:F0001
+      - feature:F0006
+    governed_by:
+      - adr:0013
+      - adr:0039
+      - adr:0077
+      - adr:0078
+      - adr:0079
+    notes:
+      - ADR-0039 stays Proposed pending both schema fixture proof and later incomplete-package display;
+        ADR-0079 stays Proposed pending its runtime proofs and explicit acceptance.
+      - ADR-0079 selects one authored planning schema source -> generated root snapshot -> installed common
+        bundle, source-gated generated Pydantic, headless AJV and shared OpenAPI. No new route, grant,
+        DDL, deployable or extraction activation.
+      - Dependency evidence references for F0001/F0004/F0006/F0007/F0008 are in the run artifact trace;
+        downstream consumer audits remain pending in their own runs. Runtime bindings/proofs are feature-action
+        work.
+      - Existing FactVersion OpenAPI nested ranges were stale relative to shipped flat DTO fields; fact-version-read-v1
+        corrects documentation only. Internal review-decision is not the HTTP submission schema.
+      - Phase A approved by operator reply approve at G3; Phase B approved with exact token approve-phase-b
+        on 2026-11-20 in plan run 2026-11-20-ccb1bd39, after G4 and seven ordered G5 pre-approval exit
+        checks. G5 post-approval regeneration/publication is authoritative in the journal/manifest. Six
+        Not Started stories, 41 ACs; no runtime implementation. Independent plan-review is next.
+      - Portable-json/v1 has declared numeric/format/resource limits; existing readers select native-compat/v1
+        before parsing and retain acceptance/reason semantics. Never fallback after validation failure.
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:assertion-admission-result-v1
+      - schema:assertion-record-v2
+      - schema:canonical-commit-request
+      - schema:canonical-commit-response
+      - schema:content-artifact-manifest
+      - schema:content-artifact-manifest-read
+      - schema:content-artifact-manifest-v2
+      - schema:content-records-v2
+      - schema:document-date-record
+      - schema:fact-answer-v1
+      - schema:fact-slot-key-v1
+      - schema:fact-slot-resolution-result-v1
+      - schema:fact-temporal-v1
+      - schema:fact-version-read-v1
+      - schema:information-state-v1
+      - schema:interpretation-output-manifest
+      - schema:interpretation-result
+      - schema:interpretation-result-v2
+      - schema:problem-details
+      - schema:qualified-money-v1
+      - schema:schema-bundle-manifest-v1
+      - schema:schema-conformance-cases-v1
+      - schema:scoped-identifier-v1
   - status: planned
     id: feature:F0012
     path: planning-mds/features/F0012-foundation-ontology
@@ -1485,6 +1545,88 @@ stories:
       - api:brain-api
     uses_schema:
       - schema:canonical-commit-request
+  - id: story:F0011-S0001
+    feature: feature:F0011
+    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
+    affects:
+      - capability:offline-contract-bundle
+    governed_by:
+      - adr:0013
+      - adr:0079
+    uses_schema:
+      - schema:schema-bundle-manifest-v1
+  - id: story:F0011-S0002
+    feature: feature:F0011
+    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
+    affects:
+      - capability:typed-fact-answer
+    governed_by:
+      - adr:0013
+      - adr:0039
+      - adr:0079
+    uses_schema:
+      - schema:fact-answer-v1
+      - schema:information-state-v1
+      - schema:schema-conformance-cases-v1
+  - id: story:F0011-S0003
+    feature: feature:F0011
+    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
+    affects:
+      - capability:typed-fact-answer
+    governed_by:
+      - adr:0013
+      - adr:0039
+      - adr:0079
+    uses_schema:
+      - schema:fact-slot-key-v1
+      - schema:qualified-money-v1
+      - schema:schema-conformance-cases-v1
+      - schema:scoped-identifier-v1
+  - id: story:F0011-S0004
+    feature: feature:F0011
+    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
+    affects:
+      - capability:cross-language-contract-validation
+    governed_by:
+      - adr:0013
+      - adr:0079
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:fact-answer-v1
+      - schema:qualified-money-v1
+      - schema:schema-bundle-manifest-v1
+      - schema:schema-conformance-cases-v1
+      - schema:scoped-identifier-v1
+  - id: story:F0011-S0005
+    feature: feature:F0011
+    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
+    affects:
+      - capability:typed-fact-answer
+    governed_by:
+      - adr:0013
+      - adr:0079
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:canonical-commit-request
+      - schema:canonical-commit-response
+      - schema:fact-answer-v1
+      - schema:fact-slot-key-v1
+      - schema:fact-slot-resolution-result-v1
+      - schema:fact-temporal-v1
+      - schema:fact-version-read-v1
+  - id: story:F0011-S0006
+    feature: feature:F0011
+    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
+    affects:
+      - capability:offline-contract-bundle
+    governed_by:
+      - adr:0013
+      - adr:0079
+    uses_schema:
+      - schema:schema-bundle-manifest-v1
+      - schema:schema-conformance-cases-v1
   - id: story:F0064-S0001
     feature: feature:F0064
     path: planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md

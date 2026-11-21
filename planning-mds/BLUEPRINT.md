@@ -260,7 +260,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0008 — Bitemporal canonical facts](features/archive/F0008-bitemporal-canonical-facts/README.md) - Done / Archived (implemented in feature run `2026-11-17-1a4ae2f0`, remediated in `2026-11-18-bce4909b` and `2026-11-19-8cfcd0ff`; planned in plan run `2026-11-16-208a1193`; seven stories [S0001](features/archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md)–[S0007](features/archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md), 46 ACs; Phase B approved 2026-11-17)
 - [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
-- [F0011 — JSON Schema contract system](features/F0011-json-schema-contract-system/README.md) - Planned
+- [F0011 — JSON Schema contract system](features/F0011-json-schema-contract-system/README.md) - Planned (Phase A drafted in plan run `2026-11-20-ccb1bd39`; six Not Started stories, 41 ACs; Phase A and Phase B approved)
 - [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned
 - [F0013 — Insurance Core GL ontology](features/F0013-insurance-core-gl-ontology/README.md) - Planned
 - [F0014 — Document Profile model](features/F0014-document-profile-model/README.md) - Planned
@@ -533,6 +533,28 @@ Plan run `2026-11-16-208a1193`. The [assembly plan](features/archive/F0008-bitem
 No new route, grant, table or UI is added. Migration 0014 is additive with a guarded downgrade. ADR-0064 and ADR-0039 remain Proposed.
 
 Feature run `2026-11-17-1a4ae2f0` implemented the design and was approved by the operator at G4 on 2026-11-18. It delivers migration 0014, `brain_domain.temporal`, `brain_temporal` bounds/attestation/commit/reader and the additive `/facts` changes. All 46 ACs and the six ADR-0078 proof gates pass on PostgreSQL 18 (1081 engine tests; 98.0% changed-line coverage). The operator accepted ADR-0078 on 2026-11-19 (decision run `2026-11-19-12422004`). SEC-F8-02 (the application connects as a superuser) and refusal reason persistence move to F0018. Independent review `2026-11-18-d34a095e` returned NOT DONE. Remediation run `2026-11-18-bce4909b` (approved 2026-11-19) added the commit-response temporal metadata, the legacy read shape and migration 0015 (same-slot lineage), amended S0004 AC1 and S0007 AC6, and recorded the F0018 handoffs. A second review, `2026-11-19-b21ec2de`, found that the new commit response could return a predecessor's attestation dates without READ on their documents (SEC-F8-NEW-01, High). Second remediation run `2026-11-19-8cfcd0ff` (approved 2026-11-19) refuses the whole commit with the non-disclosing 404 in that case. Evidence: [PM closeout](operations/evidence/runs/2026-11-19-8cfcd0ff/pm-closeout.md).
+
+---
+
+### 4.16 F0011 JSON Schema contract system (Phase B approved 2026-11-20)
+
+Plan run `2026-11-20-ccb1bd39`: Phase A approved by operator response `approve`;
+six stories and 41 ACs, all Not Started. The [assembly plan](features/F0011-json-schema-contract-system/feature-assembly-plan.md)
+and proposed [ADR-0079](architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md)
+define one authored JSON Schema 2020-12 source, a generated root runtime snapshot
+and installed offline bundle, source-gated generated Pydantic, headless AJV and
+shared metadata/OpenAPI. The inventory has 21 payload resources; additive value
+aliases reference the shipped definitions. Existing readers retain explicit
+native compatibility and current authority/domain guard ordering. A fact-read
+schema reconciles the stale nested OpenAPI description to the already shipped
+flat timestamps. No runtime behavior is changed by this planning update.
+
+No new registry table, migration, route, grant, deployable, screen or reparse is
+required. ADR-0079 and ADR-0039 remain Proposed pending their stated proofs.
+G4 ontology synchronization and all ordered G5 pre-approval exit checks passed.
+The operator approved Phase B with `approve-phase-b` on 2026-11-20; G5 performs
+post-approval regeneration/validation and publishes the manifest last. Independent
+plan-review is next, followed by the feature action. Existing C4 topology is unchanged.
 
 ---
 
