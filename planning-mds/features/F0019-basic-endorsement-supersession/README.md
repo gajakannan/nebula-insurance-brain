@@ -16,6 +16,13 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 
 - **Dependencies:** F0010, F0018 (previously F0001).
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- Endorsement supersession uses the ADR-0078 D5 algorithm: close the predecessor's recorded interval and insert zero to two remainders with `split_of_version_id`. It uses the `TEMPLATE_FIELD` start basis (ADR-0078 consequences).
+- Removing a MULTI member (for example, one additional insured) closes only that member slot (ADR-0077 D4, master blueprint section 109.1 acceptance).
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0019.yaml`.

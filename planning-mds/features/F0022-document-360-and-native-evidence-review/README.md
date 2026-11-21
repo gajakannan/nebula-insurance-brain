@@ -21,6 +21,13 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - **Dependencies:** F0009, F0016, F0018, F0021 (previously F0001).
 - ADR-0052 decision recorded 2026-11-08 - the reviewer is the session principal, review is adjudication not approval, grants are checked at batch assembly and submission, and a stale task fails closed. Show reviewers which ADR-0038 source-authority rule applied.
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- The human date selections made here unlock attestation (ADR-0078 D4). Without a selected date, an unknown-start commit is refused with `start_unattested`.
+- The existing Review Panel proof (`experience/src/review-panel/`, `engine/packages/brain-review/`, `routes/reviews.py`, from F0001-S0004) is the starting point. F0022 extends it rather than replacing it.
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0022.yaml`.

@@ -20,6 +20,13 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - Carry 110.4 model routing - v0.1 inference is local only (ADR-0055); a timeout never falls back to another provider. Carry 114.2 - record stage latency, pages/blocks, tokens, retries and cost per run without sensitive text.
 - Carry 107.4 - each run records the scope it interpreted so NOT_PROCESSED and NOT_FOUND are scoped. Carry the 88 embedding-abstraction hook as a port with no adapter (F0033 implements it).
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- Produce absence scopes (artifact, profile release, pages/blocks) for `NOT_FOUND`/`NOT_STATED` answers (ADR-0077 D5).
+- Send time-mention start bases `MENTION_A/B/C` and document time context (ADR-0078). `MENTION_C` starts cannot close a predecessor (D8).
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0016.yaml`.

@@ -222,17 +222,6 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0003-S0002](features/archive/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md) - Done
   - [F0003-S0003](features/archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) - Done
   - [F0003-S0004](features/archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) - Done
-
-**Repository tooling (Completed)**
-
-- [F0064 — Repository instructions and planning-check adoption](features/archive/F0064-repository-instructions-and-planning-check-adoption/README.md) - Done / Archived 2026-11-14 (tooling delivered 2026-09-07; plan run `2026-11-10-819c4124`; feature run `2026-11-14-3325803a`)
-  - [F0064-S0001](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) — Done
-  - [F0064-S0002](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) — Done
-  - [F0064-S0003](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Done
-  - [F0064-S0004](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Done
-
-**v0.1A (Next)**
-
 - [F0004 — Content artifact model](features/archive/F0004-content-artifact-model/README.md) - Done (four stories; feature run 2026-10-17-8a6cc79f; G4 approved 2026-10-21)
   - [F0004-S0001](features/archive/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md) - Done
   - [F0004-S0002](features/archive/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) - Done
@@ -258,9 +247,20 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0007-S0005](features/archive/F0007-factslot-model/F0007-S0005-define-name-factslots.md) — Done
   - [F0007-S0006](features/archive/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) — Done
 - [F0008 — Bitemporal canonical facts](features/archive/F0008-bitemporal-canonical-facts/README.md) - Done / Archived (implemented in feature run `2026-11-17-1a4ae2f0`, remediated in `2026-11-18-bce4909b` and `2026-11-19-8cfcd0ff`; planned in plan run `2026-11-16-208a1193`; seven stories [S0001](features/archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md)–[S0007](features/archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md), 46 ACs; Phase B approved 2026-11-17)
+
+**Repository tooling (Completed)**
+
+- [F0064 — Repository instructions and planning-check adoption](features/archive/F0064-repository-instructions-and-planning-check-adoption/README.md) - Done / Archived 2026-11-14 (tooling delivered 2026-09-07; plan run `2026-11-10-819c4124`; feature run `2026-11-14-3325803a`)
+  - [F0064-S0001](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) — Done
+  - [F0064-S0002](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) — Done
+  - [F0064-S0003](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Done
+  - [F0064-S0004](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Done
+
+**v0.1A (remaining — Now: F0009, F0011, F0012; Next: F0010, F0013–F0017)**
+
 - [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
-- [F0011 — JSON Schema contract system](features/F0011-json-schema-contract-system/README.md) - Planned (Phase A drafted in plan run `2026-11-20-ccb1bd39`; six Not Started stories, 41 ACs; Phase A and Phase B approved)
+- [F0011 — JSON Schema contract system](features/F0011-json-schema-contract-system/README.md) - Planned (plan run `2026-11-20-ccb1bd39`: Phase A and Phase B approved 2026-11-20; six Not Started stories, 41 ACs; independent plan-review next; ADR-0079 Proposed)
 - [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned
 - [F0013 — Insurance Core GL ontology](features/F0013-insurance-core-gl-ontology/README.md) - Planned
 - [F0014 — Document Profile model](features/F0014-document-profile-model/README.md) - Planned
@@ -365,11 +365,11 @@ Ontology prerequisite amendment: read the [planning handoff](architecture/ontolo
 
 ### 4.1 Service Boundaries
 
-Eight architectural planes (section 4) implemented as a modular monolith across `engine/` (semantic kernel, commit services, governance, review, search, security), `neuron/` (interpretation, conversation, learning, agent tools), and `experience/` (native semantic UX, including the Review Panel), with Docling, Docling-Graph, PostgreSQL extensions, and Temporal as engines around the semantic core (ADR-0001 as amended by ADR-0057, sections 100 and 125). The deployable topology and dependency matrix are a P0 pre-build requirement (section 106.2).
+Eight architectural planes (section 4) implemented as a modular monolith across `engine/` (semantic kernel, commit services, governance, review, search, security), `neuron/` (interpretation, conversation, learning, agent tools), and `experience/` (native semantic UX, including the Review Panel), with Docling, the direct-baseline vLLM client, PostgreSQL extensions, and (from v0.3) Temporal as engines around the semantic core (ADR-0001 as amended by ADR-0057, sections 100 and 125; Docling-Graph was rejected with ADR-0060 on 2026-11-08, section 126). Engine packages as built through F0008 are listed in master blueprint section 77; the container topology is unchanged (`architecture/c4-container.md`). The deployable topology and dependency matrix are a P0 pre-build requirement (section 106.2).
 
 ### 4.2 Data Model
 
-PostgreSQL is authoritative (ADR-0002). Kernel entities: Tenant, Workspace, KnowledgeBase, Principal, SourceDocument, DocumentVersion, ContentArtifact, ContentBlock, DocumentProfile, ExtractionProfile, SemanticInterpretationRun, Assertion, Entity, FactSlot, CanonicalFactVersion, CanonicalRelationshipVersion, Derivation, ReviewItem, ReviewDecision, LearningCandidate, Conversation, AuditEvent, OutboxEvent (definitions in `domain/glossary.md`). Core tables are listed in section 78 and mirrored in `architecture/data-model.md`; AGE labels in section 79; content artifact layout in sections 80 and 81. Every authoritative row carries `tenant_id`, `knowledge_base_id`, and audit fields (`created_at`, `recorded_at`, actor). FactSlot identity (section 13), bitemporal fact versions (section 14), and change semantics (section 16) define canonical truth.
+PostgreSQL is authoritative (ADR-0002). Kernel entities: Tenant, Workspace, KnowledgeBase, Principal, SourceDocument, DocumentVersion, ContentArtifact, ContentBlock, DocumentProfile, ExtractionProfile, SemanticInterpretationRun, Assertion, Entity, FactSlot, CanonicalFactVersion, CanonicalRelationshipVersion (a logical name: RELATIONSHIP FactSlot versions live in `canonical_fact_version`, ADR-0078), Derivation, ReviewItem, ReviewDecision, LearningCandidate, Conversation, AuditEvent, OutboxEvent (definitions in `domain/glossary.md`). Core tables are listed in section 78 and mirrored in `architecture/data-model.md`; AGE labels in section 79; content artifact layout in sections 80 and 81. Every authoritative row carries `tenant_id`, `knowledge_base_id`, and audit fields (`created_at`, `recorded_at`, actor). FactSlot identity (section 13; ADR-0077), bitemporal fact versions (section 14; ADR-0078), and change semantics (section 16) define canonical truth. Deployed schema (migrations 0001–0015) is mapped table by table in master blueprint section 78.
 
 ### 4.3 Workflow Rules
 
@@ -377,7 +377,7 @@ Ingestion and interpretation (section 86), the human review round trip (section 
 
 ### 4.4 Authorization Model
 
-Verified `(issuer, subject)` mapped to a stable internal principal; typed resource and action policies evaluated through a native Casbin adapter; tenant and knowledge-base membership resolved separately from resource scope; enforcement at API, commit, search, vector, graph, evidence, ontology, conversation context, MCP, and execution gate; user, service, and agent principals distinct with bounded delegation; every authorization decision audited with policy version (sections 66, 118 to 120; proposed ADR-0049 to ADR-0053).
+Verified `(issuer, subject)` mapped to a stable internal principal; typed resource and action policies evaluated through a native Casbin adapter; tenant and knowledge-base membership resolved separately from resource scope; enforcement at API, commit, search, vector, graph, evidence, ontology, conversation context, MCP, and execution gate; user, service, and agent principals distinct with bounded delegation; every authorization decision audited with policy version (sections 66, 118 to 120; ADR-0049/ADR-0050 accepted for the F0001-S0006 boundary and ADR-0061/ADR-0062 for the F0002 scope; ADR-0051 to ADR-0053 Proposed).
 
 ### 4.5 API Contracts
 
@@ -390,7 +390,7 @@ Performance, availability, scalability, and security targets are proposed gates 
 ### 4.7 Architecture Artifacts
 
 - `architecture/master-blueprint.md` — full baseline
-- `architecture/decisions/` — ADR-0001 to ADR-0078 (Accepted architecture and Proposed contracts; ADR-0060 (Docling-Graph) was Rejected on 2026-11-08; ADR-0038/0039/0042/0043/0051/0052/0053 have operator decisions recorded (2026-11-08) and stay Proposed until proven; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8; ADR-0071 and ADR-0072 propose the semantic execution trace contract and the read-only Graph Observatory boundary, see `architecture/graph-observatory-design.md`; ADR-0077 is Accepted (F0007); ADR-0078 (the F0008 bitemporal version contract) is Accepted (2026-11-19), section 4.15)
+- `architecture/decisions/` — ADR-0001 to ADR-0079 (master blueprint section 76 carries the reconciled status register; Accepted architecture and Proposed contracts; ADR-0060 (Docling-Graph) was Rejected on 2026-11-08; ADR-0038/0039/0042/0043/0051/0052/0053 have operator decisions recorded (2026-11-08) and stay Proposed until proven; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8; ADR-0071 and ADR-0072 propose the semantic execution trace contract and the read-only Graph Observatory boundary, see `architecture/graph-observatory-design.md`; ADR-0077 is Accepted (F0007); ADR-0078 (the F0008 bitemporal version contract) is Accepted (2026-11-19), section 4.15; ADR-0073 (F0004) and ADR-0075 (F0006) remain Proposed after their features closed, pending the proof gates named in each record; ADR-0079 (F0011 offline schema bundle) is Proposed, section 4.16)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
@@ -406,6 +406,20 @@ Section 117.1 tracks the decisions for implementation and production acceptance:
 **Time-interpretation dependency for v0.1 (2026-09-25, validate finding P-1):** F0019 and F0025 take endorsement valid time from the template route's typed effective-date field. F0016 stores time mentions and document time context alongside. Resolution from time mentions (ADR-0064, Proposed) replaces the template field only after ADR-0064 passes its proof gates, which F0026 qualifies. v0.1 acceptance does not depend on a Proposed ADR.
 
 **Document-date candidate producer (opened 2026-10-16, F0004 plan-review M-1).** F0004 delivers the append-only document-date service but no runtime caller. No feature yet owns creating CONTENT or SOURCE_METADATA date candidates. F0022 owns the verified human selection decision, which in v0.1 is the only way to select or clear a date. Operator decision (2026-10-23, F0005 plan G1): F0016 owns producing both CONTENT and SOURCE_METADATA candidates; F0005 produces none. Until F0016 delivers, consumers see every document as undated, and F0019/F0025 continue to use the template route's typed effective-date field.
+
+**Retraction versus the information-state guard (opened 2026-11-21, drift review; owner F0010 G1).** The ADR-0078 D8 guard enforces the F0008 G1 operator rule that a `PRESENT` answer closes only to `PRESENT` or `EXPLICIT_NEGATIVE`. It is applied regardless of change reason (`brain_temporal/commit.py`, `_guard`). That protects against a silent later document erasing a known value. It also refuses a reviewed retraction of an erroneous extraction to `NOT_STATED`/`NOT_FOUND`, which section 16 (`RETRACTED_AS_ERRONEOUS_EXTRACTION`) requires.
+
+- **Recommendation (option A):** keep the guard for `SUPERSEDED`. Permit `PRESENT` → `NOT_STATED`/`NOT_FOUND` only for `CORRECTED`/`RETRACTED` commits that carry a review decision (ADR-0044 reviewer authority) and replace the same valid range, so the change is recorded-time only.
+- **Rejected alternatives:** closing with no successor, which would make reads return a false `NOT_PROCESSED` and breaks the ADR-0078 D5 insert; and using `EXPLICIT_NEGATIVE`, which fabricates a source statement.
+- **Next step:** F0010 decides at plan G1 and records the result as an ADR-0078 D8 amendment, with a reason-aware guard and tests for each reason × state pair. No current caller commits retractions, so nothing is blocked before F0010.
+
+**F0065 assessment inputs versus the shipped F0007/F0008 contracts (opened 2026-11-21, drift review; owner F0065 targeted plan rework).** F0065's approved plan (2026-10-29) predates ADR-0077/0078. Its [assessment contract](features/F0065-grounded-gl-guideline-assessment/assessment-contract.md) is conceptually compatible (missing is `UNKNOWN`, explicit negative is `NOT_APPLICABLE`) but needs three bindings:
+
+1. Map the `fact-answer/v1` states: `PRESENT` is compared, `EXPLICIT_NEGATIVE` gives `NOT_APPLICABLE`, and every other state gives `UNKNOWN` with the state as reason. ADR-0078 D9 validity-unknown reads also give `UNKNOWN`.
+2. Take valid-time precision from the ADR-0078 D2 per-bound granularity columns, not from the Proposed ADR-0064.
+3. Replace the assumption that a grade-C mention carries no valid time. Under ADR-0078 a `MENTION_C` basis has bounds but cannot close a predecessor, so treat it as `valid_time_imprecise`.
+
+Fold these into the already scheduled targeted rework for plan-review H1–H3 (with F0018/F0020 Phase B). One `plan` run with `FEATURE_MODE=existing` re-approves the contract and S0002/S0004.
 
 **Account identity and account scope (opened 2026-10-09, direction set 2026-10-10).** The Cedar Bridge review asked whether Account is a party or a grouping of organizations, what an account-scoped grant reaches, what roots Entity 360, and how account identity relates to organization identity. The operator answered from commercial P&C practice, recorded in [ADR-0070](architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed):
 
@@ -555,6 +569,16 @@ G4 ontology synchronization and all ordered G5 pre-approval exit checks passed.
 The operator approved Phase B with `approve-phase-b` on 2026-11-20; G5 performs
 post-approval regeneration/validation and publishes the manifest last. Independent
 plan-review is next, followed by the feature action. Existing C4 topology is unchanged.
+
+### 4.17 Delivery reconciliation (2026-11-21)
+
+A drift review compared the planning artifacts with the code delivered through F0008 (migrations 0001–0015). It reconciled the master blueprint (sections 13, 14, 76, 77, 78, 95.1, 106.3, 109, 116.1), `architecture/data-model.md` and `architecture/c4-container.md`. Three features had no Phase B summary here:
+
+- **F0003** (feature run `2026-10-03-57d14a51`): recorded the persistence ownership and phase boundaries over migrations 0001–0007. No schema change.
+- **F0004** ([assembly plan](features/archive/F0004-content-artifact-model/feature-assembly-plan.md)): migration 0008 adds version-aware artifact metadata, normalized block/table/cell indexes with `text_origin`, artifact state events, repair records, and append-only document-date candidates/selections. ADR-0073 remains Proposed.
+- **F0005** ([compatibility evidence](features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md)): closed on its rejection branch. Fenced document jobs (migration 0004, reasons in 0009–0010) run under the accepted ADR-0074 controls. The direct-baseline client is the v0.1 extraction path.
+
+Every recipient of the ADR-0077/ADR-0078 handoffs (F0009, F0010, F0012, F0013, F0016–F0020, F0022, F0023, F0025, F0026, F0065, F0069) carries a "Shipped contract carry-in" note in its README. F0011's plan already binds them. Their Phase B binds to the as-built contract, not to the original section 13/14 sketch.
 
 ---
 

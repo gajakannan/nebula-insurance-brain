@@ -39,4 +39,8 @@ F0005 replaces the specialist coordination inside `neuron/` with Docling-Graph, 
 F0050 later adds Temporal for durable business workflows and invokes this same bounded document operation from an activity. Docling-Graph does not supply Temporal's timers, human waits, or cross-process recovery.
 
 
-The 2026-09-20 candidate adds the explicit `brain_ingestion.worker_cli` composition, engine-owned principal checks and a transactional assertion/review importer, plus shared `brain-contracts` DTOs. It runs in the existing modular monolith and introduces no service. The implementation is opt-in and has local contract evidence; the diagram continues to describe the accepted baseline until ADR-0060 passes its live and operational gates.
+The 2026-09-20 candidate added the explicit `brain_ingestion.worker_cli` composition, engine-owned principal checks, a transactional assertion/review importer and shared `brain-contracts` DTOs. It runs in the existing modular monolith and introduces no service. The importer, principal checks, fenced document jobs (migration 0004) and DTOs survived the rejection. The Docling-Graph adapter did not.
+
+## Current topology (reconciled 2026-11-21)
+
+The diagram above is the current topology through F0008. F0002–F0008 added schema, packages and guards but no container. The worker runs fenced document jobs with Docling conversion in a supervised, resource-limited, network-isolated child process (ADR-0074). The neuron packages call vLLM directly through the direct-baseline client (ADR-0055). Changes to this diagram are next expected from F0021 (OIDC session in the semantic shell, ADR-0051) and, in v0.3, F0050 (Temporal).

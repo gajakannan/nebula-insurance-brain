@@ -16,6 +16,12 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 
 - **Dependencies:** F0019, F0065 (previously F0001, F0065).
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- Prove fact answers at distinct valid/recorded coordinates over the ADR-0078 D5 split remainders and D9 reads, including `UNKNOWN` end windows (EX-SEM-004, EX-PC-014). Use the `TEMPLATE_FIELD` start basis, as BLUEPRINT section 4.8 also notes.
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0025.yaml`.

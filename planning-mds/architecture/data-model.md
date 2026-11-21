@@ -17,7 +17,16 @@ Proposed [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieva
 
 Reuse existing identity, scope, temporal, content and evidence types. Schema naming, storage placement, retention and projection checkpoints are assigned Phase B decisions in the design's D5–D9 map; the handoff's illustrative objects are not new deployed tables. Worked/boundary examples: [EX-RET-001–006](../examples/governed-evidence-retrieval.md).
 
-## Core PostgreSQL Tables (master blueprint section 78)
+## Deployed schema index (reconciled 2026-11-21)
+
+Migrations 0001–0015 are deployed. The [master blueprint section 78](master-blueprint.md#78-core-postgresql-tables) table maps every deployed table to its migration, feature and ADR. Feature sections below hold the exact columns. Deployed tables that have no feature section here, and so are documented only in their feature's archived assembly plan, are:
+
+- **F0001** (0001–0003): `source_document`, `document_version`, `content_artifact`, `semantic_interpretation_run`, `assertion`, `assertion_evidence`, `principal`, `membership`, `audit_event`, `review_item`, `review_batch`, `review_decision`, `fact_slot`, `canonical_fact_version`, `canonical_fact_change`, `outbox_event`.
+- **F0005 document jobs** (0004, 0009–0010; ADR-0074): `document_job`, `document_job_event`, `document_job_outbox`, `document_artifact_lease`.
+- **F0002 AuthX substrate** (0005–0007): `policy_release`, `policy_release_pointer`, `authentication_event` and the commit ownership registry `canonical_commit`, beside the structural tables listed in the F0002 section below.
+- **F0004 content contract** (0008): `content_artifact_state_event` and `content_repair_record`, beside the block/table/cell/date tables in the F0004 section below.
+
+## Core PostgreSQL Tables (master blueprint section 78, target inventory)
 
 ```text
 tenant
@@ -77,7 +86,7 @@ entity_alias                    search projection over name facts (ADR-0066)
 fact_slot
 fact_slot_qualifier
 canonical_fact_version
-canonical_relationship_version
+canonical_relationship_version  # not created: RELATIONSHIP slots version in canonical_fact_version (ADR-0078 D6)
 canonical_fact_evidence
 canonical_fact_change
 
@@ -279,15 +288,21 @@ Docling-Graph does not change source, content, and interpretation identity. F000
 
 The current manifest and InterpretationResult schemas reject undeclared fields. Version additions with compatible readers and retain old bundles; do not relabel F0001 files as new-pipeline outputs. Original graph IDs remain run-local. Nebula entity resolution, evidence bindings, and commit services remain authoritative; no graph export becomes a canonical database import.
 
-## F0002 proposed structural ownership and AuthX substrate
+## F0002 structural ownership and AuthX substrate (implemented by migrations 0005–0007, 2026-09-28)
 
 The [feature ERD](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md#feature-erd--proposed-ownership-and-security-substrate) and [assembly plan](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md#step-1--ownership-identity-substrate-and-migration-s0001) define the exact proposed registries, ownership constraints and backfill. ADR-0061 clarifies that tenant/entity identity and global principal control records do not acquire a fabricated KB owner; authoritative semantic content remains KB-owned. Tenant entity associations do not grant access. Existing IDs and audit history survive migration.
 
-New structural tables: tenant, workspace, knowledge_base, entity_identity, entity_knowledge_base, external_identity, principal_authority, resource_access and delegation. Existing membership gains current validity/restrictions; append-only audit supports the v1 decision payload. Source/content/assertion/review/fact/job descendants gain explicit composite ownership constraints. These are proposed migration targets, not claims about the current schema.
+New structural tables: tenant, workspace, knowledge_base, entity_identity, entity_knowledge_base, external_identity, principal_authority, resource_access and delegation. Existing membership gains current validity/restrictions; append-only audit supports the v1 decision payload. Source/content/assertion/review/fact/job descendants gain explicit composite ownership constraints. Migrations 0005–0007 implement them (F0002 feature run `2026-09-27-bb7c8d1d`; ADR-0061/0062 Accepted for the F0002 scope). The same migrations also add `policy_release`, `policy_release_pointer`, `authentication_event` and `canonical_commit`.
 
 ## Statements, time, and governance additions (ADR-0063 to ADR-0069)
 
-These are proposed contract additions, not claims about the current schema. The feature named for each record settles its columns in Phase B.
+These are proposed contract additions. The feature named for each record settles its columns in Phase B.
+
+**Delivered so far (reconciled 2026-11-21):**
+- **F0006 (migration 0011):** shipped the assertion rows as the `assertion_semantics` v2 extension, with `assertion_document_reference` and `assertion_name_claim` (see the F0006 section). `assertion_qualifier`, `mood` and `typed_assertion_source` are not yet created; ADR-0065 and ADR-0075 remain Proposed.
+- **F0004 (migration 0008):** shipped the content block origin row (see the F0004 section).
+- **F0008 (migrations 0014–0015, ADR-0078):** shipped the canonical fact version time row, with `attested_through` in addition to the listed attestation bounds.
+- **Not yet delivered:** name facts beyond the four F0007 `sys` name predicates. Every other row is still proposed.
 
 | Record | Required information | Owner |
 |---|---|---|
@@ -327,9 +342,9 @@ Canonical-contract alignment: `Account.primary_party_uid`, `Account.parent_accou
 
 The [close/reopen boundary](../examples/commercial-pc-account/boundaries/account-close-reopen.ttl) retains a closed account and its policy beside the replacement. The single-tenant SHACL graph counts only `CURRENT` accounts; F0012/F0017 canonical admission must enforce the same invariant across knowledge bases and time intervals. Account 360 selects owned policies independently of named-insured-role completeness ([EX-PC-020/021](../examples/commercial-pc-account/cases.md)); closure does not reassign policies.
 
-## Proposed F0004 content and document-date refinement
+## F0004 content and document-date refinement (implemented by migration 0008, 2026-10-21)
 
-[ADR-0073](decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md) and the [F0004 assembly plan](../features/archive/F0004-content-artifact-model/feature-assembly-plan.md) propose version-aware artifact metadata, normalized block/table/cell indexes and append-only date candidates/selections. This is an additive migration design after 0007, not deployed schema. See the [feature ERD](../features/archive/F0004-content-artifact-model/README.md#proposed-entity-relationships) and [SQL design](../features/archive/F0004-content-artifact-model/persistence-design.sql) for exact columns, scoped foreign keys, uniqueness, audit references and immutability rules.
+[ADR-0073](decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md) and the [F0004 assembly plan](../features/archive/F0004-content-artifact-model/feature-assembly-plan.md) propose version-aware artifact metadata, normalized block/table/cell indexes and append-only date candidates/selections. Migration 0008 implements this additive design (F0004 feature run `2026-10-17-8a6cc79f`), and also adds `content_artifact_state_event` and `content_repair_record`. ADR-0073 remains Proposed pending its acceptance proof gates. See the [feature ERD](../features/archive/F0004-content-artifact-model/README.md#proposed-entity-relationships) and [SQL design](../features/archive/F0004-content-artifact-model/persistence-design.sql) for exact columns, scoped foreign keys, uniqueness, audit references and immutability rules.
 
 Preserve existing source/version/artifact IDs and tenant/KB constraints. Replace only the one-artifact-per-version uniqueness after reconciliation, permitting explicitly governed replacements. Full text remains in immutable files; index rows retain line ordinal/hash and provenance. Dates belong to the document version, never the manifest. Explicit append-only selections retain a previous selection, sequence and optimistic concurrency token; no selection means undated. The semantic authorization decision UUID is separate from the authorization audit row primary key.
 

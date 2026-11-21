@@ -22,6 +22,12 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - Own master blueprint 97 and 98 - evaluation metrics with agreed targets and the regression suite; set 114.2 operational budgets with ADR-0048. v0.1 ingestion is local file intake only; the 114.1 connector contract is deferred to F0050.
 - F0006 security follow-ups - SEC-01 and SEC-02 were remediated on 2026-11-08; SEC-03 headers and converter network isolation on 2026-11-09 (planning-mds/security/reviews/). Still carried as a v0.1 release precondition - the SEC-F5-M1 remainder (a separate OS user or container for the converter).
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- The isolation proof covers the F0007/F0008 tables (ADR-0077 consequences). Qualify the SEC-F8-02 non-superuser role so that the close-only triggers cannot be bypassed.
+
 ## Documents
 
 The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0026.yaml`.

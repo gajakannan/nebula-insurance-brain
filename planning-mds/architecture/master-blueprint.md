@@ -9,6 +9,18 @@
 
 **AuthX reference:** [Architecture patterns](#118-authx-reference-architecture), [implementation gaps](#119-crm-gaps-that-must-not-be-copied-unchanged), [Brain contracts](#120-concrete-authx-contract-for-insurance-brain), and [validation evidence](#121-validation-evidence-and-required-tests).
 
+**Delivery reconciliation update (2026-11-21):** This blueprint now reflects what F0001–F0008 delivered (migrations 0001–0015) and every ADR through ADR-0079. Changes:
+
+- Section 13 and section 14 each gain an "As built" subsection for [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) and [ADR-0078](decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md).
+- Section 76 gains a status table for ADR-0060 to ADR-0062 and ADR-0070 to ADR-0079.
+- Section 77 marks which packages exist and which are planned.
+- Section 78 separates deployed tables from planned ones.
+- New section 95.1 points to the delivery status.
+- Section 106.3 records which requirements are delivered.
+- Sections 109 and 116.1 record what was settled.
+
+Normative baseline text is otherwise unchanged. Where the as-built record and the original sketch differ, the accepted ADR governs.
+
 **Document pipeline update (2026-11-08):** [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) (Docling-Graph) is **Rejected**. F0005 qualified Graph dense live on 2026-10-27 and it failed accuracy, abstention, evidence-resolution and latency gates; the operator rejected the ADR at its reopen decision instead of re-planning a candidate. The v0.1 pipeline is Docling conversion, the persisted native bundle, and the bounded direct-baseline extraction client (ADR-0055) under the accepted ADR-0074 execution controls. Section 126 records what survives. See [F0005 compatibility evidence](../features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md).
 
 **Requirement ownership update (2026-11-08):** Section 106.3 assigns every blueprint requirement that lacked an owning feature, adds F0069 (constrained policy question, v0.1C), and records operator decisions for ADR-0038, ADR-0039, ADR-0042, ADR-0043, ADR-0051, ADR-0052 and ADR-0053 (all still Proposed until their proofs pass). Section 117.1 shows the current state of the open decisions.
@@ -965,6 +977,25 @@ fact_slot_qualifier
 
 The fingerprint is deterministic and canonical; normalized qualifier rows remain authoritative.
 
+## As built (F0007, ADR-0077, migrations 0012–0013)
+
+The model above is the original sketch. [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (Accepted 2026-11-10) governs the shipped shape.
+
+**Identity.** An identity-v1 slot is the normalized key `(tenant, knowledge base, subject entity, predicate key, normalized qualifiers)`.
+- A RELATIONSHIP slot adds its object entity.
+- A MULTI member is a child `fact_slot` row with `parent_slot_id` and `member_key`.
+- `identity_fingerprint` is SHA-256 over the RFC 8785 canonical identity document, with `fingerprint_version = 1`. It only accelerates lookup, through a partial unique index per tenant/KB.
+
+**Predicate key.** It has the form `<namespace>:<localName>@v<major>`, is opaque, and is not an ontology row FK. A pinned `predicate_release_ref` is recorded but is not part of identity. F0007 registers only the `sys` name predicates. Other namespaces are `PREDICATE_UNREGISTERED` until F0012/F0013 register them.
+
+**Qualifiers.** `fact_slot_qualifier` holds authoritative, append-only rows of `(qualifier_name, value_type, canonical_value)`. Values are declared and typed, and are never silently coerced.
+
+**Answers.** An identity-v1 slot's answer lives in `canonical_fact_version.value` as the `fact-answer/v1` envelope. The envelope is `{answer_contract, state, value?, scope?}`. Its state is one of nine: `PRESENT` plus ADR-0039's eight. Only `PRESENT` carries a value, and `NOT_FOUND`/`NOT_STATED` require an absence scope. A slot with no version answers `NOT_PROCESSED`. Money is a decimal string with an ISO 4217 currency and a required basis where the predicate demands one. Identifiers are `(scheme, identifier_type, value)` with a server-normalized value.
+
+**Legacy rows.** A NULL `identity_version` marks a legacy pilot slot. Legacy rows are not backfilled.
+
+**Row-level security.** RLS for both tables is handed to F0018.
+
 ---
 
 # 14. Bitemporal Canonical Facts
@@ -1009,6 +1040,26 @@ Valid time comes from time mentions (ADR-0064):
 - **Succession.** A successor closes a predecessor only when its start is anchored (grade `A` or `B`), never on model confidence.
 
 In the example above, the endorsement is attested by its own issue date. It is received June 12 and recorded when it is canonically accepted (section 109.2). These are three distinct times.
+
+## As built (F0008, ADR-0078, migrations 0014–0015)
+
+[ADR-0078](decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (Accepted 2026-11-19) adds `fact-temporal/v1` to the existing `canonical_fact_version` row.
+
+**Contract flag.** Identity-v1 slots must write `temporal_contract = 1`. Legacy rows stay NULL and are not backfilled.
+
+**Bound precision.** Each bound carries a granularity (`YEAR`…`SECOND`) and an IANA zone. A bound is accepted only if it is truncated to its own granularity.
+
+**End state.** `valid_to_state` is `OPEN`, `BOUNDED` or `UNKNOWN`. An `UNKNOWN` end closes the range at the end of its `attested_to` period, and reads from `validity_unknown_from` onward return validity-unknown.
+
+**Attestation.** `attested_from`, `attested_through` and `attested_to` come only from the evidence documents' current F0004 date selections. Upload, receipt and acceptance clocks are never used. An unknown start is floored at the attestation (`ATTESTATION_FLOOR`).
+
+**Close-only immutability.** The database permits exactly one update, which closes an open recorded upper bound. DELETE and TRUNCATE are refused, and `canonical_fact_change` is append-only. A succession inserts zero to two remainders carrying `split_of_version_id`, which must name a version of the same slot (migration 0015). This settles the section 109.2 choice in favour of a single permitted close over an append-only event table.
+
+**Guards.** A succession whose start basis is `MENTION_C` or `ATTESTATION_FLOOR` is refused. A `PRESENT` answer may be superseded only by `PRESENT` or `EXPLICIT_NEGATIVE`. An end revision is not a succession.
+
+**Relationships and members.** RELATIONSHIP slots are versioned in this same table, so the `canonical_relationship_version` table in section 78 is not created. MULTI members version independently.
+
+**Not yet activated.** Temporal kind is reserved but not activated. Time mentions (ADR-0064, Proposed) do not yet date facts. v0.1 slices continue to use the typed effective-date field (BLUEPRINT section 4.8).
 
 ---
 
@@ -3025,6 +3076,15 @@ Every automation type starts disabled until its agreement with human decisions i
 # 76. Architecture Decision Records
 
 > Each ADR below is also maintained as an individual record under `decisions/` (ADR-0001 to ADR-0037 as the Accepted baseline; ADR-0038 to ADR-0053 from sections 116 and 122 as Proposed; ADR-0054 to ADR-0058 authored after the baseline). The individual records are the working copies; this section is the baseline text as of 2026-09-05, with later status changes noted inline rather than rewritten.
+>
+> **Current status register (reconciled 2026-11-21; the individual records are authoritative):**
+> - **Accepted:** ADR-0001–0033, 0035–0037, 0040, 0041, 0044, 0054, 0055, 0057, 0058 (as amended), 0059, 0063 (as direction), 0074, 0077, 0078.
+> - **Accepted, bounded to the scope that proved them:** ADR-0049 and ADR-0050 (F0001-S0006); ADR-0061 and ADR-0062 (F0002).
+> - **Proposed:** ADR-0038, 0039, 0042, 0043, 0045–0048, 0051–0053, 0056, 0064–0073, 0075, 0076, 0079.
+> - **Superseded:** ADR-0034, by ADR-0057.
+> - **Rejected:** ADR-0060 (2026-11-08).
+>
+> ADR-0073 (F0004) and ADR-0075 (F0006) stay Proposed although their features closed. Each record names the proof gates still outstanding.
 
 ## ADR-0001 — The Brain Owns Semantics
 
@@ -3393,6 +3453,24 @@ Azure Blob, GCS, or other adapters are wired at the composition root. See [the r
 | [ADR-0068](decisions/ADR-0068-decision-basis-fingerprints.md) | Decision basis fingerprints define staleness | Proposed |
 | [ADR-0069](decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md) | External action attempts keep identity and uncertain outcome | Proposed |
 
+## ADR-0060 to ADR-0062 and ADR-0070 to ADR-0079 — Delivery-era records (reconciled 2026-11-21)
+
+| ADR | Decision | Status | Governs |
+|---|---|---|---|
+| [ADR-0060](decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md) | Docling-Graph as the document pipeline coordinator | **Rejected** 2026-11-08 | Section 126; F0005 rejection branch |
+| [ADR-0061](decisions/ADR-0061-tenant-identity-and-structural-ownership.md) | Structural tenant → workspace → KB registries; tenant-owned entity identity with explicit KB associations; composite ownership; associations grant nothing | Accepted 2026-09-28 (F0002 scope) | Section 65; migrations 0005–0007 |
+| [ADR-0062](decisions/ADR-0062-current-authorization-and-durable-decisions.md) | Casbin plus mandatory typed checks: verified identity, current membership, parent scope, restrictions, delegation ceiling; durable audited decisions | Accepted 2026-09-28 (F0002 scope) | Sections 66, 120; migrations 0005–0007 |
+| [ADR-0070](decisions/ADR-0070-account-party-and-role-model.md) | Commercial P&C party, account and scoped-role model; roles, not party types, decide reach | Proposed (direction authorized 2026-10-10) | F0012/F0013/F0017/F0023; BLUEPRINT section 4.8 |
+| [ADR-0071](decisions/ADR-0071-semantic-execution-trace-and-answer-basis-contract.md) | A semantic execution trace is ordered facts about one execution; only the answer decides "used" evidence; gaps are disclosed, never reconstructed | Proposed | F0016, F0036–F0038, F0041/F0042, F0067 |
+| [ADR-0072](decisions/ADR-0072-observatory-is-a-read-only-projection.md) | The Graph Observatory is a read-only, authorized projection over recorded traces | Proposed | F0067 |
+| [ADR-0073](decisions/ADR-0073-versioned-content-contracts-and-document-metadata.md) | Explicit content-contract version dispatch; one verifier; governed artifact versions; document dates outside immutable bundles as append-only candidates/selections | Proposed (F0004 delivered migration 0008; acceptance proof gates in the record) | Sections 5, 80–81, 108; F0004 |
+| [ADR-0074](decisions/ADR-0074-local-document-job-execution-controls.md) | Supervised conversion-only process with resource ceilings and network isolation; one worker per inference endpoint; stable failure reasons; bounded submissions; pinned engine per job | Accepted 2026-10-27 | Sections 5, 114, 126; migrations 0004, 0009–0010 |
+| [ADR-0075](decisions/ADR-0075-versioned-assertion-semantics-and-admission.md) | Versioned assertion semantics (v2 extension), document-local references and name claims, structural admission | Proposed (F0006 delivered migration 0011 for trusted local fixtures) | Section 11; F0006, F0016, F0066 |
+| [ADR-0076](decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md) | Retrieval graph structure is a governed, derived ranking signal that grants no authority | Proposed | Section 127; F0033–F0036, F0068 |
+| [ADR-0077](decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) | FactSlot identity as a normalized key; opaque predicate keys; typed qualifiers; MULTI members as child slots; `fact-answer/v1` carrier | **Accepted** 2026-11-10 | Section 13 "As built"; F0007; migrations 0012–0013 |
+| [ADR-0078](decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) | `fact-temporal/v1` on the version row; per-bound precision; `OPEN`/`BOUNDED`/`UNKNOWN` ends; attestation from date selections; close-only immutability | **Accepted** 2026-11-19 | Section 14 "As built", 109.2; F0008; migrations 0014–0015 |
+| [ADR-0079](decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md) | One authored JSON Schema source published as a deterministic offline runtime bundle (`schemas/contracts/v1`, packaged in `brain_contracts`); cross-language conformance | Proposed (F0011 plan approved 2026-11-20) | Sections 25–27; F0011 |
+
 ---
 
 # 77. Repository Structure
@@ -3412,22 +3490,26 @@ engine/                           # Python backend: API, worker, semantic kernel
     apps/
         api/                      # FastAPI service
         worker/                   # background and ingestion workers (Temporal from v0.3)
-    packages/
-        brain-domain/
-        brain-persistence/
-        brain-content/
-        brain-schema/
-        brain-ontology/
-        brain-graph/
-        brain-temporal/
-        brain-process/
-        brain-provenance/
-        brain-resolution/         # deterministic ER in v0.1; a probabilistic ER extension may land in neuron/
-        brain-search/
-        brain-decisions/
-        brain-governance/
-        brain-review/
-        brain-security/
+    packages/                     # [built] exists today; [planned] lands with its owning feature
+        brain-domain/             # [built] F0001–F0008 domain modules (FactSlot identity, temporal contract)
+        brain-persistence/        # [built] SQLAlchemy models, unit of work
+        brain-content/            # [built] content artifact store, bundle verifier, document dates (F0004)
+        brain-contracts/          # [built] shared DTOs; F0011 runtime schema bundle (ADR-0079, resources/v1)
+        brain-assertions/         # [built] assertion semantics and structural admission (F0006)
+        brain-factslots/          # [built] FactSlot identity and answer carriers (F0007)
+        brain-temporal/           # [built] bitemporal commit and reads (F0008)
+        brain-jobs/               # [built] fenced document jobs and outbox (F0005, ADR-0074)
+        brain-review/             # [built] review items, batches, decisions (F0001 proof; F0022 extends)
+        brain-security/           # [built] principals, Casbin adapter, typed checks, audit (F0002)
+        brain-testing/            # [built] shared test fixtures
+        brain-ontology/           # [planned] F0012/F0013
+        brain-graph/              # [planned] F0020/F0034
+        brain-process/            # [planned] F0048/F0049
+        brain-provenance/         # [planned] F0009
+        brain-resolution/         # [planned] F0017 deterministic ER; a probabilistic ER extension may land in neuron/
+        brain-search/             # [planned] F0033/F0035
+        brain-decisions/          # [planned] F0057
+        brain-governance/         # [planned] F0042/F0043
     migrations/                   # Alembic
     tests/
 
@@ -3436,16 +3518,16 @@ neuron/                           # Python AI and semantic runtime (ai-engineer)
         brain-ingestion/          # bundle writer + durable conversion checkpoint callback
         brain-extraction/         # extraction pipeline port, direct-baseline adapter, result/evidence mapping
         brain-interpretation/     # semantic interpretation runs
-        brain-reasoning/
-        brain-conversation/
-        brain-learning/
-        brain-evolution/
-        brain-agent-tools/        # MCP surface
+        brain-reasoning/          # [planned] F0055/F0065
+        brain-conversation/       # [planned] F0037/F0069
+        brain-learning/           # [planned] F0041
+        brain-evolution/          # [planned] F0032
+        brain-agent-tools/        # [planned] F0047 MCP surface
     tests/
 
 experience/                       # React and TypeScript web app (frontend-developer)
     src/
-        review-panel/             # Nebula Review Panel: renderers, selector resolvers, decision batch
+        review-panel/             # [built] Nebula Review Panel proof (F0001-S0004); F0022 completes it
     tests/
 
 ontology/                         # authored ontology modules; compiled into normalized runtime structures
@@ -3488,11 +3570,30 @@ docker/                           # container definitions
 
 Mapping from the original layout: `apps/api` and `apps/worker` moved under `engine/apps/`; `apps/web` became `experience/`; the AI-facing packages moved to `neuron/packages/`; `docs/adr`, `docs/architecture`, and `docs/domain` moved under `planning-mds/architecture/decisions/`, `planning-mds/architecture/`, and `planning-mds/domain/`; the single top-level `tests/` tree is split per runtime root, with `golden-documents` promoted to `golden-corpus/`.
 
+**Reconciled 2026-11-21:** the `brain-schema/` package originally sketched here is not created. ADR-0079 publishes the runtime schema bundle under `schemas/contracts/v1` and packages it in `brain-contracts`. The `ontology/`, `golden-corpus/` and `knowledge-packs/` trees do not exist yet; F0012/F0013 and F0026 create them.
+
 ADR-0057 removed `engine/packages/brain-review-labelstudio/` and the `integrations/label-studio/` asset tree on 2026-09-08. The review boundary is `engine/packages/brain-review/` plus `experience/src/review-panel/`; `integrations/` returns when a first integration justifies it.
 
 ---
 
 # 78. Core PostgreSQL Tables
+
+## Deployed schema (migrations 0001–0015, reconciled 2026-11-21)
+
+| Migration | Feature | Tables created | Governing record |
+|---|---|---|---|
+| 0001 | F0001 | `source_document`, `document_version`, `content_artifact`, `semantic_interpretation_run`, `assertion`, `assertion_evidence` | ADR-0003, ADR-0004, ADR-0040 |
+| 0002 | F0001 | `principal`, `membership`, `audit_event`, `review_item`, `review_batch`, `review_decision` | ADR-0044, ADR-0049, ADR-0050 |
+| 0003 | F0001 | `fact_slot`, `canonical_fact_version`, `canonical_fact_change`, `outbox_event` | ADR-0008, ADR-0041 |
+| 0004 | F0005 (2026-09-20 candidate) | `document_job`, `document_job_event`, `document_job_outbox`, `document_artifact_lease` | ADR-0074 |
+| 0005–0007 | F0002 | `tenant`, `workspace`, `knowledge_base`, `entity_identity`, `entity_knowledge_base`, `external_identity`, `principal_authority`, `resource_access`, `delegation`, `policy_release`, `policy_release_pointer`, `authentication_event`, `canonical_commit`; composite ownership on existing rows | ADR-0061, ADR-0062 |
+| 0008 | F0004 | `content_block`, `content_table`, `content_table_cell`, `content_table_cell_block`, `content_artifact_state_event`, `content_repair_record`, `document_date_candidate`, `document_date_selection` | ADR-0073 (Proposed) |
+| 0009–0010 | F0005 | Job-event reason columns, no new tables | ADR-0074 |
+| 0011 | F0006 | `assertion_semantics`, `assertion_document_reference`, `assertion_name_claim` | ADR-0075 (Proposed) |
+| 0012–0013 | F0007 | `fact_slot_qualifier`; identity-v1 columns and guard on `fact_slot` | ADR-0077 |
+| 0014–0015 | F0008 | No new tables; `fact-temporal/v1` columns, close-only triggers and same-slot split lineage on `canonical_fact_version` | ADR-0078 |
+
+`architecture/data-model.md` holds exact columns and ERDs. The list below is the **target inventory**. A name not in the table above is planned, and its owning feature settles its columns in Phase B.
 
 ```text
 tenant
@@ -3545,14 +3646,14 @@ implication_rule
 implication_rule_version
 phrase_reading
 
-entity
+entity                          as built: entity_identity + entity_knowledge_base (ADR-0061)
 entity_type
 entity_alias                    search projection over name facts (ADR-0066)
 
 fact_slot
 fact_slot_qualifier
 canonical_fact_version
-canonical_relationship_version
+canonical_relationship_version  NOT CREATED: RELATIONSHIP slots version in canonical_fact_version (ADR-0077/0078)
 canonical_fact_evidence
 canonical_fact_change
 
@@ -4158,6 +4259,19 @@ F0063 Future DSL
 F0068 Spectral graph retrieval experiments (conditional; after baseline measurement)
 ```
 
+## 95.1 Delivery status
+
+The epic list above is the stable inventory. Live sequencing (Now/Next/Later) and completion evidence are generated from the feature shards into [`features/ROADMAP.md`](../features/ROADMAP.md) and [`features/REGISTRY.md`](../features/REGISTRY.md). Read status there, not here. Snapshot at 2026-11-21:
+
+| State | Features |
+|---|---|
+| Done and archived | F0001–F0008 (v0.1A kernel: foundation, tenancy/AuthX, persistence, content artifacts, ingestion, assertion plane, FactSlot, bitemporal facts); F0064 (repository tooling) |
+| Plan approved, not built | F0011 (Phase A/B 2026-11-20, plan-review next); F0065 (Phase A/B 2026-10-29, plan-review H1–H3 open) |
+| Now | F0011, F0009, F0012, F0021 |
+| Next | F0010, F0013, F0014, F0017, F0015, F0016 |
+
+Deployed schema is listed in section 78. Shipped contracts are in sections 13 and 14 ("As built") and the ADR table in section 76.
+
 ---
 
 # 96. Golden Corpus
@@ -4733,6 +4847,18 @@ A review of this blueprint against the feature portfolio on 2026-11-08 found req
 | Connector contract (source-system identity, change cursor, withdrawal) | 114.1 | F0050 (v0.3); v0.1 intake is local files only | ADR-0028 |
 | F0006 security follow-ups: SEC-01/02 remediated 2026-11-08, SEC-03 and converter network isolation 2026-11-09; separate converter OS user (SEC-F5-M1 remainder) open | 110.4, 114.3 | F0026 release precondition | ADR-0074 |
 
+**Delivered since 2026-11-08 (reconciled 2026-11-21):**
+
+| Requirement | Delivered by | Record |
+|---|---|---|
+| FactSlot identity beyond the first scalar | F0007 (migrations 0012–0013) | ADR-0077 Accepted |
+| Information state separate from value (carrier half) | F0007: the `fact-answer/v1` envelope. Schemas follow in F0011 (ADR-0079) | ADR-0077; ADR-0039 stays Proposed |
+| Qualified money and scoped identifiers (carrier half) | F0007 | ADR-0077 |
+| Temporal mutation algorithm (section 109.2) | F0008 (migrations 0014–0015) | ADR-0078 Accepted |
+| F0006 security follow-ups SEC-01/02/03 and converter network isolation | 2026-11-08/09 remediation | ADR-0074 section 1a |
+
+The remaining rows are still owned as listed.
+
 The v0.1 dependency graph in the feature shards was also corrected so each feature depends on the features it builds on, not only F0001. The dependencies are recorded in each shard's `depends_on` and appear in its README amendment.
 
 # 107. Insurance Meaning and Source Authority
@@ -4888,6 +5014,8 @@ For multivalued properties, model member identity and member-level temporal vers
 
 **Acceptance:** Two additional insureds coexist. Removing one by endorsement closes only that membership for the affected time interval.
 
+**Settled (2026-11-10):** ADR-0077 defines normalization, fingerprint version, MULTI member slots and RELATIONSHIP slots. Entity identity is tenant-owned with explicit KB association (ADR-0061). See section 13, "As built". The endorsement-removal acceptance is exercised by F0019/F0025.
+
 ## 109.2 Specify the bitemporal mutation algorithm
 
 Retain the two-dimensional exclusion design. PostgreSQL's `WITHOUT OVERLAPS` temporal-key syntax covers overlap in one range; it does not by itself implement the blueprint's two independent range-overlap conditions. [R6]
@@ -4907,6 +5035,8 @@ Decide explicitly whether closing a recorded interval is the only permitted upda
 Capture `source_received_at`, `artifact_created_at`, `assertion_created_at`, and `canonical_accepted_at` separately. In section 14's example, receipt on June 12 is not necessarily canonical acceptance on June 12 if human review completes June 14. The recorded-time convention must answer that distinction consistently.
 
 **Acceptance:** A retroactive endorsement is accepted after review, then corrected again. Queries at each valid/recorded coordinate return the appropriate version. Concurrent commits cannot create ambiguous accepted state.
+
+**Settled (2026-11-19):** ADR-0078 D5 implements these steps and chooses close-only immutability. A database trigger permits only the single close of an open recorded upper bound, and the append-only event alternative is rejected. Concurrency uses the slot lock plus the exclusion backstop (409 `temporal_conflict`/`stale_version`). See section 14, "As built". The end-to-end retroactive-endorsement acceptance remains with F0019/F0025.
 
 ## 109.3 Make commit and projection consistency explicit
 
@@ -5232,11 +5362,11 @@ The following ADR IDs are reserved suggestions, all with **status: Proposed**. T
 | Existing section | Issue | Proposed correction |
 | --- | --- | --- |
 | 0, 5, 94 | Indefinite evidence retention versus future forgetting | Authorized retention, holds, deletion, and restore behavior |
-| 6 | “Deterministic” parsing overstates a model-backed pipeline guarantee | Immutable versioned artifact; execution reproducibility metadata |
+| 6 | “Deterministic” parsing overstates a model-backed pipeline guarantee | Immutable versioned artifact; execution reproducibility metadata. **Partially reconciled at F0004/F0005:** explicit content-contract version dispatch with one verifier (ADR-0073, Proposed) and a pinned engine per job (ADR-0074) |
 | 14 | Received time appears to stand in for accepted recorded time | **Reconciled at F0001-S0005/S0007 (2026-09-10):** `canonical_fact_version` stores `source_received_at`, `artifact_created_at`, `assertion_created_at`, and `canonical_accepted_at` as four distinct columns; `recorded`'s lower bound equals `canonical_accepted_at` specifically, never one of the other three (ADR-0041, accepted) |
-| 13, 15 | Scalar overlap rule versus multivalued slots | Explicit member identity and relationship temporal rules |
+| 13, 15 | Scalar overlap rule versus multivalued slots | **Reconciled at F0007/F0008 (2026-11-10/19):** MULTI members are child slots versioned independently, and RELATIONSHIP slots carry the object entity in their identity and version in `canonical_fact_version` (ADR-0077 D4, ADR-0078 D6) |
 | 47–49 | Projection consistency and historical topology are unspecified | **Partially reconciled at F0001-S0005/S0007 (2026-09-10):** the commit/outbox contract itself is settled (one transaction writes the fact version, lineage, audit, and outbox rows together; a killed worker's replay processes each outbox event exactly once — ADR-0041, accepted). Time-aware *relationship* (graph) traversal is not yet built — no graph projection exists in this feature; F0033/F0034 own it |
-| 53 | Stable identifiers lack namespace/term qualification | Scoped identifiers and collision handling |
+| 53 | Stable identifiers lack namespace/term qualification | Scoped identifiers and collision handling. **Partially reconciled at F0007:** identifier values are `(scheme, identifier_type, value)` with server normalization, and equality includes the scheme (ADR-0077 D5). Collision handling in entity resolution remains F0017 |
 | 65 | Tenant/KB ownership leaves shared entity identity unresolved | Explicit identity scope and authorized KB membership |
 | 75 | Human annotation can be read as canonical approval | **Reconciled at F0001-S0004/S0007 (2026-09-10):** the Casbin policy grants `Reviewer` the `review:annotate` action but never `fact_slot:commit`, which only `ServicePrincipal` holds — a Review Panel decision cannot itself write canonical truth, structurally, not just by convention (ADR-0044, accepted). The review-decision-to-canonical-commit wiring itself is F0002's integration |
 | 3, 75, 96, 100, 111 | Label Studio named as the adjudication engine | Native Review Panel; ADR-0034 superseded by ADR-0057 (section 125) |

@@ -28,6 +28,13 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 - **Dependencies:** F0007, F0012 (previously F0001, F0012).
 - Apply ADR-0039 to GL limits (amount, currency, per-occurrence/aggregate basis) and scoped identifiers, and list the GL forms a package is expected to contain so F0014 can report INCOMPLETE packages.
 
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- The GL predicates (limits, retentions, coverages) register here with cardinality, value type, declared qualifiers and basis requirements (ADR-0077 D2/D3). Money requires a basis where the predicate declares one (`BASIS_REQUIRED`).
+- Activate `temporal_kind` for GL predicates where needed (ADR-0078 D10).
+
 ## Documents
 
 ### Commercial P&C teaching expansion (2026-10-08)
