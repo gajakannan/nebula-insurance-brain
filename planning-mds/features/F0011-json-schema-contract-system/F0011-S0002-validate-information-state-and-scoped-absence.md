@@ -10,7 +10,7 @@
 ## User Story
 
 **As a** Ingrid the Persistence Engineer
-**I want** validate the shipped state-plus-value answer and the exact scope of an absence
+**I want** to validate the shipped state-plus-value answer and the exact scope of an absence
 **So that** a missing answer cannot turn into an explicit negative or disclose restricted source material.
 
 ## Context & Background

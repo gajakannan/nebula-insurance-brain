@@ -1,6 +1,6 @@
 # F0011 — Structural contract design
 
-**Status:** Phase A and Phase B approved by the operator on 2026-11-20; runtime implementation Not Started.
+**Status:** Approved A+B baseline `2026-11-20-ccb1bd39`; Phase B revision `2026-11-21-e4098d22` approved by operator token `approve-phase-b` on 2026-11-22; runtime implementation Not Started.
 **Decision:** [ADR-0079](../../architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md).
 
 ## Authority and inventory
@@ -118,6 +118,16 @@ Pydantic `json_schema_extra`, the AJV source and the OpenAPI component must reta
 the same metadata. This feature adds no form renderer or editable UI.
 
 ## Existing consumer integration
+
+The per-resource mapping in [contract-inventory.yaml](contract-inventory.yaml)
+controls consumer entry points, compatibility tests, version selectors and
+adopt/delegate/retain-versioned-boundary dispositions (PR-M2). The table below
+summarizes groups only. Manifest-read and ProblemDetails are OpenAPI/doc-only
+schema boundaries; the native commit request retains its versioned DTO.
+The [assembly plan](feature-assembly-plan.md#stored-version-rollout-preflight-pr-m1)
+requires complete read-only integration/dev stored-version sweeps before
+response-guard rollout (PR-M1), and records the G3 Security audit follow-up
+(PR-L3). These are future proof obligations under unchanged S0005 ACs.
 
 | Consumer entry point | Integration and compatibility boundary |
 |----------------------|----------------------------------------|

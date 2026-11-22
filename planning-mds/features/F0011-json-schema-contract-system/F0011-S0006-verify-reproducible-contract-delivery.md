@@ -10,7 +10,7 @@
 ## User Story
 
 **As a** Dana the Platform Engineer
-**I want** reproduce and check all published contract artifacts from a clean checkout and installed packages
+**I want** to reproduce and check all published contract artifacts from a clean checkout and installed packages
 **So that** downstream ontology and profile features receive a verifiable contract instead of repository-local assumptions.
 
 ## Context & Background

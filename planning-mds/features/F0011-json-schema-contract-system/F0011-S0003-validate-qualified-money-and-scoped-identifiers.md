@@ -10,7 +10,7 @@
 ## User Story
 
 **As a** Ingrid the Persistence Engineer
-**I want** share structural definitions for exact money and namespace-qualified identifiers
+**I want** to share structural definitions for exact money and namespace-qualified identifiers
 **So that** Python and JavaScript preserve the same amount and identity instead of introducing float or namespace errors.
 
 ## Context & Background

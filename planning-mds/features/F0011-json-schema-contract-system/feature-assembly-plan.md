@@ -2,8 +2,10 @@
 
 **Created:** 2026-11-20
 **Author:** Codex / Architect
-**Status:** Phase B approved by operator token `approve-phase-b` on 2026-11-20; implementation Not Started
-**Plan Run:** 2026-11-20-ccb1bd39
+**Status:** Phase B revision approved by operator token `approve-phase-b` on 2026-11-22; implementation Not Started
+**Plan Run:** 2026-11-21-e4098d22 (B, existing)
+**Approved Baseline:** 2026-11-20-ccb1bd39; operator token `approve-phase-b` on 2026-11-20
+**Review Input:** 2026-11-21-b4cd07e4 (READY; two Medium, four Low findings)
 **Requirements:** Phase A approved by the operator (`approve`, recorded as approve-phase-a).
 
 ## Overview
@@ -26,7 +28,7 @@ do not override the product stack. No entity CRUD, new screen or new endpoint.
 | 1 | Explicit source inventory, immutable offline bundle and wire profiles | S0001 | Source closure, keyword/profile checks, hash/identity corruption refusal |
 | 2 | Publication aliases and answer/value examples | S0002/S0003 | Nine states, absence failures, exact money and namespace fixtures |
 | 3 | Generated Pydantic, AJV, metadata and OpenAPI checks | S0004 | 100% common cases; no lossy round trip or silent missing result |
-| 4 | Content/assertion and FactSlot/temporal consumer adoption | S0005 | Real entry points; native differential and same-UoW guard regressions |
+| 4 | Content/assertion and FactSlot/temporal consumer adoption | S0005 | Per-resource mapping, integration/dev stored-version sweep before guard rollout, native differential and same-UoW guard regressions |
 | 5 | Installed package/build/CI proof and developer handoff | S0006 | Clean install outside checkout; deterministic regeneration; drift injection fails |
 
 ## Existing Code (Must Be Modified)
@@ -62,6 +64,7 @@ tested through their shared package imports; there is no model/prompt/pipeline c
 | scripts/contracts/sources.yaml | Backend + Architect review | Explicit 21-resource source list and native/portable entry-point policy |
 | scripts/contracts/generate.py | Backend | Closed local build, code generation, metadata/OpenAPI emission and --check mode |
 | scripts/contracts/check.py | Backend/QE | Join expected case results, generated artifacts and OpenAPI/reference coverage |
+| scripts/contracts/check_stored_fact_versions.py | Backend/QE | Read-only integration/dev full-history serialization and exact response-guard preflight; safe aggregate report |
 | schemas/contracts/v1/*.schema.json and manifest.json | Generated | Root runtime release snapshot and digest manifest |
 | engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py | Backend | Immutable bundle registry, profile checks, decode and validate APIs |
 | engine/packages/brain-contracts/src/brain_contracts/model_adapter.py | Backend | Source-schema pre/post guards and non-lossy to_wire |
@@ -230,6 +233,95 @@ as portable AJV/Pydantic successes.
 
 ## Step 4 — Existing Entry Points and Atomicity (S0005)
 
+### Per-resource adoption (PR-M2)
+
+At feature G0, reconcile all 21 rows in [contract-inventory.yaml](contract-inventory.yaml)
+against the actual checkout and copy their consumer entry points, compatibility
+tests, version selectors, wire profiles and dispositions into
+`scripts/contracts/sources.yaml`. Owner and source identity/hash remain mandatory.
+Each entry/test is marked existing, planned, or OpenAPI/doc-only. A planned test
+must become executable feature proof; an existing fixture/helper alone is not a
+consumer test. G0 records any changed path/selector in the feature evidence before
+Step 1; a missing mapping blocks that checkpoint.
+
+Use `delegate` for existing content/assertion schema validators; use `adopt` for
+new normalized FactSlot/temporal/response guards and additive aliases; use
+`retain-versioned-boundary` for the native commit request and the manifest-read /
+ProblemDetails documentation boundaries. The last two have no existing runtime
+JSON Schema validator to delegate. Their OpenAPI assertion-tree/union checks and
+actual concrete-reader/HTTP response tests are required instead. Never wrap a
+nonexistent validator or count OpenAPI reference equality as runtime integration.
+
+### Stored-version rollout preflight (PR-M1)
+
+S0005 AC4 requires real history evidence in addition to fixtures. Backend authors
+`scripts/contracts/check_stored_fact_versions.py`; QE executes it for **both**
+integration and dev before enabling the new response guard on either existing
+environment. DevOps records the environment inventory and coherent bundle digest
+at feature G0. No assertion that these databases are fixture-only is made here.
+
+The proposed command contract, executed from the product root by the later feature
+run, is:
+
+```bash
+uv run --project engine python scripts/contracts/check_stored_fact_versions.py --environment integration --output <FEATURE_RUN_FOLDER>/artifacts/test-results/stored-versions-integration.json
+uv run --project engine python scripts/contracts/check_stored_fact_versions.py --environment dev --output <FEATURE_RUN_FOLDER>/artifacts/test-results/stored-versions-dev.json
+```
+
+The command selects the named environment using existing local database
+configuration; do not log credentials/DSNs or add an exported secret requirement.
+It is an operator preflight, not an HTTP endpoint or a new runtime grant. Its
+implementation must:
+
+1. Open a PostgreSQL READ ONLY, REPEATABLE READ transaction before selecting data.
+   Record a nonsecret environment identifier, snapshot time, code revision and
+   candidate bundle digest. Stream **every** `fact_versions` row, including closed
+   recorded ranges, historical pilot values, temporal-v1 rows and split/remainder
+   versions; do not use a current-only or valid/known-coordinate filter. Count the
+   rows in the same snapshot and reconcile selected = checked, with zero skips.
+2. Reuse `brain_persistence.repositories._fact_version_from_row` (or an extracted
+   equivalent shared with the repository) and
+   `FactVersionOut.from_domain(...).model_dump(mode="json")`, including the existing
+   absent-temporal serialization. Run the **same** candidate response guard and
+   fixed native profile used by GET, including reference/format checks. Exercise
+   `FactValidityUnknownOut` separately in the temporal route fixtures; the sweep
+   does not bypass authorization or call the HTTP facade and create audit writes.
+3. Count mapping/serialization failures, guard failures and legacy/temporal groups.
+   Emit only counts, environment label, code/bundle identity and fixed error codes /
+   contract IDs. Do not persist values, evidence, row identifiers, exception text
+   or credentials in the report. Never rewrite, coerce, delete or repair a row.
+4. Exit 0 only for complete, zero-failure coverage. Exit 1 for a data/guard mismatch;
+   exit 2 for configuration, unavailable database, incomplete enumeration or other
+   execution failure. Empty databases require an explicit zero-row environment
+   inventory signed by QE/DevOps; an unavailable database is never an empty pass.
+5. QE retains both reports for S0005 AC4 and verifies that the database remained
+   read-only. DevOps keeps the previous coherent deployment until both reports
+   pass against the release candidate. If a mismatch exists, stop rollout and
+   reconcile the guard/version boundary with Architect; no cleanup migration,
+   silent validation fallback or historical payload rewrite is authorized.
+
+Repeat the sweep against the final candidate while old-version writers are paused
+for the deployment cutover, so writes after the first snapshot cannot escape the
+check. Restore service with the coherent new bundle only after success. A changed
+guard, bundle, serializer or stored population requires fresh reports. The future
+feature tests must include a stored serialization/format mismatch, closed history,
+legacy remainders, empty and unavailable databases, incomplete iteration and a
+read-only enforcement check. This planning action does not access either database.
+
+### Read audit follow-up (PR-L3)
+
+The existing read facade commits SUCCEEDED after all source READ checks, then GET
+serializes/validates the response. An internal invariant failure can therefore
+return generic `contract_invariant_failed` 500 after a SUCCEEDED read audit.
+Track this Low finding under S0005 AC6; do not claim it is fixed or accepted by
+planning. **Owner: Security Reviewer, due at feature G3 before implementation
+approval.** Backend/QE inject a response-guard failure and prove: authorized read
+audit succeeds, HTTP returns the generic 500 with no payload/pointers, and a denied
+source still returns 404 before guard evaluation. Security must record whether
+this bounded internal-invariant audit meaning is accepted. If it is not accepted,
+Architect must revise the read-finalization design and obtain current tests/review
+before the feature advances; the discrepancy cannot silently disappear at closeout.
+
 ### Mutation traceability
 
 | Entry point | Action / carrier | Authority / concurrency | Validation failure and audit | Required test |
@@ -319,8 +411,8 @@ Only the future feature run creates QE/review/security/DevOps role reports.
 | S0003 AC4–AC7 | identifier source alias + domain normalization | Required scheme/type/value, equal strings different namespace, effective ordering and normalization mismatch |
 | S0004 AC1–AC3 | common case runners/joiner | Real Python/Pydantic/AJV, every keyword/format/branch, 100% expected outputs/no skips |
 | S0004 AC4–AC7 | generated model/to_wire, metadata/OpenAPI builder | Non-lossy serialization, exact shared refs/annotations and injected drift failure |
-| S0005 AC1–AC3 | inspected consumer inventory, content/assertion delegates | Actual named entry points, explicit native/version selectors and no reader fallback |
-| S0005 AC4–AC7 | FactSlot/temporal/API boundaries and UoW | Legacy/current history unchanged, no partial mutation, READ/admission guards, no reparse/DDL |
+| S0005 AC1–AC3 | per-resource inventory, content/assertion delegates and documented retained boundaries | Every entry point/test/selector/disposition reconciled at G0; actual consumer proof and no reader fallback |
+| S0005 AC4–AC7 | FactSlot/temporal/API boundaries and UoW | Both stored-history sweep reports pass before guard rollout; legacy/current history unchanged, no partial mutation, READ/admission guards, G3 PR-L3 disposition, no reparse/DDL |
 | S0006 AC1–AC3 | generator --check, install smoke and CI | Clean commands/version inventory, deterministic outputs, outside-checkout offline proof |
 | S0006 AC4–AC6 | semantic example ownership, AC ledger and handoff | Definitions/worked/boundary links, observed 41-AC proof with coverage, rollback and ADR status |
 
@@ -370,7 +462,9 @@ paths at G0 rather than copying this planning run's base-only manifest.
   run dependency matrix before accepting generation output.
 - Generic framework reference samples use C#/draft-07 paths. The product's Python,
   2020-12 and OpenAPI 3.1 baselines control; no framework changes are required.
-- No existing F0011 assembly plan was overwritten. ADR-0013/0077/0078 remain accepted;
+- The approved F0011 assembly baseline is revised explicitly for review findings
+  PR-M1/PR-M2/PR-L3 in plan run `2026-11-21-e4098d22`; see its gate-decisions.md
+  for reconciliation. No requirement, schema assertion or runtime behavior changes. ADR-0013/0077/0078 remain accepted;
   ADR-0079/0039 remain Proposed. F0012/F0015 vocabulary/compilers and F0014/F0023
   completeness/display stay separately owned.
 
@@ -396,9 +490,13 @@ and ADR-0079 all have real F0011 source/mapping references.
 
 ## Exit and Approval State
 
-All six stories remain Not Started. G4 ontology compile/drift and all seven ordered G5 pre-approval exit operations
-have passed. The operator approved Phase B with `approve-phase-b` on 2026-11-20.
-The G5 journal and evidence-manifest.json record the required post-approval
-compile/coverage/plain-validation/publication result. These approval-status edits
-precede checkpoint attestation and final regeneration. No implementation or formal
-ADR acceptance is inferred. Independent plan-review is next before the feature action.
+All six stories remain Not Started (41 ACs). Phase A approval from
+`2026-11-20-ccb1bd39` is unchanged; story edits add the missing grammatical "to"
+only. The original Phase B approval and review READY decision remain historical
+evidence for the baseline. G4 ontology sync and all seven ordered G5 exit
+checks passed for this revision. The operator explicitly approved it with
+`approve-phase-b` on 2026-11-22 in run `2026-11-21-e4098d22`. Its durable
+journal and manifest record the post-approval regeneration, validation and
+publication outcome. No runtime proof is inferred. ADR-0079/0039 remain
+Proposed. Feature G0 must carry this review/finding map and the later G3 PR-L3
+follow-up into its evidence before implementation proceeds.

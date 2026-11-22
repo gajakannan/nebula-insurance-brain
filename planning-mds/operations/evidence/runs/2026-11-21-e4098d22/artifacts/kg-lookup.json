@@ -1,0 +1,921 @@
+{
+  "target": {
+    "status": "planned",
+    "id": "feature:F0011",
+    "path": "planning-mds/features/F0011-json-schema-contract-system",
+    "affects": [
+      "capability:bitemporal-canonical-commit",
+      "capability:cross-language-contract-validation",
+      "capability:offline-contract-bundle",
+      "capability:typed-fact-answer",
+      "capability:versioned-assertion-semantics",
+      "capability:versioned-content-contracts",
+      "endpoint:fact-commit",
+      "endpoint:fact-get"
+    ],
+    "depends_on": [
+      "feature:F0001",
+      "feature:F0006"
+    ],
+    "governed_by": [
+      "adr:0013",
+      "adr:0039",
+      "adr:0077",
+      "adr:0078",
+      "adr:0079"
+    ],
+    "notes": [
+      "ADR-0039 stays Proposed pending both schema fixture proof and later incomplete-package display; ADR-0079 stays Proposed pending its runtime proofs and explicit acceptance.",
+      "ADR-0079 selects one authored planning schema source -> generated root snapshot -> installed common bundle, source-gated generated Pydantic, headless AJV and shared OpenAPI. No new route, grant, DDL, deployable or extraction activation.",
+      "Dependency evidence references for F0001/F0004/F0006/F0007/F0008 are in the run artifact trace; downstream consumer audits remain pending in their own runs. Runtime bindings/proofs are feature-action work.",
+      "Existing FactVersion OpenAPI nested ranges were stale relative to shipped flat DTO fields; fact-version-read-v1 corrects documentation only. Internal review-decision is not the HTTP submission schema.",
+      "Phase A approved by operator reply approve at G3; Phase B approved with exact token approve-phase-b on 2026-11-20 in plan run 2026-11-20-ccb1bd39, after G4 and seven ordered G5 pre-approval exit checks. G5 post-approval regeneration/publication is authoritative in the journal/manifest. Six Not Started stories, 41 ACs; no runtime implementation. Independent plan-review is next.",
+      "Portable-json/v1 has declared numeric/format/resource limits; existing readers select native-compat/v1 before parsing and retain acceptance/reason semantics. Never fallback after validation failure."
+    ],
+    "uses_api_contract": [
+      "api:brain-api"
+    ],
+    "uses_schema": [
+      "schema:assertion-admission-result-v1",
+      "schema:assertion-record-v2",
+      "schema:canonical-commit-request",
+      "schema:canonical-commit-response",
+      "schema:content-artifact-manifest",
+      "schema:content-artifact-manifest-read",
+      "schema:content-artifact-manifest-v2",
+      "schema:content-records-v2",
+      "schema:document-date-record",
+      "schema:fact-answer-v1",
+      "schema:fact-slot-key-v1",
+      "schema:fact-slot-resolution-result-v1",
+      "schema:fact-temporal-v1",
+      "schema:fact-version-read-v1",
+      "schema:information-state-v1",
+      "schema:interpretation-output-manifest",
+      "schema:interpretation-result",
+      "schema:interpretation-result-v2",
+      "schema:problem-details",
+      "schema:qualified-money-v1",
+      "schema:schema-bundle-manifest-v1",
+      "schema:schema-conformance-cases-v1",
+      "schema:scoped-identifier-v1"
+    ],
+    "_kind": "feature"
+  },
+  "source_precedence": [
+    "target feature folder and feature-assembly-plan.md for feature-local implementation intent",
+    "planning-mds/architecture/decisions/** for architectural decisions",
+    "planning-mds/api/*.yaml and planning-mds/schemas/*.json for interface and payload contracts",
+    "planning-mds/architecture/data-model.md and planning-mds/domain/glossary.md for domain definitions",
+    "planning-mds/knowledge-graph/*.yaml for compressed retrieval and routing"
+  ],
+  "affects": [
+    {
+      "id": "capability:bitemporal-canonical-commit",
+      "label": "Bitemporal canonical commit",
+      "notes": "Section 109.2 commit algorithm over FactSlots with two-range GiST exclusion, split intervals, explicit change reasons, and facts plus audit plus outbox in one transaction (ADR-0007, ADR-0008, ADR-0009). F0008 (ADR-0078, Accepted 2026-11-19; plan run 2026-11-16-208a1193; implemented by migrations 0014-0015) adds the fact-temporal/v1 contract for identity-v1 slots: per-bound precision and zone, OPEN/BOUNDED/UNKNOWN ends with attestation bounds, start-basis and state guards, close-only immutability triggers, remainder lineage and the fact-answer envelope backstop. As built (feature run 2026-11-17-1a4ae2f0): the commit service branches on the slot identity version; v1 path parses and validates bounds, derives attestation from F0004 selections, applies D8 guards (end revision is not succession) and writes lineage remainders; the legacy path keeps the pilot shape with predecessor timestamps and review linkage on remainders; migration 0014.",
+      "related_nodes": [
+        "adr:0078",
+        "capability:temporal-fact-resolution",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "entity:canonical-fact-version",
+        "entity:fact-slot",
+        "entity:outbox-event",
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "schema:fact-temporal-v1",
+        "workflow:canonical-commit"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md",
+        "planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md",
+        "planning-mds/features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "backend": [
+          "engine/migrations/versions/0003_fact_slots_and_commits.py",
+          "engine/packages/brain-domain/src/brain_domain/temporal.py",
+          "engine/packages/brain-temporal/src/**",
+          "engine/packages/brain-temporal/src/brain_temporal/attestation.py",
+          "engine/packages/brain-temporal/src/brain_temporal/bounds.py",
+          "engine/packages/brain-temporal/src/brain_temporal/commit.py"
+        ],
+        "tests": [
+          "engine/apps/api/tests/test_facts.py",
+          "engine/packages/brain-temporal/tests/**",
+          "engine/packages/brain-temporal/tests/test_bounds.py",
+          "engine/packages/brain-temporal/tests/test_contract_examples.py",
+          "engine/packages/brain-temporal/tests/test_temporal_service.py",
+          "engine/tests/fixtures/temporal/harness.py",
+          "engine/tests/integration/test_temporal_concurrency.py",
+          "engine/tests/integration/test_temporal_v1_commit.py"
+        ]
+      }
+    },
+    {
+      "id": "capability:cross-language-contract-validation",
+      "label": "Cross-language structural contract conformance",
+      "notes": "Planning design only, run 2026-11-20-ccb1bd39. Phase A and Phase B approved by operator on 2026-11-20; runtime proof and independent plan-review remain required. No production implementation binding is claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0079",
+          "section": "Decision",
+          "summary": "One authored structural schema source compiles into offline immutable resources and checked language/metadata/API consumers without changing existing domain or authority boundaries."
+        }
+      ],
+      "related_nodes": [
+        "adr:0013",
+        "adr:0079",
+        "schema:schema-bundle-manifest-v1",
+        "schema:schema-conformance-cases-v1"
+      ],
+      "source_docs": [
+        "planning-mds/features/F0011-json-schema-contract-system/contract-design.md",
+        "planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md"
+        ],
+        "schemas": [
+          "planning-mds/schemas/fact-version-read-v1.schema.json",
+          "planning-mds/schemas/information-state-v1.schema.json",
+          "planning-mds/schemas/qualified-money-v1.schema.json",
+          "planning-mds/schemas/schema-conformance-cases-v1.schema.json",
+          "planning-mds/schemas/scoped-identifier-v1.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "capability:offline-contract-bundle",
+      "label": "Offline versioned structural contract bundle",
+      "notes": "Planning design only, run 2026-11-20-ccb1bd39. Phase A and Phase B approved by operator on 2026-11-20; runtime proof and independent plan-review remain required. No production implementation binding is claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0079",
+          "section": "Decision",
+          "summary": "One authored structural schema source compiles into offline immutable resources and checked language/metadata/API consumers without changing existing domain or authority boundaries."
+        }
+      ],
+      "related_nodes": [
+        "adr:0013",
+        "adr:0079",
+        "schema:schema-bundle-manifest-v1",
+        "schema:schema-conformance-cases-v1"
+      ],
+      "source_docs": [
+        "planning-mds/features/F0011-json-schema-contract-system/contract-design.md",
+        "planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md"
+        ],
+        "schemas": [
+          "planning-mds/schemas/schema-bundle-manifest-v1.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "capability:typed-fact-answer",
+      "label": "Typed fact answer carrier",
+      "notes": "Implemented (F0007 run 2026-11-09-b94cfa12) fact-answer/v1 envelope for identity-v1 slots: PRESENT plus eight ADR-0039 states, mandatory absence scope for NOT_FOUND/NOT_STATED, no access-denied state, exact original-currency money and scheme-scoped identifiers. Validated at the existing commit; unread slots read NOT_PROCESSED internally. HTTP return of states is F0020.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        },
+        {
+          "adr": "adr:0039",
+          "section": "Decision",
+          "summary": "Information state is separate from value; money is qualified and identifiers are scoped."
+        }
+      ],
+      "related_nodes": [
+        "adr:0039",
+        "adr:0077",
+        "capability:bitemporal-canonical-commit",
+        "endpoint:fact-commit",
+        "entity:canonical-fact-version",
+        "entity:fact-slot",
+        "schema:fact-answer-v1"
+      ],
+      "source_docs": [
+        "planning-mds/domain/glossary.md",
+        "planning-mds/features/archive/F0007-factslot-model/feature-assembly-plan.md",
+        "planning-mds/features/archive/F0007-factslot-model/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md"
+        ],
+        "backend": [
+          "engine/packages/brain-domain/src/brain_domain/data/iso4217-2026-01.txt",
+          "engine/packages/brain-domain/src/brain_domain/fact_answers.py",
+          "engine/packages/brain-domain/src/brain_domain/fact_values.py",
+          "engine/packages/brain-factslots/src/brain_factslots/answers.py"
+        ],
+        "schemas": [
+          "planning-mds/schemas/fact-answer-v1.schema.json"
+        ],
+        "tests": [
+          "engine/packages/brain-domain/tests/test_fact_slots.py",
+          "engine/tests/integration/test_factslot_answers.py",
+          "engine/tests/integration/test_factslot_authorized_reads.py"
+        ]
+      }
+    },
+    {
+      "id": "capability:versioned-assertion-semantics",
+      "label": "Versioned assertion semantics",
+      "notes": "Implemented for F0006 run 2026-11-02-5a00b0ff: strict typed/open contracts, explicit version dispatch, independent dimensions and immutable semantic extensions. Legacy source rows and v1-only importer/defaults are preserved. Qualified synthetic fixture proof does not activate a live producer or grant canonical acceptance; ADR-0075 remains Proposed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "F0006 as-built versioned claims, structural admission and guarded current consumers have source-bound synthetic/PostgreSQL proof; no new producer, canonical acceptance policy or formal Proposed ADR acceptance is implied."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "entity:assertion",
+        "entity:assertion-document-reference",
+        "entity:assertion-semantics",
+        "schema:assertion-record-v2",
+        "schema:interpretation-result-v2"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md",
+        "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md",
+        "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "architecture": [
+          "planning-mds/architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md"
+        ],
+        "backend": [
+          "engine/migrations/versions/0011_f0006_assertion_semantics.py",
+          "engine/packages/brain-contracts/src/brain_contracts/assertions.py",
+          "engine/packages/brain-contracts/src/brain_contracts/dispatch.py",
+          "engine/packages/brain-domain/src/brain_domain/assertions.py",
+          "engine/packages/brain-persistence/src/brain_persistence/assertion_models.py",
+          "engine/packages/brain-persistence/src/brain_persistence/assertions.py",
+          "engine/packages/brain-persistence/src/brain_persistence/models.py"
+        ],
+        "resources": [
+          "engine/apps/api/pyproject.toml",
+          "engine/packages/brain-assertions/pyproject.toml",
+          "engine/packages/brain-contracts/pyproject.toml",
+          "engine/packages/brain-persistence/pyproject.toml",
+          "engine/pyproject.toml",
+          "engine/uv.lock",
+          "neuron/uv.lock"
+        ],
+        "schemas": [
+          "engine/packages/brain-contracts/src/brain_contracts/schemas/assertion-admission-result-v1.schema.json",
+          "engine/packages/brain-contracts/src/brain_contracts/schemas/assertion-record-v2.schema.json",
+          "engine/packages/brain-contracts/src/brain_contracts/schemas/interpretation-result-v2.schema.json",
+          "engine/packages/brain-contracts/src/brain_contracts/schemas/interpretation-result.schema.json",
+          "planning-mds/schemas/assertion-admission-result-v1.schema.json",
+          "planning-mds/schemas/assertion-record-v2.schema.json",
+          "planning-mds/schemas/interpretation-result-v2.schema.json"
+        ],
+        "tests": [
+          "engine/packages/brain-assertions/tests/test_contracts.py",
+          "engine/tests/integration/test_assertion_migration.py",
+          "engine/tests/integration/test_assertion_ownership.py"
+        ]
+      }
+    },
+    {
+      "id": "capability:versioned-content-contracts",
+      "label": "Versioned verified content contracts",
+      "notes": "Implemented F0004 shared v1/v2 byte/record verification, manifest-last immutable storage, fenced ready publication and legacy preservation. V2 remains default false pending deployment reconciliation/consumer gates. Integrity failures on reads never quarantine or reparse; explicit authorized operator units own repair.",
+      "related_nodes": [
+        "adr:0073",
+        "entity:content-artifact"
+      ],
+      "source_docs": [
+        "planning-mds/features/archive/F0004-content-artifact-model/feature-assembly-plan.md",
+        "planning-mds/features/archive/F0004-content-artifact-model/worked-examples.md"
+      ],
+      "_kind": "capability",
+      "code_paths": {
+        "ai": [
+          "neuron/packages/brain-ingestion/src/brain_ingestion/content_*.py",
+          "neuron/packages/brain-ingestion/src/brain_ingestion/conversion_recipe.py",
+          "neuron/packages/brain-ingestion/src/brain_ingestion/integrity_sweep.py",
+          "neuron/packages/brain-ingestion/src/brain_ingestion/item_provenance.py",
+          "neuron/packages/brain-ingestion/src/brain_ingestion/submission.py"
+        ],
+        "backend": [
+          "engine/apps/worker/src/brain_worker/content_*.py",
+          "engine/apps/worker/src/brain_worker/publication_intent.py",
+          "engine/migrations/versions/0008_f0004_content_contract.*",
+          "engine/packages/brain-content/src/brain_content/**",
+          "engine/packages/brain-persistence/src/brain_persistence/content_*.py"
+        ],
+        "infra": [
+          "config/local.yaml",
+          "docker/content-integrity-runbook.md"
+        ],
+        "tests": [
+          "engine/apps/api/tests/test_content.py",
+          "engine/packages/brain-content/tests/**",
+          "engine/tests/integration/test_content_migration_states.py",
+          "neuron/packages/brain-ingestion/tests/spikes/**",
+          "neuron/packages/brain-ingestion/tests/test_content_projection_v2.py",
+          "neuron/packages/brain-ingestion/tests/test_ocr_quality.py",
+          "neuron/tests/integration/test_content_*.py"
+        ]
+      }
+    },
+    {
+      "id": "endpoint:fact-commit",
+      "label": "POST /facts/{factSlotId}/commits",
+      "method": "POST",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "capability:authorization-enforcement",
+        "capability:bitemporal-canonical-commit"
+      ],
+      "resource": "fact_slot",
+      "route": "/facts/{factSlotId}/commits",
+      "source_docs": [
+        "planning-mds/api/brain-api.yaml",
+        "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md"
+      ],
+      "_kind": "endpoint"
+    },
+    {
+      "id": "endpoint:fact-get",
+      "label": "GET /facts/{factSlotId}",
+      "method": "GET",
+      "related_nodes": [
+        "capability:authorization-enforcement",
+        "capability:bitemporal-canonical-commit"
+      ],
+      "resource": "fact_slot",
+      "route": "/facts/{factSlotId}",
+      "source_docs": [
+        "planning-mds/api/brain-api.yaml"
+      ],
+      "_kind": "endpoint"
+    }
+  ],
+  "governed_by": [
+    {
+      "id": "adr:0013",
+      "label": "JSON Schema Is the Structural Contract",
+      "path": "planning-mds/architecture/decisions/ADR-0013-json-schema-is-the-structural-contract.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0039",
+      "label": "Typed Insurance Values and Completeness",
+      "path": "planning-mds/architecture/decisions/ADR-0039-typed-insurance-values-and-completeness.md",
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0077",
+      "label": "FactSlot Identity and Typed Answer Carriers (Accepted 2026-11-10)",
+      "path": "planning-mds/architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md",
+      "related_nodes": [
+        "adr:0006",
+        "adr:0039",
+        "adr:0066",
+        "capability:factslot-identity-resolution",
+        "capability:typed-fact-answer",
+        "entity:fact-slot",
+        "entity:fact-slot-qualifier"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0078",
+      "label": "Bitemporal Version Contract and Close-Only Immutability",
+      "path": "planning-mds/architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md",
+      "related_nodes": [
+        "adr:0007",
+        "adr:0008",
+        "adr:0039",
+        "adr:0064",
+        "adr:0077",
+        "capability:bitemporal-canonical-commit",
+        "capability:temporal-fact-resolution",
+        "entity:canonical-fact-version",
+        "schema:fact-temporal-v1"
+      ],
+      "_kind": "adr"
+    },
+    {
+      "id": "adr:0079",
+      "label": "Offline Schema Bundle and Cross-Language Conformance",
+      "path": "planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md",
+      "related_nodes": [
+        "capability:cross-language-contract-validation",
+        "capability:offline-contract-bundle"
+      ],
+      "_kind": "adr"
+    }
+  ],
+  "uses_schema": [
+    {
+      "id": "schema:assertion-admission-result-v1",
+      "label": "Assertion Admission Result V1",
+      "path": "planning-mds/schemas/assertion-admission-result-v1.schema.json",
+      "notes": "F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and producer activation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "capability:structural-assertion-admission",
+        "entity:assertion"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:assertion-record-v2",
+      "label": "Assertion Candidate V2",
+      "path": "planning-mds/schemas/assertion-record-v2.schema.json",
+      "notes": "F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and producer activation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "capability:versioned-assertion-semantics",
+        "entity:assertion"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:canonical-commit-request",
+      "label": "CanonicalCommitRequest",
+      "path": "planning-mds/schemas/canonical-commit-request.schema.json",
+      "related_nodes": [
+        "capability:bitemporal-canonical-commit",
+        "endpoint:fact-commit"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:canonical-commit-response",
+      "label": "CanonicalCommitResponse",
+      "path": "planning-mds/schemas/canonical-commit-response.schema.json",
+      "related_nodes": [
+        "capability:bitemporal-canonical-commit",
+        "endpoint:fact-commit"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:content-artifact-manifest",
+      "label": "ContentArtifactManifest",
+      "path": "planning-mds/schemas/content-artifact-manifest.schema.json",
+      "related_nodes": [
+        "capability:parse-once-content-artifact",
+        "entity:content-artifact"
+      ],
+      "_kind": "schema",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "schema:content-artifact-manifest-read",
+      "label": "Content Artifact Manifest Read",
+      "path": "planning-mds/schemas/content-artifact-manifest-read.schema.json",
+      "related_nodes": [
+        "adr:0073",
+        "capability:versioned-content-contracts",
+        "endpoint:content-artifact-get"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:content-artifact-manifest-v2",
+      "label": "Content Artifact Manifest V2",
+      "path": "planning-mds/schemas/content-artifact-manifest-v2.schema.json",
+      "related_nodes": [
+        "adr:0073",
+        "capability:versioned-content-contracts",
+        "entity:content-artifact"
+      ],
+      "_kind": "schema",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-content/src/brain_content/schemas/content-artifact-manifest-v2.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "schema:content-records-v2",
+      "label": "Content Records V2",
+      "path": "planning-mds/schemas/content-records-v2.schema.json",
+      "related_nodes": [
+        "adr:0073",
+        "capability:versioned-content-contracts",
+        "entity:content-block",
+        "entity:content-table",
+        "entity:content-table-cell"
+      ],
+      "_kind": "schema",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-content/src/brain_content/schemas/content-records-v2.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "schema:document-date-record",
+      "label": "Document Date Record",
+      "path": "planning-mds/schemas/document-date-record.schema.json",
+      "related_nodes": [
+        "adr:0073",
+        "capability:document-date-provenance",
+        "entity:document-date-candidate",
+        "entity:document-date-selection"
+      ],
+      "_kind": "schema",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-content/src/brain_content/schemas/document-date-record.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "schema:fact-answer-v1",
+      "label": "Fact Answer V1",
+      "path": "planning-mds/schemas/fact-answer-v1.schema.json",
+      "notes": "F0007 answer envelope stored in canonical_fact_version.value for identity-v1 slots; Phase B approved by operator 2026-11-09; runtime implementation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:typed-fact-answer",
+        "entity:canonical-fact-version"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-slot-key-v1",
+      "label": "FactSlot Key V1",
+      "path": "planning-mds/schemas/fact-slot-key-v1.schema.json",
+      "notes": "F0007 internal slot-resolution request design contract; Phase B approved by operator 2026-11-09. Not an HTTP payload; runtime implementation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:factslot-identity-resolution",
+        "entity:fact-slot"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-slot-resolution-result-v1",
+      "label": "FactSlot Resolution Result V1",
+      "path": "planning-mds/schemas/fact-slot-resolution-result-v1.schema.json",
+      "notes": "F0007 server-computed resolution outcome design contract; Phase B approved by operator 2026-11-09; runtime implementation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0077",
+          "section": "Decision",
+          "summary": "Proposed F0007 design: normalized KB-owned slot identity, member child slots, fact-answer/v1 carrier with scoped absence, qualified money and scoped identifiers; proof gates evidenced in feature run 2026-11-09-b94cfa12, formal acceptance pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0077",
+        "capability:factslot-identity-resolution",
+        "entity:fact-slot"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-temporal-v1",
+      "label": "Fact Temporal V1",
+      "path": "planning-mds/schemas/fact-temporal-v1.schema.json",
+      "notes": "F0008 design contract for the valid-time commit block, the stored version temporal block and the validity-unknown read (ADR-0078, Accepted 2026-11-19); implemented by F0008 (feature runs through 2026-11-19-8cfcd0ff).",
+      "rationale": [
+        {
+          "adr": "adr:0078",
+          "section": "Decision",
+          "summary": "Proposed F0008 design: per-bound granularity and IANA zone, OPEN/BOUNDED/UNKNOWN ends with attestation from F0004 date selections, start basis guards, close-only immutability and validity-unknown reads."
+        }
+      ],
+      "related_nodes": [
+        "adr:0078",
+        "capability:bitemporal-canonical-commit",
+        "capability:temporal-fact-resolution",
+        "entity:canonical-fact-version",
+        "schema:canonical-commit-request"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:fact-version-read-v1",
+      "path": "planning-mds/schemas/fact-version-read-v1.schema.json",
+      "related_nodes": [
+        "adr:0013",
+        "adr:0079"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:information-state-v1",
+      "path": "planning-mds/schemas/information-state-v1.schema.json",
+      "related_nodes": [
+        "adr:0013",
+        "adr:0079"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:interpretation-output-manifest",
+      "label": "Interpretation Output Manifest",
+      "path": "planning-mds/schemas/interpretation-output-manifest.schema.json",
+      "related_nodes": [
+        "adr:0073",
+        "capability:versioned-content-contracts",
+        "entity:semantic-interpretation-run"
+      ],
+      "_kind": "schema",
+      "code_paths": {
+        "backend": [
+          "engine/packages/brain-content/src/brain_content/outputs.py",
+          "engine/packages/brain-content/src/brain_content/schemas/interpretation-output-manifest.schema.json"
+        ]
+      }
+    },
+    {
+      "id": "schema:interpretation-result",
+      "label": "InterpretationResult",
+      "path": "planning-mds/schemas/interpretation-result.schema.json",
+      "related_nodes": [
+        "capability:semantic-interpretation-run",
+        "entity:semantic-interpretation-run"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:interpretation-result-v2",
+      "label": "Interpretation Result V2",
+      "path": "planning-mds/schemas/interpretation-result-v2.schema.json",
+      "notes": "F0006 design contract; Phase B approved by operator 2026-11-01. Runtime implementation and producer activation not claimed.",
+      "rationale": [
+        {
+          "adr": "adr:0075",
+          "section": "Decision",
+          "summary": "Proposed F0006 design preserves legacy records and requires scoped structural admission and source eligibility guards; runtime proof pending."
+        }
+      ],
+      "related_nodes": [
+        "adr:0075",
+        "capability:versioned-assertion-semantics",
+        "entity:assertion"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:problem-details",
+      "label": "ProblemDetails",
+      "path": "planning-mds/schemas/problem-details.schema.json",
+      "related_nodes": [
+        "api:brain-api",
+        "capability:runtime-roots-and-toolchain"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:qualified-money-v1",
+      "path": "planning-mds/schemas/qualified-money-v1.schema.json",
+      "related_nodes": [
+        "adr:0013",
+        "adr:0079"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:schema-bundle-manifest-v1",
+      "path": "planning-mds/schemas/schema-bundle-manifest-v1.schema.json",
+      "related_nodes": [
+        "adr:0013",
+        "adr:0079"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:schema-conformance-cases-v1",
+      "path": "planning-mds/schemas/schema-conformance-cases-v1.schema.json",
+      "related_nodes": [
+        "adr:0013",
+        "adr:0079"
+      ],
+      "_kind": "schema"
+    },
+    {
+      "id": "schema:scoped-identifier-v1",
+      "path": "planning-mds/schemas/scoped-identifier-v1.schema.json",
+      "related_nodes": [
+        "adr:0013",
+        "adr:0079"
+      ],
+      "_kind": "schema"
+    }
+  ],
+  "uses_api_contract": [
+    {
+      "id": "api:brain-api",
+      "label": "Nebula Insurance Brain API",
+      "path": "planning-mds/api/brain-api.yaml",
+      "related_nodes": [
+        "endpoint:content-artifact-file-get",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:health",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get"
+      ],
+      "_kind": "api_contract"
+    }
+  ],
+  "depends_on": [
+    {
+      "status": "archived-done",
+      "id": "feature:F0001",
+      "path": "planning-mds/features/archive/F0001-repository-and-engineering-foundation",
+      "affects": [
+        "capability:authorization-enforcement",
+        "capability:backup-and-restore",
+        "capability:bitemporal-canonical-commit",
+        "capability:credential-verification-and-principal-resolution",
+        "capability:evidence-review-round-trip",
+        "capability:local-dependency-stack",
+        "capability:local-inference-service",
+        "capability:parse-once-content-artifact",
+        "capability:runtime-roots-and-toolchain",
+        "capability:semantic-interpretation-run",
+        "endpoint:content-artifact-get",
+        "endpoint:fact-commit",
+        "endpoint:fact-get",
+        "endpoint:health",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get",
+        "entity:assertion",
+        "entity:audit-event",
+        "entity:canonical-fact-version",
+        "entity:content-artifact",
+        "entity:fact-slot",
+        "entity:outbox-event",
+        "entity:principal",
+        "entity:review-decision",
+        "entity:review-item",
+        "entity:semantic-interpretation-run",
+        "workflow:canonical-commit",
+        "workflow:human-review",
+        "workflow:ingestion-interpretation"
+      ],
+      "enforced_by_policy": [
+        "policy_rule:content-artifact-read",
+        "policy_rule:fact-slot-commit",
+        "policy_rule:fact-slot-read",
+        "policy_rule:review-task-annotate",
+        "policy_rule:review-task-read"
+      ],
+      "governed_by": [
+        "adr:0001",
+        "adr:0003",
+        "adr:0004",
+        "adr:0007",
+        "adr:0008",
+        "adr:0009",
+        "adr:0010",
+        "adr:0016",
+        "adr:0035",
+        "adr:0037",
+        "adr:0040",
+        "adr:0041",
+        "adr:0044",
+        "adr:0049",
+        "adr:0050",
+        "adr:0054",
+        "adr:0055",
+        "adr:0057",
+        "adr:0058",
+        "adr:0059"
+      ],
+      "notes": [
+        "ADR-0057 (2026-09-08) replaced Label Studio with the native Nebula Review Panel: S0004 renamed, the webhook endpoint became the review decision submission endpoint, and ADR-0058 added the anchoring contract S0004 also settles.",
+        "Phase A drafted 2026-09-06 in plan run 2026-09-06-cdb5d8cb: seven stories (toolchain, containers, four section 115.4 proofs, contract settlement). coverage_excluded stays until Phase B binds capabilities.",
+        "Phase B approved 2026-09-06: coverage_excluded removed; ten capabilities, ten entities, three workflows, six endpoints, six schemas, three roles, five policy rules declared; code bindings are authored at feature G7 once source exists."
+      ],
+      "restricted_to_role": [
+        "role:reviewer",
+        "role:service-principal",
+        "role:tenant-member"
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:canonical-commit-request",
+        "schema:canonical-commit-response",
+        "schema:content-artifact-manifest",
+        "schema:interpretation-result",
+        "schema:problem-details",
+        "schema:review-decision"
+      ],
+      "_kind": "feature"
+    },
+    {
+      "status": "archived-done",
+      "id": "feature:F0006",
+      "path": "planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis",
+      "affects": [
+        "capability:assertion-eligibility-guards",
+        "capability:structural-assertion-admission",
+        "capability:versioned-assertion-semantics",
+        "endpoint:fact-commit",
+        "endpoint:review-decisions-submit",
+        "endpoint:review-item-get",
+        "entity:assertion",
+        "entity:assertion-document-reference",
+        "entity:assertion-name-claim",
+        "entity:assertion-semantics"
+      ],
+      "depends_on": [
+        "feature:F0001",
+        "feature:F0002",
+        "feature:F0003",
+        "feature:F0004",
+        "feature:F0005"
+      ],
+      "governed_by": [
+        "adr:0005",
+        "adr:0010",
+        "adr:0013",
+        "adr:0030",
+        "adr:0035",
+        "adr:0037",
+        "adr:0058",
+        "adr:0061",
+        "adr:0062",
+        "adr:0063",
+        "adr:0065",
+        "adr:0075"
+      ],
+      "notes": [
+        "ADR-0065/0075 remain Proposed; bounded feature completion does not accept the broader ADR proof gates. Unregistered legacy pilot evidence compatibility remains explicit; attributable v2 correction lineage retains basis/mood/evidence restrictions.",
+        "As-built code/test bindings reconciled by Architect at G7 in planning-mds/operations/evidence/runs/2026-11-02-5a00b0ff/kg-reconciliation.md; archive path/status and generated trackers are PM G8 ownership.",
+        "Automatic importer remains v1-only. No live producer/model, UI, grants or broader extraction activation. F0016 owns durable drop/run adoption, F0018 full canonical orchestration, F0022 display and F0066 open extraction/alignment.",
+        "SEC-01 High is accepted only for trusted local synthetic fixtures; AI Engineer + DevOps remediate/qualify dependencies and verify resource isolation, Security verifies, target2026-11-10 and before untrusted/production PDFs. SEC-02 Medium global planning-audit carryover targets2026-11-10; SEC-03 Low nosniff follow-up targets2026-11-17."
+      ],
+      "uses_api_contract": [
+        "api:brain-api"
+      ],
+      "uses_schema": [
+        "schema:assertion-admission-result-v1",
+        "schema:assertion-record-v2",
+        "schema:interpretation-result",
+        "schema:interpretation-result-v2",
+        "schema:problem-details"
+      ],
+      "_kind": "feature"
+    }
+  ]
+}
