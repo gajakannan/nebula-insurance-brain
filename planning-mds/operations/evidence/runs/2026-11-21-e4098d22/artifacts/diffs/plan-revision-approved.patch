@@ -1,0 +1,1148 @@
+diff --git a/planning-mds/BLUEPRINT.md b/planning-mds/BLUEPRINT.md
+index fdff94f..d960bec 100644
+--- a/planning-mds/BLUEPRINT.md
++++ b/planning-mds/BLUEPRINT.md
+@@ -568,7 +568,12 @@ required. ADR-0079 and ADR-0039 remain Proposed pending their stated proofs.
+ G4 ontology synchronization and all ordered G5 pre-approval exit checks passed.
+ The operator approved Phase B with `approve-phase-b` on 2026-11-20; G5 performs
+ post-approval regeneration/validation and publishes the manifest last. Independent
+-plan-review is next, followed by the feature action. Existing C4 topology is unchanged.
++plan-review `2026-11-21-b4cd07e4` returned READY for that baseline. Phase B revision
++`2026-11-21-e4098d22` was approved by operator token `approve-phase-b` on
++2026-11-22; its G5 journal/manifest records post-approval checks and publication.
++The revision adds per-resource consumer mappings,
++read-only integration/dev full-history response-guard preflight, and PR-L3
++Security follow-up due at feature G3. Existing C4 topology is unchanged.
+ 
+ ### 4.17 Delivery reconciliation (2026-11-21)
+ 
+@@ -603,7 +608,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
+ Current position (2026-11-20): F0001 to F0008 are done and archived; ADR-0078 was accepted on 2026-11-19 (F0008 second remediation run `2026-11-19-8cfcd0ff`, approved 2026-11-19). F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
+ 
+ 1. Now (2026-11-20 roadmap review, after F0008 closed): four lanes.
+-   - **F0011** (JSON Schema contract system) continues through `plan` → `plan-review` → `feature`, numbering its migration after 0015.
++   - **F0011** (JSON Schema contract system) continues through `plan` → `plan-review` → `feature`. No migration is planned; any future migration would follow 0015.
+    - **F0009** (provenance + human-correction lineage) is dependency-ready and heads the temporal/commit path F0009 → F0010 → F0018.
+    - **F0012** (foundation ontology) is planned alongside F0011, and its feature run starts after F0011 completes.
+    - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
+index 7d98a7f..c52c98a 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
+@@ -10,7 +10,7 @@
+ ## User Story
+ 
+ **As a** Dana the Platform Engineer
+-**I want** resolve an explicit structural contract version from a reproducible local bundle
++**I want** to resolve an explicit structural contract version from a reproducible local bundle
+ **So that** every consumer validates against the intended contract without fetching remote definitions.
+ 
+ ## Context & Background
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
+index 49ddc8f..b159c0b 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
+@@ -10,7 +10,7 @@
+ ## User Story
+ 
+ **As a** Ingrid the Persistence Engineer
+-**I want** validate the shipped state-plus-value answer and the exact scope of an absence
++**I want** to validate the shipped state-plus-value answer and the exact scope of an absence
+ **So that** a missing answer cannot turn into an explicit negative or disclose restricted source material.
+ 
+ ## Context & Background
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
+index 237f5c8..2cb560f 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
+@@ -10,7 +10,7 @@
+ ## User Story
+ 
+ **As a** Ingrid the Persistence Engineer
+-**I want** share structural definitions for exact money and namespace-qualified identifiers
++**I want** to share structural definitions for exact money and namespace-qualified identifiers
+ **So that** Python and JavaScript preserve the same amount and identity instead of introducing float or namespace errors.
+ 
+ ## Context & Background
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
+index 3e4c26f..cbae658 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
+@@ -10,7 +10,7 @@
+ ## User Story
+ 
+ **As a** Dana the Platform Engineer
+-**I want** run identical structural cases through every supported client and server adapter
++**I want** to run identical structural cases through every supported client and server adapter
+ **So that** client and server cannot disagree silently about a supported wire payload.
+ 
+ ## Context & Background
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
+index 93a527c..4bc1f09 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
+@@ -10,7 +10,7 @@
+ ## User Story
+ 
+ **As a** Ingrid the Persistence Engineer
+-**I want** adopt the shared contracts at existing validation boundaries without rewriting accepted history
++**I want** to adopt the shared contracts at existing validation boundaries without rewriting accepted history
+ **So that** contract consolidation cannot weaken admission or change a historical answer.
+ 
+ ## Context & Background
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
+index d455d5a..2b02430 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
+@@ -10,7 +10,7 @@
+ ## User Story
+ 
+ **As a** Dana the Platform Engineer
+-**I want** reproduce and check all published contract artifacts from a clean checkout and installed packages
++**I want** to reproduce and check all published contract artifacts from a clean checkout and installed packages
+ **So that** downstream ontology and profile features receive a verifiable contract instead of repository-local assumptions.
+ 
+ ## Context & Background
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/GETTING-STARTED.md b/planning-mds/features/F0011-json-schema-contract-system/GETTING-STARTED.md
+index c8b835e..5b8c762 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/GETTING-STARTED.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/GETTING-STARTED.md
+@@ -5,7 +5,12 @@
+ Phase A and Phase B are approved in plan run `2026-11-20-ccb1bd39` (operator
+ Phase B token `approve-phase-b`, 2026-11-20). Six stories are Not Started. Read
+ [PRD](PRD.md), the assembly plan and contract design; independent plan-review
+-precedes the feature action.
++returned READY in review `2026-11-21-b4cd07e4`. The Phase B revision
++`2026-11-21-e4098d22` was approved by operator token `approve-phase-b` on
++2026-11-22. Its journal/manifest records final post-approval validation and
++publication. Carry the per-resource inventory, integration/dev
++stored-version rollout preflight and PR-L3 G3 Security follow-up from the
++revised assembly plan into feature G0.
+ No new runtime setup or migration is delivered by this plan.
+ 
+ ## Prerequisites
+@@ -52,7 +57,7 @@ frozen holdout.
+ From the framework checkout, run:
+ 
+ ```bash
+-python3 agents/scripts/resume-brief.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-11-20-ccb1bd39
++python3 agents/scripts/resume-brief.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-11-21-e4098d22
+ python3 agents/scripts/project_context.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --action plan
+ ```
+ 
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/PRD.md b/planning-mds/features/F0011-json-schema-contract-system/PRD.md
+index 0f06c69..ba26fdf 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/PRD.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/PRD.md
+@@ -6,6 +6,7 @@
+ **Phase:** MVP / v0.1A
+ **Status:** Phase A and Phase B approved — implementation Not Started
+ **Plan Run:** 2026-11-20-ccb1bd39 (A+B; feature mode new)
++**Plan Revision:** 2026-11-21-e4098d22 (Phase B, existing; operator approved with `approve-phase-b` on 2026-11-22). Requirements and 41 ACs are unchanged; the revision specifies the review's compatibility proof and consumer mapping.
+ 
+ ## Feature Statement
+ 
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/README.md b/planning-mds/features/F0011-json-schema-contract-system/README.md
+index 97c3fd5..af92f81 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/README.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/README.md
+@@ -4,7 +4,10 @@
+ **Phase:** v0.1A / MVP
+ **Roadmap:** Now (2026-11-20 roadmap review)
+ **Planning:** Phase A and Phase B approved by the operator on 2026-11-20; implementation Not Started.
+-**Plan Run:** `2026-11-20-ccb1bd39`
++**Plan Run:** `2026-11-20-ccb1bd39` (approved baseline)
++**Plan Revision:** `2026-11-21-e4098d22` (Phase B; operator approved with `approve-phase-b` on 2026-11-22).
++**Review:** `2026-11-21-b4cd07e4` READY for the baseline; revision adds the
++stored-history rollout proof, per-resource integration mapping and tracked G3 audit follow-up.
+ 
+ ## Overview
+ 
+@@ -113,7 +116,10 @@ ContractBundle 1 ---- many GeneratedArtifact
+ ## Approval and proof boundary
+ 
+ Phase A approved by operator response `approve`, recorded as `approve-phase-a`
+-at G3. Phase B approved by operator token `approve-phase-b` at G5 on 2026-11-20.
++at G3. The Phase B baseline was approved by operator token `approve-phase-b`
++at G5 on 2026-11-20. The review revision `2026-11-21-e4098d22` was approved
++with the same explicit token on 2026-11-22; its G5 journal/manifest records
++the post-approval regeneration, validation and publication outcome.
+ ADR-0079 and ADR-0039 remain Proposed pending their runtime proofs and later acceptance.
+ All six stories are Not Started; runtime capability, conformance and security
+ claims wait for the feature action and its independent reviews.
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/STATUS.md b/planning-mds/features/F0011-json-schema-contract-system/STATUS.md
+index 0414e1a..9b202f7 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/STATUS.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/STATUS.md
+@@ -1,9 +1,11 @@
+ # F0011 — JSON Schema contract system — Status
+ 
+-**Overall Status:** Draft
+-**Last Updated:** 2026-11-20
++**Overall Status:** Planned
++**Last Updated:** 2026-11-22
+ **Planning:** Phase A and Phase B approved by the operator; token `approve-phase-b` recorded at G5 on 2026-11-20.
+-**Plan Run:** `2026-11-20-ccb1bd39` (A+B, new; base-run-only)
++**Plan Run:** `2026-11-20-ccb1bd39` (approved A+B baseline).
++**Plan Revision:** `2026-11-21-e4098d22` (B, existing; operator approved with `approve-phase-b` on 2026-11-22).
++**Plan Review:** `2026-11-21-b4cd07e4` returned READY for the baseline; this revision addresses its six findings.
+ 
+ ## Story Checklist
+ 
+@@ -77,7 +79,10 @@ Append-only table. Empty until the feature run produces actual reviewer evidence
+ F0012/F0013 own vocabulary; F0015 owns extraction compilation; F0016 owns actual
+ searched scopes; F0014/F0023 own package completeness/display. ADR-0039 stays
+ Proposed pending all stated proofs. These are ownership boundaries, not waived
+-F0011 acceptance criteria. No unresolved implementation finding is deferred here.
++F0011 acceptance criteria. PR-L3 is a tracked Low audit follow-up: Security Reviewer must record the
++internal-invariant decision and a fault-injection result at feature G3,
++before the implementation approval gate. See the assembly plan,
++"Read audit follow-up (PR-L3)". No runtime fix or acceptance is claimed by plan.
+ 
+ ## Closeout Summary
+ 
+@@ -92,3 +97,5 @@ will be recorded by the later feature action, never by this planning run.
+ - [x] All seven ordered G5 pre-approval exit operations returned zero.
+ - [x] Operator explicitly approved Phase A at G3.
+ - [x] Operator explicitly approved Phase B after green G5 exit checks (`approve-phase-b`, 2026-11-20).
++
++- [x] Operator approved review revision `2026-11-21-e4098d22` at G5 (`approve-phase-b`, 2026-11-22); final publication is recorded by the run journal/manifest.
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/acceptance-criteria-checklist.md b/planning-mds/features/F0011-json-schema-contract-system/acceptance-criteria-checklist.md
+index 64f8cb6..4afa439 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/acceptance-criteria-checklist.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/acceptance-criteria-checklist.md
+@@ -1,6 +1,6 @@
+ # F0011 — Acceptance criteria checklist
+ 
+-Phase A draft, plan run `2026-11-20-ccb1bd39`. Every AC is defined in its owning
++Phase A approved in plan run `2026-11-20-ccb1bd39`. Every AC is defined in its owning
+ story; this index does not duplicate or override that definition.
+ 
+ | Story | Criteria | Count | Required observed proof | State |
+@@ -19,6 +19,9 @@ story; this index does not duplicate or override that definition.
+ - [ ] Exact money and scoped identifiers retain precision and namespace.
+ - [ ] Python/Pydantic/AJV run every shared case; OpenAPI resolves the same definitions.
+ - [ ] Actual consumer integration, historical compatibility and denied/refused paths pass.
++- [ ] S0005 AC1: every inventory resource has an observed consumer/test/selector/disposition mapping.
++- [ ] S0005 AC4: integration and dev stored-version sweeps pass before enabling the response guard.
++- [ ] PR-L3: feature G3 Security records the read-audit/HTTP invariant-failure disposition.
+ - [ ] Clean-package reproduction and intentional drift failure verified in CI.
+ - [ ] Feature-run evidence maps all 41 ACs to observed results with at least 80% changed executable-line coverage.
+ - [ ] Required independent signoff provenance is appended to STATUS.md.
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/contract-design.md b/planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+index 286a6be..e532cc5 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/contract-design.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+@@ -1,6 +1,6 @@
+ # F0011 — Structural contract design
+ 
+-**Status:** Phase A and Phase B approved by the operator on 2026-11-20; runtime implementation Not Started.
++**Status:** Approved A+B baseline `2026-11-20-ccb1bd39`; Phase B revision `2026-11-21-e4098d22` approved by operator token `approve-phase-b` on 2026-11-22; runtime implementation Not Started.
+ **Decision:** [ADR-0079](../../architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md).
+ 
+ ## Authority and inventory
+@@ -119,6 +119,16 @@ the same metadata. This feature adds no form renderer or editable UI.
+ 
+ ## Existing consumer integration
+ 
++The per-resource mapping in [contract-inventory.yaml](contract-inventory.yaml)
++controls consumer entry points, compatibility tests, version selectors and
++adopt/delegate/retain-versioned-boundary dispositions (PR-M2). The table below
++summarizes groups only. Manifest-read and ProblemDetails are OpenAPI/doc-only
++schema boundaries; the native commit request retains its versioned DTO.
++The [assembly plan](feature-assembly-plan.md#stored-version-rollout-preflight-pr-m1)
++requires complete read-only integration/dev stored-version sweeps before
++response-guard rollout (PR-M1), and records the G3 Security audit follow-up
++(PR-L3). These are future proof obligations under unchanged S0005 ACs.
++
+ | Consumer entry point | Integration and compatibility boundary |
+ |----------------------|----------------------------------------|
+ | brain_content.contracts.schema / validate_contract; parse_manifest; content record/date/output adapters | Delegate to the shared installed bundle; retain existing native parser/error mapping. Delete parent-directory planning fallback. Content v1/v2 selectors and v2 writer activation stay unchanged. |
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/contract-inventory.yaml b/planning-mds/features/F0011-json-schema-contract-system/contract-inventory.yaml
+index 42204e7..47f82e6 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/contract-inventory.yaml
++++ b/planning-mds/features/F0011-json-schema-contract-system/contract-inventory.yaml
+@@ -1,4 +1,4 @@
+-status: architecture-design-approved-pending-implementation
++status: phase-b-review-revision-approved-pending-implementation
+ bundle: brain-contracts/v1
+ profile: nebula-json-schema/1
+ authoring_root: planning-mds/schemas
+@@ -12,161 +12,454 @@ resources:
+   source: planning-mds/schemas/content-artifact-manifest.schema.json
+   source_sha256_at_design: 3327f72bfe19e2d297fbf0d7dd8072ac86eaa7d14f71d1ad7bb8301b4c76a28e
+   owner: content
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_content.manifest.parse_manifest
++    path: engine/packages/brain-content/src/brain_content/manifest.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-content/tests/test_versioned_content.py
++    state: existing
++  version_selector: artifact_contract_version is integer 1; parse_manifest selects the v1 resource before validation;
++    all other markers fail.
++  wire_profile: native-compat/v1
++  integration_notes: Retain ArtifactManifestV1 and native decode/error behavior; replace only schema loading/evaluation.
+ - name: content-artifact-manifest-v2
+   version: '2'
+   id: https://nebula.local/schemas/content-artifact-manifest-v2.schema.json
+   source: planning-mds/schemas/content-artifact-manifest-v2.schema.json
+   source_sha256_at_design: 492388f57b9d2e954beda21dfccb935549670408a9944d58907e0e4d16d684c6
+   owner: content
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_content.manifest.parse_manifest / ArtifactManifestV2
++    path: engine/packages/brain-content/src/brain_content/manifest.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-content/tests/test_versioned_content.py
++    state: existing
++  version_selector: artifact_contract_version is integer 2; writer activation remains unchanged.
++  wire_profile: native-compat/v1
++  integration_notes: Retain v2 input/output guards and the explicit v1/v2 dispatch; never retry v1 after v2 refusal.
+ - name: content-artifact-manifest-read
+   version: '1'
+   id: https://nebula.local/schemas/content-artifact-manifest-read.schema.json
+   source: planning-mds/schemas/content-artifact-manifest-read.schema.json
+   source_sha256_at_design: e1a39ab7deed35af3a967f3a4fb9ef0cb7d9c569128a3bf3753fdc3225b6fbd0
+   owner: content
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: retain-versioned-boundary
++  consumer_entry_points:
++  - entry_point: 'OpenAPI/doc-only: ContentArtifactManifest read union'
++    path: planning-mds/api/brain-api.yaml
++    state: OpenAPI/doc-only
++  compatibility_tests:
++  - path: engine/packages/brain-content/tests/test_versioned_content.py
++    state: existing
++  - path: engine/apps/api/tests/test_contract_openapi.py
++    state: planned
++  version_selector: OpenAPI read union selects artifact_contract_version 1 or 2; runtime parse_manifest uses the
++    concrete v1/v2 resources.
++  wire_profile: native-compat/v1
++  integration_notes: No non-test runtime validator for this wrapper. Publish/check the OpenAPI union and retain
++    concrete native readers; do not invent a delegate.
+ - name: content-records-v2
+   version: '2'
+   id: https://nebula.local/schemas/content-records-v2.schema.json
+   source: planning-mds/schemas/content-records-v2.schema.json
+   source_sha256_at_design: a807b09d635d6a5b37496e4a3190061665f235fabdf10f61574af85697b223ef
+   owner: content
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_content.records.Record.input_contract / contract (ContentBlockV2, ContentTableV2, ContentLayoutV2)
++    path: engine/packages/brain-content/src/brain_content/records.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-content/tests/test_versioned_content.py
++    state: existing
++  version_selector: Explicit record_type block/table/layout selects its $defs pointer; contract_version is 2.
++  wire_profile: native-compat/v1
++  integration_notes: Preserve per-record JSONL validation, native limits and model guards.
+ - name: document-date-record
+   version: '1'
+   id: https://nebula.local/schemas/document-date-record.schema.json
+   source: planning-mds/schemas/document-date-record.schema.json
+   source_sha256_at_design: a5227ea9bc9f51ede1e6670b28f6a07b129b21994af78634ebf4f0d0a4bfb219
+   owner: content
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_content.dates.DateRecord.input_contract / contract
++    path: engine/packages/brain-content/src/brain_content/dates.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-content/tests/test_document_dates.py
++    state: existing
++  - path: engine/tests/integration/test_f0011_consumer_contracts.py
++    state: planned
++  version_selector: Explicit document-date-record resource; contract_version 1 and record_type candidate/selection
++    select the branch.
++  wire_profile: native-compat/v1
++  integration_notes: Do not infer authority from valid shape; verified human/source basis checks stay in their existing
++    services.
+ - name: interpretation-output-manifest
+   version: '1'
+   id: https://nebula.local/schemas/interpretation-output-manifest.schema.json
+   source: planning-mds/schemas/interpretation-output-manifest.schema.json
+   source_sha256_at_design: 636c1913f1ad2a62eaffeaea688b4e515aa8f3770022801a9b8f5a19d7718173
+   owner: content
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_content.outputs.parse_run_manifest / RunManifestBase.contract
++    path: engine/packages/brain-content/src/brain_content/outputs.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-content/tests/test_run_outputs.py
++    state: existing
++  version_selector: contract_version is integer 1 or 2; independent of content artifact parse version.
++  wire_profile: native-compat/v1
++  integration_notes: Retain strict dispatch, exact interpretation basis and safe native errors.
+ - name: interpretation-result
+   version: '1'
+   id: https://nebula.local/schemas/interpretation-result.schema.json
+   source: planning-mds/schemas/interpretation-result.schema.json
+   source_sha256_at_design: f4f986406644d9390bd5bd945434531038b7050dd1a2b176d66e140bcbe52345
+   owner: assertions
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_contracts.dispatch.parse_result / parse_legacy_result
++    path: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-assertions/tests/test_contracts.py
++    state: existing
++  version_selector: schema_version key absent means legacy v1; explicit 1, null, bool or unknown selector is unsupported.
++  wire_profile: native-compat/v1
++  integration_notes: Retain legacy DTO/default behavior and allow_v2=False rejection; no failed-reader downgrade.
+ - name: interpretation-result-v2
+   version: '2'
+   id: https://nebula.local/schemas/interpretation-result-v2.schema.json
+   source: planning-mds/schemas/interpretation-result-v2.schema.json
+   source_sha256_at_design: 88c04e2d1bb14a365b958f278bb16d236067907fb3fca80f722b328ddec31eca
+   owner: assertions
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_contracts.dispatch.parse_result / parse_interpretation_result / InterpretationResultV2
++    path: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-assertions/tests/test_contracts.py
++    state: existing
++  version_selector: schema_version is integer 2 AND allow_v2 / supported_versions permits 2.
++  wire_profile: native-compat/v1
++  integration_notes: Retain AssertionContractError/Unsupported and v2 input/output guards.
+ - name: assertion-record-v2
+   version: '2'
+   id: https://nebula.local/schemas/assertion-record-v2.schema.json
+   source: planning-mds/schemas/assertion-record-v2.schema.json
+   source_sha256_at_design: 4c5ae7cc3005b4ca3953d3bec5d168ff9084a29228290394d7833f5f8fdba033
+   owner: assertions
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_contracts.assertions.parse_assertion / AssertionRecordV2 / EntityReferenceV2
++    path: engine/packages/brain-contracts/src/brain_contracts/assertions.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-assertions/tests/test_contracts.py
++    state: existing
++  - path: engine/packages/brain-assertions/tests/test_admission.py
++    state: existing
++  version_selector: Explicit assertion-record-v2 resource and optional entity_reference definition; selected by
++    the reader, not an inferred payload schema_version.
++  wire_profile: native-compat/v1
++  integration_notes: Retain existing admission, evidence and ownership checks after structural validation.
+ - name: assertion-admission-result-v1
+   version: '1'
+   id: https://nebula.local/schemas/assertion-admission-result-v1.schema.json
+   source: planning-mds/schemas/assertion-admission-result-v1.schema.json
+   source_sha256_at_design: a4a9f38b1cfdb389bf5cf0c7adfef28646796814f67f5b910401f3195e5652b5
+   owner: assertions
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: delegate
++  consumer_entry_points:
++  - entry_point: brain_contracts.assertions.AdmissionBatch / AdmissionOutcome / AdmittedAssertion / ServerEvidence
++    path: engine/packages/brain-contracts/src/brain_contracts/assertions.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-assertions/tests/test_contracts.py
++    state: existing
++  - path: engine/tests/integration/test_assertion_admission.py
++    state: existing
++  version_selector: Explicit admission-result-v1 resource; root batch schema_version 1, or explicit outcome/admitted/server_evidence
++    $defs pointer.
++  wire_profile: native-compat/v1
++  integration_notes: Retain private server-admission metadata and source/evidence verification; no new public request
++    DTO.
+ - name: fact-slot-key-v1
+   version: '1'
+   id: https://nebula.local/schemas/fact-slot-key-v1.schema.json
+   source: planning-mds/schemas/fact-slot-key-v1.schema.json
+   source_sha256_at_design: 38b13678aab3b8badea83875cd581c73db92185b5b077786da0ae6e358e3f2a0
+   owner: facts
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_factslots.resolution.FactSlotResolver.resolve
++    path: engine/packages/brain-factslots/src/brain_factslots/resolution.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-factslots/tests/test_contract_examples.py
++    state: existing
++  - path: engine/tests/integration/test_factslot_resolution.py
++    state: existing
++  - path: engine/tests/integration/test_f0011_consumer_contracts.py
++    state: planned
++  version_selector: Explicit canonical key schema_version 1 under existing identity-v1 resolution; legacy pilot
++    slots remain separate.
++  wire_profile: native-compat/v1
++  integration_notes: Add a normalized-key guard after existing authority/domain checks and before insert; no domain
++    schema-library import.
+ - name: fact-answer-v1
+   version: '1'
+   id: https://nebula.local/schemas/fact-answer-v1.schema.json
+   source: planning-mds/schemas/fact-answer-v1.schema.json
+   source_sha256_at_design: 3982d76c0ea4b8e486af94f0a741627e423d9359f0077f9333e670afc1c6d709
+   owner: facts
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_factslots.answers.FactAnswerPolicy.canonical_value
++    path: engine/packages/brain-factslots/src/brain_factslots/answers.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-factslots/tests/test_contract_examples.py
++    state: existing
++  - path: engine/tests/integration/test_factslot_answers.py
++    state: existing
++  - path: engine/tests/integration/test_f0011_consumer_contracts.py
++    state: planned
++  version_selector: answer_contract fact-answer/v1 on identity-v1 slots; legacy pilot branch is selected explicitly
++    and remains supported.
++  wire_profile: native-compat/v1
++  integration_notes: Guard the canonical envelope after domain/evidence/member checks; tolerant source_keys runs
++    before the protected refusal is exposed.
+ - name: fact-slot-resolution-result-v1
+   version: '1'
+   id: https://nebula.local/schemas/fact-slot-resolution-result-v1.schema.json
+   source: planning-mds/schemas/fact-slot-resolution-result-v1.schema.json
+   source_sha256_at_design: 9c129b71b493a3c13e09859d0c76c1173b18ab5d1e7708133162296df4d64001
+   owner: facts
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_factslots.resolution.ResolutionResult.to_json / FactSlotResolver.resolve
++    path: engine/packages/brain-factslots/src/brain_factslots/resolution.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-factslots/tests/test_contract_examples.py
++    state: existing
++  - path: engine/tests/integration/test_factslot_resolution.py
++    state: existing
++  - path: engine/tests/integration/test_f0011_consumer_contracts.py
++    state: planned
++  version_selector: Explicit resolution result schema_version 1, with fingerprint_version 1 where present.
++  wire_profile: native-compat/v1
++  integration_notes: Add normalized result validation before service return; retain domain outcomes and atomicity.
+ - name: fact-temporal-v1
+   version: '1'
+   id: https://nebula.local/schemas/fact-temporal-v1.schema.json
+   source: planning-mds/schemas/fact-temporal-v1.schema.json
+   source_sha256_at_design: 493d6d1b8f11a3ef8e22d9681beec95fb31155f91a9b07c57ed77ea26ca25e73
+   owner: facts
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_temporal.commit.CanonicalCommitService._commit_v1 / _remainder
++    path: engine/packages/brain-temporal/src/brain_temporal/commit.py
++    state: existing
++  - entry_point: brain_api.schemas.facts.FactVersionOut / FactValidityUnknownOut / CommitResponseOut
++    path: engine/apps/api/src/brain_api/schemas/facts.py
++    state: existing
++  compatibility_tests:
++  - path: engine/packages/brain-temporal/tests/test_contract_examples.py
++    state: existing
++  - path: engine/tests/integration/test_temporal_v1_commit.py
++    state: existing
++  - path: engine/tests/integration/test_temporal_reads.py
++    state: existing
++  - path: engine/tests/integration/test_f0011_consumer_contracts.py
++    state: planned
++  version_selector: Slot identity_version 1 selects temporal-v1; explicit commit_temporal/version_temporal/validity_unknown_read
++    definition, with omitted temporal for legacy versions.
++  wire_profile: native-compat/v1
++  integration_notes: Guard only newly normalized temporal carriers and authorized serialized responses. Stored-version
++    sweep precedes guard rollout; legacy remainders are not rewritten.
+ - name: canonical-commit-request
+   version: '1'
+   id: https://nebula.local/schemas/canonical-commit-request.schema.json
+   source: planning-mds/schemas/canonical-commit-request.schema.json
+   source_sha256_at_design: fd45ed9285848950b0043db87e719803967beb22bbc6b4eb0b066b9c4fa73285
+   owner: facts
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: retain-versioned-boundary
++  consumer_entry_points:
++  - entry_point: brain_api.schemas.facts.CommitProposalIn / brain_api.routes.facts.commit_fact
++    path: engine/apps/api/src/brain_api/schemas/facts.py
++    state: existing
++  compatibility_tests:
++  - path: engine/apps/api/tests/test_facts.py
++    state: existing
++  - path: engine/tests/integration/test_temporal_v1_commit.py
++    state: existing
++  - path: engine/tests/integration/test_f0011_consumer_contracts.py
++    state: planned
++  version_selector: Existing native CommitProposalIn; slot identity_version selects pilot valid_from/valid_to versus
++    identity-v1 temporal shape.
++  wire_profile: native-compat/v1
++  integration_notes: Source remains published/documented; retain the HTTP DTO and domain validation/reason precedence.
++    No new raw-request schema gate before authorization.
+ - name: canonical-commit-response
+   version: '1'
+   id: https://nebula.local/schemas/canonical-commit-response.schema.json
+   source: planning-mds/schemas/canonical-commit-response.schema.json
+   source_sha256_at_design: 87b28866039baeb3a08a11ef4eb8f3398fbc150c409128864ad9aea9f58d1b82
+   owner: facts
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_api.schemas.facts.CommitResponseOut.from_domain
++    path: engine/apps/api/src/brain_api/schemas/facts.py
++    state: existing
++  - entry_point: brain_api.routes.facts.commit_fact operation
++    path: engine/apps/api/src/brain_api/routes/facts.py
++    state: existing
++  compatibility_tests:
++  - path: engine/apps/api/tests/test_facts.py
++    state: existing
++  - path: engine/tests/integration/test_f0011_consumer_contracts.py
++    state: planned
++  - path: engine/apps/api/tests/test_contract_openapi.py
++    state: planned
++  version_selector: Explicit canonical-commit-response v1; optional versions[].temporal follows each returned version,
++    including legacy remainders.
++  wire_profile: native-compat/v1
++  integration_notes: Validate serialized output inside mutate operation, before outer commit; preserve 201 shape
++    and rollback/audit on invariant failure.
+ - name: problem-details
+   version: '1'
+   id: https://nebula.local/schemas/problem-details.schema.json
+   source: planning-mds/schemas/problem-details.schema.json
+   source_sha256_at_design: 669b4a1f64b8a40432df09f763032b940c2ee822ac008aa249ddc2d8a710f62e
+   owner: api
+-  disposition: shared-source-adapter; preserve native compatibility entry point
++  disposition: retain-versioned-boundary
++  consumer_entry_points:
++  - entry_point: 'OpenAPI/doc-only: ProblemDetails component and native exception handlers'
++    path: planning-mds/api/brain-api.yaml
++    state: OpenAPI/doc-only
++  compatibility_tests:
++  - path: engine/tests/security/conftest.py
++    state: existing
++  - path: engine/apps/api/tests/test_contract_openapi.py
++    state: planned
++  version_selector: OpenAPI ProblemDetails v1 assertion tree; established HTTP status/code/traceId mappings select
++    the native handler.
++  wire_profile: native-compat/v1
++  integration_notes: No non-test runtime JSON Schema validator exists. Check generated component equality and actual
++    handler responses; retain native error DTOs and non-disclosing errors. conftest.py supplies existing schema
++    assertions, not an executable test case alone.
+ - name: information-state-v1
+   version: '1'
+   id: https://nebula.local/schemas/information-state-v1.schema.json
+   source: planning-mds/schemas/information-state-v1.schema.json
+   source_sha256_at_design: ae4b173fc3496b8bac7c9a122e2fe730c5d1c5cc9c1b24dffe9dcfee48bb06e9
+   owner: values
+-  disposition: additive publication alias or shipped-response description
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_contracts.schema_runtime.validate_contract publication alias
++    path: engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py
++    state: planned
++  compatibility_tests:
++  - path: engine/packages/brain-contracts/tests/test_schema_runtime.py
++    state: planned
++  - path: engine/packages/brain-factslots/tests/test_contract_examples.py
++    state: existing
++  version_selector: Explicit ContractRef information-state-v1 version 1; alias fact-answer-v1#/properties/state.
++  wire_profile: portable-json/v1
++  integration_notes: Additive portable alias; existing answer consumer remains on its native resource, not a second
++    state implementation.
+ - name: qualified-money-v1
+   version: '1'
+   id: https://nebula.local/schemas/qualified-money-v1.schema.json
+   source: planning-mds/schemas/qualified-money-v1.schema.json
+   source_sha256_at_design: 68ca64725c95c73ed7652347a60bcd921a900d3e57bdefda0a8d21b8c17201cc
+   owner: values
+-  disposition: additive publication alias or shipped-response description
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_contracts.schema_runtime.validate_contract publication alias
++    path: engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py
++    state: planned
++  compatibility_tests:
++  - path: engine/packages/brain-contracts/tests/test_schema_runtime.py
++    state: planned
++  - path: engine/packages/brain-factslots/tests/test_contract_examples.py
++    state: existing
++  version_selector: Explicit ContractRef qualified-money-v1 version 1; alias fact-slot-key-v1#/$defs/money_value.
++  wire_profile: portable-json/v1
++  integration_notes: Additive portable alias; exact strings and domain currency/basis rules remain unchanged.
+ - name: scoped-identifier-v1
+   version: '1'
+   id: https://nebula.local/schemas/scoped-identifier-v1.schema.json
+   source: planning-mds/schemas/scoped-identifier-v1.schema.json
+   source_sha256_at_design: 78b5446f7974f0f9e9cb9cab4e62ff043054be2d47d142ac8f8c64973df87064
+   owner: values
+-  disposition: additive publication alias or shipped-response description
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_contracts.schema_runtime.validate_contract publication alias
++    path: engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py
++    state: planned
++  compatibility_tests:
++  - path: engine/packages/brain-contracts/tests/test_schema_runtime.py
++    state: planned
++  - path: engine/packages/brain-factslots/tests/test_contract_examples.py
++    state: existing
++  version_selector: Explicit ContractRef scoped-identifier-v1 version 1; alias fact-slot-key-v1#/$defs/identifier_value.
++  wire_profile: portable-json/v1
++  integration_notes: Additive portable alias; namespace and domain normalization remain existing responsibilities.
+ - name: fact-version-read-v1
+   version: '1'
+   id: https://nebula.local/schemas/fact-version-read-v1.schema.json
+   source: planning-mds/schemas/fact-version-read-v1.schema.json
+   source_sha256_at_design: 4f6adc53018bc204ca24bf70674d9f3727e422ba54963b56c98526645aa75964
+   owner: api
+-  disposition: additive publication alias or shipped-response description
++  disposition: adopt
++  consumer_entry_points:
++  - entry_point: brain_api.schemas.facts.FactVersionOut.from_domain / brain_api.routes.facts.get_fact
++    path: engine/apps/api/src/brain_api/schemas/facts.py
++    state: existing
++  compatibility_tests:
++  - path: engine/apps/api/tests/test_facts.py
++    state: existing
++  - path: engine/tests/integration/test_temporal_reads.py
++    state: existing
++  - path: engine/tests/integration/test_f0011_consumer_contracts.py
++    state: planned
++  - path: engine/apps/api/tests/test_contract_openapi.py
++    state: planned
++  version_selector: Explicit fact-version-read-v1 version 1 for Resolved reads; ValidityUnknown selects fact-temporal-v1#/$defs/validity_unknown_read;
++    temporal absent for legacy rows.
++  wire_profile: native-compat/v1
++  integration_notes: New guard describes shipped flat output. Validate only after all source READ checks; sweep
++    every integration/dev stored version before rollout.
+ design_tooling_schemas_not_runtime_payloads:
+ - schema-bundle-manifest-v1.schema.json
+ - schema-conformance-cases-v1.schema.json
+ retained_boundaries:
+ - name: review-decision
+-  reason: F0001 internal persisted decision schema differs from the HTTP submission
+-    body; retain existing review DTO/version and domain/audit logic, not generated
+-    CRUD.
++  reason: F0001 internal persisted decision schema differs from the HTTP submission body; retain existing review
++    DTO/version and domain/audit logic, not generated CRUD.
+ - name: authx-kernel
+-  reason: Internal F0002 server-derived identity/policy carrier, not public validation
+-    input; no new AuthX model generation or grants.
++  reason: Internal F0002 server-derived identity/policy carrier, not public validation input; no new AuthX model
++    generation or grants.
+ - name: semantic-execution-trace
+-  reason: Future trace contract owned by retrieval/observatory features; no production
+-    consumer in F0011.
++  reason: Future trace contract owned by retrieval/observatory features; no production consumer in F0011.
+ - name: commercial-pc-example and semantic-example
+-  reason: Teaching/example contracts retain existing validation; not installed as
+-    runtime business APIs.
++  reason: Teaching/example contracts retain existing validation; not installed as runtime business APIs.
++revision_run: 2026-11-21-e4098d22
++review_findings:
++- PR-M1
++- PR-M2
++mapping_policy: Entry points and tests marked existing were inspected; planned entries are feature outputs. Copy
++  each resource mapping into scripts/contracts/sources.yaml at feature G0 and verify it before implementation. OpenAPI/doc-only
++  is not an existing runtime validator. Disposition is adopt, delegate, or retain-versioned-boundary; profile is
++  selected before parsing.
+diff --git a/planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md b/planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
+index 5aa56a1..46dff35 100644
+--- a/planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
++++ b/planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
+@@ -2,8 +2,10 @@
+ 
+ **Created:** 2026-11-20
+ **Author:** Codex / Architect
+-**Status:** Phase B approved by operator token `approve-phase-b` on 2026-11-20; implementation Not Started
+-**Plan Run:** 2026-11-20-ccb1bd39
++**Status:** Phase B revision approved by operator token `approve-phase-b` on 2026-11-22; implementation Not Started
++**Plan Run:** 2026-11-21-e4098d22 (B, existing)
++**Approved Baseline:** 2026-11-20-ccb1bd39; operator token `approve-phase-b` on 2026-11-20
++**Review Input:** 2026-11-21-b4cd07e4 (READY; two Medium, four Low findings)
+ **Requirements:** Phase A approved by the operator (`approve`, recorded as approve-phase-a).
+ 
+ ## Overview
+@@ -26,7 +28,7 @@ do not override the product stack. No entity CRUD, new screen or new endpoint.
+ | 1 | Explicit source inventory, immutable offline bundle and wire profiles | S0001 | Source closure, keyword/profile checks, hash/identity corruption refusal |
+ | 2 | Publication aliases and answer/value examples | S0002/S0003 | Nine states, absence failures, exact money and namespace fixtures |
+ | 3 | Generated Pydantic, AJV, metadata and OpenAPI checks | S0004 | 100% common cases; no lossy round trip or silent missing result |
+-| 4 | Content/assertion and FactSlot/temporal consumer adoption | S0005 | Real entry points; native differential and same-UoW guard regressions |
++| 4 | Content/assertion and FactSlot/temporal consumer adoption | S0005 | Per-resource mapping, integration/dev stored-version sweep before guard rollout, native differential and same-UoW guard regressions |
+ | 5 | Installed package/build/CI proof and developer handoff | S0006 | Clean install outside checkout; deterministic regeneration; drift injection fails |
+ 
+ ## Existing Code (Must Be Modified)
+@@ -62,6 +64,7 @@ tested through their shared package imports; there is no model/prompt/pipeline c
+ | scripts/contracts/sources.yaml | Backend + Architect review | Explicit 21-resource source list and native/portable entry-point policy |
+ | scripts/contracts/generate.py | Backend | Closed local build, code generation, metadata/OpenAPI emission and --check mode |
+ | scripts/contracts/check.py | Backend/QE | Join expected case results, generated artifacts and OpenAPI/reference coverage |
++| scripts/contracts/check_stored_fact_versions.py | Backend/QE | Read-only integration/dev full-history serialization and exact response-guard preflight; safe aggregate report |
+ | schemas/contracts/v1/*.schema.json and manifest.json | Generated | Root runtime release snapshot and digest manifest |
+ | engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py | Backend | Immutable bundle registry, profile checks, decode and validate APIs |
+ | engine/packages/brain-contracts/src/brain_contracts/model_adapter.py | Backend | Source-schema pre/post guards and non-lossy to_wire |
+@@ -230,6 +233,95 @@ as portable AJV/Pydantic successes.
+ 
+ ## Step 4 — Existing Entry Points and Atomicity (S0005)
+ 
++### Per-resource adoption (PR-M2)
++
++At feature G0, reconcile all 21 rows in [contract-inventory.yaml](contract-inventory.yaml)
++against the actual checkout and copy their consumer entry points, compatibility
++tests, version selectors, wire profiles and dispositions into
++`scripts/contracts/sources.yaml`. Owner and source identity/hash remain mandatory.
++Each entry/test is marked existing, planned, or OpenAPI/doc-only. A planned test
++must become executable feature proof; an existing fixture/helper alone is not a
++consumer test. G0 records any changed path/selector in the feature evidence before
++Step 1; a missing mapping blocks that checkpoint.
++
++Use `delegate` for existing content/assertion schema validators; use `adopt` for
++new normalized FactSlot/temporal/response guards and additive aliases; use
++`retain-versioned-boundary` for the native commit request and the manifest-read /
++ProblemDetails documentation boundaries. The last two have no existing runtime
++JSON Schema validator to delegate. Their OpenAPI assertion-tree/union checks and
++actual concrete-reader/HTTP response tests are required instead. Never wrap a
++nonexistent validator or count OpenAPI reference equality as runtime integration.
++
++### Stored-version rollout preflight (PR-M1)
++
++S0005 AC4 requires real history evidence in addition to fixtures. Backend authors
++`scripts/contracts/check_stored_fact_versions.py`; QE executes it for **both**
++integration and dev before enabling the new response guard on either existing
++environment. DevOps records the environment inventory and coherent bundle digest
++at feature G0. No assertion that these databases are fixture-only is made here.
++
++The proposed command contract, executed from the product root by the later feature
++run, is:
++
++```bash
++uv run --project engine python scripts/contracts/check_stored_fact_versions.py --environment integration --output <FEATURE_RUN_FOLDER>/artifacts/test-results/stored-versions-integration.json
++uv run --project engine python scripts/contracts/check_stored_fact_versions.py --environment dev --output <FEATURE_RUN_FOLDER>/artifacts/test-results/stored-versions-dev.json
++```
++
++The command selects the named environment using existing local database
++configuration; do not log credentials/DSNs or add an exported secret requirement.
++It is an operator preflight, not an HTTP endpoint or a new runtime grant. Its
++implementation must:
++
++1. Open a PostgreSQL READ ONLY, REPEATABLE READ transaction before selecting data.
++   Record a nonsecret environment identifier, snapshot time, code revision and
++   candidate bundle digest. Stream **every** `fact_versions` row, including closed
++   recorded ranges, historical pilot values, temporal-v1 rows and split/remainder
++   versions; do not use a current-only or valid/known-coordinate filter. Count the
++   rows in the same snapshot and reconcile selected = checked, with zero skips.
++2. Reuse `brain_persistence.repositories._fact_version_from_row` (or an extracted
++   equivalent shared with the repository) and
++   `FactVersionOut.from_domain(...).model_dump(mode="json")`, including the existing
++   absent-temporal serialization. Run the **same** candidate response guard and
++   fixed native profile used by GET, including reference/format checks. Exercise
++   `FactValidityUnknownOut` separately in the temporal route fixtures; the sweep
++   does not bypass authorization or call the HTTP facade and create audit writes.
++3. Count mapping/serialization failures, guard failures and legacy/temporal groups.
++   Emit only counts, environment label, code/bundle identity and fixed error codes /
++   contract IDs. Do not persist values, evidence, row identifiers, exception text
++   or credentials in the report. Never rewrite, coerce, delete or repair a row.
++4. Exit 0 only for complete, zero-failure coverage. Exit 1 for a data/guard mismatch;
++   exit 2 for configuration, unavailable database, incomplete enumeration or other
++   execution failure. Empty databases require an explicit zero-row environment
++   inventory signed by QE/DevOps; an unavailable database is never an empty pass.
++5. QE retains both reports for S0005 AC4 and verifies that the database remained
++   read-only. DevOps keeps the previous coherent deployment until both reports
++   pass against the release candidate. If a mismatch exists, stop rollout and
++   reconcile the guard/version boundary with Architect; no cleanup migration,
++   silent validation fallback or historical payload rewrite is authorized.
++
++Repeat the sweep against the final candidate while old-version writers are paused
++for the deployment cutover, so writes after the first snapshot cannot escape the
++check. Restore service with the coherent new bundle only after success. A changed
++guard, bundle, serializer or stored population requires fresh reports. The future
++feature tests must include a stored serialization/format mismatch, closed history,
++legacy remainders, empty and unavailable databases, incomplete iteration and a
++read-only enforcement check. This planning action does not access either database.
++
++### Read audit follow-up (PR-L3)
++
++The existing read facade commits SUCCEEDED after all source READ checks, then GET
++serializes/validates the response. An internal invariant failure can therefore
++return generic `contract_invariant_failed` 500 after a SUCCEEDED read audit.
++Track this Low finding under S0005 AC6; do not claim it is fixed or accepted by
++planning. **Owner: Security Reviewer, due at feature G3 before implementation
++approval.** Backend/QE inject a response-guard failure and prove: authorized read
++audit succeeds, HTTP returns the generic 500 with no payload/pointers, and a denied
++source still returns 404 before guard evaluation. Security must record whether
++this bounded internal-invariant audit meaning is accepted. If it is not accepted,
++Architect must revise the read-finalization design and obtain current tests/review
++before the feature advances; the discrepancy cannot silently disappear at closeout.
++
+ ### Mutation traceability
+ 
+ | Entry point | Action / carrier | Authority / concurrency | Validation failure and audit | Required test |
+@@ -319,8 +411,8 @@ Only the future feature run creates QE/review/security/DevOps role reports.
+ | S0003 AC4–AC7 | identifier source alias + domain normalization | Required scheme/type/value, equal strings different namespace, effective ordering and normalization mismatch |
+ | S0004 AC1–AC3 | common case runners/joiner | Real Python/Pydantic/AJV, every keyword/format/branch, 100% expected outputs/no skips |
+ | S0004 AC4–AC7 | generated model/to_wire, metadata/OpenAPI builder | Non-lossy serialization, exact shared refs/annotations and injected drift failure |
+-| S0005 AC1–AC3 | inspected consumer inventory, content/assertion delegates | Actual named entry points, explicit native/version selectors and no reader fallback |
+-| S0005 AC4–AC7 | FactSlot/temporal/API boundaries and UoW | Legacy/current history unchanged, no partial mutation, READ/admission guards, no reparse/DDL |
++| S0005 AC1–AC3 | per-resource inventory, content/assertion delegates and documented retained boundaries | Every entry point/test/selector/disposition reconciled at G0; actual consumer proof and no reader fallback |
++| S0005 AC4–AC7 | FactSlot/temporal/API boundaries and UoW | Both stored-history sweep reports pass before guard rollout; legacy/current history unchanged, no partial mutation, READ/admission guards, G3 PR-L3 disposition, no reparse/DDL |
+ | S0006 AC1–AC3 | generator --check, install smoke and CI | Clean commands/version inventory, deterministic outputs, outside-checkout offline proof |
+ | S0006 AC4–AC6 | semantic example ownership, AC ledger and handoff | Definitions/worked/boundary links, observed 41-AC proof with coverage, rollback and ADR status |
+ 
+@@ -370,7 +462,9 @@ paths at G0 rather than copying this planning run's base-only manifest.
+   run dependency matrix before accepting generation output.
+ - Generic framework reference samples use C#/draft-07 paths. The product's Python,
+   2020-12 and OpenAPI 3.1 baselines control; no framework changes are required.
+-- No existing F0011 assembly plan was overwritten. ADR-0013/0077/0078 remain accepted;
++- The approved F0011 assembly baseline is revised explicitly for review findings
++  PR-M1/PR-M2/PR-L3 in plan run `2026-11-21-e4098d22`; see its gate-decisions.md
++  for reconciliation. No requirement, schema assertion or runtime behavior changes. ADR-0013/0077/0078 remain accepted;
+   ADR-0079/0039 remain Proposed. F0012/F0015 vocabulary/compilers and F0014/F0023
+   completeness/display stay separately owned.
+ 
+@@ -396,9 +490,13 @@ and ADR-0079 all have real F0011 source/mapping references.
+ 
+ ## Exit and Approval State
+ 
+-All six stories remain Not Started. G4 ontology compile/drift and all seven ordered G5 pre-approval exit operations
+-have passed. The operator approved Phase B with `approve-phase-b` on 2026-11-20.
+-The G5 journal and evidence-manifest.json record the required post-approval
+-compile/coverage/plain-validation/publication result. These approval-status edits
+-precede checkpoint attestation and final regeneration. No implementation or formal
+-ADR acceptance is inferred. Independent plan-review is next before the feature action.
++All six stories remain Not Started (41 ACs). Phase A approval from
++`2026-11-20-ccb1bd39` is unchanged; story edits add the missing grammatical "to"
++only. The original Phase B approval and review READY decision remain historical
++evidence for the baseline. G4 ontology sync and all seven ordered G5 exit
++checks passed for this revision. The operator explicitly approved it with
++`approve-phase-b` on 2026-11-22 in run `2026-11-21-e4098d22`. Its durable
++journal and manifest record the post-approval regeneration, validation and
++publication outcome. No runtime proof is inferred. ADR-0079/0039 remain
++Proposed. Feature G0 must carry this review/finding map and the later G3 PR-L3
++follow-up into its evidence before implementation proceeds.
+diff --git a/planning-mds/features/ROADMAP.md b/planning-mds/features/ROADMAP.md
+index fbc84f7..6c61cd9 100644
+--- a/planning-mds/features/ROADMAP.md
++++ b/planning-mds/features/ROADMAP.md
+@@ -27,7 +27,7 @@ F0035 Phase A can clarify the downstream problem first. F0033/F0034 projection/c
+ <!-- generated:begin roadmap:now -->
+ | Feature | Status | Why Now | Validation Gate |
+ |---------|--------|---------|-----------------|
+-| [F0011 — JSON Schema contract system](./F0011-json-schema-contract-system/README.md) | Planned | Now (2026-11-20 roadmap review): continues as the contract/ontology lane; dependencies done (F0001, F0006); heads F0011 → F0012 → F0013/F0014 → F0015 → F0016, the longest v0.1 chain to F0065. Owns the ADR-0039 typed-value and missingness schemas (section 106.3). JSON Schema 2020-12 is the cross-language structural contract shared by Pydantic, AJV, and OpenAPI (sections 25 to 27). Its migration is numbered after F0008's 0015. Plan run 2026-11-20-ccb1bd39: Phase A approved; six stories/41 ACs; Phase A and B approved by operator on 2026-11-20; independent plan-review next; ADR-0079 Proposed, no runtime delivered. | Plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner and date); feature run closes G0–G8 with one JSON Schema 2020-12 source consumed by Pydantic, AJV and OpenAPI, covering the F0007 typed-value and information-state carriers. |
++| [F0011 — JSON Schema contract system](./F0011-json-schema-contract-system/README.md) | Planned | Now (2026-11-20 roadmap review): continues as the contract/ontology lane; dependencies done (F0001, F0006); heads F0011 → F0012 → F0013/F0014 → F0015 → F0016, the longest v0.1 chain to F0065. Owns the ADR-0039 typed-value and missingness schemas (section 106.3). JSON Schema 2020-12 is the cross-language structural contract shared by Pydantic, AJV, and OpenAPI (sections 25 to 27). Any future migration would be numbered after F0008's 0015; F0011 plans no migration. Plan run 2026-11-20-ccb1bd39: Phase A approved; six stories/41 ACs; Phase A and B approved by operator on 2026-11-20; baseline plan-review READY; Phase B review revision approved 2026-11-22; ADR-0079 Proposed, no runtime delivered. | Plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner and date); feature run closes G0–G8 with one JSON Schema 2020-12 source consumed by Pydantic, AJV and OpenAPI, covering the F0007 typed-value and information-state carriers. |
+ | [F0009 — Provenance + human-correction lineage](./F0009-provenance-and-human-correction-lineage/README.md) | Planned | Now (2026-11-20 roadmap review): dependency-ready now that F0008 is done (F0006, F0008); heads the temporal/commit path F0009 → F0010 → F0018 → F0019/F0020 → F0025. No authoritative fact exists without evidence, and human corrections append with lineage that feeds the Golden Corpus (sections 17, 75). First consumer of the F0008 split_of_version_id lineage that migration 0015 bound to the same slot. | Plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner and date); feature run closes G0–G8 with evidence and correction lineage proven on PostgreSQL over F0008 canonical versions. |
+ | [F0012 — Foundation ontology](./F0012-foundation-ontology/README.md) | Planned | Now (2026-11-20 roadmap review): planned alongside F0011 and built after it (its only dependency is F0011); keeps the longest v0.1 chain moving. The foundation ontology module is the versioned base that every insurance module composes on (sections 19 to 22). | Plan action Phase A and Phase B may run in parallel with F0011, with plan-review READY (or High findings accepted with owner and date); the feature run starts only after F0011 is complete. |
+ | [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](./F0021-native-react-semantic-shell-and-oidc-session/README.md) | Planned | Now (2026-11-20 roadmap review): takes the Now slot freed by F0008, as the 2026-11-10 review promised; its only dependency, F0002, is done and the ADR-0051 session-transport decision is recorded. An independent UI lane, de-risking F0022 (native review round trip, a section 115.4 pre-build proof) and F0023. The native React semantic shell with the OIDC session contract and safe re-auth behavior is the first user-facing surface (section 3, 120.5). | F0002 complete; plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner and date); feature run closes G0–G8 with the OIDC session contract and safe re-auth behavior proven. |
+diff --git a/planning-mds/kg-source/features/F0011.yaml b/planning-mds/kg-source/features/F0011.yaml
+index cd0b979..0b016ae 100644
+--- a/planning-mds/kg-source/features/F0011.yaml
++++ b/planning-mds/kg-source/features/F0011.yaml
+@@ -11,9 +11,9 @@ rationale: "Now (2026-11-20 roadmap review): continues as the contract/ontology
+   \ \u2192 F0015 \u2192 F0016, the longest v0.1 chain to F0065. Owns the ADR-0039\
+   \ typed-value and missingness schemas (section 106.3). JSON Schema 2020-12 is the\
+   \ cross-language structural contract shared by Pydantic, AJV, and OpenAPI (sections\
+-  \ 25 to 27). Its migration is numbered after F0008's 0015. Plan run 2026-11-20-ccb1bd39:\
++  \ 25 to 27). Any future migration would be numbered after F0008's 0015; F0011 plans no migration. Plan run 2026-11-20-ccb1bd39:\
+   \ Phase A approved; six stories/41 ACs; Phase A and B approved by operator on 2026-11-20;\
+-  \ independent plan-review next; ADR-0079 Proposed, no runtime delivered."
++  \ baseline plan-review READY; Phase B review revision approved 2026-11-22; ADR-0079 Proposed, no runtime delivered."
+ validation_gate: "Plan action Phase A and Phase B approved and plan-review READY (or\
+   \ High findings accepted with owner and date); feature run closes G0\u2013G8 with\
+   \ one JSON Schema 2020-12 source consumed by Pydantic, AJV and OpenAPI, covering\
+@@ -32,7 +32,10 @@ notes:
+   approve-phase-b on 2026-11-20 in plan run 2026-11-20-ccb1bd39, after G4 and seven
+   ordered G5 pre-approval exit checks. G5 post-approval regeneration/publication is
+   authoritative in the journal/manifest. Six Not Started stories, 41 ACs; no runtime
+-  implementation. Independent plan-review is next.
++  implementation. Baseline plan-review 2026-11-21-b4cd07e4 is READY; Phase B
++  revision 2026-11-21-e4098d22 approved by operator token approve-phase-b on
++  2026-11-22 after green G5 exit checks; journal/manifest records final
++  post-approval regeneration, validation and publication. Unchanged 41 ACs.
+ - ADR-0079 selects one authored planning schema source -> generated root snapshot
+   -> installed common bundle, source-gated generated Pydantic, headless AJV and shared
+   OpenAPI. No new route, grant, DDL, deployable or extraction activation.
+@@ -47,6 +50,10 @@ notes:
+   bindings/proofs are feature-action work.
+ - ADR-0039 stays Proposed pending both schema fixture proof and later incomplete-package
+   display; ADR-0079 stays Proposed pending its runtime proofs and explicit acceptance.
++- Review revision 2026-11-21-e4098d22 adds per-resource integration mappings
++  and read-only integration/dev stored-version sweep proof before response-guard
++  rollout; PR-L3 audit discrepancy is a named Security Reviewer follow-up due
++  at feature G3, not a runtime fix or accepted risk.
+ affects:
+ - capability:offline-contract-bundle
+ - capability:cross-language-contract-validation
+diff --git a/planning-mds/knowledge-graph/coverage-report.yaml b/planning-mds/knowledge-graph/coverage-report.yaml
+index 4113abf..26fee88 100644
+--- a/planning-mds/knowledge-graph/coverage-report.yaml
++++ b/planning-mds/knowledge-graph/coverage-report.yaml
+@@ -388,9 +388,9 @@ freshness:
+       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+       source_count: 3
+-      last_modified: '2026-11-20'
++      last_modified: '2026-11-21'
+       source_hash: c78a855be1c31174
+-      hotspot_rank: 12
++      hotspot_rank: 11
+       hotspot_score: 0.03
+       primary_owner: gajapathi.kannan@live.com
+       primary_owner_pct: 100
+@@ -401,9 +401,9 @@ freshness:
+       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+       source_count: 3
+-      last_modified: '2026-11-20'
++      last_modified: '2026-11-21'
+       source_hash: c78a855be1c31174
+-      hotspot_rank: 13
++      hotspot_rank: 12
+       hotspot_score: 0.03
+       primary_owner: gajapathi.kannan@live.com
+       primary_owner_pct: 100
+@@ -414,9 +414,9 @@ freshness:
+       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/feature-assembly-plan.md
+       - planning-mds/features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md
+       source_count: 3
+-      last_modified: '2026-11-20'
++      last_modified: '2026-11-21'
+       source_hash: c78a855be1c31174
+-      hotspot_rank: 14
++      hotspot_rank: 13
+       hotspot_score: 0.03
+       primary_owner: gajapathi.kannan@live.com
+       primary_owner_pct: 100
+@@ -918,8 +918,8 @@ freshness:
+       - planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+       - planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
+       source_count: 2
+-      last_modified: '2026-11-21'
+-      source_hash: 540ab051f1fc7bd6
++      last_modified: '2026-11-22'
++      source_hash: c54f27ab6870ed3e
+       hotspot_rank: 28
+       hotspot_score: 0.0
+       primary_owner: gajapathi.kannan@live.com
+@@ -1041,8 +1041,8 @@ freshness:
+       - planning-mds/features/F0011-json-schema-contract-system/contract-design.md
+       - planning-mds/features/F0011-json-schema-contract-system/feature-assembly-plan.md
+       source_count: 2
+-      last_modified: '2026-11-21'
+-      source_hash: 540ab051f1fc7bd6
++      last_modified: '2026-11-22'
++      source_hash: c54f27ab6870ed3e
+       hotspot_rank: 50
+       hotspot_score: 0.0
+       primary_owner: gajapathi.kannan@live.com
+@@ -1061,7 +1061,7 @@ freshness:
+       source_count: 8
+       last_modified: '2026-11-21'
+       source_hash: 84e83195d37b49f6
+-      hotspot_rank: 11
++      hotspot_rank: 14
+       hotspot_score: 0.03
+       primary_owner: gajapathi.kannan@live.com
+       primary_owner_pct: 100
+@@ -2288,8 +2288,8 @@ freshness:
+       - planning-mds/features/F0011-json-schema-contract-system/personas.md
+       - planning-mds/features/F0011-json-schema-contract-system/schema-validation-profile.yaml
+       source_count: 17
+-      last_modified: '2026-11-21'
+-      source_hash: df7636742d6bacff
++      last_modified: '2026-11-22'
++      source_hash: c323e88b68232efa
+     feature:F0012:
+       source_paths:
+       - planning-mds/features/F0012-foundation-ontology/README.md
+@@ -2627,37 +2627,37 @@ freshness:
+       - planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
+       source_count: 1
+       last_modified: '2026-11-21'
+-      source_hash: c1689638388415e4
++      source_hash: d32acd986d8bfe07
+     story:F0011-S0002:
+       source_paths:
+       - planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
+       source_count: 1
+       last_modified: '2026-11-21'
+-      source_hash: 0559038f8264144f
++      source_hash: 1554732ab3caf056
+     story:F0011-S0003:
+       source_paths:
+       - planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
+       source_count: 1
+       last_modified: '2026-11-21'
+-      source_hash: 25ff5c26e0a77221
++      source_hash: 7b89f22344d73f70
+     story:F0011-S0004:
+       source_paths:
+       - planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
+       source_count: 1
+       last_modified: '2026-11-21'
+-      source_hash: f7455c07029b7c49
++      source_hash: 5daeab999e474c60
+     story:F0011-S0005:
+       source_paths:
+       - planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
+       source_count: 1
+       last_modified: '2026-11-21'
+-      source_hash: f949391affdceef2
++      source_hash: ee9b882dff324b38
+     story:F0011-S0006:
+       source_paths:
+       - planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
+       source_count: 1
+       last_modified: '2026-11-21'
+-      source_hash: d82ea1efff2a1f91
++      source_hash: 9d0b606f3788d635
+     story:F0064-S0001:
+       source_paths:
+       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
+diff --git a/planning-mds/knowledge-graph/feature-mappings.yaml b/planning-mds/knowledge-graph/feature-mappings.yaml
+index 72a2182..2973c93 100644
+--- a/planning-mds/knowledge-graph/feature-mappings.yaml
++++ b/planning-mds/knowledge-graph/feature-mappings.yaml
+@@ -677,9 +677,15 @@ features:
+       - Phase A approved by operator reply approve at G3; Phase B approved with exact token approve-phase-b
+         on 2026-11-20 in plan run 2026-11-20-ccb1bd39, after G4 and seven ordered G5 pre-approval exit
+         checks. G5 post-approval regeneration/publication is authoritative in the journal/manifest. Six
+-        Not Started stories, 41 ACs; no runtime implementation. Independent plan-review is next.
++        Not Started stories, 41 ACs; no runtime implementation. Baseline plan-review 2026-11-21-b4cd07e4
++        is READY; Phase B revision 2026-11-21-e4098d22 approved by operator token approve-phase-b on 2026-11-22
++        after green G5 exit checks; journal/manifest records final post-approval regeneration, validation
++        and publication. Unchanged 41 ACs.
+       - Portable-json/v1 has declared numeric/format/resource limits; existing readers select native-compat/v1
+         before parsing and retain acceptance/reason semantics. Never fallback after validation failure.
++      - Review revision 2026-11-21-e4098d22 adds per-resource integration mappings and read-only integration/dev
++        stored-version sweep proof before response-guard rollout; PR-L3 audit discrepancy is a named Security
++        Reviewer follow-up due at feature G3, not a runtime fix or accepted risk.
+     uses_api_contract:
+       - api:brain-api
+     uses_schema:
+diff --git a/planning-mds/operations/evidence/runs/2026-11-20-ccb1bd39/evidence-manifest.json b/planning-mds/operations/evidence/runs/2026-11-20-ccb1bd39/evidence-manifest.json
+index 4eda386..1c44400 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-20-ccb1bd39/evidence-manifest.json
++++ b/planning-mds/operations/evidence/runs/2026-11-20-ccb1bd39/evidence-manifest.json
+@@ -3,7 +3,7 @@
+   "feature_id": "F0011",
+   "feature_slug": "json-schema-contract-system",
+   "run_id": "2026-11-20-ccb1bd39",
+-  "status": "approved",
++  "status": "superseded",
+   "recorded_on": "2026-11-20",
+   "contract_version": "2026-07-11",
+   "contract_effective_date": "2026-07-11",
+@@ -115,5 +115,7 @@
+   "approved_phases": [
+     "A",
+     "B"
+-  ]
++  ],
++  "superseded_by": "2026-11-21-e4098d22",
++  "superseded_at": "2026-11-22T20:03:31.592248+00:00"
+ }

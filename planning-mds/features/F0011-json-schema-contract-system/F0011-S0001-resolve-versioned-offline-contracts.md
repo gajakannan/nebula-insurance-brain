@@ -10,7 +10,7 @@
 ## User Story
 
 **As a** Dana the Platform Engineer
-**I want** resolve an explicit structural contract version from a reproducible local bundle
+**I want** to resolve an explicit structural contract version from a reproducible local bundle
 **So that** every consumer validates against the intended contract without fetching remote definitions.
 
 ## Context & Background

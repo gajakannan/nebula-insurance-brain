@@ -10,7 +10,7 @@
 ## User Story
 
 **As a** Ingrid the Persistence Engineer
-**I want** adopt the shared contracts at existing validation boundaries without rewriting accepted history
+**I want** to adopt the shared contracts at existing validation boundaries without rewriting accepted history
 **So that** contract consolidation cannot weaken admission or change a historical answer.
 
 ## Context & Background

@@ -10,7 +10,7 @@
 ## User Story
 
 **As a** Dana the Platform Engineer
-**I want** run identical structural cases through every supported client and server adapter
+**I want** to run identical structural cases through every supported client and server adapter
 **So that** client and server cannot disagree silently about a supported wire payload.
 
 ## Context & Background

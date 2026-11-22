@@ -1,9 +1,11 @@
 # F0011 — JSON Schema contract system — Status
 
-**Overall Status:** Draft
-**Last Updated:** 2026-11-20
+**Overall Status:** Planned
+**Last Updated:** 2026-11-22
 **Planning:** Phase A and Phase B approved by the operator; token `approve-phase-b` recorded at G5 on 2026-11-20.
-**Plan Run:** `2026-11-20-ccb1bd39` (A+B, new; base-run-only)
+**Plan Run:** `2026-11-20-ccb1bd39` (approved A+B baseline).
+**Plan Revision:** `2026-11-21-e4098d22` (B, existing; operator approved with `approve-phase-b` on 2026-11-22).
+**Plan Review:** `2026-11-21-b4cd07e4` returned READY for the baseline; this revision addresses its six findings.
 
 ## Story Checklist
 
@@ -77,7 +79,10 @@ Append-only table. Empty until the feature run produces actual reviewer evidence
 F0012/F0013 own vocabulary; F0015 owns extraction compilation; F0016 owns actual
 searched scopes; F0014/F0023 own package completeness/display. ADR-0039 stays
 Proposed pending all stated proofs. These are ownership boundaries, not waived
-F0011 acceptance criteria. No unresolved implementation finding is deferred here.
+F0011 acceptance criteria. PR-L3 is a tracked Low audit follow-up: Security Reviewer must record the
+internal-invariant decision and a fault-injection result at feature G3,
+before the implementation approval gate. See the assembly plan,
+"Read audit follow-up (PR-L3)". No runtime fix or acceptance is claimed by plan.
 
 ## Closeout Summary
 
@@ -92,3 +97,5 @@ will be recorded by the later feature action, never by this planning run.
 - [x] All seven ordered G5 pre-approval exit operations returned zero.
 - [x] Operator explicitly approved Phase A at G3.
 - [x] Operator explicitly approved Phase B after green G5 exit checks (`approve-phase-b`, 2026-11-20).
+
+- [x] Operator approved review revision `2026-11-21-e4098d22` at G5 (`approve-phase-b`, 2026-11-22); final publication is recorded by the run journal/manifest.

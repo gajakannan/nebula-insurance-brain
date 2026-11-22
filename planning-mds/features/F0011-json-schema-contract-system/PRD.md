@@ -6,6 +6,7 @@
 **Phase:** MVP / v0.1A
 **Status:** Phase A and Phase B approved — implementation Not Started
 **Plan Run:** 2026-11-20-ccb1bd39 (A+B; feature mode new)
+**Plan Revision:** 2026-11-21-e4098d22 (Phase B, existing; operator approved with `approve-phase-b` on 2026-11-22). Requirements and 41 ACs are unchanged; the revision specifies the review's compatibility proof and consumer mapping.
 
 ## Feature Statement
 

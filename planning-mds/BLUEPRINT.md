@@ -568,7 +568,12 @@ required. ADR-0079 and ADR-0039 remain Proposed pending their stated proofs.
 G4 ontology synchronization and all ordered G5 pre-approval exit checks passed.
 The operator approved Phase B with `approve-phase-b` on 2026-11-20; G5 performs
 post-approval regeneration/validation and publishes the manifest last. Independent
-plan-review is next, followed by the feature action. Existing C4 topology is unchanged.
+plan-review `2026-11-21-b4cd07e4` returned READY for that baseline. Phase B revision
+`2026-11-21-e4098d22` was approved by operator token `approve-phase-b` on
+2026-11-22; its G5 journal/manifest records post-approval checks and publication.
+The revision adds per-resource consumer mappings,
+read-only integration/dev full-history response-guard preflight, and PR-L3
+Security follow-up due at feature G3. Existing C4 topology is unchanged.
 
 ### 4.17 Delivery reconciliation (2026-11-21)
 
@@ -603,7 +608,7 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 Current position (2026-11-20): F0001 to F0008 are done and archived; ADR-0078 was accepted on 2026-11-19 (F0008 second remediation run `2026-11-19-8cfcd0ff`, approved 2026-11-19). F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
 
 1. Now (2026-11-20 roadmap review, after F0008 closed): four lanes.
-   - **F0011** (JSON Schema contract system) continues through `plan` → `plan-review` → `feature`, numbering its migration after 0015.
+   - **F0011** (JSON Schema contract system) continues through `plan` → `plan-review` → `feature`. No migration is planned; any future migration would follow 0015.
    - **F0009** (provenance + human-correction lineage) is dependency-ready and heads the temporal/commit path F0009 → F0010 → F0018.
    - **F0012** (foundation ontology) is planned alongside F0011, and its feature run starts after F0011 completes.
    - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.

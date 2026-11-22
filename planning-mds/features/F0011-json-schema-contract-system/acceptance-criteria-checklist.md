@@ -1,6 +1,6 @@
 # F0011 — Acceptance criteria checklist
 
-Phase A draft, plan run `2026-11-20-ccb1bd39`. Every AC is defined in its owning
+Phase A approved in plan run `2026-11-20-ccb1bd39`. Every AC is defined in its owning
 story; this index does not duplicate or override that definition.
 
 | Story | Criteria | Count | Required observed proof | State |
@@ -19,6 +19,9 @@ story; this index does not duplicate or override that definition.
 - [ ] Exact money and scoped identifiers retain precision and namespace.
 - [ ] Python/Pydantic/AJV run every shared case; OpenAPI resolves the same definitions.
 - [ ] Actual consumer integration, historical compatibility and denied/refused paths pass.
+- [ ] S0005 AC1: every inventory resource has an observed consumer/test/selector/disposition mapping.
+- [ ] S0005 AC4: integration and dev stored-version sweeps pass before enabling the response guard.
+- [ ] PR-L3: feature G3 Security records the read-audit/HTTP invariant-failure disposition.
 - [ ] Clean-package reproduction and intentional drift failure verified in CI.
 - [ ] Feature-run evidence maps all 41 ACs to observed results with at least 80% changed executable-line coverage.
 - [ ] Required independent signoff provenance is appended to STATUS.md.

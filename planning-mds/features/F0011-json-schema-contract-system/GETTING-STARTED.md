@@ -5,7 +5,12 @@
 Phase A and Phase B are approved in plan run `2026-11-20-ccb1bd39` (operator
 Phase B token `approve-phase-b`, 2026-11-20). Six stories are Not Started. Read
 [PRD](PRD.md), the assembly plan and contract design; independent plan-review
-precedes the feature action.
+returned READY in review `2026-11-21-b4cd07e4`. The Phase B revision
+`2026-11-21-e4098d22` was approved by operator token `approve-phase-b` on
+2026-11-22. Its journal/manifest records final post-approval validation and
+publication. Carry the per-resource inventory, integration/dev
+stored-version rollout preflight and PR-L3 G3 Security follow-up from the
+revised assembly plan into feature G0.
 No new runtime setup or migration is delivered by this plan.
 
 ## Prerequisites
@@ -52,7 +57,7 @@ frozen holdout.
 From the framework checkout, run:
 
 ```bash
-python3 agents/scripts/resume-brief.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-11-20-ccb1bd39
+python3 agents/scripts/resume-brief.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-11-21-e4098d22
 python3 agents/scripts/project_context.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --action plan
 ```
 

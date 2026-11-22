@@ -4,7 +4,10 @@
 **Phase:** v0.1A / MVP
 **Roadmap:** Now (2026-11-20 roadmap review)
 **Planning:** Phase A and Phase B approved by the operator on 2026-11-20; implementation Not Started.
-**Plan Run:** `2026-11-20-ccb1bd39`
+**Plan Run:** `2026-11-20-ccb1bd39` (approved baseline)
+**Plan Revision:** `2026-11-21-e4098d22` (Phase B; operator approved with `approve-phase-b` on 2026-11-22).
+**Review:** `2026-11-21-b4cd07e4` READY for the baseline; revision adds the
+stored-history rollout proof, per-resource integration mapping and tracked G3 audit follow-up.
 
 ## Overview
 
@@ -113,7 +116,10 @@ ContractBundle 1 ---- many GeneratedArtifact
 ## Approval and proof boundary
 
 Phase A approved by operator response `approve`, recorded as `approve-phase-a`
-at G3. Phase B approved by operator token `approve-phase-b` at G5 on 2026-11-20.
+at G3. The Phase B baseline was approved by operator token `approve-phase-b`
+at G5 on 2026-11-20. The review revision `2026-11-21-e4098d22` was approved
+with the same explicit token on 2026-11-22; its G5 journal/manifest records
+the post-approval regeneration, validation and publication outcome.
 ADR-0079 and ADR-0039 remain Proposed pending their runtime proofs and later acceptance.
 All six stories are Not Started; runtime capability, conformance and security
 claims wait for the feature action and its independent reviews.
