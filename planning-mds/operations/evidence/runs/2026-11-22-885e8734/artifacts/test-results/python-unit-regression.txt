@@ -1,0 +1,47 @@
+........................................................................ [  6%]
+........................................................................ [ 12%]
+........................................................................ [ 18%]
+........................................................................ [ 25%]
+........................................................................ [ 31%]
+........................................................................ [ 37%]
+........................................................................ [ 43%]
+........................................................................ [ 50%]
+........................................................................ [ 56%]
+........................................................................ [ 62%]
+........................................................................ [ 69%]
+......sssss............................................................. [ 75%]
+........................................................................ [ 81%]
+........................................................................ [ 87%]
+........................................................................ [ 94%]
+......F............................................................      [100%]
+=================================== FAILURES ===================================
+____ test_installed_openapi_matches_every_actual_route_including_file_path _____
+engine/apps/api/tests/test_contract_openapi.py:42: in test_installed_openapi_matches_every_actual_route_including_file_path
+    assert actual == declared
+E   AssertionError: assert set() == {('get', '/co...ommits'), ...}
+E     
+E     Extra items in the right set:
+E     ('get', '/content/{}')
+E     ('get', '/content/{}/files/{}')
+E     ('get', '/health')
+E     ('get', '/facts/{}')
+E     ('post', '/facts/{}/commits')...
+E     
+E     ...Full output truncated (3 lines hidden), use '-vv' to show
+=============================== warnings summary ===============================
+../../tmp/f0011-engine-venv/lib/python3.14/site-packages/starlette/testclient.py:53
+  /tmp/f0011-engine-venv/lib/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+packages/brain-security/tests/test_verification.py::test_symmetric_algorithm_confusion_is_rejected
+  /tmp/f0011-engine-venv/lib/python3.14/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 19 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.14.4-final-0 ________________
+
+Coverage JSON written to file planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/coverage/python-unit-coverage.json
+=========================== short test summary info ============================
+FAILED engine/apps/api/tests/test_contract_openapi.py::test_installed_openapi_matches_every_actual_route_including_file_path
+1 failed, 1141 passed, 5 skipped, 2 warnings in 30.36s

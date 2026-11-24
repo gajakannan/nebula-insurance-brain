@@ -1,0 +1,127 @@
+$ node --test scripts/contracts/runtime.test.mjs
+TAP version 13
+# Subtest: portable decoder preserves opaque keys, supplementary characters and exact strings
+ok 1 - portable decoder preserves opaque keys, supplementary characters and exact strings
+  ---
+  duration_ms: 1.691035
+  type: 'test'
+  ...
+# Subtest: malformed JSON and duplicate keys cannot be repaired by the scanner
+ok 2 - malformed JSON and duplicate keys cannot be repaired by the scanner
+  ---
+  duration_ms: 0.734242
+  type: 'test'
+  ...
+# Subtest: portable decoder refuses unsafe numbers, surrogates and resource overflows
+ok 3 - portable decoder refuses unsafe numbers, surrogates and resource overflows
+  ---
+  duration_ms: 58.587214
+  type: 'test'
+  ...
+# Subtest: root depth is one for every scalar and nested array/object value
+ok 4 - root depth is one for every scalar and nested array/object value
+  ---
+  duration_ms: 10.863989
+  type: 'test'
+  ...
+# Subtest: direct value admission rejects lossy/non-JSON values without invoking getters
+ok 5 - direct value admission rejects lossy/non-JSON values without invoking getters
+  ---
+  duration_ms: 0.604942
+  type: 'test'
+  ...
+# Subtest: portable date/time formats bind Gregorian years and exact RFC3339 boundaries
+ok 6 - portable date/time formats bind Gregorian years and exact RFC3339 boundaries
+  ---
+  duration_ms: 0.440613
+  type: 'test'
+  ...
+# Subtest: portable URI references follow ASCII RFC3986 without WHATWG repair
+ok 7 - portable URI references follow ASCII RFC3986 without WHATWG repair
+  ---
+  duration_ms: 3.429601
+  type: 'test'
+  ...
+# Subtest: bundle uses real AJV without coercion/defaults/removal or input mutation
+ok 8 - bundle uses real AJV without coercion/defaults/removal or input mutation
+  ---
+  duration_ms: 38.676557
+  type: 'test'
+  ...
+# Subtest: bundle schema and metadata views cannot modify cached validators
+ok 9 - bundle schema and metadata views cannot modify cached validators
+  ---
+  duration_ms: 18.716295
+  type: 'test'
+  ...
+# Subtest: public bundle APIs admit schema positions and refuse schema-looking annotation data
+ok 10 - public bundle APIs admit schema positions and refuse schema-looking annotation data
+  ---
+  duration_ms: 13.879256
+  type: 'test'
+  ...
+# Subtest: registered refs resolve and dormant/external/cyclic refs fail before instances
+ok 11 - registered refs resolve and dormant/external/cyclic refs fail before instances
+  ---
+  duration_ms: 16.453613
+  type: 'test'
+  ...
+# Subtest: schema admission rejects unsupported instructions rather than data property names
+ok 12 - schema admission rejects unsupported instructions rather than data property names
+  ---
+  duration_ms: 11.131958
+  type: 'test'
+  ...
+# Subtest: pattern admission distinguishes terminal anchors from escaped and character-class dollars
+ok 13 - pattern admission distinguishes terminal anchors from escaped and character-class dollars
+  ---
+  duration_ms: 54.097743
+  type: 'test'
+  ...
+# Subtest: corrupt or incomplete bundles cannot create a usable partial runtime
+ok 14 - corrupt or incomplete bundles cannot create a usable partial runtime
+  ---
+  duration_ms: 15.470158
+  type: 'test'
+  ...
+# Subtest: compact raw fixtures expand only exact bounded recipes or one explicit raw string
+ok 15 - compact raw fixtures expand only exact bounded recipes or one explicit raw string
+  ---
+  duration_ms: 0.450463
+  type: 'test'
+  ...
+# Subtest: runner executes positive and limit-refused compact raw cases through the real decoder
+ok 16 - runner executes positive and limit-refused compact raw cases through the real decoder
+  ---
+  duration_ms: 17.014389
+  type: 'test'
+  ...
+# Subtest: runner joins expectations and persists only safe case identities/results
+ok 17 - runner joins expectations and persists only safe case identities/results
+  ---
+  duration_ms: 9.934578
+  type: 'test'
+  ...
+# Subtest: runner refuses missing, duplicate, unsupported or malformed inventory entries
+ok 18 - runner refuses missing, duplicate, unsupported or malformed inventory entries
+  ---
+  duration_ms: 13.115217
+  type: 'test'
+  ...
+# Subtest: real CLI exposes exit status and safe summaries for complete, mismatched and broken runs
+ok 19 - real CLI exposes exit status and safe summaries for complete, mismatched and broken runs
+  ---
+  duration_ms: 317.141939
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 687.332304
+
+Process completed with exit code 0.

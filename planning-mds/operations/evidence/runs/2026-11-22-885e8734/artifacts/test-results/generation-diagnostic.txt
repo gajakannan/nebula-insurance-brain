@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    from pathlib import Path; from scripts.contracts.generate import build; p=Path('/tmp/f0011-debug-build'); p.mkdir(exist_ok=True); build(p)
+                                                                                                                                      ~~~~~^^^
+  File "/app/brain/scripts/contracts/generate.py", line 234, in build
+    'brain-api.openapi.json': encode(openapi_snapshot(schemas, names))}
+                                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/app/brain/scripts/contracts/generate.py", line 105, in openapi_snapshot
+    walk(api)
+    ~~~~^^^^^
+  File "/app/brain/scripts/contracts/generate.py", line 100, in walk
+    walk(child)
+    ~~~~^^^^^^^
+  File "/app/brain/scripts/contracts/generate.py", line 100, in walk
+    walk(child)
+    ~~~~^^^^^^^
+  File "/app/brain/scripts/contracts/generate.py", line 100, in walk
+    walk(child)
+    ~~~~^^^^^^^
+  [Previous line repeated 2 more times]
+  File "/app/brain/scripts/contracts/generate.py", line 97, in walk
+    raise ValueError('OpenAPI reference is outside selected source closure')
+ValueError: OpenAPI reference is outside selected source closure

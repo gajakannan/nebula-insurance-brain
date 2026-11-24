@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from typing import Any, Protocol
 from uuid import UUID, uuid4
 
+from brain_contracts.schema_runtime import ContractRef, validate_contract
 from brain_domain.assertions import SourceAccessProof
 from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
 from brain_domain.temporal import (
@@ -269,6 +270,14 @@ class CanonicalCommitService:
         Pilot rows written before F0008 have no stored timestamps on the domain
         object, so the proposal's values are the fallback for those alone."""
         remainder_id = uuid4()
+        if piece.temporal is not None:
+            # Only newly constructed temporal carriers are guarded. A historical
+            # legacy remainder keeps its unwrapped value and absent metadata.
+            validate_contract(
+                ContractRef("fact-temporal-v1", "1", "/$defs/version_temporal"),
+                piece.temporal.to_json(),
+                profile="native-compat/v1",
+            )
         await self._repository.insert_version(
             version_id=remainder_id,
             slot_id=proposal.slot_id,
@@ -499,6 +508,11 @@ class CanonicalCommitService:
             else None,
             validity_unknown_from=placement.validity_unknown_from,
             split_of_version_id=None,
+        )
+        validate_contract(
+            ContractRef("fact-temporal-v1", "1", "/$defs/version_temporal"),
+            new_temporal.to_json(),
+            profile="native-compat/v1",
         )
 
         # Step 10: write.

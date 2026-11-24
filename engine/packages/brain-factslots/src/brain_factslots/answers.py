@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
+from brain_contracts.schema_runtime import ContractRef, validate_contract
 from brain_domain.authx import ResourceKey, ResourceType
 from brain_domain.fact_answers import (
     AnswerReason,
@@ -108,7 +109,9 @@ class FactAnswerPolicy:
                 and member_key(answer.value, contract) != slot.member_key
             ):
                 raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
-        return answer.to_json()
+        canonical = answer.to_json()
+        validate_contract(ContractRef("fact-answer-v1", "1"), canonical, profile="native-compat/v1")
+        return canonical
 
     async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
         assert answer.value is not None

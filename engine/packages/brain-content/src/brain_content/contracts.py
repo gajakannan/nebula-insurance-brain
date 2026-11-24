@@ -5,13 +5,10 @@ from __future__ import annotations
 import json
 import math
 from datetime import datetime
-from functools import lru_cache
-from importlib.resources import files
-from pathlib import Path
 from typing import Any
 from uuid import UUID
 
-from jsonschema import Draft202012Validator, FormatChecker  # type: ignore[import-untyped]
+from brain_contracts.schema_runtime import ContractBundle, ContractError, ContractRef
 
 
 def wire_value(value: Any) -> Any:
@@ -58,8 +55,7 @@ def decode_json(raw: bytes | str) -> Any:
     )
 
 
-@lru_cache(maxsize=8)
-def schema(name: str) -> dict[str, Any]:
+def _ref(name: str, definition: str | None = None) -> ContractRef:
     allowed = {
         "content-artifact-manifest.schema.json",
         "content-artifact-manifest-v2.schema.json",
@@ -69,23 +65,29 @@ def schema(name: str) -> dict[str, Any]:
     }
     if name not in allowed:
         raise ValueError("unknown content contract")
-    packaged = files("brain_content").joinpath("schemas", name)
-    if packaged.is_file():
-        return decode_json(packaged.read_bytes())
-    for start in (Path(__file__).resolve().parent, Path.cwd()):
-        for root in (start, *start.parents):
-            path = root / "planning-mds" / "schemas" / name
-            if path.is_file():
-                return decode_json(path.read_bytes())
-    raise RuntimeError("content contracts are missing from the application deployment")
+    return ContractRef(
+        name.removesuffix(".schema.json"),
+        "2" if name.endswith("-v2.schema.json") else "1",
+        f"/$defs/{definition}" if definition is not None else "",
+    )
+
+
+def schema(name: str) -> dict[str, Any]:
+    # Detached schema views cannot alter the common registry or other consumers.
+    return dict(ContractBundle.installed().schema(_ref(name)))
 
 
 def validate_contract(name: str, value: Any, definition: str | None = None) -> None:
-    contract = schema(name)
-    if definition is not None:
-        contract = {"$ref": f"#/$defs/{definition}", "$defs": contract["$defs"]}
-    validator = Draft202012Validator(contract, format_checker=FormatChecker())
-    errors = list(validator.iter_errors(value))
-    if errors:
-        # Do not place protected values, quotes, paths or schema reprs in errors.
-        raise ValueError("CONTENT_CONTRACT_INVALID")
+    ref = _ref(name, definition)
+    bundle = ContractBundle.installed()
+    try:
+        bundle.validate(ref, value, profile="native-compat/v1")
+    except ContractError as exc:
+        if exc.code not in {
+            "CONTRACT_INSTANCE_INVALID",
+            "CONTRACT_JSON_INVALID",
+            "CONTRACT_JSON_UNSUPPORTED",
+        }:
+            raise
+        # Preserve the existing safe native error, without payload or schema text.
+        raise ValueError("CONTENT_CONTRACT_INVALID") from None

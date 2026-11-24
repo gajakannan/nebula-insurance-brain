@@ -32,7 +32,6 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 |------------|------|--------|-------|--------|
 | F0009 | Provenance + human-correction lineage | Planned | v0.1A | `F0009-provenance-and-human-correction-lineage/` |
 | F0010 | Change/retraction semantics | Planned | v0.1A | `F0010-change-and-retraction-semantics/` |
-| F0011 | JSON Schema contract system | Planned | v0.1A | `F0011-json-schema-contract-system/` |
 | F0012 | Foundation ontology | Planned | v0.1A | `F0012-foundation-ontology/` |
 | F0013 | Insurance Core GL ontology | Planned | v0.1A | `F0013-insurance-core-gl-ontology/` |
 | F0014 | Document Profile model | Planned | v0.1A | `F0014-document-profile-model/` |
@@ -97,6 +96,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:archived -->
 | Feature ID | Name | Archived Date | Evidence Reentry Date | Folder |
 |------------|------|---------------|-----------------------|--------|
+| F0011 | JSON Schema contract system | 2026-11-23 |  | `archive/F0011-json-schema-contract-system/` |
 | F0008 | Bitemporal canonical facts | 2026-11-19 |  | `archive/F0008-bitemporal-canonical-facts/` |
 | F0064 | Repository instructions and planning-check adoption | 2026-11-14 |  | `archive/F0064-repository-instructions-and-planning-check-adoption/` |
 | F0007 | FactSlot model | 2026-11-10 |  | `archive/F0007-factslot-model/` |

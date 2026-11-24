@@ -22,6 +22,59 @@ on:
   workflow_dispatch:
 
 jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the pinned F0011 application validation runtimes
+        run: |
+          docker build -f docker/contracts/Dockerfile --target engine-validation -t brain-contracts-engine:ci .
+          docker build -f docker/contracts/Dockerfile --target node-validation -t brain-contracts-node:ci .
+          docker build -f docker/contracts/Dockerfile --target neuron-validation -t brain-contracts-neuron:ci .
+      - name: Prepare shared machine-result directory
+        run: |
+          mkdir -p artifacts/contracts
+          chmod 0777 artifacts/contracts
+      - name: Refuse stale source, model, metadata, manifest and OpenAPI artifacts
+        run: docker run --rm brain-contracts-engine:ci
+      - name: Prove strict JavaScript decoding and shared AJV conformance
+        run: |
+          docker run --rm brain-contracts-node:ci
+          docker run --rm -v "$PWD/artifacts/contracts:/app/brain/artifacts/contracts" brain-contracts-node:ci \
+            corepack pnpm --dir experience contracts:check --cases ../scripts/contracts/cases.json \
+            --output ../artifacts/contracts/ajv-results.json
+      - name: Join every Python, generated-model and JavaScript case without skips
+        run: >
+          docker run --rm -v "$PWD/artifacts/contracts:/app/brain/artifacts/contracts" brain-contracts-engine:ci
+          uv run --no-sync --project engine --group contract-build python scripts/contracts/check.py
+          --cases scripts/contracts/cases.json --ajv-results artifacts/contracts/ajv-results.json
+          --python-output artifacts/contracts/python-results.json --output artifacts/contracts/conformance.json
+      - name: Prove bundle integrity, typed round trips, route parity and outside-checkout installation
+        run: >
+          docker run --rm -v "$PWD/artifacts/contracts:/app/brain/artifacts/contracts" brain-contracts-engine:ci
+          uv run --no-sync --project engine --group contract-build python -m pytest -c engine/pyproject.toml
+          engine/packages/brain-contracts/tests engine/apps/api/tests/test_contract_openapi.py
+          scripts/contracts/tests -q --junitxml=artifacts/contracts/unit-and-install.xml
+      - name: Build exact wheel and source archive installation inputs
+        run: >
+          docker run --rm -v "$PWD/artifacts/contracts:/app/brain/artifacts/contracts" brain-contracts-engine:ci
+          uv run --no-sync --project engine --group contract-build python scripts/contracts/install_smoke.py
+          --output artifacts/contracts/install
+      - name: Install and exercise both distribution formats with checkout absent and network disabled
+        run: >
+          docker run --rm --network none --tmpfs /app/brain:ro
+          -v "$PWD/artifacts/contracts/install:/packages:ro" -v "$PWD/artifacts/contracts:/output"
+          brain-contracts-engine:ci python /packages/run_installed_probe.py
+      - name: Prove unchanged Neuron callers use the installed common bundle
+        run: docker run --rm brain-contracts-neuron:ci
+      - name: Preserve contract results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-conformance
+          path: artifacts/contracts/
+          if-no-files-found: error
+
   product-gates:
     runs-on: ubuntu-latest
     steps:
@@ -224,6 +277,17 @@ jobs:
           engine/tests/integration/test_temporal_reads.py
           engine/tests/integration/test_temporal_migration.py
           --cov=brain_temporal --cov-fail-under=80 --cov-report=term-missing -q
+      - name: Build the F0011 application integration runtime
+        run: docker build -f docker/contracts/Dockerfile --target engine-validation -t brain-contracts-engine:ci .
+      - name: Prove F0011 consumer guards and atomicity against PostgreSQL
+        timeout-minutes: 10
+        run: >
+          docker run --rm --network host
+          -e BRAIN_DATABASE_URL=postgresql+asyncpg://brain:brain@localhost:5432/brain
+          -e BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@localhost:5432/brain
+          brain-contracts-engine:ci
+          uv run --no-sync --project engine --group contract-build python -m pytest -c engine/pyproject.toml
+          engine/tests/integration/test_f0011_consumer_contracts.py -q
       - name: Install the locked neuron dependencies for delivery recovery
         run: uv sync --locked --project neuron
       - name: Prove worker and importer recovery against PostgreSQL
@@ -294,7 +358,7 @@ jobs:
           node-version: "24"
       - uses: pnpm/action-setup@v4
         with:
-          version: "11"
+          version: "12.21.0"
       - name: experience/ — install
         working-directory: experience
         run: pnpm install --frozen-lockfile

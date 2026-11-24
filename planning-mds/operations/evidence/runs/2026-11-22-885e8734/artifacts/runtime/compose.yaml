@@ -1,0 +1,60 @@
+name: brain-f0011-885e8734
+services:
+  engine-validation:
+    image: brain-f0006-engine:2026-11-02-5a00b0ff
+    working_dir: /app/brain
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+    environment:
+      XDG_CACHE_HOME: /tmp/.cache
+      UV_PROJECT_ENVIRONMENT: /tmp/f0011-engine-venv
+      UV_PYTHON_DOWNLOADS: never
+      BRAIN_DATABASE_URL: postgresql+asyncpg://brain:brain@postgres:5432/brain_f0008_shared
+      BRAIN_WORKER_DATABASE_URL: postgresql+psycopg://brain:brain@postgres:5432/brain_f0008_shared
+    command: [python, -c, "from threading import Event; Event().wait()"]
+    healthcheck:
+      test: [CMD, python, -c, "import sqlalchemy,jsonschema,pydantic,psycopg; c=psycopg.connect(host='postgres',dbname='brain_f0008_shared',user='brain',password='brain'); assert c.execute('SELECT 1').fetchone()[0] == 1; c.close()"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+    networks: [dependencies]
+  neuron-validation:
+    image: brain-f0006-neuron:2026-11-02-5a00b0ff
+    working_dir: /app/brain
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+    environment:
+      XDG_CACHE_HOME: /tmp/.cache
+      UV_PROJECT_ENVIRONMENT: /tmp/f0011-neuron-venv
+      UV_PYTHON_DOWNLOADS: never
+      BRAIN_DATABASE_URL: postgresql+asyncpg://brain:brain@postgres:5432/brain_f0008_shared
+      BRAIN_WORKER_DATABASE_URL: postgresql+psycopg://brain:brain@postgres:5432/brain_f0008_shared
+    command: [python, -c, "from threading import Event; Event().wait()"]
+    healthcheck:
+      test: [CMD, python, -c, "import sqlalchemy,jsonschema,pydantic; assert sqlalchemy.__version__ and pydantic.__version__"]
+      interval: 5s
+      timeout: 20s
+      retries: 12
+    networks: [dependencies]
+  node-validation:
+    image: node:22
+    user: "1000:1000"
+    working_dir: /app/brain
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+    environment:
+      XDG_CACHE_HOME: /tmp/.cache
+      COREPACK_HOME: /tmp/corepack
+      PNPM_HOME: /tmp/pnpm
+    command: [node, -e, "setInterval(() => {}, 2147483647)"]
+    healthcheck:
+      test: [CMD, node, -e, "if (+process.versions.node.split('.')[0] < 22) process.exit(1)"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+networks:
+  dependencies:
+    external: true
+    name: nebula-insurance-brain_default

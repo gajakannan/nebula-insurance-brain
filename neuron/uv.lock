@@ -407,6 +407,7 @@ name = "brain-content"
 version = "0.1.0"
 source = { editable = "../engine/packages/brain-content" }
 dependencies = [
+    { name = "brain-contracts" },
     { name = "jsonschema" },
     { name = "pydantic" },
     { name = "pyyaml" },
@@ -414,6 +415,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "brain-contracts", editable = "../engine/packages/brain-contracts" },
     { name = "jsonschema", specifier = ">=4.23" },
     { name = "pydantic", specifier = ">=2.9" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
@@ -430,6 +432,9 @@ dependencies = [
     { name = "brain-domain" },
     { name = "jsonschema" },
     { name = "pydantic" },
+    { name = "referencing" },
+    { name = "rfc3986-validator" },
+    { name = "rfc8785" },
 ]
 
 [package.metadata]
@@ -437,6 +442,9 @@ requires-dist = [
     { name = "brain-domain", editable = "../engine/packages/brain-domain" },
     { name = "jsonschema", specifier = ">=4.23" },
     { name = "pydantic", specifier = ">=2.9" },
+    { name = "referencing", specifier = ">=0.37" },
+    { name = "rfc3986-validator", specifier = ">=0.1.1" },
+    { name = "rfc8785", specifier = "==0.1.4" },
 ]
 
 [[package]]
@@ -492,12 +500,14 @@ name = "brain-factslots"
 version = "0.1.0"
 source = { editable = "../engine/packages/brain-factslots" }
 dependencies = [
+    { name = "brain-contracts" },
     { name = "brain-domain" },
     { name = "brain-security" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "brain-contracts", editable = "../engine/packages/brain-contracts" },
     { name = "brain-domain", editable = "../engine/packages/brain-domain" },
     { name = "brain-security", editable = "../engine/packages/brain-security" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
@@ -701,11 +711,13 @@ name = "brain-temporal"
 version = "0.1.0"
 source = { editable = "../engine/packages/brain-temporal" }
 dependencies = [
+    { name = "brain-contracts" },
     { name = "brain-domain" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "brain-contracts", editable = "../engine/packages/brain-contracts" },
     { name = "brain-domain", editable = "../engine/packages/brain-domain" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.24" },
@@ -3466,6 +3478,24 @@ wheels = [
 ]
 
 [[package]]
+name = "rfc3986-validator"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/88/f270de456dd7d11dcc808abfa291ecdd3f45ff44e3b549ffa01b126464d0/rfc3986_validator-0.1.1.tar.gz", hash = "sha256:3d44bde7921b3b9ec3ae4e3adca370438eccebc676456449b145d533b240d055", size = 6760, upload-time = "2019-10-28T16:00:19.144Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl", hash = "sha256:2f235c432ef459970b4306369336b9d5dbdda31b510ca1e327636e01f528bfa9", size = 4242, upload-time = "2019-10-28T16:00:13.976Z" },
+]
+
+[[package]]
+name = "rfc8785"
+version = "0.1.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/2f/fa1d2e740c490191b572d33dbca5daa180cb423c24396b856f5886371d8b/rfc8785-0.1.4.tar.gz", hash = "sha256:e545841329fe0eee4f6a3b44e7034343100c12b4ec566dc06ca9735681deb4da", size = 14321, upload-time = "2024-09-27T16:33:31.206Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4d/78/119878110660b2ad709888c8a1614fce7e2fab39080ab960656dc8605bf6/rfc8785-0.1.4-py3-none-any.whl", hash = "sha256:520d690b448ecf0703691c76e1a34a24ddcd4fc5bc41d589cb7c58ec651bcd48", size = 9240, upload-time = "2024-09-27T16:33:29.683Z" },
+]
+
+[[package]]
 name = "rich"
 version = "15.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3806,11 +3836,11 @@ wheels = [
 
 [[package]]
 name = "soupsieve"
-version = "2.9.2"
+version = "4.1.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/69/99/a6ca3beb3ccacb41fb3321d8a60e5566f9e6467601ef8eba6a17e1b89778/soupsieve-2.9.2.tar.gz", hash = "sha256:4a55d8cf158a9c2e587fa4922f1bbb91d68ac829e2d6f25403a85747c71daf74", size = 122445, upload-time = "2026-08-07T00:57:24.801Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/77/d59ca6aa338bdd8d880234d15b7c466cb176e44502899a9df81ba2e13cd0/soupsieve-4.1.3.tar.gz", hash = "sha256:13f70186c8f40bf8d0ff7bbab09a18fb149600b465269207b5e5b588f55fda08", size = 181564, upload-time = "2026-11-20T12:58:27.613Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/dc/ad025c1ee131eba60c69f4dd5779b18fcf1e6b21a343e2162a84d5d133c7/soupsieve-2.9.2-py3-none-any.whl", hash = "sha256:8089a26fd974ca7a1f30276d3d8492ab266ab15af581642dfe8aa162e0c1c823", size = 37370, upload-time = "2026-08-07T00:57:23.524Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/f7/be207468cac6ad79389f36cf1fce4f2836960df91659979ec486c727bb2e/soupsieve-4.1.3-py3-none-any.whl", hash = "sha256:7a390d1a57d1ab7bb228531e9b8a750a5ebf87db774e0ef6faeeac057d22a5bf", size = 59792, upload-time = "2026-11-20T12:58:26.459Z" },
 ]
 
 [[package]]

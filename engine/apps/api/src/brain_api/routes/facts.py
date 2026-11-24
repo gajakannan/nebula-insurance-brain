@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from brain_assertions.eligibility import AssertionIneligible
+from brain_contracts.schema_runtime import ContractError
 from brain_domain.authx import (
     Action,
     AuthorizationDecision,
@@ -13,7 +14,7 @@ from brain_domain.authx import (
     ResourceType,
 )
 from brain_domain.fact_answers import FactAnswerRejected
-from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
+from brain_domain.facts import ChangeReason, CommitProposal, FactVersion
 from brain_domain.principal import Principal
 from brain_domain.temporal import TemporalRejected
 from brain_factslots.answers import FactAnswerPolicy, FactAnswerReader
@@ -33,6 +34,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from brain_api.contract_guards import guard_commit_response, guard_fact_response
 from brain_api.deps import (
     current_principal,
     get_authorization_execution,
@@ -144,9 +146,19 @@ async def get_fact(
         requested=requested,
         additional_reads=scope_reads,
     )
-    if isinstance(result, ValidityUnknown):
-        return FactValidityUnknownOut.from_domain(result)
-    return FactVersionOut.from_domain(result.version)
+    response: FactVersionOut | FactValidityUnknownOut
+    try:
+        if isinstance(result, ValidityUnknown):
+            response = FactValidityUnknownOut.from_domain(result)
+        else:
+            response = FactVersionOut.from_domain(result.version)
+        payload = response.model_dump(mode="json")
+    except (ValueError, TypeError):
+        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+    # All exact payload/source READ checks and the read audit have completed.
+    # PR-L3's bounded SUCCEEDED-audit / invariant-500 meaning is reviewed at G3.
+    guard_fact_response(payload, validity_unknown=isinstance(result, ValidityUnknown))
+    return response
 
 
 @router.post("/{fact_slot_id}/commits", response_model=CommitResponseOut, status_code=201)
@@ -187,7 +199,7 @@ async def commit_fact(
 
     evidence_keys: set[ResourceKey] = set()
 
-    async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResult:
+    async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResponseOut:
         decision = next(
             d for d in decisions if d.resource == _slot(fact_slot_id) and d.action == Action.COMMIT
         )
@@ -216,13 +228,22 @@ async def commit_fact(
             if not needed <= readable:
                 raise StaleVersionError("attesting documents changed concurrently")
 
-        return await service.commit(
+        committed = await service.commit(
             proposal,
             authorized_scope=scope,
             authorization_decision_id=decision.decision_id,
             source_access=repository.source_access_proof(evidence_reads),
             disclosure_check=disclosure_check,
         )
+        try:
+            response = CommitResponseOut.from_domain(committed)
+            payload = response.model_dump(mode="json")
+        except (ValueError, TypeError):
+            raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+        # Validate before returning to the existing outer mutation facade, so
+        # response invariant failures roll back versions, changes and outbox.
+        guard_commit_response(payload)
+        return response
 
     async def source_keys() -> Sequence[ResourceKey]:
         # F0008: ending evidence joins the same-UoW source READ checks (D4).
@@ -288,7 +309,7 @@ async def commit_fact(
         # No database text crosses to the client: constraint messages can quote the
         # failing row (F0008 G3 security review).
         raise ConcurrentCommitApiError(None) from exc
-    return CommitResponseOut.from_domain(result)
+    return result
 
 
 def _ending_refs(temporal: object) -> tuple[UUID, ...]:

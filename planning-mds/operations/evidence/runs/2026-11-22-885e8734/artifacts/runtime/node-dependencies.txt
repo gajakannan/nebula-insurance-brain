@@ -1,0 +1,20 @@
+F0011 Node dependency setup (node-validation container)
+
+Runtime: Node 22.23.1, corepack 0.34.6, pnpm 12.21.0.
+Exact added devDependencies: ajv 8.20.0; ajv-formats 3.0.1; jsonc-parser 3.3.1.
+
+Initial add exited 1 with ERR_PNPM_UNEXPECTED_STORE: mounted node_modules metadata
+selected the host pnpm cache, whereas the container selected a workspace cache.
+Aligning the cache path then encountered a nonwritable host cache. That attempt
+was interrupted (exit 130) without running feature tests or changing code.
+
+Runtime restored by rebuilding reversible dependency links using the writable
+container cache /tmp/f0011-pnpm-store:
+  corepack pnpm --dir experience install --force --store-dir /tmp/f0011-pnpm-store
+Exit 0. Existing lock resolutions were retained; 284 packages installed.
+
+  corepack pnpm --dir experience add -D --save-exact --store-dir /tmp/f0011-pnpm-store ajv@8.20.0 ajv-formats@3.0.1 jsonc-parser@3.3.1
+Exit 0. Six packages added, exact versions persisted in package.json/pnpm-lock.yaml.
+
+No host cache permissions were changed. All commands ran in the healthy
+application Node validation container; command exits are in commands.log.

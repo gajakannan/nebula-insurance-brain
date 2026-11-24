@@ -3,7 +3,7 @@ name = "brain-contracts"
 version = "0.1.0"
 description = "Versioned DTOs shared by engine and document activities."
 requires-python = ">=3.13"
-dependencies = ["pydantic>=2.9", "jsonschema>=4.23", "brain-domain"]
+dependencies = ["pydantic>=2.9", "jsonschema>=4.23", "referencing>=0.37", "rfc3986-validator>=0.1.1", "rfc8785==0.1.4", "brain-domain"]
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -13,4 +13,4 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-brain_contracts = ["py.typed", "schemas/*.schema.json"]
+brain_contracts = ["py.typed", "schemas/*.schema.json", "resources/v1/*", "generated/*.py"]

@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from uuid import UUID
 
+from brain_contracts.schema_runtime import ContractRef, validate_contract
 from brain_domain.authx import AuthorizationDecision, ResourceKey, ResourceType
 from brain_domain.fact_slots import (
     FINGERPRINT_VERSION,
@@ -224,6 +225,32 @@ class FactSlotResolver:
             raise SlotRejected(SlotReason.SUBJECT_NOT_FOUND)
         async with self._store.atomic():
             await self._check_scope(request, authorized_scope, subject)
+            # WHY: native callers may omit qualifiers or use noncanonical UUID
+            # spellings. Validate the domain-normalized carrier after all
+            # existing protected reasons, rather than tightening raw input.
+            raw_qualifiers = key.get("qualifiers")
+            if raw_qualifiers is None:
+                raw_qualifiers = {}
+            assert isinstance(raw_qualifiers, Mapping)  # established by _parse
+            normalized: dict[str, object] = {
+                "schema_version": KEY_SCHEMA_VERSION,
+                "knowledge_base_id": str(knowledge_base_id),
+                "subject_entity_id": str(subject),
+                "predicate_key": str(request.key),
+                "predicate_release_ref": request.contract.release_ref,
+                "qualifiers": {
+                    name: canonical_value(item).canonical for name, item in raw_qualifiers.items()
+                },
+            }
+            if request.object_entity_id is not None:
+                normalized["object_entity_id"] = str(request.object_entity_id)
+            if request.member is not None:
+                normalized["member"] = request.member.canonical
+            validate_contract(
+                ContractRef("fact-slot-key-v1", "1"),
+                normalized,
+                profile="native-compat/v1",
+            )
             at = self._clock()
             header_identity = SlotIdentity(
                 tenant_id,
@@ -256,7 +283,7 @@ class FactSlotResolver:
                 fingerprint=header.identity_fingerprint,
             )
             if request.cardinality != Cardinality.MULTI:
-                return result
+                return _checked_result(result)
             member_identity = SlotIdentity(
                 tenant_id,
                 knowledge_base_id,
@@ -280,14 +307,16 @@ class FactSlotResolver:
                     at=at,
                     decision=decision,
                 )
-            return ResolutionResult(
-                result.outcome,
-                slot_id=header.id,
-                member_slot_id=member.id,
-                member_created=member_created,
-                predicate_key=str(request.key),
-                cardinality=request.cardinality,
-                fingerprint=header.identity_fingerprint,
+            return _checked_result(
+                ResolutionResult(
+                    result.outcome,
+                    slot_id=header.id,
+                    member_slot_id=member.id,
+                    member_created=member_created,
+                    predicate_key=str(request.key),
+                    cardinality=request.cardinality,
+                    fingerprint=header.identity_fingerprint,
+                )
             )
 
     async def _check_scope(
@@ -342,3 +371,12 @@ class FactSlotResolver:
         if stored.cardinality != request.cardinality:
             raise SlotRejected(SlotReason.CARDINALITY_CONFLICT)
         return stored, False
+
+
+def _checked_result(result: ResolutionResult) -> ResolutionResult:
+    validate_contract(
+        ContractRef("fact-slot-resolution-result-v1", "1"),
+        result.to_json(),
+        profile="native-compat/v1",
+    )
+    return result

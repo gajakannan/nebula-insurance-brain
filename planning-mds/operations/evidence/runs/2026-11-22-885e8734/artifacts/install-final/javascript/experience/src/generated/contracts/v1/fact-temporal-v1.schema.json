@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/fact-temporal-v1.schema.json",
+  "title": "FactTemporalV1",
+  "description": "F0008 contract (ADR-0078, Accepted): the valid-time block of a canonical commit for identity-v1 slots, and the temporal block returned for a temporal-v1 version. Structural checks only; truncation in zone, attestation derivation from F0004 document-date selections, succession and state guards run in the commit service and database triggers.",
+  "$defs": {
+    "granularity": {
+      "enum": ["YEAR", "QUARTER", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND"]
+    },
+    "iana_zone": {
+      "description": "IANA time-zone name, for example America/Chicago or the fixed-offset Etc/GMT+6. Existence is validated against the server's zone database, not by this schema.",
+      "type": "string",
+      "pattern": "^(?:[A-Za-z][A-Za-z0-9_+-]*)(?:/[A-Za-z0-9_+-]+)*$",
+      "maxLength": 64
+    },
+    "bound": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instant", "granularity", "zone"],
+      "properties": {
+        "instant": { "type": "string", "format": "date-time" },
+        "granularity": { "$ref": "#/$defs/granularity" },
+        "zone": { "$ref": "#/$defs/iana_zone" }
+      }
+    },
+    "start_basis": {
+      "description": "How the start was obtained. TEMPLATE_FIELD and HUMAN count as grade A (G1 decision 1). ATTESTATION_FLOOR is server-assigned when the start is unknown and is never accepted from a caller.",
+      "enum": ["TEMPLATE_FIELD", "HUMAN", "MENTION_A", "MENTION_B", "MENTION_C", "ATTESTATION_FLOOR"]
+    },
+    "caller_start_basis": {
+      "enum": ["TEMPLATE_FIELD", "HUMAN", "MENTION_A", "MENTION_B", "MENTION_C"]
+    },
+    "end_state": {
+      "enum": ["OPEN", "BOUNDED", "UNKNOWN"]
+    },
+    "document_date": {
+      "description": "An F0004 document-date value at its own precision (YYYY, YYYY-MM or YYYY-MM-DD).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "precision"],
+      "properties": {
+        "value": { "type": "string", "pattern": "^[0-9]{4}(?:-[0-9]{2}(?:-[0-9]{2})?)?$" },
+        "precision": { "enum": ["YEAR", "MONTH", "DAY"] }
+      }
+    },
+    "commit_temporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "valid_to_state"],
+      "properties": {
+        "contract": { "const": "fact-temporal/v1" },
+        "valid_from": {
+          "description": "Known start. Omit or null for an unknown start: the server floors it at attested_from or rejects START_UNATTESTED.",
+          "oneOf": [{ "$ref": "#/$defs/bound" }, { "type": "null" }]
+        },
+        "valid_from_basis": { "$ref": "#/$defs/caller_start_basis" },
+        "valid_to_state": { "$ref": "#/$defs/end_state" },
+        "valid_to": { "$ref": "#/$defs/bound" },
+        "attestation_zone": {
+          "description": "Zone used to place bounds derived from document dates (an attestation-floor start or an UNKNOWN end).",
+          "$ref": "#/$defs/iana_zone"
+        },
+        "ending_evidence_refs": {
+          "description": "Assertions whose documents state that the fact ended (UNKNOWN end only). attested_to is the earliest selected date among their documents.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "format": "uuid" }
+        },
+        "expected_attestation": {
+          "description": "Optional echo. If present it must equal the server-derived values, otherwise ATTESTATION_MISMATCH.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "attested_from": { "oneOf": [{ "$ref": "#/$defs/document_date" }, { "type": "null" }] },
+            "attested_through": { "oneOf": [{ "$ref": "#/$defs/document_date" }, { "type": "null" }] },
+            "attested_to": { "oneOf": [{ "$ref": "#/$defs/document_date" }, { "type": "null" }] }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "valid_from": { "$ref": "#/$defs/bound" } }, "required": ["valid_from"] },
+          "then": { "required": ["valid_from_basis"] },
+          "else": { "required": ["attestation_zone"], "not": { "required": ["valid_from_basis"] } }
+        },
+        {
+          "if": { "properties": { "valid_to_state": { "const": "BOUNDED" } } },
+          "then": { "required": ["valid_to"], "not": { "required": ["ending_evidence_refs"] } }
+        },
+        {
+          "if": { "properties": { "valid_to_state": { "const": "OPEN" } } },
+          "then": { "allOf": [{ "not": { "required": ["valid_to"] } }, { "not": { "required": ["ending_evidence_refs"] } }] }
+        },
+        {
+          "if": { "properties": { "valid_to_state": { "const": "UNKNOWN" } } },
+          "then": { "required": ["ending_evidence_refs", "attestation_zone"], "not": { "required": ["valid_to"] } }
+        }
+      ]
+    },
+    "version_temporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract", "temporal_kind", "valid_from", "valid_from_basis", "valid_to_state", "valid_to"],
+      "properties": {
+        "contract": { "const": "fact-temporal/v1" },
+        "temporal_kind": { "enum": ["STATE", "EVENT", "ETERNAL"] },
+        "valid_from": { "oneOf": [{ "$ref": "#/$defs/bound" }, { "type": "null" }] },
+        "valid_from_basis": { "oneOf": [{ "$ref": "#/$defs/start_basis" }, { "type": "null" }] },
+        "valid_to_state": { "$ref": "#/$defs/end_state" },
+        "valid_to": {
+          "description": "BOUNDED: the stated end. UNKNOWN: the integrity bound placed at the end of the attested_to period. OPEN: null.",
+          "oneOf": [{ "$ref": "#/$defs/bound" }, { "type": "null" }]
+        },
+        "attested_from": { "oneOf": [{ "$ref": "#/$defs/document_date" }, { "type": "null" }] },
+        "attested_through": { "oneOf": [{ "$ref": "#/$defs/document_date" }, { "type": "null" }] },
+        "attested_to": { "oneOf": [{ "$ref": "#/$defs/document_date" }, { "type": "null" }] },
+        "validity_unknown_from": {
+          "description": "UNKNOWN end only: valid-time reads at or after this instant and before valid_to return validity-unknown.",
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "split_of_version_id": { "type": ["string", "null"], "format": "uuid" }
+      }
+    },
+    "validity_unknown_read": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fact_slot_id", "validity", "reason"],
+      "properties": {
+        "fact_slot_id": { "type": "string", "format": "uuid" },
+        "validity": { "const": "UNKNOWN" },
+        "reason": { "enum": ["UNKNOWN_END_WINDOW", "BEFORE_ATTESTATION_FLOOR"] },
+        "version_id": {
+          "description": "The version whose unknown end or floored start produced the result. No value is returned.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "temporal": { "$ref": "#/$defs/version_temporal" }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/commit_temporal" },
+    { "$ref": "#/$defs/version_temporal" },
+    { "$ref": "#/$defs/validity_unknown_read" }
+  ]
+}

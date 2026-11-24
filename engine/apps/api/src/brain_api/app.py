@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from brain_api.contract_openapi import install_contract_openapi
 from brain_api.errors import install_problem_details_handlers
 from brain_api.health import router as health_router
 from brain_api.routes.content import router as content_router
@@ -22,6 +23,7 @@ def create_app() -> FastAPI:
     app.include_router(reviews_router)
     app.include_router(content_router)
     app.include_router(facts_router)
+    install_contract_openapi(app)
     return app
 
 

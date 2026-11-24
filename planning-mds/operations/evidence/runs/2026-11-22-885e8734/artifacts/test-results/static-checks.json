@@ -1,0 +1,26 @@
+[
+  {
+    "key": "f0011_lint_final",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/runtime/compose.yaml exec -T engine-validation uv run --no-sync --project engine --group contract-build ruff check engine scripts/contracts --output-format concise",
+    "exit_code": 0,
+    "output": "All checks passed!\n"
+  },
+  {
+    "key": "f0011_mypy_final",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/runtime/compose.yaml exec -T -w /app/brain/engine engine-validation uv run --no-sync --group contract-build mypy apps/api/src apps/worker/src packages/brain-content/src packages/brain-contracts/src packages/brain-factslots/src packages/brain-temporal/src",
+    "exit_code": 0,
+    "output": "Success: no issues found in 60 source files\n"
+  },
+  {
+    "key": "f0011_format_final",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/runtime/compose.yaml exec -T engine-validation uv run --no-sync --project engine --group contract-build ruff format --check engine scripts/contracts",
+    "exit_code": 0,
+    "output": "221 files already formatted\n"
+  },
+  {
+    "key": "f0011_mypy_complete",
+    "command": "docker compose -f planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/runtime/compose.yaml exec -T -w /app/brain/engine engine-validation uv run --no-sync --group contract-build mypy apps/api/src apps/worker/src packages/brain-content/src packages/brain-persistence/src packages/brain-domain/src packages/brain-security/src packages/brain-review/src packages/brain-temporal/src packages/brain-testing/src packages/brain-jobs/src packages/brain-contracts/src packages/brain-factslots/src",
+    "exit_code": 0,
+    "output": "Success: no issues found in 108 source files\n"
+  }
+]

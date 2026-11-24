@@ -642,9 +642,9 @@ features:
       - schema:fact-answer-v1
       - schema:fact-temporal-v1
       - schema:problem-details
-  - status: planned
+  - status: archived-done
     id: feature:F0011
-    path: planning-mds/features/F0011-json-schema-contract-system
+    path: planning-mds/features/archive/F0011-json-schema-contract-system
     affects:
       - capability:bitemporal-canonical-commit
       - capability:cross-language-contract-validation
@@ -674,6 +674,9 @@ features:
         work.
       - Existing FactVersion OpenAPI nested ranges were stale relative to shipped flat DTO fields; fact-version-read-v1
         corrects documentation only. Internal review-decision is not the HTTP submission schema.
+      - Feature run 2026-11-22-885e8734 closed 2026-11-23 (G0-G8). The G4 Low fixes were 500-handler traceId
+        logging, direct facts.py mismatch tests and Neuron SoupSieve 2.9.2 to 4.1.3. Earlier planning
+        notes below are kept for history.
       - Phase A approved by operator reply approve at G3; Phase B approved with exact token approve-phase-b
         on 2026-11-20 in plan run 2026-11-20-ccb1bd39, after G4 and seven ordered G5 pre-approval exit
         checks. G5 post-approval regeneration/publication is authoritative in the journal/manifest. Six
@@ -1553,7 +1556,7 @@ stories:
       - schema:canonical-commit-request
   - id: story:F0011-S0001
     feature: feature:F0011
-    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
+    path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
     affects:
       - capability:offline-contract-bundle
     governed_by:
@@ -1563,7 +1566,7 @@ stories:
       - schema:schema-bundle-manifest-v1
   - id: story:F0011-S0002
     feature: feature:F0011
-    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
+    path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
     affects:
       - capability:typed-fact-answer
     governed_by:
@@ -1576,7 +1579,7 @@ stories:
       - schema:schema-conformance-cases-v1
   - id: story:F0011-S0003
     feature: feature:F0011
-    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
+    path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
     affects:
       - capability:typed-fact-answer
     governed_by:
@@ -1590,7 +1593,7 @@ stories:
       - schema:scoped-identifier-v1
   - id: story:F0011-S0004
     feature: feature:F0011
-    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
+    path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
     affects:
       - capability:cross-language-contract-validation
     governed_by:
@@ -1606,7 +1609,7 @@ stories:
       - schema:scoped-identifier-v1
   - id: story:F0011-S0005
     feature: feature:F0011
-    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
+    path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
     affects:
       - capability:typed-fact-answer
     governed_by:
@@ -1624,7 +1627,7 @@ stories:
       - schema:fact-version-read-v1
   - id: story:F0011-S0006
     feature: feature:F0011
-    path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
+    path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
     affects:
       - capability:offline-contract-bundle
     governed_by:

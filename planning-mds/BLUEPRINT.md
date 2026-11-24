@@ -247,6 +247,13 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0007-S0005](features/archive/F0007-factslot-model/F0007-S0005-define-name-factslots.md) — Done
   - [F0007-S0006](features/archive/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) — Done
 - [F0008 — Bitemporal canonical facts](features/archive/F0008-bitemporal-canonical-facts/README.md) - Done / Archived (implemented in feature run `2026-11-17-1a4ae2f0`, remediated in `2026-11-18-bce4909b` and `2026-11-19-8cfcd0ff`; planned in plan run `2026-11-16-208a1193`; seven stories [S0001](features/archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md)–[S0007](features/archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md), 46 ACs; Phase B approved 2026-11-17)
+- [F0011 — JSON Schema contract system](features/archive/F0011-json-schema-contract-system/README.md) - Done / Archived 2026-11-23 (planned in plan run `2026-11-20-ccb1bd39`, reviewed in `2026-11-21-b4cd07e4`; implemented in feature run `2026-11-22-885e8734`; ADR-0079 Proposed, proofs met)
+  - [F0011-S0001](features/archive/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md) — Done
+  - [F0011-S0002](features/archive/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md) — Done
+  - [F0011-S0003](features/archive/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) — Done
+  - [F0011-S0004](features/archive/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md) — Done
+  - [F0011-S0005](features/archive/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md) — Done
+  - [F0011-S0006](features/archive/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md) — Done
 
 **Repository tooling (Completed)**
 
@@ -256,11 +263,10 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0064-S0003](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Done
   - [F0064-S0004](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Done
 
-**v0.1A (remaining — Now: F0009, F0011, F0012; Next: F0010, F0013–F0017)**
+**v0.1A (remaining — Now: F0009, F0012; Next: F0010, F0013–F0017)**
 
 - [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
-- [F0011 — JSON Schema contract system](features/F0011-json-schema-contract-system/README.md) - Planned (plan run `2026-11-20-ccb1bd39`: Phase A and Phase B approved 2026-11-20; six Not Started stories, 41 ACs; independent plan-review next; ADR-0079 Proposed)
 - [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned
 - [F0013 — Insurance Core GL ontology](features/F0013-insurance-core-gl-ontology/README.md) - Planned
 - [F0014 — Document Profile model](features/F0014-document-profile-model/README.md) - Planned
@@ -390,7 +396,7 @@ Performance, availability, scalability, and security targets are proposed gates 
 ### 4.7 Architecture Artifacts
 
 - `architecture/master-blueprint.md` — full baseline
-- `architecture/decisions/` — ADR-0001 to ADR-0079 (master blueprint section 76 carries the reconciled status register; Accepted architecture and Proposed contracts; ADR-0060 (Docling-Graph) was Rejected on 2026-11-08; ADR-0038/0039/0042/0043/0051/0052/0053 have operator decisions recorded (2026-11-08) and stay Proposed until proven; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8; ADR-0071 and ADR-0072 propose the semantic execution trace contract and the read-only Graph Observatory boundary, see `architecture/graph-observatory-design.md`; ADR-0077 is Accepted (F0007); ADR-0078 (the F0008 bitemporal version contract) is Accepted (2026-11-19), section 4.15; ADR-0073 (F0004) and ADR-0075 (F0006) remain Proposed after their features closed, pending the proof gates named in each record; ADR-0079 (F0011 offline schema bundle) is Proposed, section 4.16)
+- `architecture/decisions/` — ADR-0001 to ADR-0079 (master blueprint section 76 carries the reconciled status register; Accepted architecture and Proposed contracts; ADR-0060 (Docling-Graph) was Rejected on 2026-11-08; ADR-0038/0039/0042/0043/0051/0052/0053 have operator decisions recorded (2026-11-08) and stay Proposed until proven; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8; ADR-0071 and ADR-0072 propose the semantic execution trace contract and the read-only Graph Observatory boundary, see `architecture/graph-observatory-design.md`; ADR-0077 is Accepted (F0007); ADR-0078 (the F0008 bitemporal version contract) is Accepted (2026-11-19), section 4.15; ADR-0073 (F0004) and ADR-0075 (F0006) remain Proposed after their features closed, pending the proof gates named in each record; ADR-0079 (F0011 offline schema bundle) is Proposed with its acceptance proofs met in feature run 2026-11-22-885e8734, pending operator acceptance, section 4.16)
 - `architecture/data-model.md` — tables, graph labels, artifact layout
 - `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
 - `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
@@ -550,10 +556,11 @@ Feature run `2026-11-17-1a4ae2f0` implemented the design and was approved by the
 
 ---
 
-### 4.16 F0011 JSON Schema contract system (Phase B approved 2026-11-20)
+### 4.16 F0011 JSON Schema contract system (Done / Archived 2026-11-23)
 
 Plan run `2026-11-20-ccb1bd39`: Phase A approved by operator response `approve`;
-six stories and 41 ACs, all Not Started. The [assembly plan](features/F0011-json-schema-contract-system/feature-assembly-plan.md)
+six stories and 41 ACs. Implemented and closed in feature run `2026-11-22-885e8734` (G0–G8, operator
+G4 approval 2026-11-23); all six stories Done. The [assembly plan](features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md)
 and proposed [ADR-0079](architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md)
 define one authored JSON Schema 2020-12 source, a generated root runtime snapshot
 and installed offline bundle, source-gated generated Pydantic, headless AJV and
@@ -561,7 +568,9 @@ shared metadata/OpenAPI. The inventory has 21 payload resources; additive value
 aliases reference the shipped definitions. Existing readers retain explicit
 native compatibility and current authority/domain guard ordering. A fact-read
 schema reconciles the stale nested OpenAPI description to the already shipped
-flat timestamps. No runtime behavior is changed by this planning update.
+flat timestamps. As built, the read and commit routes validate their normalized responses
+after authorization (commit inside the mutation, so a failure rolls back), and the 500
+handlers log a correlatable traceId.
 
 No new registry table, migration, route, grant, deployable, screen or reparse is
 required. ADR-0079 and ADR-0039 remain Proposed pending their stated proofs.
@@ -608,9 +617,9 @@ Baseline authenticated writes, approval checks, source restrictions, and audit a
 Current position (2026-11-20): F0001 to F0008 are done and archived; ADR-0078 was accepted on 2026-11-19 (F0008 second remediation run `2026-11-19-8cfcd0ff`, approved 2026-11-19). F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
 
 1. Now (2026-11-20 roadmap review, after F0008 closed): four lanes.
-   - **F0011** (JSON Schema contract system) continues through `plan` → `plan-review` → `feature`. No migration is planned; any future migration would follow 0015.
+   - **F0011** (JSON Schema contract system) completed 2026-11-23 in feature run `2026-11-22-885e8734` (no migration added).
    - **F0009** (provenance + human-correction lineage) is dependency-ready and heads the temporal/commit path F0009 → F0010 → F0018.
-   - **F0012** (foundation ontology) is planned alongside F0011, and its feature run starts after F0011 completes.
+   - **F0012** (foundation ontology) is planned alongside F0011; with F0011 complete (2026-11-23), its feature run is unblocked.
    - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.
 
    Next is reordered by dependency readiness: F0010, F0013, F0014, F0017, F0015, F0016. Each lane runs `plan-review` before its feature action.

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import logging
 import uuid
 
 from brain_content.manifest import ArtifactVersionUnsupported
 from brain_content.validation import ArtifactIntegrityError
+from brain_contracts.schema_runtime import ContractError
 from brain_security.execution import AuthorizationDenied, AuthorizationUnavailable
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -11,6 +13,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from brain_api.security_headers import SECURITY_HEADERS
+
+logger = logging.getLogger(__name__)
 
 
 class ProblemDetails(BaseModel):
@@ -146,6 +150,7 @@ def _problem_response(
     code: str,
     detail: str | None,
     instance: str | None,
+    trace_id: str | None = None,
 ) -> JSONResponse:
     problem = ProblemDetails(
         type="about:blank",
@@ -154,7 +159,7 @@ def _problem_response(
         detail=detail,
         instance=instance,
         code=code,
-        traceId=str(uuid.uuid4()),
+        traceId=trace_id or str(uuid.uuid4()),
     )
     return JSONResponse(
         status_code=status_code,
@@ -165,6 +170,33 @@ def _problem_response(
 
 def install_problem_details_handlers(app: FastAPI) -> None:
     """Map BrainError subclasses and request-validation failures to ProblemDetails."""
+
+    @app.exception_handler(ContractError)
+    async def _handle_contract_invariant(request: Request, exc: ContractError) -> JSONResponse:
+        # Normalized-carrier failures are internal build/invariant faults. The
+        # response contains neither instance data nor diagnostic pointers; the
+        # server log carries only fixed codes and trusted schema coordinates,
+        # keyed by the same traceId the client receives.
+        trace_id = str(uuid.uuid4())
+        logger.error(
+            "contract_invariant_failed",
+            extra={
+                "trace_id": trace_id,
+                "contract_code": exc.issue.code,
+                "contract_id": exc.issue.contract_id,
+                "schema_pointer": exc.issue.schema_pointer,
+                "method": request.method,
+                "path": request.url.path,
+            },
+        )
+        return _problem_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            title="Internal Server Error",
+            code="contract_invariant_failed",
+            detail=None,
+            instance=None,
+            trace_id=trace_id,
+        )
 
     @app.exception_handler(ArtifactIntegrityError)
     @app.exception_handler(ArtifactVersionUnsupported)
@@ -217,13 +249,25 @@ def install_problem_details_handlers(app: FastAPI) -> None:
     async def _handle_unexpected(request: Request, exc: Exception) -> JSONResponse:
         # Starlette answers unhandled exceptions outside user middleware, so this
         # response carries the baseline security headers itself (SEC-03). No
-        # exception text crosses to the client.
+        # exception text crosses to the client. The server log records only the
+        # exception class, never its message: database errors can quote rows.
+        trace_id = str(uuid.uuid4())
+        logger.error(
+            "internal_error",
+            extra={
+                "trace_id": trace_id,
+                "error_type": type(exc).__name__,
+                "method": request.method,
+                "path": request.url.path,
+            },
+        )
         response = _problem_response(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             title="Internal Server Error",
             code="internal_error",
             detail=None,
             instance=None,
+            trace_id=trace_id,
         )
         response.headers.update(SECURITY_HEADERS)
         return response

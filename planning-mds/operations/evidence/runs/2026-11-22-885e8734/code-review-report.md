@@ -1,0 +1,325 @@
+# Code Review Report — F0011-json-schema-contract-system run 2026-11-22-885e8734
+
+Reviewer: Codex / independent Code Reviewer. Review date: 2026-11-22–23.
+
+**FINAL G3 review (2026-11-23).** The draft re-review below was completed by
+Codex / independent Code Reviewer. Claude / Code Reviewer finalized it after G2
+passed. All four source findings were corrected and independently replayed. The
+final runtime, coverage, clean-build, scan and installed-distribution evidence
+was then verified against current source (see "Final Verification" below). This
+report grants no G4 approval, story signoff or closeout.
+
+## Reviewed Files
+
+Canonical changed-file set: `scm.diff_artifact` =
+`artifacts/diffs/changed-files.txt`; base
+`bf78e111934570f83439057ea3c73a1eaefbb022`, branch
+`feature/F0011-json-schema-contract-system`. Actual tracked diff and untracked
+source files were inspected; generated/new files are not assumed present in a
+plain tracked diff. Refresh the canonical set before final review.
+
+Product-root paths reviewed in this pass:
+
+- `engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py`,
+  `model_adapter.py`, `assertions.py`, generated model mechanism and resource
+  snapshot under `generated/` and `resources/v1/`.
+- `engine/packages/brain-content/src/brain_content/contracts.py`;
+  `engine/packages/brain-factslots/src/brain_factslots/answers.py`, `engine/packages/brain-factslots/src/brain_factslots/resolution.py`;
+  `engine/packages/brain-temporal/src/brain_temporal/commit.py`.
+- `engine/apps/api/src/brain_api/app.py`, `engine/apps/api/src/brain_api/contract_guards.py`, `engine/apps/api/src/brain_api/contract_openapi.py`, `engine/apps/api/src/brain_api/errors.py`
+  and `routes/facts.py`.
+- `scripts/contracts/generate.py`, `scripts/contracts/check.py`, `scripts/contracts/check_stored_fact_versions.py`, `scripts/contracts/install_smoke.py`, `scripts/contracts/installed_probe.py`, `scripts/contracts/run_installed_probe.py`,
+  source/profile/case/provenance/behavior inventories and selected 21-resource
+  snapshot under `schemas/contracts/v1/`.
+- Re-review: `scripts/contracts/case_data.py`, `cases.schema.json`,
+  `experience/scripts/contracts/case-data.mjs`, source/runtime changes for the
+  portable registry projection, pinned RFC8785 encoder and 80 new case witnesses.
+- `experience/scripts/contracts/runtime.mjs`, `experience/scripts/contracts/check.mjs` and `experience/scripts/contracts/runtime.test.mjs`;
+  generated resource snapshot; `experience/{package.json,pnpm-lock.yaml,vite.config.ts}`.
+- `engine/packages/brain-contracts/tests/test_schema_runtime.py`, `engine/packages/brain-contracts/tests/test_generated_models.py`,
+  `engine/apps/api/tests/test_contract_openapi.py`,
+  `engine/tests/integration/test_f0011_consumer_contracts.py`,
+  `scripts/contracts/tests/test_artifact_reproducibility.py` and stored-sweep tests;
+  selected existing native/domain/temporal test references in the AC ledger.
+- `.github/workflows/ci-gates.yml`, `.dockerignore`, `docker/contracts/`, changed
+  package manifests, Engine dependency/build policy and both Python locks.
+- All six raw F0011 stories, PRD, approved assembly plan, current GETTING-STARTED,
+  product instructions from `project_context.py --product-root <absolute-root>
+  --action feature`, `.agentignore` and `SOLUTION-PATTERNS.md`.
+
+## Validation Artifacts
+
+Reviewer-owned confirmed probes:
+`artifacts/test-results/code-review-initial-probes.json`. Exact Docker probes
+were recorded with `--record-only --exit-code 0` in `commands.log`; exit 0 means
+the diagnostic executed, not that the feature passed. The probes used actual
+Engine/Node containers and never printed the 16 MiB synthetic padding. No source
+files were changed by this reviewer.
+
+Independent re-review evidence:
+
+- `artifacts/test-results/code-review-reprobe-python.json` and
+  `code-review-reprobe-javascript.json`: both `status: pass`, command exits 0.
+  Reviewer-owned scripts alongside reproduce the original depth, newline and
+  exact-byte-limit cases, plus synthetic annotation-pointer refusal for schema,
+  metadata and validate. They also verify native Python newline acceptance and
+  a real property named default remain intact. These are actual container runs,
+  not copies of author assertions.
+- `artifacts/test-results/conformance-review-final.json`: 443 actual cases /
+  1,329 results, zero mismatches. The original 1,089 result dispositions retain
+  contract/version/expected acceptance. Exact source hashes and payload/expected
+  outcomes are preserved for all 176 authored/imported cases; 187 original
+  behavior cases also retain their payloads and expectations. New IDs
+  F0011-C1187–C1266 add 30 depth, 15 byte-boundary and 35 pattern witnesses.
+- The Architect's bounded reconciliation is
+  `artifacts/diffs/portable-parity-decision.md`. Source schema bytes/identities
+  and the original bundle digest remain unchanged; engine-only pattern
+  projection and decoded-value accounting are explicit portable policies.
+
+Earlier implementation evidence examined as provisional, pre-remediation evidence:
+
+- `test-execution-report.md`, `artifacts/test-results/ac-evidence.md`;
+  `python-unit-final.xml` (1,148 pass), `consumer-integration-ci.xml` (81 pass),
+  `neuron-shared-bundle.xml` (8 pass), `js-unit.tap` (14 pass), existing frontend
+  results (12 pass). Selected lanes reported no skips.
+- `artifacts/test-results/conformance-final.json`: 363 cases / 1,089 results,
+  zero mismatches in that original inventory; 21 conditionals, 79 executed branch
+  witnesses, 29 validation keywords and four formats. This inventory omitted
+  the three original boundaries below; the 443-case re-review inventory now
+  exercises those regressions through all actual consumers.
+- `artifacts/test-results/generation-final.txt`, reproducibility/drift tests,
+  native differential comparison, stored-version initial/final sweep reports and
+  signed zero-row inventories. Actual dev/integration history was empty;
+  nonempty/closed/remainder history is separately exercised in owned PostgreSQL
+  fixtures. Empty environment sweeps are not treated as historical-shape proof.
+- `artifacts/test-results/static-checks.json` records passing full Ruff/format
+  and mypy over 108 files before remediation. Final source changes require a
+  current refresh.
+- `artifacts/install-final/installed-distribution-results.json` and clean-context
+  evidence are subject to the current-source refresh. The observed
+  `artifacts/runtime/clean-source-comparison.json` was `status: fail`,
+  `differences: [source_groups]`; the implementation owner already owns this
+  pending refresh. No package/clean-build pass is inferred for changed sources.
+
+Read-only reviewer checks: framework code-quality scan passed for the runtime;
+KG `validate.py --check-symbols --check-decisions` passed existing-index
+integrity. It does not prove regeneration freshness: `lookup.py --defines
+ContractBundle` and `--defines _checked_result` returned zero matches.
+Diff-impact reported seven affected nodes: bitemporal-canonical-commit,
+durable-authorization-decisions, factslot-identity-resolution,
+parse-once-content-artifact, runtime-roots-and-toolchain,
+semantic-interpretation-run, typed-fact-answer (all `capability:` nodes).
+KG risk resolves to 7/10 high with additional-reviewer, hotspot and owner
+acknowledgement controls. The user explicitly ordered final symbol/decision
+regeneration at G7; it remains that later gate's required contingency, not an
+instruction to mutate generated projections during this G3 review. Required
+owner acknowledgement and independent-review evidence must resolve before merge.
+
+## Severity-Ranked Findings
+
+Open source findings after independent re-review: **critical 0; high 0; medium 0;
+low 0**. Closed findings retain their original severity below: three high and
+one medium. No high finding was accepted or deferred as a recommendation.
+
+All four closures are backed by source inspection and the two independent
+`code-review-reprobe-*.json` artifacts, not solely by the implementation owner's
+passing tests. Final evidence/gate verification is complete (see Final Verification).
+
+### CR-F0011-01 (high) — CLOSED: Portable depth admission differed across languages.
+
+`schema_runtime.py:154–164` starts the root at depth 1 and checks every value;
+`experience/scripts/contracts/runtime.mjs:99–116,130–159` checks container
+nesting and returns for scalars before applying the depth limit. Exactly 128
+arrays around scalar 0 is rejected by Python (`CONTRACT_JSON_UNSUPPORTED`) and
+accepted by both JavaScript decoding and direct admission. The unit tests
+explicitly encode the conflicting results (`test_schema_runtime.py:247–249`,
+`runtime.test.mjs:104–105`). A shared profile cannot admit a payload at one
+consumer and refuse it at another. Define root/all-value depth once, align both
+JS paths and add common 127/128/129 array/object/scalar-leaf boundaries.
+**Resolution:** JS raw decoding checks scalar-leaf depth; direct admission
+starts at root depth 1 and checks every value. Original depth-128-array probe
+now refuses in both paths and Python. Thirty shared witnesses exercise
+scalar/empty-container leaves at the boundary.
+
+Owner: Backend/Frontend Developer; tracked as CR-F0011-01
+
+### CR-F0011-02 (high) — CLOSED: Pattern end-anchor semantics broke source/model/AJV parity.
+
+`schema_runtime.py:554–558` uses Python JSON Schema's default regex
+behavior, while `generate.py:49–73,183–226` retains source regex constraints in
+generated Pydantic and AJV evaluates ECMAScript patterns. For
+`ContractRef("qualified-money-v1", "1")`, the synthetic object
+`{"type":"money","amount":"1\n","currency":"USD"}` is accepted by Python
+JSON Schema, refused by generated/source-gated Pydantic
+(`CONTRACT_MODEL_MISMATCH`) and refused by AJV (`CONTRACT_INSTANCE_INVALID`).
+The source pattern is in the unchanged authored `fact-slot-key-v1` schema (line 178).
+Choose an explicit bounded portable pattern policy and align consumers without
+editing released schema identities or tightening legacy native readers. Add
+common end-anchor witnesses across the selected pattern shapes.
+**Resolution:** a detached portable engine registry projects admitted terminal
+anchors to Python exact-end matching through root/inter-resource refs. Public
+schema views and the native registry retain original bytes/behavior. Original
+money newline refuses in source/model/AJV; native Python still accepts. The
+35 new shared pattern witnesses cover all 16 distinct selected patterns and
+full money roots.
+
+Owner: Backend Developer / Architect; tracked as CR-F0011-02
+
+### CR-F0011-03 (high) — CLOSED: The decoded-value byte cap used different numeric encodings.
+
+`schema_runtime.py:537–541` measures Python `json.dumps` bytes;
+`experience/scripts/contracts/runtime.mjs:160` measures `JSON.stringify` bytes.
+Construct exactly 16,777,216 UTF-8 bytes from head `{"n":1e-7,"p":"`, x padding,
+tail `"}`. Both decoders accept. Validation against the actual empty schema at
+`ContractRef("assertion-record-v2", "2", "/$defs/qualifiers/additionalProperties")`
+fails in Python (`1e-7` is emitted as `1e-07`, one byte over) but succeeds in
+JavaScript. Specify and use one canonical decoded-value byte-accounting rule;
+keep the incoming raw-byte limit. Test near-limit exponent and other binary64
+spellings in all actual adapters. Existing `brain_domain.fact_values.jcs:92–121`
+rejects floats and non-ASCII keys and cannot be substituted for the general
+portable profile.
+**Resolution:** Python pins full `rfc8785==0.1.4` for canonical decoded-value
+UTF-8 accounting; incoming raw-byte accounting remains separate. The existing
+domain JCS helper is unchanged. Original exactly-16-MiB `1e-7` input now passes
+source validation, actual generated Pydantic parsing/serialization and AJV.
+Fifteen shared near-limit cases cover five numeric spellings at three offsets;
+unit checks also cover Unicode keys, controls, negative zero and subnormals.
+
+Owner: Backend Developer / Architect; tracked as CR-F0011-03
+
+### CR-F0011-04 (medium) — CLOSED: Caller-selected JS fragments were not restricted to admitted schema locations.
+
+`experience/scripts/contracts/runtime.mjs:389–396`
+accepts any object/boolean at a JSON Pointer; Python `schema_runtime.py:508–509`
+requires membership in `schema_nodes`. A supported annotation such as
+`default: {}` or `examples: [{}]` can therefore be selected as an accepting
+schema in JS, while Python rejects that selector. The current 21 resources
+contain no object default/examples, so no current application bypass is
+alleged. The initial defect was established by source inspection and Security's
+independent observation; the corrected behavior now has independent synthetic
+runtime proof below.
+Reuse the JS admission graph's schema-location set for caller refs and test
+annotation-data pointer refusal symmetrically.
+**Resolution:** JS retains the admitted schema-position Set and requires caller
+refs to belong to it. Independent synthetic bundles in both languages refuse
+`/default` and `/examples/0` for schema/metadata/validate, and still accept the
+genuine schema at `/properties/default`.
+
+Owner: Frontend Developer;
+follow-up: CR-F0011-04
+
+## Recommendations
+
+None open. The four findings above are corrected implementation defects, not
+accepted recommendations.
+
+Final verification raised one Low, CR-F0011-05: no direct test of the `routes/facts.py`
+`ValueError/TypeError` → `CONTRACT_MODEL_MISMATCH` translation. At the user's G4
+direction it was **fixed before approval**:
+`test_commit_response_model_mismatch_is_invariant_failure_and_rolls_back` and
+`test_read_response_model_mismatch_is_invariant_failure_before_guard` in
+`engine/tests/integration/test_f0011_consumer_contracts.py` prove a 500
+`contract_invariant_failed` with no leaked text, no guard call, and no business
+write (commit outbox/changes unchanged). `facts.py` changed lines are now 22/22 covered.
+
+Also re-reviewed for the G4 fixes:
+- `engine/apps/api/src/brain_api/errors.py`: both 500 handlers now log the same `traceId` the client
+  receives. The contract handler logs only the fixed code and trusted schema
+  coordinates; the generic handler logs only the exception class, never its text.
+  This keeps F0008's rule that database errors (which can quote rows) are not
+  propagated. Unit tests assert trace correlation and the absence of exception text.
+  `_problem_response` gains an optional `trace_id` that defaults to the previous behaviour.
+- `neuron/uv.lock`: single-package SoupSieve 2.9.2 → 4.1.3 delta; the full Neuron suite passes.
+
+## Vertical-Slice Completeness
+
+The implementation reaches actual existing consumers: installed common bundle →
+content/assertion delegates and normalized FactSlot/answer/temporal guards →
+existing API delivery, with headless AJV, generated models and source-owned
+OpenAPI. Commit serialization/guarding remains inside the existing mutation
+operation before outer commit; tests reread authoritative state after injected
+failure. GET validates only after exact source READ and read audit. No UI,
+migration, new route/grant, ontology semantics, AI activation or document reparse
+is added. Cross-language edge defects are resolved; final package/coverage/scan
+verification remains pending.
+
+## AC / Test Adequacy
+
+All 41 raw ACs were read and compared with the run's 41-row ledger. Tests enter
+the named actual boundaries rather than replacing consumer proof with the
+standalone harness. The existing suite covers nine states, scoped absence,
+money/identifiers, version dispatch/no fallback, normalized guards, source READ
+order and rollback. The re-review suite closes the original boundary gaps;
+required final evidence/gates prevent an approval at this draft stage.
+
+| Story | Draft disposition | Reason / required final evidence |
+|---|---|---|
+| S0001 (7 ACs) | Source review passed; final evidence pending | Offline closure/identity/error paths and corrected profiles/schema-position policy have actual independent proof. |
+| S0002 (7 ACs) | Provisionally traced, no signoff | All nine state/scope fixtures and actual authorization tests are mapped; rerun current consumers after shared-runtime changes. |
+| S0003 (7 ACs) | Source review passed; final evidence pending | Money/identifier semantics remain in domain; portable exact-end matching is consistent and native behavior is retained. |
+| S0004 (7 ACs) | Source review passed; final evidence pending | All 443 actual cases / 1,329 results agree; original expectations retained and independent original probes pass. |
+| S0005 (7 ACs) | Provisionally traced, no signoff | Actual no-partial-write and source READ tests exist; require current sweeps/regressions and Security's explicit PR-L3 disposition. |
+| S0006 (6 ACs) | Pending | Current generation/conformance, clean-source image, wheel/sdist and raw coverage refresh must follow remediation; G2 is pending. |
+
+PR-L3 is owned by the independent Security Reviewer. An authorized GET can commit
+a SUCCEEDED read audit then return generic `contract_invariant_failed` 500;
+denied source READ still returns 404 before guard evaluation. Code review does
+not accept that bounded audit meaning on Security's behalf.
+
+## Architecture Compliance
+
+Source authority, closed local registry, generated snapshot ownership, build-only
+code generation, installed resource loading and inward dependencies match the
+assembly plan. No schema-library import enters `brain_domain`; `brain-contracts`
+already depends on it. Domain/evidence validation remains ahead of normalized
+guards and no failed portable/versioned reader retries through legacy. Cache
+keys include bundle/ref/profile, and source/schema views are detached.
+
+Error handlers expose fixed generic invariant failures; build/case reports avoid
+protected instance values. Publication validates the candidate before replacing
+outputs, publishes manifests last and has tested rollback on publication errors.
+The dependency/build locks, CI lanes and handoff were inspected. Correctness,
+boundaries, SOLID/scope, tests, error handling, performance bounds, readability,
+AC mapping and over/under-engineering were considered. No separate architecture
+or performance defect is established in this preparatory pass.
+
+All 16 distinct selected source patterns use explicit ASCII classes/escaped
+literals; no `\d`, `\w` or `\s` Unicode-shorthand mismatch is present. Any portable
+regex adaptation must remain separate from the frozen native legacy policy.
+
+## Final Verification (post-G2)
+
+- G2 PASS journaled by `run-gate.py` (`gate-state.json`, `lifecycle-gates.log`).
+- Coverage recomputed from current-source raw data (`coverage-report.md`):
+  Python changed statements 86.4% (1166/1350); JavaScript lines 98.5% (453/460).
+  Uncovered lines relevant to CR-F0011-01..04 were inspected. In
+  `schema_runtime.py` (17 lines) and `runtime.mjs` (7 lines) they are fail-closed
+  error wrappers (`CONTRACT_*` re-raises). The exception is `runtime.mjs:263`
+  (array-keyword schema positions used by the CR-F0011-04 admission set), which
+  the unit-test V8 capture does not load. Loading the real bundle under V8
+  executes it (`artifacts/coverage/js-realbundle-v8/`, probe run 2026-11-23 by
+  this reviewer). Other uncovered application lines are bare re-raises
+  (the `facts.py` translation is now covered).
+- Source changes after the draft: the G4 Low fixes (see Recommendations) and the canonical `docker/contracts/Dockerfile`
+  Corepack selection (`COREPACK_DEFAULT_TO_LATEST=0`;
+  `corepack prepare pnpm@12.21.0 --activate`). It pins the version already
+  declared in `experience/package.json` and changes no product behaviour. All three
+  canonical images rebuild and pass offline (`artifacts/runtime/clean-build-receipts.json`),
+  and the clean context matches current source (`artifacts/runtime/clean-source-comparison.json`).
+- The canonical changed-file set `artifacts/diffs/changed-files.txt` matches the
+  working tree exactly (147 non-evidence paths after the G4 fixes).
+- PR-L3 is dispositioned by Security in `security-review-report.md`.
+- KG symbol regeneration for `ContractBundle` / `_checked_result` remains a G7 step.
+
+## Coverage Verification
+
+Verified: see "Final Verification" above. The ≥80% gate passes for both languages.
+
+## Result
+
+Result: APPROVED
+
+Open findings: critical 0, high 0, medium 0, low 0 (CR-F0011-05 Low fixed at G4). All three high findings and
+the medium fragment-policy defect are fixed and independently verified on current
+source. The vertical slice is complete for its declared scope: no UI or migration
+is in scope, and the backend, contract tooling, tests and deployability are complete.

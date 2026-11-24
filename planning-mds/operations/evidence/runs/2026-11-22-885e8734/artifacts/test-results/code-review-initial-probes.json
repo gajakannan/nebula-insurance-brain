@@ -1,0 +1,33 @@
+{
+  "reviewer": "Codex / independent Code Reviewer",
+  "run": "2026-11-22-885e8734",
+  "status": "findings-confirmed-before-remediation",
+  "probes": [
+    {
+      "finding": "CR-F0011-01",
+      "case": "128 nested arrays around scalar 0",
+      "python": "CONTRACT_JSON_UNSUPPORTED",
+      "javascript_decode_and_admit": "accepted",
+      "exit_codes": [0, 0]
+    },
+    {
+      "finding": "CR-F0011-02",
+      "ref": {"name": "qualified-money-v1", "version": "1"},
+      "case": {"type": "money", "amount": "1\n", "currency": "USD"},
+      "python_jsonschema": "accepted",
+      "generated_pydantic": "CONTRACT_MODEL_MISMATCH",
+      "ajv": "CONTRACT_INSTANCE_INVALID",
+      "exit_codes": [0, 0]
+    },
+    {
+      "finding": "CR-F0011-03",
+      "ref": {"name": "assertion-record-v2", "version": "2", "pointer": "/$defs/qualifiers/additionalProperties"},
+      "case": "16777216-byte raw JSON with n=1e-7 and x-padded string; content omitted",
+      "python_decode": "accepted",
+      "python_validate": "CONTRACT_JSON_UNSUPPORTED",
+      "javascript_decode_and_validate": "accepted",
+      "exit_codes": [0, 0]
+    }
+  ],
+  "commands": "Exact Docker probes recorded with --record-only in commands.log. The probes ran in the existing engine/node validation containers. No source files were changed by the reviewer."
+}
