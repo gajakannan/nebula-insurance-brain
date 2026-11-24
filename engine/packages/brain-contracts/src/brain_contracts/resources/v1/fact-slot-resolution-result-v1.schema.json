@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/fact-slot-resolution-result-v1.schema.json",
+  "title": "FactSlotResolutionResultV1",
+  "description": "F0007 server-computed resolution outcome (ADR-0077). Internal service result, not an HTTP payload. A rejection writes no slot, qualifier or member row. Authorization denial is not an outcome here: the caller receives the facade's non-disclosing denial before any validation detail.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "outcome"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "outcome": {
+      "enum": [
+        "RESOLVED",
+        "CREATED",
+        "REJECTED"
+      ]
+    },
+    "slot_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "member_slot_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "member_created": {
+      "type": "boolean"
+    },
+    "predicate_key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$",
+      "description": "Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference."
+    },
+    "cardinality": {
+      "enum": [
+        "SINGLE",
+        "MULTI",
+        "RELATIONSHIP"
+      ]
+    },
+    "fingerprint_version": {
+      "const": 1
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "reason": {
+      "enum": [
+        "PREDICATE_KEY_INVALID",
+        "PREDICATE_UNREGISTERED",
+        "CARDINALITY_INVALID",
+        "CARDINALITY_CONFLICT",
+        "SUBJECT_NOT_FOUND",
+        "QUALIFIER_UNDECLARED",
+        "QUALIFIER_REQUIRED",
+        "QUALIFIER_NULL_REJECTED",
+        "QUALIFIER_TYPE_INVALID",
+        "FINGERPRINT_COLLISION",
+        "MEMBER_KEY_REQUIRED",
+        "MEMBER_NOT_ALLOWED",
+        "RELATIONSHIP_OBJECT_REQUIRED",
+        "RELATIONSHIP_OBJECT_NOT_ALLOWED",
+        "RELATIONSHIP_OBJECT_OUT_OF_SCOPE",
+        "DECIMAL_INVALID",
+        "TEXT_INVALID",
+        "MONEY_FLOAT_REJECTED",
+        "CURRENCY_INVALID",
+        "BASIS_REQUIRED",
+        "CONVERTED_MONEY_UNSUPPORTED",
+        "IDENTIFIER_SCHEME_REQUIRED",
+        "IDENTIFIER_INVALID",
+        "NAME_EVIDENCE_REQUIRED"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "REJECTED"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "reason"
+        ],
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "slot_id"
+              ]
+            },
+            {
+              "required": [
+                "member_slot_id"
+              ]
+            },
+            {
+              "required": [
+                "fingerprint"
+              ]
+            }
+          ]
+        }
+      },
+      "else": {
+        "required": [
+          "slot_id",
+          "predicate_key",
+          "cardinality",
+          "fingerprint_version",
+          "fingerprint"
+        ],
+        "not": {
+          "required": [
+            "reason"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cardinality": {
+            "const": "MULTI"
+          }
+        },
+        "required": [
+          "cardinality"
+        ]
+      },
+      "then": {},
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "member_slot_id"
+              ]
+            },
+            {
+              "required": [
+                "member_created"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

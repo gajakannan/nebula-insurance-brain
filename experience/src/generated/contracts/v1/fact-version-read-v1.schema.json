@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/fact-version-read-v1.schema.json",
+  "title": "FactVersionReadV1",
+  "description": "F0011 documents the existing FactVersionOut wire shape (flat timestamps), including the F0008 additive metadata. It changes no runtime response. Legacy pilot values remain unwrapped; temporal is omitted for legacy versions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "fact_slot_id",
+    "value",
+    "valid_start",
+    "valid_end",
+    "recorded_start",
+    "recorded_end",
+    "change_reason",
+    "evidence_refs",
+    "commit_id",
+    "canonical_accepted_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "fact_slot_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "value": {
+      "type": "object"
+    },
+    "valid_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_end": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "recorded_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recorded_end": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "change_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "superseded",
+        "corrected",
+        "retracted",
+        "expired",
+        "invalidated",
+        "merged",
+        "split",
+        null
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "commit_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "canonical_accepted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "review_decision_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "source_received_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "artifact_created_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "assertion_created_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "temporal": {
+      "$ref": "fact-temporal-v1.schema.json#/$defs/version_temporal"
+    }
+  }
+}

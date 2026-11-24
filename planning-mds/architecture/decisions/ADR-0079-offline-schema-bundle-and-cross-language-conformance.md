@@ -130,7 +130,7 @@ incomplete-package display acceptance conditions are both met.
 
 ## References
 
-- [Approved requirements](../../features/F0011-json-schema-contract-system/PRD.md)
-- [Assembly plan](../../features/F0011-json-schema-contract-system/feature-assembly-plan.md)
-- [Detailed design and checked primary technical sources](../../features/F0011-json-schema-contract-system/contract-design.md)
+- [Approved requirements](../../features/archive/F0011-json-schema-contract-system/PRD.md)
+- [Assembly plan](../../features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md)
+- [Detailed design and checked primary technical sources](../../features/archive/F0011-json-schema-contract-system/contract-design.md)
 - Accepted ADR-0013, ADR-0077, ADR-0078; proposed ADR-0039.

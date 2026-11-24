@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/assertion-record-v2.schema.json",
+  "title": "AssertionCandidateV2",
+  "description": "F0006 design contract, Phase B approved by operator 2026-11-01. Untrusted source claim; structural schema validation does not establish admission, authorization or canonical eligibility.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "assertion_kind",
+    "subject_ref",
+    "object",
+    "predicate_id",
+    "ontology_release",
+    "source_relation",
+    "qualifiers",
+    "time_mention_refs",
+    "valid_time_claim",
+    "mode",
+    "origin",
+    "interpretation_basis",
+    "model_confidence",
+    "evidence"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "assertion_kind": {
+      "type": "string",
+      "enum": [
+        "OPEN_STATEMENT",
+        "TYPED_ASSERTION"
+      ]
+    },
+    "subject_ref": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "object": {
+      "$ref": "#/$defs/object"
+    },
+    "predicate_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ontology_release": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source_relation": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "qualifiers": {
+      "$ref": "#/$defs/qualifiers"
+    },
+    "time_mention_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "valid_time_claim": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "ASSERTED",
+        "OBSERVED",
+        "DERIVED"
+      ]
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "DOCUMENT_INTERPRETATION",
+        "SYSTEM_OBSERVATION",
+        "HUMAN_REVIEW",
+        "CONVERSATION_DISCOVERY",
+        "RULE_DERIVATION",
+        "AGENT_ANALYSIS"
+      ]
+    },
+    "interpretation_basis": {
+      "type": "string",
+      "enum": [
+        "EXPLICIT",
+        "INFERRED",
+        "AMBIGUOUS"
+      ]
+    },
+    "model_confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/evidence_claim"
+      }
+    }
+  },
+  "$defs": {
+    "evidence_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "block_id",
+        "quote"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "block_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_selector": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "object": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "ref",
+            "name"
+          ],
+          "properties": {
+            "kind": {
+              "const": "ENTITY"
+            },
+            "ref": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "value"
+          ],
+          "properties": {
+            "kind": {
+              "const": "LITERAL"
+            },
+            "value": {}
+          }
+        }
+      ]
+    },
+    "qualifiers": {
+      "type": "object",
+      "properties": {
+        "mood": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": {}
+    },
+    "entity_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "entity_type",
+        "label",
+        "introducing_evidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "entity_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "introducing_evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/evidence_claim"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "assertion_kind": {
+            "const": "OPEN_STATEMENT"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "predicate_id": {
+            "type": "null"
+          },
+          "ontology_release": {
+            "type": "null"
+          },
+          "source_relation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interpretation_basis": {
+            "const": "EXPLICIT"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "predicate_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ontology_release": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

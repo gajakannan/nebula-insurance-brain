@@ -110,12 +110,12 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0011-S0001](./F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md) | Resolve versioned offline contracts | High | MVP | Dana the Platform Engineer |
-| [F0011-S0002](./F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md) | Validate information state and scoped absence | High | MVP | Ingrid the Persistence Engineer |
-| [F0011-S0003](./F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) | Validate qualified money and scoped identifiers | High | MVP | Ingrid the Persistence Engineer |
-| [F0011-S0004](./F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md) | Prove cross-language contract conformance | High | MVP | Dana the Platform Engineer |
-| [F0011-S0005](./F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md) | Preserve existing consumer contracts | High | MVP | Ingrid the Persistence Engineer |
-| [F0011-S0006](./F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md) | Verify reproducible contract delivery | High | MVP | Dana the Platform Engineer |
+| [F0011-S0001](./archive/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md) | Resolve versioned offline contracts | High | MVP | Dana the Platform Engineer |
+| [F0011-S0002](./archive/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md) | Validate information state and scoped absence | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0003](./archive/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) | Validate qualified money and scoped identifiers | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0004](./archive/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md) | Prove cross-language contract conformance | High | MVP | Dana the Platform Engineer |
+| [F0011-S0005](./archive/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md) | Preserve existing consumer contracts | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0006](./archive/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md) | Verify reproducible contract delivery | High | MVP | Dana the Platform Engineer |
 
 ---
 

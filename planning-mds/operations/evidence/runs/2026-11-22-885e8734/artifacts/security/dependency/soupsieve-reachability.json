@@ -1,0 +1,464 @@
+{
+  "recorded_at_utc": "2026-11-23T22:00:04.056873+00:00",
+  "scope": "installed Docling-family source and BeautifulSoup wrappers; static aid, not a complete dynamic call graph",
+  "packages": [
+    {
+      "name": "soupsieve",
+      "version": "2.9.2",
+      "python_source_files": 7,
+      "source_files_parsed": 7,
+      "read_or_parse_failures": [],
+      "imports_and_selector_calls": [
+        {
+          "file": "soupsieve/__init__.py",
+          "imports": [
+            "bs4"
+          ],
+          "candidate_calls": [
+            {
+              "line": 90,
+              "source": "return compile(select, namespaces, flags, **kwargs).closest(tag)"
+            },
+            {
+              "line": 104,
+              "source": "return compile(select, namespaces, flags, **kwargs).match(tag)"
+            },
+            {
+              "line": 118,
+              "source": "return compile(select, namespaces, flags, **kwargs).filter(iterable)"
+            },
+            {
+              "line": 132,
+              "source": "return compile(select, namespaces, flags, **kwargs).select_one(tag)"
+            },
+            {
+              "line": 147,
+              "source": "return compile(select, namespaces, flags, **kwargs).select(tag, limit)"
+            },
+            {
+              "line": 162,
+              "source": "yield from compile(select, namespaces, flags, **kwargs).iselect(tag, limit)"
+            }
+          ]
+        },
+        {
+          "file": "soupsieve/css_match.py",
+          "imports": [
+            "bs4"
+          ],
+          "candidate_calls": [
+            {
+              "line": 12,
+              "source": "RE_NOT_EMPTY = re.compile('[^ \\t\\r\\n\\f]')"
+            },
+            {
+              "line": 14,
+              "source": "RE_NOT_WS = re.compile('[^ \\t\\r\\n\\f]+')"
+            },
+            {
+              "line": 40,
+              "source": "RE_NUM = re.compile(r\"^(?P<value>-?(?:[0-9]{1,}(\\.[0-9]+)?|\\.[0-9]+))$\")"
+            },
+            {
+              "line": 41,
+              "source": "RE_TIME = re.compile(r'^(?P<hour>[0-9]{2}):(?P<minutes>[0-9]{2})$')"
+            },
+            {
+              "line": 42,
+              "source": "RE_MONTH = re.compile(r'^(?P<year>[0-9]{4,})-(?P<month>[0-9]{2})$')"
+            },
+            {
+              "line": 43,
+              "source": "RE_WEEK = re.compile(r'^(?P<year>[0-9]{4,})-W(?P<week>[0-9]{2})$')"
+            },
+            {
+              "line": 44,
+              "source": "RE_DATE = re.compile(r'^(?P<year>[0-9]{4,})-(?P<month>[0-9]{2})-(?P<day>[0-9]{2})$')"
+            },
+            {
+              "line": 45,
+              "source": "RE_DATETIME = re.compile("
+            },
+            {
+              "line": 48,
+              "source": "RE_WILD_STRIP = re.compile(r'(?:(?:-\\*-)(?:\\*(?:-|$))*|-\\*$)')"
+            },
+            {
+              "line": 1577,
+              "source": "return CSSMatch(self.selectors, tag, self.namespaces, self.flags).match(tag)"
+            },
+            {
+              "line": 1582,
+              "source": "return CSSMatch(self.selectors, tag, self.namespaces, self.flags).closest()"
+            },
+            {
+              "line": 1604,
+              "source": "tags = self.select(tag, limit=1)"
+            },
+            {
+              "line": 496,
+              "source": "m = RE_DATE.match(value)"
+            },
+            {
+              "line": 1512,
+              "source": "if self.match(child):"
+            },
+            {
+              "line": 1525,
+              "source": "if self.match(current):"
+            },
+            {
+              "line": 1597,
+              "source": "return CSSMatch(self.selectors, iterable, self.namespaces, self.flags).filter()"
+            },
+            {
+              "line": 1610,
+              "source": "return list(self.iselect(tag, limit))"
+            },
+            {
+              "line": 1615,
+              "source": "yield from CSSMatch(self.selectors, tag, self.namespaces, self.flags).select(limit)"
+            },
+            {
+              "line": 504,
+              "source": "m = RE_MONTH.match(value)"
+            },
+            {
+              "line": 511,
+              "source": "m = RE_WEEK.match(value)"
+            },
+            {
+              "line": 1536,
+              "source": "if isinstance(tag, bs4.Tag) and self.match(tag)"
+            },
+            {
+              "line": 518,
+              "source": "m = RE_TIME.match(value)"
+            },
+            {
+              "line": 806,
+              "source": "elif pattern.match(value) is None:"
+            },
+            {
+              "line": 1599,
+              "source": "return [node for node in iterable if not CSSMatch.is_navigable_string(node) and self.match(node)]"
+            },
+            {
+              "line": 525,
+              "source": "m = RE_DATETIME.match(value)"
+            },
+            {
+              "line": 538,
+              "source": "m = RE_NUM.match(value)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "beautifulsoup4",
+      "version": "4.15.0",
+      "python_source_files": 15,
+      "source_files_parsed": 15,
+      "read_or_parse_failures": [],
+      "imports_and_selector_calls": [
+        {
+          "file": "bs4/__init__.py",
+          "imports": [
+            "bs4._typing",
+            "bs4.exceptions",
+            "bs4._warnings"
+          ],
+          "candidate_calls": []
+        },
+        {
+          "file": "bs4/_typing.py",
+          "imports": [
+            "bs4.element"
+          ],
+          "candidate_calls": []
+        },
+        {
+          "file": "bs4/builder/__init__.py",
+          "imports": [
+            "bs4.element",
+            "bs4.exceptions",
+            "bs4._typing",
+            "bs4._warnings",
+            "bs4",
+            "bs4.element",
+            "bs4._typing"
+          ],
+          "candidate_calls": [
+            {
+              "line": 705,
+              "source": "LOOKS_LIKE_HTML: Pattern[str] = re.compile(\"<[^ +]html\", re.I)"
+            },
+            {
+              "line": 708,
+              "source": "LOOKS_LIKE_HTML_B: Pattern[bytes] = re.compile(b\"<[^ +]html\", re.I)"
+            }
+          ]
+        },
+        {
+          "file": "bs4/builder/_html5lib.py",
+          "imports": [
+            "bs4._typing",
+            "bs4.builder",
+            "bs4.element",
+            "bs4.element",
+            "bs4",
+            "bs4"
+          ],
+          "candidate_calls": []
+        },
+        {
+          "file": "bs4/builder/_htmlparser.py",
+          "imports": [
+            "bs4.element",
+            "bs4.dammit",
+            "bs4.builder",
+            "bs4.exceptions",
+            "bs4",
+            "bs4.element",
+            "bs4._typing"
+          ],
+          "candidate_calls": [
+            {
+              "line": 232,
+              "source": "_DECIMAL_REFERENCE_WITH_FOLLOWING_DATA = re.compile(\"^([0-9]+)(.*)\")"
+            },
+            {
+              "line": 233,
+              "source": "_HEX_REFERENCE_WITH_FOLLOWING_DATA = re.compile(\"^([0-9a-f]+)(.*)\")"
+            }
+          ]
+        },
+        {
+          "file": "bs4/builder/_lxml.py",
+          "imports": [
+            "bs4.element",
+            "bs4.builder",
+            "bs4.dammit",
+            "bs4.exceptions",
+            "bs4._typing",
+            "bs4"
+          ],
+          "candidate_calls": []
+        },
+        {
+          "file": "bs4/css.py",
+          "imports": [
+            "bs4._typing",
+            "soupsieve",
+            "bs4",
+            "bs4.element",
+            "soupsieve",
+            "bs4"
+          ],
+          "candidate_calls": [
+            {
+              "line": 130,
+              "source": "return self.api.compile(select, self._ns(namespaces, select), flags, **kwargs)"
+            },
+            {
+              "line": 158,
+              "source": "return self.api.select_one("
+            },
+            {
+              "line": 230,
+              "source": "return self.api.iselect("
+            },
+            {
+              "line": 262,
+              "source": "return self.api.closest("
+            },
+            {
+              "line": 194,
+              "source": "self.api.select("
+            },
+            {
+              "line": 299,
+              "source": "self.api.match("
+            },
+            {
+              "line": 336,
+              "source": "self.api.filter("
+            }
+          ]
+        },
+        {
+          "file": "bs4/dammit.py",
+          "imports": [
+            "bs4._typing"
+          ],
+          "candidate_calls": [
+            {
+              "line": 89,
+              "source": "\"html\": re.compile(html_meta.encode(\"ascii\"), re.I),"
+            },
+            {
+              "line": 90,
+              "source": "\"xml\": re.compile(xml_encoding.encode(\"ascii\"), re.I),"
+            },
+            {
+              "line": 93,
+              "source": "\"html\": re.compile(html_meta, re.I),"
+            },
+            {
+              "line": 94,
+              "source": "\"xml\": re.compile(xml_encoding, re.I),"
+            },
+            {
+              "line": 284,
+              "source": "ANY_ENTITY_RE = re.compile(\"&(#\\\\d+|#x[0-9a-fA-F]+|\\\\w+);\", re.I)"
+            },
+            {
+              "line": 290,
+              "source": "BARE_AMPERSAND_OR_BRACKET: Pattern[str] = re.compile("
+            },
+            {
+              "line": 297,
+              "source": "AMPERSAND_OR_BRACKET: Pattern[str] = re.compile(\"([<>&])\")"
+            },
+            {
+              "line": 263,
+              "source": "self._CHARACTER_TO_HTML_ENTITY_RE = re.compile(re_definition)"
+            },
+            {
+              "line": 264,
+              "source": "self._CHARACTER_TO_HTML_ENTITY_WITH_AMPERSAND_RE = re.compile("
+            },
+            {
+              "line": 962,
+              "source": "smart_quotes_compiled = re.compile(smart_quotes_re)"
+            }
+          ]
+        },
+        {
+          "file": "bs4/diagnose.py",
+          "imports": [
+            "bs4",
+            "bs4",
+            "bs4.builder",
+            "bs4._typing"
+          ],
+          "candidate_calls": []
+        },
+        {
+          "file": "bs4/element.py",
+          "imports": [
+            "bs4.css",
+            "bs4._deprecation",
+            "bs4.formatter",
+            "bs4._warnings",
+            "bs4.filter",
+            "bs4",
+            "bs4.builder",
+            "bs4.filter",
+            "bs4.formatter",
+            "bs4._typing",
+            "bs4.filter",
+            "bs4"
+          ],
+          "candidate_calls": [
+            {
+              "line": 91,
+              "source": "_deprecated_whitespace_re: Pattern[str] = re.compile(r\"\\s+\")"
+            },
+            {
+              "line": 108,
+              "source": "nonwhitespace_re: Pattern[str] = re.compile(r\"\\S+\")"
+            },
+            {
+              "line": 334,
+              "source": "CHARSET_RE: Pattern[str] = re.compile(r\"((^|;)\\s*charset=)([^;]*)\", re.M)"
+            },
+            {
+              "line": 3308,
+              "source": "return self.css.select_one(selector, namespaces, **kwargs)"
+            },
+            {
+              "line": 3333,
+              "source": "return self.css.select(selector, namespaces, limit, **kwargs)"
+            }
+          ]
+        },
+        {
+          "file": "bs4/filter.py",
+          "imports": [
+            "bs4._deprecation",
+            "bs4.element",
+            "bs4._typing"
+          ],
+          "candidate_calls": [
+            {
+              "line": 159,
+              "source": "for match in self.filter(generator):"
+            },
+            {
+              "line": 178,
+              "source": "for match in self.filter(generator):"
+            },
+            {
+              "line": 236,
+              "source": "self.pattern = re.compile(pattern.decode(\"utf8\"))"
+            },
+            {
+              "line": 764,
+              "source": "return element if self.match(element) else None"
+            },
+            {
+              "line": 146,
+              "source": "if self.match(i, _known_rules=True):"
+            },
+            {
+              "line": 238,
+              "source": "self.pattern = re.compile(pattern)"
+            }
+          ]
+        },
+        {
+          "file": "bs4/formatter.py",
+          "imports": [
+            "bs4.dammit",
+            "bs4._typing"
+          ],
+          "candidate_calls": []
+        }
+      ]
+    },
+    {
+      "name": "docling",
+      "version": "2.142.0",
+      "python_source_files": 0,
+      "source_files_parsed": 0,
+      "read_or_parse_failures": [],
+      "imports_and_selector_calls": []
+    },
+    {
+      "name": "docling-core",
+      "version": "2.106.0",
+      "python_source_files": 105,
+      "source_files_parsed": 105,
+      "read_or_parse_failures": [],
+      "imports_and_selector_calls": []
+    },
+    {
+      "name": "docling-parse",
+      "version": "7.24.2",
+      "python_source_files": 4,
+      "source_files_parsed": 4,
+      "read_or_parse_failures": [],
+      "imports_and_selector_calls": []
+    },
+    {
+      "name": "docling-ibm-models",
+      "version": "4.0.4",
+      "python_source_files": 25,
+      "source_files_parsed": 25,
+      "read_or_parse_failures": [],
+      "imports_and_selector_calls": []
+    }
+  ]
+}

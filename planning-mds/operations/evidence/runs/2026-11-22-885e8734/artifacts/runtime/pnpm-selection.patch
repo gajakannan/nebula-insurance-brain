@@ -1,0 +1,15 @@
+--- a/docker/contracts/Dockerfile
++++ b/docker/contracts/Dockerfile
+@@ -32,10 +32,10 @@
+ CMD ["uv", "run", "--no-sync", "--project", "neuron", "python", "-m", "pytest", "neuron/tests/integration/test_f0011_shared_bundle.py", "-q"]
+ 
+ FROM node:22.23.1-slim AS node-validation
+-ENV XDG_CACHE_HOME=/tmp/cache COREPACK_HOME=/tmp/corepack PNPM_HOME=/tmp/pnpm
++ENV XDG_CACHE_HOME=/tmp/cache COREPACK_HOME=/tmp/corepack PNPM_HOME=/tmp/pnpm COREPACK_DEFAULT_TO_LATEST=0
+ WORKDIR /app/brain
+ COPY --chown=node:node . .
+ USER node
+-RUN corepack pnpm --dir experience install --frozen-lockfile --store-dir /tmp/pnpm-store
++RUN corepack prepare pnpm@12.21.0 --activate && corepack pnpm --dir experience install --frozen-lockfile --store-dir /tmp/pnpm-store
+ HEALTHCHECK --interval=10s --timeout=5s --retries=3 CMD node -e "if (+process.versions.node.split('.')[0] < 22) process.exit(1)"
+ CMD ["corepack", "pnpm", "--dir", "experience", "contracts:test"]

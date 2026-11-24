@@ -1,0 +1,61 @@
+session:
+  started: '2026-11-22T22:03:42+00:00'
+  role: quality-engineer
+  scope: F0011
+  run_id: 2026-11-22-885e8734
+  mode: null
+  scope_label: F0011
+  scope_id: feature:F0011
+decisions:
+- decision_id: 0
+  timestamp: '2026-11-22T22:03:57+00:00'
+  summary: G0 passed; G1 is next despite resume helper closeout message
+  topic: gate-position
+  supersedes: []
+  rationale: Actual run-gate journal records only G0; no later gate or approval has passed.
+- decision_id: 1
+  timestamp: '2026-11-22T22:03:57+00:00'
+  summary: Do not activate response guards before both real stored-history sweeps pass
+  topic: response-guard-rollout
+  supersedes: []
+  rationale: Approved PR-M1 requires integration and dev READ ONLY REPEATABLE READ complete coverage, explicit signed zero-row
+    inventories if empty, and final paused-writer cutover sweeps.
+- decision_id: 2
+  timestamp: '2026-11-22T22:03:57+00:00'
+  summary: Restore dev only through existing accepted migrations0011-0015; no new F0011 migration
+  topic: runtime-baseline
+  supersedes: []
+  rationale: Existing dev was0010 and empty, integration was0015 and empty. Full ORM history sweep needs current shipped columns
+    even for zero rows; DevOps backed up and restored dev to0015.
+- decision_id: 3
+  timestamp: '2026-11-22T22:21:44+00:00'
+  summary: Freeze delegated native UUID/date behavior; explicit source format checks on new adopted guards
+  topic: native-format-compatibility
+  supersedes: []
+  rationale: Observed old image and candidate both lack optional date-time checker. Existing nine delegates preserve it; new
+    guards must check serialized formats. Policy selected by static resource ref before input, no fallback, no schema assertion
+    change.
+- decision_id: 4
+  timestamp: '2026-11-22T22:39:01+00:00'
+  summary: Preserve dotted wire keys using deterministic generated Python class titles
+  topic: generated-type-names
+  supersedes: []
+  rationale: Installed generator interpreted result.json/provenance.json/graph.json/metadata.json as Python modules. Only
+    generator input titles change; source schema and serialized aliases stay exact.
+- decision_id: 5
+  timestamp: '2026-11-23T00:14:18+00:00'
+  summary: Final G2 source passes unit, consumer, native, conformance and typing checks
+  topic: g2-source-verification
+  supersedes: []
+  rationale: 1148 unit,81 PostgreSQL,363 cases/1089 results,86 generated artifacts; currentcode cutover-ci sweeps pass. Remaining
+    G2 packaging refresh/report validation; G3 reviews prepare in parallel and hold verdict until G2 passes.
+- decision_id: 6
+  timestamp: '2026-11-23T15:37:29+00:00'
+  summary: Architect resolves portable parity defects without changing released schema assertions or native readers
+  topic: portable-parity-reconcile
+  supersedes: []
+  rationale: Root depth1 including scalar; portable-only exactend patterns; RFC8785 binary64 canonical UTF8 size with rawbytecap;
+    admittedschema positions only. See artifacts/diffs/portable-parity-decision.md. Dockerpreflightrestored beforeimplementation.
+files_touched: []
+open_questions: []
+escalations: []

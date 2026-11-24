@@ -2,6 +2,7 @@
   "name": "nebula-insurance-brain-experience",
   "private": true,
   "version": "0.1.0",
+  "packageManager": "pnpm@12.21.0",
   "type": "module",
   "description": "Proof-scope Nebula Review Panel (F0001-S0004). The full application shell is F0021.",
   "scripts": {
@@ -10,7 +11,9 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "contracts:check": "node scripts/contracts/check.mjs",
+    "contracts:test": "node --test scripts/contracts/runtime.test.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",
@@ -19,19 +22,22 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.17.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.5.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "@eslint/js": "^9.17.0",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^5.0.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
     "jsdom": "^25.0.1",
+    "jsonc-parser": "3.3.1",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.19.0",
     "vite": "^6.4.0",

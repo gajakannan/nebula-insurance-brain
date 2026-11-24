@@ -1,0 +1,222 @@
+E501 Line too long (104 > 100)
+  --> engine/apps/api/tests/test_contract_openapi.py:48:101
+   |
+46 |         path = next(path for path in snapshot["paths"] if _path(path) == _path(route.path))
+47 |         for method in route.methods:
+48 |             assert str(route.status_code or 200) in snapshot["paths"][path][method.lower()]["responses"]
+   |                                                                                                     ^^^^
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> engine/tests/integration/test_f0011_consumer_contracts.py:7:1
+   |
+ 5 |   """
+ 6 |
+ 7 | / from __future__ import annotations
+ 8 | |
+ 9 | | from uuid import uuid4
+10 | |
+11 | | import pytest
+12 | | from brain_contracts.schema_runtime import ContractError
+13 | | from brain_testing import fixtures
+14 | | from engine.tests.fixtures.temporal import harness as h
+15 | | from engine.tests.fixtures.temporal.harness import bound, money
+16 | | from sqlalchemy.orm import Session
+17 | | from sqlalchemy import text
+18 | | from sqlalchemy.engine import make_url
+19 | | from sqlalchemy.exc import DBAPIError
+20 | | from sqlalchemy.ext.asyncio import AsyncSession
+21 | | from scripts.contracts import check_stored_fact_versions as sweep
+   | |_________________________________________________________________^
+22 |
+23 |   _clean_fact_tables = h._clean_fact_tables
+   |
+help: Organize imports
+   |
+15 | from engine.tests.fixtures.temporal.harness import bound, money
+   - from sqlalchemy.orm import Session
+16 + from scripts.contracts import check_stored_fact_versions as sweep
+17 | from sqlalchemy import text
+18 | from sqlalchemy.engine import make_url
+19 | from sqlalchemy.exc import DBAPIError
+20 | from sqlalchemy.ext.asyncio import AsyncSession
+   - from scripts.contracts import check_stored_fact_versions as sweep
+21 + from sqlalchemy.orm import Session
+22 |
+   |
+
+E501 Line too long (106 > 100)
+  --> engine/tests/integration/test_f0011_consumer_contracts.py:79:101
+   |
+79 | async def test_serialized_commit_guard_failure_rolls_back_effects_before_outer_commit(world, monkeypatch):
+   |                                                                                                     ^^^^^^
+80 |     from brain_api.routes import facts
+   |
+
+E501 Line too long (112 > 100)
+  --> engine/tests/integration/test_f0011_consumer_contracts.py:97:101
+   |
+97 | async def test_pr_l3_read_audit_precedes_safe_http_failure_and_denied_source_precedes_guard(world, monkeypatch):
+   |                                                                                                     ^^^^^^^^^^^^
+98 |     from brain_api.routes import facts
+   |
+
+E501 Line too long (105 > 100)
+   --> engine/tests/integration/test_f0011_consumer_contracts.py:113:101
+    |
+111 |     assert created.status_code == 201, created.text
+112 |     with Session(w.sync_engine) as session, session.begin():
+113 |         limited = fixtures.seed_principal(session, issuer="urn:f0011:test", subject=f"limited-{uuid4()}")
+    |                                                                                                     ^^^^^
+114 |         fixtures.seed_grant(
+115 |             session, limited.id, *w.a.scope, "TenantMember", classifications=("internal",)
+    |
+
+E501 Line too long (105 > 100)
+   --> engine/tests/integration/test_f0011_consumer_contracts.py:198:101
+    |
+198 | async def test_stored_serializer_format_mismatch_refuses_rollout_and_retains_history(world, monkeypatch):
+    |                                                                                                     ^^^^^
+199 |     w = world
+200 |     await _history(w)
+    |
+
+E501 Line too long (102 > 100)
+   --> engine/tests/integration/test_f0011_consumer_contracts.py:225:101
+    |
+223 |         assert await session.scalar(text("SHOW transaction_read_only")) == "on"
+224 |         with pytest.raises(DBAPIError) as failed:
+225 |             await session.execute(text("UPDATE canonical_fact_version SET value = value WHERE false"))
+    |                                                                                                     ^^
+226 |         original = failed.value.orig
+227 |         sqlstate = getattr(original, "sqlstate", None) or getattr(
+    |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> scripts/contracts/check_stored_fact_versions.py:8:1
+   |
+ 6 |   """
+ 7 |
+ 8 | / from __future__ import annotations
+ 9 | |
+10 | | import argparse
+11 | | import asyncio
+12 | | import hashlib
+13 | | import inspect
+14 | | import json
+15 | | import pathlib
+16 | | import subprocess
+17 | | from collections.abc import Mapping
+18 | | from datetime import date
+19 | | from typing import Any
+20 | |
+21 | | from brain_contracts.schema_runtime import ContractBundle, ContractError
+22 | | from brain_persistence.models import CanonicalFactVersionRow
+23 | | from brain_persistence.repositories import _fact_version_from_row
+24 | | from sqlalchemy import func, select, text
+25 | | from sqlalchemy.engine import make_url
+26 | | from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+27 | |
+28 | | from brain_api.config import Settings
+29 | | from brain_api.contract_guards import guard_fact_response
+30 | | from brain_api.schemas.facts import FactVersionOut
+   | |__________________________________________________^
+help: Organize imports
+   |
+20 |
+21 + from brain_api.config import Settings
+22 + from brain_api.contract_guards import guard_fact_response
+23 + from brain_api.schemas.facts import FactVersionOut
+24 | from brain_contracts.schema_runtime import ContractBundle, ContractError
+--------------------------------------------------------------------------------
+29 | from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+   -
+   - from brain_api.config import Settings
+   - from brain_api.contract_guards import guard_fact_response
+   - from brain_api.schemas.facts import FactVersionOut
+30 |
+   |
+
+TRY004 Prefer `TypeError` exception for invalid type
+  --> scripts/contracts/check_stored_fact_versions.py:58:13
+   |
+56 |         target = entries[environment]
+57 |         if not isinstance(target, dict) or not isinstance(target.get("database"), str):
+58 |             raise ValueError
+   |             ^^^^^^^^^^^^^^^^
+59 |         if set(target) - {"database", "host", "port"} or not target["database"]:
+60 |             raise ValueError
+   |
+
+BLE001 Do not catch blind exception: `Exception`
+   --> scripts/contracts/check_stored_fact_versions.py:162:24
+    |
+160 |                     version = _fact_version_from_row(row)
+161 |                     payload = FactVersionOut.from_domain(version).model_dump(mode="json")
+162 |                 except Exception:
+    |                        ^^^^^^^^^
+163 |                     report["mapping_failures"] += 1
+164 |                 else:
+    |
+
+BLE001 Do not catch blind exception: `Exception`
+   --> scripts/contracts/check_stored_fact_versions.py:191:12
+    |
+189 |         report["codes"].append(str(exc))
+190 |         return report, 2
+191 |     except Exception:
+    |            ^^^^^^^^^
+192 |         report["codes"].append("CONTRACT_SWEEP_EXECUTION_FAILED")
+193 |         return report, 2
+    |
+
+ASYNC221 Async functions should not run processes with blocking methods
+   --> scripts/contracts/check_stored_fact_versions.py:201:16
+    |
+199 |     bundle = ContractBundle.installed()
+200 |     url, database = environment_target(args.environment, args.environments_config)
+201 |     revision = subprocess.check_output(
+    |                ^^^^^^^^^^^^^^^^^^^^^^^
+202 |         ["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL, text=True
+203 |     ).strip()
+    |
+
+BLE001 Do not catch blind exception: `Exception`
+   --> scripts/contracts/check_stored_fact_versions.py:231:12
+    |
+229 |     try:
+230 |         report, code = asyncio.run(run(args))
+231 |     except Exception:
+    |            ^^^^^^^^^
+232 |         report, code = {
+233 |             "schema_version": 1, "environment": args.environment,
+    |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> scripts/contracts/tests/test_stored_fact_versions.py:3:1
+   |
+ 1 |   """F0011 sweep failure semantics; successful history proof runs on PostgreSQL."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | import json
+ 6 | | from datetime import UTC, datetime
+ 7 | | from types import SimpleNamespace
+ 8 | |
+ 9 | | import pytest
+10 | | from brain_contracts.schema_runtime import ContractError
+11 | | from scripts.contracts import check_stored_fact_versions as sweep
+12 | | from sqlalchemy.engine import make_url
+   | |______________________________________^
+help: Organize imports
+   |
+10 | from brain_contracts.schema_runtime import ContractError
+   - from scripts.contracts import check_stored_fact_versions as sweep
+11 | from sqlalchemy.engine import make_url
+12 |
+13 + from scripts.contracts import check_stored_fact_versions as sweep
+14 +
+15 |
+   |
+
+Found 14 errors.
+[*] 3 fixable with the `--fix` option.

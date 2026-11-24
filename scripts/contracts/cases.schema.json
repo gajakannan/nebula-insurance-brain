@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/build/schema-conformance-cases-v2.schema.json",
+  "title": "BuildSchemaConformanceCasesV2",
+  "description": "Build-only synthetic expectations, including positive raw JSON and bounded raw-repeat recipes. Runtime payload schemas are unchanged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "provenance",
+    "cases"
+  ],
+  "properties": {
+    "format": {
+      "const": "schema-conformance-cases/v2"
+    },
+    "provenance": {
+      "const": "synthetic-development-design"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "contract",
+          "version",
+          "valid",
+          "covers"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^F0011-C[0-9]{4}$"
+          },
+          "kind": {
+            "enum": [
+              "instance",
+              "raw-json"
+            ]
+          },
+          "contract": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*\\.schema\\.json$"
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "pointer": {
+            "type": "string",
+            "pattern": "^(/.*)?$"
+          },
+          "input": {},
+          "raw": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "covers": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^F0011-S[0-9]{4}-AC[0-9]+$"
+            }
+          },
+          "note": {
+            "type": "string"
+          },
+          "domain_expectation": {
+            "type": "string"
+          },
+          "profile": {
+            "enum": [
+              "portable-json/v1",
+              "native-compat/v1"
+            ],
+            "description": "Explicit runner profile; omission is portable-json/v1. Native-only compatibility cases are executed separately and cannot count as portable cross-language successes."
+          },
+          "raw_repeat": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "prefix",
+              "character",
+              "count",
+              "suffix"
+            ],
+            "properties": {
+              "prefix": {
+                "type": "string"
+              },
+              "suffix": {
+                "type": "string"
+              },
+              "character": {
+                "enum": [
+                  "x",
+                  "[",
+                  "]",
+                  "{",
+                  "}"
+                ]
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16777217
+              }
+            }
+          }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "kind": {
+                "const": "instance"
+              }
+            },
+            "required": [
+              "input"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "raw"
+                  ]
+                },
+                {
+                  "required": [
+                    "raw_repeat"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "const": "raw-json"
+              }
+            },
+            "not": {
+              "required": [
+                "input"
+              ]
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "raw"
+                ]
+              },
+              {
+                "required": [
+                  "raw_repeat"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

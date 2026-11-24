@@ -1,0 +1,201 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.18kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/astral-sh/uv:0.11.31
+#2 DONE 1.5s
+
+#3 [internal] load metadata for docker.io/library/python:3.14.4-slim
+#3 DONE 1.5s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 349B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [uv 1/1] FROM ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437
+#6 resolve ghcr.io/astral-sh/uv:0.11.31@sha256:ecd4de2f060c64bea0ff8ecb182ddf46ba3fcccdc8a60cfdbaf20d1a047d7437 0.1s done
+#6 DONE 0.1s
+
+#7 [engine-validation 1/6] FROM docker.io/library/python:3.14.4-slim@sha256:2ca02f32b4d9d893863367ce07ec1972819f476dd38d8612f2a9cb6a41cbb727
+#7 resolve docker.io/library/python:3.14.4-slim@sha256:2ca02f32b4d9d893863367ce07ec1972819f476dd38d8612f2a9cb6a41cbb727 0.1s done
+#7 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 7.59MB 0.1s done
+#5 DONE 0.1s
+
+#8 [engine-validation 2/6] COPY --from=uv /uv /uvx /usr/local/bin/
+#8 CACHED
+
+#9 [engine-validation 3/6] RUN useradd --create-home --uid 1000 app     && mkdir -p /app/brain /opt/venvs     && chown app:app /app/brain /opt/venvs
+#9 CACHED
+
+#10 [engine-validation 4/6] WORKDIR /app/brain
+#10 CACHED
+
+#11 [engine-validation 5/6] COPY --chown=app:app . .
+#11 DONE 0.6s
+
+#12 [engine-validation 6/6] RUN uv sync --project engine --group contract-build --locked
+#12 0.640 Using CPython 3.14.4 interpreter at: /usr/local/bin/python3
+#12 0.640 Creating virtual environment at: /opt/venvs/engine
+#12 0.685 Resolved 94 packages in 20ms
+#12 0.752    Building brain-testing @ file:///app/brain/engine/packages/brain-testing
+#12 0.753    Building brain-api @ file:///app/brain/engine/apps/api
+#12 0.754    Building brain-assertions @ file:///app/brain/engine/packages/brain-assertions
+#12 0.755    Building brain-content @ file:///app/brain/engine/packages/brain-content
+#12 0.755    Building brain-domain @ file:///app/brain/engine/packages/brain-domain
+#12 0.756    Building brain-factslots @ file:///app/brain/engine/packages/brain-factslots
+#12 0.757    Building brain-persistence @ file:///app/brain/engine/packages/brain-persistence
+#12 0.757    Building brain-review @ file:///app/brain/engine/packages/brain-review
+#12 0.758    Building brain-security @ file:///app/brain/engine/packages/brain-security
+#12 0.758    Building brain-temporal @ file:///app/brain/engine/packages/brain-temporal
+#12 0.759    Building brain-worker @ file:///app/brain/engine/apps/worker
+#12 0.760    Building brain-contracts @ file:///app/brain/engine/packages/brain-contracts
+#12 0.760    Building brain-jobs @ file:///app/brain/engine/packages/brain-jobs
+#12 1.015 Downloading pydantic-core (2.0MiB)
+#12 1.018 Downloading black (2.0MiB)
+#12 1.019 Downloading cryptography (4.5MiB)
+#12 1.020 Downloading pygments (1.2MiB)
+#12 1.020 Downloading asyncpg (3.3MiB)
+#12 1.021 Downloading psycopg-binary (5.0MiB)
+#12 1.022 Downloading ast-serialize (1.2MiB)
+#12 1.025 Downloading mypy (14.5MiB)
+#12 1.026 Downloading uvloop (4.1MiB)
+#12 1.027 Downloading sqlalchemy (3.2MiB)
+#12 1.027 Downloading ruff (9.8MiB)
+#12 1.028 Downloading datamodel-code-generator (2.3MiB)
+#12 17.50  Downloaded pygments
+#12 17.60  Downloaded ast-serialize
+#12 18.81       Built brain-persistence @ file:///app/brain/engine/packages/brain-persistence
+#12 18.82       Built brain-api @ file:///app/brain/engine/apps/api
+#12 18.83       Built brain-assertions @ file:///app/brain/engine/packages/brain-assertions
+#12 18.84       Built brain-jobs @ file:///app/brain/engine/packages/brain-jobs
+#12 18.84       Built brain-testing @ file:///app/brain/engine/packages/brain-testing
+#12 18.84       Built brain-review @ file:///app/brain/engine/packages/brain-review
+#12 18.85       Built brain-worker @ file:///app/brain/engine/apps/worker
+#12 18.85       Built brain-security @ file:///app/brain/engine/packages/brain-security
+#12 18.85       Built brain-contracts @ file:///app/brain/engine/packages/brain-contracts
+#12 18.85       Built brain-temporal @ file:///app/brain/engine/packages/brain-temporal
+#12 18.86       Built brain-domain @ file:///app/brain/engine/packages/brain-domain
+#12 18.87       Built brain-factslots @ file:///app/brain/engine/packages/brain-factslots
+#12 18.88       Built brain-content @ file:///app/brain/engine/packages/brain-content
+#12 19.94  Downloaded pydantic-core
+#12 20.22  Downloaded black
+#12 20.94  Downloaded datamodel-code-generator
+#12 31.15  Downloaded sqlalchemy
+#12 31.22  Downloaded asyncpg
+#12 33.49  Downloaded uvloop
+#12 33.57  Downloaded cryptography
+#12 33.59  Downloaded psycopg-binary
+#12 38.10  Downloaded ruff
+#12 40.52  Downloaded mypy
+#12 40.52 Prepared 88 packages in 39.83s
+#12 40.68 Installed 88 packages in 156ms
+#12 40.68  + aiosqlite==0.22.1
+#12 40.68  + alembic==1.19.1
+#12 40.68  + annotated-doc==0.0.5
+#12 40.68  + annotated-types==0.8.0
+#12 40.68  + anyio==4.15.0
+#12 40.68  + argcomplete==3.7.2
+#12 40.68  + ast-serialize==0.9.0
+#12 40.68  + asyncpg==0.31.0
+#12 40.68  + attrs==26.1.0
+#12 40.68  + black==26.10.1
+#12 40.68  + brain-api==0.1.0 (from file:///app/brain/engine/apps/api)
+#12 40.68  + brain-assertions==0.1.0 (from file:///app/brain/engine/packages/brain-assertions)
+#12 40.68  + brain-content==0.1.0 (from file:///app/brain/engine/packages/brain-content)
+#12 40.68  + brain-contracts==0.1.0 (from file:///app/brain/engine/packages/brain-contracts)
+#12 40.68  + brain-domain==0.1.0 (from file:///app/brain/engine/packages/brain-domain)
+#12 40.68  + brain-factslots==0.1.0 (from file:///app/brain/engine/packages/brain-factslots)
+#12 40.68  + brain-jobs==0.1.0 (from file:///app/brain/engine/packages/brain-jobs)
+#12 40.68  + brain-persistence==0.1.0 (from file:///app/brain/engine/packages/brain-persistence)
+#12 40.68  + brain-review==0.1.0 (from file:///app/brain/engine/packages/brain-review)
+#12 40.68  + brain-security==0.1.0 (from file:///app/brain/engine/packages/brain-security)
+#12 40.68  + brain-temporal==0.1.0 (from file:///app/brain/engine/packages/brain-temporal)
+#12 40.68  + brain-testing==0.1.0 (from file:///app/brain/engine/packages/brain-testing)
+#12 40.68  + brain-worker==0.1.0 (from file:///app/brain/engine/apps/worker)
+#12 40.68  + build==1.6.1
+#12 40.68  + casbin==1.43.0
+#12 40.68  + cffi==2.1.1
+#12 40.68  + click==8.5.0
+#12 40.68  + coverage==7.16.0
+#12 40.68  + cryptography==50.0.1
+#12 40.68  + datamodel-code-generator==0.96.0
+#12 40.68  + fastapi==0.141.1
+#12 40.68  + genson==1.4.0
+#12 40.68  + greenlet==3.5.5
+#12 40.68  + h11==0.16.0
+#12 40.68  + httpcore2==2.12.0
+#12 40.68  + httptools==0.8.0
+#12 40.68  + httpx2==2.12.0
+#12 40.68  + idna==3.19
+#12 40.68  + inflect==7.6.0
+#12 40.68  + iniconfig==2.3.0
+#12 40.68  + isort==8.0.1
+#12 40.68  + jaraco-functools==4.6.0
+#12 40.68  + jinja2==3.1.6
+#12 40.68  + jsonschema==4.26.0
+#12 40.68  + jsonschema-specifications==2025.9.1
+#12 40.68  + librt==0.15.0
+#12 40.68  + mako==1.4.1
+#12 40.68  + markupsafe==3.0.3
+#12 40.68  + more-itertools==11.2.1
+#12 40.68  + mypy==2.3.1
+#12 40.68  + mypy-extensions==1.1.0
+#12 40.68  + packaging==26.3
+#12 40.68  + pathspec==1.1.1
+#12 40.68  + platformdirs==4.14.5
+#12 40.68  + pluggy==1.6.0
+#12 40.68  + psycopg==3.3.5
+#12 40.68  + psycopg-binary==3.3.5
+#12 40.68  + pycparser==3.0
+#12 40.68  + pydantic==2.13.5
+#12 40.68  + pydantic-core==2.46.5
+#12 40.68  + pygments==2.21.0
+#12 40.68  + pyjwt==2.15.0
+#12 40.68  + pyproject-hooks==1.3.3
+#12 40.68  + pytest==9.1.1
+#12 40.68  + pytest-asyncio==1.4.0
+#12 40.68  + pytest-cov==7.1.0
+#12 40.68  + python-dotenv==1.2.3
+#12 40.68  + pytokens==0.4.1
+#12 40.68  + pyyaml==6.0.3
+#12 40.68  + referencing==0.37.0
+#12 40.68  + rfc3986-validator==0.1.1
+#12 40.68  + rfc8785==0.1.4
+#12 40.68  + rpds-py==2026.6.3
+#12 40.68  + ruff==0.16.6
+#12 40.68  + setuptools==84.1.0
+#12 40.68  + simpleeval==1.0.7
+#12 40.68  + sqlalchemy==2.0.52
+#12 40.68  + starlette==1.6.0
+#12 40.68  + truststore==0.10.4
+#12 40.68  + typeguard==4.6.0
+#12 40.68  + types-pyyaml==6.0.12.20260815
+#12 40.68  + typing-extensions==4.16.0
+#12 40.68  + typing-inspection==0.4.4
+#12 40.68  + uvicorn==0.52.4
+#12 40.68  + uvloop==0.22.1
+#12 40.68  + watchfiles==1.2.0
+#12 40.68  + websockets==17.1
+#12 40.68  + wheel==0.48.0
+#12 DONE 41.0s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 5.2s done
+#13 exporting manifest sha256:49c0f9ba848a88b82fb6ee1eac52fbfa2f425af0a339c17afe487332ac1c7c5e 0.0s done
+#13 exporting config sha256:d46d554f2c6785afa457a3bfdacd0cf483090dd213ec99cc68b47a3d6d62378f 0.0s done
+#13 exporting attestation manifest sha256:143be761570d2bf9e2afaad5b45c1ca5f2fa73a0dcc3c4c84c7eef1ed4e76175 0.1s done
+#13 exporting manifest list sha256:e21f432315817a5800b05b2326f74f4fd926ac9168703f9d41795b03d4cea837
+#13 exporting manifest list sha256:e21f432315817a5800b05b2326f74f4fd926ac9168703f9d41795b03d4cea837 0.0s done
+#13 naming to docker.io/library/brain-f0011-contract-engine:2026-11-22-885e8734 done
+#13 unpacking to docker.io/library/brain-f0011-contract-engine:2026-11-22-885e8734
+#13 unpacking to docker.io/library/brain-f0011-contract-engine:2026-11-22-885e8734 3.4s done
+#13 DONE 8.8s

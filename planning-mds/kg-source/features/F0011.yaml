@@ -1,23 +1,13 @@
 id: feature:F0011
 name: JSON Schema contract system
-path: planning-mds/features/F0011-json-schema-contract-system
-status: planned
-registry_section: Planned
+path: planning-mds/features/archive/F0011-json-schema-contract-system
+status: archived-done
+registry_section: Archived
 phase: v0.1A
-roadmap_section: Now
-roadmap_order: 1
-rationale: "Now (2026-11-20 roadmap review): continues as the contract/ontology lane;\
-  \ dependencies done (F0001, F0006); heads F0011 \u2192 F0012 \u2192 F0013/F0014\
-  \ \u2192 F0015 \u2192 F0016, the longest v0.1 chain to F0065. Owns the ADR-0039\
-  \ typed-value and missingness schemas (section 106.3). JSON Schema 2020-12 is the\
-  \ cross-language structural contract shared by Pydantic, AJV, and OpenAPI (sections\
-  \ 25 to 27). Any future migration would be numbered after F0008's 0015; F0011 plans no migration. Plan run 2026-11-20-ccb1bd39:\
-  \ Phase A approved; six stories/41 ACs; Phase A and B approved by operator on 2026-11-20;\
-  \ baseline plan-review READY; Phase B review revision approved 2026-11-22; ADR-0079 Proposed, no runtime delivered."
-validation_gate: "Plan action Phase A and Phase B approved and plan-review READY (or\
-  \ High findings accepted with owner and date); feature run closes G0\u2013G8 with\
-  \ one JSON Schema 2020-12 source consumed by Pydantic, AJV and OpenAPI, covering\
-  \ the F0007 typed-value and information-state carriers."
+roadmap_section: Completed
+roadmap_order: 9
+rationale: 'Completed 2026-11-23 in feature run 2026-11-22-885e8734: one offline 21-resource JSON Schema 2020-12 bundle consumed by source-gated generated Pydantic, headless AJV and a shared OpenAPI snapshot; native readers frozen; FactSlot read and commit response guards. All six stories Done.'
+validation_gate: 'G0-G8 governed feature run 2026-11-22-885e8734; explicit operator G4 approval after the three G3 Lows were fixed; five required role signoffs on six stories; 41/41 ACs; 443 shared cases / 1329 results with 0 mismatches; unit 1239, PostgreSQL 83, full Neuron suite green; 86.4% Python / 98.5% JS changed-line coverage; ADR-0079 proofs met, ADR stays Proposed pending operator acceptance.'
 depends_on:
 - feature:F0001
 - feature:F0006
@@ -28,6 +18,8 @@ governed_by:
 - adr:0078
 - adr:0079
 notes:
+- Feature run 2026-11-22-885e8734 closed 2026-11-23 (G0-G8). The G4 Low fixes were 500-handler traceId logging, direct facts.py
+  mismatch tests and Neuron SoupSieve 2.9.2 to 4.1.3. Earlier planning notes below are kept for history.
 - Phase A approved by operator reply approve at G3; Phase B approved with exact token
   approve-phase-b on 2026-11-20 in plan run 2026-11-20-ccb1bd39, after G4 and seven
   ordered G5 pre-approval exit checks. G5 post-approval regeneration/publication is
@@ -91,7 +83,7 @@ uses_schema:
 - schema:schema-conformance-cases-v1
 story_mappings:
 - id: story:F0011-S0001
-  path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
+  path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md
   affects:
   - capability:offline-contract-bundle
   governed_by:
@@ -100,7 +92,7 @@ story_mappings:
   uses_schema:
   - schema:schema-bundle-manifest-v1
 - id: story:F0011-S0002
-  path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
+  path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md
   affects:
   - capability:typed-fact-answer
   governed_by:
@@ -112,7 +104,7 @@ story_mappings:
   - schema:fact-answer-v1
   - schema:schema-conformance-cases-v1
 - id: story:F0011-S0003
-  path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
+  path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md
   affects:
   - capability:typed-fact-answer
   governed_by:
@@ -125,7 +117,7 @@ story_mappings:
   - schema:fact-slot-key-v1
   - schema:schema-conformance-cases-v1
 - id: story:F0011-S0004
-  path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
+  path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md
   affects:
   - capability:cross-language-contract-validation
   governed_by:
@@ -140,7 +132,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0011-S0005
-  path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
+  path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md
   affects:
   - capability:typed-fact-answer
   governed_by:
@@ -157,7 +149,7 @@ story_mappings:
   uses_api_contract:
   - api:brain-api
 - id: story:F0011-S0006
-  path: planning-mds/features/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
+  path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md
   affects:
   - capability:offline-contract-bundle
   governed_by:
@@ -166,3 +158,5 @@ story_mappings:
   uses_schema:
   - schema:schema-bundle-manifest-v1
   - schema:schema-conformance-cases-v1
+completion_state: All six stories Done; 41/41 ACs observed; 443 shared cases / 1329 results agree across Python JSON Schema, generated Pydantic and AJV; five required roles signed every story; the three G3 Lows were fixed before operator approval. ADR-0079 proofs met; the ADR stays Proposed pending operator acceptance.
+archived_date: '2026-11-23'

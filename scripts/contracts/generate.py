@@ -1,0 +1,503 @@
+"""Build the F0011 closed contract release; --check never writes tracked output."""
+
+from __future__ import annotations
+
+import argparse
+import copy
+import hashlib
+import importlib.metadata
+import importlib.util
+import json
+import os
+import pathlib
+import platform
+import re
+import subprocess
+import sys
+import tempfile
+from urllib.parse import urldefrag, urljoin
+
+import yaml
+from brain_contracts.schema_runtime import (
+    ANNOTATIONS,
+    DIALECT,
+    ContractBundle,
+    ContractError,
+    ContractRef,
+    metadata_for,
+    schema_nodes,
+)
+from jsonschema import Draft202012Validator
+
+try:
+    from case_data import raw_for_case
+except ModuleNotFoundError:  # Imported as a module from the repository's test suite.
+    from scripts.contracts.case_data import raw_for_case
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+HERE = pathlib.Path(__file__).resolve().parent
+RESOURCE_ROOTS = (
+    "schemas/contracts/v1",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1",
+    "experience/src/generated/contracts/v1",
+)
+GENERATED = "engine/packages/brain-contracts/src/brain_contracts/generated"
+BUILDER = "nebula-contract-build/1"
+
+
+def encode(value: object) -> bytes:
+    return (
+        json.dumps(value, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False)
+        + "\n"
+    ).encode()
+
+
+def model_name(name: str) -> str:
+    return "Contract" + "".join(
+        part.capitalize() for part in name.removesuffix(".schema.json").split("-")
+    )
+
+
+def rewrite_schema(
+    schema: object, identity: str, components: dict[str, str], *, models: bool = False
+) -> object:
+    result = copy.deepcopy(schema)
+    source_indices = {
+        pointer: index for index, (pointer, _) in enumerate(schema_nodes(schema))
+    }
+    for pointer, node in schema_nodes(result):
+        if not isinstance(node, dict):
+            continue
+        node.pop("$schema", None)
+        node.pop("$id", None)
+        if models:
+            # WHY: UUID/datetime codegen specializations normalize wire strings.
+            # Keep source string types; the surrounding source guard checks formats.
+            node.pop("format", None)
+            node.pop("title", None)
+            if pointer and "." in pointer.rsplit("/", 1)[-1]:
+                # Dotted JSON property names are wire aliases, not Python modules.
+                node["title"] = (
+                    components[identity] + "Fragment" + str(source_indices[pointer])
+                )
+            if node.get("type") == "object" and "additionalProperties" not in node:
+                node["additionalProperties"] = True
+        if "$ref" in node:
+            target, fragment = urldefrag(urljoin(identity, node["$ref"]))
+            if target not in components:
+                raise ContractError("CONTRACT_REFERENCE_UNRESOLVED")
+            prefix = "#/$defs/" if models else "#/components/schemas/"
+            node["$ref"] = prefix + components[target] + fragment
+    return result
+
+
+def openapi_snapshot(schemas: dict[str, dict], names: dict[str, str]) -> dict:
+    schemas = dict(schemas)
+    names = dict(names)
+    inventory = yaml.safe_load((HERE / "sources.yaml").read_text())
+    for resource in inventory.get("openapi_only_resources", []):
+        source = ROOT / resource["source"]
+        if source.resolve().parent != (ROOT / inventory["authoring_root"]).resolve():
+            raise ValueError(
+                "OpenAPI-only source outside the allowlisted authoring root"
+            )
+        schema = json.loads(source.read_bytes())
+        if (
+            schema["$id"] != resource["id"]
+            or resource["disposition"] != "retain-versioned-boundary"
+        ):
+            raise ValueError("OpenAPI-only identity/disposition mismatch")
+        schemas[resource["id"]] = schema
+        names[resource["id"]] = source.name
+    api = yaml.safe_load((ROOT / "planning-mds/api/brain-api.yaml").read_text())
+    components = api.setdefault("components", {}).setdefault("schemas", {})
+    # A deterministic source-ID namespace avoids collisions with native API names.
+    identity_map = {identity: model_name(names[identity]) for identity in schemas}
+    for identity, schema in sorted(schemas.items()):
+        components[identity_map[identity]] = rewrite_schema(
+            schema, identity, identity_map
+        )
+    problem = next(
+        schema
+        for identity, schema in schemas.items()
+        if names[identity] == "problem-details.schema.json"
+    )
+    annotations = set(ANNOTATIONS) | {"$schema", "$id"}
+
+    def assertions(value: object) -> object:
+        if isinstance(value, dict):
+            return {k: assertions(v) for k, v in value.items() if k not in annotations}
+        if isinstance(value, list):
+            return [assertions(v) for v in value]
+        return value
+
+    if assertions(components.get("ProblemDetails")) != assertions(problem):
+        raise ValueError("ProblemDetails assertion tree differs from source")
+
+    def walk(value: object) -> None:
+        if isinstance(value, dict):
+            ref = value.get("$ref")
+            if isinstance(ref, str) and not ref.startswith("#"):
+                path, pointer = urldefrag(ref)
+                filename = pathlib.PurePosixPath(path).name
+                candidates = [
+                    identity for identity, name in names.items() if name == filename
+                ]
+                if len(candidates) != 1 or not path.startswith("../schemas/"):
+                    raise ValueError(
+                        "OpenAPI reference is outside selected source closure"
+                    )
+                value["$ref"] = (
+                    "#/components/schemas/" + identity_map[candidates[0]] + pointer
+                )
+            for child in value.values():
+                walk(child)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child)
+
+    walk(api)
+    api["x-nebula-contract-sources"] = {
+        identity_map[i]: i for i in sorted(identity_map)
+    }
+    return api
+
+
+def generated_models(
+    schemas: dict[str, dict], names: dict[str, str], scratch: pathlib.Path
+) -> bytes:
+    components = {identity: model_name(names[identity]) for identity in schemas}
+    definitions = {
+        components[identity]: rewrite_schema(schema, identity, components, models=True)
+        for identity, schema in sorted(schemas.items())
+    }
+    model_index: dict[tuple[str, str], str] = {}
+    properties = {}
+    for identity in sorted(schemas):
+        name = names[identity].removesuffix(".schema.json")
+        # Include all schema fragments as typed generation roots. Existing readers
+        # and conformance cases can select a definition without dynamic codegen.
+        for index, (pointer, node) in enumerate(schema_nodes(schemas[identity])):
+            class_name = (
+                components[identity]
+                if not pointer
+                else components[identity] + "Fragment" + str(index)
+            )
+            if pointer:
+                definitions[class_name] = {
+                    "$ref": "#/$defs/" + components[identity] + pointer
+                }
+            model_index[name, pointer] = class_name
+            properties[class_name] = {"$ref": "#/$defs/" + class_name}
+    schema = {
+        "$schema": DIALECT,
+        "title": "ContractModelsV1",
+        "type": "object",
+        "$defs": definitions,
+        "properties": properties,
+    }
+    source = scratch / "contracts.codegen.json"
+    destination = scratch / "contracts_v1.py"
+    source.write_bytes(encode(schema))
+    command = [
+        sys.executable,
+        "-m",
+        "datamodel_code_generator",
+        "--input",
+        str(source),
+        "--input-file-type",
+        "jsonschema",
+        "--output",
+        str(destination),
+        "--output-model-type",
+        "pydantic_v2.BaseModel",
+        "--target-python-version",
+        "3.13",
+        "--disable-timestamp",
+        "--use-standard-collections",
+        "--use-union-operator",
+        "--use-annotated",
+        "--field-constraints",
+        "--field-include-all-keys",
+        "--enum-field-as-literal",
+        "all",
+        "--use-title-as-name",
+        "--formatters",
+        "black",
+        "isort",
+    ]
+    subprocess.run(command, check=True, capture_output=True, text=True)
+    code = destination.read_text()
+    # Normalize the generator's filename-only header; no host/temp paths may leak.
+    code = re.sub(
+        r"^#\s+filename:.*$",
+        "#   filename: contracts.codegen.json",
+        code,
+        flags=re.MULTILINE,
+    )
+    code += "\n\n# Generated stable selectors: source name and JSON Pointer -> Pydantic model.\nMODEL_INDEX = {\n"
+    for key, value in sorted(model_index.items()):
+        code += f"    {key!r}: {value!r},\n"
+    code += "}\n"
+    # Source annotations are also available at model level without executing them.
+    code += "\nSOURCE_METADATA = " + repr(metadata_for(schemas)) + "\n"
+    code += "\nfor _ref, _class_name in MODEL_INDEX.items():\n"
+    code += "    _class = globals()[_class_name]\n"
+    code += (
+        '    _identity = "https://nebula.local/schemas/" + _ref[0] + ".schema.json"\n'
+    )
+    code += '    _class.model_config["json_schema_extra"] = SOURCE_METADATA[_identity].get(_ref[1], {})\n'
+    return code.encode()
+
+
+def validate_generated(
+    bundle: ContractBundle, code: bytes, scratch: pathlib.Path
+) -> None:
+    path = scratch / "candidate_models.py"
+    path.write_bytes(code)
+    spec = importlib.util.spec_from_file_location("_nebula_candidate_models", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+        cases = json.loads((HERE / "cases.json").read_bytes())
+        case_schema = json.loads((HERE / "cases.schema.json").read_bytes())
+        Draft202012Validator(case_schema).validate(cases)
+        identifiers = set()
+        for case in cases["cases"]:
+            if case["id"] in identifiers:
+                raise ValueError("Duplicate conformance case")
+            identifiers.add(case["id"])
+            ref = ContractRef(
+                case["contract"], case["version"], case.get("pointer", "")
+            )
+            accepted = True
+            try:
+                value = (
+                    bundle.decode(raw_for_case(case), profile="portable-json/v1")
+                    if case["kind"] == "raw-json"
+                    else case["input"]
+                )
+                bundle.validate(ref, value, profile="portable-json/v1")
+            except ContractError:
+                accepted = False
+            if accepted is not case["valid"]:
+                raise ValueError("Source expectation mismatch: " + case["id"])
+            if accepted:
+                model = getattr(
+                    module,
+                    module.MODEL_INDEX[
+                        (ref.name.removesuffix(".schema.json"), ref.pointer)
+                    ],
+                )
+                parsed = model.model_validate(value)
+                wire = parsed.model_dump(mode="json", by_alias=True, exclude_unset=True)
+                bundle.validate(ref, wire, profile="portable-json/v1")
+                if wire != value:
+                    raise ValueError("Lossy generated model: " + case["id"])
+    finally:
+        del sys.modules[spec.name]
+
+
+def build(scratch: pathlib.Path) -> dict[str, bytes]:
+    inventory = yaml.safe_load((HERE / "sources.yaml").read_text())
+    resources = inventory["resources"]
+    raw_schemas = {}
+    schemas = {}
+    names = {}
+    manifest_resources = []
+    authoring = (ROOT / inventory["authoring_root"]).resolve()
+    for resource in sorted(resources, key=lambda r: r["name"]):
+        path = (ROOT / resource["source"]).resolve()
+        if path.parent != authoring or path.is_symlink():
+            raise ValueError("Source outside the declared authoring root")
+        raw = path.read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != resource["source_sha256_at_design"]:
+            raise ValueError(
+                f"Released identity changed: {resource['name']}; publish a new identity/version"
+            )
+        schema = json.loads(raw)
+        identity = resource["id"]
+        if identity in schemas or schema["$id"] != identity or path.name in raw_schemas:
+            raise ValueError("Conflicting contract identity")
+        raw_schemas[path.name] = raw
+        schemas[identity] = schema
+        names[identity] = path.name
+        manifest_resources.append(
+            {
+                "id": identity,
+                "version": resource["version"],
+                "path": path.name,
+                "sha256": digest,
+            }
+        )
+    javascript = json.loads((ROOT / "experience/package.json").read_text())[
+        "devDependencies"
+    ]
+    toolchain = {"builder": BUILDER, "python": platform.python_version()}
+    for field, distribution in [
+        ("jsonschema", "jsonschema"),
+        ("referencing", "referencing"),
+        ("pydantic", "pydantic"),
+        ("datamodel_code_generator", "datamodel-code-generator"),
+    ]:
+        toolchain[field] = importlib.metadata.version(distribution)
+    for field, package in [
+        ("ajv", "ajv"),
+        ("ajv_formats", "ajv-formats"),
+        ("jsonc_parser", "jsonc-parser"),
+    ]:
+        version = javascript[package]
+        if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+            raise ValueError(f"Build tool must be pinned: {package}")
+        toolchain[field] = version
+    manifest = {
+        "bundle": inventory["bundle"],
+        "profile": inventory["profile"],
+        "resources": manifest_resources,
+        "toolchain": toolchain,
+    }
+    raw_manifest = encode(manifest)
+    manifest_schema = json.loads(
+        (authoring / "schema-bundle-manifest-v1.schema.json").read_bytes()
+    )
+    Draft202012Validator(manifest_schema).validate(manifest)
+    bundle = ContractBundle(raw_manifest, raw_schemas.__getitem__)
+    profile = yaml.safe_load((HERE / "profile.yaml").read_text())
+    bundle_files = {
+        **raw_schemas,
+        "manifest.json": raw_manifest,
+        "ui-metadata.json": encode(metadata_for(schemas)),
+        "profile.json": encode(profile),
+        "brain-api.openapi.json": encode(openapi_snapshot(schemas, names)),
+    }
+    models = generated_models(schemas, names, scratch)
+    validate_generated(bundle, models, scratch)
+    outputs = {
+        f"{directory}/{name}": raw
+        for directory in RESOURCE_ROOTS
+        for name, raw in bundle_files.items()
+    }
+    outputs[GENERATED + "/contracts_v1.py"] = models
+    outputs[GENERATED + "/__init__.py"] = (
+        b'"""Generated source-gated contract models; do not edit."""\n'
+    )
+    # Preserve old package-resource paths as generated compatibility outputs.
+    for package, selected in [
+        (
+            "brain-contracts",
+            (
+                "assertion-record-v2",
+                "interpretation-result-v2",
+                "assertion-admission-result-v1",
+                "interpretation-result",
+            ),
+        ),
+        (
+            "brain-content",
+            (
+                "content-artifact-manifest",
+                "content-artifact-manifest-v2",
+                "content-records-v2",
+                "document-date-record",
+                "interpretation-output-manifest",
+            ),
+        ),
+    ]:
+        module = package.replace("-", "_")
+        for name in selected:
+            filename = name + ".schema.json"
+            outputs[f"engine/packages/{package}/src/{module}/schemas/{filename}"] = (
+                raw_schemas[filename]
+            )
+    return outputs
+
+
+def publish(outputs: dict[str, bytes]) -> None:
+    originals = {
+        name: ((ROOT / name).read_bytes(), (ROOT / name).stat().st_mode & 0o777)
+        if (ROOT / name).is_file()
+        else None
+        for name in outputs
+    }
+    changed = []
+    temporary_files: set[pathlib.Path] = set()
+    try:
+        # Data first; digest manifests last. Startup rejects any transient mismatch.
+        for name in sorted(outputs, key=lambda p: (p.endswith("/manifest.json"), p)):
+            path = ROOT / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as stream:
+                temporary = pathlib.Path(stream.name)
+                temporary_files.add(temporary)
+                stream.write(outputs[name])
+            # Public generated contracts must remain readable by the runtime user.
+            temporary.chmod(0o644)
+            os.replace(temporary, path)
+            temporary_files.remove(temporary)
+            changed.append(name)
+    except BaseException:
+        for name in reversed(changed):
+            path = ROOT / name
+            if originals[name] is None:
+                path.unlink(missing_ok=True)
+            else:
+                previous_bytes, previous_mode = originals[name]
+                path.write_bytes(previous_bytes)
+                path.chmod(previous_mode)
+        raise
+    finally:
+        for temporary in temporary_files:
+            temporary.unlink(missing_ok=True)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    try:
+        with tempfile.TemporaryDirectory(prefix="nebula-contract-build-") as directory:
+            outputs = build(pathlib.Path(directory))
+        stale = [
+            name
+            for name, raw in outputs.items()
+            if not (ROOT / name).is_file() or (ROOT / name).read_bytes() != raw
+        ]
+        if args.check and stale:
+            print(
+                json.dumps(
+                    {
+                        "status": "fail",
+                        "stale": stale,
+                        "regenerate": "uv run --project engine --group contract-build python scripts/contracts/generate.py",
+                    }
+                )
+            )
+            return 1
+        if not args.check:
+            publish(outputs)
+        print(
+            json.dumps(
+                {
+                    "status": "pass",
+                    "artifacts": len(outputs),
+                    "bundle_digest": hashlib.sha256(
+                        outputs[RESOURCE_ROOTS[0] + "/manifest.json"]
+                    ).hexdigest(),
+                }
+            )
+        )
+        return 0
+    except Exception as error:  # noqa: BLE001 - Never emit source/input reprs on build failure.
+        diagnostic = {
+            "status": "fail",
+            "code": getattr(error, "code", "CONTRACT_BUILD_FAILED"),
+            "error_type": type(error).__name__,
+        }
+        print(json.dumps(diagnostic))
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

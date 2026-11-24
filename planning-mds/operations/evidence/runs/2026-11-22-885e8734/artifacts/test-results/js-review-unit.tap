@@ -1,0 +1,132 @@
+TAP version 13
+# Subtest: portable decoder preserves opaque keys, supplementary characters and exact strings
+ok 1 - portable decoder preserves opaque keys, supplementary characters and exact strings
+  ---
+  duration_ms: 1.85805
+  type: 'test'
+  ...
+# Subtest: malformed JSON and duplicate keys cannot be repaired by the scanner
+ok 2 - malformed JSON and duplicate keys cannot be repaired by the scanner
+  ---
+  duration_ms: 0.801548
+  type: 'test'
+  ...
+# Subtest: portable decoder refuses unsafe numbers, surrogates and resource overflows
+ok 3 - portable decoder refuses unsafe numbers, surrogates and resource overflows
+  ---
+  duration_ms: 532.47984
+  type: 'test'
+  ...
+# Subtest: root depth is one for every scalar and nested array/object value
+ok 4 - root depth is one for every scalar and nested array/object value
+  ---
+  duration_ms: 10.927168
+  type: 'test'
+  ...
+# Subtest: direct value admission rejects lossy/non-JSON values without invoking getters
+ok 5 - direct value admission rejects lossy/non-JSON values without invoking getters
+  ---
+  duration_ms: 0.298276
+  type: 'test'
+  ...
+# Subtest: portable date/time formats bind Gregorian years and exact RFC3339 boundaries
+ok 6 - portable date/time formats bind Gregorian years and exact RFC3339 boundaries
+  ---
+  duration_ms: 0.295341
+  type: 'test'
+  ...
+# Subtest: portable URI references follow ASCII RFC3986 without WHATWG repair
+ok 7 - portable URI references follow ASCII RFC3986 without WHATWG repair
+  ---
+  duration_ms: 2.961321
+  type: 'test'
+  ...
+# Subtest: bundle uses real AJV without coercion/defaults/removal or input mutation
+ok 8 - bundle uses real AJV without coercion/defaults/removal or input mutation
+  ---
+  duration_ms: 60.196578
+  type: 'test'
+  ...
+# Subtest: bundle schema and metadata views cannot modify cached validators
+ok 9 - bundle schema and metadata views cannot modify cached validators
+  ---
+  duration_ms: 28.874857
+  type: 'test'
+  ...
+# Subtest: public bundle APIs admit schema positions and refuse schema-looking annotation data
+ok 10 - public bundle APIs admit schema positions and refuse schema-looking annotation data
+  ---
+  duration_ms: 15.937941
+  type: 'test'
+  ...
+# Subtest: registered refs resolve and dormant/external/cyclic refs fail before instances
+ok 11 - registered refs resolve and dormant/external/cyclic refs fail before instances
+  ---
+  duration_ms: 19.223515
+  type: 'test'
+  ...
+# Subtest: schema admission rejects unsupported instructions rather than data property names
+ok 12 - schema admission rejects unsupported instructions rather than data property names
+  ---
+  duration_ms: 12.549286
+  type: 'test'
+  ...
+# Subtest: corrupt or incomplete bundles cannot create a usable partial runtime
+ok 13 - corrupt or incomplete bundles cannot create a usable partial runtime
+  ---
+  duration_ms: 15.463231
+  type: 'test'
+  ...
+# Subtest: compact raw fixtures expand only exact bounded recipes or one explicit raw string
+ok 14 - compact raw fixtures expand only exact bounded recipes or one explicit raw string
+  ---
+  duration_ms: 0.443717
+  type: 'test'
+  ...
+# Subtest: runner executes positive and limit-refused compact raw cases through the real decoder
+ok 15 - runner executes positive and limit-refused compact raw cases through the real decoder
+  ---
+  duration_ms: 24.250196
+  type: 'test'
+  ...
+# Subtest: runner joins expectations and persists only safe case identities/results
+ok 16 - runner joins expectations and persists only safe case identities/results
+  ---
+  duration_ms: 15.077317
+  type: 'test'
+  ...
+# Subtest: runner refuses missing, duplicate, unsupported or malformed inventory entries
+ok 17 - runner refuses missing, duplicate, unsupported or malformed inventory entries
+  ---
+  duration_ms: 14.53624
+  type: 'test'
+  ...
+# Subtest: real CLI exposes exit status and safe summaries for complete, mismatched and broken runs
+ok 18 - real CLI exposes exit status and safe summaries for complete, mismatched and broken runs
+  ---
+  duration_ms: 375.621367
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1277.156556
+# start of coverage report
+# -------------------------------------------------------------------------
+# file             | line % | branch % | funcs % | uncovered lines
+# -------------------------------------------------------------------------
+# experience       |        |          |         | 
+#  scripts         |        |          |         | 
+#   contracts      |        |          |         | 
+#    case-data.mjs | 100.00 |   100.00 |  100.00 | 
+#    check.mjs     | 100.00 |    93.62 |  100.00 | 
+#    runtime.mjs   |  98.43 |    97.32 |   93.75 | 231-232 439-441 444-445
+# -------------------------------------------------------------------------
+# all files        |  98.74 |    97.07 |   94.55 | 
+# -------------------------------------------------------------------------
+# end of coverage report

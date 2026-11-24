@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/fact-answer-v1.schema.json",
+  "title": "FactAnswerV1",
+  "description": "F0007 answer carrier (ADR-0039 D1-D5, ADR-0077 D5). Stored as the canonical_fact_version.value of an identity-v1 slot; legacy pilot slots keep their unwrapped values. Only PRESENT carries a value. There is no access-denied state: authorization is decided before any answer is produced. Server canonicalization (decimal form, identifier and name normalization) happens before storage.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "answer_contract",
+    "state"
+  ],
+  "properties": {
+    "answer_contract": {
+      "const": "fact-answer/v1"
+    },
+    "state": {
+      "enum": [
+        "PRESENT",
+        "NOT_PROCESSED",
+        "NOT_FOUND",
+        "NOT_STATED",
+        "ILLEGIBLE",
+        "AMBIGUOUS",
+        "CONFLICTING",
+        "EXPLICIT_NEGATIVE",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "value": {
+      "$ref": "fact-slot-key-v1.schema.json#/$defs/typed_value"
+    },
+    "scope": {
+      "$ref": "#/$defs/absence_scope"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "PRESENT"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "value"
+        ],
+        "not": {
+          "required": [
+            "scope"
+          ]
+        }
+      },
+      "else": {
+        "not": {
+          "required": [
+            "value"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "NOT_FOUND",
+              "NOT_STATED"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "scope"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "NOT_PROCESSED",
+              "NOT_APPLICABLE"
+            ]
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "scope"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "absence_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Exact interpretation scope searched (ADR-0039 D2). Never implies global absence. The artifact must be readable by the caller and owned by the slot's tenant/KB.",
+      "required": [
+        "content_artifact_id",
+        "profile_release_ref"
+      ],
+      "properties": {
+        "content_artifact_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "profile_release_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$",
+          "description": "Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity."
+        },
+        "pages": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "uniqueItems": true,
+          "maxItems": 2000
+        },
+        "block_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true,
+          "maxItems": 5000
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "pages"
+          ],
+          "properties": {
+            "pages": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "required": [
+            "block_ids"
+          ],
+          "properties": {
+            "block_ids": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    }
+  }
+}

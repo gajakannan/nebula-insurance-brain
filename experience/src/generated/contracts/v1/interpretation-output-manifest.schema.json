@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/interpretation-output-manifest.schema.json",
+  "title": "InterpretationOutputManifest",
+  "description": "Run-owned outputs stay outside the parse bundle. V1 reflects the existing checkpoint marker; proposed v2 adds pipeline identity and exact date-basis selection. The selected output schema is independent of content artifact version.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "tenant_id",
+        "knowledge_base_id",
+        "artifact_id",
+        "run_id",
+        "files"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": 1
+        },
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "artifact_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "result.json",
+            "provenance.json",
+            "graph.json",
+            "metadata.json"
+          ],
+          "properties": {
+            "result.json": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "provenance.json": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "graph.json": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "metadata.json": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "tenant_id",
+        "knowledge_base_id",
+        "artifact_id",
+        "run_id",
+        "files",
+        "pipeline",
+        "document_date_selection_id"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": 2
+        },
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "artifact_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "run_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "result.json",
+            "provenance.json",
+            "graph.json",
+            "metadata.json"
+          ],
+          "properties": {
+            "result.json": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "provenance.json": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "graph.json": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "metadata.json": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "pipeline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "package_version",
+            "configuration_sha256"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "package_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "configuration_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "document_date_selection_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

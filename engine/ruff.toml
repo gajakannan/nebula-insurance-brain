@@ -2,7 +2,12 @@ target-version = "py313"
 line-length = 100
 src = ["apps", "packages"]
 # Alembic-generated migration bodies are not hand-formatted; don't fight the autogenerator.
-extend-exclude = ["migrations/versions/*.py"]
+extend-exclude = [
+    "migrations/versions/*.py",
+    # Contract models use the pinned generator's format; generate.py --check
+    # verifies their exact bytes and the conformance suite checks their behavior.
+    "packages/brain-contracts/src/brain_contracts/generated/*.py",
+]
 
 [lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

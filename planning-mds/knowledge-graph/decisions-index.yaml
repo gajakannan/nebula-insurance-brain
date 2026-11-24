@@ -1,19 +1,26 @@
 version: 0
-generated_at: '2026-11-20T04:38:40+00:00'
+generated_at: '2026-11-24T03:12:45+00:00'
 summary:
-  total_decisions: 24
+  total_decisions: 29
   by_kind:
     DECISION: 0
     SUPERSEDES: 0
     TRADEOFF: 0
-    WHY: 24
-  resolved_node_count: 12
-  resolved_symbol_count: 20
+    WHY: 29
+  resolved_node_count: 14
+  resolved_symbol_count: 25
   ambiguous_count: 0
 decisions:
-- id: decision:engine-apps-api-src-brain-api-routes-facts-l116-why
+- id: decision:engine-apps-api-src-brain-api-contract-openapi-l12-why
+  file: engine/apps/api/src/brain_api/contract_openapi.py
+  line: 12
+  kind: WHY
+  text: bundle corruption must refuse startup, even before a route validates
+  resolved_node: capability:offline-contract-bundle
+  resolved_symbol: symbol:capability-offline-contract-bundle:contract-openapi.install-contract-openapi
+- id: decision:engine-apps-api-src-brain-api-routes-facts-l118-why
   file: engine/apps/api/src/brain_api/routes/facts.py
-  line: 116
+  line: 118
   kind: WHY
   text: authorize the scope of this exact payload in the slot read's UoW.
   resolved_node: capability:durable-authorization-decisions
@@ -52,20 +59,34 @@ decisions:
   text: hold the lock from the scan through the new trigger.
   resolved_node: migration:f0008-bitemporal-contract
   resolved_symbol: symbol:migration-f0008-bitemporal-contract:0015-f0008-split-lineage-same-slot.upgrade
-- id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l126-why
+- id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l155-why
   file: engine/packages/brain-contracts/src/brain_contracts/assertions.py
-  line: 126
-  kind: WHY
-  text: referencing builds these with its own attrs wrapper, which mypy's
-  resolved_node: capability:semantic-interpretation-run
-  resolved_symbol: symbol:capability-semantic-interpretation-run:assertions.no-remote-reference
-- id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l164-why
-  file: engine/packages/brain-contracts/src/brain_contracts/assertions.py
-  line: 164
+  line: 155
   kind: WHY
   text: the offline JSON Schema checks impose exact wire types before decoding.
   resolved_node: capability:semantic-interpretation-run
   resolved_symbol: symbol:capability-semantic-interpretation-run:assertions.strict-model
+- id: decision:engine-packages-brain-contracts-src-brain-contracts-model-adapter-l40-why
+  file: engine/packages/brain-contracts/src/brain_contracts/model_adapter.py
+  line: 40
+  kind: WHY
+  text: source guards catch lost constraints, while this comparison catches
+  resolved_node: capability:offline-contract-bundle
+  resolved_symbol: symbol:capability-offline-contract-bundle:model-adapter.parse-model
+- id: decision:engine-packages-brain-contracts-src-brain-contracts-schema-runtime-l146-why
+  file: engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py
+  line: 146
+  kind: WHY
+  text: check the original token, before binary64 rounding can hide a large
+  resolved_node: capability:offline-contract-bundle
+  resolved_symbol: symbol:capability-offline-contract-bundle:schema-runtime.number
+- id: decision:engine-packages-brain-contracts-src-brain-contracts-schema-runtime-l592-why
+  file: engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py
+  line: 592
+  kind: WHY
+  text: the shipped delegates had UUID/date checks but no optional
+  resolved_node: capability:offline-contract-bundle
+  resolved_symbol: symbol:capability-offline-contract-bundle:contract-bundle.validate
 - id: decision:engine-packages-brain-domain-src-brain-domain-fact-values-l161-why
   file: engine/packages/brain-domain/src/brain_domain/fact_values.py
   line: 161
@@ -73,13 +94,20 @@ decisions:
   text: exponent text is short even when its expanded value is enormous.
   resolved_node: capability:typed-fact-answer
   resolved_symbol: symbol:capability-typed-fact-answer:fact-values.canonical-decimal
-- id: decision:engine-packages-brain-factslots-src-brain-factslots-answers-l104-why
+- id: decision:engine-packages-brain-factslots-src-brain-factslots-answers-l105-why
   file: engine/packages/brain-factslots/src/brain_factslots/answers.py
-  line: 104
+  line: 105
   kind: WHY
   text: a member's immutable identity is derived from its value; a
   resolved_node: capability:typed-fact-answer
   resolved_symbol: symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
+- id: decision:engine-packages-brain-factslots-src-brain-factslots-resolution-l228-why
+  file: engine/packages/brain-factslots/src/brain_factslots/resolution.py
+  line: 228
+  kind: WHY
+  text: native callers may omit qualifiers or use noncanonical UUID
+  resolved_node: capability:factslot-identity-resolution
+  resolved_symbol: symbol:capability-factslot-identity-resolution:fact-slot-resolver.resolve
 - id: decision:engine-packages-brain-persistence-src-brain-persistence-assertions-l87-why
   file: engine/packages/brain-persistence/src/brain_persistence/assertions.py
   line: 87
@@ -168,6 +196,13 @@ decisions:
   kind: WHY
   text: jobs submitted before pipeline selection were processed by Graph's direct
   resolved_node: capability:parse-once-content-artifact
+- id: decision:scripts-contracts-generate-l74-why
+  file: scripts/contracts/generate.py
+  line: 74
+  kind: WHY
+  text: UUID/datetime codegen specializations normalize wire strings.
+  resolved_node: capability:offline-contract-bundle
+  resolved_symbol: symbol:capability-offline-contract-bundle:generate.rewrite-schema
 - id: decision:scripts-ops-verify-content-l197-why
   file: scripts/ops/verify_content.py
   line: 197
