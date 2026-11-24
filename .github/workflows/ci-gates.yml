@@ -52,7 +52,7 @@ jobs:
       - name: Prove bundle integrity, typed round trips, route parity and outside-checkout installation
         run: >
           docker run --rm -v "$PWD/artifacts/contracts:/app/brain/artifacts/contracts" brain-contracts-engine:ci
-          uv run --no-sync --project engine --group contract-build python -m pytest
+          uv run --no-sync --project engine --group contract-build python -m pytest -c engine/pyproject.toml
           engine/packages/brain-contracts/tests engine/apps/api/tests/test_contract_openapi.py
           scripts/contracts/tests -q --junitxml=artifacts/contracts/unit-and-install.xml
       - name: Build exact wheel and source archive installation inputs
@@ -286,7 +286,7 @@ jobs:
           -e BRAIN_DATABASE_URL=postgresql+asyncpg://brain:brain@localhost:5432/brain
           -e BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@localhost:5432/brain
           brain-contracts-engine:ci
-          uv run --no-sync --project engine --group contract-build python -m pytest
+          uv run --no-sync --project engine --group contract-build python -m pytest -c engine/pyproject.toml
           engine/tests/integration/test_f0011_consumer_contracts.py -q
       - name: Install the locked neuron dependencies for delivery recovery
         run: uv sync --locked --project neuron
