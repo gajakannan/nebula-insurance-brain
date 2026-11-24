@@ -1,0 +1,440 @@
+"""Source validation surrounds generated Pydantic parsing and serialization."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel
+
+from .schema_runtime import ContractBundle, ContractError, ContractRef, WireProfile
+
+
+def model_for(ref: ContractRef) -> type[BaseModel]:
+    from .generated import contracts_v1
+
+    name = ref.name.removesuffix(".schema.json")
+    try:
+        return getattr(contracts_v1, contracts_v1.MODEL_INDEX[(name, ref.pointer)])
+    except (KeyError, AttributeError):
+        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+
+
+def to_wire(ref: ContractRef, model: BaseModel, *, profile: WireProfile) -> Any:
+    try:
+        wire = model.model_dump(mode="json", by_alias=True, exclude_unset=True)
+        ContractBundle.installed().validate(ref, wire, profile=profile)
+        return wire
+    except Exception:
+        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+
+
+def parse_model[ModelT: BaseModel](
+    ref: ContractRef, raw: bytes | str, model: type[ModelT], *, profile: WireProfile
+) -> ModelT:
+    bundle = ContractBundle.installed()
+    value = bundle.decode(raw, profile=profile)
+    bundle.validate(ref, value, profile=profile)
+    try:
+        parsed = model.model_validate(value)
+        wire = to_wire(ref, parsed, profile=profile)
+        # WHY: source guards catch lost constraints, while this comparison catches
+        # accepted extras/nulls/strings lost by a generator approximation.
+        if wire != value:
+            raise ContractError("CONTRACT_MODEL_MISMATCH")
+        return parsed
+    except Exception:
+        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+"""Strict, offline adapters for the additive assertion contracts (ADR-0075)."""
+
+from __future__ import annotations
+
+import json
+import math
+from collections.abc import Mapping
+from dataclasses import asdict, dataclass, is_dataclass
+from datetime import datetime
+from typing import Any, ClassVar, Final, Literal, Self
+from uuid import UUID
+
+from brain_domain.assertions import (
+    AssertionCandidate,
+    Basis,
+    EntityObject,
+    EntityReference,
+    EvidenceClaim,
+    Kind,
+    LiteralObject,
+    Mode,
+    Origin,
+)
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, PrivateAttr, model_validator
+
+from brain_contracts.schema_runtime import (
+    ContractBundle,
+    ContractError,
+    ContractRef,
+)
+
+NORMALIZATION_VERSION: Final = "f0006-grounding-v1"
+SCHEMA_NAMES = (
+    "assertion-record-v2.schema.json",
+    "interpretation-result-v2.schema.json",
+    "assertion-admission-result-v1.schema.json",
+    "interpretation-result.schema.json",
+)
+
+
+class AssertionContractError(ValueError):
+    """Stable error only: never include an untrusted quote or validation repr."""
+
+    code = "ASSERTION_CONTRACT_INVALID"
+
+    def __init__(self) -> None:
+        super().__init__(self.code)
+
+
+class AssertionContractUnsupported(AssertionContractError):
+    code = "ASSERTION_CONTRACT_UNSUPPORTED"
+
+
+def wire_value(value: Any) -> Any:
+    if isinstance(value, UUID):
+        return str(value)
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, BaseModel):
+        return value.model_dump(mode="json")
+    if is_dataclass(value) and not isinstance(value, type):
+        return wire_value(asdict(value))
+    if isinstance(value, Mapping):
+        return {key: wire_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [wire_value(item) for item in value]
+    return value
+
+
+def _check_json(value: Any) -> None:
+    if isinstance(value, str):
+        value.encode("utf-8", errors="strict")
+    elif value is None or type(value) in (bool, int):
+        return
+    elif type(value) is float:
+        if not math.isfinite(value):
+            raise AssertionContractError()
+    elif isinstance(value, list):
+        for item in value:
+            _check_json(item)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            if not isinstance(key, str):
+                raise AssertionContractError()
+            _check_json(key)
+            _check_json(item)
+    else:
+        raise AssertionContractError()
+
+
+def canonical_json(value: Any) -> bytes:
+    value = wire_value(value)
+    try:
+        _check_json(value)
+        return json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+        ).encode("utf-8")
+    except (TypeError, ValueError, UnicodeError, RecursionError):
+        raise AssertionContractError() from None
+
+
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise AssertionContractError()
+        result[key] = value
+    return result
+
+
+def _invalid_constant(value: str) -> None:
+    raise AssertionContractError()
+
+
+def decode_json(raw: bytes | str) -> Any:
+    """Reject duplicate keys, non-finite numbers and ill-formed Unicode at any depth."""
+    try:
+        text = raw.decode("utf-8", errors="strict") if isinstance(raw, bytes) else raw
+        value = json.loads(text, object_pairs_hook=_unique_object, parse_constant=_invalid_constant)
+        _check_json(value)
+        return value
+    except (TypeError, ValueError, UnicodeError, RecursionError):
+        raise AssertionContractError() from None
+
+
+def validate_contract(name: str, value: Any, definition: str | None = None) -> None:
+    if name not in SCHEMA_NAMES:
+        raise AssertionContractError()
+    # Select compatibility before inspecting the payload. The shared bundle
+    # provides schema identity/evaluation, while the established native decoder
+    # and wire adapters retain their acceptance and error mapping.
+    bundle = ContractBundle.installed()
+    ref = ContractRef(
+        name.removesuffix(".schema.json"),
+        "2" if name.endswith("-v2.schema.json") else "1",
+        f"/$defs/{definition}" if definition is not None else "",
+    )
+    value = wire_value(value)
+    try:
+        _check_json(value)
+        bundle.validate(ref, value, profile="native-compat/v1")
+    except ContractError as exc:
+        if exc.code not in {
+            "CONTRACT_INSTANCE_INVALID",
+            "CONTRACT_JSON_INVALID",
+            "CONTRACT_JSON_UNSUPPORTED",
+        }:
+            raise
+        raise AssertionContractError() from None
+    except (ValueError, TypeError, UnicodeError, RecursionError):
+        raise AssertionContractError() from None
+
+
+class StrictModel(BaseModel):
+    # WHY: the offline JSON Schema checks impose exact wire types before decoding.
+    # Pydantic must still decode JSON arrays, UUIDs and timestamps into Python
+    # carriers, including when a before-validator returns an inspected object.
+    model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
+
+
+class ContractModel(StrictModel):
+    schema_name: ClassVar[str]
+    definition: ClassVar[str | None] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def input_contract(cls, value: Any) -> Any:
+        validate_contract(cls.schema_name, value, cls.definition)
+        return value
+
+    @model_validator(mode="after")
+    def output_contract(self) -> Self:
+        validate_contract(self.schema_name, self.model_dump(mode="json"), self.definition)
+        return self
+
+
+class EvidenceClaimV2(StrictModel):
+    artifact_id: UUID
+    block_id: str = Field(min_length=1)
+    quote: str = Field(min_length=1)
+    model_selector: dict[str, JsonValue] | None = None
+
+    def to_domain(self) -> EvidenceClaim:
+        return EvidenceClaim(self.artifact_id, self.block_id, self.quote, self.model_selector)
+
+
+class EntityObjectV2(StrictModel):
+    kind: Literal["ENTITY"]
+    ref: UUID
+    name: str = Field(min_length=1)
+
+
+class LiteralObjectV2(StrictModel):
+    kind: Literal["LITERAL"]
+    value: JsonValue
+
+
+class EntityReferenceV2(ContractModel):
+    schema_name = "assertion-record-v2.schema.json"
+    definition = "entity_reference"
+    id: UUID
+    entity_type: str
+    label: str
+    introducing_evidence: tuple[EvidenceClaimV2, ...]
+
+    def to_domain(self) -> EntityReference:
+        return EntityReference(
+            self.id,
+            self.entity_type,
+            self.label,
+            tuple(e.to_domain() for e in self.introducing_evidence),
+        )
+
+
+class AssertionRecordV2(ContractModel):
+    schema_name = "assertion-record-v2.schema.json"
+    id: UUID
+    assertion_kind: Kind
+    subject_ref: UUID
+    object: EntityObjectV2 | LiteralObjectV2
+    predicate_id: str | None
+    ontology_release: str | None
+    source_relation: str | None
+    qualifiers: dict[str, JsonValue]
+    time_mention_refs: tuple[UUID, ...]
+    valid_time_claim: dict[str, JsonValue] | None
+    mode: Mode
+    origin: Origin
+    interpretation_basis: Basis
+    model_confidence: float | None
+    evidence: tuple[EvidenceClaimV2, ...]
+
+    def to_domain(self) -> AssertionCandidate:
+        obj = (
+            EntityObject("ENTITY", self.object.ref, self.object.name)
+            if isinstance(self.object, EntityObjectV2)
+            else LiteralObject("LITERAL", self.object.value)
+        )
+        return AssertionCandidate(
+            self.id,
+            self.assertion_kind,
+            self.subject_ref,
+            obj,
+            self.predicate_id,
+            self.ontology_release,
+            self.source_relation,
+            self.qualifiers,
+            self.time_mention_refs,
+            self.valid_time_claim,
+            self.mode,
+            self.origin,
+            self.interpretation_basis,
+            self.model_confidence,
+            tuple(e.to_domain() for e in self.evidence),
+        )
+
+
+class ServerEvidence(ContractModel):
+    schema_name = "assertion-admission-result-v1.schema.json"
+    definition = "server_evidence"
+    evidence_id: UUID
+    artifact_id: UUID
+    block_id: str
+    quote: str
+    normalization_version: Literal["f0006-grounding-v1"] = NORMALIZATION_VERSION
+    precision: Literal["span", "table_cell", "block", "page", "document", "unresolved"]
+    selector: dict[str, JsonValue]
+    text_origin: Literal["STATED", "OCR", "TRANSCRIBED", "DESCRIBED"] | None
+    origin_qualification: Literal["qualified", "legacy_unqualified"]
+    producer: dict[str, JsonValue] | None
+    producer_confidence: float | None
+
+
+@dataclass(frozen=True)
+class AdmissionMetadata:
+    raw_item_sha256: str
+    item_index: int
+    entity_snapshots: tuple[dict[str, Any], ...]
+    time_reference_snapshot: tuple[dict[str, Any], ...]
+    source_hashes: Mapping[str, str]
+
+
+class AdmittedAssertion(ContractModel):
+    schema_name = "assertion-admission-result-v1.schema.json"
+    definition = "admitted"
+    record: AssertionRecordV2
+    server_evidence: tuple[ServerEvidence, ...]
+    review_required: bool
+    reasons: tuple[str, ...]
+    blocked_operations: tuple[str, ...]
+    created_by: UUID
+    created_at: datetime
+    _metadata: AdmissionMetadata | None = PrivateAttr(default=None)
+
+    @property
+    def metadata(self) -> AdmissionMetadata:
+        if self._metadata is None:
+            raise ValueError("admission metadata is available only on checked items")
+        return self._metadata
+
+    def with_metadata(self, metadata: AdmissionMetadata) -> Self:
+        self._metadata = metadata
+        return self
+
+
+class AdmissionOutcome(ContractModel):
+    schema_name = "assertion-admission-result-v1.schema.json"
+    definition = "outcome"
+    item_index: int | None
+    item_path: str
+    candidate_id: UUID | None
+    block_id: str | None
+    disposition: Literal["REJECTED", "SIGNAL", "RUN_ISSUE"]
+    reason: str
+    raw_item_sha256: str
+    excerpt: str | None
+    model_id: str
+    prompt_hash: str
+
+
+class AdmissionBatch(ContractModel):
+    schema_name = "assertion-admission-result-v1.schema.json"
+    schema_version: Literal[1] = 1
+    run_id: UUID
+    artifact_id: UUID
+    accepted: tuple[AdmittedAssertion, ...]
+    outcomes: tuple[AdmissionOutcome, ...]
+    requires_partial: bool
+
+
+def parse_assertion(raw: bytes | str) -> AssertionRecordV2:
+    try:
+        value = decode_json(raw)
+        validate_contract("assertion-record-v2.schema.json", value)
+        return AssertionRecordV2.model_validate_json(canonical_json(value))
+    except (ValueError, TypeError):
+        raise AssertionContractError() from None
+
+
+def parse_entity(
+    value: EntityReference | EntityReferenceV2 | Mapping[str, Any],
+) -> EntityReferenceV2:
+    try:
+        return EntityReferenceV2.model_validate_json(canonical_json(value))
+    except (ValueError, TypeError):
+        raise AssertionContractError() from None
+"""Candidate response guards shared by API delivery and the history preflight.
+
+The caller completes the existing authorization/domain checks first. These
+guards inspect normalized output; a failure is an internal invariant error.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from brain_contracts.schema_runtime import ContractRef, validate_contract
+
+
+def guard_fact_response(payload: dict[str, Any], *, validity_unknown: bool = False) -> None:
+    ref = (
+        ContractRef("fact-temporal-v1", "1", "/$defs/validity_unknown_read")
+        if validity_unknown
+        else ContractRef("fact-version-read-v1", "1")
+    )
+    validate_contract(ref, payload, profile="native-compat/v1")
+
+
+def guard_commit_response(payload: dict[str, Any]) -> None:
+    validate_contract(
+        ContractRef("canonical-commit-response", "1"), payload, profile="native-compat/v1"
+    )
+"""Serve the generated source-owned OpenAPI snapshot from the installed bundle."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from brain_contracts.schema_runtime import ContractBundle
+from fastapi import FastAPI
+
+
+def install_contract_openapi(app: FastAPI) -> None:
+    # WHY: bundle corruption must refuse startup, even before a route validates
+    # its first response. No schema or API source checkout is consulted here.
+    bundle = ContractBundle.installed()
+    snapshot = bundle.openapi()
+
+    def openapi() -> dict[str, Any]:
+        if app.openapi_schema is None:
+            app.openapi_schema = dict(snapshot)
+        return app.openapi_schema
+
+    app.openapi = openapi  # type: ignore[method-assign]

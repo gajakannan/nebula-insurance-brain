@@ -1,0 +1,35 @@
+agents/architect/SKILL.md-177-   - **When considering a new node, service, or public method name**: run `lookup.py --defines <proposed-name>` to catch duplicate surfaces.
+agents/architect/SKILL.md-178-   - **When refactoring an interface or base method**: run `lookup.py --implementers <interface-symbol-id>` (or `--overrides <method-id>`) — the returned set is the change scope.
+agents/architect/SKILL.md-179-   - **At every release-readiness checkpoint**:
+agents/architect/SKILL.md-180-     - `validate.py --check-orphans` — for each orphan, decide bind / remove / exempt. Pair with `dead-code.py --safe-only` for symbol-level review. Thresholds: `agents/architect/references/dead-code-review-guide.md`.
+agents/architect/SKILL.md-181-     - `scripts/kg/risk.py` — surface canonical nodes in the **high** (`kg.risk` ≥ 7) or **critical** (`kg.risk` ≥ 9) bands and propose mitigations. Weights/bands: `agents/architect/references/risk-scoring-guide.md`.
+agents/architect/SKILL.md:182:     - Review `bus_factor_flag: true` entries in `coverage-report.yaml` and propose knowledge-share follow-ups. Thresholds: `agents/architect/references/hotspot-review-guide.md`.
+agents/architect/SKILL.md-183-
+agents/architect/SKILL.md-184-## Capability Recommendation
+agents/architect/SKILL.md-185-
+agents/architect/SKILL.md-186-**Recommended Capability Tier:** High (complex architecture reasoning)
+agents/architect/SKILL.md-187-
+agents/architect/SKILL.md-188-**Rationale:** Architecture requires deep reasoning for trade-offs, risk analysis, and long-horizon design decisions.
+agents/architect/SKILL.md-189-
+--
+agents/code-reviewer/SKILL.md-280-- Do not require markers for self-explanatory code; comments must explain rationale, not restate mechanics.
+agents/code-reviewer/SKILL.md-281-- If markers changed, verify `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --regenerate-decisions --check-decisions` passes.
+agents/code-reviewer/SKILL.md-282-
+agents/code-reviewer/SKILL.md-283-### 13. Hotspot, Ownership, and Bus-Factor Gating
+agents/code-reviewer/SKILL.md-284-- When `{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/coverage-report.yaml` carries Phase 3 freshness signals, consult them for each canonical node the PR touches before approval.
+agents/code-reviewer/SKILL.md:285:- If a touched node has `hotspot_rank` ≤ 5 (or `hotspot_score` ≥ 0.80), require explicit second-reviewer evidence on the PR. Approving without it is a **High** severity finding.
+agents/code-reviewer/SKILL.md:286:- If a touched node has `bus_factor_flag: true`, require acknowledgement from `primary_owner` on the PR. Missing acknowledgement is a **High** severity finding.
+agents/code-reviewer/SKILL.md-287-- Thresholds and customers/orders examples live in `agents/architect/references/hotspot-review-guide.md`.
+agents/code-reviewer/SKILL.md-288-- Hotspot signals are decision aids, not authority — they never override raw artifact or design judgment.
+agents/code-reviewer/SKILL.md-289-
+agents/code-reviewer/SKILL.md-290-### 14. Risk Score Gating
+agents/code-reviewer/SKILL.md-291-- For each canonical node the PR touches, run `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/risk.py <node-id>` (or `--file <changed-path>` / `--symbol <name>` for narrower scope) and record the score in the review notes.
+agents/code-reviewer/SKILL.md:292:- If the score lands in the **high** band (`kg.risk` ≥ 7), require an additional reviewer beyond the PR author. Approving without that second reviewer is a **High** severity finding.
+agents/code-reviewer/SKILL.md:293:- If the score lands in the **critical** band (`kg.risk` ≥ 9), require an explicit `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/workstate.py decision --topic risk-acknowledgement` entry referenced from the PR description before merge. Missing acknowledgement is a **High** severity finding.
+agents/code-reviewer/SKILL.md-294-- Apply each `reviewer_recommendations[]` entry from `risk.py` as a checklist item — Phase 4 is a roll-up over the Phase 1–3 gates, not a replacement for them.
+agents/code-reviewer/SKILL.md-295-- Weights, bands, and customers/orders examples live in `agents/architect/references/risk-scoring-guide.md`. Per `solution-ontology.yaml.authority.precedence`, the score never overrides raw artifact judgment.
+agents/code-reviewer/SKILL.md-296-
+agents/code-reviewer/SKILL.md-297-## Review Workflow
+agents/code-reviewer/SKILL.md-298-
+agents/code-reviewer/SKILL.md-299-### Step 1: Gather Context
+agents/code-reviewer/SKILL.md-300-Read in this order before touching the code:

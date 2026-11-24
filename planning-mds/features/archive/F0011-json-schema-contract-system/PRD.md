@@ -4,7 +4,7 @@
 **Feature Name:** JSON Schema contract system
 **Priority:** High — Now, per the 2026-11-20 roadmap review
 **Phase:** MVP / v0.1A
-**Status:** Phase A and Phase B approved — implementation Not Started
+**Status:** Done / Archived 2026-11-23 (feature run `2026-11-22-885e8734`); Phase A and Phase B approved
 **Plan Run:** 2026-11-20-ccb1bd39 (A+B; feature mode new)
 **Plan Revision:** 2026-11-21-e4098d22 (Phase B, existing; operator approved with `approve-phase-b` on 2026-11-22). Requirements and 41 ACs are unchanged; the revision specifies the review's compatibility proof and consumer mapping.
 
@@ -184,14 +184,14 @@ No dependency is judged complete from a KG mapping alone.
 
 | Story | Title | ACs | Status |
 |-------|-------|-----|--------|
-| [F0011-S0001](F0011-S0001-resolve-versioned-offline-contracts.md) | Resolve versioned offline contracts | 7 | Not Started |
-| [F0011-S0002](F0011-S0002-validate-information-state-and-scoped-absence.md) | Validate information state and scoped absence | 7 | Not Started |
-| [F0011-S0003](F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) | Validate qualified money and scoped identifiers | 7 | Not Started |
-| [F0011-S0004](F0011-S0004-prove-cross-language-contract-conformance.md) | Prove cross-language contract conformance | 7 | Not Started |
-| [F0011-S0005](F0011-S0005-preserve-existing-consumer-contracts.md) | Preserve existing consumer contracts | 7 | Not Started |
-| [F0011-S0006](F0011-S0006-verify-reproducible-contract-delivery.md) | Verify reproducible contract delivery | 6 | Not Started |
+| [F0011-S0001](F0011-S0001-resolve-versioned-offline-contracts.md) | Resolve versioned offline contracts | 7 | Done |
+| [F0011-S0002](F0011-S0002-validate-information-state-and-scoped-absence.md) | Validate information state and scoped absence | 7 | Done |
+| [F0011-S0003](F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) | Validate qualified money and scoped identifiers | 7 | Done |
+| [F0011-S0004](F0011-S0004-prove-cross-language-contract-conformance.md) | Prove cross-language contract conformance | 7 | Done |
+| [F0011-S0005](F0011-S0005-preserve-existing-consumer-contracts.md) | Preserve existing consumer contracts | 7 | Done |
+| [F0011-S0006](F0011-S0006-verify-reproducible-contract-delivery.md) | Verify reproducible contract delivery | 6 | Done |
 
-**Total Stories:** 6. **Numbered acceptance criteria:** 41. All are Not Started.
+**Total Stories:** 6. **Numbered acceptance criteria:** 41. All are Done.
 
 ## Questions & Phase B Design Tasks
 

@@ -17,7 +17,7 @@
 
 Master blueprint sections 25–27, 98 and 112 require Python/AJV parity, Pydantic conformance and a defined schema subset. AJV is absent from the current experience package; the future feature run must add a runnable conformance consumer.
 Source and boundary authority: [PRD](PRD.md), accepted ADR-0013, proposed ADR-0039,
-and the shipped contracts cited in the PRD. Phase A requirements are approved; implementation is in progress in feature run 2026-11-22-885e8734.
+and the shipped contracts cited in the PRD. Phase A requirements are approved; implemented and closed out in feature run 2026-11-22-885e8734.
 
 ## Acceptance Criteria
 
@@ -96,5 +96,5 @@ is intentional; the PRD governs any apparent conflict.
 
 ## Review Provenance
 
-Runtime implementation and test evidence is recorded in feature run 2026-11-22-885e8734; independent reviewer signoff is pending. See [STATUS](STATUS.md) for the append-only
+Runtime implementation, test evidence and independent reviewer signoffs are recorded in feature run 2026-11-22-885e8734. See [STATUS](STATUS.md) for the append-only
 provenance table; the Architect sets the final required role matrix in Phase B.

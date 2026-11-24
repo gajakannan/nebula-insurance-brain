@@ -1,5 +1,9 @@
 # Feature Evidence — F0011 JSON Schema contract system
 
+> **Final state (2026-11-24):** G0–G8 PASS; feature Done and archived 2026-11-23; merged in PR #64
+> (`15648cb`). See [`gate-decisions.md`](gate-decisions.md), [`pm-closeout.md`](pm-closeout.md) and
+> [`post-closeout-corrections.md`](post-closeout-corrections.md). The body below is the G0-era snapshot.
+
 ## Run Summary
 
 Feature run `2026-11-22-885e8734`, orchestrated by Codex under the feature evidence

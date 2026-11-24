@@ -1,0 +1,19 @@
+agents/architect/references/risk-scoring-guide.md:11:- Decide whether a structural change needs an additional reviewer.
+agents/architect/references/risk-scoring-guide.md:69:| `high` | 7–8 | Multiple signals concentrated | **Reviewer gate**: require an additional reviewer (`kg.risk ≥ 7`) |
+agents/architect/references/risk-scoring-guide.md:123:    "hotspot":   {"hotspot_rank": 3, "primary_owner": "alice@example.com", "primary_owner_pct": 62, "bus_factor_flag": false, "last_modified": "2026-05-08"},
+agents/architect/references/risk-scoring-guide.md:128:    "kg.risk ≥ 7 — additional reviewer required before merge.",
+agents/architect/references/risk-scoring-guide.md:169:- Phase 3 hotspot gates (`hotspot_rank ≤ 5`, `bus_factor_flag: true`) still
+agents/architect/references/hotspot-review-guide.md:29:| `bus_factor_flag` | boolean | `true` when `primary_owner_pct > 80`. Indicates knowledge-silo risk. |
+agents/architect/references/hotspot-review-guide.md:44:| `hotspot_rank ≤ 5` | Top-5 hottest node in product | Require explicit second-reviewer evidence on the PR. |
+agents/architect/references/hotspot-review-guide.md:45:| `hotspot_score ≥ 0.80` | Score-band cutoff | Same as `hotspot_rank ≤ 5`; use when product has many nodes and rank alone is too coarse. |
+agents/architect/references/hotspot-review-guide.md:46:| `bus_factor_flag: true` | One author owns >80% of touched lines | Tag `primary_owner` on the PR and require their acknowledgement. Architect proposes a knowledge-share follow-up at the next release-readiness checkpoint. |
+agents/architect/references/hotspot-review-guide.md:62:  with `bus_factor_flag: true` and propose knowledge-share follow-ups (pair
+agents/architect/references/hotspot-review-guide.md:80:      bus_factor_flag: false
+agents/architect/references/hotspot-review-guide.md:87:      bus_factor_flag: true
+agents/architect/references/hotspot-review-guide.md:94:      bus_factor_flag: false
+agents/architect/references/hotspot-review-guide.md:131:| `hotspot_rank` / `hotspot_score` | Code reviewer | Pick second reviewer; tighten review depth |
+agents/architect/references/hotspot-review-guide.md:133:| `bus_factor_flag` | Architect, Code reviewer | Knowledge-share follow-ups; PR acknowledgement |
+agents/code-reviewer/SKILL.md:285:- If a touched node has `hotspot_rank` ≤ 5 (or `hotspot_score` ≥ 0.80), require explicit second-reviewer evidence on the PR. Approving without it is a **High** severity finding.
+agents/code-reviewer/SKILL.md:286:- If a touched node has `bus_factor_flag: true`, require acknowledgement from `primary_owner` on the PR. Missing acknowledgement is a **High** severity finding.
+agents/code-reviewer/SKILL.md:292:- If the score lands in the **high** band (`kg.risk` ≥ 7), require an additional reviewer beyond the PR author. Approving without that second reviewer is a **High** severity finding.
+agents/code-reviewer/SKILL.md:293:- If the score lands in the **critical** band (`kg.risk` ≥ 9), require an explicit `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/workstate.py decision --topic risk-acknowledgement` entry referenced from the PR description before merge. Missing acknowledgement is a **High** severity finding.

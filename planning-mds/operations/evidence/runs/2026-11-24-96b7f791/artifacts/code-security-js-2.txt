@@ -1,0 +1,214 @@
+  return target;
+}
+
+function schemaChildren(schema, at) {
+  const children = [];
+  for (const [key, value] of Object.entries(schema)) {
+    const location = `${at}/${escapePointer(key)}`;
+    if (key === 'properties' || key === '$defs') {
+      if (value === null || typeof value !== 'object' || Array.isArray(value)) fail('CONTRACT_SCHEMA_UNSUPPORTED');
+      for (const [name, child] of Object.entries(value)) children.push([child, `${location}/${escapePointer(name)}`]);
+    } else if (SINGLE_SCHEMA.has(key)) children.push([value, location]);
+    else if (ARRAY_SCHEMA.has(key)) {
+      if (!Array.isArray(value)) fail('CONTRACT_SCHEMA_UNSUPPORTED');
+      value.forEach((child, index) => children.push([child, `${location}/${index}`]));
+    }
+  }
+  return children;
+}
+
+export function consumerVersions() {
+  return {
+    node: process.versions.node,
+    ajv: require('ajv/package.json').version,
+    ajv_formats: require('ajv-formats/package.json').version,
+    jsonc_parser: require('jsonc-parser/package.json').version,
+  };
+}
+
+/** Immutable, closed local bundle. No loadSchema callback or network retrieval exists. */
+export class ContractBundle {
+  #resources;
+  #byId;
+  #metadata;
+  #schemaPositions;
+  #ajv;
+  #validators = new Map();
+
+  static load(directory) {
+    try { return new ContractBundle(directory); }
+    catch (error) {
+      if (error instanceof ContractError) throw error;
+      fail('CONTRACT_BUNDLE_INVALID');
+    }
+  }
+
+  constructor(directory) {
+    const base = realpathSync(directory);
+    const read = (name) => {
+      const file = realpathSync(path.join(base, name));
+      if (path.dirname(file) !== base) fail('CONTRACT_BUNDLE_INVALID');
+      return readFileSync(file);
+    };
+    const manifestBytes = read('manifest.json');
+    const manifest = decodePortableJson(manifestBytes);
+    if (!exactKeys(manifest, ['bundle', 'profile', 'resources', 'toolchain'])
+        || manifest.bundle !== 'brain-contracts/v1' || manifest.profile !== 'nebula-json-schema/1'
+        || !Array.isArray(manifest.resources) || !manifest.resources.length
+        || manifest.resources.length > MAX_RESOURCES || !exactKeys(manifest.toolchain, TOOLCHAIN_KEYS)
+        || Object.values(manifest.toolchain).some((version) => typeof version !== 'string' || !version)) {
+      fail('CONTRACT_BUNDLE_INVALID');
+    }
+    this.digest = createHash('sha256').update(manifestBytes).digest('hex');
+    const profile = decodePortableJson(read('profile.json'));
+    if (profile.id !== 'nebula-json-schema/1' || profile.dialect !== DIALECT
+        || Object.entries(AJV_OPTIONS).some(([key, value]) => profile.ajv_options?.[key] !== value)
+        || VALIDATION_KEYWORDS.some((key) => !profile.validation_keywords?.includes(key))
+        || profile.validation_keywords.length !== VALIDATION_KEYWORDS.length) fail('CONTRACT_BUNDLE_INVALID');
+    this.#metadata = decodePortableJson(read('ui-metadata.json'));
+    this.#resources = new Map();
+    this.#byId = new Map();
+    for (const resource of manifest.resources) {
+      if (!exactKeys(resource, ['id', 'version', 'path', 'sha256'])
+          || typeof resource.path !== 'string' || !RESOURCE_PATH.test(resource.path)
+          || typeof resource.version !== 'string' || !/^[1-9][0-9]*$/.test(resource.version)
+          || typeof resource.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(resource.sha256)
+          || typeof resource.id !== 'string' || !resource.id) fail('CONTRACT_BUNDLE_INVALID');
+      const name = resource.path.replace(/\.schema\.json$/, '');
+      if (this.#resources.has(name) || this.#byId.has(resource.id)) fail('CONTRACT_BUNDLE_INVALID');
+      const bytes = read(resource.path);
+      if (createHash('sha256').update(bytes).digest('hex') !== resource.sha256) fail('CONTRACT_BUNDLE_INVALID');
+      const schema = decodePortableJson(bytes);
+      if (schema.$id !== resource.id || schema.$schema !== DIALECT) fail('CONTRACT_BUNDLE_INVALID');
+      const entry = { ...resource, schema };
+      this.#resources.set(name, entry);
+      this.#byId.set(resource.id, entry);
+    }
+    if (canonical(this.#admitSchemas()) !== canonical(this.#metadata)) fail('CONTRACT_BUNDLE_INVALID');
+    this.#ajv = new Ajv2020({ ...AJV_OPTIONS, logger: false });
+    addFormats(this.#ajv, ['uuid', 'date', 'date-time', 'uri-reference']);
+    this.#ajv.addFormat('uuid', /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+    this.#ajv.addFormat('date', portableDate);
+    this.#ajv.addFormat('date-time', portableDateTime);
+    this.#ajv.addFormat('uri-reference', portableUriReference);
+    for (const [keyword, type] of Object.entries(ANNOTATIONS)) {
+      if (keyword.startsWith('x-nebula-')) this.#ajv.addKeyword({ keyword, schemaType: type, valid: true });
+    }
+    try {
+      for (const { schema } of this.#resources.values()) this.#ajv.addSchema(schema);
+      for (const { id } of this.#resources.values()) this.#ajv.getSchema(id);
+    } catch { fail('CONTRACT_SCHEMA_UNSUPPORTED'); }
+    Object.freeze(this);
+  }
+
+  #admitSchemas() {
+    const nodes = new Map();
+    const metadata = Object.fromEntries([...this.#byId.keys()].map((id) => [id, {}]));
+    const visitSchema = (schema, id, location) => {
+      const key = `${id}#${location}`;
+      if (typeof schema === 'boolean') { nodes.set(key, []); return; }
+      if (schema === null || typeof schema !== 'object' || Array.isArray(schema)) fail('CONTRACT_SCHEMA_UNSUPPORTED');
+      for (const [keyword, value] of Object.entries(schema)) {
+        if (!ALLOWED.has(keyword)) fail('CONTRACT_SCHEMA_UNSUPPORTED', id, location);
+        const annotationType = ANNOTATIONS[keyword];
+        if (annotationType && annotationType !== 'json'
+            && (annotationType === 'array' ? !Array.isArray(value) : typeof value !== annotationType)) {
+          fail('CONTRACT_SCHEMA_UNSUPPORTED', id, location);
+        }
+        if (keyword === 'format' && !['uuid', 'date', 'date-time', 'uri-reference'].includes(value)) fail('CONTRACT_SCHEMA_UNSUPPORTED', id, location);
+        if (keyword === 'pattern') portablePatternSource(value);
+        if (keyword === '$schema' && value !== DIALECT) fail('CONTRACT_SCHEMA_UNSUPPORTED', id, location);
+        if (keyword === '$id' && (location || value !== id)) fail('CONTRACT_SCHEMA_UNSUPPORTED', id, location);
+      }
+      const annotations = Object.fromEntries(Object.entries(schema).filter(([keyword]) => keyword === 'title'
+        || keyword === 'description' || keyword.startsWith('x-nebula-')));
+      if (Object.keys(annotations).length) metadata[id][location] = annotations;
+      const children = schemaChildren(schema, location);
+      const edges = children.map(([, childLocation]) => `${id}#${childLocation}`);
+      if (Object.hasOwn(schema, '$ref')) {
+        if (typeof schema.$ref !== 'string') fail('CONTRACT_REFERENCE_UNRESOLVED', id, location);
+        let uri;
+        let fragment;
+        try {
+          const target = new URL(schema.$ref, id);
+          fragment = decodeURIComponent(target.hash.slice(1));
+          target.hash = '';
+          uri = target.href;
+        } catch { fail('CONTRACT_REFERENCE_UNRESOLVED', id, location); }
+        const resource = this.#byId.get(uri);
+        if (!resource) fail('CONTRACT_REFERENCE_UNRESOLVED', id, location);
+        pointer(resource.schema, fragment);
+        edges.push(`${uri}#${fragment}`);
+      }
+      nodes.set(key, edges);
+      for (const [child, childLocation] of children) visitSchema(child, id, childLocation);
+    };
+    for (const { schema, id } of this.#resources.values()) visitSchema(schema, id, '');
+    const active = new Set();
+    const done = new Set();
+    const checkCycle = (key) => {
+      if (active.has(key)) fail('CONTRACT_REFERENCE_UNRESOLVED');
+      if (done.has(key)) return;
+      if (!nodes.has(key)) fail('CONTRACT_REFERENCE_UNRESOLVED');
+      active.add(key);
+      for (const edge of nodes.get(key)) checkCycle(edge);
+      active.delete(key);
+      done.add(key);
+    };
+    for (const key of nodes.keys()) checkCycle(key);
+    this.#schemaPositions = new Set(nodes.keys());
+    return metadata;
+  }
+
+  #resolve(ref) {
+    if (!ref || typeof ref.name !== 'string') fail('CONTRACT_VERSION_UNSUPPORTED');
+    const resource = this.#resources.get(ref.name.replace(/\.schema\.json$/, ''));
+    if (!resource || resource.version !== ref.version) fail('CONTRACT_VERSION_UNSUPPORTED');
+    const fragment = ref.pointer ?? '';
+    if (typeof fragment !== 'string') fail('CONTRACT_REFERENCE_UNRESOLVED');
+    if (!this.#schemaPositions.has(`${resource.id}#${fragment}`)) fail('CONTRACT_REFERENCE_UNRESOLVED');
+    pointer(resource.schema, fragment);
+    return { resource, fragment };
+  }
+
+  schema(ref) {
+    const { resource, fragment } = this.#resolve(ref);
+    return structuredClone(pointer(resource.schema, fragment));
+  }
+
+  metadata(ref) {
+    const { resource, fragment } = this.#resolve(ref);
+    return structuredClone(this.#metadata[resource.id]?.[fragment] ?? {});
+  }
+
+  decode(raw, { profile = PROFILE } = {}) {
+    if (profile !== PROFILE) fail('CONTRACT_JSON_UNSUPPORTED');
+    return decodePortableJson(raw);
+  }
+
+  validate(ref, value, { profile = PROFILE } = {}) {
+    if (profile !== PROFILE) fail('CONTRACT_JSON_UNSUPPORTED');
+    admitPortableJson(value);
+    const { resource, fragment } = this.#resolve(ref);
+    const key = `${this.digest}:${resource.id}#${fragment}:${profile}`;
+    let validator = this.#validators.get(key);
+    if (!validator) {
+      try { validator = this.#ajv.compile({ $ref: `${resource.id}#${fragment}` }); }
+      catch { fail('CONTRACT_REFERENCE_UNRESOLVED', resource.id, fragment); }
+      this.#validators.set(key, validator);
+    }
+    if (!validator(value)) {
+      fail('CONTRACT_INSTANCE_INVALID', resource.id, validator.errors?.[0]?.schemaPath ?? fragment);
+    }
+  }
+}
+
+let defaultBundle;
+export function installedBundle() {
+  defaultBundle ??= ContractBundle.load(fileURLToPath(new URL('../../src/generated/contracts/v1/', import.meta.url)));
+  return defaultBundle;
+}
+
+export function validateContract(ref, value) {
+  installedBundle().validate(ref, value);
+}

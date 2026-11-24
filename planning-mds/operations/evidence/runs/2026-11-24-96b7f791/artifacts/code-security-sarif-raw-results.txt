@@ -1,0 +1,52 @@
+[
+  {
+    "path": "planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/security/secrets/2026-11-24-closeout-final/reports/secrets-gitleaks-20261124-031656.sarif",
+    "exists": true,
+    "runs": [
+      {
+        "tool": "gitleaks",
+        "results": []
+      }
+    ]
+  },
+  {
+    "path": "planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/security/sast-closeout/closeout/sast-semgrep-20261124-023629.sarif",
+    "exists": true,
+    "runs": [
+      {
+        "tool": "Semgrep OSS",
+        "results": [
+          {
+            "fingerprints": {
+              "matchBasedId/v1": "requires login"
+            },
+            "locations": [
+              {
+                "physicalLocation": {
+                  "artifactLocation": {
+                    "uri": "scripts/contracts/install_smoke.py",
+                    "uriBaseId": "%SRCROOT%"
+                  },
+                  "region": {
+                    "endColumn": 71,
+                    "endLine": 119,
+                    "snippet": {
+                      "text": "                else urllib.request.urlopen(wheel[\"url\"], timeout=120).read()"
+                    },
+                    "startColumn": 22,
+                    "startLine": 119
+                  }
+                }
+              }
+            ],
+            "message": {
+              "text": "Detected a dynamic value being used with urllib. urllib supports 'file://' schemes, so a dynamic value controlled by a malicious actor may allow them to read arbitrary files. Audit uses of urllib calls to ensure user data cannot control the URLs, or consider using the 'requests' library instead."
+            },
+            "properties": {},
+            "ruleId": "evidence.python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected"
+          }
+        ]
+      }
+    ]
+  }
+]

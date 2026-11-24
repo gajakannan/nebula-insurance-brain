@@ -1,0 +1,36 @@
+from collections.abc import Mapping
+from datetime import date
+from typing import Any
+
+from brain_api.config import Settings
+from brain_api.contract_guards import guard_fact_response
+from brain_api.schemas.facts import FactVersionOut
+from brain_contracts.schema_runtime import ContractBundle, ContractError
+from brain_persistence.models import CanonicalFactVersionRow
+from brain_persistence.repositories import _fact_version_from_row
+from sqlalchemy import func, select, text
+from sqlalchemy.engine import make_url
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
+
+class SweepExecutionError(ValueError):
+    """Fixed operational code only; no driver/row exception text is exposed."""
+
+
+def candidate_code_digest() -> str:
+    digest = hashlib.sha256(pathlib.Path(__file__).read_bytes())
+    for obj in (
+        _fact_version_from_row,
+        FactVersionOut,
+        guard_fact_response,
+        ContractBundle,
+    ):
+        source = inspect.getsourcefile(obj)
+        if source is None:
+            raise SweepExecutionError("CONTRACT_SWEEP_CODE_IDENTITY_UNAVAILABLE")
+        digest.update(pathlib.Path(source).read_bytes())
+    return digest.hexdigest()
+
+
+def environment_target(
+    environment: str, configuration: pathlib.Path

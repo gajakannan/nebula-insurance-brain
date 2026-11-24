@@ -1,0 +1,89 @@
+engine/packages/brain-contracts/src/brain_contracts/model_adapter.py:9:from .schema_runtime import ContractBundle, ContractError, ContractRef, WireProfile
+engine/packages/brain-contracts/src/brain_contracts/model_adapter.py:12:def model_for(ref: ContractRef) -> type[BaseModel]:
+engine/packages/brain-contracts/src/brain_contracts/model_adapter.py:22:def to_wire(ref: ContractRef, model: BaseModel, *, profile: WireProfile) -> Any:
+engine/packages/brain-contracts/src/brain_contracts/model_adapter.py:25:        ContractBundle.installed().validate(ref, wire, profile=profile)
+engine/packages/brain-contracts/src/brain_contracts/model_adapter.py:31:def parse_model[ModelT: BaseModel](
+engine/packages/brain-contracts/src/brain_contracts/model_adapter.py:34:    bundle = ContractBundle.installed()
+engine/packages/brain-contracts/src/brain_contracts/model_adapter.py:36:    bundle.validate(ref, value, profile=profile)
+engine/packages/brain-contracts/src/brain_contracts/model_adapter.py:38:        parsed = model.model_validate(value)
+engine/apps/api/src/brain_api/contract_openapi.py:7:from brain_contracts.schema_runtime import ContractBundle
+engine/apps/api/src/brain_api/contract_openapi.py:11:def install_contract_openapi(app: FastAPI) -> None:
+engine/apps/api/src/brain_api/contract_openapi.py:12:    # WHY: bundle corruption must refuse startup, even before a route validates
+engine/apps/api/src/brain_api/contract_openapi.py:14:    bundle = ContractBundle.installed()
+engine/apps/api/src/brain_api/contract_openapi.py:17:    def openapi() -> dict[str, Any]:
+engine/apps/api/src/brain_api/contract_guards.py:11:from brain_contracts.schema_runtime import ContractRef, validate_contract
+engine/apps/api/src/brain_api/contract_guards.py:14:def guard_fact_response(payload: dict[str, Any], *, validity_unknown: bool = False) -> None:
+engine/apps/api/src/brain_api/contract_guards.py:20:    validate_contract(ref, payload, profile="native-compat/v1")
+engine/apps/api/src/brain_api/contract_guards.py:23:def guard_commit_response(payload: dict[str, Any]) -> None:
+engine/apps/api/src/brain_api/contract_guards.py:24:    validate_contract(
+scripts/contracts/generate.py:24:    ContractBundle,
+scripts/contracts/generate.py:48:def encode(value: object) -> bytes:
+scripts/contracts/generate.py:55:def model_name(name: str) -> str:
+scripts/contracts/generate.py:61:def rewrite_schema(
+scripts/contracts/generate.py:94:def openapi_snapshot(schemas: dict[str, dict], names: dict[str, str]) -> dict:
+scripts/contracts/generate.py:127:    def assertions(value: object) -> object:
+scripts/contracts/generate.py:137:    def walk(value: object) -> None:
+scripts/contracts/generate.py:166:def generated_models(
+scripts/contracts/generate.py:253:def validate_generated(
+scripts/contracts/generate.py:254:    bundle: ContractBundle, code: bytes, scratch: pathlib.Path
+scripts/contracts/generate.py:265:        Draft202012Validator(case_schema).validate(cases)
+scripts/contracts/generate.py:281:                bundle.validate(ref, value, profile="portable-json/v1")
+scripts/contracts/generate.py:293:                parsed = model.model_validate(value)
+scripts/contracts/generate.py:295:                bundle.validate(ref, wire, profile="portable-json/v1")
+scripts/contracts/generate.py:302:def build(scratch: pathlib.Path) -> dict[str, bytes]:
+scripts/contracts/generate.py:365:    Draft202012Validator(manifest_schema).validate(manifest)
+scripts/contracts/generate.py:366:    bundle = ContractBundle(raw_manifest, raw_schemas.__getitem__)
+scripts/contracts/generate.py:376:    validate_generated(bundle, models, scratch)
+scripts/contracts/generate.py:417:def publish(outputs: dict[str, bytes]) -> None:
+scripts/contracts/generate.py:455:def main() -> int:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:26:from referencing import Registry, Resource
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:28:from rfc3986_validator import validate_rfc3986  # type: ignore[import-untyped]
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:107:class ContractRef:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:114:class ContractIssue:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:120:class ContractError(ValueError):
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:123:    def __init__(self, code: str, contract_id: str = "", schema_pointer: str = "") -> None:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:129:def _fail(code: str) -> NoReturn:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:133:def _pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:142:def _number(token: str) -> float:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:154:def _admit(value: Any, *, portable: bool) -> None:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:193:def _profile(profile: str) -> bool:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:199:def decode_json(raw: bytes | str, *, profile: WireProfile) -> Any:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:222:def portable_json_bytes(value: Any) -> bytes:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:235:def _portable_pattern_source(pattern: str) -> str:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:256:def _date(value: Any) -> bool:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:268:def _date_time(value: Any) -> bool:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:285:def portable_formats() -> FormatChecker:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:301:        lambda v: not isinstance(v, str) or bool(validate_rfc3986(v, rule="URI_reference"))
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:306:def escape_pointer(value: str) -> str:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:310:def resolve_pointer(value: Any, pointer: str) -> Any:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:333:def schema_nodes(schema: Any, pointer: str = "") -> Iterator[tuple[str, Any]]:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:350:def metadata_for(schemas: Mapping[str, Any]) -> dict[str, Any]:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:366:def _no_retrieve(uri: str) -> Resource:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:370:class ContractBundle:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:373:    def __init__(self, manifest_raw: bytes, read: Callable[[str], bytes]) -> None:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:377:                _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:382:                _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:400:                _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:403:                _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:409:                    _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:414:                    _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:421:                    _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:427:                    _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:430:                    _fail("CONTRACT_BUNDLE_INVALID")
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:496:            # attrs exposes the public alias `retrieve` for `_retrieve`; mypy
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:498:            registry = Registry(retrieve=_no_retrieve).with_resources(  # type: ignore[call-arg]
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:512:            self._portable_registry = Registry(retrieve=_no_retrieve).with_resources(  # type: ignore[call-arg]
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:523:            raise ContractError("CONTRACT_BUNDLE_INVALID") from None
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:527:    def installed(cls) -> ContractBundle:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:537:            raise ContractError("CONTRACT_BUNDLE_INVALID") from None
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:540:    def from_directory(cls, directory: str | Path) -> ContractBundle:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:549:            raise ContractError("CONTRACT_BUNDLE_INVALID") from None
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:551:    def _resolve(self, ref: ContractRef) -> tuple[str, str]:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:561:    def schema(self, ref: ContractRef) -> Mapping[str, Any]:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:565:    def metadata(self, ref: ContractRef) -> Mapping[str, Any]:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:571:    def openapi(self) -> dict[str, Any]:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:575:            raise ContractError("CONTRACT_BUNDLE_INVALID") from None
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:577:    def decode(self, raw: bytes | str, *, profile: WireProfile) -> Any:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:580:    def validate(self, ref: ContractRef, value: Any, *, profile: WireProfile) -> None:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:617:def validate_contract(ref: ContractRef, value: Any, *, profile: WireProfile) -> None:
+engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py:618:    ContractBundle.installed().validate(ref, value, profile=profile)

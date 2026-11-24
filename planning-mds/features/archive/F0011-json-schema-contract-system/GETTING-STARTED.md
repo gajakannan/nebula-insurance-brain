@@ -2,14 +2,13 @@
 
 ## Current implementation state
 
-Feature run `2026-11-22-885e8734` is **In Progress**. G0 assembly validation and
-G1 runtime preflight passed; G2 evidence collection is active. The generated
-candidate contains 86 artifacts. Its 443 shared cases produced 1,329 matching
+Feature run `2026-11-22-885e8734` is **Done** (G0–G8 PASS, archived 2026-11-23,
+merged in PR #64). The generated bundle contains 86 artifacts. Its 443 shared cases produced 1,329 matching
 Python JSON Schema, source-gated Pydantic and AJV results with no mismatches.
 See the [conformance result](../../../operations/evidence/runs/2026-11-22-885e8734/artifacts/test-results/conformance-review-final.json)
 and [Node test evidence](../../../operations/evidence/runs/2026-11-22-885e8734/artifacts/test-results/js-unit.tap).
 
-Code/security review, approval, required signoffs and PM closeout remain pending.
+Code/security review, approval, required signoffs and PM closeout are complete.
 Neither ADR-0079 nor ADR-0039 is accepted by these results. The approved
 [assembly plan](feature-assembly-plan.md), [contract design](contract-design.md)
 and [STATUS](STATUS.md) retain their respective design and progress authority.

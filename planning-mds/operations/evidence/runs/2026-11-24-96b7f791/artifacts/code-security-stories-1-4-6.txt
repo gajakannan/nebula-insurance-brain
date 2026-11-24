@@ -1,0 +1,299 @@
+# F0011-S0001 — Resolve versioned offline contracts
+
+**Story ID:** F0011-S0001
+**Feature:** F0011 — JSON Schema contract system
+**Title:** Resolve versioned offline contracts
+**Priority:** High
+**Phase:** MVP
+**Status:** Done
+
+## User Story
+
+**As a** Dana the Platform Engineer
+**I want** to resolve an explicit structural contract version from a reproducible local bundle
+**So that** every consumer validates against the intended contract without fetching remote definitions.
+
+## Context & Background
+
+ADR-0013 and master blueprint sections 25–27/112 require one cross-language structural contract. Existing content and assertion packages already have local schema loaders; F0011 must reconcile their ownership and reuse them where appropriate.
+Source and boundary authority: [PRD](PRD.md), accepted ADR-0013, proposed ADR-0039,
+and the shipped contracts cited in the PRD. Phase A requirements are approved; implementation is in progress in feature run 2026-11-22-885e8734.
+
+## Acceptance Criteria
+
+The numbered criteria include happy paths, edge cases and error scenarios.
+
+- [x] **F0011-S0001-AC1:** Every contract in the Phase B inventory declares JSON Schema Draft 2020-12, a unique immutable identity and an explicit version; the bundle resolves both local fragments and declared inter-schema references without network access.
+- [x] **F0011-S0001-AC2:** The inventory identifies the authored source, packaged/generated consumers, owner and version selector for every in-scope contract. Two different schema contents cannot claim the same released identity; a conflicting identity fails bundle validation.
+- [x] **F0011-S0001-AC3:** An unknown contract version, unresolved reference, unsupported dialect or unsupported validation keyword produces an explicit failure. None can select a different version, fetch a URL, or silently reduce validation.
+- [x] **F0011-S0001-AC4:** The supported keyword/format policy and the treatment of x-nebula annotations are documented and executable. Known annotations survive packaging; annotations alone never grant permission, prove evidence or establish insurance applicability.
+- [x] **F0011-S0001-AC5:** Structural validation leaves its input unchanged: it inserts no defaults, coerces no types and removes no unknown properties. A closed object with an undeclared property fails rather than losing that property.
+- [x] **F0011-S0001-AC6:** A malformed contract bundle fails before the affected consumer accepts an instance. The diagnostic identifies contract/version and rule location without echoing instance values, source quotes or credentials.
+- [x] **F0011-S0001-AC7:** The same pinned bundle produces the same schema identities and reference closure in a fresh process and an installed distribution outside the repository. Planning-only paths are not required at runtime. Artifact publication records version and check evidence; no business audit/timeline event applies to read-only validation.
+
+## Interaction Contract
+
+No UI. The entry point is the documented contract build/validation command or the
+existing consumer named in the Phase B inventory. Reviewed contract sources are
+editable in version control; released identities and historical payloads are not
+edited in place. Success is a persisted artifact/check result and, for an existing
+write consumer, its established transaction result verified by a fresh read.
+Validation failure refuses the artifact/input with a non-disclosing diagnostic.
+Only repository maintainers publish contract artifacts; runtime callers retain
+the existing principal, role, tenant/KB and lifecycle restrictions. Render-only
+proof cannot satisfy these criteria. Contract generation has no business timeline
+event; existing write/refusal audit behavior remains mandatory where applicable.
+
+## Data Requirements
+
+Contract identity/version, dialect, supported keywords/formats, annotation metadata, reference closure and artifact inventory; no tenant business records.
+
+Required versus optional fields and validation rules remain explicit in the
+versioned source contract; Phase B identifies the exact definitions and adapters.
+
+## Role-Based Visibility
+
+Internal maintainers execute build/conformance tools. This creates no runtime
+permission or grant. Existing authorized consumers retain their access checks;
+unauthorized callers receive the established denied/non-disclosing response.
+Public diagnostics contain contract/case IDs and rule locations, never protected
+payload values, credentials or evidence quotes.
+
+## Non-Functional Expectations
+
+Deterministic, offline reference resolution; no silent case skips or type coercion.
+Correctness is 100% of the declared case inventory. Changed executable-line coverage
+is at least 80%; this threshold is a feature-run obligation, not a claim of planning coverage.
+Errors and edge cases are acceptance criteria above. No end-user latency or
+throughput service-level target is introduced by this infrastructure feature.
+
+## Dependencies
+
+F0001 and F0006; reuse existing content/assertion loader behavior. No dependency on the future F0012 ontology vocabulary or F0015 extraction compiler.
+
+Related stories: the six slices and their order are indexed in [README](README.md).
+
+## Out of Scope
+
+Schema authoring UI, remote schema registries, arbitrary user-supplied schema execution, ontology/profile compilation and release activation workflows.
+
+## Questions & Assumptions
+
+No unresolved business question. The Architect must settle the supported subset,
+reference/format policy, artifact authority, exact consumer inventory and adapter
+mechanism during Phase B without changing the shipped semantics silently.
+The boundary between structural validation, domain validation and authorization
+is intentional; the PRD governs any apparent conflict.
+
+## Definition of Done
+
+- [x] Every numbered acceptance criterion has observed passing evidence.
+- [x] Positive, negative and boundary cases pass through the named real consumers.
+- [x] Applicable authorization and audit requirements remain proven.
+- [x] Reproducible artifacts and usage documentation are complete.
+- [x] Story filename matches Story ID; story index is regenerated when changed.
+- [x] Required independent story signoffs are appended to STATUS.md in the feature run.
+
+## Review Provenance
+
+Runtime implementation and test evidence is recorded in feature run 2026-11-22-885e8734; independent reviewer signoff is pending. See [STATUS](STATUS.md) for the append-only
+provenance table; the Architect sets the final required role matrix in Phase B.
+# F0011-S0004 — Prove cross-language contract conformance
+
+**Story ID:** F0011-S0004
+**Feature:** F0011 — JSON Schema contract system
+**Title:** Prove cross-language contract conformance
+**Priority:** High
+**Phase:** MVP
+**Status:** Done
+
+## User Story
+
+**As a** Dana the Platform Engineer
+**I want** to run identical structural cases through every supported client and server adapter
+**So that** client and server cannot disagree silently about a supported wire payload.
+
+## Context & Background
+
+Master blueprint sections 25–27, 98 and 112 require Python/AJV parity, Pydantic conformance and a defined schema subset. AJV is absent from the current experience package; the future feature run must add a runnable conformance consumer.
+Source and boundary authority: [PRD](PRD.md), accepted ADR-0013, proposed ADR-0039,
+and the shipped contracts cited in the PRD. Phase A requirements are approved; implementation is in progress in feature run 2026-11-22-885e8734.
+
+## Acceptance Criteria
+
+The numbered criteria include happy paths, edge cases and error scenarios.
+
+- [x] **F0011-S0004-AC1:** One shared case inventory runs through the Python JSON Schema validator, the Pydantic adapter and headless AJV. Every case declares contract/version, input and expected structural acceptance; no runner substitutes a mock for one of these consumers.
+- [x] **F0011-S0004-AC2:** The inventory covers every supported validation keyword and format, reference resolution, composition and conditional branches used by the selected contracts. Tests include an accepting case and a rejecting case for each validation behavior.
+- [x] **F0011-S0004-AC3:** All runners match the expected accept/reject result on 100% of cases. A runner crash, missing dependency, unsupported format, unresolved reference, skipped case or missing result fails conformance.
+- [x] **F0011-S0004-AC4:** Pydantic model generation/adaptation and serialization are demonstrated on the selected contracts. A Python-accepted instance serializes to schema-valid JSON without extra fields, dropped required values or lost monetary precision; input validation performs no implicit coercion.
+- [x] **F0011-S0004-AC5:** OpenAPI references the same published definitions for in-scope components. A contract check resolves and validates those references against the bundle; independently maintained copies or incompatible schema dialect translation fail the drift check.
+- [x] **F0011-S0004-AC6:** Custom x-nebula annotations and declared UI metadata are retained across the selected contract outputs, with an explicit unsupported-annotation policy. Metadata cannot be evaluated as structural validation, policy authorization or evidence verification.
+- [x] **F0011-S0004-AC7:** A deliberate mutation of one packaged schema, one expected result or one generated consumer is detected. Results record case ID, contract version and consumer versions without exposing protected instance content.
+
+## Interaction Contract
+
+No UI. The entry point is the documented contract build/validation command or the
+existing consumer named in the Phase B inventory. Reviewed contract sources are
+editable in version control; released identities and historical payloads are not
+edited in place. Success is a persisted artifact/check result and, for an existing
+write consumer, its established transaction result verified by a fresh read.
+Validation failure refuses the artifact/input with a non-disclosing diagnostic.
+Only repository maintainers publish contract artifacts; runtime callers retain
+the existing principal, role, tenant/KB and lifecycle restrictions. Render-only
+proof cannot satisfy these criteria. Contract generation has no business timeline
+event; existing write/refusal audit behavior remains mandatory where applicable.
+
+## Data Requirements
+
+Shared valid/invalid cases, consumer/version inventory, generated/adapted Pydantic models, OpenAPI references and declared annotation/UI metadata.
+
+Required versus optional fields and validation rules remain explicit in the
+versioned source contract; Phase B identifies the exact definitions and adapters.
+
+## Role-Based Visibility
+
+Internal maintainers execute build/conformance tools. This creates no runtime
+permission or grant. Existing authorized consumers retain their access checks;
+unauthorized callers receive the established denied/non-disclosing response.
+Public diagnostics contain contract/case IDs and rule locations, never protected
+payload values, credentials or evidence quotes.
+
+## Non-Functional Expectations
+
+Deterministic, offline reference resolution; no silent case skips or type coercion.
+Correctness is 100% of the declared case inventory. Changed executable-line coverage
+is at least 80%; this threshold is a feature-run obligation, not a claim of planning coverage.
+Errors and edge cases are acceptance criteria above. No end-user latency or
+throughput service-level target is introduced by this infrastructure feature.
+
+## Dependencies
+
+F0011-S0001–S0003. F0021 is not a prerequisite: the JavaScript proof is headless and creates no React screen.
+
+Related stories: the six slices and their order are indexed in [README](README.md).
+
+## Out of Scope
+
+Schema-driven form UI, ontology inference, extraction prompts, browser UX and extending every future contract before its owning feature is planned.
+
+## Questions & Assumptions
+
+No unresolved business question. The Architect must settle the supported subset,
+reference/format policy, artifact authority, exact consumer inventory and adapter
+mechanism during Phase B without changing the shipped semantics silently.
+The boundary between structural validation, domain validation and authorization
+is intentional; the PRD governs any apparent conflict.
+
+## Definition of Done
+
+- [x] Every numbered acceptance criterion has observed passing evidence.
+- [x] Positive, negative and boundary cases pass through the named real consumers.
+- [x] Applicable authorization and audit requirements remain proven.
+- [x] Reproducible artifacts and usage documentation are complete.
+- [x] Story filename matches Story ID; story index is regenerated when changed.
+- [x] Required independent story signoffs are appended to STATUS.md in the feature run.
+
+## Review Provenance
+
+Runtime implementation and test evidence is recorded in feature run 2026-11-22-885e8734; independent reviewer signoff is pending. See [STATUS](STATUS.md) for the append-only
+provenance table; the Architect sets the final required role matrix in Phase B.
+# F0011-S0006 — Verify reproducible contract delivery
+
+**Story ID:** F0011-S0006
+**Feature:** F0011 — JSON Schema contract system
+**Title:** Verify reproducible contract delivery
+**Priority:** High
+**Phase:** MVP
+**Status:** Done
+
+## User Story
+
+**As a** Dana the Platform Engineer
+**I want** to reproduce and check all published contract artifacts from a clean checkout and installed packages
+**So that** downstream ontology and profile features receive a verifiable contract instead of repository-local assumptions.
+
+## Context & Background
+
+F0011 is the head of the contract/ontology dependency lane. Its completion requires executable artifact generation/checking, documented version boundaries and concrete consumer evidence, while F0012/F0015 remain separate feature runs.
+Source and boundary authority: [PRD](PRD.md), accepted ADR-0013, proposed ADR-0039,
+and the shipped contracts cited in the PRD. Phase A requirements are approved; implementation is in progress in feature run 2026-11-22-885e8734.
+
+## Acceptance Criteria
+
+The numbered criteria include happy paths, edge cases and error scenarios.
+
+- [x] **F0011-S0006-AC1:** A documented command sequence builds or packages the declared schemas and consumer artifacts and runs the complete conformance/integration checks from a clean checkout. The evidence records exact commands, exits, dependency versions and artifact identities.
+- [x] **F0011-S0006-AC2:** Repeated generation from identical inputs yields identical contract artifacts. CI refuses stale, missing, hand-modified or reference-incomplete outputs and reports the affected artifact and regeneration command.
+- [x] **F0011-S0006-AC3:** An installed Python package and the JavaScript consumer validate the selected bundle outside the source checkout with network schema retrieval disabled. No planning directory, development fixture path or developer-local absolute path is needed in production.
+- [x] **F0011-S0006-AC4:** The continuing EX-GL-001 and information-state examples have glossary, boundary-case and owning story/contract links. Structured fixtures validate against their declared local schema; synthetic development data is labeled and kept outside frozen evaluation data.
+- [x] **F0011-S0006-AC5:** Feature evidence maps every acceptance criterion to observed results; all required cases pass and changed executable-line coverage is at least 80%. Build/readiness checks cannot be reported as runtime proof or formal acceptance of ADR-0039.
+- [x] **F0011-S0006-AC6:** The handoff identifies the supported dialect/subset, annotations, defaults/coercion/ref policy, schema authority, compatible readers, consumer adoption and rollback procedure. ADR-0039 remains Proposed until both its schema and incomplete-package display proof requirements are fulfilled. Generation records an artifact/check audit trail rather than a business timeline mutation.
+
+## Interaction Contract
+
+No UI. The entry point is the documented contract build/validation command or the
+existing consumer named in the Phase B inventory. Reviewed contract sources are
+editable in version control; released identities and historical payloads are not
+edited in place. Success is a persisted artifact/check result and, for an existing
+write consumer, its established transaction result verified by a fresh read.
+Validation failure refuses the artifact/input with a non-disclosing diagnostic.
+Only repository maintainers publish contract artifacts; runtime callers retain
+the existing principal, role, tenant/KB and lifecycle restrictions. Render-only
+proof cannot satisfy these criteria. Contract generation has no business timeline
+event; existing write/refusal audit behavior remains mandatory where applicable.
+
+## Data Requirements
+
+Artifact manifest/check results, command documentation, version inventory, case-to-AC mapping and downstream handoff; completion evidence belongs to the future feature run.
+
+Required versus optional fields and validation rules remain explicit in the
+versioned source contract; Phase B identifies the exact definitions and adapters.
+
+## Role-Based Visibility
+
+Internal maintainers execute build/conformance tools. This creates no runtime
+permission or grant. Existing authorized consumers retain their access checks;
+unauthorized callers receive the established denied/non-disclosing response.
+Public diagnostics contain contract/case IDs and rule locations, never protected
+payload values, credentials or evidence quotes.
+
+## Non-Functional Expectations
+
+Deterministic, offline reference resolution; no silent case skips or type coercion.
+Correctness is 100% of the declared case inventory. Changed executable-line coverage
+is at least 80%; this threshold is a feature-run obligation, not a claim of planning coverage.
+Errors and edge cases are acceptance criteria above. No end-user latency or
+throughput service-level target is introduced by this infrastructure feature.
+
+## Dependencies
+
+F0011-S0001–S0005; existing F0001 build/CI foundation. F0012 can plan alongside this feature but starts implementation after F0011 completes.
+
+Related stories: the six slices and their order are indexed in [README](README.md).
+
+## Out of Scope
+
+Production hosting, ontology release approval, module compatibility reasoning, workbenches, repo-wide feature-evidence audits and claiming all of ADR-0039 accepted.
+
+## Questions & Assumptions
+
+No unresolved business question. The Architect must settle the supported subset,
+reference/format policy, artifact authority, exact consumer inventory and adapter
+mechanism during Phase B without changing the shipped semantics silently.
+The boundary between structural validation, domain validation and authorization
+is intentional; the PRD governs any apparent conflict.
+
+## Definition of Done
+
+- [x] Every numbered acceptance criterion has observed passing evidence.
+- [x] Positive, negative and boundary cases pass through the named real consumers.
+- [x] Applicable authorization and audit requirements remain proven.
+- [x] Reproducible artifacts and usage documentation are complete.
+- [x] Story filename matches Story ID; story index is regenerated when changed.
+- [x] Required independent story signoffs are appended to STATUS.md in the feature run.
+
+## Review Provenance
+
+Runtime implementation and test evidence is recorded in feature run 2026-11-22-885e8734; independent reviewer signoff is pending. See [STATUS](STATUS.md) for the append-only
+provenance table; the Architect sets the final required role matrix in Phase B.

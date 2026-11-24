@@ -2,8 +2,8 @@
 
 **Status:** Done / Archived 2026-11-23 (feature run `2026-11-22-885e8734`)
 **Phase:** v0.1A / MVP
-**Roadmap:** Now (2026-11-20 roadmap review)
-**Planning:** Phase A and Phase B approved by the operator on 2026-11-20; implementation is underway in feature run `2026-11-22-885e8734`.
+**Roadmap:** Completed (was Now in the 2026-11-20 roadmap review)
+**Planning:** Phase A and Phase B approved by the operator on 2026-11-20; implemented and closed out in feature run `2026-11-22-885e8734` (G0–G8 PASS, merged in PR #64).
 **Plan Run:** `2026-11-20-ccb1bd39` (approved baseline)
 **Plan Revision:** `2026-11-21-e4098d22` (Phase B; operator approved with `approve-phase-b` on 2026-11-22).
 **Review:** `2026-11-21-b4cd07e4` READY for the baseline; revision adds the
@@ -16,12 +16,12 @@ Python/Pydantic/AJV/OpenAPI conformance and compatible adoption by existing
 consumers. Information-state, qualified-money and scoped-identifier schemas retain
 the shipped F0007 semantics. No user-visible screen is introduced.
 
-The current candidate generates 86 artifacts and has passing shared conformance:
+The delivered bundle generates 86 artifacts and has passing shared conformance:
 443 cases, 1,329 Python JSON Schema/Pydantic/AJV results, zero mismatches.
 [Observed conformance](../../../operations/evidence/runs/2026-11-22-885e8734/artifacts/test-results/conformance-review-final.json)
 and [Node tests](../../../operations/evidence/runs/2026-11-22-885e8734/artifacts/test-results/js-unit.tap)
-belong to this feature run. G2 evidence collection is active; independent G3
-reviews, G4 approval and required signoff/closeout remain pending.
+belong to this feature run. Independent G3 reviews, G4 approval, the 30 required
+story/role signoffs and PM closeout are complete; see [STATUS](STATUS.md).
 
 ## Requirement-ownership amendment (2026-11-08)
 
@@ -128,19 +128,19 @@ at G5 on 2026-11-20. The review revision `2026-11-21-e4098d22` was approved
 with the same explicit token on 2026-11-22; its G5 journal/manifest records
 the post-approval regeneration, validation and publication outcome.
 ADR-0079 and ADR-0039 remain Proposed pending their runtime proofs and later acceptance.
-All six stories are In Progress. Current runtime evidence is recorded in feature
-run `2026-11-22-885e8734`; this is not feature completion or security approval.
+All six stories are Done. Runtime evidence, signoffs and closeout are recorded in feature
+run `2026-11-22-885e8734`. Feature completion does not accept either ADR.
 
 ## Stories
 
 | ID | Title | ACs | Status |
 |----|-------|-----|--------|
-| [F0011-S0001](F0011-S0001-resolve-versioned-offline-contracts.md) | Resolve versioned offline contracts | 7 | In Progress |
-| [F0011-S0002](F0011-S0002-validate-information-state-and-scoped-absence.md) | Validate information state and scoped absence | 7 | In Progress |
-| [F0011-S0003](F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) | Validate qualified money and scoped identifiers | 7 | In Progress |
-| [F0011-S0004](F0011-S0004-prove-cross-language-contract-conformance.md) | Prove cross-language contract conformance | 7 | In Progress |
-| [F0011-S0005](F0011-S0005-preserve-existing-consumer-contracts.md) | Preserve existing consumer contracts | 7 | In Progress |
-| [F0011-S0006](F0011-S0006-verify-reproducible-contract-delivery.md) | Verify reproducible contract delivery | 6 | In Progress |
+| [F0011-S0001](F0011-S0001-resolve-versioned-offline-contracts.md) | Resolve versioned offline contracts | 7 | Done |
+| [F0011-S0002](F0011-S0002-validate-information-state-and-scoped-absence.md) | Validate information state and scoped absence | 7 | Done |
+| [F0011-S0003](F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) | Validate qualified money and scoped identifiers | 7 | Done |
+| [F0011-S0004](F0011-S0004-prove-cross-language-contract-conformance.md) | Prove cross-language contract conformance | 7 | Done |
+| [F0011-S0005](F0011-S0005-preserve-existing-consumer-contracts.md) | Preserve existing consumer contracts | 7 | Done |
+| [F0011-S0006](F0011-S0006-verify-reproducible-contract-delivery.md) | Verify reproducible contract delivery | 6 | Done |
 
 **Total Stories:** 6
 **Total Acceptance Criteria:** 41

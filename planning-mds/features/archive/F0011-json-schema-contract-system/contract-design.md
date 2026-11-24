@@ -1,6 +1,6 @@
 # F0011 — Structural contract design
 
-**Status:** Approved A+B baseline `2026-11-20-ccb1bd39`; Phase B revision `2026-11-21-e4098d22` approved by operator token `approve-phase-b` on 2026-11-22; runtime implementation Not Started.
+**Status:** Approved A+B baseline `2026-11-20-ccb1bd39`; Phase B revision `2026-11-21-e4098d22` approved by operator token `approve-phase-b` on 2026-11-22; runtime implementation Not Started at approval (historical; delivered — see [STATUS](STATUS.md)).
 **Decision:** [ADR-0079](../../../architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md).
 
 ## Authority and inventory

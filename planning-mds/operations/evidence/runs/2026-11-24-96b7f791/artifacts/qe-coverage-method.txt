@@ -1,0 +1,101 @@
+"""Recompute strict changed-statement coverage from durable raw coverage data."""
+
+import argparse
+import hashlib
+import json
+import pathlib
+import re
+import subprocess
+
+import yaml
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--product-root", required=True)
+parser.add_argument("--run-id", required=True)
+args = parser.parse_args()
+root = pathlib.Path(args.product_root).resolve()
+run = root / "planning-mds/operations/evidence/runs" / args.run_id
+manifest = json.loads((run / "evidence-manifest.json").read_text())
+base = manifest["scm"]["base_ref"]
+report = json.loads((run / "artifacts/coverage/combined-python.json").read_text())
+changed = set(subprocess.check_output(["git", "diff", "--name-only", base], cwd=root, text=True).splitlines())
+untracked = set(subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard"], cwd=root, text=True).splitlines())
+changed.update(untracked)
+selected = sorted(p for p in changed if p.endswith(".py") and p.startswith(("engine/", "neuron/", "scripts/contracts/"))
+                  and "/tests/" not in p and "/generated/" not in p)
+rows = []
+unmeasured = []
+for path in selected:
+    data = report["files"].get(path)
+    if data is None:
+        unmeasured.append(path)
+        continue
+    executed = set(data["executed_lines"])
+    statements = executed | set(data["missing_lines"])
+    if path in untracked:
+        delta = statements
+    else:
+        diff = subprocess.check_output(["git", "diff", "--unified=0", base, "--", path], cwd=root, text=True)
+        additions = set()
+        for line in diff.splitlines():
+            match = re.match(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", line)
+            if match:
+                start = int(match[1])
+                count = int(match[2]) if match[2] is not None else 1
+                additions.update(range(start, start + count))
+        delta = statements & additions
+    if delta:
+        rows.append({"path": path, "changed_statements": len(delta), "covered": len(delta & executed),
+                     "missing_lines": sorted(delta - executed),
+                     "sha256": hashlib.sha256((root / path).read_bytes()).hexdigest()})
+floor = yaml.safe_load((root.parent / "nebula-agents/agents/actions/spec/_contract.yaml").read_text())["shared"]["coverage_min_pct"]
+total = sum(row["changed_statements"] for row in rows)
+covered = sum(row["covered"] for row in rows)
+pct = 100 * covered / total
+result = {"run_id": args.run_id, "base_ref": base, "language": "Python",
+          "covered_changed_statements": covered, "changed_statements": total,
+          "coverage_pct": pct, "contract_min_pct": floor,
+          "status": "pass" if not unmeasured and pct >= floor else "fail",
+          "unmeasured": unmeasured, "files": rows,
+          "scope": "All changed authored Python application/tool code; tests, generated models, data and non-Python config excluded. JS measured separately with V8."}
+(run / "artifacts/coverage/changed-line-coverage.json").write_text(json.dumps(result, indent=2) + "\n")
+print(json.dumps({key: value for key, value in result.items() if key != "files"}))
+raise SystemExit(0 if result["status"] == "pass" else 1)
+// Line coverage for authored contract runtime scripts from raw NODE_V8_COVERAGE data.
+// A line counts as covered when the innermost V8 block range at its first non-blank
+// character has a nonzero count in any process (max across processes).
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+const [, , v8Dir, srcRoot, out] = process.argv;
+const files = ['case-data.mjs', 'check.mjs', 'runtime.mjs'];
+const prefix = 'file:///app/brain/experience/scripts/contracts/';
+const rows = [];
+for (const name of files) {
+  const src = readFileSync(join(srcRoot, name), 'utf8');
+  const best = new Int32Array(src.length).fill(-1);
+  for (const f of readdirSync(v8Dir)) {
+    for (const script of JSON.parse(readFileSync(join(v8Dir, f), 'utf8')).result) {
+      if (script.url !== prefix + name) continue;
+      const counts = new Int32Array(src.length).fill(-1);
+      const widths = new Int32Array(src.length).fill(2 ** 30);
+      for (const fn of script.functions) for (const r of fn.ranges) {
+        const w = r.endOffset - r.startOffset;
+        for (let i = r.startOffset; i < Math.min(r.endOffset, src.length); i++)
+          if (w <= widths[i]) { widths[i] = w; counts[i] = r.count; }
+      }
+      for (let i = 0; i < src.length; i++) best[i] = Math.max(best[i], counts[i]);
+    }
+  }
+  let offset = 0, total = 0, covered = 0; const missing = [];
+  src.split('\n').forEach((line, idx) => {
+    const t = line.trim();
+    const code = t && !t.startsWith('//') && !t.startsWith('*') && !t.startsWith('/*') && !/^[})\];,]+$/.test(t);
+    if (code) { total++; const i = offset + line.indexOf(t[0]); if (best[i] > 0) covered++; else missing.push(idx + 1); }
+    offset += line.length + 1;
+  });
+  rows.push({ path: 'experience/scripts/contracts/' + name, lines: total, covered, pct: +(100 * covered / total).toFixed(2), missing_lines: missing });
+}
+const lines = rows.reduce((a, r) => a + r.lines, 0), cov = rows.reduce((a, r) => a + r.covered, 0);
+const result = { language: 'JavaScript', source: v8Dir, method: 'innermost V8 block range at first non-blank character, max across processes; comment and bare-delimiter lines excluded', lines, covered: cov, coverage_pct: +(100 * cov / lines).toFixed(2), contract_min_pct: 80, status: 100 * cov / lines >= 80 ? 'pass' : 'fail', files: rows };
+writeFileSync(out, JSON.stringify(result, null, 2) + '\n');
+console.log(JSON.stringify({ ...result, files: rows.map(r => [r.path, r.pct]) }));

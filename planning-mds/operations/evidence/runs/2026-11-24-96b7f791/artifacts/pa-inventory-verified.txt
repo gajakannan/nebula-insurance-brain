@@ -1,0 +1,670 @@
+{
+  "status": "phase-b-review-revision-approved-pending-implementation",
+  "bundle": "brain-contracts/v1",
+  "profile": "nebula-json-schema/1",
+  "authoring_root": "planning-mds/schemas",
+  "future_source_manifest": "scripts/contracts/sources.yaml",
+  "future_runtime_root": "schemas/contracts/v1",
+  "future_installed_root": "engine/packages/brain-contracts/src/brain_contracts/resources/v1",
+  "resources": [
+    {
+      "name": "content-artifact-manifest",
+      "version": "1",
+      "id": "https://nebula.local/schemas/content-artifact-manifest.schema.json",
+      "source": "planning-mds/schemas/content-artifact-manifest.schema.json",
+      "source_sha256_at_design": "3327f72bfe19e2d297fbf0d7dd8072ac86eaa7d14f71d1ad7bb8301b4c76a28e",
+      "owner": "content",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_content.manifest.parse_manifest",
+          "path": "engine/packages/brain-content/src/brain_content/manifest.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-content/tests/test_versioned_content.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "artifact_contract_version is integer 1; parse_manifest selects the v1 resource before validation; all other markers fail.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Retain ArtifactManifestV1 and native decode/error behavior; replace only schema loading/evaluation."
+    },
+    {
+      "name": "content-artifact-manifest-v2",
+      "version": "2",
+      "id": "https://nebula.local/schemas/content-artifact-manifest-v2.schema.json",
+      "source": "planning-mds/schemas/content-artifact-manifest-v2.schema.json",
+      "source_sha256_at_design": "492388f57b9d2e954beda21dfccb935549670408a9944d58907e0e4d16d684c6",
+      "owner": "content",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_content.manifest.parse_manifest / ArtifactManifestV2",
+          "path": "engine/packages/brain-content/src/brain_content/manifest.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-content/tests/test_versioned_content.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "artifact_contract_version is integer 2; writer activation remains unchanged.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Retain v2 input/output guards and the explicit v1/v2 dispatch; never retry v1 after v2 refusal."
+    },
+    {
+      "name": "content-artifact-manifest-read",
+      "version": "1",
+      "id": "https://nebula.local/schemas/content-artifact-manifest-read.schema.json",
+      "source": "planning-mds/schemas/content-artifact-manifest-read.schema.json",
+      "source_sha256_at_design": "e1a39ab7deed35af3a967f3a4fb9ef0cb7d9c569128a3bf3753fdc3225b6fbd0",
+      "owner": "content",
+      "disposition": "retain-versioned-boundary",
+      "consumer_entry_points": [
+        {
+          "entry_point": "OpenAPI/doc-only: ContentArtifactManifest read union",
+          "path": "planning-mds/api/brain-api.yaml",
+          "state": "OpenAPI/doc-only"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-content/tests/test_versioned_content.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/apps/api/tests/test_contract_openapi.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "OpenAPI read union selects artifact_contract_version 1 or 2; runtime parse_manifest uses the concrete v1/v2 resources.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "No non-test runtime validator for this wrapper. Publish/check the OpenAPI union and retain concrete native readers; do not invent a delegate."
+    },
+    {
+      "name": "content-records-v2",
+      "version": "2",
+      "id": "https://nebula.local/schemas/content-records-v2.schema.json",
+      "source": "planning-mds/schemas/content-records-v2.schema.json",
+      "source_sha256_at_design": "a807b09d635d6a5b37496e4a3190061665f235fabdf10f61574af85697b223ef",
+      "owner": "content",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_content.records.Record.input_contract / contract (ContentBlockV2, ContentTableV2, ContentLayoutV2)",
+          "path": "engine/packages/brain-content/src/brain_content/records.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-content/tests/test_versioned_content.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "Explicit record_type block/table/layout selects its $defs pointer; contract_version is 2.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Preserve per-record JSONL validation, native limits and model guards."
+    },
+    {
+      "name": "document-date-record",
+      "version": "1",
+      "id": "https://nebula.local/schemas/document-date-record.schema.json",
+      "source": "planning-mds/schemas/document-date-record.schema.json",
+      "source_sha256_at_design": "a5227ea9bc9f51ede1e6670b28f6a07b129b21994af78634ebf4f0d0a4bfb219",
+      "owner": "content",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_content.dates.DateRecord.input_contract / contract",
+          "path": "engine/packages/brain-content/src/brain_content/dates.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-content/tests/test_document_dates.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_f0011_consumer_contracts.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "Explicit document-date-record resource; contract_version 1 and record_type candidate/selection select the branch.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Do not infer authority from valid shape; verified human/source basis checks stay in their existing services."
+    },
+    {
+      "name": "interpretation-output-manifest",
+      "version": "1",
+      "id": "https://nebula.local/schemas/interpretation-output-manifest.schema.json",
+      "source": "planning-mds/schemas/interpretation-output-manifest.schema.json",
+      "source_sha256_at_design": "636c1913f1ad2a62eaffeaea688b4e515aa8f3770022801a9b8f5a19d7718173",
+      "owner": "content",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_content.outputs.parse_run_manifest / RunManifestBase.contract",
+          "path": "engine/packages/brain-content/src/brain_content/outputs.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-content/tests/test_run_outputs.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "contract_version is integer 1 or 2; independent of content artifact parse version.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Retain strict dispatch, exact interpretation basis and safe native errors."
+    },
+    {
+      "name": "interpretation-result",
+      "version": "1",
+      "id": "https://nebula.local/schemas/interpretation-result.schema.json",
+      "source": "planning-mds/schemas/interpretation-result.schema.json",
+      "source_sha256_at_design": "f4f986406644d9390bd5bd945434531038b7050dd1a2b176d66e140bcbe52345",
+      "owner": "assertions",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_contracts.dispatch.parse_result / parse_legacy_result",
+          "path": "engine/packages/brain-contracts/src/brain_contracts/dispatch.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-assertions/tests/test_contracts.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "schema_version key absent means legacy v1; explicit 1, null, bool or unknown selector is unsupported.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Retain legacy DTO/default behavior and allow_v2=False rejection; no failed-reader downgrade."
+    },
+    {
+      "name": "interpretation-result-v2",
+      "version": "2",
+      "id": "https://nebula.local/schemas/interpretation-result-v2.schema.json",
+      "source": "planning-mds/schemas/interpretation-result-v2.schema.json",
+      "source_sha256_at_design": "88c04e2d1bb14a365b958f278bb16d236067907fb3fca80f722b328ddec31eca",
+      "owner": "assertions",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_contracts.dispatch.parse_result / parse_interpretation_result / InterpretationResultV2",
+          "path": "engine/packages/brain-contracts/src/brain_contracts/dispatch.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-assertions/tests/test_contracts.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "schema_version is integer 2 AND allow_v2 / supported_versions permits 2.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Retain AssertionContractError/Unsupported and v2 input/output guards."
+    },
+    {
+      "name": "assertion-record-v2",
+      "version": "2",
+      "id": "https://nebula.local/schemas/assertion-record-v2.schema.json",
+      "source": "planning-mds/schemas/assertion-record-v2.schema.json",
+      "source_sha256_at_design": "4c5ae7cc3005b4ca3953d3bec5d168ff9084a29228290394d7833f5f8fdba033",
+      "owner": "assertions",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_contracts.assertions.parse_assertion / AssertionRecordV2 / EntityReferenceV2",
+          "path": "engine/packages/brain-contracts/src/brain_contracts/assertions.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-assertions/tests/test_contracts.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/packages/brain-assertions/tests/test_admission.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "Explicit assertion-record-v2 resource and optional entity_reference definition; selected by the reader, not an inferred payload schema_version.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Retain existing admission, evidence and ownership checks after structural validation."
+    },
+    {
+      "name": "assertion-admission-result-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/assertion-admission-result-v1.schema.json",
+      "source": "planning-mds/schemas/assertion-admission-result-v1.schema.json",
+      "source_sha256_at_design": "a4a9f38b1cfdb389bf5cf0c7adfef28646796814f67f5b910401f3195e5652b5",
+      "owner": "assertions",
+      "disposition": "delegate",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_contracts.assertions.AdmissionBatch / AdmissionOutcome / AdmittedAssertion / ServerEvidence",
+          "path": "engine/packages/brain-contracts/src/brain_contracts/assertions.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-assertions/tests/test_contracts.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_assertion_admission.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "Explicit admission-result-v1 resource; root batch schema_version 1, or explicit outcome/admitted/server_evidence $defs pointer.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Retain private server-admission metadata and source/evidence verification; no new public request DTO."
+    },
+    {
+      "name": "fact-slot-key-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/fact-slot-key-v1.schema.json",
+      "source": "planning-mds/schemas/fact-slot-key-v1.schema.json",
+      "source_sha256_at_design": "38b13678aab3b8badea83875cd581c73db92185b5b077786da0ae6e358e3f2a0",
+      "owner": "facts",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_factslots.resolution.FactSlotResolver.resolve",
+          "path": "engine/packages/brain-factslots/src/brain_factslots/resolution.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-factslots/tests/test_contract_examples.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_factslot_resolution.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_f0011_consumer_contracts.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "Explicit canonical key schema_version 1 under existing identity-v1 resolution; legacy pilot slots remain separate.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Add a normalized-key guard after existing authority/domain checks and before insert; no domain schema-library import."
+    },
+    {
+      "name": "fact-answer-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/fact-answer-v1.schema.json",
+      "source": "planning-mds/schemas/fact-answer-v1.schema.json",
+      "source_sha256_at_design": "3982d76c0ea4b8e486af94f0a741627e423d9359f0077f9333e670afc1c6d709",
+      "owner": "facts",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_factslots.answers.FactAnswerPolicy.canonical_value",
+          "path": "engine/packages/brain-factslots/src/brain_factslots/answers.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-factslots/tests/test_contract_examples.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_factslot_answers.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_f0011_consumer_contracts.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "answer_contract fact-answer/v1 on identity-v1 slots; legacy pilot branch is selected explicitly and remains supported.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Guard the canonical envelope after domain/evidence/member checks; tolerant source_keys runs before the protected refusal is exposed."
+    },
+    {
+      "name": "fact-slot-resolution-result-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/fact-slot-resolution-result-v1.schema.json",
+      "source": "planning-mds/schemas/fact-slot-resolution-result-v1.schema.json",
+      "source_sha256_at_design": "9c129b71b493a3c13e09859d0c76c1173b18ab5d1e7708133162296df4d64001",
+      "owner": "facts",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_factslots.resolution.ResolutionResult.to_json / FactSlotResolver.resolve",
+          "path": "engine/packages/brain-factslots/src/brain_factslots/resolution.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-factslots/tests/test_contract_examples.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_factslot_resolution.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_f0011_consumer_contracts.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "Explicit resolution result schema_version 1, with fingerprint_version 1 where present.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Add normalized result validation before service return; retain domain outcomes and atomicity."
+    },
+    {
+      "name": "fact-temporal-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/fact-temporal-v1.schema.json",
+      "source": "planning-mds/schemas/fact-temporal-v1.schema.json",
+      "source_sha256_at_design": "493d6d1b8f11a3ef8e22d9681beec95fb31155f91a9b07c57ed77ea26ca25e73",
+      "owner": "facts",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_temporal.commit.CanonicalCommitService._commit_v1 / _remainder",
+          "path": "engine/packages/brain-temporal/src/brain_temporal/commit.py",
+          "state": "existing"
+        },
+        {
+          "entry_point": "brain_api.schemas.facts.FactVersionOut / FactValidityUnknownOut / CommitResponseOut",
+          "path": "engine/apps/api/src/brain_api/schemas/facts.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-temporal/tests/test_contract_examples.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_temporal_v1_commit.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_temporal_reads.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_f0011_consumer_contracts.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "Slot identity_version 1 selects temporal-v1; explicit commit_temporal/version_temporal/validity_unknown_read definition, with omitted temporal for legacy versions.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Guard only newly normalized temporal carriers and authorized serialized responses. Stored-version sweep precedes guard rollout; legacy remainders are not rewritten."
+    },
+    {
+      "name": "canonical-commit-request",
+      "version": "1",
+      "id": "https://nebula.local/schemas/canonical-commit-request.schema.json",
+      "source": "planning-mds/schemas/canonical-commit-request.schema.json",
+      "source_sha256_at_design": "fd45ed9285848950b0043db87e719803967beb22bbc6b4eb0b066b9c4fa73285",
+      "owner": "facts",
+      "disposition": "retain-versioned-boundary",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_api.schemas.facts.CommitProposalIn / brain_api.routes.facts.commit_fact",
+          "path": "engine/apps/api/src/brain_api/schemas/facts.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/apps/api/tests/test_facts.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_temporal_v1_commit.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_f0011_consumer_contracts.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "Existing native CommitProposalIn; slot identity_version selects pilot valid_from/valid_to versus identity-v1 temporal shape.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Source remains published/documented; retain the HTTP DTO and domain validation/reason precedence. No new raw-request schema gate before authorization."
+    },
+    {
+      "name": "canonical-commit-response",
+      "version": "1",
+      "id": "https://nebula.local/schemas/canonical-commit-response.schema.json",
+      "source": "planning-mds/schemas/canonical-commit-response.schema.json",
+      "source_sha256_at_design": "87b28866039baeb3a08a11ef4eb8f3398fbc150c409128864ad9aea9f58d1b82",
+      "owner": "facts",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_api.schemas.facts.CommitResponseOut.from_domain",
+          "path": "engine/apps/api/src/brain_api/schemas/facts.py",
+          "state": "existing"
+        },
+        {
+          "entry_point": "brain_api.routes.facts.commit_fact operation",
+          "path": "engine/apps/api/src/brain_api/routes/facts.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/apps/api/tests/test_facts.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_f0011_consumer_contracts.py",
+          "state": "planned"
+        },
+        {
+          "path": "engine/apps/api/tests/test_contract_openapi.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "Explicit canonical-commit-response v1; optional versions[].temporal follows each returned version, including legacy remainders.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "Validate serialized output inside mutate operation, before outer commit; preserve 201 shape and rollback/audit on invariant failure."
+    },
+    {
+      "name": "problem-details",
+      "version": "1",
+      "id": "https://nebula.local/schemas/problem-details.schema.json",
+      "source": "planning-mds/schemas/problem-details.schema.json",
+      "source_sha256_at_design": "669b4a1f64b8a40432df09f763032b940c2ee822ac008aa249ddc2d8a710f62e",
+      "owner": "api",
+      "disposition": "retain-versioned-boundary",
+      "consumer_entry_points": [
+        {
+          "entry_point": "OpenAPI/doc-only: ProblemDetails component and native exception handlers",
+          "path": "planning-mds/api/brain-api.yaml",
+          "state": "OpenAPI/doc-only"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/tests/security/conftest.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/apps/api/tests/test_contract_openapi.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "OpenAPI ProblemDetails v1 assertion tree; established HTTP status/code/traceId mappings select the native handler.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "No non-test runtime JSON Schema validator exists. Check generated component equality and actual handler responses; retain native error DTOs and non-disclosing errors. conftest.py supplies existing schema assertions, not an executable test case alone."
+    },
+    {
+      "name": "information-state-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/information-state-v1.schema.json",
+      "source": "planning-mds/schemas/information-state-v1.schema.json",
+      "source_sha256_at_design": "ae4b173fc3496b8bac7c9a122e2fe730c5d1c5cc9c1b24dffe9dcfee48bb06e9",
+      "owner": "values",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_contracts.schema_runtime.validate_contract publication alias",
+          "path": "engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py",
+          "state": "planned"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-contracts/tests/test_schema_runtime.py",
+          "state": "planned"
+        },
+        {
+          "path": "engine/packages/brain-factslots/tests/test_contract_examples.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "Explicit ContractRef information-state-v1 version 1; alias fact-answer-v1#/properties/state.",
+      "wire_profile": "portable-json/v1",
+      "integration_notes": "Additive portable alias; existing answer consumer remains on its native resource, not a second state implementation."
+    },
+    {
+      "name": "qualified-money-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/qualified-money-v1.schema.json",
+      "source": "planning-mds/schemas/qualified-money-v1.schema.json",
+      "source_sha256_at_design": "68ca64725c95c73ed7652347a60bcd921a900d3e57bdefda0a8d21b8c17201cc",
+      "owner": "values",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_contracts.schema_runtime.validate_contract publication alias",
+          "path": "engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py",
+          "state": "planned"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-contracts/tests/test_schema_runtime.py",
+          "state": "planned"
+        },
+        {
+          "path": "engine/packages/brain-factslots/tests/test_contract_examples.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "Explicit ContractRef qualified-money-v1 version 1; alias fact-slot-key-v1#/$defs/money_value.",
+      "wire_profile": "portable-json/v1",
+      "integration_notes": "Additive portable alias; exact strings and domain currency/basis rules remain unchanged."
+    },
+    {
+      "name": "scoped-identifier-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/scoped-identifier-v1.schema.json",
+      "source": "planning-mds/schemas/scoped-identifier-v1.schema.json",
+      "source_sha256_at_design": "78b5446f7974f0f9e9cb9cab4e62ff043054be2d47d142ac8f8c64973df87064",
+      "owner": "values",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_contracts.schema_runtime.validate_contract publication alias",
+          "path": "engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py",
+          "state": "planned"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/packages/brain-contracts/tests/test_schema_runtime.py",
+          "state": "planned"
+        },
+        {
+          "path": "engine/packages/brain-factslots/tests/test_contract_examples.py",
+          "state": "existing"
+        }
+      ],
+      "version_selector": "Explicit ContractRef scoped-identifier-v1 version 1; alias fact-slot-key-v1#/$defs/identifier_value.",
+      "wire_profile": "portable-json/v1",
+      "integration_notes": "Additive portable alias; namespace and domain normalization remain existing responsibilities."
+    },
+    {
+      "name": "fact-version-read-v1",
+      "version": "1",
+      "id": "https://nebula.local/schemas/fact-version-read-v1.schema.json",
+      "source": "planning-mds/schemas/fact-version-read-v1.schema.json",
+      "source_sha256_at_design": "4f6adc53018bc204ca24bf70674d9f3727e422ba54963b56c98526645aa75964",
+      "owner": "api",
+      "disposition": "adopt",
+      "consumer_entry_points": [
+        {
+          "entry_point": "brain_api.schemas.facts.FactVersionOut.from_domain / brain_api.routes.facts.get_fact",
+          "path": "engine/apps/api/src/brain_api/schemas/facts.py",
+          "state": "existing"
+        }
+      ],
+      "compatibility_tests": [
+        {
+          "path": "engine/apps/api/tests/test_facts.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_temporal_reads.py",
+          "state": "existing"
+        },
+        {
+          "path": "engine/tests/integration/test_f0011_consumer_contracts.py",
+          "state": "planned"
+        },
+        {
+          "path": "engine/apps/api/tests/test_contract_openapi.py",
+          "state": "planned"
+        }
+      ],
+      "version_selector": "Explicit fact-version-read-v1 version 1 for Resolved reads; ValidityUnknown selects fact-temporal-v1#/$defs/validity_unknown_read; temporal absent for legacy rows.",
+      "wire_profile": "native-compat/v1",
+      "integration_notes": "New guard describes shipped flat output. Validate only after all source READ checks; sweep every integration/dev stored version before rollout."
+    }
+  ],
+  "design_tooling_schemas_not_runtime_payloads": [
+    "schema-bundle-manifest-v1.schema.json",
+    "schema-conformance-cases-v1.schema.json"
+  ],
+  "retained_boundaries": [
+    {
+      "name": "review-decision",
+      "reason": "F0001 internal persisted decision schema differs from the HTTP submission body; retain existing review DTO/version and domain/audit logic, not generated CRUD."
+    },
+    {
+      "name": "authx-kernel",
+      "reason": "Internal F0002 server-derived identity/policy carrier, not public validation input; no new AuthX model generation or grants."
+    },
+    {
+      "name": "semantic-execution-trace",
+      "reason": "Future trace contract owned by retrieval/observatory features; no production consumer in F0011."
+    },
+    {
+      "name": "commercial-pc-example and semantic-example",
+      "reason": "Teaching/example contracts retain existing validation; not installed as runtime business APIs."
+    }
+  ],
+  "revision_run": "2026-11-21-e4098d22",
+  "review_findings": [
+    "PR-M1",
+    "PR-M2"
+  ],
+  "mapping_policy": "Entry points and tests marked existing were inspected; planned entries are feature outputs. Copy each resource mapping into scripts/contracts/sources.yaml at feature G0 and verify it before implementation. OpenAPI/doc-only is not an existing runtime validator. Disposition is adopt, delegate, or retain-versioned-boundary; profile is selected before parsing."
+}

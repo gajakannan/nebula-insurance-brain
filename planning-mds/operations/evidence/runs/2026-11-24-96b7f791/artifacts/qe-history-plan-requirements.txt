@@ -1,0 +1,212 @@
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-10-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-11-## Overview
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-12-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-13-Publish a versioned, offline JSON Schema 2020-12 bundle, generated Pydantic models,
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:14:headless AJV conformance and a shared OpenAPI snapshot. Integrate actual existing
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-15-consumers while preserving domain guards, current authorization, wire versions and
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:16:history. The detailed policy in [contract-design.md](contract-design.md), exact
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-17-[inventory](contract-inventory.yaml), [profile](schema-validation-profile.yaml),
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-18-six source schemas and synthetic [cases](contract-examples.json) are part of this
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-19-plan. All implementation paths below are proposed; this action creates no runtime.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-20-
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-27-|------|-------|---------|------------------------|
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-28-| 1 | Explicit source inventory, immutable offline bundle and wire profiles | S0001 | Source closure, keyword/profile checks, hash/identity corruption refusal |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-29-| 2 | Publication aliases and answer/value examples | S0002/S0003 | Nine states, absence failures, exact money and namespace fixtures |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-30-| 3 | Generated Pydantic, AJV, metadata and OpenAPI checks | S0004 | 100% common cases; no lossy round trip or silent missing result |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:31:| 4 | Content/assertion and FactSlot/temporal consumer adoption | S0005 | Per-resource mapping, integration/dev stored-version sweep before guard rollout, native differential and same-UoW guard regressions |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-32-| 5 | Installed package/build/CI proof and developer handoff | S0006 | Clean install outside checkout; deterministic regeneration; drift injection fails |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-33-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-34-## Existing Code (Must Be Modified)
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-35-
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-46-| engine/packages/brain-factslots/src/brain_factslots/answers.py | canonical_value() domain/evidence/member checks; tolerant source_keys() | Add shared canonical envelope check after existing guards, preserving T-08 and legacy bypass |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-47-| engine/packages/brain-temporal/src/brain_temporal/commit.py | _commit_v1(), _remainder(), same-slot lineage and bounded temporal commit | Validate new normalized temporal carriers before writes; retain all old domain reason codes, legacy remainders and atomicity |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-48-| engine/apps/api/src/brain_api/schemas/facts.py | CommitProposalIn, CommitResponseOut, FactVersionOut and validity-unknown DTOs | Preserve API behavior; prove source-schema/output correspondence; no schema guard ahead of protected source checks |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-49-| engine/apps/api/src/brain_api/routes/facts.py | execution.read/mutate with exact additional source READ and attestation checks | Validate commit serialized result inside operation before mutate commits; validate GET only after successful full read authorization |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:50:| engine/apps/api/src/brain_api/app.py | create_app() with existing /openapi.json hook | Install generated OpenAPI snapshot and verify real route parity in tests |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-51-| engine/apps/api/src/brain_api/errors.py | ProblemDetails handlers and existing domain errors | Map unexpected canonical schema invariant failure to generic 500 contract_invariant_failed, no data text |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-52-| engine/packages/brain-contracts/pyproject.toml; brain-content/pyproject.toml; brain-factslots/pyproject.toml; brain-temporal/pyproject.toml | Existing package dependencies and schema package-data globs | Package common resource tree/generated models; content/factslots/temporal may depend on brain-contracts; no reverse dependency cycle |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-53-| engine/pyproject.toml and engine/uv.lock; neuron/uv.lock | Existing workspace/locked dependency graph | Add build-only contract-build group/generator and lock one coherent runtime distribution in both Python workspaces |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-54-| experience/package.json and experience/pnpm-lock.yaml | Current Vite/Vitest host; no AJV | Add locked AJV 2020-12, ajv-formats, jsonc-parser tooling and contracts:check script; no UI code |
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-63-|---------------|-------|---------|
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-64-| scripts/contracts/sources.yaml | Backend + Architect review | Explicit 21-resource source list and native/portable entry-point policy |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-65-| scripts/contracts/generate.py | Backend | Closed local build, code generation, metadata/OpenAPI emission and --check mode |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-66-| scripts/contracts/check.py | Backend/QE | Join expected case results, generated artifacts and OpenAPI/reference coverage |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:67:| scripts/contracts/check_stored_fact_versions.py | Backend/QE | Read-only integration/dev full-history serialization and exact response-guard preflight; safe aggregate report |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:68:| schemas/contracts/v1/*.schema.json and manifest.json | Generated | Root runtime release snapshot and digest manifest |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-69-| engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py | Backend | Immutable bundle registry, profile checks, decode and validate APIs |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-70-| engine/packages/brain-contracts/src/brain_contracts/model_adapter.py | Backend | Source-schema pre/post guards and non-lossy to_wire |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-71-| engine/packages/brain-contracts/src/brain_contracts/generated/contracts_v1.py | Generated | Pydantic v2 models; preserve openness, nullable/optional distinctions and source annotations |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-72-| engine/packages/brain-contracts/src/brain_contracts/resources/v1/* | Generated | Same schema bytes, manifest, ui-metadata.json and brain-api.openapi.json installed in the wheel |
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-153-## Step 2 — State, Money and Identifier Publication (S0002/S0003)
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-154-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-155-The additive schemas reference existing definition pointers. Do not move the
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-156-source definitions or add new members to fact-answer/v1. Copy all source bytes
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:157:into the selected runtime snapshot, including reference closure. Alias annotation
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-158-metadata is descriptive only. Six design schemas parse and synthetic expectations
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-159-can be validated during plan; the feature action must run actual consumers.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-160-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-161-Execute every nine-state acceptance and negative case; scope pages/blocks retain
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-204-lost amount/identifier/metadata fails CONTRACT_MODEL_MISMATCH.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-205-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-206-The JS facade uses the exact options and parser policy in the contract design.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-207-Register schemas up front and compile synchronously, with no loadSchema/network
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:208:path. Frozen input snapshots detect mutation. Case output contains IDs and safe
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-209-codes only. Duplicate result IDs, missing cases, stderr crashes, unsupported
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:210:profiles and skipped tests make the joiner exit nonzero.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-211-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:212:Generate a complete self-contained OpenAPI 3.1 snapshot from brain-api.yaml plus
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-213-the schema bundle; rewrite refs to deterministic components with a source-ID map.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-214-Keep assertion trees and annotations equal to sources. Do not copy Pydantic's
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-215-model_json_schema output over the source. The inline ProblemDetails is checked
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:216:against its source assertion tree. Install the snapshot using FastAPI's existing
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-217-app.openapi hook/cache and prove route parity, including catch-all file paths.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-218-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-219-### Complete shared case inventory
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-220-
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-253-nonexistent validator or count OpenAPI reference equality as runtime integration.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-254-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-255-### Stored-version rollout preflight (PR-M1)
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-256-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:257:S0005 AC4 requires real history evidence in addition to fixtures. Backend authors
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-258-`scripts/contracts/check_stored_fact_versions.py`; QE executes it for **both**
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-259-integration and dev before enabling the new response guard on either existing
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-260-environment. DevOps records the environment inventory and coherent bundle digest
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-261-at feature G0. No assertion that these databases are fixture-only is made here.
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-273-It is an operator preflight, not an HTTP endpoint or a new runtime grant. Its
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-274-implementation must:
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-275-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-276-1. Open a PostgreSQL READ ONLY, REPEATABLE READ transaction before selecting data.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:277:   Record a nonsecret environment identifier, snapshot time, code revision and
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:278:   candidate bundle digest. Stream **every** `fact_versions` row, including closed
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-279-   recorded ranges, historical pilot values, temporal-v1 rows and split/remainder
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-280-   versions; do not use a current-only or valid/known-coordinate filter. Count the
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:281:   rows in the same snapshot and reconcile selected = checked, with zero skips.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-282-2. Reuse `brain_persistence.repositories._fact_version_from_row` (or an extracted
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-283-   equivalent shared with the repository) and
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-284-   `FactVersionOut.from_domain(...).model_dump(mode="json")`, including the existing
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:285:   absent-temporal serialization. Run the **same** candidate response guard and
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-286-   fixed native profile used by GET, including reference/format checks. Exercise
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:287:   `FactValidityUnknownOut` separately in the temporal route fixtures; the sweep
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-288-   does not bypass authorization or call the HTTP facade and create audit writes.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-289-3. Count mapping/serialization failures, guard failures and legacy/temporal groups.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-290-   Emit only counts, environment label, code/bundle identity and fixed error codes /
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-291-   contract IDs. Do not persist values, evidence, row identifiers, exception text
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-292-   or credentials in the report. Never rewrite, coerce, delete or repair a row.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:293:4. Exit 0 only for complete, zero-failure coverage. Exit 1 for a data/guard mismatch;
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-294-   exit 2 for configuration, unavailable database, incomplete enumeration or other
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:295:   execution failure. Empty databases require an explicit zero-row environment
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-296-   inventory signed by QE/DevOps; an unavailable database is never an empty pass.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-297-5. QE retains both reports for S0005 AC4 and verifies that the database remained
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-298-   read-only. DevOps keeps the previous coherent deployment until both reports
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:299:   pass against the release candidate. If a mismatch exists, stop rollout and
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-300-   reconcile the guard/version boundary with Architect; no cleanup migration,
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-301-   silent validation fallback or historical payload rewrite is authorized.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-302-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:303:Repeat the sweep against the final candidate while old-version writers are paused
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:304:for the deployment cutover, so writes after the first snapshot cannot escape the
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-305-check. Restore service with the coherent new bundle only after success. A changed
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-306-guard, bundle, serializer or stored population requires fresh reports. The future
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:307:feature tests must include a stored serialization/format mismatch, closed history,
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-308-legacy remainders, empty and unavailable databases, incomplete iteration and a
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-309-read-only enforcement check. This planning action does not access either database.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-310-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-311-### Read audit follow-up (PR-L3)
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-325-### Mutation traceability
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-326-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-327-| Entry point | Action / carrier | Authority / concurrency | Validation failure and audit | Required test |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-328-|-------------|------------------|-------------------------|------------------------------|---------------|
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:329:| Maintainer generate command | Publish contract artifacts | Reviewed repo sources; output staged then atomically replaced; no runtime grant | Nonzero exit; no accepted partial output; manifest/check result is artifact audit | Deliberate bad ref/hash leaves previous valid tree intact |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-330-| Existing content/result parsers | Read/admit selected version | Existing consumer principal and native reader chosen first | Preserve CONTENT_CONTRACT_INVALID / assertion safe errors and current worker refusal behavior; no fallback | Real legacy/current callers, outside-checkout package test |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-331-| FactSlot service resolve | Canonical key/result and slot rows | Current AuthorizationExecution mutate, ownership, existing uniqueness/concurrency locks | Existing domain reasons first; unexpected normalized schema mismatch rolls back slot/qualifier writes; current facade audit | DB state re-read after rejection/concurrent resolution |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-332-| Existing POST /facts/{factSlotId}/commits | Typed answer/temporal proposal and serialized result | Current fact_slot:commit AND exact source READ in same UoW; slot lock, expected version, idempotency, exclusion constraint | Preserve domain 422/409, denied 404 and failure audit; unexpected invariant => generic 500 before outer commit | No version/change/outbox partial effect; legacy/current response and retry proof |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-333-| Existing GET /facts/{factSlotId} | Serialized selected historical version/validity-unknown | Current fact_slot:read and exact absence/name/attestation source READ; existing two-coordinate reader | Full authorization completes before validation result is exposed; generic safe 500 on invariant | Denied source remains 404 even if payload would fail validation; old flat response unchanged |
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-411-| S0003 AC4–AC7 | identifier source alias + domain normalization | Required scheme/type/value, equal strings different namespace, effective ordering and normalization mismatch |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-412-| S0004 AC1–AC3 | common case runners/joiner | Real Python/Pydantic/AJV, every keyword/format/branch, 100% expected outputs/no skips |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-413-| S0004 AC4–AC7 | generated model/to_wire, metadata/OpenAPI builder | Non-lossy serialization, exact shared refs/annotations and injected drift failure |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-414-| S0005 AC1–AC3 | per-resource inventory, content/assertion delegates and documented retained boundaries | Every entry point/test/selector/disposition reconciled at G0; actual consumer proof and no reader fallback |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:415:| S0005 AC4–AC7 | FactSlot/temporal/API boundaries and UoW | Both stored-history sweep reports pass before guard rollout; legacy/current history unchanged, no partial mutation, READ/admission guards, G3 PR-L3 disposition, no reparse/DDL |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-416-| S0006 AC1–AC3 | generator --check, install smoke and CI | Clean commands/version inventory, deterministic outputs, outside-checkout offline proof |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-417-| S0006 AC4–AC6 | semantic example ownership, AC ledger and handoff | Definitions/worked/boundary links, observed 41-AC proof with coverage, rollback and ADR status |
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-418-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-419-## Data Model, Cache and Deployment
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-424-See README for the artifact ER/component views; existing C4 context/container
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-425-diagrams remain applicable. Cache immutable compiled validators in-process by
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-426-bundle hash/ref/profile only; no mutable tenant data and no external cache.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-427-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:428:Root/package snapshots are one deployment unit. Rollback restores the previous
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:429:coherent package set and its snapshot, not a mix of schema hashes. Never rewrite
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-430-historical payloads or reinterpret content. A future DDL need requires plan
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-431-amendment and a migration number after current 0015; none is planned here.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-432-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-433-## Ownership and Required Handoffs
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-488-coverage. Architect/QE own the broad regression selection; obtain primary
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-489-maintainer acknowledgement and an additional independent reviewer before the
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-490-future implementation merge. No message was sent to any maintainer by this run.
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-491-
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md:492:The tracked HEAD diff-impact check finds zero changed runtime symbols. It does
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-493-not index untracked planning files; the explicit 21-resource/six-schema inventory
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-494-and KG source review cover those new artifacts. Orphan validation passes with 14
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-495-existing advisory nodes outside F0011; retain those as baseline/future-feature
+planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md-496-entries rather than inventing F0011 links. The six new schemas, two capabilities
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-15-
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-16-The feature run authors `scripts/contracts/sources.yaml` from this inventory and
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-17-implements one deterministic generator. `planning-mds/schemas/*.schema.json` is
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-18-the authored definition. `schemas/contracts/v1/` is the generated runtime release
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md:19:snapshot, satisfying the blueprint's root schemas convention. Package resources,
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-20-AJV inputs, Pydantic models, UI metadata and OpenAPI components are derived outputs,
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md:21:checked against that snapshot. No output is a second hand-authored schema source.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-22-Runtime loading never traverses parent directories or reads planning files.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-23-
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-24-Existing package copies become generated outputs or are removed after callers
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-25-delegate to `brain_contracts`. A released schema identity is immutable after its
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-141-adopt/delegate/retain-versioned-boundary dispositions (PR-M2). The table below
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-142-summarizes groups only. Manifest-read and ProblemDetails are OpenAPI/doc-only
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-143-schema boundaries; the native commit request retains its versioned DTO.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-144-The [assembly plan](feature-assembly-plan.md#stored-version-rollout-preflight-pr-m1)
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md:145:requires complete read-only integration/dev stored-version sweeps before
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-146-response-guard rollout (PR-M1), and records the G3 Security audit follow-up
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-147-(PR-L3). These are future proof obligations under unchanged S0005 ACs.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-148-
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-149-| Consumer entry point | Integration and compatibility boundary |
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-150-|----------------------|----------------------------------------|
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md:151:| brain_content.contracts.schema / validate_contract; parse_manifest; content record/date/output adapters | Delegate to the shared installed bundle; retain existing native parser/error mapping. Delete parent-directory planning fallback. Content v1/v2 selectors and v2 writer activation stay unchanged. |
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-152-| brain_contracts.assertions.validate_contract, ContractModel; dispatch.parse_result / parse_interpretation_result | Delegate schema access; retain AssertionContractError/Unsupported, v1 absence-of-selector and explicit v2 behavior. No failed reader downgrade. |
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-153-| brain_factslots.resolution.FactSlotResolver.resolve | After current authority, domain parsing and reference checks, validate canonical key/result before insert/return. Domain remains I/O-free and does not import the schema package. |
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-154-| brain_factslots.answers.FactAnswerPolicy.canonical_value | Run existing domain parse/normalization and evidence checks inside the authorized UoW, then validate canonical fact-answer/v1. Source READ key discovery stays tolerant and occurs before protected reasons. |
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-155-| brain_temporal.commit.CanonicalCommitService._commit_v1 / _remainder | Validate normalized version_temporal/serialized answer before repository writes. Preserve reason precedence, attestation disclosure checks, row locking, idempotency and two-range constraints. Do not revalidate/rewrite historical legacy remainders as new identity-v1 payloads. |
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-173-The existing inline ProblemDetails remains because the framework validator
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-174-requires it; generation/checking verifies its assertion tree against its shared
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-175-source rather than trusting an independent edited copy.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-176-
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md:177:Build a self-contained OpenAPI snapshot by resolving external schema references
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-178-into deterministic components and rewriting refs, retaining annotations. Install
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md:179:that snapshot in brain_contracts resources and use the existing FastAPI openapi
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-180-hook/cache in create_app; `/openapi.json` already exists. CI compares normalized
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md:181:route methods/path parameters/statuses with app.routes. The snapshot must not
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-182-claim paths the application lacks or omit a protected application path.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-183-Request/response input checks retain established 401/404/409/422/503 behavior.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-184-The legacy HTTP commit request DTO remains a native compatibility boundary;
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-185-do not add schema validation ahead of authorization that changes protected reason
+--
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-221-  support code generation and excluding unset fields. Source-schema gates and
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-222-  native compatibility are Nebula decisions, not inferred generator guarantees.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-223-- [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0.html) and the
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-224-  [FastAPI OpenAPI hook](https://fastapi.tiangolo.com/how-to/extending-openapi/)
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md:225:  support the shared-definition snapshot integration.
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-226-- [Microsoft jsonc-parser](https://github.com/microsoft/node-jsonc-parser)
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-227-  documents scanner/visitor callbacks and strict parser options. Rejecting every
+planning-mds/features/archive/F0011-json-schema-contract-system/contract-design.md-228-  parser error, duplicate key and unsupported numeric token is Nebula's policy.

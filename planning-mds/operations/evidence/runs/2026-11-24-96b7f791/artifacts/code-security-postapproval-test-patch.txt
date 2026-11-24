@@ -1,0 +1,68 @@
+commit bc0ab1134ef3be48261d113d92b34fd8ea496bf3
+Author:     gajakannan <gajapathi.kannan@live.com>
+AuthorDate: Mon Nov 23 22:28:55 2026 -0500
+Commit:     gajakannan <gajapathi.kannan@live.com>
+CommitDate: Mon Nov 23 22:28:55 2026 -0500
+
+    fix(F0011): PR #64 CI — F0008 route test and cited coverage evidence
+    
+    - test_s0007_ac6_no_route_is_added compares /facts path shapes. F0011 serves the
+      source-owned OpenAPI snapshot, whose parameter labels are camelCase
+      ({factSlotId}); the routes are unchanged ({fact_slot_id}). The assertion still
+      enforces that no /facts route was added.
+    - Commit the run's raw .coverage databases. commands.log and coverage-report.md cite
+      them, and registry-wide feature-evidence validation requires cited artifacts to resolve.
+    - Regenerate coverage-report.yaml for the newly tracked evidence paths.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+diff --git a/engine/tests/integration/test_temporal_migration.py b/engine/tests/integration/test_temporal_migration.py
+index 69eb1c2..c74e731 100644
+--- a/engine/tests/integration/test_temporal_migration.py
++++ b/engine/tests/integration/test_temporal_migration.py
+@@ -8,6 +8,7 @@ identity-v1 versions written at 0013, before F0008 existed."""
+ from __future__ import annotations
+ 
+ import json
++import re
+ from datetime import UTC, datetime
+ from uuid import UUID, uuid4
+ 
+@@ -266,8 +267,15 @@ async def test_d7_upgrade_preflight_refuses_a_bad_identity_v1_envelope(database)
+ def test_s0007_ac6_no_route_is_added():
+     from brain_api.app import create_app
+ 
+-    paths = sorted(p for p in create_app().openapi()["paths"] if p.startswith("/facts"))
+-    assert paths == ["/facts/{fact_slot_id}", "/facts/{fact_slot_id}/commits"]
++    # F0011 serves the source-owned OpenAPI snapshot, whose parameter labels are
++    # camelCase (`{factSlotId}`) while the route declares `{fact_slot_id}`. Compare
++    # path shapes so the assertion stays "no /facts route was added".
++    paths = sorted(
++        re.sub(r"\{[^}]+\}", "{}", p)
++        for p in create_app().openapi()["paths"]
++        if p.startswith("/facts")
++    )
++    assert paths == ["/facts/{}", "/facts/{}/commits"]
+ 
+ 
+ async def test_0015_preflight_refuses_cross_slot_lineage_and_cycles_cleanly(database):
+diff --git a/planning-mds/operations/evidence/runs/2026-11-22-885e8734/.gitignore b/planning-mds/operations/evidence/runs/2026-11-22-885e8734/.gitignore
+index 9046d9a..c64f101 100644
+--- a/planning-mds/operations/evidence/runs/2026-11-22-885e8734/.gitignore
++++ b/planning-mds/operations/evidence/runs/2026-11-22-885e8734/.gitignore
+@@ -1,10 +1,10 @@
+-# Kept locally, not committed: third-party distributions (redistribution), binary coverage
+-# databases (their JSON/XML reports are committed), SAST source snapshots (duplicates of the
+-# committed source), superseded raw V8 captures and bytecode caches. Their sha256 hashes are
+-# recorded in the adjacent receipts (install*/preparation.json, sast*/source-inputs.json).
++# Kept locally, not committed: third-party distributions (redistribution), SAST source
++# snapshots (duplicates of the committed source), superseded raw V8 captures and bytecode
++# caches. Their sha256 hashes are recorded in the adjacent receipts
++# (install*/preparation.json, sast*/source-inputs.json). Raw .coverage databases ARE
++# committed: commands.log and coverage-report.md cite them.
+ artifacts/install*/wheels/
+ artifacts/install*/sdists/
+-artifacts/coverage/*.coverage
+ artifacts/coverage/js-v8/
+ artifacts/coverage/js-review-v8/
+ artifacts/security/sast*/source/

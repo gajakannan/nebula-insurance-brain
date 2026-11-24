@@ -1,0 +1,187 @@
+"""Source validation surrounds generated Pydantic parsing and serialization."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel
+
+from .schema_runtime import ContractBundle, ContractError, ContractRef, WireProfile
+
+
+def model_for(ref: ContractRef) -> type[BaseModel]:
+    from .generated import contracts_v1
+
+    name = ref.name.removesuffix(".schema.json")
+    try:
+        return getattr(contracts_v1, contracts_v1.MODEL_INDEX[(name, ref.pointer)])
+    except (KeyError, AttributeError):
+        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+
+
+def to_wire(ref: ContractRef, model: BaseModel, *, profile: WireProfile) -> Any:
+    try:
+        wire = model.model_dump(mode="json", by_alias=True, exclude_unset=True)
+        ContractBundle.installed().validate(ref, wire, profile=profile)
+        return wire
+    except Exception:
+        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+
+
+def parse_model[ModelT: BaseModel](
+    ref: ContractRef, raw: bytes | str, model: type[ModelT], *, profile: WireProfile
+) -> ModelT:
+    bundle = ContractBundle.installed()
+    value = bundle.decode(raw, profile=profile)
+    bundle.validate(ref, value, profile=profile)
+    try:
+        parsed = model.model_validate(value)
+        wire = to_wire(ref, parsed, profile=profile)
+        # WHY: source guards catch lost constraints, while this comparison catches
+        # accepted extras/nulls/strings lost by a generator approximation.
+        if wire != value:
+            raise ContractError("CONTRACT_MODEL_MISMATCH")
+        return parsed
+    except Exception:
+        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+"""Candidate response guards shared by API delivery and the history preflight.
+
+The caller completes the existing authorization/domain checks first. These
+guards inspect normalized output; a failure is an internal invariant error.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+from brain_contracts.schema_runtime import ContractRef, validate_contract
+
+
+def guard_fact_response(payload: dict[str, Any], *, validity_unknown: bool = False) -> None:
+    ref = (
+        ContractRef("fact-temporal-v1", "1", "/$defs/validity_unknown_read")
+        if validity_unknown
+        else ContractRef("fact-version-read-v1", "1")
+    )
+    validate_contract(ref, payload, profile="native-compat/v1")
+
+
+def guard_commit_response(payload: dict[str, Any]) -> None:
+    validate_contract(
+        ContractRef("canonical-commit-response", "1"), payload, profile="native-compat/v1"
+    )
+"""Serve the generated source-owned OpenAPI snapshot from the installed bundle."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from brain_contracts.schema_runtime import ContractBundle
+from fastapi import FastAPI
+
+
+def install_contract_openapi(app: FastAPI) -> None:
+    # WHY: bundle corruption must refuse startup, even before a route validates
+    # its first response. No schema or API source checkout is consulted here.
+    bundle = ContractBundle.installed()
+    snapshot = bundle.openapi()
+
+    def openapi() -> dict[str, Any]:
+        if app.openapi_schema is None:
+            app.openapi_schema = dict(snapshot)
+        return app.openapi_schema
+
+    app.openapi = openapi  # type: ignore[method-assign]
+"""Strict JSON decoding and validation against the product's authored contracts."""
+
+from __future__ import annotations
+
+import json
+import math
+from datetime import datetime
+from typing import Any
+from uuid import UUID
+
+from brain_contracts.schema_runtime import ContractBundle, ContractError, ContractRef
+
+
+def wire_value(value: Any) -> Any:
+    """Serialize Python-native identifiers without coercing input scalar types."""
+    if isinstance(value, UUID):
+        return str(value)
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if hasattr(value, "model_dump"):
+        return value.model_dump(mode="json")
+    if isinstance(value, dict):
+        return {key: wire_value(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [wire_value(item) for item in value]
+    return value
+
+
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON property")
+        result[key] = value
+    return result
+
+
+def _invalid_number(value: str) -> None:
+    raise ValueError("non-finite JSON number")
+
+
+def _finite_float(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError("non-finite JSON number")
+    return number
+
+
+def decode_json(raw: bytes | str) -> Any:
+    return json.loads(
+        raw,
+        object_pairs_hook=_unique_object,
+        parse_constant=_invalid_number,
+        parse_float=_finite_float,
+    )
+
+
+def _ref(name: str, definition: str | None = None) -> ContractRef:
+    allowed = {
+        "content-artifact-manifest.schema.json",
+        "content-artifact-manifest-v2.schema.json",
+        "content-records-v2.schema.json",
+        "document-date-record.schema.json",
+        "interpretation-output-manifest.schema.json",
+    }
+    if name not in allowed:
+        raise ValueError("unknown content contract")
+    return ContractRef(
+        name.removesuffix(".schema.json"),
+        "2" if name.endswith("-v2.schema.json") else "1",
+        f"/$defs/{definition}" if definition is not None else "",
+    )
+
+
+def schema(name: str) -> dict[str, Any]:
+    # Detached schema views cannot alter the common registry or other consumers.
+    return dict(ContractBundle.installed().schema(_ref(name)))
+
+
+def validate_contract(name: str, value: Any, definition: str | None = None) -> None:
+    ref = _ref(name, definition)
+    bundle = ContractBundle.installed()
+    try:
+        bundle.validate(ref, value, profile="native-compat/v1")
+    except ContractError as exc:
+        if exc.code not in {
+            "CONTRACT_INSTANCE_INVALID",
+            "CONTRACT_JSON_INVALID",
+            "CONTRACT_JSON_UNSUPPORTED",
+        }:
+            raise
+        # Preserve the existing safe native error, without payload or schema text.
+        raise ValueError("CONTENT_CONTRACT_INVALID") from None

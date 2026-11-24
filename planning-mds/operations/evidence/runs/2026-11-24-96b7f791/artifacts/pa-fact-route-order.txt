@@ -1,0 +1,101 @@
+            # otherwise the whole read is the non-disclosing 404 (SEC-F7-02).
+            slot = await repository.get_slot(fact_slot_id)
+            assert slot is not None
+            keys.extend(
+                await repository.evidence_artifact_keys(
+                    (*version.evidence_refs, *version.ending_evidence_refs), scope=slot
+                )
+            )
+        return sorted(set(keys), key=lambda k: (k.type.value, str(k.id)))
+
+    result = await execution.read(
+        principal,
+        _slot(fact_slot_id),
+        Action.READ,
+        trace_id=new_trace_id(),
+        load=load,
+        requested=requested,
+        additional_reads=scope_reads,
+    )
+    response: FactVersionOut | FactValidityUnknownOut
+    try:
+        if isinstance(result, ValidityUnknown):
+            response = FactValidityUnknownOut.from_domain(result)
+        else:
+            response = FactVersionOut.from_domain(result.version)
+        payload = response.model_dump(mode="json")
+    except (ValueError, TypeError):
+        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+    # All exact payload/source READ checks and the read audit have completed.
+    # PR-L3's bounded SUCCEEDED-audit / invariant-500 meaning is reviewed at G3.
+    guard_fact_response(payload, validity_unknown=isinstance(result, ValidityUnknown))
+    return response
+
+
+@router.post("/{fact_slot_id}/commits", response_model=CommitResponseOut, status_code=201)
+    async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResponseOut:
+        decision = next(
+            d for d in decisions if d.resource == _slot(fact_slot_id) and d.action == Action.COMMIT
+        )
+        assert decision.scope is not None
+        # The F0006 source proof covers exactly the evidence-derived reads; reads
+        # added for the answer's scope or name evidence are authorized but excluded.
+        evidence_reads = [
+            d
+            for d in decisions
+            if d.resource in evidence_keys
+            or not (d.action == Action.READ and d.resource.type == ResourceType.CONTENT_ARTIFACT)
+        ]
+        readable = {d.resource for d in decisions if d.action == Action.READ and d.allowed}
+        scope = (decision.scope.tenant_id, decision.scope.knowledge_base_id)
+
+        async def disclosure_check(predecessors: tuple[FactVersion, ...]) -> None:
+            # SEC-F8-NEW-01: remainders repeat their predecessors' attestation dates
+            # in the response. Their documents were READ-checked up front (an
+            # unreadable one already refused the commit with the non-disclosing 404).
+            # A document missing here belongs to a version committed concurrently
+            # after that check, so the commit is a retryable 409 and returns nothing.
+            refs = tuple(
+                ref for v in predecessors for ref in (*v.evidence_refs, *v.ending_evidence_refs)
+            )
+            needed = set(await repository.evidence_artifact_keys(refs, scope=scope))
+            if not needed <= readable:
+                raise StaleVersionError("attesting documents changed concurrently")
+
+        committed = await service.commit(
+            proposal,
+            authorized_scope=scope,
+            authorization_decision_id=decision.decision_id,
+            source_access=repository.source_access_proof(evidence_reads),
+            disclosure_check=disclosure_check,
+        )
+        try:
+            response = CommitResponseOut.from_domain(committed)
+            payload = response.model_dump(mode="json")
+        except (ValueError, TypeError):
+            raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+        # Validate before returning to the existing outer mutation facade, so
+        # response invariant failures roll back versions, changes and outbox.
+        guard_commit_response(payload)
+        return response
+
+    async def source_keys() -> Sequence[ResourceKey]:
+        # F0008: ending evidence joins the same-UoW source READ checks (D4).
+                answer_keys.update(
+                    await repository.current_attesting_artifact_keys(
+                        fact_slot_id, scope=slot, valid_from=window_from, valid_to=window_to
+                    )
+                )
+        return sorted(evidence_keys | answer_keys)
+
+    try:
+        result = await execution.mutate(
+            principal,
+            [_slot(fact_slot_id)],
+            Action.COMMIT,
+            trace_id=new_trace_id(),
+            operation=operation,
+            additional_reads=source_keys,
+        )
+    except AssertionIneligible as exc:
+        raise AssertionIneligibleApiError() from exc

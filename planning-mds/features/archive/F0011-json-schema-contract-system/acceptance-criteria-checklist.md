@@ -5,14 +5,15 @@ story; this index does not duplicate or override that definition.
 
 | Story | Criteria | Count | Required observed proof | State |
 |-------|----------|-------|-------------------------|-------|
-| F0011-S0001 | AC1–AC7 | 7 | Resolve versioned offline contracts | Not Started |
-| F0011-S0002 | AC1–AC7 | 7 | Validate information state and scoped absence | Not Started |
-| F0011-S0003 | AC1–AC7 | 7 | Validate qualified money and scoped identifiers | Not Started |
-| F0011-S0004 | AC1–AC7 | 7 | Prove cross-language contract conformance | Not Started |
-| F0011-S0005 | AC1–AC7 | 7 | Preserve existing consumer contracts | Not Started |
-| F0011-S0006 | AC1–AC6 | 6 | Verify reproducible contract delivery | Not Started |
+| F0011-S0001 | AC1–AC7 | 7 | Resolve versioned offline contracts | Done |
+| F0011-S0002 | AC1–AC7 | 7 | Validate information state and scoped absence | Done |
+| F0011-S0003 | AC1–AC7 | 7 | Validate qualified money and scoped identifiers | Done |
+| F0011-S0004 | AC1–AC7 | 7 | Prove cross-language contract conformance | Done |
+| F0011-S0005 | AC1–AC7 | 7 | Preserve existing consumer contracts | Done |
+| F0011-S0006 | AC1–AC6 | 6 | Verify reproducible contract delivery | Done |
 
-**Total:** 41 numbered acceptance criteria; 0 implemented/verified in this plan.
+**Total:** 41 numbered acceptance criteria; all 41 implemented and verified in feature run
+`2026-11-22-885e8734` (see [STATUS](STATUS.md)).
 
 - [x] Versioned bundle and supported subset/reference/annotation policy complete.
 - [x] All nine information states and scoped-absence failures exercised.

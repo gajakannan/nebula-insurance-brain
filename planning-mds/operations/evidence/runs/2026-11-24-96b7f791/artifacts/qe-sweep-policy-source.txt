@@ -1,0 +1,26 @@
+scripts/contracts/check_stored_fact_versions.py:5:Only safe counts and candidate identities are emitted, never data or row IDs.
+scripts/contracts/check_stored_fact_versions.py:37:def candidate_code_digest() -> str:
+scripts/contracts/check_stored_fact_versions.py:38:    digest = hashlib.sha256(pathlib.Path(__file__).read_bytes())
+scripts/contracts/check_stored_fact_versions.py:48:        digest.update(pathlib.Path(source).read_bytes())
+scripts/contracts/check_stored_fact_versions.py:49:    return digest.hexdigest()
+scripts/contracts/check_stored_fact_versions.py:86:def zero_row_inventory(path: pathlib.Path | None, environment: str) -> bool:
+scripts/contracts/check_stored_fact_versions.py:98:            signature = inventory[role]
+scripts/contracts/check_stored_fact_versions.py:100:                not isinstance(signature["reviewer"], str)
+scripts/contracts/check_stored_fact_versions.py:101:                or not signature["reviewer"].strip()
+scripts/contracts/check_stored_fact_versions.py:104:            date.fromisoformat(signature["date"])
+scripts/contracts/check_stored_fact_versions.py:115:    bundle_digest: str,
+scripts/contracts/check_stored_fact_versions.py:129:        "candidate_code_digest": candidate_code_digest(),
+scripts/contracts/check_stored_fact_versions.py:130:        "bundle_digest": bundle_digest,
+scripts/contracts/check_stored_fact_versions.py:134:        "read_only": False,
+scripts/contracts/check_stored_fact_versions.py:149:        readonly = await session.scalar(text("SHOW transaction_read_only"))
+scripts/contracts/check_stored_fact_versions.py:153:            readonly != "on"
+scripts/contracts/check_stored_fact_versions.py:158:        report["read_only"] = True
+scripts/contracts/check_stored_fact_versions.py:209:        report["zero_row_inventory_verified"] = bool(
+scripts/contracts/check_stored_fact_versions.py:234:                bundle_digest=bundle.digest,
+scripts/contracts/check_stored_fact_versions.py:236:                empty_inventory_verified=zero_row_inventory(
+scripts/contracts/check_stored_fact_versions.py:237:                    args.zero_row_inventory, args.environment
+scripts/contracts/check_stored_fact_versions.py:246:    # revision while the candidate digest also binds the executed source bytes.
+engine/tests/integration/test_f0011_consumer_contracts.py:192:            bundle_digest=sweep.ContractBundle.installed().digest,
+engine/tests/integration/test_f0011_consumer_contracts.py:205:    assert report["read_only"] is True and report["isolation"] == "repeatable read"
+engine/tests/integration/test_f0011_consumer_contracts.py:234:async def test_read_only_snapshot_is_database_enforced_even_for_local_admin(world):
+engine/tests/integration/test_f0011_consumer_contracts.py:239:        assert await session.scalar(text("SHOW transaction_read_only")) == "on"

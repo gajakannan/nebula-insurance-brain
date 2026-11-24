@@ -1,0 +1,24 @@
+23:from brain_api.contract_guards import guard_fact_response
+37:def candidate_code_digest() -> str:
+38:    digest = hashlib.sha256(pathlib.Path(__file__).read_bytes())
+42:        guard_fact_response,
+48:        digest.update(pathlib.Path(source).read_bytes())
+49:    return digest.hexdigest()
+86:def zero_row_inventory(path: pathlib.Path | None, environment: str) -> bool:
+98:            signature = inventory[role]
+100:                not isinstance(signature["reviewer"], str)
+101:                or not signature["reviewer"].strip()
+104:            date.fromisoformat(signature["date"])
+115:    bundle_digest: str,
+129:        "candidate_code_digest": candidate_code_digest(),
+130:        "bundle_digest": bundle_digest,
+134:        "read_only": False,
+149:        readonly = await session.scalar(text("SHOW transaction_read_only"))
+154:            or isolation != "repeatable read"
+158:        report["read_only"] = True
+188:                        guard_fact_response(payload)
+209:        report["zero_row_inventory_verified"] = bool(
+234:                bundle_digest=bundle.digest,
+236:                empty_inventory_verified=zero_row_inventory(
+237:                    args.zero_row_inventory, args.environment
+246:    # revision while the candidate digest also binds the executed source bytes.

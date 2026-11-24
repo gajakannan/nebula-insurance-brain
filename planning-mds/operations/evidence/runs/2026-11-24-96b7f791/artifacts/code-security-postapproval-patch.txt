@@ -1,0 +1,39 @@
+commit a125d2cdf1520b90150bf397d267c8a332039fdf
+Author:     gajakannan <gajapathi.kannan@live.com>
+AuthorDate: Mon Nov 23 22:33:31 2026 -0500
+Commit:     gajakannan <gajapathi.kannan@live.com>
+CommitDate: Mon Nov 23 22:33:31 2026 -0500
+
+    fix(ci): load the engine pytest config in the F0011 contract steps
+    
+    The contracts unit/install step and the PostgreSQL consumer step run pytest from
+    the repository root, so the root pyproject.toml (no asyncio_mode) was selected
+    and 8 async tests failed as "async def functions are not natively supported".
+    Pass -c engine/pyproject.toml, as every local evidence lane already does.
+    Reproduced in an image built from a clean clone: 8 failed / 535 passed before,
+    543 passed after. coverage-report.yaml regenerated for the workflow change.
+    
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+diff --git a/.github/workflows/ci-gates.yml b/.github/workflows/ci-gates.yml
+index 87bac78..26cf18e 100644
+--- a/.github/workflows/ci-gates.yml
++++ b/.github/workflows/ci-gates.yml
+@@ -52,7 +52,7 @@ jobs:
+       - name: Prove bundle integrity, typed round trips, route parity and outside-checkout installation
+         run: >
+           docker run --rm -v "$PWD/artifacts/contracts:/app/brain/artifacts/contracts" brain-contracts-engine:ci
+-          uv run --no-sync --project engine --group contract-build python -m pytest
++          uv run --no-sync --project engine --group contract-build python -m pytest -c engine/pyproject.toml
+           engine/packages/brain-contracts/tests engine/apps/api/tests/test_contract_openapi.py
+           scripts/contracts/tests -q --junitxml=artifacts/contracts/unit-and-install.xml
+       - name: Build exact wheel and source archive installation inputs
+@@ -286,7 +286,7 @@ jobs:
+           -e BRAIN_DATABASE_URL=postgresql+asyncpg://brain:brain@localhost:5432/brain
+           -e BRAIN_MIGRATION_ADMIN_URL=postgresql://brain:brain@localhost:5432/brain
+           brain-contracts-engine:ci
+-          uv run --no-sync --project engine --group contract-build python -m pytest
++          uv run --no-sync --project engine --group contract-build python -m pytest -c engine/pyproject.toml
+           engine/tests/integration/test_f0011_consumer_contracts.py -q
+       - name: Install the locked neuron dependencies for delivery recovery
+         run: uv sync --locked --project neuron
