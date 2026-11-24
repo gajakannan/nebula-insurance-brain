@@ -8,6 +8,7 @@ identity-v1 versions written at 0013, before F0008 existed."""
 from __future__ import annotations
 
 import json
+import re
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
@@ -266,8 +267,15 @@ async def test_d7_upgrade_preflight_refuses_a_bad_identity_v1_envelope(database)
 def test_s0007_ac6_no_route_is_added():
     from brain_api.app import create_app
 
-    paths = sorted(p for p in create_app().openapi()["paths"] if p.startswith("/facts"))
-    assert paths == ["/facts/{fact_slot_id}", "/facts/{fact_slot_id}/commits"]
+    # F0011 serves the source-owned OpenAPI snapshot, whose parameter labels are
+    # camelCase (`{factSlotId}`) while the route declares `{fact_slot_id}`. Compare
+    # path shapes so the assertion stays "no /facts route was added".
+    paths = sorted(
+        re.sub(r"\{[^}]+\}", "{}", p)
+        for p in create_app().openapi()["paths"]
+        if p.startswith("/facts")
+    )
+    assert paths == ["/facts/{}", "/facts/{}/commits"]
 
 
 async def test_0015_preflight_refuses_cross_slot_lineage_and_cycles_cleanly(database):
