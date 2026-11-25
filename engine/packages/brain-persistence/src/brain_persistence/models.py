@@ -283,6 +283,11 @@ class ReviewItemRow(Base):
     """Persistence row for `brain_domain.review.ReviewItem` (F0001-S0004)."""
 
     __tablename__ = "review_item"
+    # Mirrors migration 0005's owner key; F0009's composite FKs reference it,
+    # so metadata.create_all() schemas need it too.
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "knowledge_base_id", name="uq_review_item_owner"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True, default=uuid.uuid4)
     type: Mapped[str] = mapped_column(nullable=False)
@@ -304,6 +309,11 @@ class ReviewBatchRow(Base):
     """Persistence row for `brain_domain.review.ReviewBatch` (F0001-S0004)."""
 
     __tablename__ = "review_batch"
+    # Mirrors migration 0005's owner key; F0009's composite FKs reference it,
+    # so metadata.create_all() schemas need it too.
+    __table_args__ = (
+        UniqueConstraint("id", "tenant_id", "knowledge_base_id", name="uq_review_batch_owner"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True, default=uuid.uuid4)
     assembled_at: Mapped[datetime] = mapped_column(server_default=func.now())
