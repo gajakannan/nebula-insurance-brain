@@ -74,6 +74,18 @@ They distinguish structural shape from currency/basis/interval/normalization dom
 refusals. Only local planning-schema expectations are checked here; full runtime
 conformance and consumer proof remain required by [ADR-0079](../architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md).
 
+## F0009 provenance and correction coverage
+
+| Concept / boundary | Definition, worked and failure example | Owner / contract / release |
+|---|---|---|
+| Stored source explanation, honest missing metadata and derivation references | [EX-PROV-001](../features/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-001--explain-a-source-claim) | F0009-S0001; ADR-0010/F0006; v0.1A approved planning |
+| Append-only human correction, attribution, replay/stale/competing outcomes | [EX-PROV-002](../features/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-002--correct-without-erasing-or-accepting) | F0009-S0002; ADR-0037/0044/0058; existing review and assertion contracts |
+| Same-slot temporal remainder versus assertion correction; ending evidence | [EX-PROV-003](../features/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-003--explain-an-unchanged-temporal-remainder) | F0009-S0003; accepted ADR-0077/0078 |
+| Current authority across historical, ancestor, ending and attestation sources | [EX-PROV-004](../features/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-004--current-access-controls-old-history) | F0009-S0004; F0002/F0006/F0007/F0008 shipped boundaries |
+| Reserved LearningCandidate reference without learning or dataset effects | [EX-PROV-005](../features/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-005--reserve-future-learning-with-zero-dataset-effect) | F0009-S0005/S0006; master blueprint §§88/106.3; future F0041/F0026 consumers |
+
+All EX-PROV examples are synthetic, illustrative development expectations extending EX-GL-001. No F0009 runtime proof is claimed. The Architect binds [query](../schemas/provenance-query-v1.schema.json), [result](../schemas/provenance-result-v1.schema.json), [reservation](../schemas/learning-candidate-reservation-v1.schema.json) and [non-applied submission](../schemas/review-submission-attempt-v1.schema.json) contracts in Phase B; [glossary definitions](../domain/glossary.md#f0009-provenance-refinements-phase-b-approved) and the assembly plan control their meaning. The later feature action supplies PostgreSQL reproduction.
+
 ## Governed retrieval coverage
 
 Definitions: [retrieval glossary](../domain/glossary.md#governed-evidence-retrieval). All EX-RET cases are synthetic, illustrative development examples; no runtime or measured quality claim. Owning features remain Planned and bind story IDs/reproduction evidence during their own plan actions.

@@ -442,3 +442,24 @@ Plan run `2026-11-16-208a1193`. [ADR-0078](decisions/ADR-0078-bitemporal-version
 - **Envelope backstop:** a CHECK and the insert trigger enforce the `fact-answer/v1` state/value predicate for identity-v1 slots.
 - **Relationships:** RELATIONSHIP slot versions live in this table. The §78 `canonical_relationship_version` table is not created.
 - **No new tables.** The RLS inventory (F0018) is unchanged.
+
+
+## F0009 provenance hooks (Phase B approved 2026-11-24)
+
+Proposed [ADR-0080](decisions/ADR-0080-bounded-provenance-and-correction-reservations.md) and [assembly plan](../features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md) add two authoritative append-only scoped tables; they are not deployed by this plan. Exact proposed [DDL](../features/F0009-provenance-and-human-correction-lineage/migration-design.sql) and semantic/deferred guards are in that plan.
+
+| Table / addition | Identity and links | Invariant |
+|---|---|---|
+| learning_candidate_reservation | UUID PK; unique review_decision_id and corrected_assertion_id; composite tenant/KB refs to decision/original/child; reviewer/time | New effective CORRECT only; exact child/reviewer/decision time; no learning state or backfill |
+| review_submission_attempt | UUID PK; unique review_item_id/event_sha256; scoped item/batch/original refs; submitted action/revision/value/evidence/comment, verified reviewer/time, authorization ID | Non-applied ALREADY_DECIDED/BATCH_REFUSED only; fully protected attribution, no accepted decision/child/candidate |
+| review_decision.correction_lineage_contract | Nullable smallint; historical NULL; BEFORE INSERT stamps 1 on new decisions | Deferred constraint requires one reference for every new effective CORRECT; legacy rows remain unchanged |
+
+New table UPDATE/DELETE/TRUNCATE are denied, and populated downgrade refuses under table locks. Existing canonical version rows retain ADR-0078 close-only immutability. The lineage reader is derived/on-demand and has no authoritative graph/cache table. Existing F0018 RLS/DB-role and F0041 learning ownership remain unchanged.
+
+```mermaid
+erDiagram
+    REVIEW_DECISION ||--o| LEARNING_CANDIDATE_RESERVATION : effective_correction
+    ASSERTION ||--o| LEARNING_CANDIDATE_RESERVATION : corrected_child
+    REVIEW_ITEM ||--o{ REVIEW_SUBMISSION_ATTEMPT : non_applied
+    ASSERTION ||--o{ REVIEW_SUBMISSION_ATTEMPT : original_claim
+```

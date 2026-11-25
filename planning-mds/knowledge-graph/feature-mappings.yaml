@@ -4,10 +4,6 @@ coverage_note: Feature mappings are compiled from planning-mds/kg-source/feature
   explicit coverage exclusions until implementation exists.
 coverage:
   excluded_features:
-    - id: feature:F0009
-      path: planning-mds/features/F0009-provenance-and-human-correction-lineage
-      reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
-        to bind yet. The plan action removes this exclusion at Phase B.
     - id: feature:F0010
       path: planning-mds/features/F0010-change-and-retraction-semantics
       reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation
@@ -642,6 +638,67 @@ features:
       - schema:fact-answer-v1
       - schema:fact-temporal-v1
       - schema:problem-details
+  - status: planned
+    id: feature:F0009
+    path: planning-mds/features/F0009-provenance-and-human-correction-lineage
+    affects:
+      - capability:authorization-enforcement
+      - capability:evidence-review-round-trip
+      - capability:learning-candidate-reservation
+      - capability:provenance-lineage
+      - capability:review-submission-attribution
+      - entity:assertion
+      - entity:canonical-fact-change
+      - entity:canonical-fact-version
+      - entity:learning-candidate-reservation
+      - entity:review-decision
+      - entity:review-submission-attempt
+    depends_on:
+      - feature:F0002
+      - feature:F0004
+      - feature:F0006
+      - feature:F0007
+      - feature:F0008
+      - feature:F0011
+    governed_by:
+      - adr:0010
+      - adr:0037
+      - adr:0044
+      - adr:0058
+      - adr:0062
+      - adr:0075
+      - adr:0077
+      - adr:0078
+      - adr:0079
+      - adr:0080
+    notes:
+      - Phase A exact operator token approve-phase-a recorded and attested at G3 in run 2026-11-24-bfdbbf04.
+        Phase B design/ADR-0080 Proposed; Phase B approved 2026-11-24 with exact operator token approve-phase-b
+        after G4 and seven ordered G5 pre-approval checks. G5 journal/manifest records post-approval refresh/publication.
+        No implementation or feature evidence index.
+      - Phase B rework run 2026-11-24-c32acf46 resolves plan-review 2026-11-24-2af6f972 PR-H1 (refused
+        attempts never replay; get-or-create on item/event/outcome) and PR-H2 (closed per-kind provenance
+        edge table in provenance-result/v1); approved 2026-11-24 with approve-phase-b.
+      - Read sources before protected materialization using the opt-in metadata-first read hook; whole-result
+        refusal for any denied required source. Refused batch attribution preserves existing 422 and review
+        authority. Runtime/generated contract files are not changed by plan.
+      - 'Requirement-ownership amendment 2026-11-08 - Carry the master blueprint 88 LearningCandidate
+        hook: human corrections persist a reserved LearningCandidate reference for the Golden Corpus.
+        No learning behaviour ships in v0.1 (F0041 owns it).'
+      - Technical bindings add shipped F0002/F0004/F0007/F0011 to the original direct F0006/F0008 dependencies;
+        no future feature becomes a prerequisite.
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:assertion-record-v2
+      - schema:fact-answer-v1
+      - schema:fact-temporal-v1
+      - schema:fact-version-read-v1
+      - schema:learning-candidate-reservation-v1
+      - schema:provenance-query-v1
+      - schema:provenance-result-v1
+      - schema:review-decision
+      - schema:review-submission-attempt-v1
   - status: archived-done
     id: feature:F0011
     path: planning-mds/features/archive/F0011-json-schema-contract-system
@@ -1554,6 +1611,105 @@ stories:
       - api:brain-api
     uses_schema:
       - schema:canonical-commit-request
+  - id: story:F0009-S0001
+    feature: feature:F0009
+    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md
+    affects:
+      - capability:provenance-lineage
+    governed_by:
+      - adr:0010
+      - adr:0037
+      - adr:0080
+    uses_api_contract: []
+    uses_schema:
+      - schema:learning-candidate-reservation-v1
+      - schema:provenance-query-v1
+      - schema:provenance-result-v1
+      - schema:review-submission-attempt-v1
+  - id: story:F0009-S0002
+    feature: feature:F0009
+    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md
+    affects:
+      - capability:evidence-review-round-trip
+      - capability:review-submission-attribution
+      - entity:review-submission-attempt
+    governed_by:
+      - adr:0010
+      - adr:0037
+      - adr:0080
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:learning-candidate-reservation-v1
+      - schema:provenance-query-v1
+      - schema:provenance-result-v1
+      - schema:review-submission-attempt-v1
+  - id: story:F0009-S0003
+    feature: feature:F0009
+    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md
+    affects:
+      - capability:provenance-lineage
+      - entity:canonical-fact-change
+      - entity:canonical-fact-version
+    governed_by:
+      - adr:0010
+      - adr:0037
+      - adr:0080
+    uses_api_contract: []
+    uses_schema:
+      - schema:learning-candidate-reservation-v1
+      - schema:provenance-query-v1
+      - schema:provenance-result-v1
+      - schema:review-submission-attempt-v1
+  - id: story:F0009-S0004
+    feature: feature:F0009
+    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md
+    affects:
+      - capability:authorization-enforcement
+      - capability:provenance-lineage
+    governed_by:
+      - adr:0010
+      - adr:0037
+      - adr:0080
+    uses_api_contract: []
+    uses_schema:
+      - schema:learning-candidate-reservation-v1
+      - schema:provenance-query-v1
+      - schema:provenance-result-v1
+      - schema:review-submission-attempt-v1
+  - id: story:F0009-S0005
+    feature: feature:F0009
+    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md
+    affects:
+      - capability:learning-candidate-reservation
+      - entity:learning-candidate-reservation
+    governed_by:
+      - adr:0010
+      - adr:0037
+      - adr:0080
+    uses_api_contract: []
+    uses_schema:
+      - schema:learning-candidate-reservation-v1
+      - schema:provenance-query-v1
+      - schema:provenance-result-v1
+      - schema:review-submission-attempt-v1
+  - id: story:F0009-S0006
+    feature: feature:F0009
+    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md
+    affects:
+      - capability:learning-candidate-reservation
+      - capability:provenance-lineage
+    governed_by:
+      - adr:0010
+      - adr:0037
+      - adr:0080
+    uses_api_contract:
+      - api:brain-api
+    uses_schema:
+      - schema:learning-candidate-reservation-v1
+      - schema:provenance-query-v1
+      - schema:provenance-result-v1
+      - schema:review-submission-attempt-v1
   - id: story:F0011-S0001
     feature: feature:F0011
     path: planning-mds/features/archive/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md

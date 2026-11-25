@@ -1,0 +1,50 @@
+feature: F0009
+status: Phase B approved 2026-11-24; runtime integration pending feature action
+existing_bundle: brain-contracts/v1
+runtime_policy: No runtime sources.yaml, installed bundle, generated Pydantic/AJV assets or OpenAPI snapshot is changed
+  by plan.
+resources:
+- name: provenance-query-v1
+  source: planning-mds/schemas/provenance-query-v1.schema.json
+  producer: trusted internal host/tests construct root+anchor, never principal/tenant/grants from wire
+  consumer: brain_provenance.service.ProvenanceReader.read
+  profile: portable-json/v1
+- name: provenance-result-v1
+  source: planning-mds/schemas/provenance-result-v1.schema.json
+  producer: brain_provenance.service.ProvenanceReader.read
+  consumer: internal engine consumers and future F0020/F0022/F0023; feature integration proof calls exported reader
+  profile: native-compat/v1 for embedded old source values; portable-json/v1 only for values passing its numeric limits,
+    with no lossy conversion
+- name: learning-candidate-reservation-v1
+  source: planning-mds/schemas/learning-candidate-reservation-v1.schema.json
+  producer: SqlAlchemyReviewItemRepository.reserve_learning_reference
+  consumer: authorized internal provenance reader; future F0041 may adopt ID
+  profile: portable-json/v1
+- name: review-submission-attempt-v1
+  source: planning-mds/schemas/review-submission-attempt-v1.schema.json
+  producer: SqlAlchemyReviewItemRepository.record_refused_submission
+  consumer: authorized internal provenance reader
+  profile: native-compat/v1, retaining existing corrected_value acceptance
+- name: review-decision
+  source: planning-mds/schemas/review-decision.schema.json
+  producer: existing ReviewDecision row serializer with fully retained stale submission
+  consumer: provenance result subrecord; HTTP receipt stays distinct
+  profile: native-compat/v1; add to F0011 sources allowlist in feature action as a closed ref dependency
+existing_references:
+- assertion-record-v2
+- fact-version-read-v1
+- fact-temporal-v1
+future_feature_edits:
+- scripts/contracts/sources.yaml
+- scripts/contracts/cases.json
+- scripts/contracts/case-behavior-map.json
+- scripts/contracts/case-provenance.json
+- scripts/contracts/environments.json
+- scripts/contracts/generate.py only if current metadata consumer inventory needs extension
+checks:
+- Register new resources as explicit installed consumers, without reclassifying old entry points. Generate root/Python/AJV
+  assets and self-contained OpenAPI snapshot with the existing builder in the feature action.
+- Run all positive/negative cases through JSON Schema and generated Pydantic. Run the portable subset through headless
+  AJV; native legacy values retain native compatibility with explicit differential cases.
+- Compare old review request/receipt and fact/commit response fixtures and route list. No new path or response field
+  is introduced; generated OpenAPI paths must remain identical.

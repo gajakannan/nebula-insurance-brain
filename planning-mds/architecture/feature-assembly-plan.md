@@ -23,3 +23,5 @@ F0067 reads the resulting trace events later; it does not gate emission. F0068 a
 | F0008 | [Bitemporal canonical facts](../features/archive/F0008-bitemporal-canonical-facts/feature-assembly-plan.md) | Done / archived 2026-11-19 (second remediation run `2026-11-19-8cfcd0ff`; earlier `2026-11-18-bce4909b`, `2026-11-17-1a4ae2f0`); migrations 0014–0015 implemented; ADR-0078 proof gates met, still Proposed |
 
 | F0011 | [JSON Schema contract system](../features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md) | Phase A and Phase B approved in plan run `2026-11-20-ccb1bd39`; six stories/41 ACs; offline shared bundle and source-gated cross-language conformance; no runtime yet |
+
+| F0009 | [Provenance and correction lineage](../features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md) | Phase A approved 2026-11-24; Phase B approved 2026-11-24 in run `2026-11-24-bfdbbf04`; six stories/41 ACs; after F0006/F0008 and shipped authority/content/identity/contracts; no runtime delivery |

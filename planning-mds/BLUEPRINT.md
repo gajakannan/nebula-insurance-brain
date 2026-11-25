@@ -265,7 +265,13 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 
 **v0.1A (remaining — Now: F0009, F0012; Next: F0010, F0013–F0017)**
 
-- [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned
+- [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned (Phase A approved 2026-11-24 in plan run `2026-11-24-bfdbbf04`; six Not Started stories, 41 ACs; Phase B approved 2026-11-24)
+  - [F0009-S0001](features/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md) — Not Started
+  - [F0009-S0002](features/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md) — Not Started
+  - [F0009-S0003](features/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md) — Not Started
+  - [F0009-S0004](features/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md) — Not Started
+  - [F0009-S0005](features/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md) — Not Started
+  - [F0009-S0006](features/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md) — Not Started
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
 - [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned
 - [F0013 — Insurance Core GL ontology](features/F0013-insurance-core-gl-ontology/README.md) - Planned
@@ -593,6 +599,14 @@ A drift review compared the planning artifacts with the code delivered through F
 - **F0005** ([compatibility evidence](features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md)): closed on its rejection branch. Fenced document jobs (migration 0004, reasons in 0009–0010) run under the accepted ADR-0074 controls. The direct-baseline client is the v0.1 extraction path.
 
 Every recipient of the ADR-0077/ADR-0078 handoffs (F0009, F0010, F0012, F0013, F0016–F0020, F0022, F0023, F0025, F0026, F0065, F0069) carries a "Shipped contract carry-in" note in its README. F0011's plan already binds them. Their Phase B binds to the as-built contract, not to the original section 13/14 sketch.
+
+---
+
+### 4.18 F0009 provenance and correction lineage (Phase B approved 2026-11-24)
+
+Plan run `2026-11-24-bfdbbf04`; Phase A explicitly approved by operator token `approve-phase-a`, six Not Started stories and 41 ACs. The [assembly plan](features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md) and proposed [ADR-0080](architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md) define an internal metadata-first reader over exact assertion/version lineage, current READ of every linked source/review/ending/attestation resource, two append-only tables for future-learning reservations and non-applied submission attribution, and a nullable server-owned new-decision marker. Legacy rows are not backfilled; canonical writes remain with the shipped commit service and full orchestration remains F0018.
+
+The four design schemas use F0011 delivery in the later feature action; no runtime bundle, route, grant, UI, deployable, parse or learning producer is added by plan. A losing batch keeps its existing 422 after protected audit-only persistence, and a new effective CORRECT receives one reference atomically. G4 and all seven ordered G5 pre-approval checks passed; the operator approved Phase B with exact token `approve-phase-b` on 2026-11-24. The same run’s G5 journal/manifest records post-approval regeneration, checks and final publication. ADR-0080 is Proposed until its runtime proofs and separate acceptance. F0010 owns retraction semantics; F0020/F0022/F0023 own exposure and F0041/F0026 own learning/benchmark governance.
 
 ---
 

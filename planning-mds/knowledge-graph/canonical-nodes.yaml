@@ -430,6 +430,11 @@ adrs:
     related_nodes:
       - capability:cross-language-contract-validation
       - capability:offline-contract-bundle
+  - id: adr:0080
+    label: Bounded provenance and correction reservations
+    path: planning-mds/architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md
+    notes: Proposed F0009 design; Phase A and Phase B approved 2026-11-24 in plan run 2026-11-24-bfdbbf04.
+      Runtime proofs and separate formal ADR acceptance remain pending.
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -738,6 +743,23 @@ capabilities:
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/PRD.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/feature-assembly-plan.md
+  - id: capability:learning-candidate-reservation
+    label: Reserved learning-candidate identity
+    notes: F0009 Phase A+B planning approved 2026-11-24 in run 2026-11-24-bfdbbf04; six stories Not Started.
+      No runtime proof or formal ADR acceptance.
+    rationale:
+      - adr: adr:0080
+        section: Decision
+        summary: Keep exact on-demand lineage and immutable correction hooks under current source authority
+          without canonical or learning scope expansion.
+    related_nodes:
+      - adr:0080
+      - entity:learning-candidate-reservation
+      - entity:review-decision
+      - schema:learning-candidate-reservation-v1
+    source_docs:
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: capability:local-dependency-stack
     label: Local dependency stack
     notes: 'Docker Compose stack: PostgreSQL 18 with pgvector, AGE, btree_gist; local filesystem content-artifact
@@ -898,6 +920,44 @@ capabilities:
       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md
       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md
       - planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/PRD.md
+  - id: capability:provenance-lineage
+    label: Bounded authorized provenance lineage
+    notes: F0009 Phase A+B planning approved 2026-11-24 in run 2026-11-24-bfdbbf04; six stories Not Started.
+      No runtime proof or formal ADR acceptance.
+    rationale:
+      - adr: adr:0080
+        section: Decision
+        summary: Keep exact on-demand lineage and immutable correction hooks under current source authority
+          without canonical or learning scope expansion.
+    related_nodes:
+      - adr:0080
+      - capability:authorization-enforcement
+      - entity:assertion
+      - entity:canonical-fact-change
+      - entity:canonical-fact-version
+      - entity:review-decision
+      - schema:provenance-query-v1
+      - schema:provenance-result-v1
+    source_docs:
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+  - id: capability:review-submission-attribution
+    label: Durable non-applied review attribution
+    notes: F0009 Phase A+B planning approved 2026-11-24 in run 2026-11-24-bfdbbf04; six stories Not Started.
+      No runtime proof or formal ADR acceptance.
+    rationale:
+      - adr: adr:0080
+        section: Decision
+        summary: Keep exact on-demand lineage and immutable correction hooks under current source authority
+          without canonical or learning scope expansion.
+    related_nodes:
+      - adr:0080
+      - capability:evidence-review-round-trip
+      - entity:review-submission-attempt
+      - schema:review-submission-attempt-v1
+    source_docs:
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/PRD.md
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: capability:runtime-roots-and-toolchain
     label: Runtime roots and toolchain
     notes: engine/ and neuron/ uv workspaces, FastAPI application factory with /health, Alembic, lint
@@ -1364,6 +1424,22 @@ entities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:canonical-fact-change
+    label: Canonical fact change
+    notes: Existing append-only reason/from_version_id/to_version_id/created_at from the shipped temporal
+      kernel; F0009 consumes exact rows and invents no reason vocabulary.
+    rationale:
+      - adr: adr:0080
+        section: Decision
+        summary: Preserve typed source, review and temporal lineage; reserved identities never imply candidate
+          processing.
+    related_entities:
+      - entity:canonical-fact-version
+    related_nodes:
+      - adr:0080
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: entity:canonical-fact-version
     label: Canonical fact version
     notes: Accepted value for a fact slot with valid and recorded ranges, change reason, evidence references,
@@ -1632,6 +1708,23 @@ entities:
     source_docs:
       - planning-mds/domain/glossary.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:learning-candidate-reservation
+    label: Learning candidate reservation
+    notes: One future identity per new effective correction; exact decision/original/child/reviewer/time,
+      no learning processing.
+    rationale:
+      - adr: adr:0080
+        section: Decision
+        summary: Preserve typed source, review and temporal lineage; reserved identities never imply candidate
+          processing.
+    related_entities:
+      - entity:assertion
+      - entity:review-decision
+    related_nodes:
+      - adr:0080
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: entity:membership
     label: Membership
     notes: Proposed F0002 design; implementation pending. Current complete tenant/KB role and restriction
@@ -1831,6 +1924,23 @@ entities:
     source_docs:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md
+  - id: entity:review-submission-attempt
+    label: Refused review submission
+    notes: Append-only protected attribution of ALREADY_DECIDED or BATCH_REFUSED input; never an accepted
+      decision.
+    rationale:
+      - adr: adr:0080
+        section: Decision
+        summary: Preserve typed source, review and temporal lineage; reserved identities never imply candidate
+          processing.
+    related_entities:
+      - entity:assertion
+      - entity:review-item
+    related_nodes:
+      - adr:0080
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: entity:semantic-interpretation-run
     label: Semantic interpretation run
     notes: Versioned execution of an extraction profile over a content artifact; records run configuration,
@@ -2392,12 +2502,36 @@ schemas:
       - adr:0075
       - capability:versioned-assertion-semantics
       - entity:assertion
+  - id: schema:learning-candidate-reservation-v1
+    label: Reserved future learning identity
+    path: planning-mds/schemas/learning-candidate-reservation-v1.schema.json
+    related_nodes:
+      - adr:0080
+    source_docs:
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: schema:problem-details
     label: ProblemDetails
     path: planning-mds/schemas/problem-details.schema.json
     related_nodes:
       - api:brain-api
       - capability:runtime-roots-and-toolchain
+  - id: schema:provenance-query-v1
+    label: Exact internal provenance query
+    path: planning-mds/schemas/provenance-query-v1.schema.json
+    related_nodes:
+      - adr:0080
+    source_docs:
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+  - id: schema:provenance-result-v1
+    label: Bounded authorized provenance result
+    path: planning-mds/schemas/provenance-result-v1.schema.json
+    related_nodes:
+      - adr:0080
+    source_docs:
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: schema:qualified-money-v1
     path: planning-mds/schemas/qualified-money-v1.schema.json
     related_nodes:
@@ -2409,6 +2543,14 @@ schemas:
     related_nodes:
       - capability:evidence-review-round-trip
       - entity:review-decision
+  - id: schema:review-submission-attempt-v1
+    label: Non-applied review submission
+    path: planning-mds/schemas/review-submission-attempt-v1.schema.json
+    related_nodes:
+      - adr:0080
+    source_docs:
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml
+      - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: schema:schema-bundle-manifest-v1
     path: planning-mds/schemas/schema-bundle-manifest-v1.schema.json
     related_nodes:
