@@ -1,0 +1,113 @@
+Ontology prerequisite amendment: read the [planning handoff](architecture/ontology-planning-handoff.md) before planning F0012/F0013/F0015. It records release identities, constraint execution, missingness, dependency links, and deferred F0030/F0062 work. The six affected features have planning-only KG mappings so lookup exposes their context; PRDs, stories, assembly plans and Phase A/B approvals remain pending, and ADR-0045 stays Proposed.
+
+### 4.1 Service Boundaries
+
+Eight architectural planes (section 4) implemented as a modular monolith across `engine/` (semantic kernel, commit services, governance, review, search, security), `neuron/` (interpretation, conversation, learning, agent tools), and `experience/` (native semantic UX, including the Review Panel), with Docling, the direct-baseline vLLM client, PostgreSQL extensions, and (from v0.3) Temporal as engines around the semantic core (ADR-0001 as amended by ADR-0057, sections 100 and 125; Docling-Graph was rejected with ADR-0060 on 2026-11-08, section 126). Engine packages as built through F0008 are listed in master blueprint section 77; the container topology is unchanged (`architecture/c4-container.md`). The deployable topology and dependency matrix are a P0 pre-build requirement (section 106.2).
+
+### 4.2 Data Model
+
+PostgreSQL is authoritative (ADR-0002). Kernel entities: Tenant, Workspace, KnowledgeBase, Principal, SourceDocument, DocumentVersion, ContentArtifact, ContentBlock, DocumentProfile, ExtractionProfile, SemanticInterpretationRun, Assertion, Entity, FactSlot, CanonicalFactVersion, CanonicalRelationshipVersion (a logical name: RELATIONSHIP FactSlot versions live in `canonical_fact_version`, ADR-0078), Derivation, ReviewItem, ReviewDecision, LearningCandidate, Conversation, AuditEvent, OutboxEvent (definitions in `domain/glossary.md`). Core tables are listed in section 78 and mirrored in `architecture/data-model.md`; AGE labels in section 79; content artifact layout in sections 80 and 81. Every authoritative row carries `tenant_id`, `knowledge_base_id`, and audit fields (`created_at`, `recorded_at`, actor). FactSlot identity (section 13; ADR-0077), bitemporal fact versions (section 14; ADR-0078), and change semantics (section 16) define canonical truth. Deployed schema (migrations 0001–0015) is mapped table by table in master blueprint section 78.
+
+### 4.3 Workflow Rules
+
+Ingestion and interpretation (section 86), the human review round trip (section 75), endorsement supersession (section 87), and knowledge promotion (section 42) are the baseline workflows; every state transition is an append-only canonical commit or review decision. Process semantics and Temporal execution are v0.3 (sections 59 to 62, ADR-0028).
+
+### 4.4 Authorization Model
+
+Verified `(issuer, subject)` mapped to a stable internal principal; typed resource and action policies evaluated through a native Casbin adapter; tenant and knowledge-base membership resolved separately from resource scope; enforcement at API, commit, search, vector, graph, evidence, ontology, conversation context, MCP, and execution gate; user, service, and agent principals distinct with bounded delegation; every authorization decision audited with policy version (sections 66, 118 to 120; ADR-0049/ADR-0050 accepted for the F0001-S0006 boundary and ADR-0061/ADR-0062 for the F0002 scope; ADR-0051 to ADR-0053 Proposed).
+
+### 4.5 API Contracts
+
+Semantic REST API surface in section 68 (`GET` and `POST` over `/entities`, `/assertions`, `/facts`, `/relationships`, `/documents`, `/content`, `/ontology`, `/search`, `/graph`, `/evidence`, `/history`, `/conversations`, `/learning`, `/reviews`), and read-first MCP tools in section 69. OpenAPI lives in `api/brain-api.yaml` and is authored per feature.
+
+### 4.6 Non-Functional Requirements
+
+Performance, availability, scalability, and security targets are proposed gates in sections 114.2 and 115.2 and require baseline measurement and named owners before acceptance: extraction reuse with zero re-parse, evidence fidelity for every citation, temporal integrity under concurrent commits, zero unauthorized content in the isolation suite, ingestion recovery without duplicate effects, timed restore drills, and measured field precision and recall, latency, and cost on the frozen slice. Latency budgets are expressed in milliseconds per surface once measured.
+
+### 4.7 Architecture Artifacts
+
+- `architecture/master-blueprint.md` — full baseline
+- `architecture/decisions/` — ADR-0001 to ADR-0079 (master blueprint section 76 carries the reconciled status register; Accepted architecture and Proposed contracts; ADR-0060 (Docling-Graph) was Rejected on 2026-11-08; ADR-0038/0039/0042/0043/0051/0052/0053 have operator decisions recorded (2026-11-08) and stay Proposed until proven; ADR-0063 is accepted as direction and ADR-0064 to ADR-0069 are Proposed, section 4.11; ADR-0070 proposes the account, party and role model, section 4.8; ADR-0071 and ADR-0072 propose the semantic execution trace contract and the read-only Graph Observatory boundary, see `architecture/graph-observatory-design.md`; ADR-0077 is Accepted (F0007); ADR-0078 (the F0008 bitemporal version contract) is Accepted (2026-11-19), section 4.15; ADR-0073 (F0004) and ADR-0075 (F0006) remain Proposed after their features closed, pending the proof gates named in each record; ADR-0079 (F0011 offline schema bundle) is Proposed with its acceptance proofs met in feature run 2026-11-22-885e8734, pending operator acceptance, section 4.16)
+- `architecture/data-model.md` — tables, graph labels, artifact layout
+- `architecture/SOLUTION-PATTERNS.md` — project conventions (seeded at F0001 Phase B)
+- `architecture/c4-context.md`, `architecture/c4-container.md` — C4 L1 and L2 (Mermaid; ASCII companion in ADR-0054)
+- `api/brain-api.yaml` — OpenAPI 3.1 (F0001 scope: health, protected reads, webhook, commit)
+- `schemas/*.schema.json` — shared JSON Schemas (manifest, interpretation result, review decision, commit request and response, problem details); `semantic-example.schema.json` and `commercial-pc-example.schema.json` are educational fixture contracts, not runtime DTOs; `semantic-execution-trace.schema.json` is a draft contract under proposed ADR-0071, bound at F0036/F0038 Phase B
+- `security/policies/` — Casbin model and policy; `security/` — AuthX contract and pending security artifacts
+- `testing/evaluation-strategy.md` — Golden Corpus, metrics, regression suites, release gates
+
+### 4.8 Open decisions
+
+Section 117.1 tracks the decisions for implementation and production acceptance: source-authority owner, tenant and knowledge-base identity scope, production host, licensed corpus and reviewers, acceptance thresholds and budgets, retention and deletion behavior. F0001 G1 (2026-09-06) answered the extension build (PostgreSQL 18) and the proof model policy (self-hosted), and ADR-0057 (2026-09-08) settled the review surface. F0005 closed on its rejection branch and ADR-0060 was Rejected on 2026-11-08. The current status of every item is in master blueprint section 117.1 (updated 2026-11-08).
+
+**Time-interpretation dependency for v0.1 (2026-09-25, validate finding P-1):** F0019 and F0025 take endorsement valid time from the template route's typed effective-date field. F0016 stores time mentions and document time context alongside. Resolution from time mentions (ADR-0064, Proposed) replaces the template field only after ADR-0064 passes its proof gates, which F0026 qualifies. v0.1 acceptance does not depend on a Proposed ADR.
+
+**Document-date candidate producer (opened 2026-10-16, F0004 plan-review M-1).** F0004 delivers the append-only document-date service but no runtime caller. No feature yet owns creating CONTENT or SOURCE_METADATA date candidates. F0022 owns the verified human selection decision, which in v0.1 is the only way to select or clear a date. Operator decision (2026-10-23, F0005 plan G1): F0016 owns producing both CONTENT and SOURCE_METADATA candidates; F0005 produces none. Until F0016 delivers, consumers see every document as undated, and F0019/F0025 continue to use the template route's typed effective-date field.
+
+**Retraction versus the information-state guard (opened 2026-11-21, drift review; owner F0010 G1).** The ADR-0078 D8 guard enforces the F0008 G1 operator rule that a `PRESENT` answer closes only to `PRESENT` or `EXPLICIT_NEGATIVE`. It is applied regardless of change reason (`brain_temporal/commit.py`, `_guard`). That protects against a silent later document erasing a known value. It also refuses a reviewed retraction of an erroneous extraction to `NOT_STATED`/`NOT_FOUND`, which section 16 (`RETRACTED_AS_ERRONEOUS_EXTRACTION`) requires.
+
+- **Recommendation (option A):** keep the guard for `SUPERSEDED`. Permit `PRESENT` → `NOT_STATED`/`NOT_FOUND` only for `CORRECTED`/`RETRACTED` commits that carry a review decision (ADR-0044 reviewer authority) and replace the same valid range, so the change is recorded-time only.
+- **Rejected alternatives:** closing with no successor, which would make reads return a false `NOT_PROCESSED` and breaks the ADR-0078 D5 insert; and using `EXPLICIT_NEGATIVE`, which fabricates a source statement.
+- **Next step:** F0010 decides at plan G1 and records the result as an ADR-0078 D8 amendment, with a reason-aware guard and tests for each reason × state pair. No current caller commits retractions, so nothing is blocked before F0010.
+
+**F0065 assessment inputs versus the shipped F0007/F0008 contracts (opened 2026-11-21, drift review; owner F0065 targeted plan rework).** F0065's approved plan (2026-10-29) predates ADR-0077/0078. Its [assessment contract](features/F0065-grounded-gl-guideline-assessment/assessment-contract.md) is conceptually compatible (missing is `UNKNOWN`, explicit negative is `NOT_APPLICABLE`) but needs three bindings:
+
+1. Map the `fact-answer/v1` states: `PRESENT` is compared, `EXPLICIT_NEGATIVE` gives `NOT_APPLICABLE`, and every other state gives `UNKNOWN` with the state as reason. ADR-0078 D9 validity-unknown reads also give `UNKNOWN`.
+2. Take valid-time precision from the ADR-0078 D2 per-bound granularity columns, not from the Proposed ADR-0064.
+3. Replace the assumption that a grade-C mention carries no valid time. Under ADR-0078 a `MENTION_C` basis has bounds but cannot close a predecessor, so treat it as `valid_time_imprecise`.
+
+Fold these into the already scheduled targeted rework for plan-review H1–H3 (with F0018/F0020 Phase B). One `plan` run with `FEATURE_MODE=existing` re-approves the contract and S0002/S0004.
+
+**Account identity and account scope (opened 2026-10-09, direction set 2026-10-10).** The Cedar Bridge review asked whether Account is a party or a grouping of organizations, what an account-scoped grant reaches, what roots Entity 360, and how account identity relates to organization identity. The operator answered from commercial P&C practice, recorded in [ADR-0070](architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed):
+
+- each insured organization has its own account, with at most one designated parent account; ownership between organizations is a separate relationship with any number of percentage owners (F0012);
+- a policy belongs to exactly one account, normally the first named insured's; other named insureds stay roles on the term, and a program's master and local policies link to the program, which belongs to the parent account (F0012, F0023);
+- brokers are organizations with hierarchy, locations and people; each account has a dated broker of record and broker contacts, and a policy term can name a different placement broker;
+- external people reach only what their authoritative roles name: an account and its own policies, or a single policy, never the parent's, a sibling's or the account behind a policy; carrier staff can see the tenant but act only where they hold the role. This needs an F0002-successor scope amendment to ADR-0062;
+- account identity and organization identity resolve separately (F0017).
+
+ADR-0070 lists its proof gates; until it is accepted, F0012/F0013 Phase B plan against it.
+
+**Local proof decisions from F0001-S0007, updated for ADR-0060 (2026-09-15):**
+
+- **Item 3 (target host, PostgreSQL/extension build, model/provider data policy) — answered for the local proof scope.** The exact PostgreSQL/pgvector/AGE build is pinned and twice-verified live (S0002, re-verified at S0006 with no drift beyond an upstream base-image patch bump — `docker/DEPENDENCY-MATRIX.md`). The model/provider data policy is proven: self-hosted vLLM, chunk-text-only requests, no prompt persistence (F0001-S0003/S0006 live runs). The **production host** (as opposed to local Docker Compose) remains explicitly open, owned by F0026 per this feature's own G1 clarification and the F0001-S0006 story's stated assumption ("the production host decision waits for F0026").
+- **Item 4 (exact Docling-Graph implementation and release/commit) — closed.** Docling-Graph 1.9.1 / Docling 2.126.0 were locked and proved for the synthetic development scope ([F0005 compatibility evidence](features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md)). Graph dense then failed live qualification (F0005 run `2026-10-25-4020923b`, 2026-10-27), and the operator rejected ADR-0060 on 2026-11-08. The ADR-0074 execution controls ship for the direct-baseline pipeline.
+
+### 4.9 F0001 Phase B (2026-09-06)
+
+Assembly plan: `features/archive/F0001-repository-and-engineering-foundation/feature-assembly-plan.md` (eight steps). New decisions: ADR-0054 (runtime roots and local topology) and ADR-0055 (Phi-4-mini-instruct on vLLM). Contracts authored: `api/brain-api.yaml`, six schemas, Casbin model and policy for the proof roles TenantMember, Reviewer, ServicePrincipal. Knowledge graph: ten capabilities, ten entities, three workflows, six endpoints, three roles, five policy rules bound to F0001; code bindings follow at feature G7.
+
+---
+
+### 4.10 F0002 Phase B design (2026-09-25; design approved; implemented 2026-09-28)
+
+[Assembly plan](features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md): structural Tenant/Workspace/KB ownership, tenant-scoped entity identity with explicit KB grants, stable verified principal aliases, complete current grant slices, conjunctive resource restrictions, bounded delegation and durable decision audit. User confirmed the entity/KB identity choice and reuse of the three existing pilot roles, then approved Phase A with `approve-phase-a` and Phase B with `approve-phase-b`. This resolves section 117.1 item 2 for the F0002 pilot scope; broader production rollout remains open.
+
+ADR-0061/0062 (accepted 2026-09-28 for the bounded F0002 scope after feature run `2026-09-27-bb7c8d1d`; originally Proposed), AuthX v1 schema and OpenAPI design version 0.2.0 specify compatible migrations and existing-consumer integration. No new runtime or policy grants are delivered. F0002 proves review and canonical commit authorization independently; F0018 owns full review-to-canonical orchestration and F0022 owns review UI. This explicitly reconciles the old master-blueprint §116.1 F0002 wiring shorthand without broadening the approved PRD. Existing C4 deployment topology is unchanged; the feature README adds its ERD and component diagram. ADR-0042/0052/0053 remain Proposed for broader obligations.
+
+### 4.11 Statements, time, and governance amendments (2026-09-25)
+
+The operator reviewed Utopia's decisions made after this repository started (2026-09-05, Utopia commit `b3919ca`) and approved incorporating them.
+
+- **[ADR-0063](architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md), accepted as direction.** Open statements in the source's own words, beside typed assertions. Typed assertions come from template extraction (form-shaped sections) or from per-signature alignment (narrative sections, F0066, v0.2B).
+- **[ADR-0064](architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) to [ADR-0069](architecture/decisions/ADR-0069-action-attempts-and-uncertain-outcomes.md), Proposed.** They cover time interpretation and valid-time precision, assertion admission, text origin and mood, names as time-bounded claims, impact-gated automation with human precedent and a revert fuse, decision basis fingerprints, and external action attempts.
+
+**v0.1 impact** is limited to storage and contracts, because they are expensive to retrofit after F0003, F0006, and F0008 ship:
+
+- F0004 (document date source, text origin);
+- F0006 (assertion kinds, admission, mood);
+- F0007 and F0013 (name FactSlots, temporal kinds);
+- F0008 (precision, unknown ends);
+- F0014 (interpretation route);
+- F0016 (time mentions, drops, basis);
+- F0017 (identifier-first names);
+- F0019, F0022, F0025, F0026.
+
+v0.1 acceptance still runs on the template route. Later features carry the behavioural parts: F0027, F0032, F0043, F0050, F0052, F0056, F0059.
+
+**v0.1 scope guard (validate finding P-2).** Each v0.1 feature's Phase A admits only the storage fields, contract checks, and review/display hooks named in its amendment. It does not admit:
+
+- alignment execution;
+- automated deciders;
+- fingerprint-driven scheduling;
+- time-mention resolution replacing template fields;

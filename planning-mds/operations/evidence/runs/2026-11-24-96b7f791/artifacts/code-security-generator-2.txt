@@ -1,0 +1,164 @@
+        ("jsonschema", "jsonschema"),
+        ("referencing", "referencing"),
+        ("pydantic", "pydantic"),
+        ("datamodel_code_generator", "datamodel-code-generator"),
+    ]:
+        toolchain[field] = importlib.metadata.version(distribution)
+    for field, package in [
+        ("ajv", "ajv"),
+        ("ajv_formats", "ajv-formats"),
+        ("jsonc_parser", "jsonc-parser"),
+    ]:
+        version = javascript[package]
+        if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+            raise ValueError(f"Build tool must be pinned: {package}")
+        toolchain[field] = version
+    manifest = {
+        "bundle": inventory["bundle"],
+        "profile": inventory["profile"],
+        "resources": manifest_resources,
+        "toolchain": toolchain,
+    }
+    raw_manifest = encode(manifest)
+    manifest_schema = json.loads(
+        (authoring / "schema-bundle-manifest-v1.schema.json").read_bytes()
+    )
+    Draft202012Validator(manifest_schema).validate(manifest)
+    bundle = ContractBundle(raw_manifest, raw_schemas.__getitem__)
+    profile = yaml.safe_load((HERE / "profile.yaml").read_text())
+    bundle_files = {
+        **raw_schemas,
+        "manifest.json": raw_manifest,
+        "ui-metadata.json": encode(metadata_for(schemas)),
+        "profile.json": encode(profile),
+        "brain-api.openapi.json": encode(openapi_snapshot(schemas, names)),
+    }
+    models = generated_models(schemas, names, scratch)
+    validate_generated(bundle, models, scratch)
+    outputs = {
+        f"{directory}/{name}": raw
+        for directory in RESOURCE_ROOTS
+        for name, raw in bundle_files.items()
+    }
+    outputs[GENERATED + "/contracts_v1.py"] = models
+    outputs[GENERATED + "/__init__.py"] = (
+        b'"""Generated source-gated contract models; do not edit."""\n'
+    )
+    # Preserve old package-resource paths as generated compatibility outputs.
+    for package, selected in [
+        (
+            "brain-contracts",
+            (
+                "assertion-record-v2",
+                "interpretation-result-v2",
+                "assertion-admission-result-v1",
+                "interpretation-result",
+            ),
+        ),
+        (
+            "brain-content",
+            (
+                "content-artifact-manifest",
+                "content-artifact-manifest-v2",
+                "content-records-v2",
+                "document-date-record",
+                "interpretation-output-manifest",
+            ),
+        ),
+    ]:
+        module = package.replace("-", "_")
+        for name in selected:
+            filename = name + ".schema.json"
+            outputs[f"engine/packages/{package}/src/{module}/schemas/{filename}"] = (
+                raw_schemas[filename]
+            )
+    return outputs
+
+
+def publish(outputs: dict[str, bytes]) -> None:
+    originals = {
+        name: ((ROOT / name).read_bytes(), (ROOT / name).stat().st_mode & 0o777)
+        if (ROOT / name).is_file()
+        else None
+        for name in outputs
+    }
+    changed = []
+    temporary_files: set[pathlib.Path] = set()
+    try:
+        # Data first; digest manifests last. Startup rejects any transient mismatch.
+        for name in sorted(outputs, key=lambda p: (p.endswith("/manifest.json"), p)):
+            path = ROOT / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as stream:
+                temporary = pathlib.Path(stream.name)
+                temporary_files.add(temporary)
+                stream.write(outputs[name])
+            # Public generated contracts must remain readable by the runtime user.
+            temporary.chmod(0o644)
+            os.replace(temporary, path)
+            temporary_files.remove(temporary)
+            changed.append(name)
+    except BaseException:
+        for name in reversed(changed):
+            path = ROOT / name
+            if originals[name] is None:
+                path.unlink(missing_ok=True)
+            else:
+                previous_bytes, previous_mode = originals[name]
+                path.write_bytes(previous_bytes)
+                path.chmod(previous_mode)
+        raise
+    finally:
+        for temporary in temporary_files:
+            temporary.unlink(missing_ok=True)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    try:
+        with tempfile.TemporaryDirectory(prefix="nebula-contract-build-") as directory:
+            outputs = build(pathlib.Path(directory))
+        stale = [
+            name
+            for name, raw in outputs.items()
+            if not (ROOT / name).is_file() or (ROOT / name).read_bytes() != raw
+        ]
+        if args.check and stale:
+            print(
+                json.dumps(
+                    {
+                        "status": "fail",
+                        "stale": stale,
+                        "regenerate": "uv run --project engine --group contract-build python scripts/contracts/generate.py",
+                    }
+                )
+            )
+            return 1
+        if not args.check:
+            publish(outputs)
+        print(
+            json.dumps(
+                {
+                    "status": "pass",
+                    "artifacts": len(outputs),
+                    "bundle_digest": hashlib.sha256(
+                        outputs[RESOURCE_ROOTS[0] + "/manifest.json"]
+                    ).hexdigest(),
+                }
+            )
+        )
+        return 0
+    except Exception as error:  # noqa: BLE001 - Never emit source/input reprs on build failure.
+        diagnostic = {
+            "status": "fail",
+            "code": getattr(error, "code", "CONTRACT_BUILD_FAILED"),
+            "error_type": type(error).__name__,
+        }
+        print(json.dumps(diagnostic))
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,47 @@
+# F0011 post-closeout validation — 2026-11-24 (branch fix/F0011-feature-review-findings, after staging and --write-coverage-report)
+
+$ python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root \{NEBULA_PRODUCT_ROOT} --feature F0011 --stage closeout
+[product-root] {NEBULA_PRODUCT_ROOT} (source: --product-root)
+Feature evidence validation passed.
+Summary: validated=1, skipped_pre_contract_archived=0, skipped_active_done_pre_contract=0, skipped_retired_abandoned=0, skipped_retired_superseded=0
+exit=0
+
+$ python3 agents/product-manager/scripts/validate-trackers.py
+  errors: 0
+  warnings: 0
+  result: PASS
+
+Feature evidence validation: not requested (use --feature for scoped validation or --all-feature-evidence for a repo-wide audit).
+exit=0
+
+$ python3 \{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py
+Warnings:
+- Declared edge type is unused: validated_by
+- Declared edge type is unused: supersedes
+
+[PASS] knowledge-graph integrity checks passed.
+exit=0
+
+$ python3 \{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --check-symbols
+Warnings:
+- Declared edge type is unused: validated_by
+- Declared edge type is unused: supersedes
+
+[PASS] knowledge-graph integrity checks passed.
+exit=0
+
+$ python3 \{NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --check-drift
+Warnings:
+- Declared edge type is unused: validated_by
+- Declared edge type is unused: supersedes
+
+[PASS] knowledge-graph integrity checks passed.
+exit=0
+
+$ python3 agents/product-manager/scripts/generate-story-index.py --product-root \{NEBULA_PRODUCT_ROOT} && git -C \{NEBULA_PRODUCT_ROOT} diff --exit-code --stat -- planning-mds/features/STORY-INDEX.md
+[product-root] {NEBULA_PRODUCT_ROOT} (source: --product-root)
+Generating story index for: {NEBULA_PRODUCT_ROOT}/planning-mds/features
+------------------------------------------------------------
+Found 60 story files
+✅ Story index generated: {NEBULA_PRODUCT_ROOT}/planning-mds/features/STORY-INDEX.md
+exit=0

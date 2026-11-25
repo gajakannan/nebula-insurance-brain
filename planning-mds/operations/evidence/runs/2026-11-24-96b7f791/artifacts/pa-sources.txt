@@ -1,0 +1,170 @@
+bundle: brain-contracts/v1
+profile: nebula-json-schema/1
+authoring_root: planning-mds/schemas
+validation_profile: scripts/contracts/profile.yaml
+resources:
+- name: content-artifact-manifest
+  version: '1'
+  id: https://nebula.local/schemas/content-artifact-manifest.schema.json
+  source: planning-mds/schemas/content-artifact-manifest.schema.json
+  source_sha256_at_design: 3327f72bfe19e2d297fbf0d7dd8072ac86eaa7d14f71d1ad7bb8301b4c76a28e
+  owner: content
+  disposition: delegate
+  consumer_entry_points:
+  - entry_point: brain_content.manifest.parse_manifest
+    path: engine/packages/brain-content/src/brain_content/manifest.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-content/tests/test_versioned_content.py
+    state: existing
+  version_selector: artifact_contract_version is integer 1; parse_manifest selects
+    the v1 resource before validation; all other markers fail.
+  wire_profile: native-compat/v1
+  integration_notes: Retain ArtifactManifestV1 and native decode/error behavior; replace
+    only schema loading/evaluation.
+- name: content-artifact-manifest-v2
+  version: '2'
+  id: https://nebula.local/schemas/content-artifact-manifest-v2.schema.json
+  source: planning-mds/schemas/content-artifact-manifest-v2.schema.json
+  source_sha256_at_design: 492388f57b9d2e954beda21dfccb935549670408a9944d58907e0e4d16d684c6
+  owner: content
+  disposition: delegate
+  consumer_entry_points:
+  - entry_point: brain_content.manifest.parse_manifest / ArtifactManifestV2
+    path: engine/packages/brain-content/src/brain_content/manifest.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-content/tests/test_versioned_content.py
+    state: existing
+  version_selector: artifact_contract_version is integer 2; writer activation remains
+    unchanged.
+  wire_profile: native-compat/v1
+  integration_notes: Retain v2 input/output guards and the explicit v1/v2 dispatch;
+    never retry v1 after v2 refusal.
+- name: content-artifact-manifest-read
+  version: '1'
+  id: https://nebula.local/schemas/content-artifact-manifest-read.schema.json
+  source: planning-mds/schemas/content-artifact-manifest-read.schema.json
+  source_sha256_at_design: e1a39ab7deed35af3a967f3a4fb9ef0cb7d9c569128a3bf3753fdc3225b6fbd0
+  owner: content
+  disposition: retain-versioned-boundary
+  consumer_entry_points:
+  - entry_point: 'OpenAPI/doc-only: ContentArtifactManifest read union'
+    path: planning-mds/api/brain-api.yaml
+    state: OpenAPI/doc-only
+  compatibility_tests:
+  - path: engine/packages/brain-content/tests/test_versioned_content.py
+    state: existing
+  - path: engine/apps/api/tests/test_contract_openapi.py
+    state: existing
+  version_selector: OpenAPI read union selects artifact_contract_version 1 or 2; runtime
+    parse_manifest uses the concrete v1/v2 resources.
+  wire_profile: native-compat/v1
+  integration_notes: No non-test runtime validator for this wrapper. Publish/check
+    the OpenAPI union and retain concrete native readers; do not invent a delegate.
+- name: content-records-v2
+  version: '2'
+  id: https://nebula.local/schemas/content-records-v2.schema.json
+  source: planning-mds/schemas/content-records-v2.schema.json
+  source_sha256_at_design: a807b09d635d6a5b37496e4a3190061665f235fabdf10f61574af85697b223ef
+  owner: content
+  disposition: delegate
+  consumer_entry_points:
+  - entry_point: brain_content.records.Record.input_contract / contract (ContentBlockV2,
+      ContentTableV2, ContentLayoutV2)
+    path: engine/packages/brain-content/src/brain_content/records.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-content/tests/test_versioned_content.py
+    state: existing
+  version_selector: Explicit record_type block/table/layout selects its $defs pointer;
+    contract_version is 2.
+  wire_profile: native-compat/v1
+  integration_notes: Preserve per-record JSONL validation, native limits and model
+    guards.
+- name: document-date-record
+  version: '1'
+  id: https://nebula.local/schemas/document-date-record.schema.json
+  source: planning-mds/schemas/document-date-record.schema.json
+  source_sha256_at_design: a5227ea9bc9f51ede1e6670b28f6a07b129b21994af78634ebf4f0d0a4bfb219
+  owner: content
+  disposition: delegate
+  consumer_entry_points:
+  - entry_point: brain_content.dates.DateRecord.input_contract / contract
+    path: engine/packages/brain-content/src/brain_content/dates.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-content/tests/test_document_dates.py
+    state: existing
+  - path: engine/tests/integration/test_f0011_consumer_contracts.py
+    state: existing
+  version_selector: Explicit document-date-record resource; contract_version 1 and
+    record_type candidate/selection select the branch.
+  wire_profile: native-compat/v1
+  integration_notes: Do not infer authority from valid shape; verified human/source
+    basis checks stay in their existing services.
+- name: interpretation-output-manifest
+  version: '1'
+  id: https://nebula.local/schemas/interpretation-output-manifest.schema.json
+  source: planning-mds/schemas/interpretation-output-manifest.schema.json
+  source_sha256_at_design: 636c1913f1ad2a62eaffeaea688b4e515aa8f3770022801a9b8f5a19d7718173
+  owner: content
+  disposition: delegate
+  consumer_entry_points:
+  - entry_point: brain_content.outputs.parse_run_manifest / RunManifestBase.contract
+    path: engine/packages/brain-content/src/brain_content/outputs.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-content/tests/test_run_outputs.py
+    state: existing
+  version_selector: contract_version is integer 1 or 2; independent of content artifact
+    parse version.
+  wire_profile: native-compat/v1
+  integration_notes: Retain strict dispatch, exact interpretation basis and safe native
+    errors.
+- name: interpretation-result
+  version: '1'
+  id: https://nebula.local/schemas/interpretation-result.schema.json
+  source: planning-mds/schemas/interpretation-result.schema.json
+  source_sha256_at_design: f4f986406644d9390bd5bd945434531038b7050dd1a2b176d66e140bcbe52345
+  owner: assertions
+  disposition: delegate
+  consumer_entry_points:
+  - entry_point: brain_contracts.dispatch.parse_result / parse_legacy_result
+    path: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-assertions/tests/test_contracts.py
+    state: existing
+  version_selector: schema_version key absent means legacy v1; explicit 1, null, bool
+    or unknown selector is unsupported.
+  wire_profile: native-compat/v1
+  integration_notes: Retain legacy DTO/default behavior and allow_v2=False rejection;
+    no failed-reader downgrade.
+- name: interpretation-result-v2
+  version: '2'
+  id: https://nebula.local/schemas/interpretation-result-v2.schema.json
+  source: planning-mds/schemas/interpretation-result-v2.schema.json
+  source_sha256_at_design: 88c04e2d1bb14a365b958f278bb16d236067907fb3fca80f722b328ddec31eca
+  owner: assertions
+  disposition: delegate
+  consumer_entry_points:
+  - entry_point: brain_contracts.dispatch.parse_result / parse_interpretation_result
+      / InterpretationResultV2
+    path: engine/packages/brain-contracts/src/brain_contracts/dispatch.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-assertions/tests/test_contracts.py
+    state: existing
+  version_selector: schema_version is integer 2 AND allow_v2 / supported_versions
+    permits 2.
+  wire_profile: native-compat/v1
+  integration_notes: Retain AssertionContractError/Unsupported and v2 input/output
+    guards.
+- name: assertion-record-v2
+  version: '2'
+  id: https://nebula.local/schemas/assertion-record-v2.schema.json
+  source: planning-mds/schemas/assertion-record-v2.schema.json
+  source_sha256_at_design: 4c5ae7cc3005b4ca3953d3bec5d168ff9084a29228290394d7833f5f8fdba033
+  owner: assertions
+  disposition: delegate

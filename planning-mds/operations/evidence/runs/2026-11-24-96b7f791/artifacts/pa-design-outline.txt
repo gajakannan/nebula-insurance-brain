@@ -1,0 +1,44 @@
+1:# F0011 — Structural contract design
+6:## Authority and inventory
+9:resources: 17 existing definitions, three additive publication aliases and a
+10:description of the shipped flat fact-read response. Their exact design source
+11:hashes are recorded there. Two additional schemas describe the generated bundle
+16:The feature run authors `scripts/contracts/sources.yaml` from this inventory and
+19:snapshot, satisfying the blueprint's root schemas convention. Package resources,
+20:AJV inputs, Pydantic models, UI metadata and OpenAPI components are derived outputs,
+21:checked against that snapshot. No output is a second hand-authored schema source.
+30:## Supported schema profile
+37:admission before any instance runs. Schema-position traversal must distinguish a
+41:Only registered resource identities and fragments resolve. Build-time file paths
+42:are allowlisted under the declared source directory; runtime references are looked
+46:untaken conditional branch. Bundles with missing hashes/resources fail startup.
+56:## Wire portability and native compatibility
+63:one million nodes; the bundle is limited to 256 resources. These are the
+64:resource/interoperability limits approved with the Phase B design, not measured
+70:while delegating schema lookup and evaluation to the same source bundle. A
+85:zone, source existence, ISO currency support or temporal truncation.
+111:## Pydantic generation and metadata
+118:payload against its source schema first and validates serialized output again.
+122:Object models retain open-object extra fields where the source allows them and
+128:Money and identifier values stay strings. A source-valid instance rejected or
+134:Pydantic `json_schema_extra`, the AJV source and the OpenAPI component must retain
+137:## Existing consumer integration
+139:The per-resource mapping in [contract-inventory.yaml](contract-inventory.yaml)
+142:summarizes groups only. Manifest-read and ProblemDetails are OpenAPI/doc-only
+153:| brain_factslots.resolution.FactSlotResolver.resolve | After current authority, domain parsing and reference checks, validate canonical key/result before insert/return. Domain remains I/O-free and does not import the schema package. |
+156:| brain_api.schemas.facts and routes.facts | Keep current DTO/domain mapping. Check source-owned response shapes and generated model conformance; shared serialized-response checks run inside the existing authorized UoW, before a write commits. Never discover a response-shape failure only after committing effects. |
+157:| Existing Neuron callers of shared content/interpretation contracts | Install the same brain-contracts resource bundle. Existing imports delegate; no Neuron prompt, producer, model or extraction activation changes. Smoke both native readers. |
+167:## OpenAPI and HTTP reconciliation
+169:The design-time OpenAPI stays 3.1.0 and references the same JSON Schema resources.
+175:source rather than trusting an independent edited copy.
+177:Build a self-contained OpenAPI snapshot by resolving external schema references
+179:that snapshot in brain_contracts resources and use the existing FastAPI openapi
+189:## Proof and release
+195:with accepting and rejecting cases and all source conditional branches. It must
+201:OpenAPI matches the real routes, installed packages work without the checkout,
+204:redeploys the prior coherent package/bundle set; never mixes resource hashes or
+205:rewrites source evidence. No database migration is needed. If scope later needs
+208:## Primary technical sources checked 2026-11-20
+216:  describes explicit immutable registries/resources; the no-retrieval policy is
+223:- [OpenAPI 3.1.0](https://spec.openapis.org/oas/v3.1.0.html) and the
+224:  [FastAPI OpenAPI hook](https://fastapi.tiangolo.com/how-to/extending-openapi/)

@@ -1,0 +1,55 @@
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:1:# F0011 — JSON Schema contract system
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:3:**Status:** Done / Archived 2026-11-23 (feature run `2026-11-22-885e8734`)
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:4:**Phase:** v0.1A / MVP
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:5:**Roadmap:** Now (2026-11-20 roadmap review)
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:6:**Planning:** Phase A and Phase B approved by the operator on 2026-11-20; implementation is underway in feature run `2026-11-22-885e8734`.
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:7:**Plan Run:** `2026-11-20-ccb1bd39` (approved baseline)
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:8:**Plan Revision:** `2026-11-21-e4098d22` (Phase B; operator approved with `approve-phase-b` on 2026-11-22).
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:9:**Review:** `2026-11-21-b4cd07e4` READY for the baseline; revision adds the
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:12:## Overview
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:16:consumers. Information-state, qualified-money and scoped-identifier schemas retain
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:26:## Requirement-ownership amendment (2026-11-08)
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:31:- ADR-0039 remains Proposed pending all of its acceptance proofs, including the
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:32:  later F0023 incomplete-package display; schema publication alone cannot accept it.
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:35:Governing baseline: [ADR-0013](../../../architecture/decisions/ADR-0013-json-schema-is-the-structural-contract.md).
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:37:## Documents
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:43:- [Getting started](GETTING-STARTED.md) — implemented runtime handoff, commands, compatibility and rollback.
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:45:## Architecture review packet
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:49:- [Contract design](contract-design.md) — source authority, subset, compatibility,
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:52:- [Validation profile](schema-validation-profile.yaml) — keyword/format/annotation,
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:53:  reference, resource and new-portable versus native-compatibility policies.
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:54:- [Synthetic expectations](contract-examples.json) — 74 design cases; local schema
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:56:- [ADR-0079](../../../architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md)
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:57:  — Proposed pending runtime proofs and explicit later acceptance.
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:63:## Component view
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:82:authored schemas -> deterministic build -> root snapshot
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:89:## Artifact relationships
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:123:## Approval and proof boundary
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:130:ADR-0079 and ADR-0039 remain Proposed pending their runtime proofs and later acceptance.
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:134:## Stories
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:145:**Total Stories:** 6
+planning-mds/features/archive/F0011-json-schema-contract-system/README.md:146:**Total Acceptance Criteria:** 41
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:1:# F0011 — Getting started
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:3:## Current implementation state
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:15:and [STATUS](STATUS.md) retain their respective design and progress authority.
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:17:## Prerequisites
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:38:## Source authority and generated artifacts
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:40:`planning-mds/schemas/` remains the authored JSON Schema 2020-12 source.
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:49:| `schemas/contracts/v1/` | Generated release snapshot and digest manifest |
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:51:| `engine/packages/brain-contracts/src/brain_contracts/generated/` | Generated Pydantic models, gated by source schemas before parsing and after serialization |
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:52:| `engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py` | Installed immutable registry; explicit `ContractRef` and wire-profile APIs |
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:53:| `experience/src/generated/contracts/v1/` | Same generated schema/manifest/metadata snapshot for JavaScript |
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:54:| `experience/scripts/contracts/` | Strict portable decoder, headless AJV runner and Node unit tests |
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:55:| `scripts/contracts/cases.json` | Complete 443-case portable inventory; imported expectations retain their provenance |
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:60:fallback and never retrieves a schema over the network. The API serves its
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:64:## Run the checks in the current proof environment
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:95:native-reader differential, PostgreSQL mutation/authorization regressions, actual
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:99:## Wire profiles and consumer ordering
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:101:- New generic consumers explicitly select `portable-json/v1`: unique-key UTF-8
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:105:- Existing readers select `native-compat/v1` before inspecting or parsing input.
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:110:  semantics remain separate from the new portable admission limits.
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:112:  removal. Unknown schema instructions/annotations and unresolved, external,
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:114:  they establish neither evidence validity nor authorization. No failed portable
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:115:  or v2 validation retries through native or legacy readers.
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:130:## Rollout, stored history and rollback
+planning-mds/features/archive/F0011-json-schema-contract-system/GETTING-STARTED.md:154:## Resume this feature run

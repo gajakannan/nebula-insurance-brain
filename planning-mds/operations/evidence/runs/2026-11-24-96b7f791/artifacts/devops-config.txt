@@ -1,0 +1,76 @@
+# Reproducible F0011 validation/build runtimes; these are not deployed services.
+FROM ghcr.io/astral-sh/uv:0.11.31 AS uv
+FROM python:3.14.4-slim AS engine-validation
+COPY --from=uv /uv /uvx /usr/local/bin/
+RUN useradd --create-home --uid 1000 app \
+    && mkdir -p /app/brain /opt/venvs \
+    && chown app:app /app/brain /opt/venvs
+ENV UV_PYTHON_DOWNLOADS=never XDG_CACHE_HOME=/tmp/cache PYTHONDONTWRITEBYTECODE=1
+WORKDIR /app/brain
+COPY --chown=app:app . .
+USER app
+
+ENV UV_PROJECT_ENVIRONMENT=/opt/venvs/engine
+RUN uv sync --project engine --group contract-build --locked
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+    CMD uv run --no-sync --project engine --group contract-build python -c "import jsonschema,pydantic,datamodel_code_generator"
+CMD ["uv", "run", "--no-sync", "--project", "engine", "--group", "contract-build", "python", "scripts/contracts/generate.py", "--check"]
+
+FROM python:3.14.4-slim AS neuron-validation
+COPY --from=uv /uv /uvx /usr/local/bin/
+RUN useradd --create-home --uid 1000 app \
+    && mkdir -p /app/brain /opt/venvs \
+    && chown app:app /app/brain /opt/venvs
+ENV UV_PYTHON_DOWNLOADS=never XDG_CACHE_HOME=/tmp/cache PYTHONDONTWRITEBYTECODE=1
+WORKDIR /app/brain
+COPY --chown=app:app . .
+USER app
+ENV UV_PROJECT_ENVIRONMENT=/opt/venvs/neuron
+RUN uv sync --project neuron --locked
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+    CMD uv run --no-sync --project neuron python -c "import brain_contracts,brain_content"
+CMD ["uv", "run", "--no-sync", "--project", "neuron", "python", "-m", "pytest", "neuron/tests/integration/test_f0011_shared_bundle.py", "-q"]
+
+FROM node:22.23.1-slim AS node-validation
+ENV XDG_CACHE_HOME=/tmp/cache COREPACK_HOME=/tmp/corepack PNPM_HOME=/tmp/pnpm COREPACK_DEFAULT_TO_LATEST=0
+WORKDIR /app/brain
+COPY --chown=node:node . .
+USER node
+RUN corepack prepare pnpm@12.21.0 --activate && corepack pnpm --dir experience install --frozen-lockfile --store-dir /tmp/pnpm-store
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 CMD node -e "if (+process.versions.node.split('.')[0] < 22) process.exit(1)"
+CMD ["corepack", "pnpm", "--dir", "experience", "contracts:test"]
+# Contract validation runtimes
+
+F0011 uses the engine, Neuron and Node targets in `Dockerfile` for contract proof.
+These images are build/test tools. They do not add an application deployment.
+
+The build pins Python 3.14.4, uv 0.11.31 and Node 22.23.1. The workspace lockfiles
+pin all dependencies, including the build-only model generator. Generation uses
+the engine target so its tool versions match the release manifest.
+
+From the repository root:
+
+```sh
+docker build -f docker/contracts/Dockerfile --target engine-validation -t brain-contracts-engine:local .
+docker build -f docker/contracts/Dockerfile --target node-validation -t brain-contracts-node:local .
+docker build -f docker/contracts/Dockerfile --target neuron-validation -t brain-contracts-neuron:local .
+docker run --rm brain-contracts-engine:local
+docker run --rm brain-contracts-node:local
+docker run --rm brain-contracts-neuron:local
+```
+
+The default commands check generated-artifact freshness, run the JavaScript
+decoder tests, and smoke the unchanged Neuron readers, respectively. CI also
+joins the three consumers' case results and runs installation, corruption and
+PostgreSQL integration proofs. See `.github/workflows/ci-gates.yml`.
+
+For an existing local environment, run the complete read-only stored-history
+preflight before enabling candidate response guards. `scripts/contracts/environments.json`
+names the actual local dev and shared integration databases; connection credentials
+continue to come from the existing application Settings. Zero rows require the
+signed QE/DevOps inventory accepted by `check_stored_fact_versions.py`.
+
+Rollback restores the previous coherent contract package set and generated
+snapshot. It never rewrites historical values or reinterprets persisted content.
+F0011 adds no database migration. An old local clone must first apply the already
+shipped migrations through 0015 using the normal migration procedure and a backup.

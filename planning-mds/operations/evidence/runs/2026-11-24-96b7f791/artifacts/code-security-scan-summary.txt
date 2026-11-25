@@ -1,0 +1,119 @@
+{
+  "engine": {
+    "dependencies_reported": 75,
+    "skipped": [],
+    "findings": []
+  },
+  "neuron": {
+    "dependencies_reported": 171,
+    "skipped": [],
+    "findings": []
+  },
+  "experience": {
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0
+      },
+      "dependencies": 8,
+      "devDependencies": 330,
+      "optionalDependencies": 80,
+      "totalDependencies": 365
+    },
+    "findings": []
+  }
+}
+{
+ "recorded_at_utc": "2026-11-24T03:16:00Z",
+ "status": "pass",
+ "tool": "gitleaks 8.30.1",
+ "image_id": "sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f",
+ "wrapper": "agents/security/scripts/check-secrets.sh",
+ "mode": "filesystem --no-git",
+ "redacted": true,
+ "changed_and_untracked_source_files": 166,
+ "scanned_bytes": 7314068,
+ "findings": 0,
+ "exit_code": 0,
+ "report": "reports/secrets-gitleaks-20261124-031656.sarif",
+ "source_manifest": "source-inputs.json",
+ "network": "none",
+ "source_bytes_stored": false,
+ "supersedes": "../2026-11-24-closeout-lows/execution.json",
+ "reason": "Final re-run after the G8 archive move (renamed feature docs enter the changed set) and the case-provenance.json path repoint."
+}{
+  "recorded_at_utc": "2026-11-24T02:37:04.748902+00:00",
+  "semgrep_version": "1.169.0",
+  "report_subdirectory": "closeout",
+  "wrapper_exit_code": 1,
+  "input_files": 37,
+  "scanned_source_files": 37,
+  "scanned_total_files": 38,
+  "scanner_control_files": [
+    ".semgrepignore"
+  ],
+  "configured_rules": 413,
+  "applicable_rules_run": 287,
+  "findings": 1,
+  "findings_by_severity": {
+    "WARNING": 1
+  },
+  "scanner_errors": [],
+  "unscanned_inputs": [],
+  "unexpected_scanned_files": [],
+  "source_changes_after_snapshot": [],
+  "new_source_paths_after_snapshot": [],
+  "removed_source_paths_after_snapshot": [],
+  "sarif_artifacts": [
+    "closeout/sast-semgrep-20261124-023629.sarif"
+  ],
+  "findings_index": [
+    {
+      "rule_id": "evidence.python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected",
+      "path": "scripts/contracts/install_smoke.py",
+      "line": 119,
+      "severity": "WARNING"
+    }
+  ],
+  "security_verdict_owner": "Security Reviewer"
+}
+{
+  "exit_code": 0,
+  "scope": "Unauthenticated active OpenAPI-driven scan of private candidate API; authenticated access and atomicity proved by PostgreSQL consumer integration separately.",
+  "target": "http://engine-validation:8000/openapi.json",
+  "openapi": "3.1.0",
+  "api_paths": 7,
+  "imported_urls": 16,
+  "total_urls": 59,
+  "pass_rules": 119,
+  "fail_rules": 0,
+  "warn_rules": 0,
+  "image": "ghcr.io/zaproxy/zaproxy@sha256:8d387b1a63e3425beef4846e39719f5af2a787753af2d8b6558c6257d7a577a2",
+  "command": "docker run --rm --network nebula-insurance-brain_default -v /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain:ro -v /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro -v /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/security/dast:/zap/wrk:rw -e DAST_SCAN_CMD=/app/brain/planning-mds/operations/evidence/runs/2026-11-22-885e8734/artifacts/security/dast/run_api_scan.sh --entrypoint sh ghcr.io/zaproxy/zaproxy@sha256:8d387b1a63e3425beef4846e39719f5af2a787753af2d8b6558c6257d7a577a2 /app/framework/agents/security/scripts/run-dast-scan.sh --target http://engine-validation:8000/openapi.json --report-dir /zap/wrk --ignore-warn",
+  "stdout": "2026-11-23 21:52:06,107 Using override, new target: http://engine-validation:8000\n2026-11-23 21:52:06,107 Number of Imported URLs: 16\nTotal of 59 URLs\nPASS: Directory Browsing [0]\nPASS: Vulnerable JS Library (Powered by Retire.js) [10003]\nPASS: In Page Banner Information Leak [10009]\nPASS: Cookie No HttpOnly Flag [10010]\nPASS: Cookie Without Secure Flag [10011]\nPASS: Re-examine Cache-control Directives [10015]\nPASS: Cross-Domain JavaScript Source File Inclusion [10017]\nPASS: Content-Type Header Missing [10019]\nPASS: Anti-clickjacking Header [10020]\nPASS: X-Content-Type-Options Header Missing [10021]\nPASS: Information Disclosure - Debug Error Messages [10023]\nPASS: Information Disclosure - Sensitive Information in URL [10024]\nPASS: Information Disclosure - Sensitive Information in HTTP Referrer Header [10025]\nPASS: HTTP Parameter Override [10026]\nPASS: Information Disclosure - Suspicious Comments [10027]\nPASS: Off-site Redirect [10028]\nPASS: Cookie Poisoning [10029]\nPASS: User Controllable Charset [10030]\nPASS: User Controllable HTML Element Attribute (Potential XSS) [10031]\nPASS: Viewstate [10032]\nPASS: Directory Browsing [10033]\nPASS: Heartbleed OpenSSL Vulnerability (Indicative) [10034]\nPASS: Strict-Transport-Security Header [10035]\nPASS: HTTP Server Response Header [10036]\nPASS: Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s) [10037]\nPASS: Content Security Policy (CSP) Header Not Set [10038]\nPASS: X-Backend-Server Header Information Leak [10039]\nPASS: Secure Pages Include Mixed Content [10040]\nPASS: HTTP to HTTPS Insecure Transition in Form Post [10041]\nPASS: HTTPS to HTTP Insecure Transition in Form Post [10042]\nPASS: User Controllable JavaScript Event (XSS) [10043]\nPASS: Big Redirect Detected (Potential Sensitive Information Leak) [10044]\nPASS: Source Code Disclosure - /WEB-INF Folder [10045]\nPASS: HTTPS Content Available via HTTP [10047]\nPASS: Remote Code Execution - Shell Shock [10048]\nPASS: Content Cacheability [10049]\nPASS: Retrieved from Cache [10050]\nPASS: X-ChromeLogger-Data (XCOLD) Header Information Leak [10052]\nPASS: Cookie without SameSite Attribute [10054]\nPASS: CSP [10055]\nPASS: X-Debug-Token Information Leak [10056]\nPASS: Username Hash Found [10057]\nPASS: GET for POST [10058]\nPASS: X-AspNet-Version Response Header [10061]\nPASS: PII Disclosure [10062]\nPASS: Permissions Policy Header Not Set [10063]\nPASS: Timestamp Disclosure [10096]\nPASS: Hash Disclosure [10097]\nPASS: Cross-Domain Misconfiguration [10098]\nPASS: Source Code Disclosure [10099]\nPASS: User Agent Fuzzer [10104]\nPASS: Weak Authentication Method [10105]\nPASS: HTTP Only Site [10106]\nPASS: Reverse Tabnabbing [10108]\nPASS: Modern Web Application [10109]\nPASS: Dangerous JS Functions [10110]\nPASS: Authentication Request Identified [10111]\nPASS: Session Management Response Identified [10112]\nPASS: Verification Request Identified [10113]\nPASS: Script Served From Malicious Domain (polyfill) [10115]\nPASS: ZAP is Out of Date [10116]\nPASS: Absence of Anti-CSRF Tokens [10202]\nPASS: Private IP Disclosure [2]\nPASS: Heartbleed OpenSSL Vulnerability [20015]\nPASS: Source Code Disclosure - CVE-2012-1823 [20017]\nPASS: Remote Code Execution - CVE-2012-1823 [20018]\nPASS: External Redirect [20019]\nPASS: Server Side Technology Version with Known Vulnerabilities [20020]\nPASS: Session ID in URL Rewrite [3]\nPASS: Buffer Overflow [30001]\nPASS: Format String Error [30002]\nPASS: CRLF Injection [40003]\nPASS: Parameter Tampering [40008]\nPASS: Server Side Include [40009]\nPASS: Cross Site Scripting (Reflected) [40012]\nPASS: Cross Site Scripting (Persistent) [40014]\nPASS: Cross Site Scripting (Persistent) - Prime [40016]\nPASS: Cross Site Scripting (Persistent) - Spider [40017]\nPASS: SQL Injection [40018]\nPASS: SQL Injection - MySQL (Time Based) [40019]\nPASS: SQL Injection - Hypersonic SQL (Time Based) [40020]\nPASS: SQL Injection - Oracle (Time Based) [40021]\nPASS: SQL Injection - PostgreSQL (Time Based) [40022]\nPASS: Cross Site Scripting (DOM Based) [40026]\nPASS: SQL Injection - MsSQL (Time Based) [40027]\nPASS: ELMAH Information Leak [40028]\nPASS: Trace.axd Information Leak [40029]\nPASS: .htaccess Information Leak [40032]\nPASS: .env Information Leak [40034]\nPASS: Hidden File Finder [40035]\nPASS: Spring Actuator Information Leak [40042]\nPASS: Log4Shell [40043]\nPASS: Exponential Entity Expansion (Billion Laughs Attack) [40044]\nPASS: Spring4Shell [40045]\nPASS: Remote Code Execution (React2Shell) [40048]\nPASS: Script Active Scan Rules [50000]\nPASS: Script Passive Scan Rules [50001]\nPASS: Path Traversal [6]\nPASS: Remote File Inclusion [7]\nPASS: Insecure JSF ViewState [90001]\nPASS: Java Serialization Object [90002]\nPASS: Sub Resource Integrity Attribute Missing [90003]\nPASS: Insufficient Site Isolation Against Spectre Vulnerability [90004]\nPASS: Charset Mismatch [90011]\nPASS: XSLT Injection [90017]\nPASS: Server Side Code Injection [90019]\nPASS: Remote OS Command Injection [90020]\nPASS: XPath Injection [90021]\nPASS: Application Error Disclosure [90022]\nPASS: XML External Entity Attack [90023]\nPASS: Generic Padding Oracle [90024]\nPASS: SOAP Action Spoofing [90026]\nPASS: SOAP XML Injection [90029]\nPASS: WSDL File Detection [90030]\nPASS: Loosely Scoped Cookie [90033]\nPASS: Cloud Metadata Potentially Exposed [90034]\nPASS: Server Side Template Injection [90035]\nPASS: Server Side Template Injection (Blind) [90036]\nPASS: Remote OS Command Injection (Time Based) [90037]\nFAIL-NEW: 0\tFAIL-INPROG: 0\tWARN-NEW: 0\tWARN-INPROG: 0\tINFO: 0\tIGNORE: 0\tPASS: 119\n",
+  "cli_info_counter": 0,
+  "raw_alert_categories": [
+    {
+      "alert": "A Client Error response code was returned by the server",
+      "riskcode": "0",
+      "riskdesc": "Informational (High)",
+      "count": "43"
+    },
+    {
+      "alert": "Non-Storable Content",
+      "riskcode": "0",
+      "riskdesc": "Informational (Medium)",
+      "count": "5"
+    },
+    {
+      "alert": "Storable and Cacheable Content",
+      "riskcode": "0",
+      "riskdesc": "Informational (Medium)",
+      "count": "2"
+    }
+  ],
+  "information_disposition": "Three raw informational categories: expected401/404, non-storable protected401 and cacheable public health/OpenAPI. CLI INFO0 is a different summary counter. No raw high/medium/low alerts. See independent Security report."
+}

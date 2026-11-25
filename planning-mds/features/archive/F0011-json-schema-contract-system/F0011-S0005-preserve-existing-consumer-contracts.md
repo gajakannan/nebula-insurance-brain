@@ -17,7 +17,7 @@
 
 F0004/F0006 already validate packaged content and assertion schemas; F0007/F0008 ship domain carriers and temporal responses. F0011 must inventory each existing owner and select integration points in Phase B instead of adding a disconnected validation utility.
 Source and boundary authority: [PRD](PRD.md), accepted ADR-0013, proposed ADR-0039,
-and the shipped contracts cited in the PRD. Phase A requirements are approved; implementation is in progress in feature run 2026-11-22-885e8734.
+and the shipped contracts cited in the PRD. Phase A requirements are approved; implemented and closed out in feature run 2026-11-22-885e8734.
 
 ## Acceptance Criteria
 
@@ -96,5 +96,5 @@ is intentional; the PRD governs any apparent conflict.
 
 ## Review Provenance
 
-Runtime implementation and test evidence is recorded in feature run 2026-11-22-885e8734; independent reviewer signoff is pending. See [STATUS](STATUS.md) for the append-only
+Runtime implementation, test evidence and independent reviewer signoffs are recorded in feature run 2026-11-22-885e8734. See [STATUS](STATUS.md) for the append-only
 provenance table; the Architect sets the final required role matrix in Phase B.

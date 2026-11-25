@@ -141,5 +141,5 @@ the full Neuron suite and the canonical image lanes were re-run on current sourc
 All lanes pass on current source with no selected skips. The canonical
 Node image, previously blocked by package-manager selection, now builds and
 passes its 19 tests and all 443 cases offline. Coverage is in `coverage-report.md`
-(Python changed statements 86.0%, JavaScript lines 98.5%). This is the QE G2 verdict
+(Python changed statements 86.4% = 1166/1350, JavaScript lines 98.5%). This is the QE G2 verdict
 only: independent review, approval, signoff and closeout remain with their owners.

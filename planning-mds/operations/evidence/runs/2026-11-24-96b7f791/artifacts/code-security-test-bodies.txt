@@ -1,0 +1,161 @@
+        "AND resource_id = %s AND action = %s ORDER BY occurred_at DESC LIMIT 1",
+        slot,
+        action,
+    )
+
+
+async def test_result_contract_failure_rolls_back_slots_and_qualifiers(world, monkeypatch):
+    from brain_factslots import resolution
+
+    w = world
+    before = w.counts()
+    validate = resolution.validate_contract
+
+    def result_failure(ref, value, *, profile):
+        if ref.name == "fact-slot-resolution-result-v1":
+            _fail()
+        validate(ref, value, profile=profile)
+
+    monkeypatch.setattr(resolution, "validate_contract", result_failure)
+    with pytest.raises(ContractError):
+        await w.slot()
+    assert w.counts() == before
+    assert w.scalar("SELECT count(*) FROM audit_event WHERE operation_outcome = 'failed'") > 0
+
+
+@pytest.mark.parametrize("boundary", ["answer", "temporal"])
+async def test_normalized_contract_failure_leaves_no_business_write(world, monkeypatch, boundary):
+    from brain_factslots import answers
+    from brain_temporal import commit
+
+    w = world
+    slot = await w.slot()
+    before = w.counts()
+    outbox_before = w.scalar("SELECT count(*) FROM outbox_event")
+    changes_before = w.scalar("SELECT count(*) FROM canonical_fact_change")
+    monkeypatch.setattr(answers if boundary == "answer" else commit, "validate_contract", _fail)
+    response = await w.commit_v1(slot, money("1000000.00"), start=bound("2026-06-01T05:00:00Z"))
+    assert response.status_code == 500
+    assert response.json()["code"] == "contract_invariant_failed"
+    assert w.counts() == before
+    assert w.scalar("SELECT count(*) FROM outbox_event") == outbox_before
+    assert w.scalar("SELECT count(*) FROM canonical_fact_change") == changes_before
+    assert _audit(w, slot, "commit") == "failed"
+
+
+async def test_serialized_commit_guard_failure_rolls_back_effects_before_outer_commit(
+    world, monkeypatch
+):
+    from brain_api.routes import facts
+
+    w = world
+    slot = await w.slot()
+    before = w.counts()
+    outbox_before = w.scalar("SELECT count(*) FROM outbox_event")
+    changes_before = w.scalar("SELECT count(*) FROM canonical_fact_change")
+    monkeypatch.setattr(facts, "guard_commit_response", _fail)
+    response = await w.commit_v1(slot, money("1"), start=bound("2026-06-01T05:00:00Z"))
+    assert response.status_code == 500
+    assert response.json()["code"] == "contract_invariant_failed"
+    assert w.counts() == before
+    assert w.scalar("SELECT count(*) FROM outbox_event") == outbox_before
+    assert w.scalar("SELECT count(*) FROM canonical_fact_change") == changes_before
+    assert _audit(w, slot, "commit") == "failed"
+
+
+async def test_pr_l3_read_audit_precedes_safe_http_failure_and_denied_source_precedes_guard(
+    world, monkeypatch
+):
+    from brain_api.routes import facts
+
+    w = world
+    slot = await w.slot()
+    restricted = w.artifact(w.a, classifications=("restricted",))
+    value = {
+        "answer_contract": "fact-answer/v1",
+        "state": "NOT_FOUND",
+        "scope": {
+            "content_artifact_id": str(restricted),
+            "profile_release_ref": "gl-policy-profile/1",
+            "pages": [1],
+        },
+    }
+    created = await w.commit_v1(slot, value, start=bound("2026-06-01T05:00:00Z"))
+    assert created.status_code == 201, created.text
+    with Session(w.sync_engine) as session, session.begin():
+        limited = fixtures.seed_principal(
+            session, issuer="urn:f0011:test", subject=f"limited-{uuid4()}"
+        )
+        fixtures.seed_grant(
+            session, limited.id, *w.a.scope, "TenantMember", classifications=("internal",)
+        )
+    calls = []
+
+    def response_failure(*args, **kwargs):
+        calls.append(True)
+        _fail()
+
+    monkeypatch.setattr(facts, "guard_fact_response", response_failure)
+    before = w.counts()
+    authorized = await w.read(slot, "2026-07-01T00:00:00Z")
+    assert authorized.status_code == 500
+    assert authorized.json()["code"] == "contract_invariant_failed"
+    assert authorized.json()["detail"] is None and authorized.json()["instance"] is None
+    assert str(restricted) not in authorized.text and "schema_pointer" not in authorized.text
+    assert _audit(w, slot, "read") == "succeeded"
+    assert len(calls) == 1
+    denied = await w.read(slot, "2026-07-01T00:00:00Z", principal=limited)
+    assert denied.status_code == 404 and denied.json()["code"] == "not_found"
+    assert str(restricted) not in denied.text
+    assert len(calls) == 1
+    assert w.counts() == before
+
+
+async def test_domain_reason_stays_ahead_of_normalized_schema_guard(world, monkeypatch):
+    assert w.counts() == before
+
+
+def _model_mismatch(*args, **kwargs):
+    raise ValueError("response model could not represent the domain value")
+
+
+async def test_commit_response_model_mismatch_is_invariant_failure_and_rolls_back(
+    world, monkeypatch
+):
+    from brain_api.routes import facts
+
+    w = world
+    slot = await w.slot()
+    before = w.counts()
+    outbox_before = w.scalar("SELECT count(*) FROM outbox_event")
+    changes_before = w.scalar("SELECT count(*) FROM canonical_fact_change")
+    guard_calls = []
+    monkeypatch.setattr(facts.CommitResponseOut, "from_domain", _model_mismatch)
+    monkeypatch.setattr(facts, "guard_commit_response", lambda *a, **k: guard_calls.append(1))
+    response = await w.commit_v1(slot, money("1"), start=bound("2026-06-01T05:00:00Z"))
+    assert response.status_code == 500
+    assert response.json()["code"] == "contract_invariant_failed"
+    assert "could not represent" not in response.text
+    assert guard_calls == []
+    assert w.counts() == before
+    assert w.scalar("SELECT count(*) FROM outbox_event") == outbox_before
+    assert w.scalar("SELECT count(*) FROM canonical_fact_change") == changes_before
+
+
+async def test_read_response_model_mismatch_is_invariant_failure_before_guard(world, monkeypatch):
+    from brain_api.routes import facts
+
+    w = world
+    slot = await w.slot()
+    created = await w.commit_v1(slot, money("1"), start=bound("2026-06-01T05:00:00Z"))
+    assert created.status_code == 201, created.text
+    before = w.counts()
+    guard_calls = []
+    monkeypatch.setattr(facts.FactVersionOut, "from_domain", _model_mismatch)
+    monkeypatch.setattr(facts, "guard_fact_response", lambda *a, **k: guard_calls.append(1))
+    response = await w.read(slot, "2026-07-01T00:00:00Z")
+    assert response.status_code == 500
+    assert response.json()["code"] == "contract_invariant_failed"
+    assert "could not represent" not in response.text
+    assert guard_calls == []
+    assert w.counts() == before

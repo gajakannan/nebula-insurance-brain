@@ -1,0 +1,371 @@
+diff --git a/engine/apps/api/src/brain_api/app.py b/engine/apps/api/src/brain_api/app.py
+index f888b9c..679e545 100644
+--- a/engine/apps/api/src/brain_api/app.py
++++ b/engine/apps/api/src/brain_api/app.py
+@@ -2,6 +2,7 @@ from __future__ import annotations
+ 
+ from fastapi import FastAPI
+ 
++from brain_api.contract_openapi import install_contract_openapi
+ from brain_api.errors import install_problem_details_handlers
+ from brain_api.health import router as health_router
+ from brain_api.routes.content import router as content_router
+@@ -22,6 +23,7 @@ def create_app() -> FastAPI:
+     app.include_router(reviews_router)
+     app.include_router(content_router)
+     app.include_router(facts_router)
++    install_contract_openapi(app)
+     return app
+ 
+ 
+diff --git a/engine/apps/api/src/brain_api/errors.py b/engine/apps/api/src/brain_api/errors.py
+index db945e5..39f19d7 100644
+--- a/engine/apps/api/src/brain_api/errors.py
++++ b/engine/apps/api/src/brain_api/errors.py
+@@ -1,9 +1,11 @@
+ from __future__ import annotations
+ 
++import logging
+ import uuid
+ 
+ from brain_content.manifest import ArtifactVersionUnsupported
+ from brain_content.validation import ArtifactIntegrityError
++from brain_contracts.schema_runtime import ContractError
+ from brain_security.execution import AuthorizationDenied, AuthorizationUnavailable
+ from fastapi import FastAPI, Request, status
+ from fastapi.exceptions import RequestValidationError
+@@ -12,6 +14,8 @@ from pydantic import BaseModel
+ 
+ from brain_api.security_headers import SECURITY_HEADERS
+ 
++logger = logging.getLogger(__name__)
++
+ 
+ class ProblemDetails(BaseModel):
+     """RFC 9457 problem details. `traceId` is the sole camelCase member,
+@@ -146,6 +150,7 @@ def _problem_response(
+     code: str,
+     detail: str | None,
+     instance: str | None,
++    trace_id: str | None = None,
+ ) -> JSONResponse:
+     problem = ProblemDetails(
+         type="about:blank",
+@@ -154,7 +159,7 @@ def _problem_response(
+         detail=detail,
+         instance=instance,
+         code=code,
+-        traceId=str(uuid.uuid4()),
++        traceId=trace_id or str(uuid.uuid4()),
+     )
+     return JSONResponse(
+         status_code=status_code,
+@@ -166,6 +171,33 @@ def _problem_response(
+ def install_problem_details_handlers(app: FastAPI) -> None:
+     """Map BrainError subclasses and request-validation failures to ProblemDetails."""
+ 
++    @app.exception_handler(ContractError)
++    async def _handle_contract_invariant(request: Request, exc: ContractError) -> JSONResponse:
++        # Normalized-carrier failures are internal build/invariant faults. The
++        # response contains neither instance data nor diagnostic pointers; the
++        # server log carries only fixed codes and trusted schema coordinates,
++        # keyed by the same traceId the client receives.
++        trace_id = str(uuid.uuid4())
++        logger.error(
++            "contract_invariant_failed",
++            extra={
++                "trace_id": trace_id,
++                "contract_code": exc.issue.code,
++                "contract_id": exc.issue.contract_id,
++                "schema_pointer": exc.issue.schema_pointer,
++                "method": request.method,
++                "path": request.url.path,
++            },
++        )
++        return _problem_response(
++            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
++            title="Internal Server Error",
++            code="contract_invariant_failed",
++            detail=None,
++            instance=None,
++            trace_id=trace_id,
++        )
++
+     @app.exception_handler(ArtifactIntegrityError)
+     @app.exception_handler(ArtifactVersionUnsupported)
+     async def _handle_content_integrity(request: Request, exc: Exception) -> JSONResponse:
+@@ -217,13 +249,25 @@ def install_problem_details_handlers(app: FastAPI) -> None:
+     async def _handle_unexpected(request: Request, exc: Exception) -> JSONResponse:
+         # Starlette answers unhandled exceptions outside user middleware, so this
+         # response carries the baseline security headers itself (SEC-03). No
+-        # exception text crosses to the client.
++        # exception text crosses to the client. The server log records only the
++        # exception class, never its message: database errors can quote rows.
++        trace_id = str(uuid.uuid4())
++        logger.error(
++            "internal_error",
++            extra={
++                "trace_id": trace_id,
++                "error_type": type(exc).__name__,
++                "method": request.method,
++                "path": request.url.path,
++            },
++        )
+         response = _problem_response(
+             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+             title="Internal Server Error",
+             code="internal_error",
+             detail=None,
+             instance=None,
++            trace_id=trace_id,
+         )
+         response.headers.update(SECURITY_HEADERS)
+         return response
+diff --git a/engine/apps/api/src/brain_api/routes/facts.py b/engine/apps/api/src/brain_api/routes/facts.py
+index 44dbff4..73eb0b5 100644
+--- a/engine/apps/api/src/brain_api/routes/facts.py
++++ b/engine/apps/api/src/brain_api/routes/facts.py
+@@ -5,6 +5,7 @@ from datetime import UTC, datetime
+ from uuid import UUID
+ 
+ from brain_assertions.eligibility import AssertionIneligible
++from brain_contracts.schema_runtime import ContractError
+ from brain_domain.authx import (
+     Action,
+     AuthorizationDecision,
+@@ -13,7 +14,7 @@ from brain_domain.authx import (
+     ResourceType,
+ )
+ from brain_domain.fact_answers import FactAnswerRejected
+-from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
++from brain_domain.facts import ChangeReason, CommitProposal, FactVersion
+ from brain_domain.principal import Principal
+ from brain_domain.temporal import TemporalRejected
+ from brain_factslots.answers import FactAnswerPolicy, FactAnswerReader
+@@ -33,6 +34,7 @@ from fastapi import APIRouter, Depends, Query
+ from sqlalchemy.exc import DBAPIError, IntegrityError
+ from sqlalchemy.ext.asyncio import AsyncSession
+ 
++from brain_api.contract_guards import guard_commit_response, guard_fact_response
+ from brain_api.deps import (
+     current_principal,
+     get_authorization_execution,
+@@ -144,9 +146,19 @@ async def get_fact(
+         requested=requested,
+         additional_reads=scope_reads,
+     )
+-    if isinstance(result, ValidityUnknown):
+-        return FactValidityUnknownOut.from_domain(result)
+-    return FactVersionOut.from_domain(result.version)
++    response: FactVersionOut | FactValidityUnknownOut
++    try:
++        if isinstance(result, ValidityUnknown):
++            response = FactValidityUnknownOut.from_domain(result)
++        else:
++            response = FactVersionOut.from_domain(result.version)
++        payload = response.model_dump(mode="json")
++    except (ValueError, TypeError):
++        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
++    # All exact payload/source READ checks and the read audit have completed.
++    # PR-L3's bounded SUCCEEDED-audit / invariant-500 meaning is reviewed at G3.
++    guard_fact_response(payload, validity_unknown=isinstance(result, ValidityUnknown))
++    return response
+ 
+ 
+ @router.post("/{fact_slot_id}/commits", response_model=CommitResponseOut, status_code=201)
+@@ -187,7 +199,7 @@ async def commit_fact(
+ 
+     evidence_keys: set[ResourceKey] = set()
+ 
+-    async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResult:
++    async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResponseOut:
+         decision = next(
+             d for d in decisions if d.resource == _slot(fact_slot_id) and d.action == Action.COMMIT
+         )
+@@ -216,13 +228,22 @@ async def commit_fact(
+             if not needed <= readable:
+                 raise StaleVersionError("attesting documents changed concurrently")
+ 
+-        return await service.commit(
++        committed = await service.commit(
+             proposal,
+             authorized_scope=scope,
+             authorization_decision_id=decision.decision_id,
+             source_access=repository.source_access_proof(evidence_reads),
+             disclosure_check=disclosure_check,
+         )
++        try:
++            response = CommitResponseOut.from_domain(committed)
++            payload = response.model_dump(mode="json")
++        except (ValueError, TypeError):
++            raise ContractError("CONTRACT_MODEL_MISMATCH") from None
++        # Validate before returning to the existing outer mutation facade, so
++        # response invariant failures roll back versions, changes and outbox.
++        guard_commit_response(payload)
++        return response
+ 
+     async def source_keys() -> Sequence[ResourceKey]:
+         # F0008: ending evidence joins the same-UoW source READ checks (D4).
+@@ -288,7 +309,7 @@ async def commit_fact(
+         # No database text crosses to the client: constraint messages can quote the
+         # failing row (F0008 G3 security review).
+         raise ConcurrentCommitApiError(None) from exc
+-    return CommitResponseOut.from_domain(result)
++    return result
+ 
+ 
+ def _ending_refs(temporal: object) -> tuple[UUID, ...]:
+diff --git a/engine/packages/brain-factslots/src/brain_factslots/answers.py b/engine/packages/brain-factslots/src/brain_factslots/answers.py
+index 283e329..933e363 100644
+--- a/engine/packages/brain-factslots/src/brain_factslots/answers.py
++++ b/engine/packages/brain-factslots/src/brain_factslots/answers.py
+@@ -12,6 +12,7 @@ from datetime import datetime
+ from typing import Any
+ from uuid import UUID
+ 
++from brain_contracts.schema_runtime import ContractRef, validate_contract
+ from brain_domain.authx import ResourceKey, ResourceType
+ from brain_domain.fact_answers import (
+     AnswerReason,
+@@ -108,7 +109,9 @@ class FactAnswerPolicy:
+                 and member_key(answer.value, contract) != slot.member_key
+             ):
+                 raise FactAnswerRejected(AnswerReason.MEMBER_VALUE_MISMATCH)
+-        return answer.to_json()
++        canonical = answer.to_json()
++        validate_contract(ContractRef("fact-answer-v1", "1"), canonical, profile="native-compat/v1")
++        return canonical
+ 
+     async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
+         assert answer.value is not None
+diff --git a/engine/packages/brain-factslots/src/brain_factslots/resolution.py b/engine/packages/brain-factslots/src/brain_factslots/resolution.py
+index 97cea7c..f19b525 100644
+--- a/engine/packages/brain-factslots/src/brain_factslots/resolution.py
++++ b/engine/packages/brain-factslots/src/brain_factslots/resolution.py
+@@ -14,6 +14,7 @@ from dataclasses import dataclass
+ from datetime import UTC, datetime
+ from uuid import UUID
+ 
++from brain_contracts.schema_runtime import ContractRef, validate_contract
+ from brain_domain.authx import AuthorizationDecision, ResourceKey, ResourceType
+ from brain_domain.fact_slots import (
+     FINGERPRINT_VERSION,
+@@ -224,6 +225,32 @@ class FactSlotResolver:
+             raise SlotRejected(SlotReason.SUBJECT_NOT_FOUND)
+         async with self._store.atomic():
+             await self._check_scope(request, authorized_scope, subject)
++            # WHY: native callers may omit qualifiers or use noncanonical UUID
++            # spellings. Validate the domain-normalized carrier after all
++            # existing protected reasons, rather than tightening raw input.
++            raw_qualifiers = key.get("qualifiers")
++            if raw_qualifiers is None:
++                raw_qualifiers = {}
++            assert isinstance(raw_qualifiers, Mapping)  # established by _parse
++            normalized: dict[str, object] = {
++                "schema_version": KEY_SCHEMA_VERSION,
++                "knowledge_base_id": str(knowledge_base_id),
++                "subject_entity_id": str(subject),
++                "predicate_key": str(request.key),
++                "predicate_release_ref": request.contract.release_ref,
++                "qualifiers": {
++                    name: canonical_value(item).canonical for name, item in raw_qualifiers.items()
++                },
++            }
++            if request.object_entity_id is not None:
++                normalized["object_entity_id"] = str(request.object_entity_id)
++            if request.member is not None:
++                normalized["member"] = request.member.canonical
++            validate_contract(
++                ContractRef("fact-slot-key-v1", "1"),
++                normalized,
++                profile="native-compat/v1",
++            )
+             at = self._clock()
+             header_identity = SlotIdentity(
+                 tenant_id,
+@@ -256,7 +283,7 @@ class FactSlotResolver:
+                 fingerprint=header.identity_fingerprint,
+             )
+             if request.cardinality != Cardinality.MULTI:
+-                return result
++                return _checked_result(result)
+             member_identity = SlotIdentity(
+                 tenant_id,
+                 knowledge_base_id,
+@@ -280,14 +307,16 @@ class FactSlotResolver:
+                     at=at,
+                     decision=decision,
+                 )
+-            return ResolutionResult(
+-                result.outcome,
+-                slot_id=header.id,
+-                member_slot_id=member.id,
+-                member_created=member_created,
+-                predicate_key=str(request.key),
+-                cardinality=request.cardinality,
+-                fingerprint=header.identity_fingerprint,
++            return _checked_result(
++                ResolutionResult(
++                    result.outcome,
++                    slot_id=header.id,
++                    member_slot_id=member.id,
++                    member_created=member_created,
++                    predicate_key=str(request.key),
++                    cardinality=request.cardinality,
++                    fingerprint=header.identity_fingerprint,
++                )
+             )
+ 
+     async def _check_scope(
+@@ -342,3 +371,12 @@ class FactSlotResolver:
+         if stored.cardinality != request.cardinality:
+             raise SlotRejected(SlotReason.CARDINALITY_CONFLICT)
+         return stored, False
++
++
++def _checked_result(result: ResolutionResult) -> ResolutionResult:
++    validate_contract(
++        ContractRef("fact-slot-resolution-result-v1", "1"),
++        result.to_json(),
++        profile="native-compat/v1",
++    )
++    return result
+diff --git a/engine/packages/brain-temporal/src/brain_temporal/commit.py b/engine/packages/brain-temporal/src/brain_temporal/commit.py
+index 8cb5ab7..07233a0 100644
+--- a/engine/packages/brain-temporal/src/brain_temporal/commit.py
++++ b/engine/packages/brain-temporal/src/brain_temporal/commit.py
+@@ -6,6 +6,7 @@ from datetime import UTC, datetime
+ from typing import Any, Protocol
+ from uuid import UUID, uuid4
+ 
++from brain_contracts.schema_runtime import ContractRef, validate_contract
+ from brain_domain.assertions import SourceAccessProof
+ from brain_domain.facts import ChangeReason, CommitProposal, CommitResult, FactVersion
+ from brain_domain.temporal import (
+@@ -269,6 +270,14 @@ class CanonicalCommitService:
+         Pilot rows written before F0008 have no stored timestamps on the domain
+         object, so the proposal's values are the fallback for those alone."""
+         remainder_id = uuid4()
++        if piece.temporal is not None:
++            # Only newly constructed temporal carriers are guarded. A historical
++            # legacy remainder keeps its unwrapped value and absent metadata.
++            validate_contract(
++                ContractRef("fact-temporal-v1", "1", "/$defs/version_temporal"),
++                piece.temporal.to_json(),
++                profile="native-compat/v1",
++            )
+         await self._repository.insert_version(
+             version_id=remainder_id,
+             slot_id=proposal.slot_id,
+@@ -500,6 +509,11 @@ class CanonicalCommitService:
+             validity_unknown_from=placement.validity_unknown_from,
+             split_of_version_id=None,
+         )
++        validate_contract(
++            ContractRef("fact-temporal-v1", "1", "/$defs/version_temporal"),
++            new_temporal.to_json(),
++            profile="native-compat/v1",
++        )
+ 
+         # Step 10: write.
+         now = self._clock()

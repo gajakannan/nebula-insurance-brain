@@ -2,7 +2,7 @@
 
 **Created:** 2026-11-20
 **Author:** Codex / Architect
-**Status:** Phase B revision approved by operator token `approve-phase-b` on 2026-11-22; implementation Not Started
+**Status:** Phase B revision approved by operator token `approve-phase-b` on 2026-11-22; implementation Not Started at approval (historical; delivered — see [STATUS](STATUS.md))
 **Plan Run:** 2026-11-21-e4098d22 (B, existing)
 **Approved Baseline:** 2026-11-20-ccb1bd39; operator token `approve-phase-b` on 2026-11-20
 **Review Input:** 2026-11-21-b4cd07e4 (READY; two Medium, four Low findings)
@@ -498,7 +498,7 @@ and ADR-0079 all have real F0011 source/mapping references.
 
 ## Exit and Approval State
 
-All six stories remain Not Started (41 ACs). Phase A approval from
+At plan approval all six stories were Not Started (41 ACs); they are now Done (see [STATUS](STATUS.md)). Phase A approval from
 `2026-11-20-ccb1bd39` is unchanged; story edits add the missing grammatical "to"
 only. The original Phase B approval and review READY decision remain historical
 evidence for the baseline. G4 ontology sync and all seven ordered G5 exit

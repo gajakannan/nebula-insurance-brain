@@ -1,0 +1,168 @@
+# User Story Index
+
+Auto-generated index of all user stories across feature folders.
+
+**Total Stories:** 60
+
+---
+
+## F0001 — Repository and engineering foundation
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0001-S0001](./archive/F0001-repository-and-engineering-foundation/F0001-S0001-runtime-roots-and-toolchain-skeleton.md) | Runtime roots and toolchain skeleton | Critical | Infrastructure | Dana the Platform Engineer |
+| [F0001-S0002](./archive/F0001-repository-and-engineering-foundation/F0001-S0002-local-runtime-containers-and-dependency-matrix.md) | Local runtime containers and dependency matrix | Critical | Infrastructure | Dana the Platform Engineer |
+| [F0001-S0003](./archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md) | Proof: parse once, reinterpret twice, evidence resolves | High | Infrastructure | Mateo the Document Intelligence Engineer |
+| [F0001-S0004](./archive/F0001-repository-and-engineering-foundation/F0001-S0004-proof-native-review-round-trip.md) | Proof: native review round trip with lineage | High | Infrastructure | Rosa the Business Reviewer |
+| [F0001-S0005](./archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md) | Proof: bitemporal commit under retroactive and concurrent change | High | Infrastructure | Ingrid the Persistence Engineer |
+| [F0001-S0006](./archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md) | Proof: access boundaries, extension build, and restore | High | Infrastructure | Dana the Platform Engineer |
+| [F0001-S0007](./archive/F0001-repository-and-engineering-foundation/F0001-S0007-record-proof-outcomes-and-settle-contracts.md) | Record proof outcomes and settle the pre-build contracts | High | Infrastructure | Dana the Platform Engineer |
+
+---
+
+## F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0002-S0001](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0001-structural-tenancy-and-entity-identity.md) | Preserve structural tenancy and tenant-scoped entity identity | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0002-S0002](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0002-verified-stable-principal-resolution.md) | Resolve verified credentials to stable typed principals | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0003](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0003-current-membership-and-request-scope.md) | Resolve current memberships and intersect requested scope | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0004](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0004-conjunctive-resource-authorization.md) | Enforce parent, classification and source restrictions together | Critical | MVP | Rosa the Business Reviewer |
+| [F0002-S0005](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0005-bounded-delegation-and-service-authority.md) | Bound delegated and autonomous service authority | Critical | MVP | Dana the Platform Engineer |
+| [F0002-S0006](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/F0002-S0006-audit-and-consumer-contract-proof.md) | Prove audited kernel behavior through existing consumers | Critical | MVP | Dana the Platform Engineer |
+
+---
+
+## F0003 — PostgreSQL persistence
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0003-S0001](./archive/F0003-postgresql-persistence/F0003-S0001-persistence-inventory-and-ownership.md) | Inventory core persistence ownership and phase boundaries | Critical | v0.1A | persistence engineer |
+| [F0003-S0002](./archive/F0003-postgresql-persistence/F0003-S0002-persisted-ownership-and-reference-integrity.md) | Enforce persisted ownership and reference integrity | Critical | v0.1A | persistence engineer |
+| [F0003-S0003](./archive/F0003-postgresql-persistence/F0003-S0003-temporal-and-transaction-integrity.md) | Preserve temporal and transactional integrity | Critical | v0.1A | persistence engineer |
+| [F0003-S0004](./archive/F0003-postgresql-persistence/F0003-S0004-safe-schema-evolution.md) | Evolve the schema without losing accepted state | High | v0.1A | persistence engineer |
+
+---
+
+## F0004 — Content artifact model
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0004-S0001](./archive/F0004-content-artifact-model/F0004-S0001-publish-and-reuse-content-bundle.md) | Publish and reuse an immutable content bundle | Critical | MVP — v0.1A | document intelligence engineer |
+| [F0004-S0002](./archive/F0004-content-artifact-model/F0004-S0002-content-structure-and-text-origin.md) | Preserve content structure and text origin | Critical | MVP — v0.1A | document intelligence engineer |
+| [F0004-S0003](./archive/F0004-content-artifact-model/F0004-S0003-document-date-provenance.md) | Preserve document-date provenance | Critical | MVP — v0.1A | persistence engineer |
+| [F0004-S0004](./archive/F0004-content-artifact-model/F0004-S0004-authorized-consumers-and-compatibility.md) | Protect artifact consumers and compatibility | Critical | MVP — v0.1A | persistence engineer |
+
+---
+
+## F0005 — One-time document ingestion
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0005-S0001](./archive/F0005-one-time-docling-ingestion/F0005-S0001-pin-and-process-source-documents.md) | Pin and process source documents | High | MVP — v0.1A | document intelligence engineer |
+| [F0005-S0002](./archive/F0005-one-time-docling-ingestion/F0005-S0002-persist-artifacts-and-recover-jobs.md) | Persist artifacts and recover jobs | High | MVP — v0.1A | platform engineer |
+| [F0005-S0003](./archive/F0005-one-time-docling-ingestion/F0005-S0003-reinterpret-saved-json-and-map-evidence.md) | Reinterpret saved JSON and map evidence | High | MVP — v0.1A | document intelligence engineer |
+| [F0005-S0004](./archive/F0005-one-time-docling-ingestion/F0005-S0004-evaluate-and-activate-proven-pipeline.md) | Evaluate and activate the proven pipeline | High | MVP — v0.1A | platform owner |
+| [F0005-S0005](./archive/F0005-one-time-docling-ingestion/F0005-S0005-qualify-text-origin-and-enable-v2-publication.md) | Qualify text origin and enable v2 publication | High | MVP — v0.1A | document intelligence engineer |
+
+---
+
+## F0006 — Assertion plane + origin + interpretation basis
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0006-S0001](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0001-preserve-typed-source-claims.md) | Preserve typed source claims | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0006-S0002](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0002-retain-open-statements-and-version-contracts.md) | Retain open statements and version contracts | High | MVP | Mateo the Document Intelligence Engineer |
+| [F0006-S0003](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0003-check-structural-admission-and-evidence.md) | Check structural admission and evidence | Critical | MVP | Mateo the Document Intelligence Engineer |
+| [F0006-S0004](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0004-guard-mood-and-described-evidence.md) | Guard mood and described evidence | Critical | MVP | Rosa the Business Reviewer |
+| [F0006-S0005](./archive/F0006-assertion-plane-origin-and-interpretation-basis/F0006-S0005-preserve-existing-consumer-boundaries.md) | Preserve existing consumer boundaries | Critical | MVP | Ingrid the Persistence Engineer |
+
+---
+
+## F0007 — FactSlot model
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0007-S0001](./archive/F0007-factslot-model/F0007-S0001-resolve-stable-factslot-identity.md) | Resolve stable FactSlot identity | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0007-S0002](./archive/F0007-factslot-model/F0007-S0002-distinguish-single-multi-and-relationship-slots.md) | Distinguish single, multi-valued and relationship slots | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0007-S0003](./archive/F0007-factslot-model/F0007-S0003-carry-information-state-separately-from-value.md) | Carry information state separately from value | Critical | MVP | Rosa the Business Reviewer |
+| [F0007-S0004](./archive/F0007-factslot-model/F0007-S0004-type-money-and-identifiers.md) | Type money and identifiers | Critical | MVP | Priya the GL Underwriter |
+| [F0007-S0005](./archive/F0007-factslot-model/F0007-S0005-define-name-factslots.md) | Define name FactSlots | High | MVP | Rosa the Business Reviewer |
+| [F0007-S0006](./archive/F0007-factslot-model/F0007-S0006-preserve-pilot-slots-and-ownership.md) | Preserve pilot slots and ownership | Critical | MVP | Ingrid the Persistence Engineer |
+
+---
+
+## F0008 — Bitemporal canonical facts
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0008-S0001](./archive/F0008-bitemporal-canonical-facts/F0008-S0001-record-valid-time-precision-and-zone.md) | Record valid-time precision and zone | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0002](./archive/F0008-bitemporal-canonical-facts/F0008-S0002-distinguish-open-bounded-and-unknown-ends.md) | Distinguish open, bounded and unknown ends | Critical | MVP | Rosa the Business Reviewer |
+| [F0008-S0003](./archive/F0008-bitemporal-canonical-facts/F0008-S0003-split-intervals-and-close-recorded-time.md) | Split intervals and close recorded time | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0008-S0004](./archive/F0008-bitemporal-canonical-facts/F0008-S0004-enforce-temporal-integrity-under-concurrency.md) | Enforce temporal integrity under concurrency | Critical | MVP | Ingrid the Persistence Engineer |
+| [F0008-S0005](./archive/F0008-bitemporal-canonical-facts/F0008-S0005-guard-succession-by-start-basis-and-state.md) | Guard succession by start basis and state | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0006](./archive/F0008-bitemporal-canonical-facts/F0008-S0006-resolve-facts-at-a-valid-and-recorded-coordinate.md) | Resolve facts at a valid and recorded coordinate | Critical | MVP | Priya the GL Underwriter |
+| [F0008-S0007](./archive/F0008-bitemporal-canonical-facts/F0008-S0007-preserve-pilot-versions-through-migration.md) | Preserve pilot versions through migration | High | MVP | Ingrid the Persistence Engineer |
+
+---
+
+## F0011 — JSON Schema contract system
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0011-S0001](./archive/F0011-json-schema-contract-system/F0011-S0001-resolve-versioned-offline-contracts.md) | Resolve versioned offline contracts | High | MVP | Dana the Platform Engineer |
+| [F0011-S0002](./archive/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md) | Validate information state and scoped absence | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0003](./archive/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md) | Validate qualified money and scoped identifiers | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0004](./archive/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md) | Prove cross-language contract conformance | High | MVP | Dana the Platform Engineer |
+| [F0011-S0005](./archive/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md) | Preserve existing consumer contracts | High | MVP | Ingrid the Persistence Engineer |
+| [F0011-S0006](./archive/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md) | Verify reproducible contract delivery | High | MVP | Dana the Platform Engineer |
+
+---
+
+## F0064 — Repository instructions and planning-check adoption
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0064-S0001](./archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md) | Declare the product manifest | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0002](./archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) | Provide agent instructions and the review checklist | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0003](./archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) | Validate plan-readiness structure | Medium | Infrastructure | Dana the Platform Engineer |
+| [F0064-S0004](./archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) | Enforce checks in CI and document setup | Medium | Infrastructure | Dana the Platform Engineer |
+
+---
+
+## F0065 — Grounded GL guideline assessment
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0065-S0001](./F0065-grounded-gl-guideline-assessment/F0065-S0001-versioned-guideline-rule.md) | Versioned guideline rule | High | v0.1B | domain steward responsible for GL guidelines |
+| [F0065-S0002](./F0065-grounded-gl-guideline-assessment/F0065-S0002-evaluate-accepted-facts.md) | Evaluate accepted facts | High | v0.1B | GL underwriter inspecting a coverage limit |
+| [F0065-S0003](./F0065-grounded-gl-guideline-assessment/F0065-S0003-preserve-assessment-lineage.md) | Preserve assessment lineage | High | v0.1B | reviewer auditing a guideline assessment |
+| [F0065-S0004](./F0065-grounded-gl-guideline-assessment/F0065-S0004-temporal-reassessment.md) | Temporal reassessment | High | v0.1B | GL underwriter reviewing a late endorsement |
+| [F0065-S0005](./F0065-grounded-gl-guideline-assessment/F0065-S0005-explain-assessment-in-entity-360.md) | Explain assessment in Entity 360 | High | v0.1B | GL underwriter using Entity 360 |
+| [F0065-S0006](./F0065-grounded-gl-guideline-assessment/F0065-S0006-reproducible-worked-examples.md) | Reproducible worked examples | High | v0.1B | new contributor reviewing the semantic architecture |
+
+---
+
+## Summary by Phase
+
+| Phase | Count |
+|-------|-------|
+| Infrastructure | 11 |
+| MVP | 30 |
+| MVP — v0.1A | 9 |
+| v0.1A | 4 |
+| v0.1B | 6 |
+
+---
+
+## Summary by Priority
+
+| Priority | Count |
+|----------|-------|
+| Critical | 30 |
+| High | 26 |
+| Medium | 4 |
+
+---
+
+*Generated by generate-story-index.py*

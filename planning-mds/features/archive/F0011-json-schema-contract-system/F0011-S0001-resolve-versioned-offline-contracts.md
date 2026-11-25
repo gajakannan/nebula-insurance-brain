@@ -17,7 +17,7 @@
 
 ADR-0013 and master blueprint sections 25–27/112 require one cross-language structural contract. Existing content and assertion packages already have local schema loaders; F0011 must reconcile their ownership and reuse them where appropriate.
 Source and boundary authority: [PRD](PRD.md), accepted ADR-0013, proposed ADR-0039,
-and the shipped contracts cited in the PRD. Phase A requirements are approved; implementation is in progress in feature run 2026-11-22-885e8734.
+and the shipped contracts cited in the PRD. Phase A requirements are approved; implemented and closed out in feature run 2026-11-22-885e8734.
 
 ## Acceptance Criteria
 
@@ -96,5 +96,5 @@ is intentional; the PRD governs any apparent conflict.
 
 ## Review Provenance
 
-Runtime implementation and test evidence is recorded in feature run 2026-11-22-885e8734; independent reviewer signoff is pending. See [STATUS](STATUS.md) for the append-only
+Runtime implementation, test evidence and independent reviewer signoffs are recorded in feature run 2026-11-22-885e8734. See [STATUS](STATUS.md) for the append-only
 provenance table; the Architect sets the final required role matrix in Phase B.

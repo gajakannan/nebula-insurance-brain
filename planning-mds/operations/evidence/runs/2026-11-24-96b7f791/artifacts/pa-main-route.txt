@@ -1,0 +1,48 @@
+engine/packages/brain-temporal/src/brain_temporal/commit.py:9:from brain_contracts.schema_runtime import ContractRef, validate_contract
+engine/packages/brain-temporal/src/brain_temporal/commit.py:152:        authorization_decision_id: UUID | None,
+engine/packages/brain-temporal/src/brain_temporal/commit.py:183:    F0002: authorization is not performed here. The caller runs `commit` as the
+engine/packages/brain-temporal/src/brain_temporal/commit.py:184:    operation of `AuthorizationExecution.mutate`, which has already locked current
+engine/packages/brain-temporal/src/brain_temporal/commit.py:187:    and the durable authorization decision then commit or roll back together.
+engine/packages/brain-temporal/src/brain_temporal/commit.py:211:        authorization_decision_id: UUID | None,
+engine/packages/brain-temporal/src/brain_temporal/commit.py:223:                authorization_decision_id=authorization_decision_id,
+engine/packages/brain-temporal/src/brain_temporal/commit.py:229:            authorization_decision_id=authorization_decision_id,
+engine/packages/brain-temporal/src/brain_temporal/commit.py:277:                ContractRef("fact-temporal-v1", "1", "/$defs/version_temporal"),
+engine/packages/brain-temporal/src/brain_temporal/commit.py:349:        authorization_decision_id: UUID | None,
+engine/packages/brain-temporal/src/brain_temporal/commit.py:374:            authorization_decision_id=authorization_decision_id,
+engine/packages/brain-temporal/src/brain_temporal/commit.py:434:        authorization_decision_id: UUID | None,
+engine/packages/brain-temporal/src/brain_temporal/commit.py:513:            ContractRef("fact-temporal-v1", "1", "/$defs/version_temporal"),
+engine/packages/brain-temporal/src/brain_temporal/commit.py:525:            authorization_decision_id=authorization_decision_id,
+engine/packages/brain-factslots/src/brain_factslots/answers.py:15:from brain_contracts.schema_runtime import ContractRef, validate_contract
+engine/packages/brain-factslots/src/brain_factslots/answers.py:28:from brain_factslots.ports import FactSlotStore, PredicateContractRegistry, StoredSlot
+engine/packages/brain-factslots/src/brain_factslots/answers.py:41:    def __init__(self, registry: PredicateContractRegistry, store: FactSlotStore) -> None:
+engine/packages/brain-factslots/src/brain_factslots/answers.py:49:        authorization has run."""
+engine/packages/brain-factslots/src/brain_factslots/answers.py:113:        validate_contract(ContractRef("fact-answer-v1", "1"), canonical, profile="native-compat/v1")
+engine/packages/brain-factslots/src/brain_factslots/answers.py:131:    answers `NOT_PROCESSED`, never null. Read authorization is the caller's
+engine/packages/brain-factslots/src/brain_factslots/answers.py:147:    async def read(self, slot_id: UUID, *, valid_at: datetime, known_at: datetime) -> FactAnswer:
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:4:source artifacts (`AuthorizedFactSlots.resolve` runs it as the operation of
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:5:`AuthorizationExecution.mutate` with INTERPRET). `authorized_scope` comes from that
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:17:from brain_contracts.schema_runtime import ContractRef, validate_contract
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:24:    PredicateContract,
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:45:from brain_factslots.ports import FactSlotStore, PredicateContractRegistry, StoredSlot
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:108:    contract: PredicateContract
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:129:        registry: PredicateContractRegistry,
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:250:                ContractRef("fact-slot-key-v1", "1"),
+engine/packages/brain-factslots/src/brain_factslots/resolution.py:378:        ContractRef("fact-slot-resolution-result-v1", "1"),
+engine/apps/api/src/brain_api/routes/facts.py:8:from brain_contracts.schema_runtime import ContractError
+engine/apps/api/src/brain_api/routes/facts.py:21:from brain_factslots.ports import PredicateContractRegistry
+engine/apps/api/src/brain_api/routes/facts.py:37:from brain_api.contract_guards import guard_commit_response, guard_fact_response
+engine/apps/api/src/brain_api/routes/facts.py:40:    get_authorization_execution,
+engine/apps/api/src/brain_api/routes/facts.py:89:    execution: AuthorizationExecution = Depends(get_authorization_execution),
+engine/apps/api/src/brain_api/routes/facts.py:92:    """Business valid/known coordinates select history only; authorization always
+engine/apps/api/src/brain_api/routes/facts.py:140:    result = await execution.read(
+engine/apps/api/src/brain_api/routes/facts.py:157:        raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+engine/apps/api/src/brain_api/routes/facts.py:160:    guard_fact_response(payload, validity_unknown=isinstance(result, ValidityUnknown))
+engine/apps/api/src/brain_api/routes/facts.py:169:    execution: AuthorizationExecution = Depends(get_authorization_execution),
+engine/apps/api/src/brain_api/routes/facts.py:171:    registry: PredicateContractRegistry = Depends(get_predicate_registry),
+engine/apps/api/src/brain_api/routes/facts.py:202:    async def operation(decisions: Sequence[AuthorizationDecision]) -> CommitResponseOut:
+engine/apps/api/src/brain_api/routes/facts.py:234:            authorization_decision_id=decision.decision_id,
+engine/apps/api/src/brain_api/routes/facts.py:242:            raise ContractError("CONTRACT_MODEL_MISMATCH") from None
+engine/apps/api/src/brain_api/routes/facts.py:245:        guard_commit_response(payload)
+engine/apps/api/src/brain_api/routes/facts.py:281:        result = await execution.mutate(
+engine/apps/api/src/brain_api/routes/facts.py:286:            operation=operation,
+engine/apps/api/src/brain_api/routes/facts.py:317:    refused with its reason code inside the operation, after authorization."""

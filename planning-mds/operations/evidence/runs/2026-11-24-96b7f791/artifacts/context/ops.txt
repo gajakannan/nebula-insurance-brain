@@ -1,0 +1,77 @@
+## Package Anatomy
+
+All paths are relative to `{NEBULA_PRODUCT_ROOT}`. Templates for every file below
+live at `agents/templates/` (e.g. `feature-evidence-readme-template.md`,
+`evidence-manifest-template.json`, `pm-closeout-template.md`,
+`commands-log-template.md`).
+
+### Base run files (both profiles)
+
+| File | Required headings | Purpose |
+|------|-------------------|---------|
+| `README.md` | `Run Summary`, `Status`, `Evidence Index`, `Validation Summary`, `Open Follow-ups` | Human entry point; status must match the manifest |
+| `action-context.md` | `Run Identity`, `Inputs`, `Assumptions`, `Scope Boundaries`, `Lifecycle Stage` | What ran, with what inputs, at which stage |
+| `artifact-trace.md` | `Artifacts Read`, `Artifacts Created Or Updated`, `Generated Evidence`, `External Or Global Evidence References`, `Omissions And Waivers` | Path-accurate trace of every artifact touched |
+| `gate-decisions.md` | `Gate Decisions` (gate, decision, decider, timestamp, rationale, blocking, follow-up) | Every gate decision with rationale |
+| `commands.log` | JSON-Lines (see Telemetry below) | Append-only command record |
+| `lifecycle-gates.log` | `Lifecycle Gate Run`, `Command`, `Stage`, `Exit Code`, `Result`, `Output References`, `Skipped Gates` | Output of `run-lifecycle-gates.py` |
+
+Required-heading checks are **structural** — the heading must be present
+even when its body is empty (use `None`). Heading matching is
+case-insensitive and whitespace-insensitive, but word order and
+punctuation must match.
+
+### Feature package files (added on top of the base files)
+
+| Artifact | Owner | Gate | Required when |
+|----------|-------|------|---------------|
+| `evidence-manifest.json` | Orchestrator / PM | G0 / G6 / G8 | every feature run |
+| `latest-run.json` | PM | G8 | approved completed terminal feature |
+| `feature-action-execution.md` | Orchestrator | G6 | every feature run |
+| `g0-assembly-plan-validation.md` | Architect | G0 | every feature run |
+| `g1-runtime-preflight.md` | DevOps / orchestrator | G1 | `runtime_bearing = true` |
+| `g2-self-review.md` | Orchestrator | G2 | every feature run |
+| `test-plan.md`, `test-execution-report.md`, `coverage-report.md` | QE | G2/G5 | every completed terminal feature |
+| `deployability-check.md` | DevOps / orchestrator | G2/G5 | every completed terminal feature |
+| `code-review-report.md` | Code Reviewer | G3/G5 | every completed terminal feature |
+| `security-review-report.md` | Security | G3/G5 | Security required or `security_sensitive_scope = true` |
+| `signoff-ledger.md` | PM | G5/G6 | every completed terminal feature |
+| `pm-closeout.md` | PM | G8 | every completed terminal feature |
+| `artifacts/{coverage,diffs,test-results,security,screenshots}/` | QE / FE / orchestrator | varies | when that artifact class exists |
+
+`coverage-report.md` must exist even when coverage is waived. The `diffs/`
+artifact is required for implementation-changing runs (manifest
+`scm.diff_artifact` must resolve and list the changed files).
+
+## Telemetry: the Command Log
+
+`commands.log` is **JSON Lines** — one JSON object per non-empty line,
+append-only across the whole run:
+
+```json
+{"schema_version":1,"timestamp":"2026-05-19T14:20:00-04:00","cwd":"{NEBULA_PRODUCT_ROOT}","command":"pnpm test","exit_code":0,"artifacts":["…/artifacts/test-results/pnpm-test.log"],"redactions":[]}
+```
+
+| Field | Notes |
+|-------|-------|
+| `schema_version` | supported integer |
+| `timestamp` | ISO 8601 with timezone or `Z` |
+| `cwd` | repo-relative or `{NEBULA_PRODUCT_ROOT}` preferred; absolute paths warn unless justified in `artifact-trace.md` → `Run Environment` |
+| `command` | non-empty, sanitized |
+| `exit_code` | integer |
+| `artifacts` | paths produced; resolve where committed |
+| `redactions` | names of redacted fields/token classes |
+
+**Secret scanning is mandatory and self-contained.** The validator scans a
+per-record surface (`command` + `artifacts` strings) against named patterns
+in `agents/product-manager/scripts/secret_patterns.json` — bearer tokens,
+cookies, private keys, raw connection strings, access keys (single-line
+regex), and `env_dump` / `env_file_contents` (multi-line scanners). The
+pattern file is the maintained source of truth and is loaded at startup;
+products may extend it (name conflicts error). Public scanners like
+`detect-secrets`/`trufflehog` may inform the pattern set but are **not**
+invoked at runtime, so validation stays deterministic. Each class has a
+must-detect and must-not-detect (redaction-marker) acceptance set proven by
+fixtures.
+
+## Verdicts & Recommendations

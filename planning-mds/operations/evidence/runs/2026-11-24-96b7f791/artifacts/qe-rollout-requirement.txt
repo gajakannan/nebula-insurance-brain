@@ -1,0 +1,43 @@
+### Stored-version rollout preflight (PR-M1)
+
+S0005 AC4 requires real history evidence in addition to fixtures. Backend authors
+`scripts/contracts/check_stored_fact_versions.py`; QE executes it for **both**
+integration and dev before enabling the new response guard on either existing
+environment. DevOps records the environment inventory and coherent bundle digest
+at feature G0. No assertion that these databases are fixture-only is made here.
+
+The proposed command contract, executed from the product root by the later feature
+run, is:
+
+```bash
+uv run --project engine python scripts/contracts/check_stored_fact_versions.py --environment integration --output <FEATURE_RUN_FOLDER>/artifacts/test-results/stored-versions-integration.json
+uv run --project engine python scripts/contracts/check_stored_fact_versions.py --environment dev --output <FEATURE_RUN_FOLDER>/artifacts/test-results/stored-versions-dev.json
+```
+
+The command selects the named environment using existing local database
+configuration; do not log credentials/DSNs or add an exported secret requirement.
+It is an operator preflight, not an HTTP endpoint or a new runtime grant. Its
+implementation must:
+
+1. Open a PostgreSQL READ ONLY, REPEATABLE READ transaction before selecting data.
+   Record a nonsecret environment identifier, snapshot time, code revision and
+   candidate bundle digest. Stream **every** `fact_versions` row, including closed
+   recorded ranges, historical pilot values, temporal-v1 rows and split/remainder
+   versions; do not use a current-only or valid/known-coordinate filter. Count the
+   rows in the same snapshot and reconcile selected = checked, with zero skips.
+2. Reuse `brain_persistence.repositories._fact_version_from_row` (or an extracted
+   equivalent shared with the repository) and
+   `FactVersionOut.from_domain(...).model_dump(mode="json")`, including the existing
+   absent-temporal serialization. Run the **same** candidate response guard and
+   fixed native profile used by GET, including reference/format checks. Exercise
+   `FactValidityUnknownOut` separately in the temporal route fixtures; the sweep
+   does not bypass authorization or call the HTTP facade and create audit writes.
+3. Count mapping/serialization failures, guard failures and legacy/temporal groups.
+   Emit only counts, environment label, code/bundle identity and fixed error codes /
+   contract IDs. Do not persist values, evidence, row identifiers, exception text
+   or credentials in the report. Never rewrite, coerce, delete or repair a row.
+4. Exit 0 only for complete, zero-failure coverage. Exit 1 for a data/guard mismatch;
+   exit 2 for configuration, unavailable database, incomplete enumeration or other
+   execution failure. Empty databases require an explicit zero-row environment
+   inventory signed by QE/DevOps; an unavailable database is never an empty pass.
+5. QE retains both reports for S0005 AC4 and verifies that the database remained

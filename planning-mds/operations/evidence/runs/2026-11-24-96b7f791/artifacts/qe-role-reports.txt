@@ -1,0 +1,282 @@
+# F0011 Test Plan
+
+Owner: Codex / Quality Engineer
+Date: 2026-11-22
+Run: 2026-11-22-885e8734
+Status: execution in progress; final runtime and security evidence in test-execution-report.md
+
+## Scope and acceptance traceability
+
+All six approved stories and 41 ACs are required. The assembly plan's complete
+AC-to-proof map controls scope. No planning or authored-fixture result counts as
+runtime proof. Synthetic development fixtures remain outside the frozen holdout.
+
+| Story | Required layers and cases | Planned durable evidence |
+|---|---|---|
+| S0001 AC1–AC7 | Offline registry, identity/hash/version, dormant bad refs, dialect/keyword/annotation policy, no network/mutation, installed package | artifacts/test-results/python-contracts.txt; installed-package report; bundle manifest |
+| S0002 AC1–AC7 | Nine answer states and scoped absence; malformed scope/duplicates; denied source before protected metadata; temporal UNKNOWN separate | common-case conformance; existing fact-answer and source READ suites |
+| S0003 AC1–AC7 | Exact decimal/currency and scoped identifiers; structural versus domain currency/basis/normalization/interval outcomes | common-case conformance; existing FactSlot domain/integration suites |
+| S0004 AC1–AC7 | Real JSON Schema/source-gated generated Pydantic/AJV, every supported behavior/format and source conditional; no missing/duplicate/skipped results; metadata/OpenAPI drift | artifacts/test-results/conformance.json; node unit log; generator/drift tests |
+| S0005 AC1–AC7 | Every mapped real consumer; native legacy/current dispatch; actual integration/dev full-history preflight; source READ/admission; no partial authoritative writes | two stored-version reports, signed empty inventories if applicable, PostgreSQL consumer regressions and native differential proof |
+| S0006 AC1–AC6 | Deterministic generation/check; outside-checkout wheel/sdist and JS; intentional drift failure; complete AC ledger and coherent rollback/CI | artifacts/test-results/reproducibility.txt; packaging/CI evidence; coverage artifacts |
+
+## Runtime and execution order
+
+Use the current checkout mounted at `/app/brain` in the run-local Engine, Neuron
+and Node containers. Verify health and database connectivity before stack-specific
+commands. A runtime failure stops code edits until health is restored and the
+unchanged failed command is rerun. G1 must pass before validation suites begin.
+
+1. Confirm locked tool versions and both existing databases at the shipped 0015 baseline.
+2. Generate and source-check the complete candidate. Execute registry/decoder/model
+   tests and real AJV cases; join all 363 declared results per consumer.
+3. Run full-history READ ONLY REPEATABLE READ sweeps for integration and dev,
+   reconciling same-snapshot selected/checked counts with zero skips. If zero rows
+   are observed, QE and DevOps sign that explicit inventory, then rerun the same
+   sweep with the signed file. A missing/old-schema/unavailable DB is a failure.
+4. Only after both candidate sweeps pass, activate response guards inside the
+   existing write unit of work and after complete read authorization. Rerun
+   affected container integration suites and final cutover sweeps while prior
+   application writers are paused. Record exact candidate code and bundle digests.
+5. Verify full affected Engine/Neuron regressions, existing frontend regressions,
+   deterministic rebuild, intentional drift injection and installed distribution.
+6. Measure changed executable-line coverage against the contract-owned floor;
+   use Python coverage JSON/XML and Node coverage for headless JS. Generated code
+   is explicitly reported separately from authored runtime logic.
+
+## Critical regression cases
+
+- Malformed v2 never falls back to legacy; disabled v2 still refuses.
+- Money precision, scientific notation and original currency survive typed round trips.
+- Schema-valid unsupported currency/basis/normalization remains a domain refusal.
+- Denied absence/name/attestation source returns the existing non-disclosing response
+  before any output-contract reason; structural success grants no authority.
+- Injected normalized result, temporal and commit-response failures leave no slot,
+  qualifier, version, change or outbox partial mutation; fresh DB reads prove this.
+- PR-L3: authorized read audit may be SUCCEEDED before output invariant failure;
+  HTTP must be generic `contract_invariant_failed` 500 without payload/pointers.
+  Security must explicitly decide this bounded audit meaning at G3.
+- Sweeper covers closed history, legacy/remainder versions, incomplete enumeration,
+  empty/unavailable databases, mapper/serializer/format faults and PostgreSQL READ ONLY.
+
+## Coverage and exclusions
+
+Coverage is required, with no waiver planned. Report numerator, denominator,
+changed-path basis and durable artifacts. UI/theme/accessibility/screenshot and live
+model/PDF evaluation layers are outside this headless infrastructure feature;
+the existing UI and Neuron caller regressions still run. No new latency SLO,
+ontology release proof or formal ADR acceptance is claimed.
+
+## Completion rules
+
+Every expected case and consumer result must be present and match. A crash,
+unsupported profile/dependency/format, missing or duplicate case, stale artifact,
+failed guard-order/atomicity check or incomplete history sweep blocks a PASS.
+Record actual commands, exits, report paths and remaining findings in the execution
+and coverage reports before G2. All five required roles remain required at signoff.
+# Test Execution Report — F0011 run 2026-11-22-885e8734
+
+Owner/reviewer: Codex / Quality Engineer; final refresh Claude / Quality Engineer
+Date: 2026-11-23
+
+## Commands Executed
+
+Exact commands, working directories and exits are in commands.log. Runtime
+commands use the run-local Compose file and the locked Engine/Neuron/Node
+environments. The final execution lanes are:
+
+- Engine: `uv run --no-sync --project engine --group contract-build python .../run_unit_regressions.py -c engine/pyproject.toml engine/packages engine/apps/api/tests scripts/contracts/tests -q --cov ...` — exit0.
+- PostgreSQL: `.../run_consumer_tests.py` executes the selected F0011/F0007/F0008 actual consumer integration suites — exit0.
+- Conformance: `python scripts/contracts/check.py --cases scripts/contracts/cases.json --ajv-results .../ajv-review-final.json --output .../conformance-review-final.json` — exit0, under coverage.
+- Reproducibility: `python scripts/contracts/generate.py --check` — exit0, 86 exact artifacts.
+- Neuron: `pytest -c neuron/pyproject.toml neuron/tests/integration/test_f0011_shared_bundle.py` — exit0.
+- Node: `pnpm --dir experience contracts:test` and `contracts:check` — exit0.
+- Existing frontend: frozen install, lint, Vitest and build — exit0.
+- Installed wheel/sdist: isolated installation/probe commands in DevOps evidence — exit0.
+- Canonical Node image (after the pnpm-selection Dockerfile correction): `docker run --rm --network none brain-f0011-contract-node:2026-11-22-885e8734` — exit0, 19/19 (`artifacts/runtime/canonical-node-tests.txt`); `contracts:check` in the same image — 443 cases, 0 failed, joined by the clean Engine image into 1329 results with 0 mismatches (`artifacts/test-results/canonical-node-conformance.json`).
+- Static checks: full Engine Ruff/format and CI mypy108 files — exit0; `artifacts/test-results/static-checks.json`.
+
+## Pass/Fail Counts
+
+| Lane | Total | Pass | Fail | Skip | Retries |
+|---|---:|---:|---:|---:|---:|
+| Engine/package/API/tool unit regressions | 1239 | 1239 | 0 | 0 | 0 |
+| Actual PostgreSQL consumer integration | 83 | 83 | 0 | 0 | 0 |
+| Full Neuron suite on SoupSieve 4.1.3 (G4 follow-up) | 313 | 265 | 0 | 48 | 0 |
+| Neuron existing shared-bundle callers | 8 | 8 | 0 | 0 | 0 |
+| Headless Node contract tests | 19 | 19 | 0 | 0 | 0 |
+| Existing frontend Vitest regressions | 12 | 12 | 0 | 0 | 0 |
+| Shared conformance results (443 cases × 3 consumers) | 1329 | 1329 | 0 | 0 | 0 |
+
+These are distinct lanes, not a claim that every result represents a unique
+business scenario. Native baseline/candidate each matched seven cases exactly.
+Each actual environment sweep selected and checked all zero existing versions,
+with explicit QE/DevOps zero-row signatures. Nonempty history, closed versions,
+legacy pilots and remainders were separately exercised in owned PostgreSQL
+fixtures; the empty production-like inventory is not presented as that proof.
+
+## Skipped Tests And Rationale
+
+Full Neuron suite (G4 follow-up only): 48 skips are pre-existing environment
+opt-ins, none HTML/selector-related: 26 live F0005 qualification, 12 PostgreSQL URL
+opt-ins, 4 user/network namespaces, 2 systemd scope, 2 vLLM endpoint, 1 live
+Graph/vLLM, 1 uncached tokenizer. The F0011 lanes below remain zero-skip.
+
+No selected test skipped. The final Engine runner enabled the five existing
+optional PostgreSQL job tests using the already-configured integration connection;
+they each create/drop their own random schema, without modifying public history.
+
+Browser E2E, screenshot, theme and accessibility lanes are outside this headless
+tooling change: no screen or interaction changes. QE owns this disposition; no
+later UI work is needed for F0011. Existing frontend regressions still passed.
+Live inference, model evaluation and PDF reparse are outside the approved scope;
+Neuron caller regressions execute without a model call. No new latency SLO or
+load-bearing endpoint is introduced; correctness/resource bounds are tested.
+
+## Raw Test Artifact Paths
+
+- `artifacts/test-results/python-unit-final.xml`
+- `artifacts/test-results/python-unit-closeout.xml` (final, after G4 Low fixes)
+- `artifacts/test-results/consumer-integration-closeout.xml` (final, after G4 Low fixes)
+- `artifacts/test-results/neuron-full-soupsieve4.xml`
+- `artifacts/test-results/consumer-integration-ci.xml`
+- `artifacts/test-results/consumer-integration-ci.txt`
+- `artifacts/test-results/neuron-shared-bundle.xml`
+- `artifacts/test-results/js-review-unit-final.tap`
+- `artifacts/test-results/frontend-test.txt`
+- `artifacts/test-results/frontend-lint.txt`
+- `artifacts/test-results/frontend-build.txt`
+- `artifacts/test-results/frontend-frozen-install.txt`
+- `artifacts/test-results/conformance-review-final.json`
+- `artifacts/test-results/ajv-review-final.json`
+- `artifacts/test-results/generation-final.txt`
+- `artifacts/test-results/expected-mutation.xml`
+- `artifacts/test-results/native-differential-ci-comparison.txt`
+- `artifacts/test-results/stored-versions-integration-cutover-ci.json`
+- `artifacts/test-results/stored-versions-dev-cutover-ci.json`
+- `artifacts/install-final/installed-distribution-results.json`
+- `artifacts/runtime/canonical-node-tests.txt`
+- `artifacts/test-results/canonical-node-cases.json`
+- `artifacts/test-results/canonical-node-conformance.json`
+
+## Failed / Retried Command History
+
+Historical failed attempts remain under artifacts and in commands.log:
+
+- Generator format projection initially exposed datamodel class naming collisions
+  for dotted JSON property names; deterministic class titles fixed naming while
+  aliases preserved the wire. All declared cases then passed before publication.
+- Generated files initially inherited restrictive staging permissions; publication
+  now makes readable0644 output and restores previous bytes/modes on failure.
+  Both rollback and nonroot-reader checks pass.
+- Initial full unit run had one route-parity test failure after FastAPI lazy
+  routing and five unconfigured optional job skips. The parity test now enumerates
+  actual effective route contexts and asserts a nonempty route set; the final
+  full1148 run has neither failure nor skip.
+- Native environment probing found optional date-time checker differences.
+  Delegated legacy resources now retain the observed pre-change UUID/date policy;
+  newly adopted carriers use the four explicit formats. Exact old/candidate
+  native results match, without changing portable expectations.
+- Installed probes initially selected an inactive Pydantic lock candidate and a
+  source-valid fixture missing old DTO-required nullable fields. Active marker/
+  actual installed version checks and explicit native-producer fixtures corrected
+  those proof defects; portable cases and native reader behavior were preserved.
+- Initial CI lint/format/type checks identified generated-format policy and six
+  typing issues. The exact generated path now uses its pinned generator format;
+  authored files are formatted and type annotations/stub boundaries are explicit.
+  Full CI lint/format/type checks and runtime regressions pass after correction.
+- DNS/credential-helper/runtime installation failures were restored within the
+  run's containers/client configuration, then the unchanged affected commands
+  reran. See baseline-restoration/dns-restoration and DevOps evidence; no runtime
+  preflight failure remains unresolved.
+
+These are diagnosed/fixed attempts, not automatic retries masking flaky tests.
+The two final Engine warnings are existing anyio deprecation and a deliberately
+short synthetic HMAC test key.
+
+## AC Coverage Result
+
+`artifacts/test-results/ac-evidence.md` maps all41 feature-local criteria to
+observed tests and raw artifacts. Structural results do not prove source ownership,
+currency support, normalization, evidence admissibility or authorization; their
+actual domain/transaction boundaries have separate test references.
+
+PR-L3's injected read-invariant failure is observed and recorded. G3 Security must
+explicitly accept the bounded audit meaning or require a redesign. This is a
+future required review gate, not a QE waiver or an accepted security finding.
+Independent review, implementation approval, signoff and closeout remain pending.
+
+## Result
+
+Result: PASS
+
+G4 follow-up (2026-11-23): after the user chose to fix all three Lows, the Engine
+unit lane (1239), the PostgreSQL consumer lane (83), Engine Ruff/format/mypy (108 files),
+the full Neuron suite and the canonical image lanes were re-run on current source and pass.
+
+All lanes pass on current source with no selected skips. The canonical
+Node image, previously blocked by package-manager selection, now builds and
+passes its 19 tests and all 443 cases offline. Coverage is in `coverage-report.md`
+(Python changed statements 86.0%, JavaScript lines 98.5%). This is the QE G2 verdict
+only: independent review, approval, signoff and closeout remain with their owners.
+# Coverage Report — F0011-json-schema-contract-system run 2026-11-22-885e8734
+
+Owner: Claude / Quality Engineer. Date: 2026-11-23.
+
+Scope is the changed authored executable code of this feature against base
+`bf78e111934570f83439057ea3c73a1eaefbb022`: tracked diff plus untracked source.
+Tests, generated Pydantic models, schema/data resources and non-executable
+configuration are excluded. The contract floor is `shared.coverage_min_pct` = 80
+from `nebula-agents/agents/actions/spec/_contract.yaml`.
+
+## Coverage Target And Actual Per Layer
+
+| Layer | Target | Actual | Source |
+|-------|------:|------:|--------|
+| Changed Python (engine packages, API, `scripts/contracts`, Neuron) — changed statements | 80% | 86.4% (1166/1350) | `artifacts/coverage/changed-line-coverage.json` |
+| Changed JavaScript (`experience/scripts/contracts/{case-data,check,runtime}.mjs`) — lines | 80% | 98.5% (453/460) | `artifacts/coverage/js-line-coverage.json` |
+
+Per-file Python rows, including missing line numbers and the file hash measured,
+are in `changed-line-coverage.json`. No changed file is unmeasured.
+
+## Raw Artifact Paths
+
+- Combined Python data: `artifacts/coverage/combined.coverage`, reported as
+  `artifacts/coverage/combined-python.json` and `artifacts/coverage/combined-python.xml`.
+- Combined inputs (each recorded after the last change to the source it measures; the G4 Low fixes were re-measured at 2026-11-23 21:34–21:35 -05:00):
+  `core.coverage` (full Engine/package/API/tool unit run, 1239 tests),
+  `conformance.coverage`, `generation.coverage`, `consumer-closeout.coverage`
+  (PostgreSQL consumer integration, 83 tests), `consumer-cli-review-final.coverage`,
+  `neuron-smoke.coverage`, `install.coverage`.
+- Measurement method: `artifacts/coverage/measure_changed_coverage.py`
+  (changed-statement intersection with `git diff --unified=0`; untracked files count in full).
+- JavaScript raw V8 data: `artifacts/coverage/js-review-final-v8/` (recorded
+  2026-11-23 10:42 -05:00, after the last `.mjs` change at 10:41); summarised by
+  `artifacts/coverage/summarize_v8.mjs`, which takes the innermost V8 block range at
+  each line's first non-blank character, using the maximum across processes.
+
+## Feature-Scoped Notes
+
+- This refresh supersedes the 2026-11-22 18:56 figure (85.5%, 1102/1289). That
+  figure predated the portable-parity remediation (workstate decision 6). The
+  per-suite data had already been regenerated on current source, but the combine
+  and changed-line measurement had not.
+- `scripts/contracts/installed_probe.py` (52 statements) and
+  `scripts/contracts/run_installed_probe.py` (35) show 0% because they run only
+  inside the isolated installed-distribution container, which has the checkout hidden
+  and no coverage tracer. Their behaviour is evidenced by
+  `artifacts/install-final/installed-distribution-results.json` (wheel and sdist both pass).
+  Coverage still clears the floor even with them counted as uncovered.
+- G4 follow-up (2026-11-23): two direct PostgreSQL tests now cover the
+  `facts.py` `ValueError/TypeError` → `CONTRACT_MODEL_MISMATCH` translations, for
+  commit (with rollback) and read. Two unit tests cover the new 500-handler logging.
+  `routes/facts.py` (22/22) and `brain_api/errors.py` (10/10) changed statements are
+  now fully covered. The remaining uncovered application lines are bare re-raises
+  (`contracts.py:91`, `assertions.py:148`) and an accessor no caller exercises
+  (`contracts.py:77`).
+- No cross-feature coverage regression: existing F0007/F0008 consumer suites run
+  inside `consumer-closeout.coverage` and pass.
+
+## Result
+
+Result: PASS

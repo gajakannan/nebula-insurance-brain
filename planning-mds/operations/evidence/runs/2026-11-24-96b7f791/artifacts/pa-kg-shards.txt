@@ -1,0 +1,115 @@
+# F0011 bindings. Planning paths from plan run 2026-11-20-ccb1bd39; as-built code paths added by
+# the Architect at feature G7, run 2026-11-22-885e8734. New files are bound by literal path
+# because wildcard bindings resolve only against git-tracked files, and these are untracked until
+# the feature commit. Feature-folder documents are not bound here: the feature shard's path covers
+# them across the G8 archive move. Modified existing consumers (FactSlot, temporal, content, API
+# routes) stay on their existing capability bindings.
+bindings:
+- id: capability:offline-contract-bundle
+  paths:
+    architecture:
+    - planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md
+    schemas:
+    - planning-mds/schemas/schema-bundle-manifest-v1.schema.json
+    backend:
+    - engine/apps/api/src/brain_api/contract_openapi.py
+    - engine/packages/brain-contracts/src/brain_contracts/generated/__init__.py
+    - engine/packages/brain-contracts/src/brain_contracts/generated/contracts_v1.py
+    - engine/packages/brain-contracts/src/brain_contracts/model_adapter.py
+    - engine/packages/brain-contracts/src/brain_contracts/schema_runtime.py
+    resources:
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/assertion-admission-result-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/assertion-record-v2.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/brain-api.openapi.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/canonical-commit-request.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/canonical-commit-response.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/content-artifact-manifest-read.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/content-artifact-manifest-v2.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/content-artifact-manifest.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/content-records-v2.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/document-date-record.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/fact-answer-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/fact-slot-key-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/fact-slot-resolution-result-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/fact-temporal-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/fact-version-read-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/information-state-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/interpretation-output-manifest.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/interpretation-result-v2.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/interpretation-result.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/manifest.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/problem-details.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/profile.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/qualified-money-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/scoped-identifier-v1.schema.json
+    - engine/packages/brain-contracts/src/brain_contracts/resources/v1/ui-metadata.json
+    - schemas/contracts/v1/assertion-admission-result-v1.schema.json
+    - schemas/contracts/v1/assertion-record-v2.schema.json
+    - schemas/contracts/v1/brain-api.openapi.json
+    - schemas/contracts/v1/canonical-commit-request.schema.json
+    - schemas/contracts/v1/canonical-commit-response.schema.json
+    - schemas/contracts/v1/content-artifact-manifest-read.schema.json
+    - schemas/contracts/v1/content-artifact-manifest-v2.schema.json
+    - schemas/contracts/v1/content-artifact-manifest.schema.json
+    - schemas/contracts/v1/content-records-v2.schema.json
+    - schemas/contracts/v1/document-date-record.schema.json
+    - schemas/contracts/v1/fact-answer-v1.schema.json
+    - schemas/contracts/v1/fact-slot-key-v1.schema.json
+    - schemas/contracts/v1/fact-slot-resolution-result-v1.schema.json
+    - schemas/contracts/v1/fact-temporal-v1.schema.json
+    - schemas/contracts/v1/fact-version-read-v1.schema.json
+    - schemas/contracts/v1/information-state-v1.schema.json
+    - schemas/contracts/v1/interpretation-output-manifest.schema.json
+    - schemas/contracts/v1/interpretation-result-v2.schema.json
+    - schemas/contracts/v1/interpretation-result.schema.json
+    - schemas/contracts/v1/manifest.json
+    - schemas/contracts/v1/problem-details.schema.json
+    - schemas/contracts/v1/profile.json
+    - schemas/contracts/v1/qualified-money-v1.schema.json
+    - schemas/contracts/v1/scoped-identifier-v1.schema.json
+    - schemas/contracts/v1/ui-metadata.json
+    validation:
+    - scripts/contracts/generate.py
+    - scripts/contracts/install_smoke.py
+    - scripts/contracts/installed_probe.py
+    - scripts/contracts/profile.yaml
+    - scripts/contracts/run_installed_probe.py
+    - scripts/contracts/sources.yaml
+    infra:
+    - .dockerignore
+    - docker/contracts/Dockerfile
+    - docker/contracts/README.md
+    tests:
+    - engine/apps/api/tests/test_contract_openapi.py
+    - engine/packages/brain-contracts/tests/test_generated_models.py
+    - engine/packages/brain-contracts/tests/test_schema_runtime.py
+    - neuron/tests/integration/test_f0011_shared_bundle.py
+    - scripts/contracts/tests/test_artifact_reproducibility.py
+- id: capability:cross-language-contract-validation
+  paths:
+    architecture:
+    - planning-mds/architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md
+    schemas:
+    - planning-mds/schemas/information-state-v1.schema.json
+    - planning-mds/schemas/qualified-money-v1.schema.json
+    - planning-mds/schemas/scoped-identifier-v1.schema.json
+    - planning-mds/schemas/fact-version-read-v1.schema.json
+    - planning-mds/schemas/schema-conformance-cases-v1.schema.json
+    backend:
+    - engine/apps/api/src/brain_api/contract_guards.py
+    frontend:
+    - experience/scripts/contracts/case-data.mjs
+    - experience/scripts/contracts/check.mjs
+    - experience/scripts/contracts/runtime.mjs
+    - experience/scripts/contracts/runtime.test.mjs
+    - experience/src/generated/contracts/v1/assertion-admission-result-v1.schema.json
+    - experience/src/generated/contracts/v1/assertion-record-v2.schema.json
+    - experience/src/generated/contracts/v1/brain-api.openapi.json
+    - experience/src/generated/contracts/v1/canonical-commit-request.schema.json
+    - experience/src/generated/contracts/v1/canonical-commit-response.schema.json
+    - experience/src/generated/contracts/v1/content-artifact-manifest-read.schema.json
+    - experience/src/generated/contracts/v1/content-artifact-manifest-v2.schema.json
+    - experience/src/generated/contracts/v1/content-artifact-manifest.schema.json
+    - experience/src/generated/contracts/v1/content-records-v2.schema.json
+    - experience/src/generated/contracts/v1/document-date-record.schema.json
+    - experience/src/generated/contracts/v1/fact-answer-v1.schema.json
