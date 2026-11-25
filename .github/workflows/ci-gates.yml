@@ -118,6 +118,7 @@ jobs:
           packages/brain-persistence/src packages/brain-domain/src packages/brain-security/src
           packages/brain-review/src packages/brain-temporal/src packages/brain-testing/src
           packages/brain-jobs/src packages/brain-contracts/src packages/brain-factslots/src
+          packages/brain-provenance/src
       - name: engine/ — pytest, all packages (>=80% coverage each, checked per-package below)
         working-directory: engine
         run: uv run pytest -q
@@ -144,6 +145,10 @@ jobs:
       - name: engine/ — pytest brain_jobs coverage gate (>=80%)
         working-directory: engine
         run: uv run pytest packages/brain-jobs/tests --cov=brain_jobs --cov-fail-under=80
+      # F0009: reader orchestration with in-memory ports; PostgreSQL proof in runtime-stack.
+      - name: engine/ — pytest brain_provenance coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-provenance/tests --cov=brain_provenance --cov-fail-under=80
       # F0007: pure and in-memory service tests; the PostgreSQL proof runs in runtime-stack.
       - name: engine/ — pytest brain_factslots coverage gate (>=80%)
         working-directory: engine
@@ -225,7 +230,12 @@ jobs:
       # isolated DB+bytes restore, so it belongs with PostgreSQL and Docker.
       # WHY repo root: the F0006 assertion suites import `engine.tests.fixtures`,
       # and they are the only exercise of brain_persistence.assertions.
-      - name: Prove F0004/F0006 persistence and restore (>=80% persistence coverage)
+      # F0009 provenance/correction lineage (ADR-0080) runs here too: its suites are
+      # the only exercise of brain_persistence.provenance and the reservation/attempt
+      # repository paths (owned databases per test, migration 0016 up/down/up and
+      # populated refusal, direct-SQL guards, the review boundary through the
+      # unchanged HTTP route, and the metadata-first reader).
+      - name: Prove F0004/F0006/F0009 persistence, lineage and restore (>=80% persistence coverage)
         timeout-minutes: 10
         env:
           BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@localhost:5432/brain
@@ -239,6 +249,10 @@ jobs:
           engine/tests/integration/test_assertion_consumers.py
           engine/tests/integration/test_assertion_migration.py
           engine/tests/integration/test_assertion_ownership.py
+          engine/tests/integration/test_f0009_migration.py
+          engine/tests/integration/test_f0009_corrections.py
+          engine/tests/integration/test_f0009_provenance.py
+          engine/tests/integration/test_f0009_temporal_lineage.py
           --cov=brain_persistence --cov-fail-under=80
           --cov-report=term-missing --cov-report=xml:engine/coverage/persistence.xml -q
       # F0007 FactSlot identity (ADR-0077): owned databases per test, real concurrency,

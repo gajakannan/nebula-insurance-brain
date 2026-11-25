@@ -74,6 +74,18 @@ class ReviewDecisionOut(BaseModel):
         )
 
 
+def _legacy_decision_view(decision: ReviewDecision) -> ReviewDecisionOut:
+    """F0009 PR-L1: a stale decision now retains its non-applied submission, but the
+    legacy GET keeps the values it always returned for one (null). The retained
+    payload is reachable only through the authorized provenance reader."""
+    view = ReviewDecisionOut.from_domain(decision)
+    if decision.stale:
+        return view.model_copy(
+            update={"corrected_value": None, "evidence": None, "reviewer_comment": None}
+        )
+    return view
+
+
 class ReviewItemOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -101,7 +113,7 @@ class ReviewItemOut(BaseModel):
             knowledge_base_id=item.knowledge_base_id,
             review_batch_id=item.review_batch_id,
             evidence=EvidenceLocatorOut.from_domain(item.evidence),
-            decision=ReviewDecisionOut.from_domain(decision) if decision else None,
+            decision=_legacy_decision_view(decision) if decision else None,
             created_at=item.created_at,
         )
 

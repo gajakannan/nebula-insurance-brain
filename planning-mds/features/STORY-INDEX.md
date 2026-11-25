@@ -110,12 +110,12 @@ Auto-generated index of all user stories across feature folders.
 
 | Story ID | Title | Priority | Phase | Persona |
 |----------|-------|----------|-------|---------|
-| [F0009-S0001](./F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md) | Reconstruct source provenance | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
-| [F0009-S0002](./F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md) | Append auditable human corrections | Critical | MVP — v0.1A | business reviewer (Rosa) |
-| [F0009-S0003](./F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md) | Trace temporal version lineage | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
-| [F0009-S0004](./F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md) | Enforce current authority across lineage | Critical | MVP — v0.1A | business reviewer (Rosa) |
-| [F0009-S0005](./F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md) | Reserve a learning-candidate reference | Critical | MVP — v0.1A | business reviewer (Rosa) |
-| [F0009-S0006](./F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md) | Prove compatible lineage delivery | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
+| [F0009-S0001](./archive/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md) | Reconstruct source provenance | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
+| [F0009-S0002](./archive/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md) | Append auditable human corrections | Critical | MVP — v0.1A | business reviewer (Rosa) |
+| [F0009-S0003](./archive/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md) | Trace temporal version lineage | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
+| [F0009-S0004](./archive/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md) | Enforce current authority across lineage | Critical | MVP — v0.1A | business reviewer (Rosa) |
+| [F0009-S0005](./archive/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md) | Reserve a learning-candidate reference | Critical | MVP — v0.1A | business reviewer (Rosa) |
+| [F0009-S0006](./archive/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md) | Prove compatible lineage delivery | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
 
 ---
 

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/provenance-query-v1.schema.json",
+  "title": "Provenance query v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "root",
+    "anchor"
+  ],
+  "properties": {
+    "contract": {
+      "const": "provenance-query/v1"
+    },
+    "root": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "id"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "assertion",
+            "fact_version"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "fact_slot",
+            "review_task",
+            "content_artifact"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    }
+  }
+}

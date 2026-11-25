@@ -189,10 +189,82 @@
       "title": "InterpretationResult"
     }
   },
+  "https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json": {
+    "": {
+      "title": "Reserved future learning identity v1"
+    }
+  },
   "https://nebula.local/schemas/problem-details.schema.json": {
     "": {
       "description": "RFC 9457 problem details with a stable machine `code` and a `traceId` extension member (camelCase to match the framework API contract validator; every other payload is snake_case). F0001-S0001.",
       "title": "ProblemDetails"
+    }
+  },
+  "https://nebula.local/schemas/provenance-query-v1.schema.json": {
+    "": {
+      "title": "Provenance query v1"
+    }
+  },
+  "https://nebula.local/schemas/provenance-result-v1.schema.json": {
+    "": {
+      "title": "Bounded authorized provenance result v1"
+    },
+    "/properties/edges": {
+      "description": "Every edge reads '<source> <kind> <target>'. Each kind admits only the endpoint record kinds listed in its branch. Edges are unique by (kind, source, target); domain checks additionally require both endpoints in records and every non-root record to be connected to the root (ignoring direction). Directional ancestry kinds (corrected_from, split_of) must be acyclic."
+    },
+    "/properties/edges/items/oneOf/0": {
+      "description": "HUMAN_REVIEW child assertion -> its stored original (assertion.original_assertion_id)."
+    },
+    "/properties/edges/items/oneOf/1": {
+      "description": "Assertion -> its assertion_evidence row; or fact_version -> an evidence.refs entry."
+    },
+    "/properties/edges/items/oneOf/10": {
+      "description": "Effective CORRECT decision -> its reserved future-learning identity."
+    },
+    "/properties/edges/items/oneOf/11": {
+      "description": "Canonical version -> the review decision stored on it (review_decision_id); implies no acceptance by review."
+    },
+    "/properties/edges/items/oneOf/12": {
+      "description": "Remainder -> its same-slot predecessor (split_of_version_id)."
+    },
+    "/properties/edges/items/oneOf/13": {
+      "description": "canonical_fact_change -> from_version_id."
+    },
+    "/properties/edges/items/oneOf/14": {
+      "description": "canonical_fact_change -> to_version_id."
+    },
+    "/properties/edges/items/oneOf/15": {
+      "description": "Version with an exposed attested_* document date -> each artifact behind its refs/ending_refs (the current_attesting_artifact_keys join)."
+    },
+    "/properties/edges/items/oneOf/16": {
+      "description": "Record -> a stored derivation/input reference; never a fabricated document locator."
+    },
+    "/properties/edges/items/oneOf/2": {
+      "description": "fact_version -> an evidence.ending_refs entry; never relabelled as support."
+    },
+    "/properties/edges/items/oneOf/3": {
+      "description": "Evidence row -> the immutable artifact it cites (assertion_evidence.artifact_id)."
+    },
+    "/properties/edges/items/oneOf/4": {
+      "description": "Assertion -> its producing interpretation run (assertion.run_id)."
+    },
+    "/properties/edges/items/oneOf/5": {
+      "description": "Interpretation run -> the artifact it read (semantic_interpretation_run.artifact_id)."
+    },
+    "/properties/edges/items/oneOf/6": {
+      "description": "Artifact -> its document version (content_artifact.document_version_id)."
+    },
+    "/properties/edges/items/oneOf/7": {
+      "description": "Document version -> its source document (document_version.source_document_id)."
+    },
+    "/properties/edges/items/oneOf/8": {
+      "description": "Decision (via its review item) or refused attempt (original_assertion_id) -> the assertion under review."
+    },
+    "/properties/edges/items/oneOf/9": {
+      "description": "Effective CORRECT decision -> its HUMAN_REVIEW child (corrected_assertion_id)."
+    },
+    "/properties/records/items/oneOf/10/properties/data/properties/from_version_id": {
+      "description": "Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."
     }
   },
   "https://nebula.local/schemas/qualified-money-v1.schema.json": {
@@ -201,6 +273,35 @@
       "title": "QualifiedMoneyV1",
       "x-nebula-concept": "qualified-money",
       "x-nebula-display-name": "QualifiedMoneyV1"
+    }
+  },
+  "https://nebula.local/schemas/review-decision.schema.json": {
+    "": {
+      "description": "Governed outcome of one human review submitted from the Nebula Review Panel; corrections append and never rewrite the original assertion (master blueprint sections 75 and 125, ADR-0037, ADR-0057, ADR-0058; F0001-S0004).",
+      "title": "ReviewDecision"
+    },
+    "/properties/action": {
+      "description": "ACCEPT, CORRECT, and REJECT are adjudications. BLOCKED is not: it records that the evidence could not be anchored, produces no assertion, and leaves the review item open (ADR-0058)."
+    },
+    "/properties/event_sha256": {
+      "description": "Hash of the submitted decision event; the idempotency key for resubmission of a batch."
+    },
+    "/properties/evidence": {
+      "description": "The locator the reviewer actually saw, at the precision it was shown, carried onto any assertion this decision creates."
+    },
+    "/properties/evidence/oneOf/1/properties/selector": {
+      "description": "W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points."
+    },
+    "/properties/reason_code": {
+      "description": "Required for CORRECT, REJECT, and BLOCKED. EVIDENCE_UNRESOLVED is the only reason code valid with BLOCKED."
+    },
+    "/properties/reviewer_principal_id": {
+      "description": "Resolved from the authenticated session, never from the request payload (ADR-0049, ADR-0057)."
+    }
+  },
+  "https://nebula.local/schemas/review-submission-attempt-v1.schema.json": {
+    "": {
+      "title": "Non-applied review submission v1"
     }
   },
   "https://nebula.local/schemas/scoped-identifier-v1.schema.json": {

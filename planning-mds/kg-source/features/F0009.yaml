@@ -1,17 +1,13 @@
 id: feature:F0009
 name: Provenance + human-correction lineage
-path: planning-mds/features/F0009-provenance-and-human-correction-lineage
-status: planned
-registry_section: Planned
+path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage
+status: archived-done
+registry_section: Archived
 phase: v0.1A
-roadmap_section: Now
-roadmap_order: 2
-rationale: 'Now: direct F0006/F0008 and authority/content/identity/contracts are shipped. Phase A approved 2026-11-24
-  in plan run 2026-11-24-bfdbbf04; six Not Started stories/41 ACs; Phase B approved 2026-11-24 adds bounded exact lineage and atomic
-  future-learning reservation, with no new route/grant/producer. Heads F0009 -> F0010 -> F0018.'
-validation_gate: Plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner
-  and date); feature run closes G0–G8 with evidence and correction lineage proven on PostgreSQL over F0008 canonical
-  versions.
+roadmap_section: Completed
+roadmap_order: 10
+rationale: 'Completed 2026-11-25 in feature run 2026-11-24-08701e37: internal metadata-first provenance reader under current authority, atomic learning-candidate reservation, refused-submission attribution and migration 0016; no new route, grant or producer. All six stories Done.'
+validation_gate: 'G0-G8 governed feature run 2026-11-24-08701e37; explicit operator G4 approval 2026-11-25; five required role signoffs on six stories; 41/41 ACs; EX-PROV-001-005 on PostgreSQL 18; 1729 engine tests plus host restore lane; 94.4% changed-line coverage; 464 shared cases / 1392 results with 0 mismatches; ADR-0080 proofs met, ADR stays Proposed pending operator acceptance.'
 depends_on:
 - feature:F0006
 - feature:F0008
@@ -31,6 +27,7 @@ governed_by:
 - adr:0079
 - adr:0080
 notes:
+- 'Closeout 2026-11-25 (PM G8, feature run 2026-11-24-08701e37): archived. G2 design corrections recorded (nullable fact_change.from_version_id; attempt authorization bound by audit_event.decision_id; uq_review_decision_owner; review-decision bundled). Follow-ups: framework check-secrets --no-git; KG symbol cache key.'
 - 'Requirement-ownership amendment 2026-11-08 - Carry the master blueprint 88 LearningCandidate hook: human corrections
   persist a reserved LearningCandidate reference for the Golden Corpus. No learning behaviour ships in v0.1 (F0041 owns
   it).'
@@ -55,6 +52,7 @@ affects:
 - entity:canonical-fact-change
 - entity:learning-candidate-reservation
 - entity:review-submission-attempt
+- migration:f0009-provenance-hooks
 uses_api_contract:
 - api:brain-api
 uses_schema:
@@ -69,91 +67,85 @@ uses_schema:
 - schema:fact-answer-v1
 story_mappings:
 - id: story:F0009-S0001
-  path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md
+  path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md
   affects:
   - capability:provenance-lineage
   governed_by:
   - adr:0080
   - adr:0010
-  - adr:0037
+  - adr:0058
+  - adr:0075
   uses_schema:
   - schema:provenance-query-v1
   - schema:provenance-result-v1
-  - schema:learning-candidate-reservation-v1
-  - schema:review-submission-attempt-v1
+  - schema:assertion-record-v2
   uses_api_contract: []
 - id: story:F0009-S0002
-  path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md
+  path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md
   affects:
   - capability:review-submission-attribution
   - capability:evidence-review-round-trip
   - entity:review-submission-attempt
   governed_by:
   - adr:0080
-  - adr:0010
   - adr:0037
+  - adr:0044
+  - adr:0058
   uses_schema:
-  - schema:provenance-query-v1
-  - schema:provenance-result-v1
-  - schema:learning-candidate-reservation-v1
   - schema:review-submission-attempt-v1
+  - schema:review-decision
   uses_api_contract:
   - api:brain-api
 - id: story:F0009-S0003
-  path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md
+  path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md
   affects:
   - capability:provenance-lineage
   - entity:canonical-fact-version
   - entity:canonical-fact-change
   governed_by:
   - adr:0080
-  - adr:0010
-  - adr:0037
+  - adr:0078
+  - adr:0077
   uses_schema:
-  - schema:provenance-query-v1
   - schema:provenance-result-v1
-  - schema:learning-candidate-reservation-v1
-  - schema:review-submission-attempt-v1
+  - schema:fact-version-read-v1
+  - schema:fact-temporal-v1
   uses_api_contract: []
 - id: story:F0009-S0004
-  path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md
+  path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md
   affects:
   - capability:provenance-lineage
   - capability:authorization-enforcement
   governed_by:
   - adr:0080
-  - adr:0010
-  - adr:0037
+  - adr:0062
   uses_schema:
   - schema:provenance-query-v1
   - schema:provenance-result-v1
-  - schema:learning-candidate-reservation-v1
-  - schema:review-submission-attempt-v1
   uses_api_contract: []
 - id: story:F0009-S0005
-  path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md
+  path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md
   affects:
   - capability:learning-candidate-reservation
   - entity:learning-candidate-reservation
   governed_by:
   - adr:0080
-  - adr:0010
   - adr:0037
+  - adr:0044
   uses_schema:
-  - schema:provenance-query-v1
-  - schema:provenance-result-v1
   - schema:learning-candidate-reservation-v1
-  - schema:review-submission-attempt-v1
-  uses_api_contract: []
+  uses_api_contract:
+  - api:brain-api
 - id: story:F0009-S0006
-  path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md
+  path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md
   affects:
   - capability:provenance-lineage
   - capability:learning-candidate-reservation
+  - capability:review-submission-attribution
+  - migration:f0009-provenance-hooks
   governed_by:
   - adr:0080
-  - adr:0010
-  - adr:0037
+  - adr:0079
   uses_schema:
   - schema:provenance-query-v1
   - schema:provenance-result-v1
@@ -161,3 +153,5 @@ story_mappings:
   - schema:review-submission-attempt-v1
   uses_api_contract:
   - api:brain-api
+completion_state: All six stories Done; 41/41 ACs observed with EX-PROV-001-005 reproduced on PostgreSQL 18; 464 shared cases / 1392 results agree across JSON Schema, generated Pydantic and AJV; five required roles signed every story; the one G3 Low was fixed before operator approval. ADR-0080 proofs met; the ADR stays Proposed pending operator acceptance.
+archived_date: '2026-11-25'

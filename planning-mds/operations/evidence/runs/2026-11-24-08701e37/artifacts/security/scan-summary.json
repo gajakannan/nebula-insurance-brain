@@ -1,0 +1,58 @@
+{
+  "dependency": {
+    "engine": 75,
+    "neuron": 171,
+    "vulns": 0,
+    "experience": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    },
+    "tool": "pip-audit 2.10.1 (uv tool, frozen uv export, third-party pins) + pnpm 12.21.0 audit --audit-level high",
+    "framework_script": "agents/security/scripts/scan-dependencies.sh"
+  },
+  "secrets": {
+    "tool": "gitleaks v8.30.1 (zricethezav/gitleaks@sha256:c00b6bd0\u2026)",
+    "files": 107,
+    "results": 0,
+    "note": "framework check-secrets.sh --mode filesystem passed `-- --no-git`; without it gitleaks 8.30 `detect` scanned 0 bytes in git mode (framework follow-up)"
+  },
+  "sast": {
+    "tool": "semgrep (semgrep/semgrep@sha256:2b33f46b\u2026), offline F0011-reviewed rules",
+    "targets": 29,
+    "rules": 200,
+    "errors": 0,
+    "findings": [
+      {
+        "rule": "avoid-sqlalchemy-text",
+        "path": "engine/migrations/versions/0016_f0009_provenance_hooks.py",
+        "line": 297
+      },
+      {
+        "rule": "avoid-sqlalchemy-text",
+        "path": "engine/migrations/versions/0016_f0009_provenance_hooks.py",
+        "line": 320
+      },
+      {
+        "rule": "avoid-sqlalchemy-text",
+        "path": "engine/migrations/versions/0016_f0009_provenance_hooks.py",
+        "line": 332
+      },
+      {
+        "rule": "avoid-sqlalchemy-text",
+        "path": "engine/migrations/versions/0016_f0009_provenance_hooks.py",
+        "line": 334
+      }
+    ]
+  },
+  "dast": {
+    "tool": "ZAP API scan (ghcr.io/zaproxy/zaproxy@sha256:8d387b1a\u2026)",
+    "target": "http://brain-f0009-08701e37-engine-validation-1:8000/openapi.json",
+    "fail_new": 0,
+    "warn_new": 0,
+    "pass": 119,
+    "scope": "Unauthenticated OpenAPI-driven active scan; authenticated authorization/atomicity proved by PostgreSQL suites"
+  }
+}

@@ -364,10 +364,17 @@ class AuthorizationExecution:
         requested: RequestedScope = NO_FILTER,
         delegation_id: UUID | None = None,
         additional_reads: Callable[[T], Awaitable[Sequence[ResourceKey]]] | None = None,
+        prepare_reads: Callable[[], Awaitable[Sequence[ResourceKey]]] | None = None,
     ) -> T:
         """Load once under the primary lock, then authorize dependencies derived
         from that exact private payload before auditing and returning it. All
-        authority/resource locks remain held until the single final commit."""
+        authority/resource locks remain held until the single final commit.
+
+        `prepare_reads` (F0009, opt-in) runs after the primary decision and before
+        `load`: it discovers metadata-only requirements, and every one of them is
+        authorized and locked before any protected payload is loaded. A denied or
+        missing requirement aborts the whole read. When it is supplied, authority
+        is rechecked again after `load`, so an expiry during the load still denies."""
         evaluated = await self._guarded_decide(
             authenticated, [key], action, requested, trace_id, delegation_id
         )
@@ -377,11 +384,23 @@ class AuthorizationExecution:
         if not evaluated[0].decision.allowed:
             raise await self._deny(evaluated)
         decision = evaluated[0].decision
+        if prepare_reads is not None:
+            # WHY: requirements come from metadata only, so no protected payload is
+            # materialized until every source READ has been decided in this UoW.
+            evaluated = await self._authorize_more(
+                evaluated, prepare_reads, authenticated, requested, trace_id, delegation_id
+            )
         try:
             payload = await load(decision)
         except Exception:
-            await self._persist_fresh([decision.with_outcome(OperationOutcome.FAILED)])
+            await self._persist_fresh(
+                [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
+            )
             raise
+        if prepare_reads is not None:
+            evaluated = self._recheck_all(evaluated)
+            if not all(e.decision.allowed for e in evaluated):
+                raise await self._deny(evaluated)
         if additional_reads is not None:
             # WHY: a separate scope read would commit and release the current
             # authority locks before returning the answer. Deriving keys from
@@ -417,6 +436,39 @@ class AuthorizationExecution:
             await self._safe_rollback()
             raise AuthorizationUnavailable("read audit could not be persisted") from exc
         return payload
+
+    async def _authorize_more(
+        self,
+        evaluated: list[Evaluated],
+        discover: Callable[[], Awaitable[Sequence[ResourceKey]]],
+        authenticated: Principal,
+        requested: RequestedScope,
+        trace_id: str,
+        delegation_id: UUID | None,
+    ) -> list[Evaluated]:
+        """Authorize metadata-derived READ requirements inside the same unit of work,
+        then recheck the whole set; any denial persists the audit and raises."""
+        try:
+            keys = sorted(set(await discover()))
+            more = (
+                await self._guarded_decide(
+                    authenticated, keys, Action.READ, requested, trace_id, delegation_id
+                )
+                if keys
+                else []
+            )
+        except Exception:
+            await self._persist_fresh(
+                [e.decision.with_outcome(OperationOutcome.FAILED) for e in evaluated]
+            )
+            raise
+        combined = [*evaluated, *more]
+        if not all(e.decision.allowed for e in combined):
+            raise await self._deny(combined)
+        combined = self._recheck_all(combined)
+        if not all(e.decision.allowed for e in combined):
+            raise await self._deny(combined)
+        return combined
 
     async def mutate(
         self,

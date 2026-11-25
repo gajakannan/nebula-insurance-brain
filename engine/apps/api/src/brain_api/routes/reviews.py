@@ -20,10 +20,15 @@ from brain_persistence.repositories import (
 from brain_review.decisions import (
     DecisionRequest,
     InvalidBlockedReasonCode,
+    RefusedBatch,
     ReviewDecisionService,
     ReviewItemAlreadyDecided,
     ReviewItemNotFound,
+    ReviewLineageChanged,
     UnresolvedEvidenceRequiresBlocked,
+    compute_event_sha256,
+    preflight_batch,
+    submitted_now,
 )
 from brain_security.execution import AuthorizationExecution
 from fastapi import APIRouter, Depends
@@ -36,7 +41,7 @@ from brain_api.deps import (
     get_db_session,
     new_trace_id,
 )
-from brain_api.errors import NotFoundError, UnprocessableError
+from brain_api.errors import NotFoundError, ServiceUnavailableError, UnprocessableError
 from brain_api.schemas.review import (
     EvidenceLocatorOut,
     ReviewDecisionBatchIn,
@@ -121,9 +126,11 @@ async def submit_review_decisions(
         session, actor_id=principal.id, content_store=content_store
     )
 
+    trace_id = new_trace_id()
+
     async def operation(
         decisions: Sequence[AuthorizationDecision],
-    ) -> ReviewDecisionReceiptOut:
+    ) -> ReviewDecisionReceiptOut | RefusedBatch:
         authorizations = {
             d.resource.id: d
             for d in decisions
@@ -131,15 +138,64 @@ async def submit_review_decisions(
         }
         audit = ReviewDecisionAuditSink(SqlAlchemyAuditEventRepository(session), authorizations)
         service = ReviewDecisionService(repository, audit)
+        requests = [_to_decision_request(d, principal.id) for d in batch.decisions]
+        items = []
+        for request in requests:
+            item = await repository.get(request.review_item_id)
+            if item is None or item.review_batch_id != review_batch_id:
+                raise UnprocessableError()
+            items.append(item)
+        # F0009 Step 3.2: lock every item, then prove the authorized source set
+        # still describes it; a change is a fresh-operation retry (PR-L2), never
+        # an incompletely authorized write.
+        await repository.lock_batch_items([item.id for item in items])
+        authorized_sources = {
+            d.resource
+            for d in decisions
+            if d.resource.type == ResourceType.CONTENT_ARTIFACT and d.action == Action.READ
+        }
+        if set(await repository.source_keys([item.id for item in items])) != authorized_sources:
+            raise ReviewLineageChanged()
+        # F0009 Step 3.4: refuse the whole batch before any effect when any
+        # nonduplicate item already carries a distinct decision.
+        refused = await preflight_batch(repository, list(zip(items, requests, strict=True)))
+        if refused:
+            attempt_ids: list[UUID] = []
+            submitted_at = submitted_now()
+            for refusal in refused:
+                request = refusal.request
+                attempt_id = await repository.record_refused_submission(
+                    item=refusal.item,
+                    request_action=request.action.value,
+                    reviewer_principal_id=principal.id,
+                    assertion_version=request.assertion_version,
+                    reason_code=request.reason_code.value if request.reason_code else None,
+                    corrected_value=request.corrected_value,
+                    evidence=request.evidence_seen,
+                    reviewer_comment=request.reviewer_comment,
+                    event_sha256=compute_event_sha256(request),
+                    outcome=refusal.outcome,
+                    authorization=authorizations[refusal.item.id],
+                    submitted_at=submitted_at,
+                )
+                await audit.record_refusal(
+                    attempt_id=attempt_id,
+                    review_item_id=refusal.item.id,
+                    reviewer_principal_id=principal.id,
+                    action=request.action.value,
+                    outcome=refusal.outcome,
+                    occurred_at=submitted_at,
+                    trace_id=trace_id,
+                )
+                attempt_ids.append(attempt_id)
+            # Returned, not raised: only the refusal records and audit commit.
+            return RefusedBatch(tuple(attempt_ids))
         decision_ids: list[UUID] = []
         applied = 0
         any_duplicate = False
         stale = 0
         blocked = 0
         for decision_in in batch.decisions:
-            item = await repository.get(decision_in.review_item_id)
-            if item is None or item.review_batch_id != review_batch_id:
-                raise UnprocessableError()
             try:
                 outcome = await service.submit(_to_decision_request(decision_in, principal.id))
             except (
@@ -172,11 +228,18 @@ async def submit_review_decisions(
     async def source_keys() -> Sequence[ResourceKey]:
         return await repository.source_keys([d.review_item_id for d in batch.decisions])
 
-    return await execution.mutate(
-        principal,
-        [_task(d.review_item_id) for d in batch.decisions],
-        Action.ANNOTATE,
-        trace_id=new_trace_id(),
-        operation=operation,
-        additional_reads=source_keys,
-    )
+    try:
+        result = await execution.mutate(
+            principal,
+            [_task(d.review_item_id) for d in batch.decisions],
+            Action.ANNOTATE,
+            trace_id=trace_id,
+            operation=operation,
+            additional_reads=source_keys,
+        )
+    except ReviewLineageChanged as exc:
+        raise ServiceUnavailableError() from exc
+    if isinstance(result, RefusedBatch):
+        # The refusal is committed and audited; the outward result is unchanged.
+        raise UnprocessableError()
+    return result

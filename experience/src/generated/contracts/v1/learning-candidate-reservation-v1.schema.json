@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json",
+  "title": "Reserved future learning identity v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "id",
+    "tenant_id",
+    "knowledge_base_id",
+    "review_decision_id",
+    "original_assertion_id",
+    "corrected_assertion_id",
+    "reviewer_principal_id",
+    "reserved_at"
+  ],
+  "properties": {
+    "contract": {
+      "const": "learning-candidate-reservation/v1"
+    },
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "tenant_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "knowledge_base_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "review_decision_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "original_assertion_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "corrected_assertion_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reviewer_principal_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "reserved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

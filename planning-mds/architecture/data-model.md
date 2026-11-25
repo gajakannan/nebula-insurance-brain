@@ -446,7 +446,7 @@ Plan run `2026-11-16-208a1193`. [ADR-0078](decisions/ADR-0078-bitemporal-version
 
 ## F0009 provenance hooks (Phase B approved 2026-11-24)
 
-Proposed [ADR-0080](decisions/ADR-0080-bounded-provenance-and-correction-reservations.md) and [assembly plan](../features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md) add two authoritative append-only scoped tables; they are not deployed by this plan. Exact proposed [DDL](../features/F0009-provenance-and-human-correction-lineage/migration-design.sql) and semantic/deferred guards are in that plan.
+Proposed [ADR-0080](decisions/ADR-0080-bounded-provenance-and-correction-reservations.md) and [assembly plan](../features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md) add two authoritative append-only scoped tables; they are not deployed by this plan. Exact proposed [DDL](../features/archive/F0009-provenance-and-human-correction-lineage/migration-design.sql) and semantic/deferred guards are in that plan.
 
 | Table / addition | Identity and links | Invariant |
 |---|---|---|

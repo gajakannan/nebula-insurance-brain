@@ -67,6 +67,9 @@ def _downgrade(target: str) -> None:
     command.downgrade(f0007.configuration(), target)
 
 
+F0008_HEAD = "0015"
+
+
 def _snapshot(url: str) -> dict:
     with psycopg.connect(url) as connection:
 
@@ -169,7 +172,9 @@ async def test_s0007_ac1_ac2_ac4_ac6_up_down_up_keeps_every_version_identical(da
     before = _snapshot(database)
     assert len(before["canonical_fact_version"]) >= 5  # pilot plus F0007 identity-v1 rows
 
-    _upgrade("head")
+    # F0008's own revisions (0014-0015). Later additive revisions add tables and their
+    # grants by design; F0009's 0016 identity proof is test_f0009_migration.py.
+    _upgrade(F0008_HEAD)
     assert _snapshot(database) == before
     with psycopg.connect(database) as connection:
         nulls = connection.execute(
@@ -188,7 +193,7 @@ async def test_s0007_ac1_ac2_ac4_ac6_up_down_up_keeps_every_version_identical(da
             ).fetchone()[0]
             == 0
         )
-    _upgrade("head")
+    _upgrade(F0008_HEAD)
     assert _snapshot(database) == before
 
     # AC2: a legacy row with a NULL upper bound reads as OPEN; no temporal block.

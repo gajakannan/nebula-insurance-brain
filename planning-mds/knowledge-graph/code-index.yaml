@@ -215,12 +215,16 @@ node_bindings:
     paths:
       architecture:
         - planning-mds/architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md
-        - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+        - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+      backend:
+        - engine/packages/brain-persistence/src/brain_persistence/provenance_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/repositories.py
+        - engine/packages/brain-review/src/brain_review/decisions.py
       schemas:
         - planning-mds/schemas/learning-candidate-reservation-v1.schema.json
-        - planning-mds/schemas/provenance-query-v1.schema.json
-        - planning-mds/schemas/provenance-result-v1.schema.json
-        - planning-mds/schemas/review-submission-attempt-v1.schema.json
+      tests:
+        - engine/packages/brain-review/tests/test_f0009_decisions.py
+        - engine/tests/integration/test_f0009_corrections.py
   - id: capability:local-dependency-stack
     paths:
       infra:
@@ -399,22 +403,37 @@ node_bindings:
     paths:
       architecture:
         - planning-mds/architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md
-        - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+        - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+      backend:
+        - engine/packages/brain-domain/src/brain_domain/provenance.py
+        - engine/packages/brain-persistence/src/brain_persistence/lineage_contracts.py
+        - engine/packages/brain-persistence/src/brain_persistence/provenance.py
+        - engine/packages/brain-provenance/**
       schemas:
-        - planning-mds/schemas/learning-candidate-reservation-v1.schema.json
         - planning-mds/schemas/provenance-query-v1.schema.json
         - planning-mds/schemas/provenance-result-v1.schema.json
-        - planning-mds/schemas/review-submission-attempt-v1.schema.json
+      tests:
+        - engine/packages/brain-domain/tests/test_provenance.py
+        - engine/packages/brain-security/tests/test_provenance_prepared_read.py
+        - engine/tests/fixtures/f0009_provenance.py
+        - engine/tests/integration/test_f0009_provenance.py
+        - engine/tests/integration/test_f0009_temporal_lineage.py
   - id: capability:review-submission-attribution
     paths:
       architecture:
         - planning-mds/architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md
-        - planning-mds/features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+        - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+      backend:
+        - engine/apps/api/src/brain_api/routes/reviews.py
+        - engine/apps/api/src/brain_api/schemas/review.py
+        - engine/packages/brain-persistence/src/brain_persistence/provenance_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/repositories.py
+        - engine/packages/brain-review/src/brain_review/decisions.py
       schemas:
-        - planning-mds/schemas/learning-candidate-reservation-v1.schema.json
-        - planning-mds/schemas/provenance-query-v1.schema.json
-        - planning-mds/schemas/provenance-result-v1.schema.json
         - planning-mds/schemas/review-submission-attempt-v1.schema.json
+      tests:
+        - engine/apps/api/tests/test_f0009_review_compatibility.py
+        - engine/tests/integration/test_f0009_corrections.py
   - id: capability:runtime-roots-and-toolchain
     paths:
       backend:
@@ -714,6 +733,12 @@ node_bindings:
         - engine/migrations/versions/0015_f0008_split_lineage_same_slot.py
       tests:
         - engine/tests/integration/test_temporal_migration.py
+  - id: migration:f0009-provenance-hooks
+    paths:
+      backend:
+        - engine/migrations/versions/0016_f0009_provenance_hooks.py
+      tests:
+        - engine/tests/integration/test_f0009_migration.py
   - id: schema:commercial-pc-example
     paths:
       architecture:

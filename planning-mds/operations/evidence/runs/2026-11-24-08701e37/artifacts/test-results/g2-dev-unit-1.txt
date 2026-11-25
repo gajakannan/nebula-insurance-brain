@@ -1,0 +1,29 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 17%]
+........................................................................ [ 23%]
+........................................................................ [ 29%]
+........................................................................ [ 35%]
+........................................................................ [ 41%]
+........................................................................ [ 47%]
+........................................................................ [ 53%]
+...................................................................F
+=================================== FAILURES ===================================
+______________ test_installed_bundle_resource_count_and_identity _______________
+
+    def test_installed_bundle_resource_count_and_identity():
+        bundle = ContractBundle.installed()
+>       assert len(bundle._manifest["resources"]) == 21
+E       AssertionError: assert 26 == 21
+E        +  where 26 = len([{'id': 'https://nebula.local/schemas/assertion-admission-result-v1.schema.json', 'path': 'assertion-admission-result-...-read.schema.json', 'sha256': 'e1a39ab7deed35af3a967f3a4fb9ef0cb7d9c569128a3bf3753fdc3225b6fbd0', 'version': '1'}, ...])
+
+engine/packages/brain-contracts/tests/test_schema_runtime.py:297: AssertionError
+=============================== warnings summary ===============================
+../../tmp/f0009-engine-venv/lib/python3.14/site-packages/starlette/testclient.py:53
+  /tmp/f0009-engine-venv/lib/python3.14/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED engine/packages/brain-contracts/tests/test_schema_runtime.py::test_installed_bundle_resource_count_and_identity
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!

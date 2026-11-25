@@ -254,6 +254,13 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0011-S0004](features/archive/F0011-json-schema-contract-system/F0011-S0004-prove-cross-language-contract-conformance.md) — Done
   - [F0011-S0005](features/archive/F0011-json-schema-contract-system/F0011-S0005-preserve-existing-consumer-contracts.md) — Done
   - [F0011-S0006](features/archive/F0011-json-schema-contract-system/F0011-S0006-verify-reproducible-contract-delivery.md) — Done
+- [F0009 — Provenance + human-correction lineage](features/archive/F0009-provenance-and-human-correction-lineage/README.md) - Done / Archived 2026-11-25 (planned in plan run `2026-11-24-bfdbbf04`, reworked in `2026-11-24-c32acf46`, reviewed in `2026-11-24-2af6f972`; implemented in feature run `2026-11-24-08701e37`; migration 0016; ADR-0080 Proposed, proofs met)
+  - [F0009-S0001](features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md) — Done
+  - [F0009-S0002](features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md) — Done
+  - [F0009-S0003](features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md) — Done
+  - [F0009-S0004](features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md) — Done
+  - [F0009-S0005](features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md) — Done
+  - [F0009-S0006](features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md) — Done
 
 **Repository tooling (Completed)**
 
@@ -263,15 +270,8 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0064-S0003](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Done
   - [F0064-S0004](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Done
 
-**v0.1A (remaining — Now: F0009, F0012; Next: F0010, F0013–F0017)**
+**v0.1A (remaining — Now: F0012; Next: F0010, F0013–F0017)**
 
-- [F0009 — Provenance + human-correction lineage](features/F0009-provenance-and-human-correction-lineage/README.md) - Planned (Phase A approved 2026-11-24 in plan run `2026-11-24-bfdbbf04`; six Not Started stories, 41 ACs; Phase B approved 2026-11-24)
-  - [F0009-S0001](features/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md) — Not Started
-  - [F0009-S0002](features/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md) — Not Started
-  - [F0009-S0003](features/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md) — Not Started
-  - [F0009-S0004](features/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md) — Not Started
-  - [F0009-S0005](features/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md) — Not Started
-  - [F0009-S0006](features/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md) — Not Started
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
 - [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned
 - [F0013 — Insurance Core GL ontology](features/F0013-insurance-core-gl-ontology/README.md) - Planned
@@ -381,7 +381,7 @@ Eight architectural planes (section 4) implemented as a modular monolith across 
 
 ### 4.2 Data Model
 
-PostgreSQL is authoritative (ADR-0002). Kernel entities: Tenant, Workspace, KnowledgeBase, Principal, SourceDocument, DocumentVersion, ContentArtifact, ContentBlock, DocumentProfile, ExtractionProfile, SemanticInterpretationRun, Assertion, Entity, FactSlot, CanonicalFactVersion, CanonicalRelationshipVersion (a logical name: RELATIONSHIP FactSlot versions live in `canonical_fact_version`, ADR-0078), Derivation, ReviewItem, ReviewDecision, LearningCandidate, Conversation, AuditEvent, OutboxEvent (definitions in `domain/glossary.md`). Core tables are listed in section 78 and mirrored in `architecture/data-model.md`; AGE labels in section 79; content artifact layout in sections 80 and 81. Every authoritative row carries `tenant_id`, `knowledge_base_id`, and audit fields (`created_at`, `recorded_at`, actor). FactSlot identity (section 13; ADR-0077), bitemporal fact versions (section 14; ADR-0078), and change semantics (section 16) define canonical truth. Deployed schema (migrations 0001–0015) is mapped table by table in master blueprint section 78.
+PostgreSQL is authoritative (ADR-0002). Kernel entities: Tenant, Workspace, KnowledgeBase, Principal, SourceDocument, DocumentVersion, ContentArtifact, ContentBlock, DocumentProfile, ExtractionProfile, SemanticInterpretationRun, Assertion, Entity, FactSlot, CanonicalFactVersion, CanonicalRelationshipVersion (a logical name: RELATIONSHIP FactSlot versions live in `canonical_fact_version`, ADR-0078), Derivation, ReviewItem, ReviewDecision, LearningCandidate, Conversation, AuditEvent, OutboxEvent (definitions in `domain/glossary.md`). Core tables are listed in section 78 and mirrored in `architecture/data-model.md`; AGE labels in section 79; content artifact layout in sections 80 and 81. Every authoritative row carries `tenant_id`, `knowledge_base_id`, and audit fields (`created_at`, `recorded_at`, actor). FactSlot identity (section 13; ADR-0077), bitemporal fact versions (section 14; ADR-0078), and change semantics (section 16) define canonical truth. Deployed schema (migrations 0001–0015) is mapped table by table in master blueprint section 78; F0009 adds migration 0016 (two append-only lineage tables and review-decision guards, section 4.18).
 
 ### 4.3 Workflow Rules
 
@@ -602,11 +602,13 @@ Every recipient of the ADR-0077/ADR-0078 handoffs (F0009, F0010, F0012, F0013, F
 
 ---
 
-### 4.18 F0009 provenance and correction lineage (Phase B approved 2026-11-24)
+### 4.18 F0009 provenance and correction lineage (Phase B approved 2026-11-24; implemented and archived 2026-11-25)
 
-Plan run `2026-11-24-bfdbbf04`; Phase A explicitly approved by operator token `approve-phase-a`, six Not Started stories and 41 ACs. The [assembly plan](features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md) and proposed [ADR-0080](architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md) define an internal metadata-first reader over exact assertion/version lineage, current READ of every linked source/review/ending/attestation resource, two append-only tables for future-learning reservations and non-applied submission attribution, and a nullable server-owned new-decision marker. Legacy rows are not backfilled; canonical writes remain with the shipped commit service and full orchestration remains F0018.
+Plan run `2026-11-24-bfdbbf04`; Phase A explicitly approved by operator token `approve-phase-a`, six stories and 41 ACs (all Done 2026-11-25). The [assembly plan](features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md) and proposed [ADR-0080](architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md) define an internal metadata-first reader over exact assertion/version lineage, current READ of every linked source/review/ending/attestation resource, two append-only tables for future-learning reservations and non-applied submission attribution, and a nullable server-owned new-decision marker. Legacy rows are not backfilled; canonical writes remain with the shipped commit service and full orchestration remains F0018.
 
-The four design schemas use F0011 delivery in the later feature action; no runtime bundle, route, grant, UI, deployable, parse or learning producer is added by plan. A losing batch keeps its existing 422 after protected audit-only persistence, and a new effective CORRECT receives one reference atomically. G4 and all seven ordered G5 pre-approval checks passed; the operator approved Phase B with exact token `approve-phase-b` on 2026-11-24. The same run’s G5 journal/manifest records post-approval regeneration, checks and final publication. ADR-0080 is Proposed until its runtime proofs and separate acceptance. F0010 owns retraction semantics; F0020/F0022/F0023 own exposure and F0041/F0026 own learning/benchmark governance.
+The four design schemas use F0011 delivery in the later feature action; no runtime bundle, route, grant, UI, deployable, parse or learning producer is added by plan. A losing batch keeps its existing 422 after protected audit-only persistence, and a new effective CORRECT receives one reference atomically. G4 and all seven ordered G5 pre-approval checks passed; the operator approved Phase B with exact token `approve-phase-b` on 2026-11-24. The same run’s G5 journal/manifest records post-approval regeneration, checks and final publication. ADR-0080 is Proposed until its runtime proofs and separate acceptance.
+
+Feature run `2026-11-24-08701e37` implemented the design, with operator G4 approval on 2026-11-25. It delivers `brain_domain.provenance`, the `brain-provenance` reader (exported, not routed), the opt-in `prepare_reads` authorization hook, review-boundary preflight with refused-attempt attribution and an atomic learning reservation, and migration 0016. All 41 ACs and EX-PROV-001–005 are proven on PostgreSQL 18 (changed-line coverage 94.4%; 1392/1392 shared conformance results). G2 recorded five design corrections, among them a nullable `fact_change.from_version_id` and attempt authorization bound by `audit_event.decision_id` (see the run reports). ADR-0080 runtime proofs are met; the ADR stays Proposed pending operator acceptance. Evidence: [PM closeout](operations/evidence/runs/2026-11-24-08701e37/pm-closeout.md). F0010 owns retraction semantics; F0020/F0022/F0023 own exposure and F0041/F0026 own learning/benchmark governance.
 
 ---
 
@@ -632,7 +634,7 @@ Current position (2026-11-20): F0001 to F0008 are done and archived; ADR-0078 wa
 
 1. Now (2026-11-20 roadmap review, after F0008 closed): four lanes.
    - **F0011** (JSON Schema contract system) completed 2026-11-23 in feature run `2026-11-22-885e8734` (no migration added).
-   - **F0009** (provenance + human-correction lineage) is dependency-ready and heads the temporal/commit path F0009 → F0010 → F0018.
+   - **F0009** (provenance + human-correction lineage) completed 2026-11-25 in feature run `2026-11-24-08701e37` (migration 0016); F0010 → F0018 continue the temporal/commit path.
    - **F0012** (foundation ontology) is planned alongside F0011; with F0011 complete (2026-11-23), its feature run is unblocked.
    - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.
 

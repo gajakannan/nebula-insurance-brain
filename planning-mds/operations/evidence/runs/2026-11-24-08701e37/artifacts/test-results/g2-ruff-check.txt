@@ -1,0 +1,40 @@
+    -                 "valid_from_basis, valid_to_state, split_of_version_id) "
+    -                 "SELECT gen_random_uuid(), %s, tenant_id, knowledge_base_id, value, valid, "
+    -                 "recorded, evidence, commit_id, source_received_at, artifact_created_at, "
+    -                 "assertion_created_at, canonical_accepted_at, temporal_contract, temporal_kind, "
+    -                 "valid_from_granularity, valid_from_zone, valid_from_basis, valid_to_state, %s "
+    -                 "FROM canonical_fact_version WHERE id = %s",
+    -                 (await w.slot(), v1, v1),
+    -             )
+188 +     with psycopg.connect(w.url) as connection, pytest.raises(psycopg.errors.CheckViolation):
+189 +         connection.execute(
+190 +             "INSERT INTO canonical_fact_version (id, slot_id, tenant_id, knowledge_base_id, "
+191 +             "value, valid, recorded, evidence, commit_id, source_received_at, "
+192 +             "artifact_created_at, assertion_created_at, canonical_accepted_at, "
+193 +             "temporal_contract, temporal_kind, valid_from_granularity, valid_from_zone, "
+194 +             "valid_from_basis, valid_to_state, split_of_version_id) "
+195 +             "SELECT gen_random_uuid(), %s, tenant_id, knowledge_base_id, value, valid, "
+196 +             "recorded, evidence, commit_id, source_received_at, artifact_created_at, "
+197 +             "assertion_created_at, canonical_accepted_at, temporal_contract, temporal_kind, "
+198 +             "valid_from_granularity, valid_from_zone, valid_from_basis, valid_to_state, %s "
+199 +             "FROM canonical_fact_version WHERE id = %s",
+200 +             (await w.slot(), v1, v1),
+201 +         )
+202 |     with psycopg.connect(w.url) as connection:
+    |
+
+SIM117 Use a single `with` statement with multiple contexts instead of nested `with` statements
+   --> tests/integration/test_f0009_temporal_lineage.py:203:5
+    |
+201 |                   (await w.slot(), v1, v1),
+202 |               )
+203 | /     with psycopg.connect(w.url) as connection:
+204 | |         with pytest.raises(psycopg.errors.ForeignKeyViolation):
+    | |_______________________________________________________________^
+205 |               connection.execute(
+206 |                   "INSERT INTO canonical_fact_change (id, reason, from_version_id, to_version_id, "
+    |
+help: Combine `with` statements
+
+Found 47 errors.
+[*] 3 fixable with the `--fix` option.
