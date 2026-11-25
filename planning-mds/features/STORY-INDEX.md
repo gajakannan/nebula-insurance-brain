@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 60
+**Total Stories:** 66
 
 ---
 
@@ -106,6 +106,19 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0009 — Provenance + human-correction lineage
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0009-S0001](./F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md) | Reconstruct source provenance | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
+| [F0009-S0002](./F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md) | Append auditable human corrections | Critical | MVP — v0.1A | business reviewer (Rosa) |
+| [F0009-S0003](./F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md) | Trace temporal version lineage | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
+| [F0009-S0004](./F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md) | Enforce current authority across lineage | Critical | MVP — v0.1A | business reviewer (Rosa) |
+| [F0009-S0005](./F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md) | Reserve a learning-candidate reference | Critical | MVP — v0.1A | business reviewer (Rosa) |
+| [F0009-S0006](./F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md) | Prove compatible lineage delivery | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
+
+---
+
 ## F0011 — JSON Schema contract system
 
 | Story ID | Title | Priority | Phase | Persona |
@@ -149,7 +162,7 @@ Auto-generated index of all user stories across feature folders.
 |-------|-------|
 | Infrastructure | 11 |
 | MVP | 30 |
-| MVP — v0.1A | 9 |
+| MVP — v0.1A | 15 |
 | v0.1A | 4 |
 | v0.1B | 6 |
 
@@ -159,7 +172,7 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
-| Critical | 30 |
+| Critical | 36 |
 | High | 26 |
 | Medium | 4 |
 

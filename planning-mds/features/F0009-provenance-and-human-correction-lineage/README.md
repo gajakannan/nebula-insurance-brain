@@ -3,6 +3,8 @@
 **Status:** Planned
 **Phase:** v0.1A
 **Roadmap:** Now (2026-11-20 roadmap review)
+**Plan Run:** `2026-11-24-bfdbbf04`
+**Planning:** Phase A approved 2026-11-24; Phase B approved 2026-11-24 by operator token `approve-phase-b`
 
 ## Overview
 
@@ -27,11 +29,111 @@ F0007 and F0008 shipped [ADR-0077](../../architecture/decisions/ADR-0077-factslo
 
 ## Documents
 
-The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0009.yaml`.
+| Document | Purpose |
+|---|---|
+| [PRD](PRD.md) | Phase A requirements and scope assumptions |
+| [Personas](personas.md) | Existing persona jobs and boundaries |
+| [Acceptance checklist](acceptance-criteria-checklist.md) | 41 ACs and required runtime proof |
+| [STATUS](STATUS.md) | Not Started skeleton; no runtime signoff |
+| [GETTING-STARTED](GETTING-STARTED.md) | Planning resume and carry-in guide |
+| [Worked examples](worked-examples.md) | Synthetic EX-PROV-001–005 and expected boundaries |
 
 ## Stories
 
 | ID | Title | Status |
-|----|-------|--------|
+|---|---|---|
+| [F0009-S0001](F0009-S0001-reconstruct-source-provenance.md) | Reconstruct source provenance | Not Started |
+| [F0009-S0002](F0009-S0002-append-auditable-human-corrections.md) | Append auditable human corrections | Not Started |
+| [F0009-S0003](F0009-S0003-trace-temporal-version-lineage.md) | Trace temporal version lineage | Not Started |
+| [F0009-S0004](F0009-S0004-enforce-current-authority-across-lineage.md) | Enforce current authority across lineage | Not Started |
+| [F0009-S0005](F0009-S0005-reserve-learning-candidate-reference.md) | Reserve a learning-candidate reference | Not Started |
+| [F0009-S0006](F0009-S0006-prove-compatible-lineage-delivery.md) | Prove compatible lineage delivery | Not Started |
 
-**Total Stories:** 0
+**Total Stories:** 6
+**Completed:** 0 / 6
+
+## Architecture review
+
+Phase A approved at G3 with operator token `approve-phase-a` (2026-11-24). Phase B approved 2026-11-24 by operator token `approve-phase-b`. Phase B rework run `2026-11-24-c32acf46` (refused-attempt replay and provenance edge semantics, plan-review PR-H1/PR-H2) was approved the same day with `approve-phase-b`. G4 and all seven ordered G5 pre-approval operations passed; the G5 journal records post-approval regeneration and publication. No runtime completion, formal ADR acceptance or build readiness is asserted.
+
+| Artifact | Design status |
+|---|---|
+| [Assembly plan](feature-assembly-plan.md) | Five-step Python implementation specification; all 41 ACs mapped |
+| [ADR-0080](../../architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md) | Proposed; runtime proofs and separate acceptance required |
+| [Contract inventory](contract-inventory.yaml) | Four new schemas plus existing closed dependencies; no runtime bundle changes at plan |
+| [Migration design](migration-design.sql) | Two new tables, one nullable server marker; no legacy backfill |
+| [Contract examples](contract-examples.json) | Synthetic structural expectations, no runtime proof |
+
+
+## Feature ERD
+
+New tables are proposed; the other records already exist. A reservation is a future identity only; no learning candidate processor is added.
+
+```mermaid
+erDiagram
+    ASSERTION ||--o{ ASSERTION : corrected_from
+    REVIEW_ITEM ||--o{ REVIEW_DECISION : adjudicated_by
+    ASSERTION ||--o{ REVIEW_ITEM : reviewed_in
+    REVIEW_DECISION ||--o| LEARNING_CANDIDATE_RESERVATION : reserves
+    ASSERTION ||--o| LEARNING_CANDIDATE_RESERVATION : corrected_child
+    REVIEW_ITEM ||--o{ REVIEW_SUBMISSION_ATTEMPT : refused_submission
+    CANONICAL_FACT_VERSION ||--o{ CANONICAL_FACT_VERSION : split_of_same_slot
+    ASSERTION {
+        uuid id PK
+        uuid original_assertion_id FK
+        int semantic_contract_version
+    }
+    REVIEW_ITEM {
+        uuid id PK
+        uuid assertion_id FK
+    }
+    REVIEW_DECISION {
+        uuid id PK
+        uuid review_item_id FK
+        uuid corrected_assertion_id FK
+        int correction_lineage_contract
+        boolean stale
+    }
+    LEARNING_CANDIDATE_RESERVATION {
+        uuid id PK
+        uuid review_decision_id FK
+        uuid original_assertion_id FK
+        uuid corrected_assertion_id FK
+    }
+    REVIEW_SUBMISSION_ATTEMPT {
+        uuid id PK
+        uuid review_item_id FK
+        uuid original_assertion_id FK
+        string event_sha256
+        string outcome
+    }
+    CANONICAL_FACT_VERSION {
+        uuid id PK
+        uuid slot_id FK
+        uuid split_of_version_id FK
+    }
+```
+
+```text
+original Assertion <- corrected_from - HUMAN_REVIEW child
+       | ReviewItem -> ReviewDecision -> reserved future learning UUID
+       +-----------> refused-submission attempt (no child/reservation)
+exact canonical version -> split predecessor / change endpoints / evidence
+```
+
+## Component view
+
+```mermaid
+flowchart LR
+    Host[Internal authorized host] --> Reader[ProvenanceReader]
+    Reader --> Auth[AuthorizationExecution: current locks and audit]
+    Reader --> Port[ProvenanceRepository port]
+    Port --> SQL[SQLAlchemy adapter: metadata then protected materialization]
+    SQL --> PG[(Existing PostgreSQL)]
+    Review[Existing review POST] --> Preflight[Batch preflight and decision service]
+    Preflight --> PG
+    Auth --> PG
+    Contracts[F0011 installed contracts] --> Reader
+```
+
+The existing [C4 L1](../../architecture/c4-context.md) and [C4 L2](../../architecture/c4-container.md) topology is unchanged. No cache, model producer, route, grant or deployable is added. Full mutation/authorization/rollback detail is in the assembly plan.

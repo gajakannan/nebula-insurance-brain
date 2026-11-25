@@ -474,3 +474,21 @@ The record left when an authorized deletion removes content: it keeps identity a
 ### Constrained policy question
 
 The v0.1C "chat with this policy" surface: a conversation rooted on one entitled policy that answers through typed fact queries with scope, time basis, information state, citations and abstention. It has no broad retrieval or learning (EX-OWN-005; F0069; ADR-0046 v0.1 subset).
+
+
+## F0009 provenance refinements (Phase B approved)
+
+### Provenance Explanation
+
+**Type:** Value Object
+**Definition:** A bounded, currently authorized explanation of one exact assertion or canonical version. It retains typed source, correction, split and change links and explicitly marks unavailable legacy/producer metadata; it is not a second authoritative graph or canonical acceptance. [EX-PROV-001/003/004](../features/F0009-provenance-and-human-correction-lineage/worked-examples.md), F0009-S0001/S0003/S0004; [result schema](../schemas/provenance-result-v1.schema.json), proposed [ADR-0080](../architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md).
+
+### Learning Candidate Reservation
+
+**Type:** Entity
+**Definition:** An immutable server-owned UUID linked to one new effective human correction's decision, original/child assertions, reviewer and time. It reserves future F0041 identity and confers no learning job, candidate approval, independent support or Golden Corpus/holdout membership. [EX-PROV-005](../features/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-005--reserve-future-learning-with-zero-dataset-effect), F0009-S0005; [reservation schema](../schemas/learning-candidate-reservation-v1.schema.json).
+
+### Refused Review Submission
+
+**Type:** Entity
+**Definition:** Attributed non-applied input retained when an already-decided item causes the existing review batch to be refused. It is distinct from an applied/stale ReviewDecision; it produces no corrected assertion or reservation and preserves the existing HTTP 422. [EX-PROV-002](../features/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-002--correct-without-erasing-or-accepting), F0009-S0002; [attempt schema](../schemas/review-submission-attempt-v1.schema.json).

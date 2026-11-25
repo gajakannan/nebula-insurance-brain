@@ -1,0 +1,1489 @@
+{
+  "provenance": "synthetic development fixtures; structural only, no runtime execution",
+  "cases": [
+    {
+      "id": "provenance-query-v1-valid",
+      "schema": "provenance-query-v1.schema.json",
+      "expected": true,
+      "value": {
+        "contract": "provenance-query/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000001"
+        },
+        "anchor": {
+          "type": "review_task",
+          "id": "00000000-0000-4000-8000-000000000002"
+        }
+      }
+    },
+    {
+      "id": "provenance-query-v1-missing-contract",
+      "schema": "provenance-query-v1.schema.json",
+      "expected": false,
+      "value": {
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000001"
+        },
+        "anchor": {
+          "type": "review_task",
+          "id": "00000000-0000-4000-8000-000000000002"
+        }
+      }
+    },
+    {
+      "id": "provenance-query-v1-extra-authority",
+      "schema": "provenance-query-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "provenance-query/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000001"
+        },
+        "anchor": {
+          "type": "review_task",
+          "id": "00000000-0000-4000-8000-000000000002"
+        },
+        "approved": true
+      }
+    },
+    {
+      "id": "provenance-result-v1-valid",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": true,
+      "value": {
+        "contract": "provenance-result/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000001"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000001",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          }
+        ],
+        "edges": [],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000001"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "provenance-result-v1-missing-contract",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": false,
+      "value": {
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000001"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000001",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          }
+        ],
+        "edges": [],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000001"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "provenance-result-v1-extra-authority",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "provenance-result/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000001"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000001",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          }
+        ],
+        "edges": [],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000001"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ],
+        "approved": true
+      }
+    },
+    {
+      "id": "learning-candidate-reservation-v1-valid",
+      "schema": "learning-candidate-reservation-v1.schema.json",
+      "expected": true,
+      "value": {
+        "contract": "learning-candidate-reservation/v1",
+        "id": "00000000-0000-4000-8000-000000000009",
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "review_decision_id": "00000000-0000-4000-8000-000000000005",
+        "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+        "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+        "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+        "reserved_at": "2026-11-24T19:00:00-05:00"
+      }
+    },
+    {
+      "id": "learning-candidate-reservation-v1-missing-contract",
+      "schema": "learning-candidate-reservation-v1.schema.json",
+      "expected": false,
+      "value": {
+        "id": "00000000-0000-4000-8000-000000000009",
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "review_decision_id": "00000000-0000-4000-8000-000000000005",
+        "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+        "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+        "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+        "reserved_at": "2026-11-24T19:00:00-05:00"
+      }
+    },
+    {
+      "id": "learning-candidate-reservation-v1-extra-authority",
+      "schema": "learning-candidate-reservation-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "learning-candidate-reservation/v1",
+        "id": "00000000-0000-4000-8000-000000000009",
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "review_decision_id": "00000000-0000-4000-8000-000000000005",
+        "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+        "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+        "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+        "reserved_at": "2026-11-24T19:00:00-05:00",
+        "approved": true
+      }
+    },
+    {
+      "id": "review-submission-attempt-v1-valid",
+      "schema": "review-submission-attempt-v1.schema.json",
+      "expected": true,
+      "value": {
+        "contract": "review-submission-attempt/v1",
+        "id": "00000000-0000-4000-8000-000000000010",
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "review_item_id": "00000000-0000-4000-8000-000000000002",
+        "review_batch_id": "00000000-0000-4000-8000-000000000011",
+        "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+        "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+        "submitted_at": "2026-11-24T19:00:00-05:00",
+        "event_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assertion_version": 1,
+        "action": "CORRECT",
+        "reason_code": "MISREAD_VALUE",
+        "corrected_value": {
+          "amount": "2000000",
+          "currency": "USD"
+        },
+        "evidence": {
+          "source": "00000000-0000-4000-8000-000000000001",
+          "precision": "page"
+        },
+        "reviewer_comment": null,
+        "outcome": "ALREADY_DECIDED",
+        "authorization_decision_id": "00000000-0000-4000-8000-000000000012"
+      }
+    },
+    {
+      "id": "review-submission-attempt-v1-missing-contract",
+      "schema": "review-submission-attempt-v1.schema.json",
+      "expected": false,
+      "value": {
+        "id": "00000000-0000-4000-8000-000000000010",
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "review_item_id": "00000000-0000-4000-8000-000000000002",
+        "review_batch_id": "00000000-0000-4000-8000-000000000011",
+        "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+        "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+        "submitted_at": "2026-11-24T19:00:00-05:00",
+        "event_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assertion_version": 1,
+        "action": "CORRECT",
+        "reason_code": "MISREAD_VALUE",
+        "corrected_value": {
+          "amount": "2000000",
+          "currency": "USD"
+        },
+        "evidence": {
+          "source": "00000000-0000-4000-8000-000000000001",
+          "precision": "page"
+        },
+        "reviewer_comment": null,
+        "outcome": "ALREADY_DECIDED",
+        "authorization_decision_id": "00000000-0000-4000-8000-000000000012"
+      }
+    },
+    {
+      "id": "review-submission-attempt-v1-extra-authority",
+      "schema": "review-submission-attempt-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "review-submission-attempt/v1",
+        "id": "00000000-0000-4000-8000-000000000010",
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "review_item_id": "00000000-0000-4000-8000-000000000002",
+        "review_batch_id": "00000000-0000-4000-8000-000000000011",
+        "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+        "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+        "submitted_at": "2026-11-24T19:00:00-05:00",
+        "event_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assertion_version": 1,
+        "action": "CORRECT",
+        "reason_code": "MISREAD_VALUE",
+        "corrected_value": {
+          "amount": "2000000",
+          "currency": "USD"
+        },
+        "evidence": {
+          "source": "00000000-0000-4000-8000-000000000001",
+          "precision": "page"
+        },
+        "reviewer_comment": null,
+        "outcome": "ALREADY_DECIDED",
+        "authorization_decision_id": "00000000-0000-4000-8000-000000000012",
+        "approved": true
+      }
+    },
+    {
+      "id": "query-no-new-auth-resource",
+      "schema": "provenance-query-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "provenance-query/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000001"
+        },
+        "anchor": {
+          "type": "assertion",
+          "id": "00000000-0000-4000-8000-000000000002"
+        }
+      }
+    },
+    {
+      "id": "reservation-bad-id",
+      "schema": "learning-candidate-reservation-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "learning-candidate-reservation/v1",
+        "id": "not-an-id",
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "review_decision_id": "00000000-0000-4000-8000-000000000005",
+        "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+        "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+        "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+        "reserved_at": "2026-11-24T19:00:00-05:00"
+      }
+    },
+    {
+      "id": "attempt-cannot-assert-applied",
+      "schema": "review-submission-attempt-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "review-submission-attempt/v1",
+        "id": "00000000-0000-4000-8000-000000000010",
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "review_item_id": "00000000-0000-4000-8000-000000000002",
+        "review_batch_id": "00000000-0000-4000-8000-000000000011",
+        "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+        "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+        "submitted_at": "2026-11-24T19:00:00-05:00",
+        "event_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assertion_version": 1,
+        "action": "CORRECT",
+        "reason_code": "MISREAD_VALUE",
+        "corrected_value": {
+          "amount": "2000000",
+          "currency": "USD"
+        },
+        "evidence": {
+          "source": "00000000-0000-4000-8000-000000000001",
+          "precision": "page"
+        },
+        "reviewer_comment": null,
+        "outcome": "APPLIED",
+        "authorization_decision_id": "00000000-0000-4000-8000-000000000012"
+      }
+    },
+    {
+      "id": "result-no-producer-node",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "provenance-result/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000001"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "learning_job",
+            "id": "00000000-0000-4000-8000-000000000001",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          }
+        ],
+        "edges": [],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000001"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "provenance-result-v1-correction-lineage-edges",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": true,
+      "value": {
+        "contract": "provenance-result/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000007"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000006",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000007",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "HUMAN_REVIEW",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "model_confidence": null,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "learning_reservation",
+            "id": "00000000-0000-4000-8000-000000000009",
+            "data": {
+              "contract": "learning-candidate-reservation/v1",
+              "id": "00000000-0000-4000-8000-000000000009",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_decision_id": "00000000-0000-4000-8000-000000000005",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reserved_at": "2026-11-24T19:00:00-05:00"
+            }
+          },
+          {
+            "kind": "review_attempt",
+            "id": "00000000-0000-4000-8000-000000000010",
+            "data": {
+              "contract": "review-submission-attempt/v1",
+              "id": "00000000-0000-4000-8000-000000000010",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "submitted_at": "2026-11-24T19:00:00-05:00",
+              "event_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "assertion_version": 1,
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_comment": null,
+              "outcome": "ALREADY_DECIDED",
+              "authorization_decision_id": "00000000-0000-4000-8000-000000000012"
+            }
+          },
+          {
+            "kind": "review_decision",
+            "id": "00000000-0000-4000-8000-000000000005",
+            "data": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reviewer_comment": null,
+              "decided_at": "2026-11-24T19:00:00-05:00",
+              "assertion_version": 1,
+              "stale": false,
+              "event_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "kind": "corrected_from",
+            "source": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "created_assertion",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            }
+          },
+          {
+            "kind": "reserved_learning",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "learning_reservation",
+              "id": "00000000-0000-4000-8000-000000000009"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_attempt",
+              "id": "00000000-0000-4000-8000-000000000010"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          }
+        ],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          },
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "edge-reversed-direction",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "provenance-result/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000007"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000006",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000007",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "HUMAN_REVIEW",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "model_confidence": null,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "learning_reservation",
+            "id": "00000000-0000-4000-8000-000000000009",
+            "data": {
+              "contract": "learning-candidate-reservation/v1",
+              "id": "00000000-0000-4000-8000-000000000009",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_decision_id": "00000000-0000-4000-8000-000000000005",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reserved_at": "2026-11-24T19:00:00-05:00"
+            }
+          },
+          {
+            "kind": "review_attempt",
+            "id": "00000000-0000-4000-8000-000000000010",
+            "data": {
+              "contract": "review-submission-attempt/v1",
+              "id": "00000000-0000-4000-8000-000000000010",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "submitted_at": "2026-11-24T19:00:00-05:00",
+              "event_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "assertion_version": 1,
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_comment": null,
+              "outcome": "ALREADY_DECIDED",
+              "authorization_decision_id": "00000000-0000-4000-8000-000000000012"
+            }
+          },
+          {
+            "kind": "review_decision",
+            "id": "00000000-0000-4000-8000-000000000005",
+            "data": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reviewer_comment": null,
+              "decided_at": "2026-11-24T19:00:00-05:00",
+              "assertion_version": 1,
+              "stale": false,
+              "event_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "kind": "corrected_from",
+            "source": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "created_assertion",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            }
+          },
+          {
+            "kind": "reserved_learning",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "learning_reservation",
+              "id": "00000000-0000-4000-8000-000000000009"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            },
+            "target": {
+              "kind": "review_attempt",
+              "id": "00000000-0000-4000-8000-000000000010"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          }
+        ],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          },
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "edge-retired-kind",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "provenance-result/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000007"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000006",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000007",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "HUMAN_REVIEW",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "model_confidence": null,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "learning_reservation",
+            "id": "00000000-0000-4000-8000-000000000009",
+            "data": {
+              "contract": "learning-candidate-reservation/v1",
+              "id": "00000000-0000-4000-8000-000000000009",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_decision_id": "00000000-0000-4000-8000-000000000005",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reserved_at": "2026-11-24T19:00:00-05:00"
+            }
+          },
+          {
+            "kind": "review_attempt",
+            "id": "00000000-0000-4000-8000-000000000010",
+            "data": {
+              "contract": "review-submission-attempt/v1",
+              "id": "00000000-0000-4000-8000-000000000010",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "submitted_at": "2026-11-24T19:00:00-05:00",
+              "event_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "assertion_version": 1,
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_comment": null,
+              "outcome": "ALREADY_DECIDED",
+              "authorization_decision_id": "00000000-0000-4000-8000-000000000012"
+            }
+          },
+          {
+            "kind": "review_decision",
+            "id": "00000000-0000-4000-8000-000000000005",
+            "data": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reviewer_comment": null,
+              "decided_at": "2026-11-24T19:00:00-05:00",
+              "assertion_version": 1,
+              "stale": false,
+              "event_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "kind": "reviewed_by",
+            "source": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "created_assertion",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            }
+          },
+          {
+            "kind": "reserved_learning",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "learning_reservation",
+              "id": "00000000-0000-4000-8000-000000000009"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_attempt",
+              "id": "00000000-0000-4000-8000-000000000010"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          }
+        ],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          },
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "edge-duplicate",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "provenance-result/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000007"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000006",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000007",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "HUMAN_REVIEW",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "model_confidence": null,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "learning_reservation",
+            "id": "00000000-0000-4000-8000-000000000009",
+            "data": {
+              "contract": "learning-candidate-reservation/v1",
+              "id": "00000000-0000-4000-8000-000000000009",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_decision_id": "00000000-0000-4000-8000-000000000005",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reserved_at": "2026-11-24T19:00:00-05:00"
+            }
+          },
+          {
+            "kind": "review_attempt",
+            "id": "00000000-0000-4000-8000-000000000010",
+            "data": {
+              "contract": "review-submission-attempt/v1",
+              "id": "00000000-0000-4000-8000-000000000010",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "submitted_at": "2026-11-24T19:00:00-05:00",
+              "event_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "assertion_version": 1,
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_comment": null,
+              "outcome": "ALREADY_DECIDED",
+              "authorization_decision_id": "00000000-0000-4000-8000-000000000012"
+            }
+          },
+          {
+            "kind": "review_decision",
+            "id": "00000000-0000-4000-8000-000000000005",
+            "data": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reviewer_comment": null,
+              "decided_at": "2026-11-24T19:00:00-05:00",
+              "assertion_version": 1,
+              "stale": false,
+              "event_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "kind": "corrected_from",
+            "source": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "created_assertion",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            }
+          },
+          {
+            "kind": "reserved_learning",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "learning_reservation",
+              "id": "00000000-0000-4000-8000-000000000009"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_attempt",
+              "id": "00000000-0000-4000-8000-000000000010"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "corrected_from",
+            "source": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          }
+        ],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          },
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ]
+      }
+    },
+    {
+      "id": "edge-wrong-endpoint-kind",
+      "schema": "provenance-result-v1.schema.json",
+      "expected": false,
+      "value": {
+        "contract": "provenance-result/v1",
+        "root": {
+          "kind": "assertion",
+          "id": "00000000-0000-4000-8000-000000000007"
+        },
+        "tenant_id": "00000000-0000-4000-8000-000000000003",
+        "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+        "completeness": "INCOMPLETE",
+        "records": [
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000006",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "MACHINE_EXTRACTION",
+              "original_assertion_id": null,
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "20000000",
+                "currency": "USD"
+              },
+              "model_confidence": 0.61,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "assertion",
+            "id": "00000000-0000-4000-8000-000000000007",
+            "data": {
+              "semantic_contract_version": 1,
+              "version": 1,
+              "run_id": null,
+              "origin": "HUMAN_REVIEW",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "subject_type": "Policy",
+              "slot_type": "EachOccurrence",
+              "value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "model_confidence": null,
+              "interpretation_basis": "EXPLICIT",
+              "created_at": "2026-11-24T19:00:00-05:00",
+              "semantics": null
+            }
+          },
+          {
+            "kind": "learning_reservation",
+            "id": "00000000-0000-4000-8000-000000000009",
+            "data": {
+              "contract": "learning-candidate-reservation/v1",
+              "id": "00000000-0000-4000-8000-000000000009",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_decision_id": "00000000-0000-4000-8000-000000000005",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reserved_at": "2026-11-24T19:00:00-05:00"
+            }
+          },
+          {
+            "kind": "review_attempt",
+            "id": "00000000-0000-4000-8000-000000000010",
+            "data": {
+              "contract": "review-submission-attempt/v1",
+              "id": "00000000-0000-4000-8000-000000000010",
+              "tenant_id": "00000000-0000-4000-8000-000000000003",
+              "knowledge_base_id": "00000000-0000-4000-8000-000000000004",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "original_assertion_id": "00000000-0000-4000-8000-000000000006",
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "submitted_at": "2026-11-24T19:00:00-05:00",
+              "event_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "assertion_version": 1,
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_comment": null,
+              "outcome": "ALREADY_DECIDED",
+              "authorization_decision_id": "00000000-0000-4000-8000-000000000012"
+            }
+          },
+          {
+            "kind": "review_decision",
+            "id": "00000000-0000-4000-8000-000000000005",
+            "data": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "review_item_id": "00000000-0000-4000-8000-000000000002",
+              "review_batch_id": "00000000-0000-4000-8000-000000000011",
+              "action": "CORRECT",
+              "reason_code": "MISREAD_VALUE",
+              "corrected_value": {
+                "amount": "2000000",
+                "currency": "USD"
+              },
+              "corrected_assertion_id": "00000000-0000-4000-8000-000000000007",
+              "evidence": {
+                "source": "00000000-0000-4000-8000-000000000001",
+                "precision": "page"
+              },
+              "reviewer_principal_id": "00000000-0000-4000-8000-000000000008",
+              "reviewer_comment": null,
+              "decided_at": "2026-11-24T19:00:00-05:00",
+              "assertion_version": 1,
+              "stale": false,
+              "event_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          }
+        ],
+        "edges": [
+          {
+            "kind": "corrected_from",
+            "source": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "target": {
+              "kind": "fact_version",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "created_assertion",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            }
+          },
+          {
+            "kind": "reserved_learning",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "learning_reservation",
+              "id": "00000000-0000-4000-8000-000000000009"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_attempt",
+              "id": "00000000-0000-4000-8000-000000000010"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          },
+          {
+            "kind": "reviews",
+            "source": {
+              "kind": "review_decision",
+              "id": "00000000-0000-4000-8000-000000000005"
+            },
+            "target": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            }
+          }
+        ],
+        "gaps": [
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000006"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          },
+          {
+            "record": {
+              "kind": "assertion",
+              "id": "00000000-0000-4000-8000-000000000007"
+            },
+            "field": "semantics",
+            "reason": "LEGACY_UNQUALIFIED"
+          }
+        ]
+      }
+    }
+  ]
+}
