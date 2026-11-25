@@ -118,6 +118,7 @@ jobs:
           packages/brain-persistence/src packages/brain-domain/src packages/brain-security/src
           packages/brain-review/src packages/brain-temporal/src packages/brain-testing/src
           packages/brain-jobs/src packages/brain-contracts/src packages/brain-factslots/src
+          packages/brain-provenance/src
       - name: engine/ — pytest, all packages (>=80% coverage each, checked per-package below)
         working-directory: engine
         run: uv run pytest -q
@@ -144,6 +145,10 @@ jobs:
       - name: engine/ — pytest brain_jobs coverage gate (>=80%)
         working-directory: engine
         run: uv run pytest packages/brain-jobs/tests --cov=brain_jobs --cov-fail-under=80
+      # F0009: reader orchestration with in-memory ports; PostgreSQL proof in runtime-stack.
+      - name: engine/ — pytest brain_provenance coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-provenance/tests --cov=brain_provenance --cov-fail-under=80
       # F0007: pure and in-memory service tests; the PostgreSQL proof runs in runtime-stack.
       - name: engine/ — pytest brain_factslots coverage gate (>=80%)
         working-directory: engine
@@ -277,6 +282,20 @@ jobs:
           engine/tests/integration/test_temporal_reads.py
           engine/tests/integration/test_temporal_migration.py
           --cov=brain_temporal --cov-fail-under=80 --cov-report=term-missing -q
+      # F0009 provenance/correction lineage (ADR-0080): owned databases per test,
+      # migration 0016 up/down/up and populated refusal, direct-SQL guards, the
+      # review boundary through the unchanged HTTP route, and the metadata-first
+      # reader over v2 assertions and the F0008 split fixture.
+      - name: Prove F0009 lineage, review boundary and migration 0016
+        timeout-minutes: 10
+        env:
+          BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@localhost:5432/brain
+        run: >
+          engine/.venv/bin/python -m pytest
+          engine/tests/integration/test_f0009_migration.py
+          engine/tests/integration/test_f0009_corrections.py
+          engine/tests/integration/test_f0009_provenance.py
+          engine/tests/integration/test_f0009_temporal_lineage.py -q
       - name: Build the F0011 application integration runtime
         run: docker build -f docker/contracts/Dockerfile --target engine-validation -t brain-contracts-engine:ci .
       - name: Prove F0011 consumer guards and atomicity against PostgreSQL

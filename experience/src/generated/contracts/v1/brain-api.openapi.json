@@ -4998,6 +4998,59 @@
         "title": "InterpretationResultV2",
         "type": "object"
       },
+      "ContractLearningCandidateReservationV1": {
+        "additionalProperties": false,
+        "properties": {
+          "contract": {
+            "const": "learning-candidate-reservation/v1"
+          },
+          "corrected_assertion_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "knowledge_base_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "original_assertion_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reserved_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "review_decision_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewer_principal_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract",
+          "id",
+          "tenant_id",
+          "knowledge_base_id",
+          "review_decision_id",
+          "original_assertion_id",
+          "corrected_assertion_id",
+          "reviewer_principal_id",
+          "reserved_at"
+        ],
+        "title": "Reserved future learning identity v1",
+        "type": "object"
+      },
       "ContractProblemDetails": {
         "additionalProperties": false,
         "description": "RFC 9457 problem details with a stable machine `code` and a `traceId` extension member (camelCase to match the framework API contract validator; every other payload is snake_case). F0001-S0001.",
@@ -5038,6 +5091,1667 @@
           "traceId"
         ],
         "title": "ProblemDetails",
+        "type": "object"
+      },
+      "ContractProvenanceQueryV1": {
+        "additionalProperties": false,
+        "properties": {
+          "anchor": {
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "fact_slot",
+                  "review_task",
+                  "content_artifact"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ],
+            "type": "object"
+          },
+          "contract": {
+            "const": "provenance-query/v1"
+          },
+          "root": {
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "assertion",
+                  "fact_version"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "id"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "contract",
+          "root",
+          "anchor"
+        ],
+        "title": "Provenance query v1",
+        "type": "object"
+      },
+      "ContractProvenanceResultV1": {
+        "additionalProperties": false,
+        "properties": {
+          "completeness": {
+            "enum": [
+              "COMPLETE",
+              "INCOMPLETE"
+            ]
+          },
+          "contract": {
+            "const": "provenance-result/v1"
+          },
+          "edges": {
+            "description": "Every edge reads '<source> <kind> <target>'. Each kind admits only the endpoint record kinds listed in its branch. Edges are unique by (kind, source, target); domain checks additionally require both endpoints in records and every non-root record to be connected to the root (ignoring direction). Directional ancestry kinds (corrected_from, split_of) must be acyclic.",
+            "items": {
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "description": "HUMAN_REVIEW child assertion -> its stored original (assertion.original_assertion_id).",
+                  "properties": {
+                    "kind": {
+                      "const": "corrected_from"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "assertion"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "assertion"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Assertion -> its assertion_evidence row; or fact_version -> an evidence.refs entry.",
+                  "properties": {
+                    "kind": {
+                      "const": "supported_by"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "assertion",
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "evidence"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "fact_version -> an evidence.ending_refs entry; never relabelled as support.",
+                  "properties": {
+                    "kind": {
+                      "const": "ending_evidence"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "evidence"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Evidence row -> the immutable artifact it cites (assertion_evidence.artifact_id).",
+                  "properties": {
+                    "kind": {
+                      "const": "located_in"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "evidence"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "content_artifact"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Assertion -> its producing interpretation run (assertion.run_id).",
+                  "properties": {
+                    "kind": {
+                      "const": "interpreted_in"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "assertion"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "interpretation_run"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Interpretation run -> the artifact it read (semantic_interpretation_run.artifact_id).",
+                  "properties": {
+                    "kind": {
+                      "const": "interprets"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "interpretation_run"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "content_artifact"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Artifact -> its document version (content_artifact.document_version_id).",
+                  "properties": {
+                    "kind": {
+                      "const": "artifact_of"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "content_artifact"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "document_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Document version -> its source document (document_version.source_document_id).",
+                  "properties": {
+                    "kind": {
+                      "const": "version_of"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "document_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "source_document"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Decision (via its review item) or refused attempt (original_assertion_id) -> the assertion under review.",
+                  "properties": {
+                    "kind": {
+                      "const": "reviews"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "review_decision",
+                            "review_attempt"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "assertion"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Effective CORRECT decision -> its HUMAN_REVIEW child (corrected_assertion_id).",
+                  "properties": {
+                    "kind": {
+                      "const": "created_assertion"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "review_decision"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "assertion"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Effective CORRECT decision -> its reserved future-learning identity.",
+                  "properties": {
+                    "kind": {
+                      "const": "reserved_learning"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "review_decision"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "learning_reservation"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Canonical version -> the review decision stored on it (review_decision_id); implies no acceptance by review.",
+                  "properties": {
+                    "kind": {
+                      "const": "recorded_decision"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "review_decision"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Remainder -> its same-slot predecessor (split_of_version_id).",
+                  "properties": {
+                    "kind": {
+                      "const": "split_of"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "canonical_fact_change -> from_version_id.",
+                  "properties": {
+                    "kind": {
+                      "const": "changed_from"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_change"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "canonical_fact_change -> to_version_id.",
+                  "properties": {
+                    "kind": {
+                      "const": "changed_to"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_change"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Version with an exposed attested_* document date -> each artifact behind its refs/ending_refs (the current_attesting_artifact_keys join).",
+                  "properties": {
+                    "kind": {
+                      "const": "attested_by"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "content_artifact"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "description": "Record -> a stored derivation/input reference; never a fabricated document locator.",
+                  "properties": {
+                    "kind": {
+                      "const": "derived_from"
+                    },
+                    "source": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "assertion",
+                            "fact_version"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    },
+                    "target": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "kind": {
+                          "enum": [
+                            "derivation_reference"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "id"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "source",
+                    "target"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "maxItems": 8192,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "gaps": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "reason": {
+                  "enum": [
+                    "LEGACY_UNQUALIFIED",
+                    "METADATA_UNAVAILABLE",
+                    "DERIVATION_UNAVAILABLE"
+                  ]
+                },
+                "record": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "enum": [
+                        "assertion",
+                        "evidence",
+                        "content_artifact",
+                        "document_version",
+                        "source_document",
+                        "interpretation_run",
+                        "review_decision",
+                        "review_attempt",
+                        "learning_reservation",
+                        "fact_version",
+                        "fact_change",
+                        "derivation_reference"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "record",
+                "field",
+                "reason"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "knowledge_base_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "records": {
+            "items": {
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "interpretation_basis": {
+                          "type": "string"
+                        },
+                        "model_confidence": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "origin": {
+                          "type": "string"
+                        },
+                        "original_assertion_id": {
+                          "format": "uuid",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "run_id": {
+                          "format": "uuid",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "semantic_contract_version": {
+                          "enum": [
+                            1,
+                            2
+                          ]
+                        },
+                        "semantics": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "$ref": "#/components/schemas/ContractAssertionRecordV2"
+                            }
+                          ]
+                        },
+                        "slot_type": {
+                          "type": "string"
+                        },
+                        "subject_type": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "version": {
+                          "minimum": 1,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "semantic_contract_version",
+                        "version",
+                        "run_id",
+                        "origin",
+                        "original_assertion_id",
+                        "subject_type",
+                        "slot_type",
+                        "value",
+                        "model_confidence",
+                        "interpretation_basis",
+                        "created_at",
+                        "semantics"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "assertion"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "artifact_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "assertion_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "bbox": {
+                          "additionalProperties": true,
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        },
+                        "block_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "char_end": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "char_start": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "precision": {
+                          "type": "string"
+                        },
+                        "stored_content_record": {
+                          "additionalProperties": true,
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "assertion_id",
+                        "artifact_id",
+                        "block_id",
+                        "page",
+                        "bbox",
+                        "char_start",
+                        "char_end",
+                        "precision",
+                        "created_at",
+                        "stored_content_record"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "evidence"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "artifact_contract_version": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "artifact_sha256": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "document_version_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "manifest_sha256": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "publication_state": {
+                          "type": "string"
+                        },
+                        "recipe_sha256": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "document_version_id",
+                        "artifact_sha256",
+                        "artifact_contract_version",
+                        "manifest_sha256",
+                        "recipe_sha256",
+                        "publication_state",
+                        "created_at"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "content_artifact"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "source_document_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "source_document_id",
+                        "created_at"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "document_version"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "source_sha256": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "source_sha256",
+                        "created_at"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "source_document"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "artifact_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "counters": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "profile_id": {
+                          "type": "string"
+                        },
+                        "profile_version": {
+                          "type": "string"
+                        },
+                        "run_configuration": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "artifact_id",
+                        "profile_id",
+                        "profile_version",
+                        "status",
+                        "run_configuration",
+                        "counters",
+                        "created_at"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "interpretation_run"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ContractReviewDecision"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "review_decision"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ContractReviewSubmissionAttemptV1"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "review_attempt"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ContractLearningCandidateReservationV1"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "learning_reservation"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ContractFactVersionReadV1"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "fact_version"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actor_principal_id": {
+                          "format": "uuid",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "commit_id": {
+                          "format": "uuid",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "created_at": {
+                          "format": "date-time",
+                          "type": "string"
+                        },
+                        "from_version_id": {
+                          "description": "Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version.",
+                          "format": "uuid",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "reason": {
+                          "type": "string"
+                        },
+                        "to_version_id": {
+                          "format": "uuid",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "from_version_id",
+                        "to_version_id",
+                        "reason",
+                        "created_at",
+                        "actor_principal_id",
+                        "commit_id"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "fact_change"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "data": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "input_version_ids": {
+                          "items": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "type": "array",
+                          "uniqueItems": true
+                        },
+                        "producer_available": {
+                          "type": "boolean"
+                        },
+                        "stored_reference": {
+                          "additionalProperties": true,
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "stored_reference",
+                        "input_version_ids",
+                        "producer_available"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "const": "derivation_reference"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "data"
+                  ],
+                  "type": "object"
+                }
+              ]
+            },
+            "maxItems": 2048,
+            "minItems": 1,
+            "type": "array"
+          },
+          "root": {
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "assertion",
+                  "fact_version"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "id"
+            ],
+            "type": "object"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract",
+          "root",
+          "tenant_id",
+          "knowledge_base_id",
+          "completeness",
+          "records",
+          "edges",
+          "gaps"
+        ],
+        "title": "Bounded authorized provenance result v1",
         "type": "object"
       },
       "ContractQualifiedMoneyV1": {
@@ -5194,6 +6908,124 @@
           "event_sha256"
         ],
         "title": "ReviewDecision",
+        "type": "object"
+      },
+      "ContractReviewSubmissionAttemptV1": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "ACCEPT",
+              "CORRECT",
+              "REJECT",
+              "BLOCKED"
+            ]
+          },
+          "assertion_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "authorization_decision_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "contract": {
+            "const": "review-submission-attempt/v1"
+          },
+          "corrected_value": {
+            "additionalProperties": true,
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "event_sha256": {
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "knowledge_base_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "original_assertion_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "ALREADY_DECIDED",
+              "BATCH_REFUSED"
+            ]
+          },
+          "reason_code": {
+            "enum": [
+              "MISREAD_VALUE",
+              "WRONG_REGION",
+              "NOT_IN_SOURCE",
+              "OUT_OF_SCOPE",
+              "EVIDENCE_UNRESOLVED",
+              null
+            ]
+          },
+          "review_batch_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "review_item_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reviewer_comment": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reviewer_principal_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "submitted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contract",
+          "id",
+          "tenant_id",
+          "knowledge_base_id",
+          "review_item_id",
+          "review_batch_id",
+          "original_assertion_id",
+          "reviewer_principal_id",
+          "submitted_at",
+          "event_sha256",
+          "assertion_version",
+          "action",
+          "reason_code",
+          "corrected_value",
+          "evidence",
+          "reviewer_comment",
+          "outcome",
+          "authorization_decision_id"
+        ],
+        "title": "Non-applied review submission v1",
         "type": "object"
       },
       "ContractScopedIdentifierV1": {
@@ -6065,9 +7897,13 @@
     "ContractInterpretationOutputManifest": "https://nebula.local/schemas/interpretation-output-manifest.schema.json",
     "ContractInterpretationResult": "https://nebula.local/schemas/interpretation-result.schema.json",
     "ContractInterpretationResultV2": "https://nebula.local/schemas/interpretation-result-v2.schema.json",
+    "ContractLearningCandidateReservationV1": "https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json",
     "ContractProblemDetails": "https://nebula.local/schemas/problem-details.schema.json",
+    "ContractProvenanceQueryV1": "https://nebula.local/schemas/provenance-query-v1.schema.json",
+    "ContractProvenanceResultV1": "https://nebula.local/schemas/provenance-result-v1.schema.json",
     "ContractQualifiedMoneyV1": "https://nebula.local/schemas/qualified-money-v1.schema.json",
     "ContractReviewDecision": "https://nebula.local/schemas/review-decision.schema.json",
+    "ContractReviewSubmissionAttemptV1": "https://nebula.local/schemas/review-submission-attempt-v1.schema.json",
     "ContractScopedIdentifierV1": "https://nebula.local/schemas/scoped-identifier-v1.schema.json"
   }
 }

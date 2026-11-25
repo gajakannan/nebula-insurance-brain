@@ -1,0 +1,17 @@
+id: migration:f0009-provenance-hooks
+label: F0009 learning reservations, refused review submissions and decision append-only guards (revision 0016, additive)
+path: engine/migrations/versions/0016_f0009_provenance_hooks.py
+notes: Adds the nullable server-owned review_decision.correction_lineage_contract marker (NULL on every pre-F0009 row,
+  stamped 1 by a BEFORE INSERT trigger), uq_review_decision_owner, append-only learning_candidate_reservation and
+  review_submission_attempt tables with composite owner FKs, SECURITY INVOKER guards (reservation must match an effective
+  non-stale CORRECT, its child, reviewer and UTC decision instant; attempt must match its item and an allowed
+  review_task:annotate authorization by audit decision_id), append-only protection for review_decision and a
+  DEFERRABLE INITIALLY DEFERRED trigger requiring each new effective correction's reservation. Downgrade refuses under
+  ACCESS EXCLUSIVE locks while either new table has a row. Implemented in feature run 2026-11-24-08701e37.
+related_nodes:
+- capability:learning-candidate-reservation
+- capability:review-submission-attribution
+- entity:learning-candidate-reservation
+- entity:review-submission-attempt
+- entity:review-decision
+- adr:0080

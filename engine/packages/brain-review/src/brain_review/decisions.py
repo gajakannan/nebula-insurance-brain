@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import UUID, uuid4
 
 from brain_domain.review import (
@@ -36,6 +37,12 @@ class UnresolvedEvidenceRequiresBlocked(Exception):
 
 class InvalidBlockedReasonCode(Exception):
     """BLOCKED is valid only with reason code EVIDENCE_UNRESOLVED."""
+
+
+class ReviewLineageChanged(Exception):
+    """F0009 (PR-L2): the batch's source set changed between authorization and the
+    item locks. Nothing is applied or recorded; the facade audits the failure and
+    the caller resubmits as a fresh operation (sanitized 503)."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,6 +85,11 @@ class ReviewItemRepository(Protocol):
     async def current_assertion_version(self, assertion_id: UUID) -> int: ...
 
     async def save_decision(self, decision: ReviewDecision) -> None: ...
+
+    async def reserve_learning_reference(self, decision: ReviewDecision) -> UUID:
+        """F0009 S0005: stage the one reserved future-learning identity for a new
+        effective correction in the same unit of work. Never commits."""
+        ...
 
     async def create_corrected_assertion(
         self, *, original_assertion_id: UUID, value: dict, evidence: EvidenceLocator | None
@@ -142,6 +154,10 @@ class ReviewDecisionService:
                 stale=True,
                 event_sha256=event_sha256,
                 reason_code=request.reason_code,
+                # F0009 S0002 AC5: the non-applied submission stays attributable.
+                corrected_value=request.corrected_value,
+                evidence=request.evidence_seen,
+                reviewer_comment=request.reviewer_comment,
             )
             await self._repository.save_decision(decision)
             await self._audit.record_decision(decision)
@@ -200,6 +216,78 @@ class ReviewDecisionService:
             reviewer_comment=request.reviewer_comment,
         )
         await self._repository.save_decision(decision)
+        if corrected_assertion_id is not None:
+            # F0009 S0005 AC2: same unit of work; a failure here propagates before
+            # audit/commit and the facade rolls the whole correction back.
+            await self._repository.reserve_learning_reference(decision)
         await self._audit.record_decision(decision)
         await self._repository.mark_item_status(item.id, ReviewItemStatus.DECIDED)
         return DecisionOutcome(decision=decision, applied=True, duplicate=False)
+
+
+AttemptOutcome = Literal["ALREADY_DECIDED", "BATCH_REFUSED"]
+
+
+@dataclass(frozen=True, slots=True)
+class RefusedSubmission:
+    """One nonduplicate submission of a refused batch (F0009 S0002 AC6)."""
+
+    request: DecisionRequest
+    item: ReviewItem
+    event_sha256: str
+    outcome: AttemptOutcome
+
+
+@dataclass(frozen=True, slots=True)
+class RefusedBatch:
+    """Internal tagged result: only refusal records and their audit commit, and the
+    caller then raises its existing sanitized 422. Not an HTTP response."""
+
+    attempt_ids: tuple[UUID, ...]
+
+
+class BatchPreflightRepository(Protocol):
+    async def get_decision_by_event_sha256(
+        self, review_item_id: UUID, event_sha256: str
+    ) -> ReviewDecision | None: ...
+
+    async def has_any_decision(self, review_item_id: UUID) -> bool: ...
+
+
+async def preflight_batch(
+    repository: BatchPreflightRepository,
+    submissions: Sequence[tuple[ReviewItem, DecisionRequest]],
+) -> list[RefusedSubmission]:
+    """Decide, before any effect, whether a batch must be refused (assembly plan
+    Step 3.3-3.4). Replay identity comes only from ReviewDecision rows: a stored
+    refused attempt never short-circuits a request (operator decision 2026-11-24,
+    plan-review PR-H1). Items must already be locked by the caller.
+
+    Returns an empty list for a clean batch. Otherwise every nonduplicate
+    submission is refused: ALREADY_DECIDED where the item carries a distinct
+    decision, BATCH_REFUSED for the rest. Duplicates (an exact prior event) are
+    replays and create no attempt."""
+    pending: list[tuple[ReviewItem, DecisionRequest, str, bool]] = []
+    conflict = False
+    for item, request in submissions:
+        event_sha256 = compute_event_sha256(request)
+        if await repository.get_decision_by_event_sha256(item.id, event_sha256) is not None:
+            continue
+        decided = await repository.has_any_decision(item.id)
+        conflict |= decided
+        pending.append((item, request, event_sha256, decided))
+    if not conflict:
+        return []
+    return [
+        RefusedSubmission(
+            request=request,
+            item=item,
+            event_sha256=event_sha256,
+            outcome="ALREADY_DECIDED" if decided else "BATCH_REFUSED",
+        )
+        for item, request, event_sha256, decided in pending
+    ]
+
+
+def submitted_now() -> datetime:
+    return datetime.now(UTC)

@@ -22,6 +22,9 @@ class FakeReviewItemRepository:
         self.assertion_versions: dict[UUID, int] = {}
         self.corrected_assertions: dict[UUID, dict] = {}
         self.new_items_opened: list[tuple[ReviewItem, int]] = []
+        # F0009: reserved learning identities by decision id, plus a failure switch.
+        self.reservations: dict[UUID, UUID] = {}
+        self.fail_reservation = False
 
     def seed_item(self, item: ReviewItem, *, assertion_version: int | None = None) -> None:
         self.items[item.id] = item
@@ -53,6 +56,14 @@ class FakeReviewItemRepository:
 
     async def save_decision(self, decision: ReviewDecision) -> None:
         self.decisions.setdefault(decision.review_item_id, []).append(decision)
+
+    async def reserve_learning_reference(self, decision: ReviewDecision) -> UUID:
+        if self.fail_reservation:
+            raise RuntimeError("injected reservation failure")
+        assert decision.corrected_assertion_id is not None and not decision.stale
+        assert decision.id not in self.reservations
+        self.reservations[decision.id] = uuid4()
+        return self.reservations[decision.id]
 
     async def create_corrected_assertion(
         self, *, original_assertion_id: UUID, value: dict, evidence: EvidenceLocator | None

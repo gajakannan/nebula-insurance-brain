@@ -1,14 +1,14 @@
 version: 0
-generated_at: '2026-11-24T03:12:45+00:00'
+generated_at: '2026-11-25T05:43:04+00:00'
 summary:
-  total_decisions: 29
+  total_decisions: 32
   by_kind:
     DECISION: 0
     SUPERSEDES: 0
     TRADEOFF: 0
-    WHY: 29
-  resolved_node_count: 14
-  resolved_symbol_count: 25
+    WHY: 32
+  resolved_node_count: 15
+  resolved_symbol_count: 28
   ambiguous_count: 0
 decisions:
 - id: decision:engine-apps-api-src-brain-api-contract-openapi-l12-why
@@ -59,6 +59,20 @@ decisions:
   text: hold the lock from the scan through the new trigger.
   resolved_node: migration:f0008-bitemporal-contract
   resolved_symbol: symbol:migration-f0008-bitemporal-contract:0015-f0008-split-lineage-same-slot.upgrade
+- id: decision:engine-migrations-versions-0016-f0009-provenance-hooks-l295-why
+  file: engine/migrations/versions/0016_f0009_provenance_hooks.py
+  line: 295
+  kind: WHY
+  text: parent-to-child order, held through the install, so no review writer
+  resolved_node: migration:f0009-provenance-hooks
+  resolved_symbol: symbol:migration-f0009-provenance-hooks:0016-f0009-provenance-hooks.upgrade
+- id: decision:engine-migrations-versions-0016-f0009-provenance-hooks-l329-why
+  file: engine/migrations/versions/0016_f0009_provenance_hooks.py
+  line: 329
+  kind: WHY
+  text: ACCESS EXCLUSIVE in a fixed lexical order makes the emptiness check and
+  resolved_node: migration:f0009-provenance-hooks
+  resolved_symbol: symbol:migration-f0009-provenance-hooks:0016-f0009-provenance-hooks.downgrade
 - id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l155-why
   file: engine/packages/brain-contracts/src/brain_contracts/assertions.py
   line: 155
@@ -136,16 +150,23 @@ decisions:
   text: select only the owner columns. AuthX reconciliation runs between
   resolved_node: capability:structural-tenancy-and-entity-identity
   resolved_symbol: symbol:capability-structural-tenancy-and-entity-identity:tenancy.record-owner
-- id: decision:engine-packages-brain-security-src-brain-security-execution-l386-why
+- id: decision:engine-packages-brain-security-src-brain-security-execution-l388-why
   file: engine/packages/brain-security/src/brain_security/execution.py
-  line: 386
+  line: 388
+  kind: WHY
+  text: requirements come from metadata only, so no protected payload is
+  resolved_node: capability:durable-authorization-decisions
+  resolved_symbol: symbol:capability-durable-authorization-decisions:authorization-execution.read
+- id: decision:engine-packages-brain-security-src-brain-security-execution-l405-why
+  file: engine/packages/brain-security/src/brain_security/execution.py
+  line: 405
   kind: WHY
   text: a separate scope read would commit and release the current
   resolved_node: capability:durable-authorization-decisions
   resolved_symbol: symbol:capability-durable-authorization-decisions:authorization-execution.read
-- id: decision:engine-packages-brain-security-src-brain-security-execution-l446-why
+- id: decision:engine-packages-brain-security-src-brain-security-execution-l498-why
   file: engine/packages/brain-security/src/brain_security/execution.py
-  line: 446
+  line: 498
   kind: WHY
   text: source access joins this mutation's UoW. Calling the read
   resolved_node: capability:durable-authorization-decisions

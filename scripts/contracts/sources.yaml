@@ -463,11 +463,123 @@ resources:
   wire_profile: native-compat/v1
   integration_notes: New guard describes shipped flat output. Validate only after
     all source READ checks; sweep every integration/dev stored version before rollout.
-retained_boundaries:
+- name: provenance-query-v1
+  version: '1'
+  id: https://nebula.local/schemas/provenance-query-v1.schema.json
+  source: planning-mds/schemas/provenance-query-v1.schema.json
+  source_sha256_at_design: 18b427498897b67a535cbc0df0000cfc5051c814f89e4ebb73a21573317011cc
+  owner: provenance
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_provenance.service.ProvenanceReader.read
+    path: engine/packages/brain-provenance/src/brain_provenance/service.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-provenance/tests/test_reader.py
+    state: existing
+  - path: engine/packages/brain-domain/tests/test_provenance.py
+    state: existing
+  version_selector: contract is the constant provenance-query/v1; any other marker is refused
+    before discovery.
+  wire_profile: portable-json/v1
+  integration_notes: Trusted internal hosts and tests construct root and anchor. Principal,
+    tenant, grants and actor never come from the wire.
+- name: provenance-result-v1
+  version: '1'
+  id: https://nebula.local/schemas/provenance-result-v1.schema.json
+  source: planning-mds/schemas/provenance-result-v1.schema.json
+  source_sha256_at_design: cbdfad656ca323d19f7ede2191fd11c76268c43bb453981440df7a253e0fd06c
+  owner: provenance
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_provenance.service.ProvenanceReader.read (output guard before audit
+      commit)
+    path: engine/packages/brain-provenance/src/brain_provenance/service.py
+    state: existing
+  - entry_point: brain_api.deps.get_provenance_reader (exported factory; no route registers
+      it)
+    path: engine/apps/api/src/brain_api/deps.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-provenance/tests/test_reader.py
+    state: existing
+  - path: engine/tests/integration/test_f0009_provenance.py
+    state: existing
+  version_selector: contract is the constant provenance-result/v1; node data selects the referenced
+    record schema by kind (closed per-kind edge table, rework 2026-11-24-c32acf46).
+  wire_profile: native-compat/v1
+  integration_notes: Embedded stored source values keep native compatibility; there is no
+    lossy conversion to the portable profile. F0020/F0022/F0023 are future consumers and are
+    not inventoried until they exist.
+- name: learning-candidate-reservation-v1
+  version: '1'
+  id: https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json
+  source: planning-mds/schemas/learning-candidate-reservation-v1.schema.json
+  source_sha256_at_design: 5e7f9c53ba99a40573513ab945eea359819b066db4094917f61570827aa8631c
+  owner: review
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_persistence.repositories.SqlAlchemyReviewItemRepository.reserve_learning_reference
+    path: engine/packages/brain-persistence/src/brain_persistence/repositories.py
+    state: existing
+  - entry_point: brain_persistence.provenance.SqlAlchemyProvenanceRepository.materialize
+    path: engine/packages/brain-persistence/src/brain_persistence/provenance.py
+    state: existing
+  compatibility_tests:
+  - path: engine/tests/integration/test_f0009_corrections.py
+    state: existing
+  version_selector: contract is the constant learning-candidate-reservation/v1.
+  wire_profile: portable-json/v1
+  integration_notes: F0041 may later adopt the identity. No learning processing reads it in
+    F0009.
+- name: review-submission-attempt-v1
+  version: '1'
+  id: https://nebula.local/schemas/review-submission-attempt-v1.schema.json
+  source: planning-mds/schemas/review-submission-attempt-v1.schema.json
+  source_sha256_at_design: a7b684dbc726b27e92eeb026ac3dcb93bd875cdd500bf42a8df0efa0741d9c7c
+  owner: review
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_persistence.repositories.SqlAlchemyReviewItemRepository.record_refused_submission
+    path: engine/packages/brain-persistence/src/brain_persistence/repositories.py
+    state: existing
+  - entry_point: brain_persistence.provenance.SqlAlchemyProvenanceRepository.materialize
+    path: engine/packages/brain-persistence/src/brain_persistence/provenance.py
+    state: existing
+  compatibility_tests:
+  - path: engine/tests/integration/test_f0009_corrections.py
+    state: existing
+  version_selector: contract is the constant review-submission-attempt/v1.
+  wire_profile: native-compat/v1
+  integration_notes: Retains the existing corrected_value acceptance of the review request.
+    Never returned by the legacy review routes.
 - name: review-decision
-  reason: F0001 internal persisted decision schema differs from the HTTP submission
-    body; retain existing review DTO/version and domain/audit logic, not generated
-    CRUD.
+  version: '1'
+  id: https://nebula.local/schemas/review-decision.schema.json
+  source: planning-mds/schemas/review-decision.schema.json
+  source_sha256_at_design: 0ce518dba5cc9e95299287704afd951f23fdddeed9d0d033615f6bcac93bbe3a
+  owner: review
+  disposition: retain-versioned-boundary
+  consumer_entry_points:
+  - entry_point: brain_persistence.provenance.SqlAlchemyProvenanceRepository.materialize (review_decision
+      record data)
+    path: engine/packages/brain-persistence/src/brain_persistence/provenance.py
+    state: existing
+  - entry_point: 'OpenAPI/doc-only: existing review-decision component'
+    path: planning-mds/api/brain-api.yaml
+    state: OpenAPI/doc-only
+  compatibility_tests:
+  - path: engine/apps/api/tests/test_reviews.py
+    state: existing
+  - path: engine/tests/integration/test_f0009_provenance.py
+    state: existing
+  version_selector: Closed $ref dependency of provenance-result-v1 (review_decision record
+    data). The HTTP submission and receipt keep their own DTOs.
+  wire_profile: native-compat/v1
+  integration_notes: Moves from retained_boundaries/openapi_only_resources into resources
+    because a bundled schema now references it. Existing review DTOs, hashing and audit are
+    unchanged; no generated CRUD.
+retained_boundaries:
 - name: authx-kernel
   reason: Internal F0002 server-derived identity/policy carrier, not public validation
     input; no new AuthX model generation or grants.
@@ -480,7 +592,4 @@ retained_boundaries:
 tooling_schemas:
 - schema-bundle-manifest-v1.schema.json
 - schema-conformance-cases-v1.schema.json
-openapi_only_resources:
-- source: planning-mds/schemas/review-decision.schema.json
-  id: https://nebula.local/schemas/review-decision.schema.json
-  disposition: retain-versioned-boundary
+openapi_only_resources: []

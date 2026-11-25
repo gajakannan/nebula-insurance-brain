@@ -17,7 +17,9 @@ from brain_persistence.identity import (
     SqlAlchemyAuthenticationEventSink,
     SqlAlchemyIdentityRepository,
 )
+from brain_persistence.provenance import SqlAlchemyProvenanceRepository
 from brain_persistence.session import make_engine, make_session_factory
+from brain_provenance import ProvenanceReader
 from brain_security.audit import AuthenticationEventSink
 from brain_security.casbin_adapter import CasbinAuthorizationAdapter
 from brain_security.execution import AuthorizationExecution
@@ -192,6 +194,16 @@ async def get_authorization_execution(
     return AuthorizationExecution(
         SqlAlchemyAuthorityStore(session), casbin_adapter, casbin_adapter.release
     )
+
+
+async def get_provenance_reader(
+    session: AsyncSession = Depends(get_db_session),
+    execution: AuthorizationExecution = Depends(get_authorization_execution),
+) -> ProvenanceReader:
+    """F0009: the internal provenance reader over the request's unit of work. The
+    repository and the authorization facade share one session; no route
+    registers this factory yet (F0020 owns public exposure)."""
+    return ProvenanceReader(SqlAlchemyProvenanceRepository(session), execution)
 
 
 def get_content_store() -> ContentArtifactStore:

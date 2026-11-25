@@ -78,5 +78,5 @@ Current membership, parent/classification conjunction, policy/grant revisions an
 
 ## References
 
-- [F0009 PRD](../../features/F0009-provenance-and-human-correction-lineage/PRD.md), [assembly plan](../../features/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md), [contract inventory](../../features/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml)
+- [F0009 PRD](../../features/archive/F0009-provenance-and-human-correction-lineage/PRD.md), [assembly plan](../../features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md), [contract inventory](../../features/archive/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml)
 - [ADR-0010](ADR-0010-provenance-is-mandatory.md), [ADR-0037](ADR-0037-human-corrections-append-they-do-not-rewrite-evidence.md), [ADR-0044](ADR-0044-review-surface-and-approval-contract.md), [ADR-0078](ADR-0078-bitemporal-version-contract-and-close-only-immutability.md), proposed [ADR-0079](ADR-0079-offline-schema-bundle-and-cross-language-conformance.md)

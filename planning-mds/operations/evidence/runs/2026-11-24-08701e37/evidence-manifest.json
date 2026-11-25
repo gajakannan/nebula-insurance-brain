@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "feature_id": "F0009",
+  "feature_slug": "provenance-and-human-correction-lineage",
+  "run_id": "2026-11-24-08701e37",
+  "status": "approved",
+  "recorded_on": "2026-11-24",
+  "contract_version": "2026-07-11",
+  "contract_effective_date": "2026-07-11",
+  "feature_path_at_run_start": "planning-mds/features/F0009-provenance-and-human-correction-lineage",
+  "feature_path_at_closeout": "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage",
+  "feature_state": "Done",
+  "rerun_of": null,
+  "changed_paths": [
+    ".github/workflows/ci-gates.yml",
+    "engine/apps/api/pyproject.toml",
+    "engine/apps/api/src/brain_api/deps.py",
+    "engine/apps/api/src/brain_api/routes/reviews.py",
+    "engine/apps/api/src/brain_api/schemas/review.py",
+    "engine/apps/api/tests/test_f0009_review_compatibility.py",
+    "engine/migrations/versions/0016_f0009_provenance_hooks.py",
+    "engine/packages/brain-contracts/src/brain_contracts/generated/contracts_v1.py",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1/brain-api.openapi.json",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1/learning-candidate-reservation-v1.schema.json",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1/manifest.json",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1/provenance-query-v1.schema.json",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1/provenance-result-v1.schema.json",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1/review-decision.schema.json",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1/review-submission-attempt-v1.schema.json",
+    "engine/packages/brain-contracts/src/brain_contracts/resources/v1/ui-metadata.json",
+    "engine/packages/brain-contracts/tests/test_schema_runtime.py",
+    "engine/packages/brain-domain/src/brain_domain/provenance.py",
+    "engine/packages/brain-domain/tests/test_provenance.py",
+    "engine/packages/brain-persistence/pyproject.toml",
+    "engine/packages/brain-persistence/src/brain_persistence/lineage_contracts.py",
+    "engine/packages/brain-persistence/src/brain_persistence/models.py",
+    "engine/packages/brain-persistence/src/brain_persistence/provenance.py",
+    "engine/packages/brain-persistence/src/brain_persistence/provenance_models.py",
+    "engine/packages/brain-persistence/src/brain_persistence/repositories.py",
+    "engine/packages/brain-provenance",
+    "engine/packages/brain-review/src/brain_review/decisions.py",
+    "engine/packages/brain-review/tests/conftest.py",
+    "engine/packages/brain-review/tests/test_f0009_decisions.py",
+    "engine/packages/brain-security/src/brain_security/execution.py",
+    "engine/packages/brain-security/tests/test_provenance_prepared_read.py",
+    "engine/pyproject.toml",
+    "engine/tests/fixtures/f0009_provenance.py",
+    "engine/tests/integration/test_f0009_corrections.py",
+    "engine/tests/integration/test_f0009_migration.py",
+    "engine/tests/integration/test_f0009_provenance.py",
+    "engine/tests/integration/test_f0009_temporal_lineage.py",
+    "engine/tests/integration/test_temporal_migration.py",
+    "engine/uv.lock",
+    "experience/src/generated/contracts/v1/brain-api.openapi.json",
+    "experience/src/generated/contracts/v1/learning-candidate-reservation-v1.schema.json",
+    "experience/src/generated/contracts/v1/manifest.json",
+    "experience/src/generated/contracts/v1/provenance-query-v1.schema.json",
+    "experience/src/generated/contracts/v1/provenance-result-v1.schema.json",
+    "experience/src/generated/contracts/v1/review-decision.schema.json",
+    "experience/src/generated/contracts/v1/review-submission-attempt-v1.schema.json",
+    "experience/src/generated/contracts/v1/ui-metadata.json",
+    "planning-mds/BLUEPRINT.md",
+    "planning-mds/architecture/data-model.md",
+    "planning-mds/architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md",
+    "planning-mds/architecture/feature-assembly-plan.md",
+    "planning-mds/domain/glossary.md",
+    "planning-mds/examples/README.md",
+    "planning-mds/features/F0009-provenance-and-human-correction-lineage",
+    "planning-mds/features/REGISTRY.md",
+    "planning-mds/features/ROADMAP.md",
+    "planning-mds/features/STORY-INDEX.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/GETTING-STARTED.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/PRD.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/README.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/STATUS.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/acceptance-criteria-checklist.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/contract-examples.json",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/migration-design.sql",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/personas.md",
+    "planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md",
+    "planning-mds/kg-source/bindings/f0009-planning.yaml",
+    "planning-mds/kg-source/features/F0009.yaml",
+    "planning-mds/kg-source/nodes/capabilities/learning-candidate-reservation.yaml",
+    "planning-mds/kg-source/nodes/capabilities/provenance-lineage.yaml",
+    "planning-mds/kg-source/nodes/capabilities/review-submission-attribution.yaml",
+    "planning-mds/kg-source/nodes/migrations/f0009-provenance-hooks.yaml",
+    "planning-mds/knowledge-graph/canonical-nodes.yaml",
+    "planning-mds/knowledge-graph/code-index.yaml",
+    "planning-mds/knowledge-graph/coverage-report.yaml",
+    "planning-mds/knowledge-graph/decisions-index.yaml",
+    "planning-mds/knowledge-graph/feature-mappings.yaml",
+    "planning-mds/knowledge-graph/symbol-index.yaml",
+    "planning-mds/knowledge-graph/unbound-but-referenced.yaml",
+    "planning-mds/operations/evidence/features/F0009-provenance-and-human-correction-lineage/latest-run.json",
+    "planning-mds/operations/evidence/runs/2026-11-24-08701e37",
+    "planning-mds/schemas/provenance-result-v1.schema.json",
+    "schemas/contracts/v1/brain-api.openapi.json",
+    "schemas/contracts/v1/learning-candidate-reservation-v1.schema.json",
+    "schemas/contracts/v1/manifest.json",
+    "schemas/contracts/v1/provenance-query-v1.schema.json",
+    "schemas/contracts/v1/provenance-result-v1.schema.json",
+    "schemas/contracts/v1/review-decision.schema.json",
+    "schemas/contracts/v1/review-submission-attempt-v1.schema.json",
+    "schemas/contracts/v1/ui-metadata.json",
+    "scripts/contracts/case-provenance.json",
+    "scripts/contracts/cases.json",
+    "scripts/contracts/sources.yaml"
+  ],
+  "scm": {
+    "base_ref": "3729dbee528ce27a3a939b24abe5b8efca3aeb9e",
+    "head_ref": "feature/f0009-provenance-and-human-correction-lineage",
+    "diff_artifact": "artifacts/diffs/changed-files.txt"
+  },
+  "runtime_bearing": true,
+  "deployment_config_changed": true,
+  "frontend_in_scope": true,
+  "security_sensitive_scope": true,
+  "required_roles": [
+    "Quality Engineer",
+    "Code Reviewer",
+    "Security Reviewer",
+    "DevOps",
+    "Architect"
+  ],
+  "gate_results": {
+    "assembly_plan_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g0-assembly-plan-validation.md"
+    },
+    "runtime_preflight": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g1-runtime-preflight.md"
+    },
+    "self_review": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "g2-self-review.md"
+    },
+    "deployability": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "deployability-check.md"
+    },
+    "approval": {
+      "required": true,
+      "result": "APPROVED",
+      "artifact": "gate-decisions.md",
+      "mitigation_tokens": []
+    },
+    "signoff": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "signoff-ledger.md"
+    },
+    "candidate_validation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "feature-action-execution.md"
+    },
+    "kg_reconciliation": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "kg-reconciliation.md"
+    },
+    "pm_closeout": {
+      "required": true,
+      "result": "APPROVED",
+      "artifact": "pm-closeout.md"
+    },
+    "tracker_sync": {
+      "required": true,
+      "result": "PASS",
+      "artifact": "lifecycle-gates.log"
+    }
+  },
+  "files": {
+    "readme": "README.md",
+    "action_context": "action-context.md",
+    "artifact_trace": "artifact-trace.md",
+    "gate_decisions": "gate-decisions.md",
+    "commands_log": "commands.log",
+    "lifecycle_gates_log": "lifecycle-gates.log",
+    "assembly_plan_validation": "g0-assembly-plan-validation.md",
+    "runtime_preflight": "g1-runtime-preflight.md",
+    "self_review": "g2-self-review.md",
+    "deployability": "deployability-check.md",
+    "test_plan": "test-plan.md",
+    "test_execution_report": "test-execution-report.md",
+    "coverage_report": "coverage-report.md",
+    "code_review_report": "code-review-report.md",
+    "security_review_report": "security-review-report.md",
+    "architect_implementation_review": "architect-implementation-review.md",
+    "signoff_ledger": "signoff-ledger.md",
+    "feature_action_execution": "feature-action-execution.md",
+    "kg_reconciliation": "kg-reconciliation.md",
+    "pm_closeout": "pm-closeout.md",
+    "token_usage": "token-usage.json"
+  },
+  "role_results": {
+    "Quality Engineer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "test-plan.md",
+        "test-execution-report.md",
+        "coverage-report.md"
+      ],
+      "verdict_artifact": "test-execution-report.md"
+    },
+    "DevOps": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g1-runtime-preflight.md",
+        "deployability-check.md"
+      ],
+      "verdict_artifact": "deployability-check.md"
+    },
+    "Architect": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "g0-assembly-plan-validation.md",
+        "architect-implementation-review.md"
+      ],
+      "verdict_artifact": "architect-implementation-review.md"
+    },
+    "Code Reviewer": {
+      "required": true,
+      "result": "APPROVED",
+      "required_artifacts": [
+        "code-review-report.md"
+      ],
+      "verdict_artifact": "code-review-report.md"
+    },
+    "Security Reviewer": {
+      "required": true,
+      "result": "PASS",
+      "required_artifacts": [
+        "security-review-report.md"
+      ],
+      "verdict_artifact": "security-review-report.md"
+    }
+  },
+  "token_usage": {
+    "artifact": "token-usage.json",
+    "agent_tool": "claude-code",
+    "turns": 366,
+    "context_tokens": 175788832,
+    "uncached_input_tokens": 740,
+    "cached_input_tokens": 175026913,
+    "cache_creation_input_tokens": 761179,
+    "cache_creation_1h_input_tokens": 761179,
+    "cache_creation_5m_input_tokens": 0,
+    "output_tokens": 356516,
+    "cache_hit_ratio": 0.9957,
+    "compactions": 0
+  },
+  "security_scans": {
+    "dependency": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/scan-summary.json",
+      "waiver": null,
+      "note": "pip-audit 2.10.1 over frozen engine (75) and neuron (171) locks: 0 vulns; pnpm audit experience: 0 at all levels"
+    },
+    "secrets": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/secrets/run.log",
+      "waiver": null,
+      "note": "gitleaks v8.30.1 filesystem mode over 107 changed files (4.59 MB); framework script needed `-- --no-git` (follow-up)"
+    },
+    "sast": {
+      "ran": true,
+      "result": "findings-triaged",
+      "artifact": "artifacts/security/sast/final-timeout60/results.json",
+      "waiver": null,
+      "note": "semgrep 200 offline rules, 29 targets, 0 errors: 4 avoid-sqlalchemy-text in migration 0016, constant identifiers only; accepted as false positive by Security (security-review-report.md)"
+    },
+    "dast": {
+      "ran": true,
+      "result": "clean",
+      "artifact": "artifacts/security/dast/api-scan.json",
+      "waiver": null,
+      "note": "ZAP API scan of candidate API OpenAPI: 0 fail, 0 warn, 119 pass"
+    }
+  },
+  "omissions": [],
+  "waivers": {},
+  "global_evidence_refs": {},
+  "action": "feature",
+  "run_scope": "feature-completion"
+}

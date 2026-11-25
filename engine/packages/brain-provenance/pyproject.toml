@@ -1,0 +1,37 @@
+[project]
+name = "brain-provenance"
+version = "0.1.0"
+description = "Internal metadata-first provenance and correction-lineage reader (F0009, ADR-0080)."
+requires-python = ">=3.13"
+dependencies = [
+  "brain-contracts",
+  "brain-domain",
+  "brain-security",
+]
+
+[tool.uv.sources]
+brain-contracts = { workspace = true }
+brain-domain = { workspace = true }
+brain-security = { workspace = true }
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "pytest-asyncio>=0.24",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+brain_provenance = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+asyncio_mode = "auto"

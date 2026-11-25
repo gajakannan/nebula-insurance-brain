@@ -534,6 +534,21 @@ class RunConfiguration(BaseModel):
     schema_hash: str
 
 
+class ContractLearningCandidateReservationV1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    contract: Literal['learning-candidate-reservation/v1']
+    corrected_assertion_id: str
+    id: str
+    knowledge_base_id: str
+    original_assertion_id: str
+    reserved_at: str
+    review_decision_id: str
+    reviewer_principal_id: str
+    tenant_id: str
+
+
 class ContractProblemDetails(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -545,6 +560,699 @@ class ContractProblemDetails(BaseModel):
     title: str
     traceId: Annotated[str, Field(min_length=1)]
     type: str
+
+
+class Anchor(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    type: Literal['fact_slot', 'review_task', 'content_artifact']
+
+
+class Root(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class ContractProvenanceQueryV1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    anchor: Anchor
+    contract: Literal['provenance-query/v1']
+    root: Root
+
+
+class Source(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Target(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Edges(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['corrected_from']
+    source: Source
+    target: Target
+
+
+class Source1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class Target1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Edges1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['supported_by']
+    source: Source1
+    target: Target1
+
+
+class Source2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Edges2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['ending_evidence']
+    source: Source2
+    target: Target1
+
+
+class Source3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Target3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Edges3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['located_in']
+    source: Source3
+    target: Target3
+
+
+class Source4(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Target4(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Edges4(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['interpreted_in']
+    source: Source4
+    target: Target4
+
+
+class Source5(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Target5(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Edges5(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['interprets']
+    source: Source5
+    target: Target5
+
+
+class Source6(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Target6(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['document_version']
+
+
+class Edges6(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['artifact_of']
+    source: Source6
+    target: Target6
+
+
+class Source7(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['document_version']
+
+
+class Target7(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['source_document']
+
+
+class Edges7(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['version_of']
+    source: Source7
+    target: Target7
+
+
+class Source8(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision', 'review_attempt']
+
+
+class Target8(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Edges8(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['reviews']
+    source: Source8
+    target: Target8
+
+
+class Source9(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Edges9(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['created_assertion']
+    source: Source9
+    target: Target8
+
+
+class Target10(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['learning_reservation']
+
+
+class Edges10(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['reserved_learning']
+    source: Source9
+    target: Target10
+
+
+class Source11(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target11(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Edges11(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['recorded_decision']
+    source: Source11
+    target: Target11
+
+
+class Target12(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Edges12(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['split_of']
+    source: Source11
+    target: Target12
+
+
+class Source13(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_change']
+
+
+class Edges13(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['changed_from']
+    source: Source13
+    target: Target12
+
+
+class Edges14(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['changed_to']
+    source: Source13
+    target: Target12
+
+
+class Source15(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target15(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Edges15(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['attested_by']
+    source: Source15
+    target: Target15
+
+
+class Source16(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class Target16(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['derivation_reference']
+
+
+class Edges16(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['derived_from']
+    source: Source16
+    target: Target16
+
+
+class Record1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal[
+        'assertion',
+        'evidence',
+        'content_artifact',
+        'document_version',
+        'source_document',
+        'interpretation_run',
+        'review_decision',
+        'review_attempt',
+        'learning_reservation',
+        'fact_version',
+        'fact_change',
+        'derivation_reference',
+    ]
+
+
+class Gap(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    field: str
+    reason: Literal[
+        'LEGACY_UNQUALIFIED', 'METADATA_UNAVAILABLE', 'DERIVATION_UNAVAILABLE'
+    ]
+    record: Record1
+
+
+class Data1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_id: str
+    assertion_id: str
+    bbox: dict[str, Any] | None
+    block_id: str | None
+    char_end: int | None
+    char_start: int | None
+    created_at: str
+    page: int | None
+    precision: str
+    stored_content_record: dict[str, Any] | None
+
+
+class Records1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data1
+    id: str
+    kind: Literal['evidence']
+
+
+class Data2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_contract_version: int | None
+    artifact_sha256: str
+    created_at: str
+    document_version_id: str
+    manifest_sha256: str | None
+    publication_state: str
+    recipe_sha256: str | None
+
+
+class Records2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data2
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Data3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    source_document_id: str
+
+
+class Records3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data3
+    id: str
+    kind: Literal['document_version']
+
+
+class Data4(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    source_sha256: str
+
+
+class Records4(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data4
+    id: str
+    kind: Literal['source_document']
+
+
+class Data5(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_id: str
+    counters: dict[str, Any]
+    created_at: str
+    profile_id: str
+    profile_version: str
+    run_configuration: dict[str, Any]
+    status: str
+
+
+class Records5(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data5
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Records8(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractLearningCandidateReservationV1
+    id: str
+    kind: Literal['learning_reservation']
+
+
+class Data6(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    actor_principal_id: str | None
+    commit_id: str | None
+    created_at: str
+    from_version_id: Annotated[
+        str | None,
+        Field(
+            description="Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."
+        ),
+    ]
+    reason: str
+    to_version_id: str
+
+
+class Records10(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data6
+    id: str
+    kind: Literal['fact_change']
+
+
+class Data7(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    input_version_ids: list[str]
+    producer_available: bool
+    stored_reference: dict[str, Any]
+
+
+class Records11(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data7
+    id: str
+    kind: Literal['derivation_reference']
+
+
+class SelectorItem(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    type: str
+
+
+class Evidence1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    part: str | None = None
+    precision: Literal[
+        'exact-span', 'table-cell', 'block', 'page', 'document', 'unresolved'
+    ]
+    selector: Annotated[
+        list[SelectorItem] | None,
+        Field(
+            description='W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points.'
+        ),
+    ] = None
+    source: str
+    unresolved_reason: str | None = None
+
+
+class ContractReviewDecision(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    action: Annotated[
+        Literal['ACCEPT', 'CORRECT', 'REJECT', 'BLOCKED'],
+        Field(
+            description='ACCEPT, CORRECT, and REJECT are adjudications. BLOCKED is not: it records that the evidence could not be anchored, produces no assertion, and leaves the review item open (ADR-0058).'
+        ),
+    ]
+    assertion_version: Annotated[int, Field(ge=1)]
+    corrected_assertion_id: str | None = None
+    corrected_value: dict[str, Any] | None = None
+    decided_at: str
+    event_sha256: Annotated[
+        str,
+        Field(
+            description='Hash of the submitted decision event; the idempotency key for resubmission of a batch.',
+            pattern='^[a-f0-9]{64}$',
+        ),
+    ]
+    evidence: Annotated[
+        Evidence1 | None,
+        Field(
+            description='The locator the reviewer actually saw, at the precision it was shown, carried onto any assertion this decision creates.'
+        ),
+    ] = None
+    id: str
+    reason_code: Annotated[
+        Literal[
+            'MISREAD_VALUE',
+            'WRONG_REGION',
+            'NOT_IN_SOURCE',
+            'OUT_OF_SCOPE',
+            'EVIDENCE_UNRESOLVED',
+        ]
+        | None,
+        Field(
+            description='Required for CORRECT, REJECT, and BLOCKED. EVIDENCE_UNRESOLVED is the only reason code valid with BLOCKED.'
+        ),
+    ] = None
+    review_batch_id: str
+    review_item_id: str
+    reviewer_comment: str | None = None
+    reviewer_principal_id: Annotated[
+        str,
+        Field(
+            description='Resolved from the authenticated session, never from the request payload (ADR-0049, ADR-0057).'
+        ),
+    ]
+    stale: bool
+
+
+class ContractReviewSubmissionAttemptV1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    action: Literal['ACCEPT', 'CORRECT', 'REJECT', 'BLOCKED']
+    assertion_version: Annotated[int, Field(ge=1)]
+    authorization_decision_id: str
+    contract: Literal['review-submission-attempt/v1']
+    corrected_value: dict[str, Any] | None
+    event_sha256: Annotated[str, Field(pattern='^[a-f0-9]{64}$')]
+    evidence: dict[str, Any] | None
+    id: str
+    knowledge_base_id: str
+    original_assertion_id: str
+    outcome: Literal['ALREADY_DECIDED', 'BATCH_REFUSED']
+    reason_code: (
+        Literal[
+            'MISREAD_VALUE',
+            'WRONG_REGION',
+            'NOT_IN_SOURCE',
+            'OUT_OF_SCOPE',
+            'EVIDENCE_UNRESOLVED',
+        ]
+        | None
+    )
+    review_batch_id: str
+    review_item_id: str
+    reviewer_comment: str | None
+    reviewer_principal_id: str
+    submitted_at: str
+    tenant_id: str
 
 
 class AdditionalProperties(RootModel[Any]):
@@ -3770,7 +4478,7 @@ class TypeModel5(RootModel[Literal['money']]):
     root: Literal['money']
 
 
-class Evidence1(BaseModel):
+class Evidence2(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -3782,7 +4490,7 @@ class NameValue(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    evidence: Evidence1
+    evidence: Evidence2
     name_kind: Annotated[
         str | None, Field(pattern='^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$')
     ] = None
@@ -4858,6 +5566,30 @@ class AdditionalPropertiesModel3(RootModel[Any]):
     root: Any
 
 
+class ContractModel(RootModel[Literal['learning-candidate-reservation/v1']]):
+    root: Literal['learning-candidate-reservation/v1']
+
+
+class CorrectedAssertionId(RootModel[str]):
+    root: str
+
+
+class OriginalAssertionId(RootModel[str]):
+    root: str
+
+
+class ReservedAt(RootModel[str]):
+    root: str
+
+
+class ReviewDecisionIdModel(RootModel[str]):
+    root: str
+
+
+class ReviewerPrincipalId(RootModel[str]):
+    root: str
+
+
 class Code(RootModel[str]):
     root: Annotated[str, Field(pattern='^[a-z][a-z0-9_]*$')]
 
@@ -4883,6 +5615,2464 @@ class TraceId(RootModel[str]):
 
 
 class TypeModel8(RootModel[str]):
+    root: str
+
+
+class TypeModel9(RootModel[Literal['fact_slot', 'review_task', 'content_artifact']]):
+    root: Literal['fact_slot', 'review_task', 'content_artifact']
+
+
+class ContractModel1(RootModel[Literal['provenance-query/v1']]):
+    root: Literal['provenance-query/v1']
+
+
+class KindModel9(RootModel[Literal['assertion', 'fact_version']]):
+    root: Literal['assertion', 'fact_version']
+
+
+class Completeness(RootModel[Literal['COMPLETE', 'INCOMPLETE']]):
+    root: Literal['COMPLETE', 'INCOMPLETE']
+
+
+class ContractModel2(RootModel[Literal['provenance-result/v1']]):
+    root: Literal['provenance-result/v1']
+
+
+class Source17(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Target17(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Edges17(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['corrected_from']
+    source: Source17
+    target: Target17
+
+
+class Source18(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class Target18(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Edges18(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['supported_by']
+    source: Source18
+    target: Target18
+
+
+class Source19(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Edges19(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['ending_evidence']
+    source: Source19
+    target: Target18
+
+
+class Source20(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Target20(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Edges20(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['located_in']
+    source: Source20
+    target: Target20
+
+
+class Source21(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Target21(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Edges21(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['interpreted_in']
+    source: Source21
+    target: Target21
+
+
+class Source22(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Target22(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Edges22(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['interprets']
+    source: Source22
+    target: Target22
+
+
+class Source23(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Target23(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['document_version']
+
+
+class Edges23(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['artifact_of']
+    source: Source23
+    target: Target23
+
+
+class Source24(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['document_version']
+
+
+class Target24(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['source_document']
+
+
+class Edges24(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['version_of']
+    source: Source24
+    target: Target24
+
+
+class Source25(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision', 'review_attempt']
+
+
+class Target25(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Edges25(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['reviews']
+    source: Source25
+    target: Target25
+
+
+class Source26(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Edges26(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['created_assertion']
+    source: Source26
+    target: Target25
+
+
+class Target27(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['learning_reservation']
+
+
+class Edges27(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['reserved_learning']
+    source: Source26
+    target: Target27
+
+
+class Source28(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target28(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Edges28(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['recorded_decision']
+    source: Source28
+    target: Target28
+
+
+class Target29(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Edges29(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['split_of']
+    source: Source28
+    target: Target29
+
+
+class Source30(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_change']
+
+
+class Edges30(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['changed_from']
+    source: Source30
+    target: Target29
+
+
+class Edges31(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['changed_to']
+    source: Source30
+    target: Target29
+
+
+class Source32(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target32(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Edges32(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['attested_by']
+    source: Source32
+    target: Target32
+
+
+class Source33(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class Target33(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['derivation_reference']
+
+
+class Edges33(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['derived_from']
+    source: Source33
+    target: Target33
+
+
+class EdgesModel(
+    RootModel[
+        list[
+            Edges17
+            | Edges18
+            | Edges19
+            | Edges20
+            | Edges21
+            | Edges22
+            | Edges23
+            | Edges24
+            | Edges25
+            | Edges26
+            | Edges27
+            | Edges28
+            | Edges29
+            | Edges30
+            | Edges31
+            | Edges32
+            | Edges33
+        ]
+    ]
+):
+    root: Annotated[
+        list[
+            Edges17
+            | Edges18
+            | Edges19
+            | Edges20
+            | Edges21
+            | Edges22
+            | Edges23
+            | Edges24
+            | Edges25
+            | Edges26
+            | Edges27
+            | Edges28
+            | Edges29
+            | Edges30
+            | Edges31
+            | Edges32
+            | Edges33
+        ],
+        Field(
+            description="Every edge reads '<source> <kind> <target>'. Each kind admits only the endpoint record kinds listed in its branch. Edges are unique by (kind, source, target); domain checks additionally require both endpoints in records and every non-root record to be connected to the root (ignoring direction). Directional ancestry kinds (corrected_from, split_of) must be acyclic.",
+            max_length=8192,
+        ),
+    ]
+
+
+class Source34(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Target34(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Items1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['corrected_from']
+    source: Source34
+    target: Target34
+
+
+class Source35(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class Target35(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Items2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['supported_by']
+    source: Source35
+    target: Target35
+
+
+class Source36(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Items3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['ending_evidence']
+    source: Source36
+    target: Target35
+
+
+class Source37(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Target37(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Items4(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['located_in']
+    source: Source37
+    target: Target37
+
+
+class Source38(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Target38(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Items5(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['interpreted_in']
+    source: Source38
+    target: Target38
+
+
+class Source39(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Target39(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Items6(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['interprets']
+    source: Source39
+    target: Target39
+
+
+class Source40(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Target40(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['document_version']
+
+
+class Items7(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['artifact_of']
+    source: Source40
+    target: Target40
+
+
+class Source41(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['document_version']
+
+
+class Target41(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['source_document']
+
+
+class Items8(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['version_of']
+    source: Source41
+    target: Target41
+
+
+class Source42(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision', 'review_attempt']
+
+
+class Target42(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Items9(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['reviews']
+    source: Source42
+    target: Target42
+
+
+class Source43(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Items10(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['created_assertion']
+    source: Source43
+    target: Target42
+
+
+class Target44(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['learning_reservation']
+
+
+class Items11(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['reserved_learning']
+    source: Source43
+    target: Target44
+
+
+class Source45(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target45(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Items12(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['recorded_decision']
+    source: Source45
+    target: Target45
+
+
+class Target46(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Items13(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['split_of']
+    source: Source45
+    target: Target46
+
+
+class Source47(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_change']
+
+
+class Items14(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['changed_from']
+    source: Source47
+    target: Target46
+
+
+class Items15(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['changed_to']
+    source: Source47
+    target: Target46
+
+
+class Source49(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target49(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Items16(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['attested_by']
+    source: Source49
+    target: Target49
+
+
+class Source50(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class Target50(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['derivation_reference']
+
+
+class Items17(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['derived_from']
+    source: Source50
+    target: Target50
+
+
+class ItemsModel28(
+    RootModel[
+        Items1
+        | Items2
+        | Items3
+        | Items4
+        | Items5
+        | Items6
+        | Items7
+        | Items8
+        | Items9
+        | Items10
+        | Items11
+        | Items12
+        | Items13
+        | Items14
+        | Items15
+        | Items16
+        | Items17
+    ]
+):
+    root: (
+        Items1
+        | Items2
+        | Items3
+        | Items4
+        | Items5
+        | Items6
+        | Items7
+        | Items8
+        | Items9
+        | Items10
+        | Items11
+        | Items12
+        | Items13
+        | Items14
+        | Items15
+        | Items16
+        | Items17
+    )
+
+
+class Source51(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Target51(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Field0Model50(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['corrected_from']
+    source: Source51
+    target: Target51
+
+
+class KindModel10(RootModel[Literal['corrected_from']]):
+    root: Literal['corrected_from']
+
+
+class KindModel11(RootModel[Literal['assertion']]):
+    root: Literal['assertion']
+
+
+class Source52(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class Target52(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Field1Model28(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['supported_by']
+    source: Source52
+    target: Target52
+
+
+class KindModel12(RootModel[Literal['supported_by']]):
+    root: Literal['supported_by']
+
+
+class KindModel13(RootModel[Literal['assertion', 'fact_version']]):
+    root: Literal['assertion', 'fact_version']
+
+
+class KindModel14(RootModel[Literal['evidence']]):
+    root: Literal['evidence']
+
+
+class Source53(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Target53(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['learning_reservation']
+
+
+class Field10(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['reserved_learning']
+    source: Source53
+    target: Target53
+
+
+class KindModel15(RootModel[Literal['reserved_learning']]):
+    root: Literal['reserved_learning']
+
+
+class KindModel16(RootModel[Literal['review_decision']]):
+    root: Literal['review_decision']
+
+
+class KindModel17(RootModel[Literal['learning_reservation']]):
+    root: Literal['learning_reservation']
+
+
+class Source54(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target54(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Field11(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['recorded_decision']
+    source: Source54
+    target: Target54
+
+
+class KindModel18(RootModel[Literal['recorded_decision']]):
+    root: Literal['recorded_decision']
+
+
+class KindModel19(RootModel[Literal['fact_version']]):
+    root: Literal['fact_version']
+
+
+class KindModel20(RootModel[Literal['review_decision']]):
+    root: Literal['review_decision']
+
+
+class Target55(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Field12(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['split_of']
+    source: Source54
+    target: Target55
+
+
+class KindModel21(RootModel[Literal['split_of']]):
+    root: Literal['split_of']
+
+
+class KindModel22(RootModel[Literal['fact_version']]):
+    root: Literal['fact_version']
+
+
+class Source56(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_change']
+
+
+class Field13(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['changed_from']
+    source: Source56
+    target: Target55
+
+
+class KindModel23(RootModel[Literal['changed_from']]):
+    root: Literal['changed_from']
+
+
+class KindModel24(RootModel[Literal['fact_change']]):
+    root: Literal['fact_change']
+
+
+class KindModel25(RootModel[Literal['fact_version']]):
+    root: Literal['fact_version']
+
+
+class Field14(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['changed_to']
+    source: Source56
+    target: Target55
+
+
+class KindModel26(RootModel[Literal['changed_to']]):
+    root: Literal['changed_to']
+
+
+class KindModel27(RootModel[Literal['fact_change']]):
+    root: Literal['fact_change']
+
+
+class KindModel28(RootModel[Literal['fact_version']]):
+    root: Literal['fact_version']
+
+
+class Source58(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target58(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Field15(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['attested_by']
+    source: Source58
+    target: Target58
+
+
+class KindModel29(RootModel[Literal['attested_by']]):
+    root: Literal['attested_by']
+
+
+class KindModel30(RootModel[Literal['fact_version']]):
+    root: Literal['fact_version']
+
+
+class KindModel31(RootModel[Literal['content_artifact']]):
+    root: Literal['content_artifact']
+
+
+class Source59(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion', 'fact_version']
+
+
+class Target59(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['derivation_reference']
+
+
+class Field16(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['derived_from']
+    source: Source59
+    target: Target59
+
+
+class KindModel32(RootModel[Literal['derived_from']]):
+    root: Literal['derived_from']
+
+
+class KindModel33(RootModel[Literal['assertion', 'fact_version']]):
+    root: Literal['assertion', 'fact_version']
+
+
+class KindModel34(RootModel[Literal['derivation_reference']]):
+    root: Literal['derivation_reference']
+
+
+class Source60(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['fact_version']
+
+
+class Target60(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Field2Model8(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['ending_evidence']
+    source: Source60
+    target: Target60
+
+
+class KindModel35(RootModel[Literal['ending_evidence']]):
+    root: Literal['ending_evidence']
+
+
+class KindModel36(RootModel[Literal['fact_version']]):
+    root: Literal['fact_version']
+
+
+class KindModel37(RootModel[Literal['evidence']]):
+    root: Literal['evidence']
+
+
+class Source61(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['evidence']
+
+
+class Target61(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Field3Model3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['located_in']
+    source: Source61
+    target: Target61
+
+
+class KindModel38(RootModel[Literal['located_in']]):
+    root: Literal['located_in']
+
+
+class KindModel39(RootModel[Literal['evidence']]):
+    root: Literal['evidence']
+
+
+class KindModel40(RootModel[Literal['content_artifact']]):
+    root: Literal['content_artifact']
+
+
+class Source62(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Target62(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Field4Model1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['interpreted_in']
+    source: Source62
+    target: Target62
+
+
+class KindModel41(RootModel[Literal['interpreted_in']]):
+    root: Literal['interpreted_in']
+
+
+class KindModel42(RootModel[Literal['assertion']]):
+    root: Literal['assertion']
+
+
+class KindModel43(RootModel[Literal['interpretation_run']]):
+    root: Literal['interpretation_run']
+
+
+class Source63(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Target63(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Field5Model1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['interprets']
+    source: Source63
+    target: Target63
+
+
+class KindModel44(RootModel[Literal['interprets']]):
+    root: Literal['interprets']
+
+
+class KindModel45(RootModel[Literal['interpretation_run']]):
+    root: Literal['interpretation_run']
+
+
+class KindModel46(RootModel[Literal['content_artifact']]):
+    root: Literal['content_artifact']
+
+
+class Source64(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Target64(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['document_version']
+
+
+class Field6Model(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['artifact_of']
+    source: Source64
+    target: Target64
+
+
+class KindModel47(RootModel[Literal['artifact_of']]):
+    root: Literal['artifact_of']
+
+
+class KindModel48(RootModel[Literal['content_artifact']]):
+    root: Literal['content_artifact']
+
+
+class KindModel49(RootModel[Literal['document_version']]):
+    root: Literal['document_version']
+
+
+class Source65(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['document_version']
+
+
+class Target65(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['source_document']
+
+
+class Field7Model(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['version_of']
+    source: Source65
+    target: Target65
+
+
+class KindModel50(RootModel[Literal['version_of']]):
+    root: Literal['version_of']
+
+
+class KindModel51(RootModel[Literal['document_version']]):
+    root: Literal['document_version']
+
+
+class KindModel52(RootModel[Literal['source_document']]):
+    root: Literal['source_document']
+
+
+class Source66(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision', 'review_attempt']
+
+
+class Target66(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['assertion']
+
+
+class Field8Model(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['reviews']
+    source: Source66
+    target: Target66
+
+
+class KindModel53(RootModel[Literal['reviews']]):
+    root: Literal['reviews']
+
+
+class KindModel54(RootModel[Literal['review_decision', 'review_attempt']]):
+    root: Literal['review_decision', 'review_attempt']
+
+
+class KindModel55(RootModel[Literal['assertion']]):
+    root: Literal['assertion']
+
+
+class Source67(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    id: str
+    kind: Literal['review_decision']
+
+
+class Field9(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    kind: Literal['created_assertion']
+    source: Source67
+    target: Target66
+
+
+class KindModel56(RootModel[Literal['created_assertion']]):
+    root: Literal['created_assertion']
+
+
+class KindModel57(RootModel[Literal['review_decision']]):
+    root: Literal['review_decision']
+
+
+class KindModel58(RootModel[Literal['assertion']]):
+    root: Literal['assertion']
+
+
+class Gap1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    field: str
+    reason: Literal[
+        'LEGACY_UNQUALIFIED', 'METADATA_UNAVAILABLE', 'DERIVATION_UNAVAILABLE'
+    ]
+    record: Record1
+
+
+class Gaps(RootModel[list[Gap1]]):
+    root: list[Gap1]
+
+
+class ItemsModel29(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    field: str
+    reason: Literal[
+        'LEGACY_UNQUALIFIED', 'METADATA_UNAVAILABLE', 'DERIVATION_UNAVAILABLE'
+    ]
+    record: Record1
+
+
+class FieldModel1(RootModel[str]):
+    root: str
+
+
+class ReasonModel6(
+    RootModel[
+        Literal['LEGACY_UNQUALIFIED', 'METADATA_UNAVAILABLE', 'DERIVATION_UNAVAILABLE']
+    ]
+):
+    root: Literal[
+        'LEGACY_UNQUALIFIED', 'METADATA_UNAVAILABLE', 'DERIVATION_UNAVAILABLE'
+    ]
+
+
+class KindModel59(
+    RootModel[
+        Literal[
+            'assertion',
+            'evidence',
+            'content_artifact',
+            'document_version',
+            'source_document',
+            'interpretation_run',
+            'review_decision',
+            'review_attempt',
+            'learning_reservation',
+            'fact_version',
+            'fact_change',
+            'derivation_reference',
+        ]
+    ]
+):
+    root: Literal[
+        'assertion',
+        'evidence',
+        'content_artifact',
+        'document_version',
+        'source_document',
+        'interpretation_run',
+        'review_decision',
+        'review_attempt',
+        'learning_reservation',
+        'fact_version',
+        'fact_change',
+        'derivation_reference',
+    ]
+
+
+class Data9(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_id: str
+    assertion_id: str
+    bbox: dict[str, Any] | None
+    block_id: str | None
+    char_end: int | None
+    char_start: int | None
+    created_at: str
+    page: int | None
+    precision: str
+    stored_content_record: dict[str, Any] | None
+
+
+class Records13(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data9
+    id: str
+    kind: Literal['evidence']
+
+
+class Data10(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_contract_version: int | None
+    artifact_sha256: str
+    created_at: str
+    document_version_id: str
+    manifest_sha256: str | None
+    publication_state: str
+    recipe_sha256: str | None
+
+
+class Records14(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data10
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Data11(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    source_document_id: str
+
+
+class Records15(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data11
+    id: str
+    kind: Literal['document_version']
+
+
+class Data12(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    source_sha256: str
+
+
+class Records16(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data12
+    id: str
+    kind: Literal['source_document']
+
+
+class Data13(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_id: str
+    counters: dict[str, Any]
+    created_at: str
+    profile_id: str
+    profile_version: str
+    run_configuration: dict[str, Any]
+    status: str
+
+
+class Records17(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data13
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Records18(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractReviewDecision
+    id: str
+    kind: Literal['review_decision']
+
+
+class Records19(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractReviewSubmissionAttemptV1
+    id: str
+    kind: Literal['review_attempt']
+
+
+class Records20(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractLearningCandidateReservationV1
+    id: str
+    kind: Literal['learning_reservation']
+
+
+class Data14(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    actor_principal_id: str | None
+    commit_id: str | None
+    created_at: str
+    from_version_id: Annotated[
+        str | None,
+        Field(
+            description="Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."
+        ),
+    ]
+    reason: str
+    to_version_id: str
+
+
+class Records22(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data14
+    id: str
+    kind: Literal['fact_change']
+
+
+class Data15(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    input_version_ids: list[str]
+    producer_available: bool
+    stored_reference: dict[str, Any]
+
+
+class Records23(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data15
+    id: str
+    kind: Literal['derivation_reference']
+
+
+class Data17(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_id: str
+    assertion_id: str
+    bbox: dict[str, Any] | None
+    block_id: str | None
+    char_end: int | None
+    char_start: int | None
+    created_at: str
+    page: int | None
+    precision: str
+    stored_content_record: dict[str, Any] | None
+
+
+class Items19(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data17
+    id: str
+    kind: Literal['evidence']
+
+
+class Data18(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_contract_version: int | None
+    artifact_sha256: str
+    created_at: str
+    document_version_id: str
+    manifest_sha256: str | None
+    publication_state: str
+    recipe_sha256: str | None
+
+
+class Items20(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data18
+    id: str
+    kind: Literal['content_artifact']
+
+
+class Data19(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    source_document_id: str
+
+
+class Items21(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data19
+    id: str
+    kind: Literal['document_version']
+
+
+class Data20(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    source_sha256: str
+
+
+class Items22(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data20
+    id: str
+    kind: Literal['source_document']
+
+
+class Data21(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_id: str
+    counters: dict[str, Any]
+    created_at: str
+    profile_id: str
+    profile_version: str
+    run_configuration: dict[str, Any]
+    status: str
+
+
+class Items23(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data21
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class Items24(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractReviewDecision
+    id: str
+    kind: Literal['review_decision']
+
+
+class Items25(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractReviewSubmissionAttemptV1
+    id: str
+    kind: Literal['review_attempt']
+
+
+class Items26(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractLearningCandidateReservationV1
+    id: str
+    kind: Literal['learning_reservation']
+
+
+class Data22(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    actor_principal_id: str | None
+    commit_id: str | None
+    created_at: str
+    from_version_id: Annotated[
+        str | None,
+        Field(
+            description="Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."
+        ),
+    ]
+    reason: str
+    to_version_id: str
+
+
+class Items28(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data22
+    id: str
+    kind: Literal['fact_change']
+
+
+class Data23(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    input_version_ids: list[str]
+    producer_available: bool
+    stored_reference: dict[str, Any]
+
+
+class Items29(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data23
+    id: str
+    kind: Literal['derivation_reference']
+
+
+class InterpretationBasisModel1(RootModel[str]):
+    root: str
+
+
+class ModelConfidenceModel(RootModel[float | None]):
+    root: float | None
+
+
+class OriginModel(RootModel[str]):
+    root: str
+
+
+class OriginalAssertionIdModel(RootModel[str | None]):
+    root: str | None
+
+
+class RunIdModel(RootModel[str | None]):
+    root: str | None
+
+
+class SemanticContractVersion(RootModel[Literal[1, 2]]):
+    root: Literal[1, 2]
+
+
+class Field0Model51(RootModel[None]):
+    root: None
+
+
+class VersionModel(RootModel[int]):
+    root: Annotated[int, Field(ge=1)]
+
+
+class KindModel60(RootModel[Literal['assertion']]):
+    root: Literal['assertion']
+
+
+class Data25(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_id: str
+    assertion_id: str
+    bbox: dict[str, Any] | None
+    block_id: str | None
+    char_end: int | None
+    char_start: int | None
+    created_at: str
+    page: int | None
+    precision: str
+    stored_content_record: dict[str, Any] | None
+
+
+class Field1Model29(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data25
+    id: str
+    kind: Literal['evidence']
+
+
+class BboxModel3(RootModel[dict[str, Any] | None]):
+    root: dict[str, Any] | None
+
+
+class CharEndModel6(RootModel[int | None]):
+    root: int | None
+
+
+class CharStartModel6(RootModel[int | None]):
+    root: int | None
+
+
+class PageModel1(RootModel[int | None]):
+    root: int | None
+
+
+class PrecisionModel5(RootModel[str]):
+    root: str
+
+
+class StoredContentRecord(RootModel[dict[str, Any] | None]):
+    root: dict[str, Any] | None
+
+
+class KindModel61(RootModel[Literal['evidence']]):
+    root: Literal['evidence']
+
+
+class Data26(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    actor_principal_id: str | None
+    commit_id: str | None
+    created_at: str
+    from_version_id: Annotated[
+        str | None,
+        Field(
+            description="Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."
+        ),
+    ]
+    reason: str
+    to_version_id: str
+
+
+class Field10Model(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data26
+    id: str
+    kind: Literal['fact_change']
+
+
+class ActorPrincipalIdModel(RootModel[str | None]):
+    root: str | None
+
+
+class CommitIdModel(RootModel[str | None]):
+    root: str | None
+
+
+class FromVersionId(RootModel[str | None]):
+    root: Annotated[
+        str | None,
+        Field(
+            description="Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."
+        ),
+    ]
+
+
+class ReasonModel7(RootModel[str]):
+    root: str
+
+
+class ToVersionId(RootModel[str]):
+    root: str
+
+
+class KindModel62(RootModel[Literal['fact_change']]):
+    root: Literal['fact_change']
+
+
+class Data27(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    input_version_ids: list[str]
+    producer_available: bool
+    stored_reference: dict[str, Any]
+
+
+class Field11Model(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data27
+    id: str
+    kind: Literal['derivation_reference']
+
+
+class InputVersionIds(RootModel[list[str]]):
+    root: list[str]
+
+
+class ItemsModel30(RootModel[str]):
+    root: str
+
+
+class ProducerAvailable(RootModel[bool]):
+    root: bool
+
+
+class StoredReference(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+
+
+class KindModel63(RootModel[Literal['derivation_reference']]):
+    root: Literal['derivation_reference']
+
+
+class Data28(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_contract_version: int | None
+    artifact_sha256: str
+    created_at: str
+    document_version_id: str
+    manifest_sha256: str | None
+    publication_state: str
+    recipe_sha256: str | None
+
+
+class Field2Model9(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data28
+    id: str
+    kind: Literal['content_artifact']
+
+
+class ArtifactContractVersionModel1(RootModel[int | None]):
+    root: int | None
+
+
+class ArtifactSha256Model(RootModel[str]):
+    root: str
+
+
+class ManifestSha256(RootModel[str | None]):
+    root: str | None
+
+
+class PublicationState(RootModel[str]):
+    root: str
+
+
+class RecipeSha256Model(RootModel[str | None]):
+    root: str | None
+
+
+class KindModel64(RootModel[Literal['content_artifact']]):
+    root: Literal['content_artifact']
+
+
+class Data29(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    source_document_id: str
+
+
+class Field3Model4(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data29
+    id: str
+    kind: Literal['document_version']
+
+
+class SourceDocumentId(RootModel[str]):
+    root: str
+
+
+class KindModel65(RootModel[Literal['document_version']]):
+    root: Literal['document_version']
+
+
+class Data30(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    source_sha256: str
+
+
+class Field4Model2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data30
+    id: str
+    kind: Literal['source_document']
+
+
+class SourceSha256Model(RootModel[str]):
+    root: str
+
+
+class KindModel66(RootModel[Literal['source_document']]):
+    root: Literal['source_document']
+
+
+class Data31(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_id: str
+    counters: dict[str, Any]
+    created_at: str
+    profile_id: str
+    profile_version: str
+    run_configuration: dict[str, Any]
+    status: str
+
+
+class Field5Model2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: Data31
+    id: str
+    kind: Literal['interpretation_run']
+
+
+class CountersModel(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+
+
+class RunConfigurationModel(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+
+
+class StatusModel3(RootModel[str]):
+    root: str
+
+
+class KindModel67(RootModel[Literal['interpretation_run']]):
+    root: Literal['interpretation_run']
+
+
+class Field6Model1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractReviewDecision
+    id: str
+    kind: Literal['review_decision']
+
+
+class Data(RootModel[ContractReviewDecision]):
+    root: ContractReviewDecision
+
+
+class KindModel68(RootModel[Literal['review_decision']]):
+    root: Literal['review_decision']
+
+
+class Field7Model1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractReviewSubmissionAttemptV1
+    id: str
+    kind: Literal['review_attempt']
+
+
+class DataModel(RootModel[ContractReviewSubmissionAttemptV1]):
+    root: ContractReviewSubmissionAttemptV1
+
+
+class KindModel69(RootModel[Literal['review_attempt']]):
+    root: Literal['review_attempt']
+
+
+class Field8Model1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractLearningCandidateReservationV1
+    id: str
+    kind: Literal['learning_reservation']
+
+
+class DataModel1(RootModel[ContractLearningCandidateReservationV1]):
+    root: ContractLearningCandidateReservationV1
+
+
+class KindModel70(RootModel[Literal['learning_reservation']]):
+    root: Literal['learning_reservation']
+
+
+class KindModel71(RootModel[Literal['fact_version']]):
+    root: Literal['fact_version']
+
+
+class KindModel72(RootModel[Literal['assertion', 'fact_version']]):
+    root: Literal['assertion', 'fact_version']
+
+
+class Action(RootModel[Literal['ACCEPT', 'CORRECT', 'REJECT', 'BLOCKED']]):
+    root: Annotated[
+        Literal['ACCEPT', 'CORRECT', 'REJECT', 'BLOCKED'],
+        Field(
+            description='ACCEPT, CORRECT, and REJECT are adjudications. BLOCKED is not: it records that the evidence could not be anchored, produces no assertion, and leaves the review item open (ADR-0058).'
+        ),
+    ]
+
+
+class AssertionVersion(RootModel[int]):
+    root: Annotated[int, Field(ge=1)]
+
+
+class CorrectedAssertionIdModel(RootModel[str | None]):
+    root: str | None
+
+
+class CorrectedValue(RootModel[dict[str, Any] | None]):
+    root: dict[str, Any] | None
+
+
+class EventSha256(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='Hash of the submitted decision event; the idempotency key for resubmission of a batch.',
+            pattern='^[a-f0-9]{64}$',
+        ),
+    ]
+
+
+class Evidence3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    part: str | None = None
+    precision: Literal[
+        'exact-span', 'table-cell', 'block', 'page', 'document', 'unresolved'
+    ]
+    selector: Annotated[
+        list[SelectorItem] | None,
+        Field(
+            description='W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points.'
+        ),
+    ] = None
+    source: str
+    unresolved_reason: str | None = None
+
+
+class EvidenceModel(RootModel[Evidence3 | None]):
+    root: Annotated[
+        Evidence3 | None,
+        Field(
+            description='The locator the reviewer actually saw, at the precision it was shown, carried onto any assertion this decision creates.'
+        ),
+    ]
+
+
+class Field1Model30(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    part: str | None = None
+    precision: Literal[
+        'exact-span', 'table-cell', 'block', 'page', 'document', 'unresolved'
+    ]
+    selector: Annotated[
+        list[SelectorItem] | None,
+        Field(
+            description='W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points.'
+        ),
+    ] = None
+    source: str
+    unresolved_reason: str | None = None
+
+
+class Part(RootModel[str]):
+    root: str
+
+
+class PrecisionModel6(
+    RootModel[
+        Literal['exact-span', 'table-cell', 'block', 'page', 'document', 'unresolved']
+    ]
+):
+    root: Literal['exact-span', 'table-cell', 'block', 'page', 'document', 'unresolved']
+
+
+class SelectorModel(RootModel[list[SelectorItem]]):
+    root: Annotated[
+        list[SelectorItem],
+        Field(
+            description='W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points.'
+        ),
+    ]
+
+
+class ItemsModel31(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    type: str
+
+
+class TypeModel10(RootModel[str]):
+    root: str
+
+
+class SourceModel(RootModel[str]):
+    root: str
+
+
+class UnresolvedReason(RootModel[str]):
+    root: str
+
+
+class ReasonCode(
+    RootModel[
+        Literal[
+            'MISREAD_VALUE',
+            'WRONG_REGION',
+            'NOT_IN_SOURCE',
+            'OUT_OF_SCOPE',
+            'EVIDENCE_UNRESOLVED',
+        ]
+        | None
+    ]
+):
+    root: Annotated[
+        Literal[
+            'MISREAD_VALUE',
+            'WRONG_REGION',
+            'NOT_IN_SOURCE',
+            'OUT_OF_SCOPE',
+            'EVIDENCE_UNRESOLVED',
+        ]
+        | None,
+        Field(
+            description='Required for CORRECT, REJECT, and BLOCKED. EVIDENCE_UNRESOLVED is the only reason code valid with BLOCKED.'
+        ),
+    ]
+
+
+class ReviewBatchId(RootModel[str]):
+    root: str
+
+
+class ReviewItemId(RootModel[str]):
+    root: str
+
+
+class ReviewerComment(RootModel[str | None]):
+    root: str | None
+
+
+class ReviewerPrincipalIdModel(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='Resolved from the authenticated session, never from the request payload (ADR-0049, ADR-0057).'
+        ),
+    ]
+
+
+class Stale(RootModel[bool]):
+    root: bool
+
+
+class ActionModel(RootModel[Literal['ACCEPT', 'CORRECT', 'REJECT', 'BLOCKED']]):
+    root: Literal['ACCEPT', 'CORRECT', 'REJECT', 'BLOCKED']
+
+
+class ContractModel3(RootModel[Literal['review-submission-attempt/v1']]):
+    root: Literal['review-submission-attempt/v1']
+
+
+class EventSha256Model(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[a-f0-9]{64}$')]
+
+
+class EvidenceModel1(RootModel[dict[str, Any] | None]):
+    root: dict[str, Any] | None
+
+
+class OriginalAssertionIdModel1(RootModel[str]):
+    root: str
+
+
+class OutcomeModel3(RootModel[Literal['ALREADY_DECIDED', 'BATCH_REFUSED']]):
+    root: Literal['ALREADY_DECIDED', 'BATCH_REFUSED']
+
+
+class ReasonCodeModel(
+    RootModel[
+        Literal[
+            'MISREAD_VALUE',
+            'WRONG_REGION',
+            'NOT_IN_SOURCE',
+            'OUT_OF_SCOPE',
+            'EVIDENCE_UNRESOLVED',
+        ]
+        | None
+    ]
+):
+    root: (
+        Literal[
+            'MISREAD_VALUE',
+            'WRONG_REGION',
+            'NOT_IN_SOURCE',
+            'OUT_OF_SCOPE',
+            'EVIDENCE_UNRESOLVED',
+        ]
+        | None
+    )
+
+
+class ReviewerPrincipalIdModel1(RootModel[str]):
+    root: str
+
+
+class SubmittedAt(RootModel[str]):
     root: str
 
 
@@ -7856,8 +11046,8 @@ class ContractFactSlotKeyV1Fragment58(RootModel[NameKind]):
     root: NameKind
 
 
-class ContractFactSlotKeyV1Fragment59(RootModel[Evidence1]):
-    root: Evidence1
+class ContractFactSlotKeyV1Fragment59(RootModel[Evidence2]):
+    root: Evidence2
 
 
 class ContractFactSlotKeyV1Fragment6(RootModel[PredicateReleaseRef]):
@@ -8903,6 +12093,48 @@ class ContractInterpretationResultV2Fragment9(RootModel[Relationships]):
     root: Relationships
 
 
+class ContractLearningCandidateReservationV1Fragment1(
+    RootModel[AdditionalPropertiesModel3]
+):
+    root: AdditionalPropertiesModel3
+
+
+class ContractLearningCandidateReservationV1Fragment10(RootModel[ReservedAt]):
+    root: ReservedAt
+
+
+class ContractLearningCandidateReservationV1Fragment2(RootModel[ContractModel]):
+    root: ContractModel
+
+
+class ContractLearningCandidateReservationV1Fragment3(RootModel[Id]):
+    root: Id
+
+
+class ContractLearningCandidateReservationV1Fragment4(RootModel[TenantId]):
+    root: TenantId
+
+
+class ContractLearningCandidateReservationV1Fragment5(RootModel[KnowledgeBaseId]):
+    root: KnowledgeBaseId
+
+
+class ContractLearningCandidateReservationV1Fragment6(RootModel[ReviewDecisionIdModel]):
+    root: ReviewDecisionIdModel
+
+
+class ContractLearningCandidateReservationV1Fragment7(RootModel[OriginalAssertionId]):
+    root: OriginalAssertionId
+
+
+class ContractLearningCandidateReservationV1Fragment8(RootModel[CorrectedAssertionId]):
+    root: CorrectedAssertionId
+
+
+class ContractLearningCandidateReservationV1Fragment9(RootModel[ReviewerPrincipalId]):
+    root: ReviewerPrincipalId
+
+
 class ContractProblemDetailsFragment1(RootModel[AdditionalPropertiesModel3]):
     root: AdditionalPropertiesModel3
 
@@ -8935,6 +12167,1401 @@ class ContractProblemDetailsFragment8(RootModel[TraceId]):
     root: TraceId
 
 
+class ContractProvenanceQueryV1Fragment1(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceQueryV1Fragment10(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceQueryV1Fragment2(RootModel[ContractModel1]):
+    root: ContractModel1
+
+
+class ContractProvenanceQueryV1Fragment3(RootModel[Root]):
+    root: Root
+
+
+class ContractProvenanceQueryV1Fragment4(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceQueryV1Fragment5(RootModel[KindModel9]):
+    root: KindModel9
+
+
+class ContractProvenanceQueryV1Fragment6(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceQueryV1Fragment7(RootModel[Anchor]):
+    root: Anchor
+
+
+class ContractProvenanceQueryV1Fragment8(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceQueryV1Fragment9(RootModel[TypeModel9]):
+    root: TypeModel9
+
+
+class DataModel2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    created_at: str
+    interpretation_basis: str
+    model_confidence: float | None
+    origin: str
+    original_assertion_id: str | None
+    run_id: str | None
+    semantic_contract_version: Literal[1, 2]
+    semantics: ContractAssertionRecordV2 | None
+    slot_type: str
+    subject_type: str
+    value: dict[str, Any]
+    version: Annotated[int, Field(ge=1)]
+
+
+class Records(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: DataModel2
+    id: str
+    kind: Literal['assertion']
+
+
+class Records6(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractReviewDecision
+    id: str
+    kind: Literal['review_decision']
+
+
+class Records7(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractReviewSubmissionAttemptV1
+    id: str
+    kind: Literal['review_attempt']
+
+
+class ContractProvenanceResultV1Fragment1(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment100(RootModel[Field7Model1]):
+    root: Field7Model1
+
+
+class ContractProvenanceResultV1Fragment101(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment102(RootModel[KindModel69]):
+    root: KindModel69
+
+
+class ContractProvenanceResultV1Fragment103(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment104(RootModel[DataModel]):
+    root: DataModel
+
+
+class ContractProvenanceResultV1Fragment105(RootModel[Field8Model1]):
+    root: Field8Model1
+
+
+class ContractProvenanceResultV1Fragment106(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment107(RootModel[KindModel70]):
+    root: KindModel70
+
+
+class ContractProvenanceResultV1Fragment108(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment109(RootModel[DataModel1]):
+    root: DataModel1
+
+
+class ContractProvenanceResultV1Fragment111(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment112(RootModel[KindModel71]):
+    root: KindModel71
+
+
+class ContractProvenanceResultV1Fragment113(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment115(RootModel[Field10Model]):
+    root: Field10Model
+
+
+class ContractProvenanceResultV1Fragment116(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment117(RootModel[KindModel62]):
+    root: KindModel62
+
+
+class ContractProvenanceResultV1Fragment118(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment119(RootModel[Data26]):
+    root: Data26
+
+
+class ContractProvenanceResultV1Fragment120(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment121(RootModel[FromVersionId | None]):
+    root: FromVersionId | None
+
+
+class ContractProvenanceResultV1Fragment122(RootModel[ToVersionId]):
+    root: ToVersionId
+
+
+class ContractProvenanceResultV1Fragment123(RootModel[ReasonModel7]):
+    root: ReasonModel7
+
+
+class ContractProvenanceResultV1Fragment124(RootModel[CreatedAt]):
+    root: CreatedAt
+
+
+class ContractProvenanceResultV1Fragment125(RootModel[ActorPrincipalIdModel | None]):
+    root: ActorPrincipalIdModel | None
+
+
+class ContractProvenanceResultV1Fragment126(RootModel[CommitIdModel | None]):
+    root: CommitIdModel | None
+
+
+class ContractProvenanceResultV1Fragment127(RootModel[Field11Model]):
+    root: Field11Model
+
+
+class ContractProvenanceResultV1Fragment128(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment129(RootModel[KindModel63]):
+    root: KindModel63
+
+
+class ContractProvenanceResultV1Fragment13(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment130(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment131(RootModel[Data27]):
+    root: Data27
+
+
+class ContractProvenanceResultV1Fragment132(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment133(RootModel[StoredReference]):
+    root: StoredReference
+
+
+class ContractProvenanceResultV1Fragment134(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment135(RootModel[InputVersionIds]):
+    root: InputVersionIds
+
+
+class ContractProvenanceResultV1Fragment136(RootModel[ItemsModel30]):
+    root: ItemsModel30
+
+
+class ContractProvenanceResultV1Fragment137(RootModel[ProducerAvailable]):
+    root: ProducerAvailable
+
+
+class ContractProvenanceResultV1Fragment138(RootModel[EdgesModel]):
+    root: EdgesModel
+
+
+class ContractProvenanceResultV1Fragment139(RootModel[ItemsModel28]):
+    root: ItemsModel28
+
+
+class ContractProvenanceResultV1Fragment14(RootModel[KindModel60]):
+    root: KindModel60
+
+
+class ContractProvenanceResultV1Fragment140(RootModel[Field0Model50]):
+    root: Field0Model50
+
+
+class ContractProvenanceResultV1Fragment141(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment142(RootModel[KindModel10]):
+    root: KindModel10
+
+
+class ContractProvenanceResultV1Fragment143(RootModel[Source51]):
+    root: Source51
+
+
+class ContractProvenanceResultV1Fragment144(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment145(RootModel[KindModel11]):
+    root: KindModel11
+
+
+class ContractProvenanceResultV1Fragment146(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment147(RootModel[Target51]):
+    root: Target51
+
+
+class ContractProvenanceResultV1Fragment148(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment149(RootModel[KindModel11]):
+    root: KindModel11
+
+
+class ContractProvenanceResultV1Fragment15(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment150(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment151(RootModel[Field1Model28]):
+    root: Field1Model28
+
+
+class ContractProvenanceResultV1Fragment152(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment153(RootModel[KindModel12]):
+    root: KindModel12
+
+
+class ContractProvenanceResultV1Fragment154(RootModel[Source52]):
+    root: Source52
+
+
+class ContractProvenanceResultV1Fragment155(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment156(RootModel[KindModel13]):
+    root: KindModel13
+
+
+class ContractProvenanceResultV1Fragment157(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment158(RootModel[Target52]):
+    root: Target52
+
+
+class ContractProvenanceResultV1Fragment159(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment160(RootModel[KindModel14]):
+    root: KindModel14
+
+
+class ContractProvenanceResultV1Fragment161(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment162(RootModel[Field2Model8]):
+    root: Field2Model8
+
+
+class ContractProvenanceResultV1Fragment163(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment164(RootModel[KindModel35]):
+    root: KindModel35
+
+
+class ContractProvenanceResultV1Fragment165(RootModel[Source60]):
+    root: Source60
+
+
+class ContractProvenanceResultV1Fragment166(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment167(RootModel[KindModel36]):
+    root: KindModel36
+
+
+class ContractProvenanceResultV1Fragment168(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment169(RootModel[Target60]):
+    root: Target60
+
+
+class ContractProvenanceResultV1Fragment17(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment170(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment171(RootModel[KindModel37]):
+    root: KindModel37
+
+
+class ContractProvenanceResultV1Fragment172(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment173(RootModel[Field3Model3]):
+    root: Field3Model3
+
+
+class ContractProvenanceResultV1Fragment174(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment175(RootModel[KindModel38]):
+    root: KindModel38
+
+
+class ContractProvenanceResultV1Fragment176(RootModel[Source61]):
+    root: Source61
+
+
+class ContractProvenanceResultV1Fragment177(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment178(RootModel[KindModel39]):
+    root: KindModel39
+
+
+class ContractProvenanceResultV1Fragment179(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment18(RootModel[SemanticContractVersion]):
+    root: SemanticContractVersion
+
+
+class ContractProvenanceResultV1Fragment180(RootModel[Target61]):
+    root: Target61
+
+
+class ContractProvenanceResultV1Fragment181(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment182(RootModel[KindModel40]):
+    root: KindModel40
+
+
+class ContractProvenanceResultV1Fragment183(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment184(RootModel[Field4Model1]):
+    root: Field4Model1
+
+
+class ContractProvenanceResultV1Fragment185(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment186(RootModel[KindModel41]):
+    root: KindModel41
+
+
+class ContractProvenanceResultV1Fragment187(RootModel[Source62]):
+    root: Source62
+
+
+class ContractProvenanceResultV1Fragment188(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment189(RootModel[KindModel42]):
+    root: KindModel42
+
+
+class ContractProvenanceResultV1Fragment19(RootModel[VersionModel]):
+    root: VersionModel
+
+
+class ContractProvenanceResultV1Fragment190(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment191(RootModel[Target62]):
+    root: Target62
+
+
+class ContractProvenanceResultV1Fragment192(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment193(RootModel[KindModel43]):
+    root: KindModel43
+
+
+class ContractProvenanceResultV1Fragment194(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment195(RootModel[Field5Model1]):
+    root: Field5Model1
+
+
+class ContractProvenanceResultV1Fragment196(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment197(RootModel[KindModel44]):
+    root: KindModel44
+
+
+class ContractProvenanceResultV1Fragment198(RootModel[Source63]):
+    root: Source63
+
+
+class ContractProvenanceResultV1Fragment199(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment2(RootModel[ContractModel2]):
+    root: ContractModel2
+
+
+class ContractProvenanceResultV1Fragment20(RootModel[RunIdModel | None]):
+    root: RunIdModel | None
+
+
+class ContractProvenanceResultV1Fragment200(RootModel[KindModel45]):
+    root: KindModel45
+
+
+class ContractProvenanceResultV1Fragment201(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment202(RootModel[Target63]):
+    root: Target63
+
+
+class ContractProvenanceResultV1Fragment203(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment204(RootModel[KindModel46]):
+    root: KindModel46
+
+
+class ContractProvenanceResultV1Fragment205(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment206(RootModel[Field6Model]):
+    root: Field6Model
+
+
+class ContractProvenanceResultV1Fragment207(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment208(RootModel[KindModel47]):
+    root: KindModel47
+
+
+class ContractProvenanceResultV1Fragment209(RootModel[Source64]):
+    root: Source64
+
+
+class ContractProvenanceResultV1Fragment21(RootModel[OriginModel]):
+    root: OriginModel
+
+
+class ContractProvenanceResultV1Fragment210(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment211(RootModel[KindModel48]):
+    root: KindModel48
+
+
+class ContractProvenanceResultV1Fragment212(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment213(RootModel[Target64]):
+    root: Target64
+
+
+class ContractProvenanceResultV1Fragment214(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment215(RootModel[KindModel49]):
+    root: KindModel49
+
+
+class ContractProvenanceResultV1Fragment216(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment217(RootModel[Field7Model]):
+    root: Field7Model
+
+
+class ContractProvenanceResultV1Fragment218(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment219(RootModel[KindModel50]):
+    root: KindModel50
+
+
+class ContractProvenanceResultV1Fragment22(RootModel[OriginalAssertionIdModel | None]):
+    root: OriginalAssertionIdModel | None
+
+
+class ContractProvenanceResultV1Fragment220(RootModel[Source65]):
+    root: Source65
+
+
+class ContractProvenanceResultV1Fragment221(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment222(RootModel[KindModel51]):
+    root: KindModel51
+
+
+class ContractProvenanceResultV1Fragment223(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment224(RootModel[Target65]):
+    root: Target65
+
+
+class ContractProvenanceResultV1Fragment225(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment226(RootModel[KindModel52]):
+    root: KindModel52
+
+
+class ContractProvenanceResultV1Fragment227(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment228(RootModel[Field8Model]):
+    root: Field8Model
+
+
+class ContractProvenanceResultV1Fragment229(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment23(RootModel[SubjectType]):
+    root: SubjectType
+
+
+class ContractProvenanceResultV1Fragment230(RootModel[KindModel53]):
+    root: KindModel53
+
+
+class ContractProvenanceResultV1Fragment231(RootModel[Source66]):
+    root: Source66
+
+
+class ContractProvenanceResultV1Fragment232(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment233(RootModel[KindModel54]):
+    root: KindModel54
+
+
+class ContractProvenanceResultV1Fragment234(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment235(RootModel[Target66]):
+    root: Target66
+
+
+class ContractProvenanceResultV1Fragment236(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment237(RootModel[KindModel55]):
+    root: KindModel55
+
+
+class ContractProvenanceResultV1Fragment238(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment239(RootModel[Field9]):
+    root: Field9
+
+
+class ContractProvenanceResultV1Fragment24(RootModel[SlotType]):
+    root: SlotType
+
+
+class ContractProvenanceResultV1Fragment240(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment241(RootModel[KindModel56]):
+    root: KindModel56
+
+
+class ContractProvenanceResultV1Fragment242(RootModel[Source67]):
+    root: Source67
+
+
+class ContractProvenanceResultV1Fragment243(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment244(RootModel[KindModel57]):
+    root: KindModel57
+
+
+class ContractProvenanceResultV1Fragment245(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment246(RootModel[Target66]):
+    root: Target66
+
+
+class ContractProvenanceResultV1Fragment247(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment248(RootModel[KindModel58]):
+    root: KindModel58
+
+
+class ContractProvenanceResultV1Fragment249(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment25(RootModel[ValueModel11]):
+    root: ValueModel11
+
+
+class ContractProvenanceResultV1Fragment250(RootModel[Field10]):
+    root: Field10
+
+
+class ContractProvenanceResultV1Fragment251(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment252(RootModel[KindModel15]):
+    root: KindModel15
+
+
+class ContractProvenanceResultV1Fragment253(RootModel[Source53]):
+    root: Source53
+
+
+class ContractProvenanceResultV1Fragment254(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment255(RootModel[KindModel16]):
+    root: KindModel16
+
+
+class ContractProvenanceResultV1Fragment256(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment257(RootModel[Target53]):
+    root: Target53
+
+
+class ContractProvenanceResultV1Fragment258(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment259(RootModel[KindModel17]):
+    root: KindModel17
+
+
+class ContractProvenanceResultV1Fragment26(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment260(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment261(RootModel[Field11]):
+    root: Field11
+
+
+class ContractProvenanceResultV1Fragment262(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment263(RootModel[KindModel18]):
+    root: KindModel18
+
+
+class ContractProvenanceResultV1Fragment264(RootModel[Source54]):
+    root: Source54
+
+
+class ContractProvenanceResultV1Fragment265(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment266(RootModel[KindModel19]):
+    root: KindModel19
+
+
+class ContractProvenanceResultV1Fragment267(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment268(RootModel[Target54]):
+    root: Target54
+
+
+class ContractProvenanceResultV1Fragment269(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment27(RootModel[ModelConfidenceModel | None]):
+    root: ModelConfidenceModel | None
+
+
+class ContractProvenanceResultV1Fragment270(RootModel[KindModel20]):
+    root: KindModel20
+
+
+class ContractProvenanceResultV1Fragment271(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment272(RootModel[Field12]):
+    root: Field12
+
+
+class ContractProvenanceResultV1Fragment273(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment274(RootModel[KindModel21]):
+    root: KindModel21
+
+
+class ContractProvenanceResultV1Fragment275(RootModel[Source54]):
+    root: Source54
+
+
+class ContractProvenanceResultV1Fragment276(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment277(RootModel[KindModel22]):
+    root: KindModel22
+
+
+class ContractProvenanceResultV1Fragment278(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment279(RootModel[Target55]):
+    root: Target55
+
+
+class ContractProvenanceResultV1Fragment28(RootModel[InterpretationBasisModel1]):
+    root: InterpretationBasisModel1
+
+
+class ContractProvenanceResultV1Fragment280(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment281(RootModel[KindModel22]):
+    root: KindModel22
+
+
+class ContractProvenanceResultV1Fragment282(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment283(RootModel[Field13]):
+    root: Field13
+
+
+class ContractProvenanceResultV1Fragment284(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment285(RootModel[KindModel23]):
+    root: KindModel23
+
+
+class ContractProvenanceResultV1Fragment286(RootModel[Source56]):
+    root: Source56
+
+
+class ContractProvenanceResultV1Fragment287(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment288(RootModel[KindModel24]):
+    root: KindModel24
+
+
+class ContractProvenanceResultV1Fragment289(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment29(RootModel[CreatedAt]):
+    root: CreatedAt
+
+
+class ContractProvenanceResultV1Fragment290(RootModel[Target55]):
+    root: Target55
+
+
+class ContractProvenanceResultV1Fragment291(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment292(RootModel[KindModel25]):
+    root: KindModel25
+
+
+class ContractProvenanceResultV1Fragment293(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment294(RootModel[Field14]):
+    root: Field14
+
+
+class ContractProvenanceResultV1Fragment295(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment296(RootModel[KindModel26]):
+    root: KindModel26
+
+
+class ContractProvenanceResultV1Fragment297(RootModel[Source56]):
+    root: Source56
+
+
+class ContractProvenanceResultV1Fragment298(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment299(RootModel[KindModel27]):
+    root: KindModel27
+
+
+class ContractProvenanceResultV1Fragment3(RootModel[Root]):
+    root: Root
+
+
+class ContractProvenanceResultV1Fragment300(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment301(RootModel[Target55]):
+    root: Target55
+
+
+class ContractProvenanceResultV1Fragment302(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment303(RootModel[KindModel28]):
+    root: KindModel28
+
+
+class ContractProvenanceResultV1Fragment304(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment305(RootModel[Field15]):
+    root: Field15
+
+
+class ContractProvenanceResultV1Fragment306(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment307(RootModel[KindModel29]):
+    root: KindModel29
+
+
+class ContractProvenanceResultV1Fragment308(RootModel[Source58]):
+    root: Source58
+
+
+class ContractProvenanceResultV1Fragment309(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment31(RootModel[Field0Model51 | None]):
+    root: Field0Model51 | None
+
+
+class ContractProvenanceResultV1Fragment310(RootModel[KindModel30]):
+    root: KindModel30
+
+
+class ContractProvenanceResultV1Fragment311(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment312(RootModel[Target58]):
+    root: Target58
+
+
+class ContractProvenanceResultV1Fragment313(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment314(RootModel[KindModel31]):
+    root: KindModel31
+
+
+class ContractProvenanceResultV1Fragment315(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment316(RootModel[Field16]):
+    root: Field16
+
+
+class ContractProvenanceResultV1Fragment317(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment318(RootModel[KindModel32]):
+    root: KindModel32
+
+
+class ContractProvenanceResultV1Fragment319(RootModel[Source59]):
+    root: Source59
+
+
+class ContractProvenanceResultV1Fragment320(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment321(RootModel[KindModel33]):
+    root: KindModel33
+
+
+class ContractProvenanceResultV1Fragment322(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment323(RootModel[Target59]):
+    root: Target59
+
+
+class ContractProvenanceResultV1Fragment324(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment325(RootModel[KindModel34]):
+    root: KindModel34
+
+
+class ContractProvenanceResultV1Fragment326(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment327(RootModel[Gaps]):
+    root: Gaps
+
+
+class ContractProvenanceResultV1Fragment328(RootModel[ItemsModel29]):
+    root: ItemsModel29
+
+
+class ContractProvenanceResultV1Fragment329(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment33(RootModel[Field1Model29]):
+    root: Field1Model29
+
+
+class ContractProvenanceResultV1Fragment330(RootModel[Record1]):
+    root: Record1
+
+
+class ContractProvenanceResultV1Fragment331(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment332(RootModel[KindModel59]):
+    root: KindModel59
+
+
+class ContractProvenanceResultV1Fragment333(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment334(RootModel[FieldModel1]):
+    root: FieldModel1
+
+
+class ContractProvenanceResultV1Fragment335(RootModel[ReasonModel6]):
+    root: ReasonModel6
+
+
+class ContractProvenanceResultV1Fragment34(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment35(RootModel[KindModel61]):
+    root: KindModel61
+
+
+class ContractProvenanceResultV1Fragment36(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment37(RootModel[Data25]):
+    root: Data25
+
+
+class ContractProvenanceResultV1Fragment38(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment39(RootModel[AssertionId]):
+    root: AssertionId
+
+
+class ContractProvenanceResultV1Fragment4(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment40(RootModel[ArtifactId]):
+    root: ArtifactId
+
+
+class ContractProvenanceResultV1Fragment41(RootModel[BlockIdModel4 | None]):
+    root: BlockIdModel4 | None
+
+
+class ContractProvenanceResultV1Fragment42(RootModel[PageModel1 | None]):
+    root: PageModel1 | None
+
+
+class ContractProvenanceResultV1Fragment43(RootModel[BboxModel3 | None]):
+    root: BboxModel3 | None
+
+
+class ContractProvenanceResultV1Fragment44(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment45(RootModel[CharStartModel6 | None]):
+    root: CharStartModel6 | None
+
+
+class ContractProvenanceResultV1Fragment46(RootModel[CharEndModel6 | None]):
+    root: CharEndModel6 | None
+
+
+class ContractProvenanceResultV1Fragment47(RootModel[PrecisionModel5]):
+    root: PrecisionModel5
+
+
+class ContractProvenanceResultV1Fragment48(RootModel[CreatedAt]):
+    root: CreatedAt
+
+
+class ContractProvenanceResultV1Fragment49(RootModel[StoredContentRecord | None]):
+    root: StoredContentRecord | None
+
+
+class ContractProvenanceResultV1Fragment5(RootModel[KindModel72]):
+    root: KindModel72
+
+
+class ContractProvenanceResultV1Fragment50(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment51(RootModel[Field2Model9]):
+    root: Field2Model9
+
+
+class ContractProvenanceResultV1Fragment52(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment53(RootModel[KindModel64]):
+    root: KindModel64
+
+
+class ContractProvenanceResultV1Fragment54(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment55(RootModel[Data28]):
+    root: Data28
+
+
+class ContractProvenanceResultV1Fragment56(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment57(RootModel[DocumentVersionId]):
+    root: DocumentVersionId
+
+
+class ContractProvenanceResultV1Fragment58(RootModel[ArtifactSha256Model]):
+    root: ArtifactSha256Model
+
+
+class ContractProvenanceResultV1Fragment59(
+    RootModel[ArtifactContractVersionModel1 | None]
+):
+    root: ArtifactContractVersionModel1 | None
+
+
+class ContractProvenanceResultV1Fragment6(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment60(RootModel[ManifestSha256 | None]):
+    root: ManifestSha256 | None
+
+
+class ContractProvenanceResultV1Fragment61(RootModel[RecipeSha256Model | None]):
+    root: RecipeSha256Model | None
+
+
+class ContractProvenanceResultV1Fragment62(RootModel[PublicationState]):
+    root: PublicationState
+
+
+class ContractProvenanceResultV1Fragment63(RootModel[CreatedAt]):
+    root: CreatedAt
+
+
+class ContractProvenanceResultV1Fragment64(RootModel[Field3Model4]):
+    root: Field3Model4
+
+
+class ContractProvenanceResultV1Fragment65(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment66(RootModel[KindModel65]):
+    root: KindModel65
+
+
+class ContractProvenanceResultV1Fragment67(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment68(RootModel[Data29]):
+    root: Data29
+
+
+class ContractProvenanceResultV1Fragment69(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment7(RootModel[TenantId]):
+    root: TenantId
+
+
+class ContractProvenanceResultV1Fragment70(RootModel[SourceDocumentId]):
+    root: SourceDocumentId
+
+
+class ContractProvenanceResultV1Fragment71(RootModel[CreatedAt]):
+    root: CreatedAt
+
+
+class ContractProvenanceResultV1Fragment72(RootModel[Field4Model2]):
+    root: Field4Model2
+
+
+class ContractProvenanceResultV1Fragment73(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment74(RootModel[KindModel66]):
+    root: KindModel66
+
+
+class ContractProvenanceResultV1Fragment75(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment76(RootModel[Data30]):
+    root: Data30
+
+
+class ContractProvenanceResultV1Fragment77(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment78(RootModel[SourceSha256Model]):
+    root: SourceSha256Model
+
+
+class ContractProvenanceResultV1Fragment79(RootModel[CreatedAt]):
+    root: CreatedAt
+
+
+class ContractProvenanceResultV1Fragment8(RootModel[KnowledgeBaseId]):
+    root: KnowledgeBaseId
+
+
+class ContractProvenanceResultV1Fragment80(RootModel[Field5Model2]):
+    root: Field5Model2
+
+
+class ContractProvenanceResultV1Fragment81(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment82(RootModel[KindModel67]):
+    root: KindModel67
+
+
+class ContractProvenanceResultV1Fragment83(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment84(RootModel[Data31]):
+    root: Data31
+
+
+class ContractProvenanceResultV1Fragment85(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment86(RootModel[ArtifactId]):
+    root: ArtifactId
+
+
+class ContractProvenanceResultV1Fragment87(RootModel[ProfileId]):
+    root: ProfileId
+
+
+class ContractProvenanceResultV1Fragment88(RootModel[ProfileVersion]):
+    root: ProfileVersion
+
+
+class ContractProvenanceResultV1Fragment89(RootModel[StatusModel3]):
+    root: StatusModel3
+
+
+class ContractProvenanceResultV1Fragment9(RootModel[Completeness]):
+    root: Completeness
+
+
+class ContractProvenanceResultV1Fragment90(RootModel[RunConfigurationModel]):
+    root: RunConfigurationModel
+
+
+class ContractProvenanceResultV1Fragment91(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment92(RootModel[CountersModel]):
+    root: CountersModel
+
+
+class ContractProvenanceResultV1Fragment93(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment94(RootModel[CreatedAt]):
+    root: CreatedAt
+
+
+class ContractProvenanceResultV1Fragment95(RootModel[Field6Model1]):
+    root: Field6Model1
+
+
+class ContractProvenanceResultV1Fragment96(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractProvenanceResultV1Fragment97(RootModel[KindModel68]):
+    root: KindModel68
+
+
+class ContractProvenanceResultV1Fragment98(RootModel[Id]):
+    root: Id
+
+
+class ContractProvenanceResultV1Fragment99(RootModel[Data]):
+    root: Data
+
+
 class ContractQualifiedMoneyV1(RootModel[MoneyValue]):
     root: Annotated[
         MoneyValue,
@@ -8946,6 +13573,194 @@ class ContractQualifiedMoneyV1(RootModel[MoneyValue]):
             },
         ),
     ]
+
+
+class ContractReviewDecisionFragment1(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractReviewDecisionFragment10(RootModel[Field0Model51 | None]):
+    root: Field0Model51 | None
+
+
+class ContractReviewDecisionFragment11(RootModel[Field1Model30]):
+    root: Field1Model30
+
+
+class ContractReviewDecisionFragment12(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractReviewDecisionFragment13(RootModel[SourceModel]):
+    root: SourceModel
+
+
+class ContractReviewDecisionFragment14(RootModel[Part]):
+    root: Part
+
+
+class ContractReviewDecisionFragment15(RootModel[PrecisionModel6]):
+    root: PrecisionModel6
+
+
+class ContractReviewDecisionFragment16(RootModel[UnresolvedReason]):
+    root: UnresolvedReason
+
+
+class ContractReviewDecisionFragment17(RootModel[SelectorModel]):
+    root: SelectorModel
+
+
+class ContractReviewDecisionFragment18(RootModel[ItemsModel31]):
+    root: ItemsModel31
+
+
+class ContractReviewDecisionFragment19(RootModel[TypeModel10]):
+    root: TypeModel10
+
+
+class ContractReviewDecisionFragment2(RootModel[Id]):
+    root: Id
+
+
+class ContractReviewDecisionFragment20(RootModel[ReviewerPrincipalIdModel]):
+    root: ReviewerPrincipalIdModel
+
+
+class ContractReviewDecisionFragment21(RootModel[ReviewerComment | None]):
+    root: ReviewerComment | None
+
+
+class ContractReviewDecisionFragment22(RootModel[DecidedAt]):
+    root: DecidedAt
+
+
+class ContractReviewDecisionFragment23(RootModel[AssertionVersion]):
+    root: AssertionVersion
+
+
+class ContractReviewDecisionFragment24(RootModel[Stale]):
+    root: Stale
+
+
+class ContractReviewDecisionFragment25(RootModel[EventSha256]):
+    root: EventSha256
+
+
+class ContractReviewDecisionFragment3(RootModel[ReviewItemId]):
+    root: ReviewItemId
+
+
+class ContractReviewDecisionFragment4(RootModel[ReviewBatchId]):
+    root: ReviewBatchId
+
+
+class ContractReviewDecisionFragment5(RootModel[Action]):
+    root: Action
+
+
+class ContractReviewDecisionFragment6(RootModel[ReasonCode | None]):
+    root: ReasonCode | None
+
+
+class ContractReviewDecisionFragment7(RootModel[CorrectedValue | None]):
+    root: CorrectedValue | None
+
+
+class ContractReviewDecisionFragment8(RootModel[CorrectedAssertionIdModel | None]):
+    root: CorrectedAssertionIdModel | None
+
+
+class ContractReviewDecisionFragment9(RootModel[EvidenceModel | None]):
+    root: EvidenceModel | None
+
+
+class ContractReviewSubmissionAttemptV1Fragment1(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractReviewSubmissionAttemptV1Fragment10(RootModel[SubmittedAt]):
+    root: SubmittedAt
+
+
+class ContractReviewSubmissionAttemptV1Fragment11(RootModel[EventSha256Model]):
+    root: EventSha256Model
+
+
+class ContractReviewSubmissionAttemptV1Fragment12(RootModel[AssertionVersion]):
+    root: AssertionVersion
+
+
+class ContractReviewSubmissionAttemptV1Fragment13(RootModel[ActionModel]):
+    root: ActionModel
+
+
+class ContractReviewSubmissionAttemptV1Fragment14(RootModel[ReasonCodeModel]):
+    root: ReasonCodeModel
+
+
+class ContractReviewSubmissionAttemptV1Fragment15(RootModel[CorrectedValue | None]):
+    root: CorrectedValue | None
+
+
+class ContractReviewSubmissionAttemptV1Fragment16(
+    RootModel[AdditionalPropertiesModel3]
+):
+    root: AdditionalPropertiesModel3
+
+
+class ContractReviewSubmissionAttemptV1Fragment17(RootModel[EvidenceModel1 | None]):
+    root: EvidenceModel1 | None
+
+
+class ContractReviewSubmissionAttemptV1Fragment18(
+    RootModel[AdditionalPropertiesModel3]
+):
+    root: AdditionalPropertiesModel3
+
+
+class ContractReviewSubmissionAttemptV1Fragment19(RootModel[ReviewerComment | None]):
+    root: ReviewerComment | None
+
+
+class ContractReviewSubmissionAttemptV1Fragment2(RootModel[ContractModel3]):
+    root: ContractModel3
+
+
+class ContractReviewSubmissionAttemptV1Fragment20(RootModel[OutcomeModel3]):
+    root: OutcomeModel3
+
+
+class ContractReviewSubmissionAttemptV1Fragment21(RootModel[AuthorizationDecisionId]):
+    root: AuthorizationDecisionId
+
+
+class ContractReviewSubmissionAttemptV1Fragment3(RootModel[Id]):
+    root: Id
+
+
+class ContractReviewSubmissionAttemptV1Fragment4(RootModel[TenantId]):
+    root: TenantId
+
+
+class ContractReviewSubmissionAttemptV1Fragment5(RootModel[KnowledgeBaseId]):
+    root: KnowledgeBaseId
+
+
+class ContractReviewSubmissionAttemptV1Fragment6(RootModel[ReviewItemId]):
+    root: ReviewItemId
+
+
+class ContractReviewSubmissionAttemptV1Fragment7(RootModel[ReviewBatchId]):
+    root: ReviewBatchId
+
+
+class ContractReviewSubmissionAttemptV1Fragment8(RootModel[OriginalAssertionIdModel1]):
+    root: OriginalAssertionIdModel1
+
+
+class ContractReviewSubmissionAttemptV1Fragment9(RootModel[ReviewerPrincipalIdModel1]):
+    root: ReviewerPrincipalIdModel1
 
 
 class ContractScopedIdentifierV1(RootModel[IdentifierValue]):
@@ -9015,7 +13830,7 @@ class Accepted(RootModel[list[AcceptedItem1]]):
     root: Annotated[list[AcceptedItem1], Field(min_length=0)]
 
 
-class ItemsModel28(BaseModel):
+class ItemsModel32(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -9052,15 +13867,15 @@ class IntroducingEvidence(RootModel[list[EvidenceClaim]]):
     root: Annotated[list[EvidenceClaim], Field(min_length=1)]
 
 
-class ItemsModel29(RootModel[EvidenceClaim]):
+class ItemsModel33(RootModel[EvidenceClaim]):
     root: EvidenceClaim
 
 
-class Field0Model50(RootModel[ContractContentArtifactManifest]):
+class Field0Model52(RootModel[ContractContentArtifactManifest]):
     root: ContractContentArtifactManifest
 
 
-class Field1Model28(RootModel[ContractContentArtifactManifestV2]):
+class Field1Model31(RootModel[ContractContentArtifactManifestV2]):
     root: ContractContentArtifactManifestV2
 
 
@@ -9089,11 +13904,11 @@ class OriginAnchor(RootModel[NativeText | Unresolved]):
     root: NativeText | Unresolved
 
 
-class Field0Model51(RootModel[NativeText]):
+class Field0Model53(RootModel[NativeText]):
     root: NativeText
 
 
-class Field1Model29(RootModel[Unresolved]):
+class Field1Model32(RootModel[Unresolved]):
     root: Unresolved
 
 
@@ -9105,7 +13920,7 @@ class OriginAnchorModel(RootModel[PageRegion | Unresolved]):
     root: PageRegion | Unresolved
 
 
-class Field0Model52(RootModel[PageRegion]):
+class Field0Model54(RootModel[PageRegion]):
     root: PageRegion
 
 
@@ -9117,7 +13932,7 @@ class OriginAnchorModel1(RootModel[TimeSpan | Unresolved]):
     root: TimeSpan | Unresolved
 
 
-class Field0Model53(RootModel[TimeSpan]):
+class Field0Model55(RootModel[TimeSpan]):
     root: TimeSpan
 
 
@@ -9129,7 +13944,7 @@ class OriginAnchorModel2(RootModel[Figure | Unresolved]):
     root: Figure | Unresolved
 
 
-class Field0Model54(RootModel[Figure]):
+class Field0Model56(RootModel[Figure]):
     root: Figure
 
 
@@ -9139,27 +13954,27 @@ class OriginAnchorModel3(
     root: NativeText | PageRegion | TimeSpan | Figure | Unresolved
 
 
-class Field0Model55(RootModel[NativeText]):
+class Field0Model57(RootModel[NativeText]):
     root: NativeText
 
 
-class Field1Model30(RootModel[PageRegion]):
+class Field1Model33(RootModel[PageRegion]):
     root: PageRegion
 
 
-class Field2Model8(RootModel[TimeSpan]):
+class Field2Model10(RootModel[TimeSpan]):
     root: TimeSpan
 
 
-class Field3Model3(RootModel[Figure]):
+class Field3Model5(RootModel[Figure]):
     root: Figure
 
 
-class Field4Model1(RootModel[Unresolved]):
+class Field4Model3(RootModel[Unresolved]):
     root: Unresolved
 
 
-class Field0Model56(RootModel[Block]):
+class Field0Model58(RootModel[Block]):
     root: Block
 
 
@@ -9194,7 +14009,7 @@ class QualifierValue(
     ]
 
 
-class Field0Model57(RootModel[TextValue]):
+class Field0Model59(RootModel[TextValue]):
     root: TextValue
 
 
@@ -9293,7 +14108,7 @@ class AttestationZone(RootModel[IanaZone]):
     ]
 
 
-class Field0Model58(RootModel[DocumentDate]):
+class Field0Model60(RootModel[DocumentDate]):
     root: DocumentDate
 
 
@@ -9306,7 +14121,7 @@ class ValidFromModel1(RootModel[Bound | None]):
     ]
 
 
-class Field0Model59(RootModel[Bound]):
+class Field0Model61(RootModel[Bound]):
     root: Bound
 
 
@@ -9354,11 +14169,11 @@ class ValidToModel1(RootModel[Bound | None]):
     ]
 
 
-class Field0Model60(RootModel[CommitTemporal]):
+class Field0Model62(RootModel[CommitTemporal]):
     root: CommitTemporal
 
 
-class Field1Model31(RootModel[VersionTemporal]):
+class Field1Model34(RootModel[VersionTemporal]):
     root: VersionTemporal
 
 
@@ -9383,7 +14198,7 @@ class Assertions(RootModel[list[ContractAssertionRecordV2]]):
     root: Annotated[list[ContractAssertionRecordV2], Field(min_length=0)]
 
 
-class ItemsModel30(RootModel[ContractAssertionRecordV2]):
+class ItemsModel34(RootModel[ContractAssertionRecordV2]):
     root: ContractAssertionRecordV2
 
 
@@ -9391,8 +14206,43 @@ class Entities(RootModel[list[EntityReference]]):
     root: Annotated[list[EntityReference], Field(min_length=0)]
 
 
-class ItemsModel31(RootModel[EntityReference]):
+class ItemsModel35(RootModel[EntityReference]):
     root: EntityReference
+
+
+class Records12(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: DataModel2
+    id: str
+    kind: Literal['assertion']
+
+
+class Items18(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: DataModel2
+    id: str
+    kind: Literal['assertion']
+
+
+class Field0Model63(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: DataModel2
+    id: str
+    kind: Literal['assertion']
+
+
+class Semantics(RootModel[ContractAssertionRecordV2 | None]):
+    root: ContractAssertionRecordV2 | None
+
+
+class Field1Model35(RootModel[ContractAssertionRecordV2]):
+    root: ContractAssertionRecordV2
 
 
 class AcceptedItem(BaseModel):
@@ -9434,8 +14284,8 @@ class ContractAssertionAdmissionResultV1Fragment5(RootModel[Accepted]):
     root: Accepted
 
 
-class ContractAssertionAdmissionResultV1Fragment6(RootModel[ItemsModel28]):
-    root: ItemsModel28
+class ContractAssertionAdmissionResultV1Fragment6(RootModel[ItemsModel32]):
+    root: ItemsModel32
 
 
 class ContractAssertionAdmissionResultV1Fragment70(RootModel[Admitted]):
@@ -9458,8 +14308,8 @@ class ContractAssertionRecordV2Fragment49(RootModel[IntroducingEvidence]):
     root: IntroducingEvidence
 
 
-class ContractAssertionRecordV2Fragment50(RootModel[ItemsModel29]):
-    root: ItemsModel29
+class ContractAssertionRecordV2Fragment50(RootModel[ItemsModel33]):
+    root: ItemsModel33
 
 
 class ContractCanonicalCommitRequest1(BaseModel):
@@ -9541,7 +14391,7 @@ class ContractCanonicalCommitRequest(
     ]
 
 
-class VersionModel(BaseModel):
+class VersionModel1(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -9559,7 +14409,7 @@ class ContractCanonicalCommitResponse(BaseModel):
     canonical_accepted_at: str
     commit_id: str
     fact_version_ids: Annotated[list[str], Field(min_length=1)]
-    versions: Annotated[list[VersionModel] | None, Field(min_length=1)] = None
+    versions: Annotated[list[VersionModel1] | None, Field(min_length=1)] = None
 
 
 class ContractContentArtifactManifestRead(
@@ -9568,12 +14418,12 @@ class ContractContentArtifactManifestRead(
     root: ContractContentArtifactManifest | ContractContentArtifactManifestV2
 
 
-class ContractContentArtifactManifestReadFragment1(RootModel[Field0Model50]):
-    root: Field0Model50
+class ContractContentArtifactManifestReadFragment1(RootModel[Field0Model52]):
+    root: Field0Model52
 
 
-class ContractContentArtifactManifestReadFragment2(RootModel[Field1Model28]):
-    root: Field1Model28
+class ContractContentArtifactManifestReadFragment2(RootModel[Field1Model31]):
+    root: Field1Model31
 
 
 class ContractContentRecordsV2(RootModel[Block | Table | Layout]):
@@ -10192,8 +15042,8 @@ class ContractContentRecordsV2(RootModel[Block | Table | Layout]):
     ]
 
 
-class ContractContentRecordsV2Fragment1(RootModel[Field0Model56]):
-    root: Field0Model56
+class ContractContentRecordsV2Fragment1(RootModel[Field0Model58]):
+    root: Field0Model58
 
 
 class ContractContentRecordsV2Fragment102(RootModel[Block]):
@@ -10204,24 +15054,24 @@ class ContractContentRecordsV2Fragment130(RootModel[OriginAnchorModel3]):
     root: OriginAnchorModel3
 
 
-class ContractContentRecordsV2Fragment131(RootModel[Field0Model55]):
-    root: Field0Model55
+class ContractContentRecordsV2Fragment131(RootModel[Field0Model57]):
+    root: Field0Model57
 
 
-class ContractContentRecordsV2Fragment132(RootModel[Field1Model30]):
-    root: Field1Model30
+class ContractContentRecordsV2Fragment132(RootModel[Field1Model33]):
+    root: Field1Model33
 
 
-class ContractContentRecordsV2Fragment133(RootModel[Field2Model8]):
-    root: Field2Model8
+class ContractContentRecordsV2Fragment133(RootModel[Field2Model10]):
+    root: Field2Model10
 
 
-class ContractContentRecordsV2Fragment134(RootModel[Field3Model3]):
-    root: Field3Model3
+class ContractContentRecordsV2Fragment134(RootModel[Field3Model5]):
+    root: Field3Model5
 
 
-class ContractContentRecordsV2Fragment135(RootModel[Field4Model1]):
-    root: Field4Model1
+class ContractContentRecordsV2Fragment135(RootModel[Field4Model3]):
+    root: Field4Model3
 
 
 class ContractContentRecordsV2Fragment142(RootModel[ThenModel13]):
@@ -10232,12 +15082,12 @@ class ContractContentRecordsV2Fragment143(RootModel[OriginAnchor]):
     root: OriginAnchor
 
 
-class ContractContentRecordsV2Fragment144(RootModel[Field0Model51]):
-    root: Field0Model51
+class ContractContentRecordsV2Fragment144(RootModel[Field0Model53]):
+    root: Field0Model53
 
 
-class ContractContentRecordsV2Fragment145(RootModel[Field1Model29]):
-    root: Field1Model29
+class ContractContentRecordsV2Fragment145(RootModel[Field1Model32]):
+    root: Field1Model32
 
 
 class ContractContentRecordsV2Fragment149(RootModel[ThenModel14]):
@@ -10248,12 +15098,12 @@ class ContractContentRecordsV2Fragment150(RootModel[OriginAnchorModel]):
     root: OriginAnchorModel
 
 
-class ContractContentRecordsV2Fragment151(RootModel[Field0Model52]):
-    root: Field0Model52
+class ContractContentRecordsV2Fragment151(RootModel[Field0Model54]):
+    root: Field0Model54
 
 
-class ContractContentRecordsV2Fragment152(RootModel[Field1Model29]):
-    root: Field1Model29
+class ContractContentRecordsV2Fragment152(RootModel[Field1Model32]):
+    root: Field1Model32
 
 
 class ContractContentRecordsV2Fragment156(RootModel[ThenModel15]):
@@ -10264,12 +15114,12 @@ class ContractContentRecordsV2Fragment157(RootModel[OriginAnchorModel1]):
     root: OriginAnchorModel1
 
 
-class ContractContentRecordsV2Fragment158(RootModel[Field0Model53]):
-    root: Field0Model53
+class ContractContentRecordsV2Fragment158(RootModel[Field0Model55]):
+    root: Field0Model55
 
 
-class ContractContentRecordsV2Fragment159(RootModel[Field1Model29]):
-    root: Field1Model29
+class ContractContentRecordsV2Fragment159(RootModel[Field1Model32]):
+    root: Field1Model32
 
 
 class ContractContentRecordsV2Fragment163(RootModel[ThenModel16]):
@@ -10280,12 +15130,12 @@ class ContractContentRecordsV2Fragment164(RootModel[OriginAnchorModel2]):
     root: OriginAnchorModel2
 
 
-class ContractContentRecordsV2Fragment165(RootModel[Field0Model54]):
-    root: Field0Model54
+class ContractContentRecordsV2Fragment165(RootModel[Field0Model56]):
+    root: Field0Model56
 
 
-class ContractContentRecordsV2Fragment166(RootModel[Field1Model29]):
-    root: Field1Model29
+class ContractContentRecordsV2Fragment166(RootModel[Field1Model32]):
+    root: Field1Model32
 
 
 class ContractFactAnswerV1Fragment4(RootModel[ValueModel12]):
@@ -10340,8 +15190,8 @@ class ContractFactSlotKeyV1Fragment73(RootModel[QualifierValue]):
     root: QualifierValue
 
 
-class ContractFactSlotKeyV1Fragment74(RootModel[Field0Model57]):
-    root: Field0Model57
+class ContractFactSlotKeyV1Fragment74(RootModel[Field0Model59]):
+    root: Field0Model59
 
 
 class ContractFactSlotKeyV1Fragment9(RootModel[AdditionalPropertiesModel4]):
@@ -10356,8 +15206,8 @@ class ContractFactTemporalV1Fragment18(RootModel[ValidFromModel1 | None]):
     root: ValidFromModel1 | None
 
 
-class ContractFactTemporalV1Fragment19(RootModel[Field0Model59]):
-    root: Field0Model59
+class ContractFactTemporalV1Fragment19(RootModel[Field0Model61]):
+    root: Field0Model61
 
 
 class ContractFactTemporalV1Fragment22(RootModel[ValidToStateModel2]):
@@ -10384,24 +15234,24 @@ class ContractFactTemporalV1Fragment3(RootModel[Bound]):
     root: Bound
 
 
-class ContractFactTemporalV1Fragment30(RootModel[Field0Model58]):
-    root: Field0Model58
+class ContractFactTemporalV1Fragment30(RootModel[Field0Model60]):
+    root: Field0Model60
 
 
 class ContractFactTemporalV1Fragment32(RootModel[AttestedThrough | None]):
     root: AttestedThrough | None
 
 
-class ContractFactTemporalV1Fragment33(RootModel[Field0Model58]):
-    root: Field0Model58
+class ContractFactTemporalV1Fragment33(RootModel[Field0Model60]):
+    root: Field0Model60
 
 
 class ContractFactTemporalV1Fragment35(RootModel[AttestedTo | None]):
     root: AttestedTo | None
 
 
-class ContractFactTemporalV1Fragment36(RootModel[Field0Model58]):
-    root: Field0Model58
+class ContractFactTemporalV1Fragment36(RootModel[Field0Model60]):
+    root: Field0Model60
 
 
 class ContractFactTemporalV1Fragment39(RootModel[IfModel17]):
@@ -10424,8 +15274,8 @@ class ContractFactTemporalV1Fragment66(RootModel[ValidFromModel2 | None]):
     root: ValidFromModel2 | None
 
 
-class ContractFactTemporalV1Fragment67(RootModel[Field0Model59]):
-    root: Field0Model59
+class ContractFactTemporalV1Fragment67(RootModel[Field0Model61]):
+    root: Field0Model61
 
 
 class ContractFactTemporalV1Fragment7(RootModel[Zone]):
@@ -10436,16 +15286,16 @@ class ContractFactTemporalV1Fragment73(RootModel[ValidToModel1 | None]):
     root: ValidToModel1 | None
 
 
-class ContractFactTemporalV1Fragment74(RootModel[Field0Model59]):
-    root: Field0Model59
+class ContractFactTemporalV1Fragment74(RootModel[Field0Model61]):
+    root: Field0Model61
 
 
-class ContractFactTemporalV1Fragment94(RootModel[Field0Model60]):
-    root: Field0Model60
+class ContractFactTemporalV1Fragment94(RootModel[Field0Model62]):
+    root: Field0Model62
 
 
-class ContractFactTemporalV1Fragment95(RootModel[Field1Model31]):
-    root: Field1Model31
+class ContractFactTemporalV1Fragment95(RootModel[Field1Model34]):
+    root: Field1Model34
 
 
 class ContractFactVersionReadV1(BaseModel):
@@ -10525,16 +15375,95 @@ class ContractInterpretationResultV2Fragment5(RootModel[Entities]):
     root: Entities
 
 
-class ContractInterpretationResultV2Fragment6(RootModel[ItemsModel31]):
-    root: ItemsModel31
+class ContractInterpretationResultV2Fragment6(RootModel[ItemsModel35]):
+    root: ItemsModel35
 
 
 class ContractInterpretationResultV2Fragment7(RootModel[Assertions]):
     root: Assertions
 
 
-class ContractInterpretationResultV2Fragment8(RootModel[ItemsModel30]):
-    root: ItemsModel30
+class ContractInterpretationResultV2Fragment8(RootModel[ItemsModel34]):
+    root: ItemsModel34
+
+
+class Records9(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractFactVersionReadV1
+    id: str
+    kind: Literal['fact_version']
+
+
+class ContractProvenanceResultV1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    completeness: Literal['COMPLETE', 'INCOMPLETE']
+    contract: Literal['provenance-result/v1']
+    edges: Annotated[
+        list[
+            Edges
+            | Edges1
+            | Edges2
+            | Edges3
+            | Edges4
+            | Edges5
+            | Edges6
+            | Edges7
+            | Edges8
+            | Edges9
+            | Edges10
+            | Edges11
+            | Edges12
+            | Edges13
+            | Edges14
+            | Edges15
+            | Edges16
+        ],
+        Field(
+            description="Every edge reads '<source> <kind> <target>'. Each kind admits only the endpoint record kinds listed in its branch. Edges are unique by (kind, source, target); domain checks additionally require both endpoints in records and every non-root record to be connected to the root (ignoring direction). Directional ancestry kinds (corrected_from, split_of) must be acyclic.",
+            max_length=8192,
+        ),
+    ]
+    gaps: list[Gap]
+    knowledge_base_id: str
+    records: Annotated[
+        list[
+            Records
+            | Records1
+            | Records2
+            | Records3
+            | Records4
+            | Records5
+            | Records6
+            | Records7
+            | Records8
+            | Records9
+            | Records10
+            | Records11
+        ],
+        Field(max_length=2048, min_length=1),
+    ]
+    root: Root
+    tenant_id: str
+
+
+class ContractProvenanceResultV1Fragment12(RootModel[Field0Model63]):
+    root: Field0Model63
+
+
+class ContractProvenanceResultV1Fragment16(RootModel[DataModel2]):
+    root: DataModel2
+
+
+class ContractProvenanceResultV1Fragment30(RootModel[Semantics | None]):
+    root: Semantics | None
+
+
+class ContractProvenanceResultV1Fragment32(RootModel[Field1Model35]):
+    root: Field1Model35
 
 
 class TemporalModel(RootModel[CommitTemporal]):
@@ -10546,11 +15475,11 @@ class TemporalModel(RootModel[CommitTemporal]):
     ]
 
 
-class Versions(RootModel[list[VersionModel]]):
-    root: Annotated[list[VersionModel], Field(min_length=1)]
+class Versions(RootModel[list[VersionModel1]]):
+    root: Annotated[list[VersionModel1], Field(min_length=1)]
 
 
-class ItemsModel32(BaseModel):
+class ItemsModel36(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -10588,7 +15517,7 @@ class TemporalModel2(RootModel[VersionTemporal]):
     root: VersionTemporal
 
 
-class Field2Model9(RootModel[ValidityUnknownRead]):
+class Field2Model11(RootModel[ValidityUnknownRead]):
     root: ValidityUnknownRead
 
 
@@ -10606,11 +15535,11 @@ class CandidateAssertion(BaseModel):
     value: dict[str, Any]
 
 
-class EvidenceModel(RootModel[list[EvidenceBinding]]):
+class EvidenceModel2(RootModel[list[EvidenceBinding]]):
     root: Annotated[list[EvidenceBinding], Field(min_length=1)]
 
 
-class ItemsModel33(RootModel[EvidenceBinding]):
+class ItemsModel37(RootModel[EvidenceBinding]):
     root: EvidenceBinding
 
 
@@ -10625,7 +15554,7 @@ class CandidateEntity(BaseModel):
     label: str
 
 
-class EvidenceModel1(RootModel[list[EvidenceBinding]]):
+class EvidenceModel3(RootModel[list[EvidenceBinding]]):
     root: list[EvidenceBinding]
 
 
@@ -10646,7 +15575,7 @@ class AssertionsModel(RootModel[list[CandidateAssertion]]):
     root: list[CandidateAssertion]
 
 
-class ItemsModel34(RootModel[CandidateAssertion]):
+class ItemsModel38(RootModel[CandidateAssertion]):
     root: CandidateAssertion
 
 
@@ -10654,7 +15583,7 @@ class EntitiesModel(RootModel[list[CandidateEntity]]):
     root: list[CandidateEntity]
 
 
-class ItemsModel35(RootModel[CandidateEntity]):
+class ItemsModel39(RootModel[CandidateEntity]):
     root: CandidateEntity
 
 
@@ -10662,8 +15591,99 @@ class RelationshipsModel(RootModel[list[CandidateRelationship]]):
     root: list[CandidateRelationship]
 
 
-class ItemsModel36(RootModel[CandidateRelationship]):
+class ItemsModel40(RootModel[CandidateRelationship]):
     root: CandidateRelationship
+
+
+class RecordsModel(
+    RootModel[
+        list[
+            Records12
+            | Records13
+            | Records14
+            | Records15
+            | Records16
+            | Records17
+            | Records18
+            | Records19
+            | Records20
+            | Records9
+            | Records22
+            | Records23
+        ]
+    ]
+):
+    root: Annotated[
+        list[
+            Records12
+            | Records13
+            | Records14
+            | Records15
+            | Records16
+            | Records17
+            | Records18
+            | Records19
+            | Records20
+            | Records9
+            | Records22
+            | Records23
+        ],
+        Field(max_length=2048, min_length=1),
+    ]
+
+
+class Items27(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractFactVersionReadV1
+    id: str
+    kind: Literal['fact_version']
+
+
+class ItemsModel41(
+    RootModel[
+        Items18
+        | Items19
+        | Items20
+        | Items21
+        | Items22
+        | Items23
+        | Items24
+        | Items25
+        | Items26
+        | Items27
+        | Items28
+        | Items29
+    ]
+):
+    root: (
+        Items18
+        | Items19
+        | Items20
+        | Items21
+        | Items22
+        | Items23
+        | Items24
+        | Items25
+        | Items26
+        | Items27
+        | Items28
+        | Items29
+    )
+
+
+class Field9Model(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    data: ContractFactVersionReadV1
+    id: str
+    kind: Literal['fact_version']
+
+
+class DataModel3(RootModel[ContractFactVersionReadV1]):
+    root: ContractFactVersionReadV1
 
 
 class ContractCanonicalCommitRequestFragment14(RootModel[TemporalModel]):
@@ -10678,8 +15698,8 @@ class ContractCanonicalCommitResponseFragment6(RootModel[Versions]):
     root: Versions
 
 
-class ContractCanonicalCommitResponseFragment7(RootModel[ItemsModel32]):
-    root: ItemsModel32
+class ContractCanonicalCommitResponseFragment7(RootModel[ItemsModel36]):
+    root: ItemsModel36
 
 
 class ContractFactTemporalV1(
@@ -10986,8 +16006,8 @@ class ContractFactTemporalV1Fragment93(RootModel[TemporalModel2]):
     root: TemporalModel2
 
 
-class ContractFactTemporalV1Fragment96(RootModel[Field2Model9]):
-    root: Field2Model9
+class ContractFactTemporalV1Fragment96(RootModel[Field2Model11]):
+    root: Field2Model11
 
 
 class ContractInterpretationResult(BaseModel):
@@ -11009,8 +16029,8 @@ class ContractInterpretationResult(BaseModel):
     warnings: list[str]
 
 
-class ContractInterpretationResultFragment10(RootModel[ItemsModel36]):
-    root: ItemsModel36
+class ContractInterpretationResultFragment10(RootModel[ItemsModel40]):
+    root: ItemsModel40
 
 
 class ContractInterpretationResultFragment5(RootModel[EntitiesModel]):
@@ -11021,16 +16041,16 @@ class ContractInterpretationResultFragment57(RootModel[CandidateEntity]):
     root: CandidateEntity
 
 
-class ContractInterpretationResultFragment6(RootModel[ItemsModel35]):
-    root: ItemsModel35
+class ContractInterpretationResultFragment6(RootModel[ItemsModel39]):
+    root: ItemsModel39
 
 
-class ContractInterpretationResultFragment63(RootModel[EvidenceModel1]):
-    root: EvidenceModel1
+class ContractInterpretationResultFragment63(RootModel[EvidenceModel3]):
+    root: EvidenceModel3
 
 
-class ContractInterpretationResultFragment64(RootModel[ItemsModel33]):
-    root: ItemsModel33
+class ContractInterpretationResultFragment64(RootModel[ItemsModel37]):
+    root: ItemsModel37
 
 
 class ContractInterpretationResultFragment65(RootModel[CandidateAssertion]):
@@ -11041,32 +16061,48 @@ class ContractInterpretationResultFragment7(RootModel[AssertionsModel]):
     root: AssertionsModel
 
 
-class ContractInterpretationResultFragment72(RootModel[EvidenceModel]):
-    root: EvidenceModel
+class ContractInterpretationResultFragment72(RootModel[EvidenceModel2]):
+    root: EvidenceModel2
 
 
-class ContractInterpretationResultFragment73(RootModel[ItemsModel33]):
-    root: ItemsModel33
+class ContractInterpretationResultFragment73(RootModel[ItemsModel37]):
+    root: ItemsModel37
 
 
 class ContractInterpretationResultFragment76(RootModel[CandidateRelationship]):
     root: CandidateRelationship
 
 
-class ContractInterpretationResultFragment8(RootModel[ItemsModel34]):
-    root: ItemsModel34
+class ContractInterpretationResultFragment8(RootModel[ItemsModel38]):
+    root: ItemsModel38
 
 
-class ContractInterpretationResultFragment82(RootModel[EvidenceModel1]):
-    root: EvidenceModel1
+class ContractInterpretationResultFragment82(RootModel[EvidenceModel3]):
+    root: EvidenceModel3
 
 
-class ContractInterpretationResultFragment83(RootModel[ItemsModel33]):
-    root: ItemsModel33
+class ContractInterpretationResultFragment83(RootModel[ItemsModel37]):
+    root: ItemsModel37
 
 
 class ContractInterpretationResultFragment9(RootModel[RelationshipsModel]):
     root: RelationshipsModel
+
+
+class ContractProvenanceResultV1Fragment10(RootModel[RecordsModel]):
+    root: RecordsModel
+
+
+class ContractProvenanceResultV1Fragment11(RootModel[ItemsModel41]):
+    root: ItemsModel41
+
+
+class ContractProvenanceResultV1Fragment110(RootModel[Field9Model]):
+    root: Field9Model
+
+
+class ContractProvenanceResultV1Fragment114(RootModel[DataModel3]):
+    root: DataModel3
 
 
 class ContractModelsV1(BaseModel):
@@ -15337,6 +20373,50 @@ class ContractModelsV1(BaseModel):
         ContractInterpretationResultV2Fragment9 | None,
         Field(alias='ContractInterpretationResultV2Fragment9'),
     ] = None
+    ContractLearningCandidateReservationV1_1: Annotated[
+        ContractLearningCandidateReservationV1 | None,
+        Field(alias='ContractLearningCandidateReservationV1'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment1_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment1 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment1'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment10_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment10 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment10'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment2_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment2 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment2'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment3_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment3 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment3'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment4_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment4 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment4'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment5_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment5 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment5'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment6_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment6 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment6'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment7_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment7 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment7'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment8_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment8 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment8'),
+    ] = None
+    ContractLearningCandidateReservationV1Fragment9_1: Annotated[
+        ContractLearningCandidateReservationV1Fragment9 | None,
+        Field(alias='ContractLearningCandidateReservationV1Fragment9'),
+    ] = None
     ContractProblemDetails_1: Annotated[
         ContractProblemDetails | None, Field(alias='ContractProblemDetails')
     ] = None
@@ -15372,8 +20452,1585 @@ class ContractModelsV1(BaseModel):
         ContractProblemDetailsFragment8 | None,
         Field(alias='ContractProblemDetailsFragment8'),
     ] = None
+    ContractProvenanceQueryV1_1: Annotated[
+        ContractProvenanceQueryV1 | None, Field(alias='ContractProvenanceQueryV1')
+    ] = None
+    ContractProvenanceQueryV1Fragment1_1: Annotated[
+        ContractProvenanceQueryV1Fragment1 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment1'),
+    ] = None
+    ContractProvenanceQueryV1Fragment10_1: Annotated[
+        ContractProvenanceQueryV1Fragment10 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment10'),
+    ] = None
+    ContractProvenanceQueryV1Fragment2_1: Annotated[
+        ContractProvenanceQueryV1Fragment2 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment2'),
+    ] = None
+    ContractProvenanceQueryV1Fragment3_1: Annotated[
+        ContractProvenanceQueryV1Fragment3 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment3'),
+    ] = None
+    ContractProvenanceQueryV1Fragment4_1: Annotated[
+        ContractProvenanceQueryV1Fragment4 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment4'),
+    ] = None
+    ContractProvenanceQueryV1Fragment5_1: Annotated[
+        ContractProvenanceQueryV1Fragment5 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment5'),
+    ] = None
+    ContractProvenanceQueryV1Fragment6_1: Annotated[
+        ContractProvenanceQueryV1Fragment6 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment6'),
+    ] = None
+    ContractProvenanceQueryV1Fragment7_1: Annotated[
+        ContractProvenanceQueryV1Fragment7 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment7'),
+    ] = None
+    ContractProvenanceQueryV1Fragment8_1: Annotated[
+        ContractProvenanceQueryV1Fragment8 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment8'),
+    ] = None
+    ContractProvenanceQueryV1Fragment9_1: Annotated[
+        ContractProvenanceQueryV1Fragment9 | None,
+        Field(alias='ContractProvenanceQueryV1Fragment9'),
+    ] = None
+    ContractProvenanceResultV1_1: Annotated[
+        ContractProvenanceResultV1 | None, Field(alias='ContractProvenanceResultV1')
+    ] = None
+    ContractProvenanceResultV1Fragment1_1: Annotated[
+        ContractProvenanceResultV1Fragment1 | None,
+        Field(alias='ContractProvenanceResultV1Fragment1'),
+    ] = None
+    ContractProvenanceResultV1Fragment10_1: Annotated[
+        ContractProvenanceResultV1Fragment10 | None,
+        Field(alias='ContractProvenanceResultV1Fragment10'),
+    ] = None
+    ContractProvenanceResultV1Fragment100_1: Annotated[
+        ContractProvenanceResultV1Fragment100 | None,
+        Field(alias='ContractProvenanceResultV1Fragment100'),
+    ] = None
+    ContractProvenanceResultV1Fragment101_1: Annotated[
+        ContractProvenanceResultV1Fragment101 | None,
+        Field(alias='ContractProvenanceResultV1Fragment101'),
+    ] = None
+    ContractProvenanceResultV1Fragment102_1: Annotated[
+        ContractProvenanceResultV1Fragment102 | None,
+        Field(alias='ContractProvenanceResultV1Fragment102'),
+    ] = None
+    ContractProvenanceResultV1Fragment103_1: Annotated[
+        ContractProvenanceResultV1Fragment103 | None,
+        Field(alias='ContractProvenanceResultV1Fragment103'),
+    ] = None
+    ContractProvenanceResultV1Fragment104_1: Annotated[
+        ContractProvenanceResultV1Fragment104 | None,
+        Field(alias='ContractProvenanceResultV1Fragment104'),
+    ] = None
+    ContractProvenanceResultV1Fragment105_1: Annotated[
+        ContractProvenanceResultV1Fragment105 | None,
+        Field(alias='ContractProvenanceResultV1Fragment105'),
+    ] = None
+    ContractProvenanceResultV1Fragment106_1: Annotated[
+        ContractProvenanceResultV1Fragment106 | None,
+        Field(alias='ContractProvenanceResultV1Fragment106'),
+    ] = None
+    ContractProvenanceResultV1Fragment107_1: Annotated[
+        ContractProvenanceResultV1Fragment107 | None,
+        Field(alias='ContractProvenanceResultV1Fragment107'),
+    ] = None
+    ContractProvenanceResultV1Fragment108_1: Annotated[
+        ContractProvenanceResultV1Fragment108 | None,
+        Field(alias='ContractProvenanceResultV1Fragment108'),
+    ] = None
+    ContractProvenanceResultV1Fragment109_1: Annotated[
+        ContractProvenanceResultV1Fragment109 | None,
+        Field(alias='ContractProvenanceResultV1Fragment109'),
+    ] = None
+    ContractProvenanceResultV1Fragment11_1: Annotated[
+        ContractProvenanceResultV1Fragment11 | None,
+        Field(alias='ContractProvenanceResultV1Fragment11'),
+    ] = None
+    ContractProvenanceResultV1Fragment110_1: Annotated[
+        ContractProvenanceResultV1Fragment110 | None,
+        Field(alias='ContractProvenanceResultV1Fragment110'),
+    ] = None
+    ContractProvenanceResultV1Fragment111_1: Annotated[
+        ContractProvenanceResultV1Fragment111 | None,
+        Field(alias='ContractProvenanceResultV1Fragment111'),
+    ] = None
+    ContractProvenanceResultV1Fragment112_1: Annotated[
+        ContractProvenanceResultV1Fragment112 | None,
+        Field(alias='ContractProvenanceResultV1Fragment112'),
+    ] = None
+    ContractProvenanceResultV1Fragment113_1: Annotated[
+        ContractProvenanceResultV1Fragment113 | None,
+        Field(alias='ContractProvenanceResultV1Fragment113'),
+    ] = None
+    ContractProvenanceResultV1Fragment114_1: Annotated[
+        ContractProvenanceResultV1Fragment114 | None,
+        Field(alias='ContractProvenanceResultV1Fragment114'),
+    ] = None
+    ContractProvenanceResultV1Fragment115_1: Annotated[
+        ContractProvenanceResultV1Fragment115 | None,
+        Field(alias='ContractProvenanceResultV1Fragment115'),
+    ] = None
+    ContractProvenanceResultV1Fragment116_1: Annotated[
+        ContractProvenanceResultV1Fragment116 | None,
+        Field(alias='ContractProvenanceResultV1Fragment116'),
+    ] = None
+    ContractProvenanceResultV1Fragment117_1: Annotated[
+        ContractProvenanceResultV1Fragment117 | None,
+        Field(alias='ContractProvenanceResultV1Fragment117'),
+    ] = None
+    ContractProvenanceResultV1Fragment118_1: Annotated[
+        ContractProvenanceResultV1Fragment118 | None,
+        Field(alias='ContractProvenanceResultV1Fragment118'),
+    ] = None
+    ContractProvenanceResultV1Fragment119_1: Annotated[
+        ContractProvenanceResultV1Fragment119 | None,
+        Field(alias='ContractProvenanceResultV1Fragment119'),
+    ] = None
+    ContractProvenanceResultV1Fragment12_1: Annotated[
+        ContractProvenanceResultV1Fragment12 | None,
+        Field(alias='ContractProvenanceResultV1Fragment12'),
+    ] = None
+    ContractProvenanceResultV1Fragment120_1: Annotated[
+        ContractProvenanceResultV1Fragment120 | None,
+        Field(alias='ContractProvenanceResultV1Fragment120'),
+    ] = None
+    ContractProvenanceResultV1Fragment121_1: Annotated[
+        ContractProvenanceResultV1Fragment121 | None,
+        Field(alias='ContractProvenanceResultV1Fragment121'),
+    ] = None
+    ContractProvenanceResultV1Fragment122_1: Annotated[
+        ContractProvenanceResultV1Fragment122 | None,
+        Field(alias='ContractProvenanceResultV1Fragment122'),
+    ] = None
+    ContractProvenanceResultV1Fragment123_1: Annotated[
+        ContractProvenanceResultV1Fragment123 | None,
+        Field(alias='ContractProvenanceResultV1Fragment123'),
+    ] = None
+    ContractProvenanceResultV1Fragment124_1: Annotated[
+        ContractProvenanceResultV1Fragment124 | None,
+        Field(alias='ContractProvenanceResultV1Fragment124'),
+    ] = None
+    ContractProvenanceResultV1Fragment125_1: Annotated[
+        ContractProvenanceResultV1Fragment125 | None,
+        Field(alias='ContractProvenanceResultV1Fragment125'),
+    ] = None
+    ContractProvenanceResultV1Fragment126_1: Annotated[
+        ContractProvenanceResultV1Fragment126 | None,
+        Field(alias='ContractProvenanceResultV1Fragment126'),
+    ] = None
+    ContractProvenanceResultV1Fragment127_1: Annotated[
+        ContractProvenanceResultV1Fragment127 | None,
+        Field(alias='ContractProvenanceResultV1Fragment127'),
+    ] = None
+    ContractProvenanceResultV1Fragment128_1: Annotated[
+        ContractProvenanceResultV1Fragment128 | None,
+        Field(alias='ContractProvenanceResultV1Fragment128'),
+    ] = None
+    ContractProvenanceResultV1Fragment129_1: Annotated[
+        ContractProvenanceResultV1Fragment129 | None,
+        Field(alias='ContractProvenanceResultV1Fragment129'),
+    ] = None
+    ContractProvenanceResultV1Fragment13_1: Annotated[
+        ContractProvenanceResultV1Fragment13 | None,
+        Field(alias='ContractProvenanceResultV1Fragment13'),
+    ] = None
+    ContractProvenanceResultV1Fragment130_1: Annotated[
+        ContractProvenanceResultV1Fragment130 | None,
+        Field(alias='ContractProvenanceResultV1Fragment130'),
+    ] = None
+    ContractProvenanceResultV1Fragment131_1: Annotated[
+        ContractProvenanceResultV1Fragment131 | None,
+        Field(alias='ContractProvenanceResultV1Fragment131'),
+    ] = None
+    ContractProvenanceResultV1Fragment132_1: Annotated[
+        ContractProvenanceResultV1Fragment132 | None,
+        Field(alias='ContractProvenanceResultV1Fragment132'),
+    ] = None
+    ContractProvenanceResultV1Fragment133_1: Annotated[
+        ContractProvenanceResultV1Fragment133 | None,
+        Field(alias='ContractProvenanceResultV1Fragment133'),
+    ] = None
+    ContractProvenanceResultV1Fragment134_1: Annotated[
+        ContractProvenanceResultV1Fragment134 | None,
+        Field(alias='ContractProvenanceResultV1Fragment134'),
+    ] = None
+    ContractProvenanceResultV1Fragment135_1: Annotated[
+        ContractProvenanceResultV1Fragment135 | None,
+        Field(alias='ContractProvenanceResultV1Fragment135'),
+    ] = None
+    ContractProvenanceResultV1Fragment136_1: Annotated[
+        ContractProvenanceResultV1Fragment136 | None,
+        Field(alias='ContractProvenanceResultV1Fragment136'),
+    ] = None
+    ContractProvenanceResultV1Fragment137_1: Annotated[
+        ContractProvenanceResultV1Fragment137 | None,
+        Field(alias='ContractProvenanceResultV1Fragment137'),
+    ] = None
+    ContractProvenanceResultV1Fragment138_1: Annotated[
+        ContractProvenanceResultV1Fragment138 | None,
+        Field(alias='ContractProvenanceResultV1Fragment138'),
+    ] = None
+    ContractProvenanceResultV1Fragment139_1: Annotated[
+        ContractProvenanceResultV1Fragment139 | None,
+        Field(alias='ContractProvenanceResultV1Fragment139'),
+    ] = None
+    ContractProvenanceResultV1Fragment14_1: Annotated[
+        ContractProvenanceResultV1Fragment14 | None,
+        Field(alias='ContractProvenanceResultV1Fragment14'),
+    ] = None
+    ContractProvenanceResultV1Fragment140_1: Annotated[
+        ContractProvenanceResultV1Fragment140 | None,
+        Field(alias='ContractProvenanceResultV1Fragment140'),
+    ] = None
+    ContractProvenanceResultV1Fragment141_1: Annotated[
+        ContractProvenanceResultV1Fragment141 | None,
+        Field(alias='ContractProvenanceResultV1Fragment141'),
+    ] = None
+    ContractProvenanceResultV1Fragment142_1: Annotated[
+        ContractProvenanceResultV1Fragment142 | None,
+        Field(alias='ContractProvenanceResultV1Fragment142'),
+    ] = None
+    ContractProvenanceResultV1Fragment143_1: Annotated[
+        ContractProvenanceResultV1Fragment143 | None,
+        Field(alias='ContractProvenanceResultV1Fragment143'),
+    ] = None
+    ContractProvenanceResultV1Fragment144_1: Annotated[
+        ContractProvenanceResultV1Fragment144 | None,
+        Field(alias='ContractProvenanceResultV1Fragment144'),
+    ] = None
+    ContractProvenanceResultV1Fragment145_1: Annotated[
+        ContractProvenanceResultV1Fragment145 | None,
+        Field(alias='ContractProvenanceResultV1Fragment145'),
+    ] = None
+    ContractProvenanceResultV1Fragment146_1: Annotated[
+        ContractProvenanceResultV1Fragment146 | None,
+        Field(alias='ContractProvenanceResultV1Fragment146'),
+    ] = None
+    ContractProvenanceResultV1Fragment147_1: Annotated[
+        ContractProvenanceResultV1Fragment147 | None,
+        Field(alias='ContractProvenanceResultV1Fragment147'),
+    ] = None
+    ContractProvenanceResultV1Fragment148_1: Annotated[
+        ContractProvenanceResultV1Fragment148 | None,
+        Field(alias='ContractProvenanceResultV1Fragment148'),
+    ] = None
+    ContractProvenanceResultV1Fragment149_1: Annotated[
+        ContractProvenanceResultV1Fragment149 | None,
+        Field(alias='ContractProvenanceResultV1Fragment149'),
+    ] = None
+    ContractProvenanceResultV1Fragment15_1: Annotated[
+        ContractProvenanceResultV1Fragment15 | None,
+        Field(alias='ContractProvenanceResultV1Fragment15'),
+    ] = None
+    ContractProvenanceResultV1Fragment150_1: Annotated[
+        ContractProvenanceResultV1Fragment150 | None,
+        Field(alias='ContractProvenanceResultV1Fragment150'),
+    ] = None
+    ContractProvenanceResultV1Fragment151_1: Annotated[
+        ContractProvenanceResultV1Fragment151 | None,
+        Field(alias='ContractProvenanceResultV1Fragment151'),
+    ] = None
+    ContractProvenanceResultV1Fragment152_1: Annotated[
+        ContractProvenanceResultV1Fragment152 | None,
+        Field(alias='ContractProvenanceResultV1Fragment152'),
+    ] = None
+    ContractProvenanceResultV1Fragment153_1: Annotated[
+        ContractProvenanceResultV1Fragment153 | None,
+        Field(alias='ContractProvenanceResultV1Fragment153'),
+    ] = None
+    ContractProvenanceResultV1Fragment154_1: Annotated[
+        ContractProvenanceResultV1Fragment154 | None,
+        Field(alias='ContractProvenanceResultV1Fragment154'),
+    ] = None
+    ContractProvenanceResultV1Fragment155_1: Annotated[
+        ContractProvenanceResultV1Fragment155 | None,
+        Field(alias='ContractProvenanceResultV1Fragment155'),
+    ] = None
+    ContractProvenanceResultV1Fragment156_1: Annotated[
+        ContractProvenanceResultV1Fragment156 | None,
+        Field(alias='ContractProvenanceResultV1Fragment156'),
+    ] = None
+    ContractProvenanceResultV1Fragment157_1: Annotated[
+        ContractProvenanceResultV1Fragment157 | None,
+        Field(alias='ContractProvenanceResultV1Fragment157'),
+    ] = None
+    ContractProvenanceResultV1Fragment158_1: Annotated[
+        ContractProvenanceResultV1Fragment158 | None,
+        Field(alias='ContractProvenanceResultV1Fragment158'),
+    ] = None
+    ContractProvenanceResultV1Fragment159_1: Annotated[
+        ContractProvenanceResultV1Fragment159 | None,
+        Field(alias='ContractProvenanceResultV1Fragment159'),
+    ] = None
+    ContractProvenanceResultV1Fragment16_1: Annotated[
+        ContractProvenanceResultV1Fragment16 | None,
+        Field(alias='ContractProvenanceResultV1Fragment16'),
+    ] = None
+    ContractProvenanceResultV1Fragment160_1: Annotated[
+        ContractProvenanceResultV1Fragment160 | None,
+        Field(alias='ContractProvenanceResultV1Fragment160'),
+    ] = None
+    ContractProvenanceResultV1Fragment161_1: Annotated[
+        ContractProvenanceResultV1Fragment161 | None,
+        Field(alias='ContractProvenanceResultV1Fragment161'),
+    ] = None
+    ContractProvenanceResultV1Fragment162_1: Annotated[
+        ContractProvenanceResultV1Fragment162 | None,
+        Field(alias='ContractProvenanceResultV1Fragment162'),
+    ] = None
+    ContractProvenanceResultV1Fragment163_1: Annotated[
+        ContractProvenanceResultV1Fragment163 | None,
+        Field(alias='ContractProvenanceResultV1Fragment163'),
+    ] = None
+    ContractProvenanceResultV1Fragment164_1: Annotated[
+        ContractProvenanceResultV1Fragment164 | None,
+        Field(alias='ContractProvenanceResultV1Fragment164'),
+    ] = None
+    ContractProvenanceResultV1Fragment165_1: Annotated[
+        ContractProvenanceResultV1Fragment165 | None,
+        Field(alias='ContractProvenanceResultV1Fragment165'),
+    ] = None
+    ContractProvenanceResultV1Fragment166_1: Annotated[
+        ContractProvenanceResultV1Fragment166 | None,
+        Field(alias='ContractProvenanceResultV1Fragment166'),
+    ] = None
+    ContractProvenanceResultV1Fragment167_1: Annotated[
+        ContractProvenanceResultV1Fragment167 | None,
+        Field(alias='ContractProvenanceResultV1Fragment167'),
+    ] = None
+    ContractProvenanceResultV1Fragment168_1: Annotated[
+        ContractProvenanceResultV1Fragment168 | None,
+        Field(alias='ContractProvenanceResultV1Fragment168'),
+    ] = None
+    ContractProvenanceResultV1Fragment169_1: Annotated[
+        ContractProvenanceResultV1Fragment169 | None,
+        Field(alias='ContractProvenanceResultV1Fragment169'),
+    ] = None
+    ContractProvenanceResultV1Fragment17_1: Annotated[
+        ContractProvenanceResultV1Fragment17 | None,
+        Field(alias='ContractProvenanceResultV1Fragment17'),
+    ] = None
+    ContractProvenanceResultV1Fragment170_1: Annotated[
+        ContractProvenanceResultV1Fragment170 | None,
+        Field(alias='ContractProvenanceResultV1Fragment170'),
+    ] = None
+    ContractProvenanceResultV1Fragment171_1: Annotated[
+        ContractProvenanceResultV1Fragment171 | None,
+        Field(alias='ContractProvenanceResultV1Fragment171'),
+    ] = None
+    ContractProvenanceResultV1Fragment172_1: Annotated[
+        ContractProvenanceResultV1Fragment172 | None,
+        Field(alias='ContractProvenanceResultV1Fragment172'),
+    ] = None
+    ContractProvenanceResultV1Fragment173_1: Annotated[
+        ContractProvenanceResultV1Fragment173 | None,
+        Field(alias='ContractProvenanceResultV1Fragment173'),
+    ] = None
+    ContractProvenanceResultV1Fragment174_1: Annotated[
+        ContractProvenanceResultV1Fragment174 | None,
+        Field(alias='ContractProvenanceResultV1Fragment174'),
+    ] = None
+    ContractProvenanceResultV1Fragment175_1: Annotated[
+        ContractProvenanceResultV1Fragment175 | None,
+        Field(alias='ContractProvenanceResultV1Fragment175'),
+    ] = None
+    ContractProvenanceResultV1Fragment176_1: Annotated[
+        ContractProvenanceResultV1Fragment176 | None,
+        Field(alias='ContractProvenanceResultV1Fragment176'),
+    ] = None
+    ContractProvenanceResultV1Fragment177_1: Annotated[
+        ContractProvenanceResultV1Fragment177 | None,
+        Field(alias='ContractProvenanceResultV1Fragment177'),
+    ] = None
+    ContractProvenanceResultV1Fragment178_1: Annotated[
+        ContractProvenanceResultV1Fragment178 | None,
+        Field(alias='ContractProvenanceResultV1Fragment178'),
+    ] = None
+    ContractProvenanceResultV1Fragment179_1: Annotated[
+        ContractProvenanceResultV1Fragment179 | None,
+        Field(alias='ContractProvenanceResultV1Fragment179'),
+    ] = None
+    ContractProvenanceResultV1Fragment18_1: Annotated[
+        ContractProvenanceResultV1Fragment18 | None,
+        Field(alias='ContractProvenanceResultV1Fragment18'),
+    ] = None
+    ContractProvenanceResultV1Fragment180_1: Annotated[
+        ContractProvenanceResultV1Fragment180 | None,
+        Field(alias='ContractProvenanceResultV1Fragment180'),
+    ] = None
+    ContractProvenanceResultV1Fragment181_1: Annotated[
+        ContractProvenanceResultV1Fragment181 | None,
+        Field(alias='ContractProvenanceResultV1Fragment181'),
+    ] = None
+    ContractProvenanceResultV1Fragment182_1: Annotated[
+        ContractProvenanceResultV1Fragment182 | None,
+        Field(alias='ContractProvenanceResultV1Fragment182'),
+    ] = None
+    ContractProvenanceResultV1Fragment183_1: Annotated[
+        ContractProvenanceResultV1Fragment183 | None,
+        Field(alias='ContractProvenanceResultV1Fragment183'),
+    ] = None
+    ContractProvenanceResultV1Fragment184_1: Annotated[
+        ContractProvenanceResultV1Fragment184 | None,
+        Field(alias='ContractProvenanceResultV1Fragment184'),
+    ] = None
+    ContractProvenanceResultV1Fragment185_1: Annotated[
+        ContractProvenanceResultV1Fragment185 | None,
+        Field(alias='ContractProvenanceResultV1Fragment185'),
+    ] = None
+    ContractProvenanceResultV1Fragment186_1: Annotated[
+        ContractProvenanceResultV1Fragment186 | None,
+        Field(alias='ContractProvenanceResultV1Fragment186'),
+    ] = None
+    ContractProvenanceResultV1Fragment187_1: Annotated[
+        ContractProvenanceResultV1Fragment187 | None,
+        Field(alias='ContractProvenanceResultV1Fragment187'),
+    ] = None
+    ContractProvenanceResultV1Fragment188_1: Annotated[
+        ContractProvenanceResultV1Fragment188 | None,
+        Field(alias='ContractProvenanceResultV1Fragment188'),
+    ] = None
+    ContractProvenanceResultV1Fragment189_1: Annotated[
+        ContractProvenanceResultV1Fragment189 | None,
+        Field(alias='ContractProvenanceResultV1Fragment189'),
+    ] = None
+    ContractProvenanceResultV1Fragment19_1: Annotated[
+        ContractProvenanceResultV1Fragment19 | None,
+        Field(alias='ContractProvenanceResultV1Fragment19'),
+    ] = None
+    ContractProvenanceResultV1Fragment190_1: Annotated[
+        ContractProvenanceResultV1Fragment190 | None,
+        Field(alias='ContractProvenanceResultV1Fragment190'),
+    ] = None
+    ContractProvenanceResultV1Fragment191_1: Annotated[
+        ContractProvenanceResultV1Fragment191 | None,
+        Field(alias='ContractProvenanceResultV1Fragment191'),
+    ] = None
+    ContractProvenanceResultV1Fragment192_1: Annotated[
+        ContractProvenanceResultV1Fragment192 | None,
+        Field(alias='ContractProvenanceResultV1Fragment192'),
+    ] = None
+    ContractProvenanceResultV1Fragment193_1: Annotated[
+        ContractProvenanceResultV1Fragment193 | None,
+        Field(alias='ContractProvenanceResultV1Fragment193'),
+    ] = None
+    ContractProvenanceResultV1Fragment194_1: Annotated[
+        ContractProvenanceResultV1Fragment194 | None,
+        Field(alias='ContractProvenanceResultV1Fragment194'),
+    ] = None
+    ContractProvenanceResultV1Fragment195_1: Annotated[
+        ContractProvenanceResultV1Fragment195 | None,
+        Field(alias='ContractProvenanceResultV1Fragment195'),
+    ] = None
+    ContractProvenanceResultV1Fragment196_1: Annotated[
+        ContractProvenanceResultV1Fragment196 | None,
+        Field(alias='ContractProvenanceResultV1Fragment196'),
+    ] = None
+    ContractProvenanceResultV1Fragment197_1: Annotated[
+        ContractProvenanceResultV1Fragment197 | None,
+        Field(alias='ContractProvenanceResultV1Fragment197'),
+    ] = None
+    ContractProvenanceResultV1Fragment198_1: Annotated[
+        ContractProvenanceResultV1Fragment198 | None,
+        Field(alias='ContractProvenanceResultV1Fragment198'),
+    ] = None
+    ContractProvenanceResultV1Fragment199_1: Annotated[
+        ContractProvenanceResultV1Fragment199 | None,
+        Field(alias='ContractProvenanceResultV1Fragment199'),
+    ] = None
+    ContractProvenanceResultV1Fragment2_1: Annotated[
+        ContractProvenanceResultV1Fragment2 | None,
+        Field(alias='ContractProvenanceResultV1Fragment2'),
+    ] = None
+    ContractProvenanceResultV1Fragment20_1: Annotated[
+        ContractProvenanceResultV1Fragment20 | None,
+        Field(alias='ContractProvenanceResultV1Fragment20'),
+    ] = None
+    ContractProvenanceResultV1Fragment200_1: Annotated[
+        ContractProvenanceResultV1Fragment200 | None,
+        Field(alias='ContractProvenanceResultV1Fragment200'),
+    ] = None
+    ContractProvenanceResultV1Fragment201_1: Annotated[
+        ContractProvenanceResultV1Fragment201 | None,
+        Field(alias='ContractProvenanceResultV1Fragment201'),
+    ] = None
+    ContractProvenanceResultV1Fragment202_1: Annotated[
+        ContractProvenanceResultV1Fragment202 | None,
+        Field(alias='ContractProvenanceResultV1Fragment202'),
+    ] = None
+    ContractProvenanceResultV1Fragment203_1: Annotated[
+        ContractProvenanceResultV1Fragment203 | None,
+        Field(alias='ContractProvenanceResultV1Fragment203'),
+    ] = None
+    ContractProvenanceResultV1Fragment204_1: Annotated[
+        ContractProvenanceResultV1Fragment204 | None,
+        Field(alias='ContractProvenanceResultV1Fragment204'),
+    ] = None
+    ContractProvenanceResultV1Fragment205_1: Annotated[
+        ContractProvenanceResultV1Fragment205 | None,
+        Field(alias='ContractProvenanceResultV1Fragment205'),
+    ] = None
+    ContractProvenanceResultV1Fragment206_1: Annotated[
+        ContractProvenanceResultV1Fragment206 | None,
+        Field(alias='ContractProvenanceResultV1Fragment206'),
+    ] = None
+    ContractProvenanceResultV1Fragment207_1: Annotated[
+        ContractProvenanceResultV1Fragment207 | None,
+        Field(alias='ContractProvenanceResultV1Fragment207'),
+    ] = None
+    ContractProvenanceResultV1Fragment208_1: Annotated[
+        ContractProvenanceResultV1Fragment208 | None,
+        Field(alias='ContractProvenanceResultV1Fragment208'),
+    ] = None
+    ContractProvenanceResultV1Fragment209_1: Annotated[
+        ContractProvenanceResultV1Fragment209 | None,
+        Field(alias='ContractProvenanceResultV1Fragment209'),
+    ] = None
+    ContractProvenanceResultV1Fragment21_1: Annotated[
+        ContractProvenanceResultV1Fragment21 | None,
+        Field(alias='ContractProvenanceResultV1Fragment21'),
+    ] = None
+    ContractProvenanceResultV1Fragment210_1: Annotated[
+        ContractProvenanceResultV1Fragment210 | None,
+        Field(alias='ContractProvenanceResultV1Fragment210'),
+    ] = None
+    ContractProvenanceResultV1Fragment211_1: Annotated[
+        ContractProvenanceResultV1Fragment211 | None,
+        Field(alias='ContractProvenanceResultV1Fragment211'),
+    ] = None
+    ContractProvenanceResultV1Fragment212_1: Annotated[
+        ContractProvenanceResultV1Fragment212 | None,
+        Field(alias='ContractProvenanceResultV1Fragment212'),
+    ] = None
+    ContractProvenanceResultV1Fragment213_1: Annotated[
+        ContractProvenanceResultV1Fragment213 | None,
+        Field(alias='ContractProvenanceResultV1Fragment213'),
+    ] = None
+    ContractProvenanceResultV1Fragment214_1: Annotated[
+        ContractProvenanceResultV1Fragment214 | None,
+        Field(alias='ContractProvenanceResultV1Fragment214'),
+    ] = None
+    ContractProvenanceResultV1Fragment215_1: Annotated[
+        ContractProvenanceResultV1Fragment215 | None,
+        Field(alias='ContractProvenanceResultV1Fragment215'),
+    ] = None
+    ContractProvenanceResultV1Fragment216_1: Annotated[
+        ContractProvenanceResultV1Fragment216 | None,
+        Field(alias='ContractProvenanceResultV1Fragment216'),
+    ] = None
+    ContractProvenanceResultV1Fragment217_1: Annotated[
+        ContractProvenanceResultV1Fragment217 | None,
+        Field(alias='ContractProvenanceResultV1Fragment217'),
+    ] = None
+    ContractProvenanceResultV1Fragment218_1: Annotated[
+        ContractProvenanceResultV1Fragment218 | None,
+        Field(alias='ContractProvenanceResultV1Fragment218'),
+    ] = None
+    ContractProvenanceResultV1Fragment219_1: Annotated[
+        ContractProvenanceResultV1Fragment219 | None,
+        Field(alias='ContractProvenanceResultV1Fragment219'),
+    ] = None
+    ContractProvenanceResultV1Fragment22_1: Annotated[
+        ContractProvenanceResultV1Fragment22 | None,
+        Field(alias='ContractProvenanceResultV1Fragment22'),
+    ] = None
+    ContractProvenanceResultV1Fragment220_1: Annotated[
+        ContractProvenanceResultV1Fragment220 | None,
+        Field(alias='ContractProvenanceResultV1Fragment220'),
+    ] = None
+    ContractProvenanceResultV1Fragment221_1: Annotated[
+        ContractProvenanceResultV1Fragment221 | None,
+        Field(alias='ContractProvenanceResultV1Fragment221'),
+    ] = None
+    ContractProvenanceResultV1Fragment222_1: Annotated[
+        ContractProvenanceResultV1Fragment222 | None,
+        Field(alias='ContractProvenanceResultV1Fragment222'),
+    ] = None
+    ContractProvenanceResultV1Fragment223_1: Annotated[
+        ContractProvenanceResultV1Fragment223 | None,
+        Field(alias='ContractProvenanceResultV1Fragment223'),
+    ] = None
+    ContractProvenanceResultV1Fragment224_1: Annotated[
+        ContractProvenanceResultV1Fragment224 | None,
+        Field(alias='ContractProvenanceResultV1Fragment224'),
+    ] = None
+    ContractProvenanceResultV1Fragment225_1: Annotated[
+        ContractProvenanceResultV1Fragment225 | None,
+        Field(alias='ContractProvenanceResultV1Fragment225'),
+    ] = None
+    ContractProvenanceResultV1Fragment226_1: Annotated[
+        ContractProvenanceResultV1Fragment226 | None,
+        Field(alias='ContractProvenanceResultV1Fragment226'),
+    ] = None
+    ContractProvenanceResultV1Fragment227_1: Annotated[
+        ContractProvenanceResultV1Fragment227 | None,
+        Field(alias='ContractProvenanceResultV1Fragment227'),
+    ] = None
+    ContractProvenanceResultV1Fragment228_1: Annotated[
+        ContractProvenanceResultV1Fragment228 | None,
+        Field(alias='ContractProvenanceResultV1Fragment228'),
+    ] = None
+    ContractProvenanceResultV1Fragment229_1: Annotated[
+        ContractProvenanceResultV1Fragment229 | None,
+        Field(alias='ContractProvenanceResultV1Fragment229'),
+    ] = None
+    ContractProvenanceResultV1Fragment23_1: Annotated[
+        ContractProvenanceResultV1Fragment23 | None,
+        Field(alias='ContractProvenanceResultV1Fragment23'),
+    ] = None
+    ContractProvenanceResultV1Fragment230_1: Annotated[
+        ContractProvenanceResultV1Fragment230 | None,
+        Field(alias='ContractProvenanceResultV1Fragment230'),
+    ] = None
+    ContractProvenanceResultV1Fragment231_1: Annotated[
+        ContractProvenanceResultV1Fragment231 | None,
+        Field(alias='ContractProvenanceResultV1Fragment231'),
+    ] = None
+    ContractProvenanceResultV1Fragment232_1: Annotated[
+        ContractProvenanceResultV1Fragment232 | None,
+        Field(alias='ContractProvenanceResultV1Fragment232'),
+    ] = None
+    ContractProvenanceResultV1Fragment233_1: Annotated[
+        ContractProvenanceResultV1Fragment233 | None,
+        Field(alias='ContractProvenanceResultV1Fragment233'),
+    ] = None
+    ContractProvenanceResultV1Fragment234_1: Annotated[
+        ContractProvenanceResultV1Fragment234 | None,
+        Field(alias='ContractProvenanceResultV1Fragment234'),
+    ] = None
+    ContractProvenanceResultV1Fragment235_1: Annotated[
+        ContractProvenanceResultV1Fragment235 | None,
+        Field(alias='ContractProvenanceResultV1Fragment235'),
+    ] = None
+    ContractProvenanceResultV1Fragment236_1: Annotated[
+        ContractProvenanceResultV1Fragment236 | None,
+        Field(alias='ContractProvenanceResultV1Fragment236'),
+    ] = None
+    ContractProvenanceResultV1Fragment237_1: Annotated[
+        ContractProvenanceResultV1Fragment237 | None,
+        Field(alias='ContractProvenanceResultV1Fragment237'),
+    ] = None
+    ContractProvenanceResultV1Fragment238_1: Annotated[
+        ContractProvenanceResultV1Fragment238 | None,
+        Field(alias='ContractProvenanceResultV1Fragment238'),
+    ] = None
+    ContractProvenanceResultV1Fragment239_1: Annotated[
+        ContractProvenanceResultV1Fragment239 | None,
+        Field(alias='ContractProvenanceResultV1Fragment239'),
+    ] = None
+    ContractProvenanceResultV1Fragment24_1: Annotated[
+        ContractProvenanceResultV1Fragment24 | None,
+        Field(alias='ContractProvenanceResultV1Fragment24'),
+    ] = None
+    ContractProvenanceResultV1Fragment240_1: Annotated[
+        ContractProvenanceResultV1Fragment240 | None,
+        Field(alias='ContractProvenanceResultV1Fragment240'),
+    ] = None
+    ContractProvenanceResultV1Fragment241_1: Annotated[
+        ContractProvenanceResultV1Fragment241 | None,
+        Field(alias='ContractProvenanceResultV1Fragment241'),
+    ] = None
+    ContractProvenanceResultV1Fragment242_1: Annotated[
+        ContractProvenanceResultV1Fragment242 | None,
+        Field(alias='ContractProvenanceResultV1Fragment242'),
+    ] = None
+    ContractProvenanceResultV1Fragment243_1: Annotated[
+        ContractProvenanceResultV1Fragment243 | None,
+        Field(alias='ContractProvenanceResultV1Fragment243'),
+    ] = None
+    ContractProvenanceResultV1Fragment244_1: Annotated[
+        ContractProvenanceResultV1Fragment244 | None,
+        Field(alias='ContractProvenanceResultV1Fragment244'),
+    ] = None
+    ContractProvenanceResultV1Fragment245_1: Annotated[
+        ContractProvenanceResultV1Fragment245 | None,
+        Field(alias='ContractProvenanceResultV1Fragment245'),
+    ] = None
+    ContractProvenanceResultV1Fragment246_1: Annotated[
+        ContractProvenanceResultV1Fragment246 | None,
+        Field(alias='ContractProvenanceResultV1Fragment246'),
+    ] = None
+    ContractProvenanceResultV1Fragment247_1: Annotated[
+        ContractProvenanceResultV1Fragment247 | None,
+        Field(alias='ContractProvenanceResultV1Fragment247'),
+    ] = None
+    ContractProvenanceResultV1Fragment248_1: Annotated[
+        ContractProvenanceResultV1Fragment248 | None,
+        Field(alias='ContractProvenanceResultV1Fragment248'),
+    ] = None
+    ContractProvenanceResultV1Fragment249_1: Annotated[
+        ContractProvenanceResultV1Fragment249 | None,
+        Field(alias='ContractProvenanceResultV1Fragment249'),
+    ] = None
+    ContractProvenanceResultV1Fragment25_1: Annotated[
+        ContractProvenanceResultV1Fragment25 | None,
+        Field(alias='ContractProvenanceResultV1Fragment25'),
+    ] = None
+    ContractProvenanceResultV1Fragment250_1: Annotated[
+        ContractProvenanceResultV1Fragment250 | None,
+        Field(alias='ContractProvenanceResultV1Fragment250'),
+    ] = None
+    ContractProvenanceResultV1Fragment251_1: Annotated[
+        ContractProvenanceResultV1Fragment251 | None,
+        Field(alias='ContractProvenanceResultV1Fragment251'),
+    ] = None
+    ContractProvenanceResultV1Fragment252_1: Annotated[
+        ContractProvenanceResultV1Fragment252 | None,
+        Field(alias='ContractProvenanceResultV1Fragment252'),
+    ] = None
+    ContractProvenanceResultV1Fragment253_1: Annotated[
+        ContractProvenanceResultV1Fragment253 | None,
+        Field(alias='ContractProvenanceResultV1Fragment253'),
+    ] = None
+    ContractProvenanceResultV1Fragment254_1: Annotated[
+        ContractProvenanceResultV1Fragment254 | None,
+        Field(alias='ContractProvenanceResultV1Fragment254'),
+    ] = None
+    ContractProvenanceResultV1Fragment255_1: Annotated[
+        ContractProvenanceResultV1Fragment255 | None,
+        Field(alias='ContractProvenanceResultV1Fragment255'),
+    ] = None
+    ContractProvenanceResultV1Fragment256_1: Annotated[
+        ContractProvenanceResultV1Fragment256 | None,
+        Field(alias='ContractProvenanceResultV1Fragment256'),
+    ] = None
+    ContractProvenanceResultV1Fragment257_1: Annotated[
+        ContractProvenanceResultV1Fragment257 | None,
+        Field(alias='ContractProvenanceResultV1Fragment257'),
+    ] = None
+    ContractProvenanceResultV1Fragment258_1: Annotated[
+        ContractProvenanceResultV1Fragment258 | None,
+        Field(alias='ContractProvenanceResultV1Fragment258'),
+    ] = None
+    ContractProvenanceResultV1Fragment259_1: Annotated[
+        ContractProvenanceResultV1Fragment259 | None,
+        Field(alias='ContractProvenanceResultV1Fragment259'),
+    ] = None
+    ContractProvenanceResultV1Fragment26_1: Annotated[
+        ContractProvenanceResultV1Fragment26 | None,
+        Field(alias='ContractProvenanceResultV1Fragment26'),
+    ] = None
+    ContractProvenanceResultV1Fragment260_1: Annotated[
+        ContractProvenanceResultV1Fragment260 | None,
+        Field(alias='ContractProvenanceResultV1Fragment260'),
+    ] = None
+    ContractProvenanceResultV1Fragment261_1: Annotated[
+        ContractProvenanceResultV1Fragment261 | None,
+        Field(alias='ContractProvenanceResultV1Fragment261'),
+    ] = None
+    ContractProvenanceResultV1Fragment262_1: Annotated[
+        ContractProvenanceResultV1Fragment262 | None,
+        Field(alias='ContractProvenanceResultV1Fragment262'),
+    ] = None
+    ContractProvenanceResultV1Fragment263_1: Annotated[
+        ContractProvenanceResultV1Fragment263 | None,
+        Field(alias='ContractProvenanceResultV1Fragment263'),
+    ] = None
+    ContractProvenanceResultV1Fragment264_1: Annotated[
+        ContractProvenanceResultV1Fragment264 | None,
+        Field(alias='ContractProvenanceResultV1Fragment264'),
+    ] = None
+    ContractProvenanceResultV1Fragment265_1: Annotated[
+        ContractProvenanceResultV1Fragment265 | None,
+        Field(alias='ContractProvenanceResultV1Fragment265'),
+    ] = None
+    ContractProvenanceResultV1Fragment266_1: Annotated[
+        ContractProvenanceResultV1Fragment266 | None,
+        Field(alias='ContractProvenanceResultV1Fragment266'),
+    ] = None
+    ContractProvenanceResultV1Fragment267_1: Annotated[
+        ContractProvenanceResultV1Fragment267 | None,
+        Field(alias='ContractProvenanceResultV1Fragment267'),
+    ] = None
+    ContractProvenanceResultV1Fragment268_1: Annotated[
+        ContractProvenanceResultV1Fragment268 | None,
+        Field(alias='ContractProvenanceResultV1Fragment268'),
+    ] = None
+    ContractProvenanceResultV1Fragment269_1: Annotated[
+        ContractProvenanceResultV1Fragment269 | None,
+        Field(alias='ContractProvenanceResultV1Fragment269'),
+    ] = None
+    ContractProvenanceResultV1Fragment27_1: Annotated[
+        ContractProvenanceResultV1Fragment27 | None,
+        Field(alias='ContractProvenanceResultV1Fragment27'),
+    ] = None
+    ContractProvenanceResultV1Fragment270_1: Annotated[
+        ContractProvenanceResultV1Fragment270 | None,
+        Field(alias='ContractProvenanceResultV1Fragment270'),
+    ] = None
+    ContractProvenanceResultV1Fragment271_1: Annotated[
+        ContractProvenanceResultV1Fragment271 | None,
+        Field(alias='ContractProvenanceResultV1Fragment271'),
+    ] = None
+    ContractProvenanceResultV1Fragment272_1: Annotated[
+        ContractProvenanceResultV1Fragment272 | None,
+        Field(alias='ContractProvenanceResultV1Fragment272'),
+    ] = None
+    ContractProvenanceResultV1Fragment273_1: Annotated[
+        ContractProvenanceResultV1Fragment273 | None,
+        Field(alias='ContractProvenanceResultV1Fragment273'),
+    ] = None
+    ContractProvenanceResultV1Fragment274_1: Annotated[
+        ContractProvenanceResultV1Fragment274 | None,
+        Field(alias='ContractProvenanceResultV1Fragment274'),
+    ] = None
+    ContractProvenanceResultV1Fragment275_1: Annotated[
+        ContractProvenanceResultV1Fragment275 | None,
+        Field(alias='ContractProvenanceResultV1Fragment275'),
+    ] = None
+    ContractProvenanceResultV1Fragment276_1: Annotated[
+        ContractProvenanceResultV1Fragment276 | None,
+        Field(alias='ContractProvenanceResultV1Fragment276'),
+    ] = None
+    ContractProvenanceResultV1Fragment277_1: Annotated[
+        ContractProvenanceResultV1Fragment277 | None,
+        Field(alias='ContractProvenanceResultV1Fragment277'),
+    ] = None
+    ContractProvenanceResultV1Fragment278_1: Annotated[
+        ContractProvenanceResultV1Fragment278 | None,
+        Field(alias='ContractProvenanceResultV1Fragment278'),
+    ] = None
+    ContractProvenanceResultV1Fragment279_1: Annotated[
+        ContractProvenanceResultV1Fragment279 | None,
+        Field(alias='ContractProvenanceResultV1Fragment279'),
+    ] = None
+    ContractProvenanceResultV1Fragment28_1: Annotated[
+        ContractProvenanceResultV1Fragment28 | None,
+        Field(alias='ContractProvenanceResultV1Fragment28'),
+    ] = None
+    ContractProvenanceResultV1Fragment280_1: Annotated[
+        ContractProvenanceResultV1Fragment280 | None,
+        Field(alias='ContractProvenanceResultV1Fragment280'),
+    ] = None
+    ContractProvenanceResultV1Fragment281_1: Annotated[
+        ContractProvenanceResultV1Fragment281 | None,
+        Field(alias='ContractProvenanceResultV1Fragment281'),
+    ] = None
+    ContractProvenanceResultV1Fragment282_1: Annotated[
+        ContractProvenanceResultV1Fragment282 | None,
+        Field(alias='ContractProvenanceResultV1Fragment282'),
+    ] = None
+    ContractProvenanceResultV1Fragment283_1: Annotated[
+        ContractProvenanceResultV1Fragment283 | None,
+        Field(alias='ContractProvenanceResultV1Fragment283'),
+    ] = None
+    ContractProvenanceResultV1Fragment284_1: Annotated[
+        ContractProvenanceResultV1Fragment284 | None,
+        Field(alias='ContractProvenanceResultV1Fragment284'),
+    ] = None
+    ContractProvenanceResultV1Fragment285_1: Annotated[
+        ContractProvenanceResultV1Fragment285 | None,
+        Field(alias='ContractProvenanceResultV1Fragment285'),
+    ] = None
+    ContractProvenanceResultV1Fragment286_1: Annotated[
+        ContractProvenanceResultV1Fragment286 | None,
+        Field(alias='ContractProvenanceResultV1Fragment286'),
+    ] = None
+    ContractProvenanceResultV1Fragment287_1: Annotated[
+        ContractProvenanceResultV1Fragment287 | None,
+        Field(alias='ContractProvenanceResultV1Fragment287'),
+    ] = None
+    ContractProvenanceResultV1Fragment288_1: Annotated[
+        ContractProvenanceResultV1Fragment288 | None,
+        Field(alias='ContractProvenanceResultV1Fragment288'),
+    ] = None
+    ContractProvenanceResultV1Fragment289_1: Annotated[
+        ContractProvenanceResultV1Fragment289 | None,
+        Field(alias='ContractProvenanceResultV1Fragment289'),
+    ] = None
+    ContractProvenanceResultV1Fragment29_1: Annotated[
+        ContractProvenanceResultV1Fragment29 | None,
+        Field(alias='ContractProvenanceResultV1Fragment29'),
+    ] = None
+    ContractProvenanceResultV1Fragment290_1: Annotated[
+        ContractProvenanceResultV1Fragment290 | None,
+        Field(alias='ContractProvenanceResultV1Fragment290'),
+    ] = None
+    ContractProvenanceResultV1Fragment291_1: Annotated[
+        ContractProvenanceResultV1Fragment291 | None,
+        Field(alias='ContractProvenanceResultV1Fragment291'),
+    ] = None
+    ContractProvenanceResultV1Fragment292_1: Annotated[
+        ContractProvenanceResultV1Fragment292 | None,
+        Field(alias='ContractProvenanceResultV1Fragment292'),
+    ] = None
+    ContractProvenanceResultV1Fragment293_1: Annotated[
+        ContractProvenanceResultV1Fragment293 | None,
+        Field(alias='ContractProvenanceResultV1Fragment293'),
+    ] = None
+    ContractProvenanceResultV1Fragment294_1: Annotated[
+        ContractProvenanceResultV1Fragment294 | None,
+        Field(alias='ContractProvenanceResultV1Fragment294'),
+    ] = None
+    ContractProvenanceResultV1Fragment295_1: Annotated[
+        ContractProvenanceResultV1Fragment295 | None,
+        Field(alias='ContractProvenanceResultV1Fragment295'),
+    ] = None
+    ContractProvenanceResultV1Fragment296_1: Annotated[
+        ContractProvenanceResultV1Fragment296 | None,
+        Field(alias='ContractProvenanceResultV1Fragment296'),
+    ] = None
+    ContractProvenanceResultV1Fragment297_1: Annotated[
+        ContractProvenanceResultV1Fragment297 | None,
+        Field(alias='ContractProvenanceResultV1Fragment297'),
+    ] = None
+    ContractProvenanceResultV1Fragment298_1: Annotated[
+        ContractProvenanceResultV1Fragment298 | None,
+        Field(alias='ContractProvenanceResultV1Fragment298'),
+    ] = None
+    ContractProvenanceResultV1Fragment299_1: Annotated[
+        ContractProvenanceResultV1Fragment299 | None,
+        Field(alias='ContractProvenanceResultV1Fragment299'),
+    ] = None
+    ContractProvenanceResultV1Fragment3_1: Annotated[
+        ContractProvenanceResultV1Fragment3 | None,
+        Field(alias='ContractProvenanceResultV1Fragment3'),
+    ] = None
+    ContractProvenanceResultV1Fragment30_1: Annotated[
+        ContractProvenanceResultV1Fragment30 | None,
+        Field(alias='ContractProvenanceResultV1Fragment30'),
+    ] = None
+    ContractProvenanceResultV1Fragment300_1: Annotated[
+        ContractProvenanceResultV1Fragment300 | None,
+        Field(alias='ContractProvenanceResultV1Fragment300'),
+    ] = None
+    ContractProvenanceResultV1Fragment301_1: Annotated[
+        ContractProvenanceResultV1Fragment301 | None,
+        Field(alias='ContractProvenanceResultV1Fragment301'),
+    ] = None
+    ContractProvenanceResultV1Fragment302_1: Annotated[
+        ContractProvenanceResultV1Fragment302 | None,
+        Field(alias='ContractProvenanceResultV1Fragment302'),
+    ] = None
+    ContractProvenanceResultV1Fragment303_1: Annotated[
+        ContractProvenanceResultV1Fragment303 | None,
+        Field(alias='ContractProvenanceResultV1Fragment303'),
+    ] = None
+    ContractProvenanceResultV1Fragment304_1: Annotated[
+        ContractProvenanceResultV1Fragment304 | None,
+        Field(alias='ContractProvenanceResultV1Fragment304'),
+    ] = None
+    ContractProvenanceResultV1Fragment305_1: Annotated[
+        ContractProvenanceResultV1Fragment305 | None,
+        Field(alias='ContractProvenanceResultV1Fragment305'),
+    ] = None
+    ContractProvenanceResultV1Fragment306_1: Annotated[
+        ContractProvenanceResultV1Fragment306 | None,
+        Field(alias='ContractProvenanceResultV1Fragment306'),
+    ] = None
+    ContractProvenanceResultV1Fragment307_1: Annotated[
+        ContractProvenanceResultV1Fragment307 | None,
+        Field(alias='ContractProvenanceResultV1Fragment307'),
+    ] = None
+    ContractProvenanceResultV1Fragment308_1: Annotated[
+        ContractProvenanceResultV1Fragment308 | None,
+        Field(alias='ContractProvenanceResultV1Fragment308'),
+    ] = None
+    ContractProvenanceResultV1Fragment309_1: Annotated[
+        ContractProvenanceResultV1Fragment309 | None,
+        Field(alias='ContractProvenanceResultV1Fragment309'),
+    ] = None
+    ContractProvenanceResultV1Fragment31_1: Annotated[
+        ContractProvenanceResultV1Fragment31 | None,
+        Field(alias='ContractProvenanceResultV1Fragment31'),
+    ] = None
+    ContractProvenanceResultV1Fragment310_1: Annotated[
+        ContractProvenanceResultV1Fragment310 | None,
+        Field(alias='ContractProvenanceResultV1Fragment310'),
+    ] = None
+    ContractProvenanceResultV1Fragment311_1: Annotated[
+        ContractProvenanceResultV1Fragment311 | None,
+        Field(alias='ContractProvenanceResultV1Fragment311'),
+    ] = None
+    ContractProvenanceResultV1Fragment312_1: Annotated[
+        ContractProvenanceResultV1Fragment312 | None,
+        Field(alias='ContractProvenanceResultV1Fragment312'),
+    ] = None
+    ContractProvenanceResultV1Fragment313_1: Annotated[
+        ContractProvenanceResultV1Fragment313 | None,
+        Field(alias='ContractProvenanceResultV1Fragment313'),
+    ] = None
+    ContractProvenanceResultV1Fragment314_1: Annotated[
+        ContractProvenanceResultV1Fragment314 | None,
+        Field(alias='ContractProvenanceResultV1Fragment314'),
+    ] = None
+    ContractProvenanceResultV1Fragment315_1: Annotated[
+        ContractProvenanceResultV1Fragment315 | None,
+        Field(alias='ContractProvenanceResultV1Fragment315'),
+    ] = None
+    ContractProvenanceResultV1Fragment316_1: Annotated[
+        ContractProvenanceResultV1Fragment316 | None,
+        Field(alias='ContractProvenanceResultV1Fragment316'),
+    ] = None
+    ContractProvenanceResultV1Fragment317_1: Annotated[
+        ContractProvenanceResultV1Fragment317 | None,
+        Field(alias='ContractProvenanceResultV1Fragment317'),
+    ] = None
+    ContractProvenanceResultV1Fragment318_1: Annotated[
+        ContractProvenanceResultV1Fragment318 | None,
+        Field(alias='ContractProvenanceResultV1Fragment318'),
+    ] = None
+    ContractProvenanceResultV1Fragment319_1: Annotated[
+        ContractProvenanceResultV1Fragment319 | None,
+        Field(alias='ContractProvenanceResultV1Fragment319'),
+    ] = None
+    ContractProvenanceResultV1Fragment32_1: Annotated[
+        ContractProvenanceResultV1Fragment32 | None,
+        Field(alias='ContractProvenanceResultV1Fragment32'),
+    ] = None
+    ContractProvenanceResultV1Fragment320_1: Annotated[
+        ContractProvenanceResultV1Fragment320 | None,
+        Field(alias='ContractProvenanceResultV1Fragment320'),
+    ] = None
+    ContractProvenanceResultV1Fragment321_1: Annotated[
+        ContractProvenanceResultV1Fragment321 | None,
+        Field(alias='ContractProvenanceResultV1Fragment321'),
+    ] = None
+    ContractProvenanceResultV1Fragment322_1: Annotated[
+        ContractProvenanceResultV1Fragment322 | None,
+        Field(alias='ContractProvenanceResultV1Fragment322'),
+    ] = None
+    ContractProvenanceResultV1Fragment323_1: Annotated[
+        ContractProvenanceResultV1Fragment323 | None,
+        Field(alias='ContractProvenanceResultV1Fragment323'),
+    ] = None
+    ContractProvenanceResultV1Fragment324_1: Annotated[
+        ContractProvenanceResultV1Fragment324 | None,
+        Field(alias='ContractProvenanceResultV1Fragment324'),
+    ] = None
+    ContractProvenanceResultV1Fragment325_1: Annotated[
+        ContractProvenanceResultV1Fragment325 | None,
+        Field(alias='ContractProvenanceResultV1Fragment325'),
+    ] = None
+    ContractProvenanceResultV1Fragment326_1: Annotated[
+        ContractProvenanceResultV1Fragment326 | None,
+        Field(alias='ContractProvenanceResultV1Fragment326'),
+    ] = None
+    ContractProvenanceResultV1Fragment327_1: Annotated[
+        ContractProvenanceResultV1Fragment327 | None,
+        Field(alias='ContractProvenanceResultV1Fragment327'),
+    ] = None
+    ContractProvenanceResultV1Fragment328_1: Annotated[
+        ContractProvenanceResultV1Fragment328 | None,
+        Field(alias='ContractProvenanceResultV1Fragment328'),
+    ] = None
+    ContractProvenanceResultV1Fragment329_1: Annotated[
+        ContractProvenanceResultV1Fragment329 | None,
+        Field(alias='ContractProvenanceResultV1Fragment329'),
+    ] = None
+    ContractProvenanceResultV1Fragment33_1: Annotated[
+        ContractProvenanceResultV1Fragment33 | None,
+        Field(alias='ContractProvenanceResultV1Fragment33'),
+    ] = None
+    ContractProvenanceResultV1Fragment330_1: Annotated[
+        ContractProvenanceResultV1Fragment330 | None,
+        Field(alias='ContractProvenanceResultV1Fragment330'),
+    ] = None
+    ContractProvenanceResultV1Fragment331_1: Annotated[
+        ContractProvenanceResultV1Fragment331 | None,
+        Field(alias='ContractProvenanceResultV1Fragment331'),
+    ] = None
+    ContractProvenanceResultV1Fragment332_1: Annotated[
+        ContractProvenanceResultV1Fragment332 | None,
+        Field(alias='ContractProvenanceResultV1Fragment332'),
+    ] = None
+    ContractProvenanceResultV1Fragment333_1: Annotated[
+        ContractProvenanceResultV1Fragment333 | None,
+        Field(alias='ContractProvenanceResultV1Fragment333'),
+    ] = None
+    ContractProvenanceResultV1Fragment334_1: Annotated[
+        ContractProvenanceResultV1Fragment334 | None,
+        Field(alias='ContractProvenanceResultV1Fragment334'),
+    ] = None
+    ContractProvenanceResultV1Fragment335_1: Annotated[
+        ContractProvenanceResultV1Fragment335 | None,
+        Field(alias='ContractProvenanceResultV1Fragment335'),
+    ] = None
+    ContractProvenanceResultV1Fragment34_1: Annotated[
+        ContractProvenanceResultV1Fragment34 | None,
+        Field(alias='ContractProvenanceResultV1Fragment34'),
+    ] = None
+    ContractProvenanceResultV1Fragment35_1: Annotated[
+        ContractProvenanceResultV1Fragment35 | None,
+        Field(alias='ContractProvenanceResultV1Fragment35'),
+    ] = None
+    ContractProvenanceResultV1Fragment36_1: Annotated[
+        ContractProvenanceResultV1Fragment36 | None,
+        Field(alias='ContractProvenanceResultV1Fragment36'),
+    ] = None
+    ContractProvenanceResultV1Fragment37_1: Annotated[
+        ContractProvenanceResultV1Fragment37 | None,
+        Field(alias='ContractProvenanceResultV1Fragment37'),
+    ] = None
+    ContractProvenanceResultV1Fragment38_1: Annotated[
+        ContractProvenanceResultV1Fragment38 | None,
+        Field(alias='ContractProvenanceResultV1Fragment38'),
+    ] = None
+    ContractProvenanceResultV1Fragment39_1: Annotated[
+        ContractProvenanceResultV1Fragment39 | None,
+        Field(alias='ContractProvenanceResultV1Fragment39'),
+    ] = None
+    ContractProvenanceResultV1Fragment4_1: Annotated[
+        ContractProvenanceResultV1Fragment4 | None,
+        Field(alias='ContractProvenanceResultV1Fragment4'),
+    ] = None
+    ContractProvenanceResultV1Fragment40_1: Annotated[
+        ContractProvenanceResultV1Fragment40 | None,
+        Field(alias='ContractProvenanceResultV1Fragment40'),
+    ] = None
+    ContractProvenanceResultV1Fragment41_1: Annotated[
+        ContractProvenanceResultV1Fragment41 | None,
+        Field(alias='ContractProvenanceResultV1Fragment41'),
+    ] = None
+    ContractProvenanceResultV1Fragment42_1: Annotated[
+        ContractProvenanceResultV1Fragment42 | None,
+        Field(alias='ContractProvenanceResultV1Fragment42'),
+    ] = None
+    ContractProvenanceResultV1Fragment43_1: Annotated[
+        ContractProvenanceResultV1Fragment43 | None,
+        Field(alias='ContractProvenanceResultV1Fragment43'),
+    ] = None
+    ContractProvenanceResultV1Fragment44_1: Annotated[
+        ContractProvenanceResultV1Fragment44 | None,
+        Field(alias='ContractProvenanceResultV1Fragment44'),
+    ] = None
+    ContractProvenanceResultV1Fragment45_1: Annotated[
+        ContractProvenanceResultV1Fragment45 | None,
+        Field(alias='ContractProvenanceResultV1Fragment45'),
+    ] = None
+    ContractProvenanceResultV1Fragment46_1: Annotated[
+        ContractProvenanceResultV1Fragment46 | None,
+        Field(alias='ContractProvenanceResultV1Fragment46'),
+    ] = None
+    ContractProvenanceResultV1Fragment47_1: Annotated[
+        ContractProvenanceResultV1Fragment47 | None,
+        Field(alias='ContractProvenanceResultV1Fragment47'),
+    ] = None
+    ContractProvenanceResultV1Fragment48_1: Annotated[
+        ContractProvenanceResultV1Fragment48 | None,
+        Field(alias='ContractProvenanceResultV1Fragment48'),
+    ] = None
+    ContractProvenanceResultV1Fragment49_1: Annotated[
+        ContractProvenanceResultV1Fragment49 | None,
+        Field(alias='ContractProvenanceResultV1Fragment49'),
+    ] = None
+    ContractProvenanceResultV1Fragment5_1: Annotated[
+        ContractProvenanceResultV1Fragment5 | None,
+        Field(alias='ContractProvenanceResultV1Fragment5'),
+    ] = None
+    ContractProvenanceResultV1Fragment50_1: Annotated[
+        ContractProvenanceResultV1Fragment50 | None,
+        Field(alias='ContractProvenanceResultV1Fragment50'),
+    ] = None
+    ContractProvenanceResultV1Fragment51_1: Annotated[
+        ContractProvenanceResultV1Fragment51 | None,
+        Field(alias='ContractProvenanceResultV1Fragment51'),
+    ] = None
+    ContractProvenanceResultV1Fragment52_1: Annotated[
+        ContractProvenanceResultV1Fragment52 | None,
+        Field(alias='ContractProvenanceResultV1Fragment52'),
+    ] = None
+    ContractProvenanceResultV1Fragment53_1: Annotated[
+        ContractProvenanceResultV1Fragment53 | None,
+        Field(alias='ContractProvenanceResultV1Fragment53'),
+    ] = None
+    ContractProvenanceResultV1Fragment54_1: Annotated[
+        ContractProvenanceResultV1Fragment54 | None,
+        Field(alias='ContractProvenanceResultV1Fragment54'),
+    ] = None
+    ContractProvenanceResultV1Fragment55_1: Annotated[
+        ContractProvenanceResultV1Fragment55 | None,
+        Field(alias='ContractProvenanceResultV1Fragment55'),
+    ] = None
+    ContractProvenanceResultV1Fragment56_1: Annotated[
+        ContractProvenanceResultV1Fragment56 | None,
+        Field(alias='ContractProvenanceResultV1Fragment56'),
+    ] = None
+    ContractProvenanceResultV1Fragment57_1: Annotated[
+        ContractProvenanceResultV1Fragment57 | None,
+        Field(alias='ContractProvenanceResultV1Fragment57'),
+    ] = None
+    ContractProvenanceResultV1Fragment58_1: Annotated[
+        ContractProvenanceResultV1Fragment58 | None,
+        Field(alias='ContractProvenanceResultV1Fragment58'),
+    ] = None
+    ContractProvenanceResultV1Fragment59_1: Annotated[
+        ContractProvenanceResultV1Fragment59 | None,
+        Field(alias='ContractProvenanceResultV1Fragment59'),
+    ] = None
+    ContractProvenanceResultV1Fragment6_1: Annotated[
+        ContractProvenanceResultV1Fragment6 | None,
+        Field(alias='ContractProvenanceResultV1Fragment6'),
+    ] = None
+    ContractProvenanceResultV1Fragment60_1: Annotated[
+        ContractProvenanceResultV1Fragment60 | None,
+        Field(alias='ContractProvenanceResultV1Fragment60'),
+    ] = None
+    ContractProvenanceResultV1Fragment61_1: Annotated[
+        ContractProvenanceResultV1Fragment61 | None,
+        Field(alias='ContractProvenanceResultV1Fragment61'),
+    ] = None
+    ContractProvenanceResultV1Fragment62_1: Annotated[
+        ContractProvenanceResultV1Fragment62 | None,
+        Field(alias='ContractProvenanceResultV1Fragment62'),
+    ] = None
+    ContractProvenanceResultV1Fragment63_1: Annotated[
+        ContractProvenanceResultV1Fragment63 | None,
+        Field(alias='ContractProvenanceResultV1Fragment63'),
+    ] = None
+    ContractProvenanceResultV1Fragment64_1: Annotated[
+        ContractProvenanceResultV1Fragment64 | None,
+        Field(alias='ContractProvenanceResultV1Fragment64'),
+    ] = None
+    ContractProvenanceResultV1Fragment65_1: Annotated[
+        ContractProvenanceResultV1Fragment65 | None,
+        Field(alias='ContractProvenanceResultV1Fragment65'),
+    ] = None
+    ContractProvenanceResultV1Fragment66_1: Annotated[
+        ContractProvenanceResultV1Fragment66 | None,
+        Field(alias='ContractProvenanceResultV1Fragment66'),
+    ] = None
+    ContractProvenanceResultV1Fragment67_1: Annotated[
+        ContractProvenanceResultV1Fragment67 | None,
+        Field(alias='ContractProvenanceResultV1Fragment67'),
+    ] = None
+    ContractProvenanceResultV1Fragment68_1: Annotated[
+        ContractProvenanceResultV1Fragment68 | None,
+        Field(alias='ContractProvenanceResultV1Fragment68'),
+    ] = None
+    ContractProvenanceResultV1Fragment69_1: Annotated[
+        ContractProvenanceResultV1Fragment69 | None,
+        Field(alias='ContractProvenanceResultV1Fragment69'),
+    ] = None
+    ContractProvenanceResultV1Fragment7_1: Annotated[
+        ContractProvenanceResultV1Fragment7 | None,
+        Field(alias='ContractProvenanceResultV1Fragment7'),
+    ] = None
+    ContractProvenanceResultV1Fragment70_1: Annotated[
+        ContractProvenanceResultV1Fragment70 | None,
+        Field(alias='ContractProvenanceResultV1Fragment70'),
+    ] = None
+    ContractProvenanceResultV1Fragment71_1: Annotated[
+        ContractProvenanceResultV1Fragment71 | None,
+        Field(alias='ContractProvenanceResultV1Fragment71'),
+    ] = None
+    ContractProvenanceResultV1Fragment72_1: Annotated[
+        ContractProvenanceResultV1Fragment72 | None,
+        Field(alias='ContractProvenanceResultV1Fragment72'),
+    ] = None
+    ContractProvenanceResultV1Fragment73_1: Annotated[
+        ContractProvenanceResultV1Fragment73 | None,
+        Field(alias='ContractProvenanceResultV1Fragment73'),
+    ] = None
+    ContractProvenanceResultV1Fragment74_1: Annotated[
+        ContractProvenanceResultV1Fragment74 | None,
+        Field(alias='ContractProvenanceResultV1Fragment74'),
+    ] = None
+    ContractProvenanceResultV1Fragment75_1: Annotated[
+        ContractProvenanceResultV1Fragment75 | None,
+        Field(alias='ContractProvenanceResultV1Fragment75'),
+    ] = None
+    ContractProvenanceResultV1Fragment76_1: Annotated[
+        ContractProvenanceResultV1Fragment76 | None,
+        Field(alias='ContractProvenanceResultV1Fragment76'),
+    ] = None
+    ContractProvenanceResultV1Fragment77_1: Annotated[
+        ContractProvenanceResultV1Fragment77 | None,
+        Field(alias='ContractProvenanceResultV1Fragment77'),
+    ] = None
+    ContractProvenanceResultV1Fragment78_1: Annotated[
+        ContractProvenanceResultV1Fragment78 | None,
+        Field(alias='ContractProvenanceResultV1Fragment78'),
+    ] = None
+    ContractProvenanceResultV1Fragment79_1: Annotated[
+        ContractProvenanceResultV1Fragment79 | None,
+        Field(alias='ContractProvenanceResultV1Fragment79'),
+    ] = None
+    ContractProvenanceResultV1Fragment8_1: Annotated[
+        ContractProvenanceResultV1Fragment8 | None,
+        Field(alias='ContractProvenanceResultV1Fragment8'),
+    ] = None
+    ContractProvenanceResultV1Fragment80_1: Annotated[
+        ContractProvenanceResultV1Fragment80 | None,
+        Field(alias='ContractProvenanceResultV1Fragment80'),
+    ] = None
+    ContractProvenanceResultV1Fragment81_1: Annotated[
+        ContractProvenanceResultV1Fragment81 | None,
+        Field(alias='ContractProvenanceResultV1Fragment81'),
+    ] = None
+    ContractProvenanceResultV1Fragment82_1: Annotated[
+        ContractProvenanceResultV1Fragment82 | None,
+        Field(alias='ContractProvenanceResultV1Fragment82'),
+    ] = None
+    ContractProvenanceResultV1Fragment83_1: Annotated[
+        ContractProvenanceResultV1Fragment83 | None,
+        Field(alias='ContractProvenanceResultV1Fragment83'),
+    ] = None
+    ContractProvenanceResultV1Fragment84_1: Annotated[
+        ContractProvenanceResultV1Fragment84 | None,
+        Field(alias='ContractProvenanceResultV1Fragment84'),
+    ] = None
+    ContractProvenanceResultV1Fragment85_1: Annotated[
+        ContractProvenanceResultV1Fragment85 | None,
+        Field(alias='ContractProvenanceResultV1Fragment85'),
+    ] = None
+    ContractProvenanceResultV1Fragment86_1: Annotated[
+        ContractProvenanceResultV1Fragment86 | None,
+        Field(alias='ContractProvenanceResultV1Fragment86'),
+    ] = None
+    ContractProvenanceResultV1Fragment87_1: Annotated[
+        ContractProvenanceResultV1Fragment87 | None,
+        Field(alias='ContractProvenanceResultV1Fragment87'),
+    ] = None
+    ContractProvenanceResultV1Fragment88_1: Annotated[
+        ContractProvenanceResultV1Fragment88 | None,
+        Field(alias='ContractProvenanceResultV1Fragment88'),
+    ] = None
+    ContractProvenanceResultV1Fragment89_1: Annotated[
+        ContractProvenanceResultV1Fragment89 | None,
+        Field(alias='ContractProvenanceResultV1Fragment89'),
+    ] = None
+    ContractProvenanceResultV1Fragment9_1: Annotated[
+        ContractProvenanceResultV1Fragment9 | None,
+        Field(alias='ContractProvenanceResultV1Fragment9'),
+    ] = None
+    ContractProvenanceResultV1Fragment90_1: Annotated[
+        ContractProvenanceResultV1Fragment90 | None,
+        Field(alias='ContractProvenanceResultV1Fragment90'),
+    ] = None
+    ContractProvenanceResultV1Fragment91_1: Annotated[
+        ContractProvenanceResultV1Fragment91 | None,
+        Field(alias='ContractProvenanceResultV1Fragment91'),
+    ] = None
+    ContractProvenanceResultV1Fragment92_1: Annotated[
+        ContractProvenanceResultV1Fragment92 | None,
+        Field(alias='ContractProvenanceResultV1Fragment92'),
+    ] = None
+    ContractProvenanceResultV1Fragment93_1: Annotated[
+        ContractProvenanceResultV1Fragment93 | None,
+        Field(alias='ContractProvenanceResultV1Fragment93'),
+    ] = None
+    ContractProvenanceResultV1Fragment94_1: Annotated[
+        ContractProvenanceResultV1Fragment94 | None,
+        Field(alias='ContractProvenanceResultV1Fragment94'),
+    ] = None
+    ContractProvenanceResultV1Fragment95_1: Annotated[
+        ContractProvenanceResultV1Fragment95 | None,
+        Field(alias='ContractProvenanceResultV1Fragment95'),
+    ] = None
+    ContractProvenanceResultV1Fragment96_1: Annotated[
+        ContractProvenanceResultV1Fragment96 | None,
+        Field(alias='ContractProvenanceResultV1Fragment96'),
+    ] = None
+    ContractProvenanceResultV1Fragment97_1: Annotated[
+        ContractProvenanceResultV1Fragment97 | None,
+        Field(alias='ContractProvenanceResultV1Fragment97'),
+    ] = None
+    ContractProvenanceResultV1Fragment98_1: Annotated[
+        ContractProvenanceResultV1Fragment98 | None,
+        Field(alias='ContractProvenanceResultV1Fragment98'),
+    ] = None
+    ContractProvenanceResultV1Fragment99_1: Annotated[
+        ContractProvenanceResultV1Fragment99 | None,
+        Field(alias='ContractProvenanceResultV1Fragment99'),
+    ] = None
     ContractQualifiedMoneyV1_1: Annotated[
         ContractQualifiedMoneyV1 | None, Field(alias='ContractQualifiedMoneyV1')
+    ] = None
+    ContractReviewDecision_1: Annotated[
+        ContractReviewDecision | None, Field(alias='ContractReviewDecision')
+    ] = None
+    ContractReviewDecisionFragment1_1: Annotated[
+        ContractReviewDecisionFragment1 | None,
+        Field(alias='ContractReviewDecisionFragment1'),
+    ] = None
+    ContractReviewDecisionFragment10_1: Annotated[
+        ContractReviewDecisionFragment10 | None,
+        Field(alias='ContractReviewDecisionFragment10'),
+    ] = None
+    ContractReviewDecisionFragment11_1: Annotated[
+        ContractReviewDecisionFragment11 | None,
+        Field(alias='ContractReviewDecisionFragment11'),
+    ] = None
+    ContractReviewDecisionFragment12_1: Annotated[
+        ContractReviewDecisionFragment12 | None,
+        Field(alias='ContractReviewDecisionFragment12'),
+    ] = None
+    ContractReviewDecisionFragment13_1: Annotated[
+        ContractReviewDecisionFragment13 | None,
+        Field(alias='ContractReviewDecisionFragment13'),
+    ] = None
+    ContractReviewDecisionFragment14_1: Annotated[
+        ContractReviewDecisionFragment14 | None,
+        Field(alias='ContractReviewDecisionFragment14'),
+    ] = None
+    ContractReviewDecisionFragment15_1: Annotated[
+        ContractReviewDecisionFragment15 | None,
+        Field(alias='ContractReviewDecisionFragment15'),
+    ] = None
+    ContractReviewDecisionFragment16_1: Annotated[
+        ContractReviewDecisionFragment16 | None,
+        Field(alias='ContractReviewDecisionFragment16'),
+    ] = None
+    ContractReviewDecisionFragment17_1: Annotated[
+        ContractReviewDecisionFragment17 | None,
+        Field(alias='ContractReviewDecisionFragment17'),
+    ] = None
+    ContractReviewDecisionFragment18_1: Annotated[
+        ContractReviewDecisionFragment18 | None,
+        Field(alias='ContractReviewDecisionFragment18'),
+    ] = None
+    ContractReviewDecisionFragment19_1: Annotated[
+        ContractReviewDecisionFragment19 | None,
+        Field(alias='ContractReviewDecisionFragment19'),
+    ] = None
+    ContractReviewDecisionFragment2_1: Annotated[
+        ContractReviewDecisionFragment2 | None,
+        Field(alias='ContractReviewDecisionFragment2'),
+    ] = None
+    ContractReviewDecisionFragment20_1: Annotated[
+        ContractReviewDecisionFragment20 | None,
+        Field(alias='ContractReviewDecisionFragment20'),
+    ] = None
+    ContractReviewDecisionFragment21_1: Annotated[
+        ContractReviewDecisionFragment21 | None,
+        Field(alias='ContractReviewDecisionFragment21'),
+    ] = None
+    ContractReviewDecisionFragment22_1: Annotated[
+        ContractReviewDecisionFragment22 | None,
+        Field(alias='ContractReviewDecisionFragment22'),
+    ] = None
+    ContractReviewDecisionFragment23_1: Annotated[
+        ContractReviewDecisionFragment23 | None,
+        Field(alias='ContractReviewDecisionFragment23'),
+    ] = None
+    ContractReviewDecisionFragment24_1: Annotated[
+        ContractReviewDecisionFragment24 | None,
+        Field(alias='ContractReviewDecisionFragment24'),
+    ] = None
+    ContractReviewDecisionFragment25_1: Annotated[
+        ContractReviewDecisionFragment25 | None,
+        Field(alias='ContractReviewDecisionFragment25'),
+    ] = None
+    ContractReviewDecisionFragment3_1: Annotated[
+        ContractReviewDecisionFragment3 | None,
+        Field(alias='ContractReviewDecisionFragment3'),
+    ] = None
+    ContractReviewDecisionFragment4_1: Annotated[
+        ContractReviewDecisionFragment4 | None,
+        Field(alias='ContractReviewDecisionFragment4'),
+    ] = None
+    ContractReviewDecisionFragment5_1: Annotated[
+        ContractReviewDecisionFragment5 | None,
+        Field(alias='ContractReviewDecisionFragment5'),
+    ] = None
+    ContractReviewDecisionFragment6_1: Annotated[
+        ContractReviewDecisionFragment6 | None,
+        Field(alias='ContractReviewDecisionFragment6'),
+    ] = None
+    ContractReviewDecisionFragment7_1: Annotated[
+        ContractReviewDecisionFragment7 | None,
+        Field(alias='ContractReviewDecisionFragment7'),
+    ] = None
+    ContractReviewDecisionFragment8_1: Annotated[
+        ContractReviewDecisionFragment8 | None,
+        Field(alias='ContractReviewDecisionFragment8'),
+    ] = None
+    ContractReviewDecisionFragment9_1: Annotated[
+        ContractReviewDecisionFragment9 | None,
+        Field(alias='ContractReviewDecisionFragment9'),
+    ] = None
+    ContractReviewSubmissionAttemptV1_1: Annotated[
+        ContractReviewSubmissionAttemptV1 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment1_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment1 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment1'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment10_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment10 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment10'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment11_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment11 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment11'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment12_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment12 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment12'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment13_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment13 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment13'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment14_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment14 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment14'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment15_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment15 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment15'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment16_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment16 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment16'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment17_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment17 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment17'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment18_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment18 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment18'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment19_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment19 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment19'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment2_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment2 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment2'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment20_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment20 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment20'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment21_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment21 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment21'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment3_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment3 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment3'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment4_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment4 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment4'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment5_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment5 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment5'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment6_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment6 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment6'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment7_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment7 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment7'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment8_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment8 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment8'),
+    ] = None
+    ContractReviewSubmissionAttemptV1Fragment9_1: Annotated[
+        ContractReviewSubmissionAttemptV1Fragment9 | None,
+        Field(alias='ContractReviewSubmissionAttemptV1Fragment9'),
     ] = None
     ContractScopedIdentifierV1_1: Annotated[
         ContractScopedIdentifierV1 | None, Field(alias='ContractScopedIdentifierV1')
@@ -16451,6 +23108,17 @@ MODEL_INDEX = {
     ('interpretation-result-v2', '/properties/status'): 'ContractInterpretationResultV2Fragment4',
     ('interpretation-result-v2', '/properties/warnings'): 'ContractInterpretationResultV2Fragment13',
     ('interpretation-result-v2', '/properties/warnings/items'): 'ContractInterpretationResultV2Fragment14',
+    ('learning-candidate-reservation-v1', ''): 'ContractLearningCandidateReservationV1',
+    ('learning-candidate-reservation-v1', '/additionalProperties'): 'ContractLearningCandidateReservationV1Fragment1',
+    ('learning-candidate-reservation-v1', '/properties/contract'): 'ContractLearningCandidateReservationV1Fragment2',
+    ('learning-candidate-reservation-v1', '/properties/corrected_assertion_id'): 'ContractLearningCandidateReservationV1Fragment8',
+    ('learning-candidate-reservation-v1', '/properties/id'): 'ContractLearningCandidateReservationV1Fragment3',
+    ('learning-candidate-reservation-v1', '/properties/knowledge_base_id'): 'ContractLearningCandidateReservationV1Fragment5',
+    ('learning-candidate-reservation-v1', '/properties/original_assertion_id'): 'ContractLearningCandidateReservationV1Fragment7',
+    ('learning-candidate-reservation-v1', '/properties/reserved_at'): 'ContractLearningCandidateReservationV1Fragment10',
+    ('learning-candidate-reservation-v1', '/properties/review_decision_id'): 'ContractLearningCandidateReservationV1Fragment6',
+    ('learning-candidate-reservation-v1', '/properties/reviewer_principal_id'): 'ContractLearningCandidateReservationV1Fragment9',
+    ('learning-candidate-reservation-v1', '/properties/tenant_id'): 'ContractLearningCandidateReservationV1Fragment4',
     ('problem-details', ''): 'ContractProblemDetails',
     ('problem-details', '/additionalProperties'): 'ContractProblemDetailsFragment1',
     ('problem-details', '/properties/code'): 'ContractProblemDetailsFragment7',
@@ -16460,11 +23128,406 @@ MODEL_INDEX = {
     ('problem-details', '/properties/title'): 'ContractProblemDetailsFragment3',
     ('problem-details', '/properties/traceId'): 'ContractProblemDetailsFragment8',
     ('problem-details', '/properties/type'): 'ContractProblemDetailsFragment2',
+    ('provenance-query-v1', ''): 'ContractProvenanceQueryV1',
+    ('provenance-query-v1', '/additionalProperties'): 'ContractProvenanceQueryV1Fragment1',
+    ('provenance-query-v1', '/properties/anchor'): 'ContractProvenanceQueryV1Fragment7',
+    ('provenance-query-v1', '/properties/anchor/additionalProperties'): 'ContractProvenanceQueryV1Fragment8',
+    ('provenance-query-v1', '/properties/anchor/properties/id'): 'ContractProvenanceQueryV1Fragment10',
+    ('provenance-query-v1', '/properties/anchor/properties/type'): 'ContractProvenanceQueryV1Fragment9',
+    ('provenance-query-v1', '/properties/contract'): 'ContractProvenanceQueryV1Fragment2',
+    ('provenance-query-v1', '/properties/root'): 'ContractProvenanceQueryV1Fragment3',
+    ('provenance-query-v1', '/properties/root/additionalProperties'): 'ContractProvenanceQueryV1Fragment4',
+    ('provenance-query-v1', '/properties/root/properties/id'): 'ContractProvenanceQueryV1Fragment6',
+    ('provenance-query-v1', '/properties/root/properties/kind'): 'ContractProvenanceQueryV1Fragment5',
+    ('provenance-result-v1', ''): 'ContractProvenanceResultV1',
+    ('provenance-result-v1', '/additionalProperties'): 'ContractProvenanceResultV1Fragment1',
+    ('provenance-result-v1', '/properties/completeness'): 'ContractProvenanceResultV1Fragment9',
+    ('provenance-result-v1', '/properties/contract'): 'ContractProvenanceResultV1Fragment2',
+    ('provenance-result-v1', '/properties/edges'): 'ContractProvenanceResultV1Fragment138',
+    ('provenance-result-v1', '/properties/edges/items'): 'ContractProvenanceResultV1Fragment139',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0'): 'ContractProvenanceResultV1Fragment140',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/additionalProperties'): 'ContractProvenanceResultV1Fragment141',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/kind'): 'ContractProvenanceResultV1Fragment142',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/source'): 'ContractProvenanceResultV1Fragment143',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment144',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment146',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment145',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/target'): 'ContractProvenanceResultV1Fragment147',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment148',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment150',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/0/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment149',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1'): 'ContractProvenanceResultV1Fragment151',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/additionalProperties'): 'ContractProvenanceResultV1Fragment152',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/kind'): 'ContractProvenanceResultV1Fragment153',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/source'): 'ContractProvenanceResultV1Fragment154',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment155',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment157',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment156',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/target'): 'ContractProvenanceResultV1Fragment158',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment159',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment161',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/1/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment160',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10'): 'ContractProvenanceResultV1Fragment250',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/additionalProperties'): 'ContractProvenanceResultV1Fragment251',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/kind'): 'ContractProvenanceResultV1Fragment252',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/source'): 'ContractProvenanceResultV1Fragment253',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment254',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment256',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment255',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/target'): 'ContractProvenanceResultV1Fragment257',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment258',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment260',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/10/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment259',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11'): 'ContractProvenanceResultV1Fragment261',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/additionalProperties'): 'ContractProvenanceResultV1Fragment262',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/kind'): 'ContractProvenanceResultV1Fragment263',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/source'): 'ContractProvenanceResultV1Fragment264',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment265',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment267',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment266',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/target'): 'ContractProvenanceResultV1Fragment268',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment269',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment271',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/11/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment270',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12'): 'ContractProvenanceResultV1Fragment272',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/additionalProperties'): 'ContractProvenanceResultV1Fragment273',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/kind'): 'ContractProvenanceResultV1Fragment274',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/source'): 'ContractProvenanceResultV1Fragment275',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment276',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment278',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment277',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/target'): 'ContractProvenanceResultV1Fragment279',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment280',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment282',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/12/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment281',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13'): 'ContractProvenanceResultV1Fragment283',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/additionalProperties'): 'ContractProvenanceResultV1Fragment284',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/kind'): 'ContractProvenanceResultV1Fragment285',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/source'): 'ContractProvenanceResultV1Fragment286',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment287',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment289',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment288',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/target'): 'ContractProvenanceResultV1Fragment290',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment291',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment293',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/13/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment292',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14'): 'ContractProvenanceResultV1Fragment294',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/additionalProperties'): 'ContractProvenanceResultV1Fragment295',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/kind'): 'ContractProvenanceResultV1Fragment296',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/source'): 'ContractProvenanceResultV1Fragment297',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment298',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment300',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment299',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/target'): 'ContractProvenanceResultV1Fragment301',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment302',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment304',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/14/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment303',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15'): 'ContractProvenanceResultV1Fragment305',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/additionalProperties'): 'ContractProvenanceResultV1Fragment306',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/kind'): 'ContractProvenanceResultV1Fragment307',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/source'): 'ContractProvenanceResultV1Fragment308',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment309',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment311',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment310',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/target'): 'ContractProvenanceResultV1Fragment312',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment313',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment315',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/15/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment314',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16'): 'ContractProvenanceResultV1Fragment316',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/additionalProperties'): 'ContractProvenanceResultV1Fragment317',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/kind'): 'ContractProvenanceResultV1Fragment318',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/source'): 'ContractProvenanceResultV1Fragment319',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment320',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment322',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment321',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/target'): 'ContractProvenanceResultV1Fragment323',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment324',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment326',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/16/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment325',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2'): 'ContractProvenanceResultV1Fragment162',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/additionalProperties'): 'ContractProvenanceResultV1Fragment163',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/kind'): 'ContractProvenanceResultV1Fragment164',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/source'): 'ContractProvenanceResultV1Fragment165',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment166',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment168',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment167',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/target'): 'ContractProvenanceResultV1Fragment169',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment170',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment172',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/2/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment171',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3'): 'ContractProvenanceResultV1Fragment173',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/additionalProperties'): 'ContractProvenanceResultV1Fragment174',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/kind'): 'ContractProvenanceResultV1Fragment175',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/source'): 'ContractProvenanceResultV1Fragment176',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment177',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment179',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment178',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/target'): 'ContractProvenanceResultV1Fragment180',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment181',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment183',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/3/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment182',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4'): 'ContractProvenanceResultV1Fragment184',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/additionalProperties'): 'ContractProvenanceResultV1Fragment185',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/kind'): 'ContractProvenanceResultV1Fragment186',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/source'): 'ContractProvenanceResultV1Fragment187',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment188',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment190',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment189',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/target'): 'ContractProvenanceResultV1Fragment191',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment192',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment194',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/4/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment193',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5'): 'ContractProvenanceResultV1Fragment195',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/additionalProperties'): 'ContractProvenanceResultV1Fragment196',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/kind'): 'ContractProvenanceResultV1Fragment197',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/source'): 'ContractProvenanceResultV1Fragment198',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment199',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment201',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment200',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/target'): 'ContractProvenanceResultV1Fragment202',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment203',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment205',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/5/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment204',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6'): 'ContractProvenanceResultV1Fragment206',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/additionalProperties'): 'ContractProvenanceResultV1Fragment207',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/kind'): 'ContractProvenanceResultV1Fragment208',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/source'): 'ContractProvenanceResultV1Fragment209',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment210',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment212',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment211',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/target'): 'ContractProvenanceResultV1Fragment213',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment214',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment216',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/6/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment215',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7'): 'ContractProvenanceResultV1Fragment217',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/additionalProperties'): 'ContractProvenanceResultV1Fragment218',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/kind'): 'ContractProvenanceResultV1Fragment219',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/source'): 'ContractProvenanceResultV1Fragment220',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment221',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment223',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment222',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/target'): 'ContractProvenanceResultV1Fragment224',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment225',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment227',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/7/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment226',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8'): 'ContractProvenanceResultV1Fragment228',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/additionalProperties'): 'ContractProvenanceResultV1Fragment229',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/kind'): 'ContractProvenanceResultV1Fragment230',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/source'): 'ContractProvenanceResultV1Fragment231',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment232',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment234',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment233',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/target'): 'ContractProvenanceResultV1Fragment235',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment236',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment238',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/8/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment237',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9'): 'ContractProvenanceResultV1Fragment239',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/additionalProperties'): 'ContractProvenanceResultV1Fragment240',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/kind'): 'ContractProvenanceResultV1Fragment241',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/source'): 'ContractProvenanceResultV1Fragment242',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/source/additionalProperties'): 'ContractProvenanceResultV1Fragment243',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/source/properties/id'): 'ContractProvenanceResultV1Fragment245',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/source/properties/kind'): 'ContractProvenanceResultV1Fragment244',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/target'): 'ContractProvenanceResultV1Fragment246',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/target/additionalProperties'): 'ContractProvenanceResultV1Fragment247',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/target/properties/id'): 'ContractProvenanceResultV1Fragment249',
+    ('provenance-result-v1', '/properties/edges/items/oneOf/9/properties/target/properties/kind'): 'ContractProvenanceResultV1Fragment248',
+    ('provenance-result-v1', '/properties/gaps'): 'ContractProvenanceResultV1Fragment327',
+    ('provenance-result-v1', '/properties/gaps/items'): 'ContractProvenanceResultV1Fragment328',
+    ('provenance-result-v1', '/properties/gaps/items/additionalProperties'): 'ContractProvenanceResultV1Fragment329',
+    ('provenance-result-v1', '/properties/gaps/items/properties/field'): 'ContractProvenanceResultV1Fragment334',
+    ('provenance-result-v1', '/properties/gaps/items/properties/reason'): 'ContractProvenanceResultV1Fragment335',
+    ('provenance-result-v1', '/properties/gaps/items/properties/record'): 'ContractProvenanceResultV1Fragment330',
+    ('provenance-result-v1', '/properties/gaps/items/properties/record/additionalProperties'): 'ContractProvenanceResultV1Fragment331',
+    ('provenance-result-v1', '/properties/gaps/items/properties/record/properties/id'): 'ContractProvenanceResultV1Fragment333',
+    ('provenance-result-v1', '/properties/gaps/items/properties/record/properties/kind'): 'ContractProvenanceResultV1Fragment332',
+    ('provenance-result-v1', '/properties/knowledge_base_id'): 'ContractProvenanceResultV1Fragment8',
+    ('provenance-result-v1', '/properties/records'): 'ContractProvenanceResultV1Fragment10',
+    ('provenance-result-v1', '/properties/records/items'): 'ContractProvenanceResultV1Fragment11',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0'): 'ContractProvenanceResultV1Fragment12',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/additionalProperties'): 'ContractProvenanceResultV1Fragment13',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data'): 'ContractProvenanceResultV1Fragment16',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/additionalProperties'): 'ContractProvenanceResultV1Fragment17',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/created_at'): 'ContractProvenanceResultV1Fragment29',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/interpretation_basis'): 'ContractProvenanceResultV1Fragment28',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/model_confidence'): 'ContractProvenanceResultV1Fragment27',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/origin'): 'ContractProvenanceResultV1Fragment21',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/original_assertion_id'): 'ContractProvenanceResultV1Fragment22',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/run_id'): 'ContractProvenanceResultV1Fragment20',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/semantic_contract_version'): 'ContractProvenanceResultV1Fragment18',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/semantics'): 'ContractProvenanceResultV1Fragment30',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/semantics/oneOf/0'): 'ContractProvenanceResultV1Fragment31',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/semantics/oneOf/1'): 'ContractProvenanceResultV1Fragment32',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/slot_type'): 'ContractProvenanceResultV1Fragment24',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/subject_type'): 'ContractProvenanceResultV1Fragment23',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/value'): 'ContractProvenanceResultV1Fragment25',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/value/additionalProperties'): 'ContractProvenanceResultV1Fragment26',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/data/properties/version'): 'ContractProvenanceResultV1Fragment19',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/id'): 'ContractProvenanceResultV1Fragment15',
+    ('provenance-result-v1', '/properties/records/items/oneOf/0/properties/kind'): 'ContractProvenanceResultV1Fragment14',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1'): 'ContractProvenanceResultV1Fragment33',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/additionalProperties'): 'ContractProvenanceResultV1Fragment34',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data'): 'ContractProvenanceResultV1Fragment37',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/additionalProperties'): 'ContractProvenanceResultV1Fragment38',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/artifact_id'): 'ContractProvenanceResultV1Fragment40',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/assertion_id'): 'ContractProvenanceResultV1Fragment39',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/bbox'): 'ContractProvenanceResultV1Fragment43',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/bbox/additionalProperties'): 'ContractProvenanceResultV1Fragment44',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/block_id'): 'ContractProvenanceResultV1Fragment41',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/char_end'): 'ContractProvenanceResultV1Fragment46',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/char_start'): 'ContractProvenanceResultV1Fragment45',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/created_at'): 'ContractProvenanceResultV1Fragment48',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/page'): 'ContractProvenanceResultV1Fragment42',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/precision'): 'ContractProvenanceResultV1Fragment47',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/stored_content_record'): 'ContractProvenanceResultV1Fragment49',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/data/properties/stored_content_record/additionalProperties'): 'ContractProvenanceResultV1Fragment50',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/id'): 'ContractProvenanceResultV1Fragment36',
+    ('provenance-result-v1', '/properties/records/items/oneOf/1/properties/kind'): 'ContractProvenanceResultV1Fragment35',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10'): 'ContractProvenanceResultV1Fragment115',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/additionalProperties'): 'ContractProvenanceResultV1Fragment116',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/data'): 'ContractProvenanceResultV1Fragment119',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/data/additionalProperties'): 'ContractProvenanceResultV1Fragment120',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/data/properties/actor_principal_id'): 'ContractProvenanceResultV1Fragment125',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/data/properties/commit_id'): 'ContractProvenanceResultV1Fragment126',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/data/properties/created_at'): 'ContractProvenanceResultV1Fragment124',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/data/properties/from_version_id'): 'ContractProvenanceResultV1Fragment121',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/data/properties/reason'): 'ContractProvenanceResultV1Fragment123',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/data/properties/to_version_id'): 'ContractProvenanceResultV1Fragment122',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/id'): 'ContractProvenanceResultV1Fragment118',
+    ('provenance-result-v1', '/properties/records/items/oneOf/10/properties/kind'): 'ContractProvenanceResultV1Fragment117',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11'): 'ContractProvenanceResultV1Fragment127',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/additionalProperties'): 'ContractProvenanceResultV1Fragment128',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/data'): 'ContractProvenanceResultV1Fragment131',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/data/additionalProperties'): 'ContractProvenanceResultV1Fragment132',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/data/properties/input_version_ids'): 'ContractProvenanceResultV1Fragment135',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/data/properties/input_version_ids/items'): 'ContractProvenanceResultV1Fragment136',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/data/properties/producer_available'): 'ContractProvenanceResultV1Fragment137',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/data/properties/stored_reference'): 'ContractProvenanceResultV1Fragment133',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/data/properties/stored_reference/additionalProperties'): 'ContractProvenanceResultV1Fragment134',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/id'): 'ContractProvenanceResultV1Fragment130',
+    ('provenance-result-v1', '/properties/records/items/oneOf/11/properties/kind'): 'ContractProvenanceResultV1Fragment129',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2'): 'ContractProvenanceResultV1Fragment51',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/additionalProperties'): 'ContractProvenanceResultV1Fragment52',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data'): 'ContractProvenanceResultV1Fragment55',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data/additionalProperties'): 'ContractProvenanceResultV1Fragment56',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data/properties/artifact_contract_version'): 'ContractProvenanceResultV1Fragment59',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data/properties/artifact_sha256'): 'ContractProvenanceResultV1Fragment58',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data/properties/created_at'): 'ContractProvenanceResultV1Fragment63',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data/properties/document_version_id'): 'ContractProvenanceResultV1Fragment57',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data/properties/manifest_sha256'): 'ContractProvenanceResultV1Fragment60',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data/properties/publication_state'): 'ContractProvenanceResultV1Fragment62',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/data/properties/recipe_sha256'): 'ContractProvenanceResultV1Fragment61',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/id'): 'ContractProvenanceResultV1Fragment54',
+    ('provenance-result-v1', '/properties/records/items/oneOf/2/properties/kind'): 'ContractProvenanceResultV1Fragment53',
+    ('provenance-result-v1', '/properties/records/items/oneOf/3'): 'ContractProvenanceResultV1Fragment64',
+    ('provenance-result-v1', '/properties/records/items/oneOf/3/additionalProperties'): 'ContractProvenanceResultV1Fragment65',
+    ('provenance-result-v1', '/properties/records/items/oneOf/3/properties/data'): 'ContractProvenanceResultV1Fragment68',
+    ('provenance-result-v1', '/properties/records/items/oneOf/3/properties/data/additionalProperties'): 'ContractProvenanceResultV1Fragment69',
+    ('provenance-result-v1', '/properties/records/items/oneOf/3/properties/data/properties/created_at'): 'ContractProvenanceResultV1Fragment71',
+    ('provenance-result-v1', '/properties/records/items/oneOf/3/properties/data/properties/source_document_id'): 'ContractProvenanceResultV1Fragment70',
+    ('provenance-result-v1', '/properties/records/items/oneOf/3/properties/id'): 'ContractProvenanceResultV1Fragment67',
+    ('provenance-result-v1', '/properties/records/items/oneOf/3/properties/kind'): 'ContractProvenanceResultV1Fragment66',
+    ('provenance-result-v1', '/properties/records/items/oneOf/4'): 'ContractProvenanceResultV1Fragment72',
+    ('provenance-result-v1', '/properties/records/items/oneOf/4/additionalProperties'): 'ContractProvenanceResultV1Fragment73',
+    ('provenance-result-v1', '/properties/records/items/oneOf/4/properties/data'): 'ContractProvenanceResultV1Fragment76',
+    ('provenance-result-v1', '/properties/records/items/oneOf/4/properties/data/additionalProperties'): 'ContractProvenanceResultV1Fragment77',
+    ('provenance-result-v1', '/properties/records/items/oneOf/4/properties/data/properties/created_at'): 'ContractProvenanceResultV1Fragment79',
+    ('provenance-result-v1', '/properties/records/items/oneOf/4/properties/data/properties/source_sha256'): 'ContractProvenanceResultV1Fragment78',
+    ('provenance-result-v1', '/properties/records/items/oneOf/4/properties/id'): 'ContractProvenanceResultV1Fragment75',
+    ('provenance-result-v1', '/properties/records/items/oneOf/4/properties/kind'): 'ContractProvenanceResultV1Fragment74',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5'): 'ContractProvenanceResultV1Fragment80',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/additionalProperties'): 'ContractProvenanceResultV1Fragment81',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data'): 'ContractProvenanceResultV1Fragment84',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/additionalProperties'): 'ContractProvenanceResultV1Fragment85',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/artifact_id'): 'ContractProvenanceResultV1Fragment86',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/counters'): 'ContractProvenanceResultV1Fragment92',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/counters/additionalProperties'): 'ContractProvenanceResultV1Fragment93',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/created_at'): 'ContractProvenanceResultV1Fragment94',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/profile_id'): 'ContractProvenanceResultV1Fragment87',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/profile_version'): 'ContractProvenanceResultV1Fragment88',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/run_configuration'): 'ContractProvenanceResultV1Fragment90',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/run_configuration/additionalProperties'): 'ContractProvenanceResultV1Fragment91',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/data/properties/status'): 'ContractProvenanceResultV1Fragment89',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/id'): 'ContractProvenanceResultV1Fragment83',
+    ('provenance-result-v1', '/properties/records/items/oneOf/5/properties/kind'): 'ContractProvenanceResultV1Fragment82',
+    ('provenance-result-v1', '/properties/records/items/oneOf/6'): 'ContractProvenanceResultV1Fragment95',
+    ('provenance-result-v1', '/properties/records/items/oneOf/6/additionalProperties'): 'ContractProvenanceResultV1Fragment96',
+    ('provenance-result-v1', '/properties/records/items/oneOf/6/properties/data'): 'ContractProvenanceResultV1Fragment99',
+    ('provenance-result-v1', '/properties/records/items/oneOf/6/properties/id'): 'ContractProvenanceResultV1Fragment98',
+    ('provenance-result-v1', '/properties/records/items/oneOf/6/properties/kind'): 'ContractProvenanceResultV1Fragment97',
+    ('provenance-result-v1', '/properties/records/items/oneOf/7'): 'ContractProvenanceResultV1Fragment100',
+    ('provenance-result-v1', '/properties/records/items/oneOf/7/additionalProperties'): 'ContractProvenanceResultV1Fragment101',
+    ('provenance-result-v1', '/properties/records/items/oneOf/7/properties/data'): 'ContractProvenanceResultV1Fragment104',
+    ('provenance-result-v1', '/properties/records/items/oneOf/7/properties/id'): 'ContractProvenanceResultV1Fragment103',
+    ('provenance-result-v1', '/properties/records/items/oneOf/7/properties/kind'): 'ContractProvenanceResultV1Fragment102',
+    ('provenance-result-v1', '/properties/records/items/oneOf/8'): 'ContractProvenanceResultV1Fragment105',
+    ('provenance-result-v1', '/properties/records/items/oneOf/8/additionalProperties'): 'ContractProvenanceResultV1Fragment106',
+    ('provenance-result-v1', '/properties/records/items/oneOf/8/properties/data'): 'ContractProvenanceResultV1Fragment109',
+    ('provenance-result-v1', '/properties/records/items/oneOf/8/properties/id'): 'ContractProvenanceResultV1Fragment108',
+    ('provenance-result-v1', '/properties/records/items/oneOf/8/properties/kind'): 'ContractProvenanceResultV1Fragment107',
+    ('provenance-result-v1', '/properties/records/items/oneOf/9'): 'ContractProvenanceResultV1Fragment110',
+    ('provenance-result-v1', '/properties/records/items/oneOf/9/additionalProperties'): 'ContractProvenanceResultV1Fragment111',
+    ('provenance-result-v1', '/properties/records/items/oneOf/9/properties/data'): 'ContractProvenanceResultV1Fragment114',
+    ('provenance-result-v1', '/properties/records/items/oneOf/9/properties/id'): 'ContractProvenanceResultV1Fragment113',
+    ('provenance-result-v1', '/properties/records/items/oneOf/9/properties/kind'): 'ContractProvenanceResultV1Fragment112',
+    ('provenance-result-v1', '/properties/root'): 'ContractProvenanceResultV1Fragment3',
+    ('provenance-result-v1', '/properties/root/additionalProperties'): 'ContractProvenanceResultV1Fragment4',
+    ('provenance-result-v1', '/properties/root/properties/id'): 'ContractProvenanceResultV1Fragment6',
+    ('provenance-result-v1', '/properties/root/properties/kind'): 'ContractProvenanceResultV1Fragment5',
+    ('provenance-result-v1', '/properties/tenant_id'): 'ContractProvenanceResultV1Fragment7',
     ('qualified-money-v1', ''): 'ContractQualifiedMoneyV1',
+    ('review-decision', ''): 'ContractReviewDecision',
+    ('review-decision', '/additionalProperties'): 'ContractReviewDecisionFragment1',
+    ('review-decision', '/properties/action'): 'ContractReviewDecisionFragment5',
+    ('review-decision', '/properties/assertion_version'): 'ContractReviewDecisionFragment23',
+    ('review-decision', '/properties/corrected_assertion_id'): 'ContractReviewDecisionFragment8',
+    ('review-decision', '/properties/corrected_value'): 'ContractReviewDecisionFragment7',
+    ('review-decision', '/properties/decided_at'): 'ContractReviewDecisionFragment22',
+    ('review-decision', '/properties/event_sha256'): 'ContractReviewDecisionFragment25',
+    ('review-decision', '/properties/evidence'): 'ContractReviewDecisionFragment9',
+    ('review-decision', '/properties/evidence/oneOf/0'): 'ContractReviewDecisionFragment10',
+    ('review-decision', '/properties/evidence/oneOf/1'): 'ContractReviewDecisionFragment11',
+    ('review-decision', '/properties/evidence/oneOf/1/additionalProperties'): 'ContractReviewDecisionFragment12',
+    ('review-decision', '/properties/evidence/oneOf/1/properties/part'): 'ContractReviewDecisionFragment14',
+    ('review-decision', '/properties/evidence/oneOf/1/properties/precision'): 'ContractReviewDecisionFragment15',
+    ('review-decision', '/properties/evidence/oneOf/1/properties/selector'): 'ContractReviewDecisionFragment17',
+    ('review-decision', '/properties/evidence/oneOf/1/properties/selector/items'): 'ContractReviewDecisionFragment18',
+    ('review-decision', '/properties/evidence/oneOf/1/properties/selector/items/properties/type'): 'ContractReviewDecisionFragment19',
+    ('review-decision', '/properties/evidence/oneOf/1/properties/source'): 'ContractReviewDecisionFragment13',
+    ('review-decision', '/properties/evidence/oneOf/1/properties/unresolved_reason'): 'ContractReviewDecisionFragment16',
+    ('review-decision', '/properties/id'): 'ContractReviewDecisionFragment2',
+    ('review-decision', '/properties/reason_code'): 'ContractReviewDecisionFragment6',
+    ('review-decision', '/properties/review_batch_id'): 'ContractReviewDecisionFragment4',
+    ('review-decision', '/properties/review_item_id'): 'ContractReviewDecisionFragment3',
+    ('review-decision', '/properties/reviewer_comment'): 'ContractReviewDecisionFragment21',
+    ('review-decision', '/properties/reviewer_principal_id'): 'ContractReviewDecisionFragment20',
+    ('review-decision', '/properties/stale'): 'ContractReviewDecisionFragment24',
+    ('review-submission-attempt-v1', ''): 'ContractReviewSubmissionAttemptV1',
+    ('review-submission-attempt-v1', '/additionalProperties'): 'ContractReviewSubmissionAttemptV1Fragment1',
+    ('review-submission-attempt-v1', '/properties/action'): 'ContractReviewSubmissionAttemptV1Fragment13',
+    ('review-submission-attempt-v1', '/properties/assertion_version'): 'ContractReviewSubmissionAttemptV1Fragment12',
+    ('review-submission-attempt-v1', '/properties/authorization_decision_id'): 'ContractReviewSubmissionAttemptV1Fragment21',
+    ('review-submission-attempt-v1', '/properties/contract'): 'ContractReviewSubmissionAttemptV1Fragment2',
+    ('review-submission-attempt-v1', '/properties/corrected_value'): 'ContractReviewSubmissionAttemptV1Fragment15',
+    ('review-submission-attempt-v1', '/properties/corrected_value/additionalProperties'): 'ContractReviewSubmissionAttemptV1Fragment16',
+    ('review-submission-attempt-v1', '/properties/event_sha256'): 'ContractReviewSubmissionAttemptV1Fragment11',
+    ('review-submission-attempt-v1', '/properties/evidence'): 'ContractReviewSubmissionAttemptV1Fragment17',
+    ('review-submission-attempt-v1', '/properties/evidence/additionalProperties'): 'ContractReviewSubmissionAttemptV1Fragment18',
+    ('review-submission-attempt-v1', '/properties/id'): 'ContractReviewSubmissionAttemptV1Fragment3',
+    ('review-submission-attempt-v1', '/properties/knowledge_base_id'): 'ContractReviewSubmissionAttemptV1Fragment5',
+    ('review-submission-attempt-v1', '/properties/original_assertion_id'): 'ContractReviewSubmissionAttemptV1Fragment8',
+    ('review-submission-attempt-v1', '/properties/outcome'): 'ContractReviewSubmissionAttemptV1Fragment20',
+    ('review-submission-attempt-v1', '/properties/reason_code'): 'ContractReviewSubmissionAttemptV1Fragment14',
+    ('review-submission-attempt-v1', '/properties/review_batch_id'): 'ContractReviewSubmissionAttemptV1Fragment7',
+    ('review-submission-attempt-v1', '/properties/review_item_id'): 'ContractReviewSubmissionAttemptV1Fragment6',
+    ('review-submission-attempt-v1', '/properties/reviewer_comment'): 'ContractReviewSubmissionAttemptV1Fragment19',
+    ('review-submission-attempt-v1', '/properties/reviewer_principal_id'): 'ContractReviewSubmissionAttemptV1Fragment9',
+    ('review-submission-attempt-v1', '/properties/submitted_at'): 'ContractReviewSubmissionAttemptV1Fragment10',
+    ('review-submission-attempt-v1', '/properties/tenant_id'): 'ContractReviewSubmissionAttemptV1Fragment4',
     ('scoped-identifier-v1', ''): 'ContractScopedIdentifierV1',
 }
 
-SOURCE_METADATA = {'https://nebula.local/schemas/assertion-admission-result-v1.schema.json': {'': {'title': 'AssertionAdmissionResultV1', 'description': 'F0006 server-computed protected result. F0016 must durably persist outcomes before marking a run complete. This internal result is not an HTTP endpoint or general log payload. No field grants permission.'}}, 'https://nebula.local/schemas/assertion-record-v2.schema.json': {'': {'title': 'AssertionCandidateV2', 'description': 'F0006 design contract, Phase B approved by operator 2026-11-01. Untrusted source claim; structural schema validation does not establish admission, authorization or canonical eligibility.'}}, 'https://nebula.local/schemas/canonical-commit-request.schema.json': {'': {'title': 'CanonicalCommitRequest', 'description': 'Proposal for one canonical fact commit (master blueprint section 109.2; F0001-S0005). F0008 design: exactly one of valid_from (legacy pilot slots) or temporal (identity-v1 slots) is present.'}, '/properties/temporal': {'description': 'F0008 (ADR-0078, Accepted): required for identity-v1 slots (rejected as temporal_fields_required when absent); omitted for legacy pilot slots, which keep valid_from/valid_to semantics. When present, valid_from/valid_to above must be omitted and are derived from this block.'}}, 'https://nebula.local/schemas/canonical-commit-response.schema.json': {'': {'title': 'CanonicalCommitResponse', 'description': 'Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005). F0008 (S0002 AC7, remediation run 2026-11-18-bce4909b): a fact-temporal/v1 commit adds `versions`, one entry per written version in `fact_version_ids` order, carrying its temporal block; a legacy pilot commit omits it.'}, '/properties/versions/items/properties/temporal': {'description': 'Absent for a legacy remainder on an identity-v1 slot.'}}, 'https://nebula.local/schemas/content-artifact-manifest-read.schema.json': {'': {'title': 'ContentArtifactManifestRead'}}, 'https://nebula.local/schemas/content-artifact-manifest-v2.schema.json': {'': {'title': 'ContentArtifactManifestV2', 'description': 'F0004 proposed v2 parse bundle. Date metadata and interpretation outputs are external, append-only records. Cross-file hashes, identity, duplicate paths and native asset closure require service validation.'}, '/properties/extraction_quality/properties/ocr': {'description': 'F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.'}}, 'https://nebula.local/schemas/content-artifact-manifest.schema.json': {'': {'title': 'ContentArtifactManifest', 'description': 'Manifest of one accepted parse-once content artifact bundle (master blueprint sections 80, 81, 108.1; F0001-S0003). F0004 compatibility clarification: source.pdf is the observed retained-PDF filename; no v2 metadata is synthesized for legacy artifacts.'}, '/properties/extraction_quality/properties/ocr': {'description': 'F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.'}}, 'https://nebula.local/schemas/content-records-v2.schema.json': {'': {'title': 'ContentRecordsV2', 'description': 'One JSONL record. Relational uniqueness, bounds, native references and geometry consistency are service checks. Positions refer to exact block.text in Unicode code points; identity normalization never rewrites source text.'}}, 'https://nebula.local/schemas/document-date-record.schema.json': {'': {'title': 'DocumentDateRecord', 'description': 'Append-only candidates and explicit selections; no automatic precedence. HUMAN provenance needs a trusted verifier, not schema validity alone. In v0.1 every selection, including a clear, carries a verified human selection decision; a service principal may record candidates but cannot select. A null candidate explicitly clears the selected date; no selection means undated. YEAR/MONTH/DAY preserve supplied precision.'}, '/oneOf/1/properties/human_decision': {'description': "Verified human selection decision (F0022 producer). actor_principal_id here is the deciding human; the record's top-level actor_principal_id is the calling principal. Schema validity is not authority: the trusted verifier binds decision, document version, candidate (or clear) and expected previous selection."}}, 'https://nebula.local/schemas/fact-answer-v1.schema.json': {'': {'title': 'FactAnswerV1', 'description': 'F0007 answer carrier (ADR-0039 D1-D5, ADR-0077 D5). Stored as the canonical_fact_version.value of an identity-v1 slot; legacy pilot slots keep their unwrapped values. Only PRESENT carries a value. There is no access-denied state: authorization is decided before any answer is produced. Server canonicalization (decimal form, identifier and name normalization) happens before storage.'}, '/$defs/absence_scope': {'description': "Exact interpretation scope searched (ADR-0039 D2). Never implies global absence. The artifact must be readable by the caller and owned by the slot's tenant/KB."}, '/$defs/absence_scope/properties/profile_release_ref': {'description': 'Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity.'}}, 'https://nebula.local/schemas/fact-slot-key-v1.schema.json': {'': {'title': 'FactSlotKeyV1', 'description': 'F0007 internal slot-resolution request (ADR-0077). Not an HTTP route. Tenant comes from the authorized scope, never from this payload. Qualifier names are declared by the predicate contract; ordering of the input object is irrelevant to identity.'}, '/properties/predicate_key': {'description': 'Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference.'}, '/properties/predicate_release_ref': {'description': 'Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity.'}, '/properties/object_entity_id': {'description': 'Required for RELATIONSHIP predicates, forbidden otherwise.'}, '/properties/member': {'description': 'Required to address a member of a MULTI slot; forbidden otherwise.'}, '/$defs/decimal_value': {'description': 'Input and canonical value have at most 64 total characters including sign/point. Server semantic validation rejects exponent forms whose canonical expansion exceeds that bound before allocating it; every emitted canonical form is a valid reload input.'}, '/$defs/money_value': {'description': 'ADR-0039 D4. Amount is an exact decimal string; a JSON number is rejected (MONEY_FLOAT_REJECTED). Input and canonical amount are bounded to 64 total characters including sign/point; oversized canonical expansions reject DECIMAL_INVALID before allocation. Original currency only in F0007: any conversion marker is rejected (CONVERTED_MONEY_UNSUPPORTED) at the domain validator, so the schema does not admit one.'}, '/$defs/identifier_value': {'description': 'ADR-0039 D5 scoped identifier. normalized_value is server-computed from the identifier-type normalization table; a supplied value that differs is rejected.'}, '/$defs/name_value': {'description': "ADR-0066 name value. normalized is server-computed (NFC, casefold, whitespace collapse); evidence must name an admitted F0006 v2 assertion in the slot's tenant/KB."}, '/$defs/qualifier_value': {'description': 'Qualifiers use the scalar typed values only (no name values). Explicit null is rejected with QUALIFIER_NULL_REJECTED; an omitted qualifier contributes nothing to identity.'}}, 'https://nebula.local/schemas/fact-slot-resolution-result-v1.schema.json': {'': {'title': 'FactSlotResolutionResultV1', 'description': "F0007 server-computed resolution outcome (ADR-0077). Internal service result, not an HTTP payload. A rejection writes no slot, qualifier or member row. Authorization denial is not an outcome here: the caller receives the facade's non-disclosing denial before any validation detail."}, '/properties/predicate_key': {'description': 'Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference.'}}, 'https://nebula.local/schemas/fact-temporal-v1.schema.json': {'': {'title': 'FactTemporalV1', 'description': 'F0008 contract (ADR-0078, Accepted): the valid-time block of a canonical commit for identity-v1 slots, and the temporal block returned for a temporal-v1 version. Structural checks only; truncation in zone, attestation derivation from F0004 document-date selections, succession and state guards run in the commit service and database triggers.'}, '/$defs/iana_zone': {'description': "IANA time-zone name, for example America/Chicago or the fixed-offset Etc/GMT+6. Existence is validated against the server's zone database, not by this schema."}, '/$defs/start_basis': {'description': 'How the start was obtained. TEMPLATE_FIELD and HUMAN count as grade A (G1 decision 1). ATTESTATION_FLOOR is server-assigned when the start is unknown and is never accepted from a caller.'}, '/$defs/document_date': {'description': 'An F0004 document-date value at its own precision (YYYY, YYYY-MM or YYYY-MM-DD).'}, '/$defs/commit_temporal/properties/valid_from': {'description': 'Known start. Omit or null for an unknown start: the server floors it at attested_from or rejects START_UNATTESTED.'}, '/$defs/commit_temporal/properties/attestation_zone': {'description': 'Zone used to place bounds derived from document dates (an attestation-floor start or an UNKNOWN end).'}, '/$defs/commit_temporal/properties/ending_evidence_refs': {'description': 'Assertions whose documents state that the fact ended (UNKNOWN end only). attested_to is the earliest selected date among their documents.'}, '/$defs/commit_temporal/properties/expected_attestation': {'description': 'Optional echo. If present it must equal the server-derived values, otherwise ATTESTATION_MISMATCH.'}, '/$defs/version_temporal/properties/valid_to': {'description': 'BOUNDED: the stated end. UNKNOWN: the integrity bound placed at the end of the attested_to period. OPEN: null.'}, '/$defs/version_temporal/properties/validity_unknown_from': {'description': 'UNKNOWN end only: valid-time reads at or after this instant and before valid_to return validity-unknown.'}, '/$defs/validity_unknown_read/properties/version_id': {'description': 'The version whose unknown end or floored start produced the result. No value is returned.'}}, 'https://nebula.local/schemas/fact-version-read-v1.schema.json': {'': {'title': 'FactVersionReadV1', 'description': 'F0011 documents the existing FactVersionOut wire shape (flat timestamps), including the F0008 additive metadata. It changes no runtime response. Legacy pilot values remain unwrapped; temporal is omitted for legacy versions.'}}, 'https://nebula.local/schemas/information-state-v1.schema.json': {'': {'title': 'InformationStateV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'information-state', 'x-nebula-display-name': 'InformationStateV1'}}, 'https://nebula.local/schemas/interpretation-output-manifest.schema.json': {'': {'title': 'InterpretationOutputManifest', 'description': 'Run-owned outputs stay outside the parse bundle. V1 reflects the existing checkpoint marker; proposed v2 adds pipeline identity and exact date-basis selection. The selected output schema is independent of content artifact version.'}}, 'https://nebula.local/schemas/interpretation-result-v2.schema.json': {'': {'title': 'InterpretationResultV2', 'description': 'F0006 additive result version. No live producer is activated; the existing importer continues to accept only legacy v1. Candidate entities are document-local references, never canonical entities. Complete items may be checked independently; F0016 owns durable drops and run lifecycle.'}}, 'https://nebula.local/schemas/interpretation-result.schema.json': {'': {'title': 'InterpretationResult', 'description': 'Provider-neutral output of one semantic interpretation run over a persisted content artifact (master blueprint section 108.3; F0001-S0003).'}}, 'https://nebula.local/schemas/problem-details.schema.json': {'': {'title': 'ProblemDetails', 'description': 'RFC 9457 problem details with a stable machine `code` and a `traceId` extension member (camelCase to match the framework API contract validator; every other payload is snake_case). F0001-S0001.'}}, 'https://nebula.local/schemas/qualified-money-v1.schema.json': {'': {'title': 'QualifiedMoneyV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'qualified-money', 'x-nebula-display-name': 'QualifiedMoneyV1'}}, 'https://nebula.local/schemas/scoped-identifier-v1.schema.json': {'': {'title': 'ScopedIdentifierV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'scoped-identifier', 'x-nebula-display-name': 'ScopedIdentifierV1'}}}
+SOURCE_METADATA = {'https://nebula.local/schemas/assertion-admission-result-v1.schema.json': {'': {'title': 'AssertionAdmissionResultV1', 'description': 'F0006 server-computed protected result. F0016 must durably persist outcomes before marking a run complete. This internal result is not an HTTP endpoint or general log payload. No field grants permission.'}}, 'https://nebula.local/schemas/assertion-record-v2.schema.json': {'': {'title': 'AssertionCandidateV2', 'description': 'F0006 design contract, Phase B approved by operator 2026-11-01. Untrusted source claim; structural schema validation does not establish admission, authorization or canonical eligibility.'}}, 'https://nebula.local/schemas/canonical-commit-request.schema.json': {'': {'title': 'CanonicalCommitRequest', 'description': 'Proposal for one canonical fact commit (master blueprint section 109.2; F0001-S0005). F0008 design: exactly one of valid_from (legacy pilot slots) or temporal (identity-v1 slots) is present.'}, '/properties/temporal': {'description': 'F0008 (ADR-0078, Accepted): required for identity-v1 slots (rejected as temporal_fields_required when absent); omitted for legacy pilot slots, which keep valid_from/valid_to semantics. When present, valid_from/valid_to above must be omitted and are derived from this block.'}}, 'https://nebula.local/schemas/canonical-commit-response.schema.json': {'': {'title': 'CanonicalCommitResponse', 'description': 'Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005). F0008 (S0002 AC7, remediation run 2026-11-18-bce4909b): a fact-temporal/v1 commit adds `versions`, one entry per written version in `fact_version_ids` order, carrying its temporal block; a legacy pilot commit omits it.'}, '/properties/versions/items/properties/temporal': {'description': 'Absent for a legacy remainder on an identity-v1 slot.'}}, 'https://nebula.local/schemas/content-artifact-manifest-read.schema.json': {'': {'title': 'ContentArtifactManifestRead'}}, 'https://nebula.local/schemas/content-artifact-manifest-v2.schema.json': {'': {'title': 'ContentArtifactManifestV2', 'description': 'F0004 proposed v2 parse bundle. Date metadata and interpretation outputs are external, append-only records. Cross-file hashes, identity, duplicate paths and native asset closure require service validation.'}, '/properties/extraction_quality/properties/ocr': {'description': 'F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.'}}, 'https://nebula.local/schemas/content-artifact-manifest.schema.json': {'': {'title': 'ContentArtifactManifest', 'description': 'Manifest of one accepted parse-once content artifact bundle (master blueprint sections 80, 81, 108.1; F0001-S0003). F0004 compatibility clarification: source.pdf is the observed retained-PDF filename; no v2 metadata is synthesized for legacy artifacts.'}, '/properties/extraction_quality/properties/ocr': {'description': 'F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.'}}, 'https://nebula.local/schemas/content-records-v2.schema.json': {'': {'title': 'ContentRecordsV2', 'description': 'One JSONL record. Relational uniqueness, bounds, native references and geometry consistency are service checks. Positions refer to exact block.text in Unicode code points; identity normalization never rewrites source text.'}}, 'https://nebula.local/schemas/document-date-record.schema.json': {'': {'title': 'DocumentDateRecord', 'description': 'Append-only candidates and explicit selections; no automatic precedence. HUMAN provenance needs a trusted verifier, not schema validity alone. In v0.1 every selection, including a clear, carries a verified human selection decision; a service principal may record candidates but cannot select. A null candidate explicitly clears the selected date; no selection means undated. YEAR/MONTH/DAY preserve supplied precision.'}, '/oneOf/1/properties/human_decision': {'description': "Verified human selection decision (F0022 producer). actor_principal_id here is the deciding human; the record's top-level actor_principal_id is the calling principal. Schema validity is not authority: the trusted verifier binds decision, document version, candidate (or clear) and expected previous selection."}}, 'https://nebula.local/schemas/fact-answer-v1.schema.json': {'': {'title': 'FactAnswerV1', 'description': 'F0007 answer carrier (ADR-0039 D1-D5, ADR-0077 D5). Stored as the canonical_fact_version.value of an identity-v1 slot; legacy pilot slots keep their unwrapped values. Only PRESENT carries a value. There is no access-denied state: authorization is decided before any answer is produced. Server canonicalization (decimal form, identifier and name normalization) happens before storage.'}, '/$defs/absence_scope': {'description': "Exact interpretation scope searched (ADR-0039 D2). Never implies global absence. The artifact must be readable by the caller and owned by the slot's tenant/KB."}, '/$defs/absence_scope/properties/profile_release_ref': {'description': 'Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity.'}}, 'https://nebula.local/schemas/fact-slot-key-v1.schema.json': {'': {'title': 'FactSlotKeyV1', 'description': 'F0007 internal slot-resolution request (ADR-0077). Not an HTTP route. Tenant comes from the authorized scope, never from this payload. Qualifier names are declared by the predicate contract; ordering of the input object is irrelevant to identity.'}, '/properties/predicate_key': {'description': 'Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference.'}, '/properties/predicate_release_ref': {'description': 'Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity.'}, '/properties/object_entity_id': {'description': 'Required for RELATIONSHIP predicates, forbidden otherwise.'}, '/properties/member': {'description': 'Required to address a member of a MULTI slot; forbidden otherwise.'}, '/$defs/decimal_value': {'description': 'Input and canonical value have at most 64 total characters including sign/point. Server semantic validation rejects exponent forms whose canonical expansion exceeds that bound before allocating it; every emitted canonical form is a valid reload input.'}, '/$defs/money_value': {'description': 'ADR-0039 D4. Amount is an exact decimal string; a JSON number is rejected (MONEY_FLOAT_REJECTED). Input and canonical amount are bounded to 64 total characters including sign/point; oversized canonical expansions reject DECIMAL_INVALID before allocation. Original currency only in F0007: any conversion marker is rejected (CONVERTED_MONEY_UNSUPPORTED) at the domain validator, so the schema does not admit one.'}, '/$defs/identifier_value': {'description': 'ADR-0039 D5 scoped identifier. normalized_value is server-computed from the identifier-type normalization table; a supplied value that differs is rejected.'}, '/$defs/name_value': {'description': "ADR-0066 name value. normalized is server-computed (NFC, casefold, whitespace collapse); evidence must name an admitted F0006 v2 assertion in the slot's tenant/KB."}, '/$defs/qualifier_value': {'description': 'Qualifiers use the scalar typed values only (no name values). Explicit null is rejected with QUALIFIER_NULL_REJECTED; an omitted qualifier contributes nothing to identity.'}}, 'https://nebula.local/schemas/fact-slot-resolution-result-v1.schema.json': {'': {'title': 'FactSlotResolutionResultV1', 'description': "F0007 server-computed resolution outcome (ADR-0077). Internal service result, not an HTTP payload. A rejection writes no slot, qualifier or member row. Authorization denial is not an outcome here: the caller receives the facade's non-disclosing denial before any validation detail."}, '/properties/predicate_key': {'description': 'Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference.'}}, 'https://nebula.local/schemas/fact-temporal-v1.schema.json': {'': {'title': 'FactTemporalV1', 'description': 'F0008 contract (ADR-0078, Accepted): the valid-time block of a canonical commit for identity-v1 slots, and the temporal block returned for a temporal-v1 version. Structural checks only; truncation in zone, attestation derivation from F0004 document-date selections, succession and state guards run in the commit service and database triggers.'}, '/$defs/iana_zone': {'description': "IANA time-zone name, for example America/Chicago or the fixed-offset Etc/GMT+6. Existence is validated against the server's zone database, not by this schema."}, '/$defs/start_basis': {'description': 'How the start was obtained. TEMPLATE_FIELD and HUMAN count as grade A (G1 decision 1). ATTESTATION_FLOOR is server-assigned when the start is unknown and is never accepted from a caller.'}, '/$defs/document_date': {'description': 'An F0004 document-date value at its own precision (YYYY, YYYY-MM or YYYY-MM-DD).'}, '/$defs/commit_temporal/properties/valid_from': {'description': 'Known start. Omit or null for an unknown start: the server floors it at attested_from or rejects START_UNATTESTED.'}, '/$defs/commit_temporal/properties/attestation_zone': {'description': 'Zone used to place bounds derived from document dates (an attestation-floor start or an UNKNOWN end).'}, '/$defs/commit_temporal/properties/ending_evidence_refs': {'description': 'Assertions whose documents state that the fact ended (UNKNOWN end only). attested_to is the earliest selected date among their documents.'}, '/$defs/commit_temporal/properties/expected_attestation': {'description': 'Optional echo. If present it must equal the server-derived values, otherwise ATTESTATION_MISMATCH.'}, '/$defs/version_temporal/properties/valid_to': {'description': 'BOUNDED: the stated end. UNKNOWN: the integrity bound placed at the end of the attested_to period. OPEN: null.'}, '/$defs/version_temporal/properties/validity_unknown_from': {'description': 'UNKNOWN end only: valid-time reads at or after this instant and before valid_to return validity-unknown.'}, '/$defs/validity_unknown_read/properties/version_id': {'description': 'The version whose unknown end or floored start produced the result. No value is returned.'}}, 'https://nebula.local/schemas/fact-version-read-v1.schema.json': {'': {'title': 'FactVersionReadV1', 'description': 'F0011 documents the existing FactVersionOut wire shape (flat timestamps), including the F0008 additive metadata. It changes no runtime response. Legacy pilot values remain unwrapped; temporal is omitted for legacy versions.'}}, 'https://nebula.local/schemas/information-state-v1.schema.json': {'': {'title': 'InformationStateV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'information-state', 'x-nebula-display-name': 'InformationStateV1'}}, 'https://nebula.local/schemas/interpretation-output-manifest.schema.json': {'': {'title': 'InterpretationOutputManifest', 'description': 'Run-owned outputs stay outside the parse bundle. V1 reflects the existing checkpoint marker; proposed v2 adds pipeline identity and exact date-basis selection. The selected output schema is independent of content artifact version.'}}, 'https://nebula.local/schemas/interpretation-result-v2.schema.json': {'': {'title': 'InterpretationResultV2', 'description': 'F0006 additive result version. No live producer is activated; the existing importer continues to accept only legacy v1. Candidate entities are document-local references, never canonical entities. Complete items may be checked independently; F0016 owns durable drops and run lifecycle.'}}, 'https://nebula.local/schemas/interpretation-result.schema.json': {'': {'title': 'InterpretationResult', 'description': 'Provider-neutral output of one semantic interpretation run over a persisted content artifact (master blueprint section 108.3; F0001-S0003).'}}, 'https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json': {'': {'title': 'Reserved future learning identity v1'}}, 'https://nebula.local/schemas/problem-details.schema.json': {'': {'title': 'ProblemDetails', 'description': 'RFC 9457 problem details with a stable machine `code` and a `traceId` extension member (camelCase to match the framework API contract validator; every other payload is snake_case). F0001-S0001.'}}, 'https://nebula.local/schemas/provenance-query-v1.schema.json': {'': {'title': 'Provenance query v1'}}, 'https://nebula.local/schemas/provenance-result-v1.schema.json': {'': {'title': 'Bounded authorized provenance result v1'}, '/properties/records/items/oneOf/10/properties/data/properties/from_version_id': {'description': "Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."}, '/properties/edges': {'description': "Every edge reads '<source> <kind> <target>'. Each kind admits only the endpoint record kinds listed in its branch. Edges are unique by (kind, source, target); domain checks additionally require both endpoints in records and every non-root record to be connected to the root (ignoring direction). Directional ancestry kinds (corrected_from, split_of) must be acyclic."}, '/properties/edges/items/oneOf/0': {'description': 'HUMAN_REVIEW child assertion -> its stored original (assertion.original_assertion_id).'}, '/properties/edges/items/oneOf/1': {'description': 'Assertion -> its assertion_evidence row; or fact_version -> an evidence.refs entry.'}, '/properties/edges/items/oneOf/2': {'description': 'fact_version -> an evidence.ending_refs entry; never relabelled as support.'}, '/properties/edges/items/oneOf/3': {'description': 'Evidence row -> the immutable artifact it cites (assertion_evidence.artifact_id).'}, '/properties/edges/items/oneOf/4': {'description': 'Assertion -> its producing interpretation run (assertion.run_id).'}, '/properties/edges/items/oneOf/5': {'description': 'Interpretation run -> the artifact it read (semantic_interpretation_run.artifact_id).'}, '/properties/edges/items/oneOf/6': {'description': 'Artifact -> its document version (content_artifact.document_version_id).'}, '/properties/edges/items/oneOf/7': {'description': 'Document version -> its source document (document_version.source_document_id).'}, '/properties/edges/items/oneOf/8': {'description': 'Decision (via its review item) or refused attempt (original_assertion_id) -> the assertion under review.'}, '/properties/edges/items/oneOf/9': {'description': 'Effective CORRECT decision -> its HUMAN_REVIEW child (corrected_assertion_id).'}, '/properties/edges/items/oneOf/10': {'description': 'Effective CORRECT decision -> its reserved future-learning identity.'}, '/properties/edges/items/oneOf/11': {'description': 'Canonical version -> the review decision stored on it (review_decision_id); implies no acceptance by review.'}, '/properties/edges/items/oneOf/12': {'description': 'Remainder -> its same-slot predecessor (split_of_version_id).'}, '/properties/edges/items/oneOf/13': {'description': 'canonical_fact_change -> from_version_id.'}, '/properties/edges/items/oneOf/14': {'description': 'canonical_fact_change -> to_version_id.'}, '/properties/edges/items/oneOf/15': {'description': 'Version with an exposed attested_* document date -> each artifact behind its refs/ending_refs (the current_attesting_artifact_keys join).'}, '/properties/edges/items/oneOf/16': {'description': 'Record -> a stored derivation/input reference; never a fabricated document locator.'}}, 'https://nebula.local/schemas/qualified-money-v1.schema.json': {'': {'title': 'QualifiedMoneyV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'qualified-money', 'x-nebula-display-name': 'QualifiedMoneyV1'}}, 'https://nebula.local/schemas/review-decision.schema.json': {'': {'title': 'ReviewDecision', 'description': 'Governed outcome of one human review submitted from the Nebula Review Panel; corrections append and never rewrite the original assertion (master blueprint sections 75 and 125, ADR-0037, ADR-0057, ADR-0058; F0001-S0004).'}, '/properties/action': {'description': 'ACCEPT, CORRECT, and REJECT are adjudications. BLOCKED is not: it records that the evidence could not be anchored, produces no assertion, and leaves the review item open (ADR-0058).'}, '/properties/reason_code': {'description': 'Required for CORRECT, REJECT, and BLOCKED. EVIDENCE_UNRESOLVED is the only reason code valid with BLOCKED.'}, '/properties/evidence': {'description': 'The locator the reviewer actually saw, at the precision it was shown, carried onto any assertion this decision creates.'}, '/properties/evidence/oneOf/1/properties/selector': {'description': 'W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points.'}, '/properties/reviewer_principal_id': {'description': 'Resolved from the authenticated session, never from the request payload (ADR-0049, ADR-0057).'}, '/properties/event_sha256': {'description': 'Hash of the submitted decision event; the idempotency key for resubmission of a batch.'}}, 'https://nebula.local/schemas/review-submission-attempt-v1.schema.json': {'': {'title': 'Non-applied review submission v1'}}, 'https://nebula.local/schemas/scoped-identifier-v1.schema.json': {'': {'title': 'ScopedIdentifierV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'scoped-identifier', 'x-nebula-display-name': 'ScopedIdentifierV1'}}}
 
 for _ref, _class_name in MODEL_INDEX.items():
     _class = globals()[_class_name]

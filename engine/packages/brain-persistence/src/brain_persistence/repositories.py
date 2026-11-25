@@ -9,6 +9,7 @@ from brain_domain.assertions import SourceAccessProof
 from brain_domain.audit import AuditEvent
 from brain_domain.authx import AuthorizationDecision, ResourceKey, ResourceType
 from brain_domain.facts import ChangeReason, FactVersion
+from brain_domain.provenance import LearningCandidateReservation, ReviewSubmissionAttempt
 from brain_domain.review import (
     EvidenceLocator,
     ReviewDecision,
@@ -38,6 +39,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from brain_persistence import content_models as content_tables
 from brain_persistence.authx import audit_timestamp
+from brain_persistence.lineage_contracts import ATTEMPT as ATTEMPT_CONTRACT
+from brain_persistence.lineage_contracts import RESERVATION as RESERVATION_CONTRACT
+from brain_persistence.lineage_contracts import validate_lineage
 from brain_persistence.models import (
     Assertion,
     AssertionEvidence,
@@ -50,6 +54,10 @@ from brain_persistence.models import (
     OutboxEventRow,
     ReviewDecisionRow,
     ReviewItemRow,
+)
+from brain_persistence.provenance_models import (
+    LearningCandidateReservationRow,
+    ReviewSubmissionAttemptRow,
 )
 from brain_persistence.tenancy import inherit_resource_access
 
@@ -93,6 +101,41 @@ class ReviewDecisionAuditSink:
                     "authorization_decision_id": str(authorization.decision_id),
                     "stale": decision.stale,
                 },
+            )
+        )
+
+    async def record_refusal(
+        self,
+        *,
+        attempt_id: UUID,
+        review_item_id: UUID,
+        reviewer_principal_id: UUID,
+        action: str,
+        outcome: str,
+        occurred_at: datetime,
+        trace_id: str,
+    ) -> None:
+        """F0009 S0002 AC6: one audit event per refused request. The payload carries
+        only the attempt identity and outcome, never a value, comment or excerpt."""
+        authorization = self._authorizations[review_item_id]
+        await self._repository.append(
+            AuditEvent(
+                id=uuid4(),
+                occurred_at=occurred_at,
+                actor_principal_id=reviewer_principal_id,
+                delegate_principal_id=authorization.executor_principal_id,
+                resource_type="review_item",
+                resource_id=review_item_id,
+                action=action,
+                decision=False,
+                reason_code=outcome,
+                policy_hash=authorization.policy_hash,
+                grant_revision=authorization.grant_revision,
+                trace_id=trace_id,
+                decision_id=authorization.decision_id,
+                event_type="review_submission_refused",
+                operation_outcome="failed",
+                payload={"attempt_id": str(attempt_id), "outcome": outcome},
             )
         )
 
@@ -149,6 +192,11 @@ def _evidence_to_json(evidence: EvidenceLocator | None) -> dict | None:
         "unresolved_reason": evidence.unresolved_reason,
         "selector": list(evidence.selector),
     }
+
+
+def _aware_utc(value: datetime) -> datetime:
+    """A naive value is the stored F0001 UTC instant; make it timezone-aware."""
+    return value.astimezone(UTC) if value.tzinfo else value.replace(tzinfo=UTC)
 
 
 def _review_item_from_row(row: ReviewItemRow) -> ReviewItem:
@@ -210,12 +258,144 @@ class SqlAlchemyReviewItemRepository:
                 select(ReviewItemRow.assertion_id).where(ReviewItemRow.id == item_id)
             )
             if assertion_id is not None:
+                # F0009 Step 3.1: a replay or refusal can expose prior decisions'
+                # corrected children, so their sources join the authorized set.
+                children = (
+                    await self._session.execute(
+                        select(ReviewDecisionRow.corrected_assertion_id).where(
+                            ReviewDecisionRow.review_item_id == item_id,
+                            ReviewDecisionRow.corrected_assertion_id.is_not(None),
+                        )
+                    )
+                ).scalars()
                 discovery = await discover_sources(
-                    self._session, (), None, assertion_ids=(assertion_id,)
+                    self._session,
+                    (),
+                    None,
+                    assertion_ids=(assertion_id, *(c for c in children if c is not None)),
                 )
+                # Unregistered legacy (v1-only) sources stay the explicit F0006
+                # compatibility boundary: never fabricated into a source key.
                 if discovery.has_v2:
                     sources.update(discovery.keys)
         return tuple(sorted(sources))
+
+    async def lock_batch_items(self, review_item_ids: Sequence[UUID]) -> None:
+        """F0009 Step 3.2: FOR UPDATE every submitted item in ascending UUID order
+        before any decision state is read, so concurrent batches serialize."""
+        for item_id in sorted(set(review_item_ids), key=str):
+            await self._session.execute(
+                select(ReviewItemRow.id).where(ReviewItemRow.id == item_id).with_for_update()
+            )
+
+    async def reserve_learning_reference(self, decision: ReviewDecision) -> UUID:
+        """F0009 S0005 AC1: one server UUID per new effective correction, linked to
+        the exact decision, original/child, reviewer and decision time. The item and
+        ownership come from trusted stored rows; the database guard rechecks them."""
+        if decision.corrected_assertion_id is None or decision.stale:
+            raise ValueError("only an effective correction is reserved")
+        item = await self._session.get(ReviewItemRow, decision.review_item_id)
+        if item is None:
+            raise ValueError(f"review item {decision.review_item_id} not found")
+        reservation = LearningCandidateReservation(
+            id=uuid4(),
+            tenant_id=item.tenant_id,
+            knowledge_base_id=item.knowledge_base_id,
+            review_decision_id=decision.id,
+            original_assertion_id=item.assertion_id,
+            corrected_assertion_id=decision.corrected_assertion_id,
+            reviewer_principal_id=decision.reviewer_principal_id,
+            reserved_at=_aware_utc(decision.decided_at),
+        )
+        validate_lineage(RESERVATION_CONTRACT, reservation.to_json())
+        self._session.add(
+            LearningCandidateReservationRow(
+                id=reservation.id,
+                tenant_id=reservation.tenant_id,
+                knowledge_base_id=reservation.knowledge_base_id,
+                review_decision_id=reservation.review_decision_id,
+                original_assertion_id=reservation.original_assertion_id,
+                corrected_assertion_id=reservation.corrected_assertion_id,
+                reviewer_principal_id=reservation.reviewer_principal_id,
+                reserved_at=reservation.reserved_at,
+            )
+        )
+        await self._session.flush()
+        return reservation.id
+
+    async def record_refused_submission(
+        self,
+        *,
+        item: ReviewItem,
+        request_action: str,
+        reviewer_principal_id: UUID,
+        assertion_version: int,
+        reason_code: str | None,
+        corrected_value: dict | None,
+        evidence: EvidenceLocator | None,
+        reviewer_comment: str | None,
+        event_sha256: str,
+        outcome: str,
+        authorization: AuthorizationDecision,
+        submitted_at: datetime,
+    ) -> UUID:
+        """F0009 S0002 AC6: get-or-create on (item, event, outcome) under the item
+        locks the caller holds. A matching row is reused unchanged (append-only);
+        a changed outcome appends a new row."""
+        existing = await self._session.scalar(
+            select(ReviewSubmissionAttemptRow.id).where(
+                ReviewSubmissionAttemptRow.review_item_id == item.id,
+                ReviewSubmissionAttemptRow.event_sha256 == event_sha256,
+                ReviewSubmissionAttemptRow.outcome == outcome,
+            )
+        )
+        if existing is not None:
+            return existing
+        if item.review_batch_id is None:
+            raise ValueError(f"review item {item.id} has not been assembled into a batch")
+        attempt = ReviewSubmissionAttempt(
+            id=uuid4(),
+            tenant_id=item.tenant_id,
+            knowledge_base_id=item.knowledge_base_id,
+            review_item_id=item.id,
+            review_batch_id=item.review_batch_id,
+            original_assertion_id=item.assertion_id,
+            reviewer_principal_id=reviewer_principal_id,
+            submitted_at=_aware_utc(submitted_at),
+            event_sha256=event_sha256,
+            assertion_version=assertion_version,
+            action=request_action,
+            reason_code=reason_code,
+            corrected_value=corrected_value,
+            evidence=_evidence_to_json(evidence),
+            reviewer_comment=reviewer_comment,
+            outcome=outcome,
+            authorization_decision_id=authorization.decision_id,
+        )
+        validate_lineage(ATTEMPT_CONTRACT, attempt.to_json())
+        self._session.add(
+            ReviewSubmissionAttemptRow(
+                id=attempt.id,
+                tenant_id=attempt.tenant_id,
+                knowledge_base_id=attempt.knowledge_base_id,
+                review_item_id=attempt.review_item_id,
+                review_batch_id=attempt.review_batch_id,
+                original_assertion_id=attempt.original_assertion_id,
+                reviewer_principal_id=attempt.reviewer_principal_id,
+                submitted_at=attempt.submitted_at,
+                event_sha256=attempt.event_sha256,
+                assertion_version=attempt.assertion_version,
+                action=attempt.action,
+                reason_code=attempt.reason_code,
+                corrected_value=attempt.corrected_value,
+                evidence=attempt.evidence,
+                reviewer_comment=attempt.reviewer_comment,
+                outcome=attempt.outcome,
+                authorization_decision_id=attempt.authorization_decision_id,
+            )
+        )
+        await self._session.flush()
+        return attempt.id
 
     async def get(self, review_item_id: UUID) -> ReviewItem | None:
         row = await self._session.get(ReviewItemRow, review_item_id)
@@ -282,6 +462,9 @@ class SqlAlchemyReviewItemRepository:
                 event_sha256=decision.event_sha256,
                 tenant_id=item.tenant_id,
                 knowledge_base_id=item.knowledge_base_id,
+                # F0009 PR-M1: persist the decision's own instant (naive UTC, the
+                # F0001 column convention), never the server default.
+                decided_at=audit_timestamp(decision.decided_at),
             )
         )
         await self._session.flush()

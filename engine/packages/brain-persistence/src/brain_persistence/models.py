@@ -325,6 +325,12 @@ class ReviewDecisionRow(Base):
     __tablename__ = "review_decision"
     __table_args__ = (
         UniqueConstraint("review_item_id", "event_sha256", name="uq_review_decision_item_event"),
+        # F0009 (migration 0016): composite owner key for the lineage tables.
+        UniqueConstraint("id", "tenant_id", "knowledge_base_id", name="uq_review_decision_owner"),
+        CheckConstraint(
+            "correction_lineage_contract IS NULL OR correction_lineage_contract = 1",
+            name="ck_review_decision_correction_lineage_contract",
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, primary_key=True, default=uuid.uuid4)
@@ -350,6 +356,12 @@ class ReviewDecisionRow(Base):
     # migrations 0005/0006 — the database is the enforcement point.
     tenant_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
     knowledge_base_id: Mapped[uuid.UUID] = mapped_column(_UUIDVariant, nullable=False)
+    # F0009: server-owned marker. A BEFORE INSERT trigger stamps 1 on every new
+    # decision; pre-F0009 rows stay NULL and never acquire a reservation. The
+    # application never writes it, so it is excluded from inserts.
+    correction_lineage_contract: Mapped[int | None] = mapped_column(
+        SmallInteger, nullable=True, insert_default=None
+    )
 
     review_item: Mapped[ReviewItemRow] = relationship(back_populates="decisions")
 
@@ -690,3 +702,4 @@ class CanonicalCommitRow(Base):
 from brain_persistence import assertion_models as _assertion_models  # noqa: E402, F401
 from brain_persistence import content_models as _content_models  # noqa: E402, F401
 from brain_persistence import fact_slot_models as _fact_slot_models  # noqa: E402, F401
+from brain_persistence import provenance_models as _provenance_models  # noqa: E402, F401

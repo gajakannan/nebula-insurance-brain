@@ -1,0 +1,44 @@
+$ eslint .
+$ vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv5.1.1 [39m[90m/app/brain/experience[39m
+
+Error: Not implemented: HTMLCanvasElement.prototype.getContext (without installing the canvas npm package)
+    at module.exports (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
+    at HTMLCanvasElementImpl.getContext (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/living/nodes/HTMLCanvasElement-impl.js:42:5)
+    at HTMLCanvasElement.getContext (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/living/generated/HTMLCanvasElement.js:131:58)
+    at /app/brain/experience/src/review-panel/Viewport.tsx:64:29 undefined
+Error: Not implemented: HTMLCanvasElement.prototype.getContext (without installing the canvas npm package)
+    at module.exports (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
+    at HTMLCanvasElementImpl.getContext (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/living/nodes/HTMLCanvasElement-impl.js:42:5)
+    at HTMLCanvasElement.getContext (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/living/generated/HTMLCanvasElement.js:131:58)
+    at /app/brain/experience/src/review-panel/Viewport.tsx:64:29 undefined
+Error: Not implemented: HTMLCanvasElement.prototype.getContext (without installing the canvas npm package)
+    at module.exports (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
+    at HTMLCanvasElementImpl.getContext (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/living/nodes/HTMLCanvasElement-impl.js:42:5)
+    at HTMLCanvasElement.getContext (/app/brain/experience/node_modules/.pnpm/jsdom@25.0.1_supports-color@7.2.0/node_modules/jsdom/lib/jsdom/living/generated/HTMLCanvasElement.js:131:58)
+    at /app/brain/experience/src/review-panel/Viewport.tsx:64:29 undefined
+ [32m✓[39m src/review-panel/__tests__/Viewport.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 32[2mms[22m[39m
+ [32m✓[39m src/review-panel/__tests__/FieldList.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 123[2mms[22m[39m
+ [32m✓[39m src/review-panel/__tests__/ReviewPanel.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[32m 138[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 04:44:05
+[2m   Duration [22m 548ms[2m (environment 51%, tests 23%, setup 16%, import 8%, transform 2%, worker 1%)[22m
+
+$ tsc -b && vite build
+vite v6.4.6 building for production...
+transforming...
+✓ 31 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                          0.34 kB │ gzip:   0.25 kB
+dist/assets/pdf.worker-BgryrOlp.mjs  2,209.73 kB
+dist/assets/index-BgUlKH2p.js          516.32 kB │ gzip: 156.90 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 940ms

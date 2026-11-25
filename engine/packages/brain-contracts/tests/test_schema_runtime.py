@@ -294,7 +294,16 @@ def test_errors_never_contain_instance_values():
 
 def test_installed_bundle_resource_count_and_identity():
     bundle = ContractBundle.installed()
-    assert len(bundle._manifest["resources"]) == 21
+    # F0011 shipped 21; F0009 adds provenance-query/result, the reservation and
+    # attempt carriers, and review-decision as their closed $ref dependency.
+    assert len(bundle._manifest["resources"]) == 26
+    for name in (
+        "provenance-query-v1",
+        "provenance-result-v1",
+        "learning-candidate-reservation-v1",
+        "review-submission-attempt-v1",
+    ):
+        assert bundle.schema(ContractRef(name, "1"))["$id"].endswith(f"/{name}.schema.json")
     assert len(bundle.digest) == 64
     assert bundle.schema(ContractRef("qualified-money-v1", "1"))["$ref"].endswith("/money_value")
     assert bundle.openapi()["openapi"] == "3.1.0"

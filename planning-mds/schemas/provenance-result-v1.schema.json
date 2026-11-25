@@ -552,8 +552,12 @@
                 ],
                 "properties": {
                   "from_version_id": {
-                    "type": "string",
-                    "format": "uuid"
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "uuid",
+                    "description": "Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."
                   },
                   "to_version_id": {
                     "type": "string",

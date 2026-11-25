@@ -1,0 +1,17 @@
+# Gate Decisions — F0009-provenance-and-human-correction-lineage run 2026-11-24-08701e37
+
+## Gate Decisions
+
+| Gate | Decision | Decider | Timestamp | Rationale | Blocking | Follow-up |
+|------|----------|---------|-----------|-----------|----------|-----------|
+| G0 | PASS | Architect | 2026-11-24T22:26:00-05:00 | Approved plan reconciled against main 3729dbe; PR-M1/M2 and PR-L1/L2/L4/L5 resolved without requirement change; migration head 0015 confirmed | No | PR-L3 KG story-mapping precision at G7 |
+| G1 | PASS | DevOps | 2026-11-24T22:42:00-05:00 | Engine/node validation containers healthy; brain_f0009 at 0015; baseline 1628 pass, 3 pre-existing pg_dump-absent restore failures, contracts reproducible | No | Report the 3 restore-test environment failures separately at G2 |
+| G2 | PASS | Quality Engineer | 2026-11-24T23:43:00-05:00 | 41/41 ACs with runtime proof (75 F0009 tests, 1729 engine pass; 3 container-only restore tests pass in host lane 13/13); changed-line coverage 94.41%; conformance 1392/1392; all four scan classes ran; deployability PASS | No | SAST 4 migration findings to Security at G3 |
+| G3 | PASS | Code Reviewer + Security Reviewer | 2026-11-24T23:46:00-05:00 | Code review APPROVED (0C/0H/0M; CR-L1 low closed by anchor-before-expansion fix, 30/30 re-verified); security PASS (0 open findings; 4 SAST migration hits triaged false positive); Architect implementation review PASS | No | - |
+| G4 | APPROVED | User (operator) | 2026-11-25T00:37:00-05:00 | Operator answered `approve` at the G4 approval gate. Code APPROVED (0C/0H/0M, CR-L1 closed), Security PASS (0 open), 41/41 ACs runtime-proven; gate_policy standard ACCEPTABLE (artifacts/g4-gate-policy.json), no justification required | No | ADR-0080 acceptance remains a separate operator decision |
+| G5 | PASS | Claude (Opus 5.5) / Product Manager | 2026-11-25T00:39:00-05:00 | All 5 required roles × 6 stories (30 rows) signed PASS/APPROVED; each verdict cross-checked against its role report's Result line; STATUS provenance and signoff-ledger.md consistent | No | G6 candidate validation |
+| G6 | PASS | Claude (Opus 5.5) / Quality Engineer | 2026-11-25T00:41:00-05:00 | G0–G5 evidence present with passing verdicts; manifest is a pre-closeout candidate (in-progress, no pm_closeout/tracker_sync/latest-run.json); feature-action-execution.md timeline written; scoped tracker validation recorded | No | G7 KG reconciliation |
+| G7 | PASS | Claude (Opus 5.5) / Architect | 2026-11-25T00:43:00-05:00 | As-built code bound to provenance-lineage, learning-candidate-reservation, review-submission-attribution and new migration:f0009-provenance-hooks; PR-L3 story mappings narrowed; compile, symbols/decisions regenerate+check and drift pass (0 symbol warnings after clearing a stale local symbol cache) | No | KG tooling follow-up: symbol cache key omits bound node |
+| G8 | APPROVED | Claude (Opus 5.5) / Product Manager | 2026-11-25T00:47:00-05:00 | PM closeout: archive move with links repointed and verified; STATUS, stories, checklist, README, PRD, BLUEPRINT, ROADMAP, umbrella plan and feature shard updated; prior manifests patched; latest-run.json written; coverage regenerated after the move; closeout, tracker and KG validators run | No | ADR-0080 acceptance (operator); framework and KG tooling follow-ups in pm-closeout.md |
+
+Decisions: `PASS`, `PASS WITH RECOMMENDATIONS`, `FAIL`, `SKIP`. Blocking values: `Yes` / `No`.

@@ -638,9 +638,9 @@ features:
       - schema:fact-answer-v1
       - schema:fact-temporal-v1
       - schema:problem-details
-  - status: planned
+  - status: archived-done
     id: feature:F0009
-    path: planning-mds/features/F0009-provenance-and-human-correction-lineage
+    path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage
     affects:
       - capability:authorization-enforcement
       - capability:evidence-review-round-trip
@@ -653,6 +653,7 @@ features:
       - entity:learning-candidate-reservation
       - entity:review-decision
       - entity:review-submission-attempt
+      - migration:f0009-provenance-hooks
     depends_on:
       - feature:F0002
       - feature:F0004
@@ -672,6 +673,10 @@ features:
       - adr:0079
       - adr:0080
     notes:
+      - 'Closeout 2026-11-25 (PM G8, feature run 2026-11-24-08701e37): archived. G2 design corrections
+        recorded (nullable fact_change.from_version_id; attempt authorization bound by audit_event.decision_id;
+        uq_review_decision_owner; review-decision bundled). Follow-ups: framework check-secrets --no-git;
+        KG symbol cache key.'
       - Phase A exact operator token approve-phase-a recorded and attested at G3 in run 2026-11-24-bfdbbf04.
         Phase B design/ADR-0080 Proposed; Phase B approved 2026-11-24 with exact operator token approve-phase-b
         after G4 and seven ordered G5 pre-approval checks. G5 journal/manifest records post-approval refresh/publication.
@@ -1613,95 +1618,89 @@ stories:
       - schema:canonical-commit-request
   - id: story:F0009-S0001
     feature: feature:F0009
-    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md
+    path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0001-reconstruct-source-provenance.md
     affects:
       - capability:provenance-lineage
     governed_by:
       - adr:0010
-      - adr:0037
+      - adr:0058
+      - adr:0075
       - adr:0080
     uses_api_contract: []
     uses_schema:
-      - schema:learning-candidate-reservation-v1
+      - schema:assertion-record-v2
       - schema:provenance-query-v1
       - schema:provenance-result-v1
-      - schema:review-submission-attempt-v1
   - id: story:F0009-S0002
     feature: feature:F0009
-    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md
+    path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0002-append-auditable-human-corrections.md
     affects:
       - capability:evidence-review-round-trip
       - capability:review-submission-attribution
       - entity:review-submission-attempt
     governed_by:
-      - adr:0010
       - adr:0037
+      - adr:0044
+      - adr:0058
       - adr:0080
     uses_api_contract:
       - api:brain-api
     uses_schema:
-      - schema:learning-candidate-reservation-v1
-      - schema:provenance-query-v1
-      - schema:provenance-result-v1
+      - schema:review-decision
       - schema:review-submission-attempt-v1
   - id: story:F0009-S0003
     feature: feature:F0009
-    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md
+    path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0003-trace-temporal-version-lineage.md
     affects:
       - capability:provenance-lineage
       - entity:canonical-fact-change
       - entity:canonical-fact-version
     governed_by:
-      - adr:0010
-      - adr:0037
+      - adr:0077
+      - adr:0078
       - adr:0080
     uses_api_contract: []
     uses_schema:
-      - schema:learning-candidate-reservation-v1
-      - schema:provenance-query-v1
+      - schema:fact-temporal-v1
+      - schema:fact-version-read-v1
       - schema:provenance-result-v1
-      - schema:review-submission-attempt-v1
   - id: story:F0009-S0004
     feature: feature:F0009
-    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md
+    path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0004-enforce-current-authority-across-lineage.md
     affects:
       - capability:authorization-enforcement
       - capability:provenance-lineage
     governed_by:
-      - adr:0010
-      - adr:0037
+      - adr:0062
       - adr:0080
     uses_api_contract: []
     uses_schema:
-      - schema:learning-candidate-reservation-v1
       - schema:provenance-query-v1
       - schema:provenance-result-v1
-      - schema:review-submission-attempt-v1
   - id: story:F0009-S0005
     feature: feature:F0009
-    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md
+    path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0005-reserve-learning-candidate-reference.md
     affects:
       - capability:learning-candidate-reservation
       - entity:learning-candidate-reservation
     governed_by:
-      - adr:0010
       - adr:0037
+      - adr:0044
       - adr:0080
-    uses_api_contract: []
+    uses_api_contract:
+      - api:brain-api
     uses_schema:
       - schema:learning-candidate-reservation-v1
-      - schema:provenance-query-v1
-      - schema:provenance-result-v1
-      - schema:review-submission-attempt-v1
   - id: story:F0009-S0006
     feature: feature:F0009
-    path: planning-mds/features/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md
+    path: planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/F0009-S0006-prove-compatible-lineage-delivery.md
     affects:
       - capability:learning-candidate-reservation
       - capability:provenance-lineage
+      - capability:review-submission-attribution
+      - migration:f0009-provenance-hooks
     governed_by:
-      - adr:0010
-      - adr:0037
+      - adr:0079
       - adr:0080
     uses_api_contract:
       - api:brain-api

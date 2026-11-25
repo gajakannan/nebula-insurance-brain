@@ -1,0 +1,22 @@
+                   
+                   
+┌─────────────────┐
+│ 4 Code Findings │
+└─────────────────┘
+                                                                    
+    source/engine/migrations/versions/0016_f0009_provenance_hooks.py
+   ❯❯❱ python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+          ❰❰ Blocking ❱❱
+          sqlalchemy.text passes the constructed SQL statement to the database mostly unchanged. This means  
+          that the usual SQL injection protections are not applied and this function is vulnerable to SQL    
+          injection if user input can reach here. Use normal SQLAlchemy operators (such as `or_()`, `and_()`,
+          etc.) to construct SQL.                                                                            
+          Details: https://sg.run/yP1O                                                                       
+                                                                                                             
+          297┆ bind.execute(text(f"LOCK TABLE review_item, {DECISION} IN SHARE ROW EXCLUSIVE MODE"))
+            ⋮┆----------------------------------------
+          320┆ text(f"SELECT count(*) FROM {DECISION} WHERE correction_lineage_contract IS NOT NULL")
+            ⋮┆----------------------------------------
+          332┆ bind.execute(text(f"LOCK TABLE {table} IN ACCESS EXCLUSIVE MODE"))
+            ⋮┆----------------------------------------
+          334┆ table: bind.execute(text(f"SELECT count(*) FROM {table}")).scalar_one()

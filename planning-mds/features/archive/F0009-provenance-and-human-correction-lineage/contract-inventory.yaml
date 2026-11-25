@@ -1,0 +1,137 @@
+feature: F0009
+status: Phase B approved 2026-11-24; G0 reconciled in feature run 2026-11-24-08701e37 (PR-M2 resolved)
+existing_bundle: brain-contracts/v1
+runtime_policy: The feature action copies each resource below into scripts/contracts/sources.yaml and regenerates
+  the root snapshot, installed bundle, generated Pydantic, AJV assets and OpenAPI snapshot with the shipped F0011
+  toolchain. Entries use the exact sources.yaml field set. A planned state marks a path the feature run creates;
+  it becomes `existing` in sources.yaml once that file exists.
+resources:
+- name: provenance-query-v1
+  version: '1'
+  id: https://nebula.local/schemas/provenance-query-v1.schema.json
+  source: planning-mds/schemas/provenance-query-v1.schema.json
+  source_sha256_at_design: 18b427498897b67a535cbc0df0000cfc5051c814f89e4ebb73a21573317011cc
+  owner: provenance
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_provenance.service.ProvenanceReader.read
+    path: engine/packages/brain-provenance/src/brain_provenance/service.py
+    state: planned
+  compatibility_tests:
+  - path: engine/packages/brain-provenance/tests/test_reader.py
+    state: planned
+  - path: engine/packages/brain-domain/tests/test_provenance.py
+    state: planned
+  version_selector: contract is the constant provenance-query/v1; any other marker is refused before discovery.
+  wire_profile: portable-json/v1
+  integration_notes: Trusted internal hosts and tests construct root and anchor. Principal, tenant, grants and
+    actor never come from the wire.
+- name: provenance-result-v1
+  version: '1'
+  id: https://nebula.local/schemas/provenance-result-v1.schema.json
+  source: planning-mds/schemas/provenance-result-v1.schema.json
+  source_sha256_at_design: 58d78f8db2d99010564466da8ac5bfb68fc0b29d5d9132ab731bbb8cc443a3f9
+  owner: provenance
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_provenance.service.ProvenanceReader.read (output guard before audit commit)
+    path: engine/packages/brain-provenance/src/brain_provenance/service.py
+    state: planned
+  - entry_point: brain_api.deps.get_provenance_reader (exported factory; no route registers it)
+    path: engine/apps/api/src/brain_api/deps.py
+    state: planned
+  compatibility_tests:
+  - path: engine/packages/brain-provenance/tests/test_reader.py
+    state: planned
+  - path: engine/tests/integration/test_f0009_provenance.py
+    state: planned
+  version_selector: contract is the constant provenance-result/v1; node data selects the referenced record schema
+    by kind (closed per-kind edge table, rework 2026-11-24-c32acf46).
+  wire_profile: native-compat/v1
+  integration_notes: Embedded stored source values keep native compatibility; there is no lossy conversion to the
+    portable profile. F0020/F0022/F0023 are future consumers and are not inventoried until they exist.
+- name: learning-candidate-reservation-v1
+  version: '1'
+  id: https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json
+  source: planning-mds/schemas/learning-candidate-reservation-v1.schema.json
+  source_sha256_at_design: 5e7f9c53ba99a40573513ab945eea359819b066db4094917f61570827aa8631c
+  owner: review
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_persistence.repositories.SqlAlchemyReviewItemRepository.reserve_learning_reference
+    path: engine/packages/brain-persistence/src/brain_persistence/repositories.py
+    state: planned
+  - entry_point: brain_persistence.provenance.SqlAlchemyProvenanceRepository.materialize
+    path: engine/packages/brain-persistence/src/brain_persistence/provenance.py
+    state: planned
+  compatibility_tests:
+  - path: engine/tests/integration/test_f0009_corrections.py
+    state: planned
+  version_selector: contract is the constant learning-candidate-reservation/v1.
+  wire_profile: portable-json/v1
+  integration_notes: F0041 may later adopt the identity. No learning processing reads it in F0009.
+- name: review-submission-attempt-v1
+  version: '1'
+  id: https://nebula.local/schemas/review-submission-attempt-v1.schema.json
+  source: planning-mds/schemas/review-submission-attempt-v1.schema.json
+  source_sha256_at_design: a7b684dbc726b27e92eeb026ac3dcb93bd875cdd500bf42a8df0efa0741d9c7c
+  owner: review
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_persistence.repositories.SqlAlchemyReviewItemRepository.record_refused_submission
+    path: engine/packages/brain-persistence/src/brain_persistence/repositories.py
+    state: planned
+  - entry_point: brain_persistence.provenance.SqlAlchemyProvenanceRepository.materialize
+    path: engine/packages/brain-persistence/src/brain_persistence/provenance.py
+    state: planned
+  compatibility_tests:
+  - path: engine/tests/integration/test_f0009_corrections.py
+    state: planned
+  version_selector: contract is the constant review-submission-attempt/v1.
+  wire_profile: native-compat/v1
+  integration_notes: Retains the existing corrected_value acceptance of the review request. Never returned by the
+    legacy review routes.
+- name: review-decision
+  version: '1'
+  id: https://nebula.local/schemas/review-decision.schema.json
+  source: planning-mds/schemas/review-decision.schema.json
+  source_sha256_at_design: 0ce518dba5cc9e95299287704afd951f23fdddeed9d0d033615f6bcac93bbe3a
+  owner: review
+  disposition: retain-versioned-boundary
+  consumer_entry_points:
+  - entry_point: brain_persistence.provenance.SqlAlchemyProvenanceRepository.materialize (review_decision record data)
+    path: engine/packages/brain-persistence/src/brain_persistence/provenance.py
+    state: planned
+  - entry_point: 'OpenAPI/doc-only: existing review-decision component'
+    path: planning-mds/api/brain-api.yaml
+    state: OpenAPI/doc-only
+  compatibility_tests:
+  - path: engine/apps/api/tests/test_reviews.py
+    state: existing
+  - path: engine/tests/integration/test_f0009_provenance.py
+    state: planned
+  version_selector: Closed $ref dependency of provenance-result-v1 (review_decision record data). The HTTP submission
+    and receipt keep their own DTOs.
+  wire_profile: native-compat/v1
+  integration_notes: Moves from retained_boundaries/openapi_only_resources into resources because a bundled schema
+    now references it. Existing review DTOs, hashing and audit are unchanged; no generated CRUD.
+existing_references:
+- assertion-record-v2
+- fact-version-read-v1
+- fact-temporal-v1
+future_feature_edits:
+- scripts/contracts/sources.yaml
+- scripts/contracts/cases.json
+- scripts/contracts/case-behavior-map.json
+- scripts/contracts/case-provenance.json
+- scripts/contracts/behavior-cases.json
+- scripts/contracts/native-cases.json
+- scripts/contracts/environments.json
+- scripts/contracts/generate.py only if current metadata consumer inventory needs extension
+checks:
+- Register new resources as explicit installed consumers, without reclassifying old entry points. Generate root/Python/AJV
+  assets and self-contained OpenAPI snapshot with the existing builder in the feature action.
+- Run all positive/negative cases through JSON Schema and generated Pydantic. Run the portable subset through headless
+  AJV; native legacy values retain native compatibility with explicit differential cases.
+- Compare old review request/receipt and fact/commit response fixtures and route list. No new path or response field
+  is introduced; generated OpenAPI paths must remain identical.
