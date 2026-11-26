@@ -1,0 +1,855 @@
+# F0012 foundation module design draft (Phase B, plan run 2026-11-25-120320e9).
+# Validates against planning-mds/schemas/ontology-module-authoring-v1.schema.json.
+# The feature run copies it to ontology/modules/foundation/module.yaml; local names and codes are reviewable design, not shipped runtime.
+# PartyRoleTypeCode: 'existing' values appear in nebula-insurance-data-contracts today; 'proposed' values come from
+# account-model-cross-repo-plan.md step 7 (examples/commercial-pc-account/projection-mapping.yaml); 'unmapped' has no code yet.
+authoring_schema: ontology-module-authoring/v1
+module:
+  id: foundation
+  version: 1
+  predicate_namespace: fnd
+  dependencies: []
+terms:
+- id: foundation.thing
+  kind: class
+  labels:
+    en-US: Thing
+  definition: The root of every foundation class; anything the Brain can describe with evidence.
+  parents: []
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - master-blueprint section 22
+- id: foundation.party
+  kind: class
+  labels:
+    en-US: Party
+  definition: A person or an organization capable of participating in a scoped insurance relationship.
+  parents:
+  - foundation.thing
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.person
+  kind: class
+  labels:
+    en-US: Person
+  definition: An individual human party; a role played in insurance does not make the person an application principal.
+  parents:
+  - foundation.party
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.organization
+  kind: class
+  labels:
+    en-US: Organization
+  definition: An identified organization. Broker, carrier, MGA and insured are roles it plays in a scope, not kinds
+    of organization.
+  parents:
+  - foundation.party
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.place
+  kind: class
+  labels:
+    en-US: Place
+  definition: A location such as an office, premises or yard at which an organization operates; operating there
+    does not make it insured property.
+  parents:
+  - foundation.thing
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.document
+  kind: class
+  labels:
+    en-US: Document
+  definition: A source document whose versions are parsed once and retained as immutable evidence.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.agreement
+  kind: class
+  labels:
+    en-US: Agreement
+  definition: A binding arrangement between parties; insurance policies and programs are agreements defined by insurance
+    modules.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.event
+  kind: class
+  labels:
+    en-US: Event
+  definition: Something that happens at a point in time at its stated granularity.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.process
+  kind: class
+  labels:
+    en-US: Process
+  definition: A sequence of activities with lifecycle states, defined in detail by later process modules.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.decision
+  kind: class
+  labels:
+    en-US: Decision
+  definition: An attributable choice made by a party or principal under stated authority.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.role
+  kind: class
+  labels:
+    en-US: Role
+  definition: A function a party performs within a scope; roles describe who does what and grant nothing by themselves.
+  parents:
+  - foundation.thing
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.time-interval
+  kind: class
+  labels:
+    en-US: Time interval
+  definition: A span of time with a start and an end bound at stated granularities.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.amount
+  kind: class
+  labels:
+    en-US: Amount
+  definition: A quantity with a unit or currency; money is an amount with a currency and a basis.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.measurement
+  kind: class
+  labels:
+    en-US: Measurement
+  definition: An observed or reported quantity with its unit, method and observation time.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.identifier
+  kind: class
+  labels:
+    en-US: Identifier
+  definition: A value that identifies a thing within a named issuing scheme.
+  parents:
+  - foundation.thing
+  examples:
+  - planning-mds/domain/glossary.md
+  regression_cases:
+  - planning-mds/domain/glossary.md
+- id: foundation.role-scope
+  kind: class
+  labels:
+    en-US: Role scope
+  definition: The thing a role assignment applies to. Account is a role scope; insurance modules add policy-term
+    and submission scopes.
+  parents:
+  - foundation.thing
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.account
+  kind: class
+  labels:
+    en-US: Account
+  definition: The carrier's customer relationship with exactly one insured or prospective insured organization,
+    with at most one designated parent account.
+  parents:
+  - foundation.role-scope
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.ownership-interest
+  kind: class
+  labels:
+    en-US: Ownership interest
+  definition: A recorded ownership of one organization by a party with a percentage; majority is computed, never
+    stored.
+  parents:
+  - foundation.thing
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.role-assignment
+  kind: class
+  labels:
+    en-US: Role assignment
+  definition: A party playing a role kind in a scope, optionally acting for an organization, valid over a period.
+  parents:
+  - foundation.role
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.role-kind
+  kind: class
+  labels:
+    en-US: Role kind
+  definition: The open vocabulary of role kinds a role assignment can name.
+  parents:
+  - foundation.thing
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.account-status
+  kind: class
+  labels:
+    en-US: Account status
+  definition: 'The lifecycle state of an account in the teaching vocabulary: CURRENT means not closed.'
+  parents:
+  - foundation.thing
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.organization.parent-organization
+  kind: object_property
+  labels:
+    en-US: Parent organization
+  definition: The organization directly above this one in its hierarchy; the hierarchy has no fixed depth.
+  domain: foundation.organization
+  range: foundation.organization
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: parentOrganization
+    major: 1
+  value_type: entity_ref
+  cardinality: SINGLE
+- id: foundation.organization.operates-at
+  kind: object_property
+  labels:
+    en-US: Operates at
+  definition: A place at which the organization operates during the valid period.
+  domain: foundation.organization
+  range: foundation.place
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: operatesAt
+    major: 1
+  value_type: entity_ref
+  cardinality: RELATIONSHIP
+- id: foundation.person.employed-by
+  kind: object_property
+  labels:
+    en-US: Employed by
+  definition: The organization or branch that employs the person; separate from any role the person plays.
+  domain: foundation.person
+  range: foundation.organization
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: employedBy
+    major: 1
+  value_type: entity_ref
+  cardinality: RELATIONSHIP
+- id: foundation.account.organization
+  kind: object_property
+  labels:
+    en-US: Account organization
+  definition: The one organization the account is the customer relationship with; the link never changes.
+  domain: foundation.account
+  range: foundation.organization
+  temporal_kind: ETERNAL
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: accountOrganization
+    major: 1
+  value_type: entity_ref
+  cardinality: SINGLE
+- id: foundation.account.status
+  kind: object_property
+  labels:
+    en-US: Account status
+  definition: The account's lifecycle status at a valid and known time; unknown status is incomplete, not closed.
+  domain: foundation.account
+  range: foundation.account-status
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: accountStatus
+    major: 1
+  value_type: code
+  cardinality: SINGLE
+- id: foundation.account.parent-account
+  kind: object_property
+  labels:
+    en-US: Parent account
+  definition: The account designated as this account's parent for roll-up; never computed from ownership.
+  domain: foundation.account
+  range: foundation.account
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: parentAccount
+    major: 1
+  value_type: entity_ref
+  cardinality: SINGLE
+- id: foundation.ownership-interest.owner
+  kind: object_property
+  labels:
+    en-US: Owner
+  definition: The party holding the ownership interest.
+  domain: foundation.ownership-interest
+  range: foundation.party
+  temporal_kind: ETERNAL
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: ownershipOwner
+    major: 1
+  value_type: entity_ref
+  cardinality: SINGLE
+- id: foundation.ownership-interest.owned-organization
+  kind: object_property
+  labels:
+    en-US: Owned organization
+  definition: The organization the ownership interest is in.
+  domain: foundation.ownership-interest
+  range: foundation.organization
+  temporal_kind: ETERNAL
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: ownershipOwnedOrganization
+    major: 1
+  value_type: entity_ref
+  cardinality: SINGLE
+- id: foundation.ownership-interest.percentage
+  kind: datatype_property
+  labels:
+    en-US: Ownership percentage
+  definition: The recorded percentage of the owned organization held, greater than 0 and at most 100.
+  domain: foundation.ownership-interest
+  range: xsd:decimal
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: ownershipPercentage
+    major: 1
+  value_type: decimal
+  cardinality: SINGLE
+- id: foundation.role-assignment.party
+  kind: object_property
+  labels:
+    en-US: Party in role
+  definition: The party filling the role during the valid period.
+  domain: foundation.role-assignment
+  range: foundation.party
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: roleParty
+    major: 1
+  value_type: entity_ref
+  cardinality: SINGLE
+- id: foundation.role-assignment.role-kind
+  kind: object_property
+  labels:
+    en-US: Role kind
+  definition: The kind of role assigned; fixed for the life of the assignment.
+  domain: foundation.role-assignment
+  range: foundation.role-kind
+  temporal_kind: ETERNAL
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: roleKind
+    major: 1
+  value_type: code
+  cardinality: SINGLE
+- id: foundation.role-assignment.scope
+  kind: object_property
+  labels:
+    en-US: Role scope
+  definition: The account, policy term or submission the assignment applies to; fixed for the life of the assignment.
+  domain: foundation.role-assignment
+  range: foundation.role-scope
+  temporal_kind: ETERNAL
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: roleScope
+    major: 1
+  value_type: entity_ref
+  cardinality: SINGLE
+- id: foundation.role-assignment.acted-for
+  kind: object_property
+  labels:
+    en-US: Acted for
+  definition: The organization or branch a person represents in this role.
+  domain: foundation.role-assignment
+  range: foundation.organization
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: roleActedFor
+    major: 1
+  value_type: entity_ref
+  cardinality: SINGLE
+- id: foundation.role-assignment.coverage-part
+  kind: object_property
+  labels:
+    en-US: Coverage part
+  definition: A coverage part of a policy term that narrows a policy-term role; insurance modules narrow the range.
+  domain: foundation.role-assignment
+  range: foundation.thing
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: roleCoveragePart
+    major: 1
+  value_type: entity_ref
+  cardinality: MULTI
+- id: foundation.role-assignment.authoritative-source
+  kind: datatype_property
+  labels:
+    en-US: Authoritative source
+  definition: The trusted source that confirmed the assignment; data only, it grants nothing.
+  domain: foundation.role-assignment
+  range: xsd:string
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  predicate:
+    local_name: roleAuthoritativeSource
+    major: 1
+  value_type: code
+  cardinality: SINGLE
+- id: foundation.organization.child-organization
+  kind: object_property
+  labels:
+    en-US: Child organization
+  definition: Inverse of parent organization; derived, never stored as a slot.
+  domain: foundation.organization
+  range: foundation.organization
+  temporal_kind: STATE
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  inverse_of: foundation.organization.parent-organization
+- id: foundation.role-kind.first-named-insured
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: First named insured
+  definition: The first named insured role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: FIRST_NAMED_INSURED
+    PartyRoleTypeCode_status: proposed
+- id: foundation.role-kind.additional-named-insured
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Additional named insured
+  definition: The additional named insured role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: ADDITIONAL_NAMED_INSURED
+    PartyRoleTypeCode_status: proposed
+- id: foundation.role-kind.additional-insured
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Additional insured
+  definition: The additional insured role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: ADDITIONAL_INSURED
+    PartyRoleTypeCode_status: existing
+- id: foundation.role-kind.broker-of-record
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Broker of record
+  definition: The broker of record role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: BROKER_OF_RECORD
+    PartyRoleTypeCode_status: existing
+- id: foundation.role-kind.placement-broker
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Placement broker
+  definition: The placement broker role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: PLACEMENT_BROKER
+    PartyRoleTypeCode_status: proposed
+- id: foundation.role-kind.broker-contact
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Broker contact
+  definition: The broker contact role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: BROKER_CONTACT
+    PartyRoleTypeCode_status: proposed
+- id: foundation.role-kind.risk-manager
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Risk manager
+  definition: The risk manager role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: RISK_MANAGER
+    PartyRoleTypeCode_status: proposed
+- id: foundation.role-kind.account-contact
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Account contact
+  definition: The account contact role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: ACCOUNT_CONTACT
+    PartyRoleTypeCode_status: proposed
+- id: foundation.role-kind.organization-contact
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Organization contact
+  definition: The organization contact role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: null
+    PartyRoleTypeCode_status: unmapped
+- id: foundation.role-kind.underwriter
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Underwriter
+  definition: The underwriter role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: UNDERWRITER
+    PartyRoleTypeCode_status: proposed
+- id: foundation.role-kind.underwriting-assistant
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Underwriting assistant
+  definition: The underwriting assistant role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: null
+    PartyRoleTypeCode_status: unmapped
+- id: foundation.role-kind.distribution-contact
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Distribution contact
+  definition: The distribution contact role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: null
+    PartyRoleTypeCode_status: unmapped
+- id: foundation.role-kind.marketing-representative
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Marketing representative
+  definition: The marketing representative role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: null
+    PartyRoleTypeCode_status: unmapped
+- id: foundation.role-kind.operations-contact
+  kind: code_value
+  code_of: foundation.role-kind
+  labels:
+    en-US: Operations contact
+  definition: The operations contact role kind (ADR-0070 section 4); confers no access by itself.
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+  external_codes:
+    PartyRoleTypeCode: null
+    PartyRoleTypeCode_status: unmapped
+- id: foundation.account-status.current
+  kind: code_value
+  code_of: foundation.account-status
+  labels:
+    en-US: Current
+  definition: Account status CURRENT in the teaching vocabulary (ADR-0070 section 2).
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+- id: foundation.account-status.closed
+  kind: code_value
+  code_of: foundation.account-status
+  labels:
+    en-US: Closed
+  definition: Account status CLOSED in the teaching vocabulary (ADR-0070 section 2).
+  examples:
+  - examples/commercial-pc-account/records.json
+  regression_cases:
+  - examples/commercial-pc-account/cases.md
+constraints:
+- id: foundation.constraint.one-parent-account
+  construct: maxCardinality
+  subject: foundation.account
+  stage: example-validation
+  consumer: semantic-examples gate
+  applicability: account snapshot at one valid/known coordinate
+  severity: violation
+  on_nonconformance: fail the example
+  data_basis: asserted
+  property: foundation.account.parent-account
+  value: 1
+- id: foundation.constraint.no-parent-cycle
+  construct: custom
+  subject: foundation.account
+  stage: canonical-admission
+  consumer: F0017/F0018 canonical admission
+  applicability: designated parent chain at one coordinate
+  severity: violation
+  on_nonconformance: refuse the commit
+  data_basis: asserted
+  property: foundation.account.parent-account
+  expression: An account is never its own parent or ancestor.
+- id: foundation.constraint.percentage-range
+  construct: custom
+  subject: foundation.ownership-interest
+  stage: canonical-admission
+  consumer: F0017/F0018 canonical admission
+  applicability: every supplied percentage
+  severity: violation
+  on_nonconformance: refuse the malformed value
+  data_basis: asserted
+  property: foundation.ownership-interest.percentage
+  expression: 0 < percentage <= 100.
+- id: foundation.constraint.percentage-total
+  construct: custom
+  subject: foundation.organization
+  stage: canonical-admission
+  consumer: F0017/F0018 canonical admission
+  applicability: recorded ownership of one organization at one valid/known coordinate
+  severity: violation
+  on_nonconformance: refuse the commit that would exceed 100
+  data_basis: asserted
+  expression: Recorded percentages for one owned organization total at most 100; less is allowed when owners are
+    unknown.
+- id: foundation.constraint.one-current-account
+  construct: custom
+  subject: foundation.organization
+  stage: canonical-admission
+  consumer: F0017/F0018 canonical admission
+  applicability: all knowledge bases of one tenant at one valid/known coordinate
+  severity: violation
+  on_nonconformance: refuse the second current account
+  data_basis: asserted
+  expression: At most one account with status CURRENT per organization per tenant; missing or unknown status cannot
+    satisfy this check.
+- id: foundation.constraint.one-account-organization
+  construct: maxCardinality
+  subject: foundation.account
+  stage: authoring
+  consumer: foundation compiler
+  applicability: every account
+  severity: violation
+  on_nonconformance: refuse the release
+  data_basis: asserted
+  property: foundation.account.organization
+  value: 1
+- id: foundation.constraint.role-scope-range
+  construct: range
+  subject: foundation.role-assignment
+  stage: authoring
+  consumer: foundation compiler
+  applicability: every role-assignment scope declaration
+  severity: violation
+  on_nonconformance: refuse the release
+  data_basis: asserted
+  property: foundation.role-assignment.scope
+projection:
+- property: foundation.organization.parent-organization
+  disposition: edge
+  label: PARENT_ORGANIZATION
+  direction: subject-to-object
+- property: foundation.organization.operates-at
+  disposition: edge
+  label: OPERATES_AT
+  direction: subject-to-object
+- property: foundation.person.employed-by
+  disposition: edge
+  label: EMPLOYED_BY
+  direction: subject-to-object
+- property: foundation.account.organization
+  disposition: edge
+  label: ACCOUNT_ORGANIZATION
+  direction: subject-to-object
+- property: foundation.account.status
+  disposition: vertex_property
+  label: account_status
+- property: foundation.account.parent-account
+  disposition: edge
+  label: PARENT_ACCOUNT
+  direction: subject-to-object
+- property: foundation.ownership-interest.owner
+  disposition: edge
+  label: OWNER
+  direction: subject-to-object
+- property: foundation.ownership-interest.owned-organization
+  disposition: edge
+  label: OWNED_ORGANIZATION
+  direction: subject-to-object
+- property: foundation.ownership-interest.percentage
+  disposition: vertex_property
+  label: percentage
+- property: foundation.role-assignment.party
+  disposition: edge
+  label: ROLE_PARTY
+  direction: subject-to-object
+- property: foundation.role-assignment.role-kind
+  disposition: vertex_property
+  label: role_kind
+- property: foundation.role-assignment.scope
+  disposition: edge
+  label: ROLE_SCOPE
+  direction: subject-to-object
+- property: foundation.role-assignment.acted-for
+  disposition: edge
+  label: ACTED_FOR
+  direction: subject-to-object
+- property: foundation.role-assignment.coverage-part
+  disposition: edge
+  label: ROLE_COVERAGE_PART
+  direction: subject-to-object
+- property: foundation.role-assignment.authoritative-source
+  disposition: vertex_property
+  label: authoritative_source
+- property: foundation.organization.child-organization
+  disposition: omitted
+  reason: Inverse of parent organization; derived, never materialized as a duplicate edge.

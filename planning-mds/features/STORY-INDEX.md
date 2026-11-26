@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 66
+**Total Stories:** 73
 
 ---
 
@@ -132,6 +132,20 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0012 — Foundation ontology
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0012-S0001](./F0012-foundation-ontology/F0012-S0001-validate-foundation-module-authoring.md) | Validate foundation module authoring | Critical | MVP — v0.1A | domain steward (Sameer) |
+| [F0012-S0002](./F0012-foundation-ontology/F0012-S0002-assign-stable-term-identities.md) | Assign stable term identities | Critical | MVP — v0.1A | domain steward (Sameer) |
+| [F0012-S0003](./F0012-foundation-ontology/F0012-S0003-model-parties-accounts-and-scoped-roles.md) | Model parties, accounts and scoped roles | Critical | MVP — v0.1A | domain steward (Sameer) |
+| [F0012-S0004](./F0012-foundation-ontology/F0012-S0004-compile-and-install-immutable-releases.md) | Compile and install immutable releases | Critical | MVP — v0.1A | persistence engineer (Ingrid) |
+| [F0012-S0005](./F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md) | Register predicates and activate temporal kinds | Critical | MVP — v0.1A | document intelligence engineer (Mateo) |
+| [F0012-S0006](./F0012-foundation-ontology/F0012-S0006-gate-activation-with-impact-report.md) | Gate activation with an impact report | Critical | MVP — v0.1A | domain steward (Sameer) |
+| [F0012-S0007](./F0012-foundation-ontology/F0012-S0007-prove-reproducible-release-delivery.md) | Prove reproducible release delivery | High | MVP — v0.1A | persistence engineer (Ingrid) |
+
+---
+
 ## F0064 — Repository instructions and planning-check adoption
 
 | Story ID | Title | Priority | Phase | Persona |
@@ -162,7 +176,7 @@ Auto-generated index of all user stories across feature folders.
 |-------|-------|
 | Infrastructure | 11 |
 | MVP | 30 |
-| MVP — v0.1A | 15 |
+| MVP — v0.1A | 22 |
 | v0.1A | 4 |
 | v0.1B | 6 |
 
@@ -172,8 +186,8 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
-| Critical | 36 |
-| High | 26 |
+| Critical | 42 |
+| High | 27 |
 | Medium | 4 |
 
 ---

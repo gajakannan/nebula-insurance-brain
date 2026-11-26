@@ -1,0 +1,353 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/ontology-release-manifest-v1.schema.json",
+  "title": "Ontology release manifest v1",
+  "description": "Compiled, content-addressed composed release (ADR-0081 D3). release_ref is ontrel:sha256-<manifest_digest>.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "release_ref",
+    "name",
+    "sequence",
+    "manifest_digest",
+    "authoring_schema",
+    "compiler_version",
+    "semantics",
+    "modules",
+    "dependency_lock",
+    "terms_digest",
+    "predicates",
+    "change_records",
+    "projection_mapping",
+    "artifact_slots"
+  ],
+  "properties": {
+    "contract": {
+      "const": "ontology-release-manifest/v1"
+    },
+    "release_ref": {
+      "type": "string",
+      "pattern": "^ontrel:sha256-[0-9a-f]{64}$"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "manifest_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "authoring_schema": {
+      "const": "ontology-module-authoring/v1"
+    },
+    "compiler_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inference",
+        "validation",
+        "ruleset"
+      ],
+      "properties": {
+        "inference": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "subClassOf",
+              "subPropertyOf",
+              "inverseOf"
+            ]
+          }
+        },
+        "validation": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "domain",
+              "range",
+              "disjoint",
+              "minCardinality",
+              "maxCardinality",
+              "custom"
+            ]
+          }
+        },
+        "ruleset": {
+          "const": "nebula-tbox-subset/v1"
+        }
+      }
+    },
+    "modules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "version",
+          "digest"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "dependency_lock": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "module",
+          "requires"
+        ],
+        "properties": {
+          "module": {
+            "type": "string"
+          },
+          "requires": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,47}@[1-9][0-9]*#sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "terms_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "predicates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "term_iri",
+          "predicate_key",
+          "cardinality",
+          "value_type",
+          "temporal_kind",
+          "basis_required"
+        ],
+        "properties": {
+          "term_iri": {
+            "type": "string",
+            "pattern": "^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$"
+          },
+          "predicate_key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$"
+          },
+          "cardinality": {
+            "enum": [
+              "SINGLE",
+              "MULTI",
+              "RELATIONSHIP"
+            ]
+          },
+          "value_type": {
+            "type": "string"
+          },
+          "temporal_kind": {
+            "enum": [
+              "STATE",
+              "EVENT",
+              "ETERNAL"
+            ]
+          },
+          "qualifiers": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "member_key_source": {
+            "enum": [
+              "value",
+              "entity",
+              null
+            ]
+          },
+          "basis_required": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "change_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "class",
+          "source_iris",
+          "replacement_iris",
+          "rationale"
+        ],
+        "properties": {
+          "class": {
+            "enum": [
+              "rename_alias",
+              "semantic_change",
+              "split",
+              "merge",
+              "retirement"
+            ]
+          },
+          "source_iris": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$"
+            }
+          },
+          "replacement_iris": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$"
+            }
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "projection_mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "digest",
+        "required_context"
+      ],
+      "properties": {
+        "version": {
+          "const": "nebula-age-mapping/v1"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "required_context": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "artifact_slots": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profiles",
+        "templates",
+        "compiler",
+        "validation"
+      ],
+      "properties": {
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "digest"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "templates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "digest"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "compiler": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "digest"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "validation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ref",
+              "digest"
+            ],
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
