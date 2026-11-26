@@ -17,27 +17,51 @@ affects:
 - glossary_term:constraint-execution-context
 - glossary_term:ontology-projection-mapping
 - capability:ontology-release-compatibility
+- capability:foundation-ontology-release
+- capability:release-backed-predicate-registry
+- capability:factslot-identity-resolution
+- capability:bitemporal-canonical-commit
+- capability:authorization-enforcement
+- capability:offline-contract-bundle
 notes:
-- The commercial P&C handoff introduces a synthetic contractor account and scoped party roles. Settle the account/party/product representation in the PRD; non-GL examples are future breadth, not expanded delivery scope.
-- Proposed ADR-0070 answers BLUEPRINT section 4.8 with one account per organization with a designated parent, percentage ownership, organization hierarchy, broker of record per account, scoped roles with acted-for organization, and exactly one owning account per policy. F0012 authors this vocabulary in Phase B.
-- Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD, stories,
-  assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending at formal plan.
-- Authoring contract precedes vocabulary content. Stable IRIs and meaning-change classes are paired; constraint stage/consumer/severity/data basis and missingness are explicit. Release records are proposed in data-model.md under ADR-0045.
-- Resolve blueprint sections 20/82 parents versus parent before authoring. The synthetic interchange examples illustrate proposed predicate-to-projection mappings, not a frozen schema or implemented compiler.
+- The commercial P&C handoff introduces a synthetic contractor account and scoped party roles. Settle the account/party/product
+  representation in the PRD; non-GL examples are future breadth, not expanded delivery scope.
+- Proposed ADR-0070 answers BLUEPRINT section 4.8 with one account per organization with a designated parent, percentage
+  ownership, organization hierarchy, broker of record per account, scoped roles with acted-for organization, and
+  exactly one owning account per policy. F0012 authors this vocabulary in Phase B.
+- Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD, stories, assembly
+  plan and Phase A/B approvals remain pending. Dependency evidence audit pending at formal plan.
+- Authoring contract precedes vocabulary content. Stable IRIs and meaning-change classes are paired; constraint
+  stage/consumer/severity/data basis and missingness are explicit. Release records are proposed in data-model.md
+  under ADR-0045.
+- Resolve blueprint sections 20/82 parents versus parent before authoring. The synthetic interchange examples illustrate
+  proposed predicate-to-projection mappings, not a frozen schema or implemented compiler.
 - Read planning-mds/architecture/ontology-planning-handoff.md for scope, deferred work and retrieval verification.
-- 'Requirement-ownership amendment 2026-11-08 - Carry master blueprint 67: concept labels are language-tagged
-  label metadata on one canonical concept ID; translation never duplicates knowledge. ADR-0045 decision
-  direction recorded 2026-11-08; F0012 is its proving feature.'
+- 'Requirement-ownership amendment 2026-11-08 - Carry master blueprint 67: concept labels are language-tagged label
+  metadata on one canonical concept ID; translation never duplicates knowledge. ADR-0045 decision direction recorded
+  2026-11-08; F0012 is its proving feature.'
+- 'Plan run 2026-11-25-120320e9 G1 operator decisions D1-D8: files+compile+DB, F0012 owns section 22 plus ADR-0070
+  party/account/ownership/role (Policy/Submission/Program to F0013), inference subset subClassOf/subPropertyOf/inverseOf,
+  urn:nebula:ont namespace, tenant extensions rejected, ETERNAL/EVENT activated, gated activation, parents list
+  only.'
+- 'Phase A approved 2026-11-25 with exact operator token approve-phase-a; Phase B approved 2026-11-25 with exact
+  operator token approve-phase-b. Design: ADR-0081 (Proposed), assembly plan, foundation-module-design.yaml, migration-design.sql
+  (0017), three design schemas. No implementation or feature evidence index.'
 phase: v0.1A
 roadmap_section: Now
 roadmap_order: 3
-rationale: 'Now (2026-11-20 roadmap review): planned alongside F0011 and built after it (its only dependency is F0011); keeps
-  the longest v0.1 chain moving. The foundation ontology module is the versioned base that every insurance module composes
-  on (sections 19 to 22).'
-validation_gate: Plan action Phase A and Phase B may run in parallel with F0011, with plan-review READY (or High findings
-  accepted with owner and date); the feature run starts only after F0011 is complete.
+rationale: 'Now (2026-11-20 roadmap review): planned alongside F0011 and built after it. Plan run 2026-11-25-120320e9:
+  Phase A approved 2026-11-25 (seven stories, 46 ACs); Phase B designs authoring/compile, immutable PostgreSQL releases,
+  a release-backed predicate registry with ETERNAL/EVENT activation and a reviewed activation gate (ADR-0081, Proposed).
+  The foundation module is the versioned base every insurance module composes on (sections 19 to 22).'
+validation_gate: Plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with
+  owner and date); feature run closes G0–G8 with deterministic recompilation, immutable install, release-backed
+  predicates and gated activation proven on PostgreSQL.
 depends_on:
 - feature:F0011
+- feature:F0002
+- feature:F0007
+- feature:F0008
 governed_by:
 - adr:0011
 - adr:0012
@@ -45,3 +69,107 @@ governed_by:
 - adr:0063
 - adr:0064
 - adr:0070
+- adr:0077
+- adr:0078
+- adr:0079
+- adr:0030
+- adr:0062
+- adr:0081
+uses_schema:
+- schema:ontology-module-authoring-v1
+- schema:ontology-release-manifest-v1
+- schema:ontology-impact-report-v1
+- schema:fact-temporal-v1
+- schema:fact-slot-key-v1
+- schema:commercial-pc-example
+story_mappings:
+- id: story:F0012-S0001
+  path: planning-mds/features/F0012-foundation-ontology/F0012-S0001-validate-foundation-module-authoring.md
+  affects:
+  - capability:foundation-ontology-release
+  - glossary_term:constraint-execution-context
+  governed_by:
+  - adr:0081
+  - adr:0045
+  - adr:0063
+  - adr:0064
+  uses_schema:
+  - schema:ontology-module-authoring-v1
+- id: story:F0012-S0002
+  path: planning-mds/features/F0012-foundation-ontology/F0012-S0002-assign-stable-term-identities.md
+  affects:
+  - glossary_term:stable-term-iri
+  - capability:foundation-ontology-release
+  governed_by:
+  - adr:0081
+  - adr:0045
+  uses_schema:
+  - schema:ontology-module-authoring-v1
+- id: story:F0012-S0003
+  path: planning-mds/features/F0012-foundation-ontology/F0012-S0003-model-parties-accounts-and-scoped-roles.md
+  affects:
+  - entity:account
+  - entity:insurance-party
+  - entity:insurance-party-role-assignment
+  - entity:ownership-interest
+  governed_by:
+  - adr:0070
+  - adr:0064
+  - adr:0063
+  - adr:0011
+  uses_schema:
+  - schema:ontology-module-authoring-v1
+  - schema:commercial-pc-example
+- id: story:F0012-S0004
+  path: planning-mds/features/F0012-foundation-ontology/F0012-S0004-compile-and-install-immutable-releases.md
+  affects:
+  - entity:ontology-release
+  - entity:ontology-module-version
+  - entity:ontology-release-module
+  - glossary_term:ontology-projection-mapping
+  governed_by:
+  - adr:0081
+  - adr:0045
+  - adr:0012
+  - adr:0030
+  uses_schema:
+  - schema:ontology-release-manifest-v1
+- id: story:F0012-S0005
+  path: planning-mds/features/F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md
+  affects:
+  - capability:release-backed-predicate-registry
+  - capability:factslot-identity-resolution
+  - capability:bitemporal-canonical-commit
+  governed_by:
+  - adr:0081
+  - adr:0077
+  - adr:0078
+  uses_schema:
+  - schema:fact-slot-key-v1
+  - schema:fact-temporal-v1
+  - schema:ontology-release-manifest-v1
+- id: story:F0012-S0006
+  path: planning-mds/features/F0012-foundation-ontology/F0012-S0006-gate-activation-with-impact-report.md
+  affects:
+  - capability:ontology-release-compatibility
+  - entity:ontology-release
+  - capability:authorization-enforcement
+  governed_by:
+  - adr:0081
+  - adr:0045
+  - adr:0062
+  uses_schema:
+  - schema:ontology-impact-report-v1
+- id: story:F0012-S0007
+  path: planning-mds/features/F0012-foundation-ontology/F0012-S0007-prove-reproducible-release-delivery.md
+  affects:
+  - capability:foundation-ontology-release
+  - capability:offline-contract-bundle
+  governed_by:
+  - adr:0081
+  - adr:0045
+  - adr:0079
+  - adr:0012
+  uses_schema:
+  - schema:ontology-release-manifest-v1
+  - schema:ontology-impact-report-v1

@@ -273,7 +273,14 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 **v0.1A (remaining — Now: F0012; Next: F0010, F0013–F0017)**
 
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
-- [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned
+- [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned; Phase A and Phase B approved 2026-11-25 in plan run `2026-11-25-120320e9` ([PRD](features/F0012-foundation-ontology/PRD.md)); plan-review next
+  - [F0012-S0001](features/F0012-foundation-ontology/F0012-S0001-validate-foundation-module-authoring.md) — Not Started
+  - [F0012-S0002](features/F0012-foundation-ontology/F0012-S0002-assign-stable-term-identities.md) — Not Started
+  - [F0012-S0003](features/F0012-foundation-ontology/F0012-S0003-model-parties-accounts-and-scoped-roles.md) — Not Started
+  - [F0012-S0004](features/F0012-foundation-ontology/F0012-S0004-compile-and-install-immutable-releases.md) — Not Started
+  - [F0012-S0005](features/F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md) — Not Started
+  - [F0012-S0006](features/F0012-foundation-ontology/F0012-S0006-gate-activation-with-impact-report.md) — Not Started
+  - [F0012-S0007](features/F0012-foundation-ontology/F0012-S0007-prove-reproducible-release-delivery.md) — Not Started
 - [F0013 — Insurance Core GL ontology](features/F0013-insurance-core-gl-ontology/README.md) - Planned
 - [F0014 — Document Profile model](features/F0014-document-profile-model/README.md) - Planned
 - [F0015 — Extraction Profile compiler](features/F0015-extraction-profile-compiler/README.md) - Planned
@@ -609,6 +616,11 @@ Plan run `2026-11-24-bfdbbf04`; Phase A explicitly approved by operator token `a
 The four design schemas use F0011 delivery in the later feature action; no runtime bundle, route, grant, UI, deployable, parse or learning producer is added by plan. A losing batch keeps its existing 422 after protected audit-only persistence, and a new effective CORRECT receives one reference atomically. G4 and all seven ordered G5 pre-approval checks passed; the operator approved Phase B with exact token `approve-phase-b` on 2026-11-24. The same run’s G5 journal/manifest records post-approval regeneration, checks and final publication. ADR-0080 is Proposed until its runtime proofs and separate acceptance.
 
 Feature run `2026-11-24-08701e37` implemented the design, with operator G4 approval on 2026-11-25. It delivers `brain_domain.provenance`, the `brain-provenance` reader (exported, not routed), the opt-in `prepare_reads` authorization hook, review-boundary preflight with refused-attempt attribution and an atomic learning reservation, and migration 0016. All 41 ACs and EX-PROV-001–005 are proven on PostgreSQL 18 (changed-line coverage 94.4%; 1392/1392 shared conformance results). G2 recorded five design corrections, among them a nullable `fact_change.from_version_id` and attempt authorization bound by `audit_event.decision_id` (see the run reports). ADR-0080 runtime proofs are met; the ADR stays Proposed pending operator acceptance. Evidence: [PM closeout](operations/evidence/runs/2026-11-24-08701e37/pm-closeout.md). F0010 owns retraction semantics; F0020/F0022/F0023 own exposure and F0041/F0026 own learning/benchmark governance.
+
+
+### 4.19 F0012 foundation ontology (Phase B approved 2026-11-25)
+
+Plan run `2026-11-25-120320e9`; Phase A approved by operator token `approve-phase-a` (seven stories, 46 ACs; G1 decisions D1–D8). The [assembly plan](features/F0012-foundation-ontology/feature-assembly-plan.md) and proposed [ADR-0081](architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md) define: YAML modules under `ontology/` validated by `ontology-module-authoring/v1` (`parents:` only; inference `subClassOf`/`subPropertyOf`/`inverseOf`; validation-only domain/range/disjoint/cardinality with execution context; other constructs refused); `urn:nebula:ont:` IRIs with reuse/collision refusal and change records; a deterministic compiler producing content-addressed releases (`ontrel:sha256-…`) with exact locks, projection mapping and RDF/JSON-LD export; migration 0017 with eight append-only, tenant/KB-owned release tables; a release-backed predicate registry (`fnd` namespace, 15 foundation predicates) and ETERNAL/EVENT activation over the ADR-0078 D10 shapes without DDL; an impact report and reviewed, audited activation/rollback under a new `ontology_release` resource and `OntologySteward` role. The foundation module carries the section 22 classes and the ADR-0070 party/account/ownership/role vocabulary; Policy/Submission/Program stay with F0013. Canonical-admission constraints are declared for F0017/F0018. No HTTP route, screen, parse or model call. ADR-0045/0070/0081 remain Proposed. The operator approved Phase B with `approve-phase-b` on 2026-11-25; plan-review precedes the feature run.
 
 ---
 

@@ -781,7 +781,13 @@ features:
     id: feature:F0012
     path: planning-mds/features/F0012-foundation-ontology
     affects:
+      - capability:authorization-enforcement
+      - capability:bitemporal-canonical-commit
+      - capability:factslot-identity-resolution
+      - capability:foundation-ontology-release
+      - capability:offline-contract-bundle
       - capability:ontology-release-compatibility
+      - capability:release-backed-predicate-registry
       - entity:account
       - entity:insurance-party
       - entity:insurance-party-role-assignment
@@ -795,18 +801,34 @@ features:
       - glossary_term:stable-term-iri
       - schema:commercial-pc-example
     depends_on:
+      - feature:F0002
+      - feature:F0007
+      - feature:F0008
       - feature:F0011
     governed_by:
       - adr:0011
       - adr:0012
+      - adr:0030
       - adr:0045
+      - adr:0062
       - adr:0063
       - adr:0064
       - adr:0070
+      - adr:0077
+      - adr:0078
+      - adr:0079
+      - adr:0081
     notes:
       - Authoring contract precedes vocabulary content. Stable IRIs and meaning-change classes are paired;
         constraint stage/consumer/severity/data basis and missingness are explicit. Release records are
         proposed in data-model.md under ADR-0045.
+      - 'Phase A approved 2026-11-25 with exact operator token approve-phase-a; Phase B approved 2026-11-25
+        with exact operator token approve-phase-b. Design: ADR-0081 (Proposed), assembly plan, foundation-module-design.yaml,
+        migration-design.sql (0017), three design schemas. No implementation or feature evidence index.'
+      - 'Plan run 2026-11-25-120320e9 G1 operator decisions D1-D8: files+compile+DB, F0012 owns section
+        22 plus ADR-0070 party/account/ownership/role (Policy/Submission/Program to F0013), inference
+        subset subClassOf/subPropertyOf/inverseOf, urn:nebula:ont namespace, tenant extensions rejected,
+        ETERNAL/EVENT activated, gated activation, parents list only.'
       - Planning-only bindings from the ontology prerequisite amendment; status remains planned. PRD,
         stories, assembly plan and Phase A/B approvals remain pending. Dependency evidence audit pending
         at formal plan.
@@ -825,6 +847,13 @@ features:
       - The commercial P&C handoff introduces a synthetic contractor account and scoped party roles. Settle
         the account/party/product representation in the PRD; non-GL examples are future breadth, not expanded
         delivery scope.
+    uses_schema:
+      - schema:commercial-pc-example
+      - schema:fact-slot-key-v1
+      - schema:fact-temporal-v1
+      - schema:ontology-impact-report-v1
+      - schema:ontology-module-authoring-v1
+      - schema:ontology-release-manifest-v1
   - status: planned
     id: feature:F0013
     path: planning-mds/features/F0013-insurance-core-gl-ontology
@@ -1791,6 +1820,103 @@ stories:
     uses_schema:
       - schema:schema-bundle-manifest-v1
       - schema:schema-conformance-cases-v1
+  - id: story:F0012-S0001
+    feature: feature:F0012
+    path: planning-mds/features/F0012-foundation-ontology/F0012-S0001-validate-foundation-module-authoring.md
+    affects:
+      - capability:foundation-ontology-release
+      - glossary_term:constraint-execution-context
+    governed_by:
+      - adr:0045
+      - adr:0063
+      - adr:0064
+      - adr:0081
+    uses_schema:
+      - schema:ontology-module-authoring-v1
+  - id: story:F0012-S0002
+    feature: feature:F0012
+    path: planning-mds/features/F0012-foundation-ontology/F0012-S0002-assign-stable-term-identities.md
+    affects:
+      - capability:foundation-ontology-release
+      - glossary_term:stable-term-iri
+    governed_by:
+      - adr:0045
+      - adr:0081
+    uses_schema:
+      - schema:ontology-module-authoring-v1
+  - id: story:F0012-S0003
+    feature: feature:F0012
+    path: planning-mds/features/F0012-foundation-ontology/F0012-S0003-model-parties-accounts-and-scoped-roles.md
+    affects:
+      - entity:account
+      - entity:insurance-party
+      - entity:insurance-party-role-assignment
+      - entity:ownership-interest
+    governed_by:
+      - adr:0011
+      - adr:0063
+      - adr:0064
+      - adr:0070
+    uses_schema:
+      - schema:commercial-pc-example
+      - schema:ontology-module-authoring-v1
+  - id: story:F0012-S0004
+    feature: feature:F0012
+    path: planning-mds/features/F0012-foundation-ontology/F0012-S0004-compile-and-install-immutable-releases.md
+    affects:
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:ontology-projection-mapping
+    governed_by:
+      - adr:0012
+      - adr:0030
+      - adr:0045
+      - adr:0081
+    uses_schema:
+      - schema:ontology-release-manifest-v1
+  - id: story:F0012-S0005
+    feature: feature:F0012
+    path: planning-mds/features/F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md
+    affects:
+      - capability:bitemporal-canonical-commit
+      - capability:factslot-identity-resolution
+      - capability:release-backed-predicate-registry
+    governed_by:
+      - adr:0077
+      - adr:0078
+      - adr:0081
+    uses_schema:
+      - schema:fact-slot-key-v1
+      - schema:fact-temporal-v1
+      - schema:ontology-release-manifest-v1
+  - id: story:F0012-S0006
+    feature: feature:F0012
+    path: planning-mds/features/F0012-foundation-ontology/F0012-S0006-gate-activation-with-impact-report.md
+    affects:
+      - capability:authorization-enforcement
+      - capability:ontology-release-compatibility
+      - entity:ontology-release
+    governed_by:
+      - adr:0045
+      - adr:0062
+      - adr:0081
+    uses_schema:
+      - schema:ontology-impact-report-v1
+  - id: story:F0012-S0007
+    feature: feature:F0012
+    path: planning-mds/features/F0012-foundation-ontology/F0012-S0007-prove-reproducible-release-delivery.md
+    affects:
+      - capability:foundation-ontology-release
+      - capability:offline-contract-bundle
+    governed_by:
+      - adr:0012
+      - adr:0045
+      - adr:0079
+      - adr:0081
+    uses_schema:
+      - schema:ontology-impact-report-v1
+      - schema:ontology-release-manifest-v1
   - id: story:F0064-S0001
     feature: feature:F0064
     path: planning-mds/features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0001-declare-product-manifest.md

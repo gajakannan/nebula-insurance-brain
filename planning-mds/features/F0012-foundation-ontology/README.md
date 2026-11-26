@@ -3,6 +3,7 @@
 **Status:** Planned
 **Phase:** v0.1A
 **Roadmap:** Now (2026-11-20 roadmap review; planned alongside F0011, built after it)
+**Planning:** plan run `2026-11-25-120320e9` (A+B, new) — Phase A approved 2026-11-25 (`approve-phase-a`); Phase B approved 2026-11-25 (`approve-phase-b`). Next: plan-review, then the feature action. See [PRD](PRD.md), [STATUS](STATUS.md) and [personas](personas.md).
 
 ## Overview
 
@@ -55,14 +56,21 @@ Use the [Cedar Bridge contractor account](../../examples/commercial-pc-account/R
 - A policy belongs to exactly one account, normally the first named insured's; a program belongs to the parent account and its master and local policies link to it, mirroring the canonical `MASTER_PROGRAM` Agreement. Declare `temporal_kind` for every property (ADR-0064); the [data model](../../architecture/data-model.md#proposed-party-account-and-role-records-adr-0070) lists them.
 - Role assignments carry the authoritative source that the proposed access amendment needs (ADR-0070 section 5); the vocabulary itself grants nothing.
 
-The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0012.yaml`.
+The PRD, STATUS, personas and stories were authored by plan run `2026-11-25-120320e9` (Phase A); the feature shard is `planning-mds/kg-source/features/F0012.yaml`. The G1 operator decisions D1–D8 are listed in the [PRD](PRD.md#risks--assumptions).
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
+| [F0012-S0001](F0012-S0001-validate-foundation-module-authoring.md) | Validate foundation module authoring | Not Started |
+| [F0012-S0002](F0012-S0002-assign-stable-term-identities.md) | Assign stable term identities | Not Started |
+| [F0012-S0003](F0012-S0003-model-parties-accounts-and-scoped-roles.md) | Model parties, accounts and scoped roles | Not Started |
+| [F0012-S0004](F0012-S0004-compile-and-install-immutable-releases.md) | Compile and install immutable releases | Not Started |
+| [F0012-S0005](F0012-S0005-register-predicates-and-activate-temporal-kinds.md) | Register predicates and activate temporal kinds | Not Started |
+| [F0012-S0006](F0012-S0006-gate-activation-with-impact-report.md) | Gate activation with an impact report | Not Started |
+| [F0012-S0007](F0012-S0007-prove-reproducible-release-delivery.md) | Prove reproducible release delivery | Not Started |
 
-**Total Stories:** 0
+**Total Stories:** 7
 
 ## Statements, time, and governance scope amendment (2026-09-25)
 

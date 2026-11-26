@@ -1,0 +1,23 @@
+id: capability:release-backed-predicate-registry
+label: Release-backed predicate contracts and temporal-kind activation
+notes: Proposed F0012 Phase B design, not implemented. PredicateContractRegistry serves sys predicates plus predicates
+  of releases installed in the tenant/KB, prepared per unit of work; no fallback to the active release. Commits
+  take temporal_kind from the contract (ETERNAL/EVENT over ADR-0078 D10 shapes, no DDL).
+source_docs:
+- F0012/feature-assembly-plan.md
+- F0012/F0012-S0005-register-predicates-and-activate-temporal-kinds.md
+- planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
+rationale:
+- adr: adr:0081
+  section: D6. Release-backed predicate contracts
+  summary: Registry keeps the synchronous port and resolves only releases installed for the scope.
+- adr: adr:0077
+  section: 'D2. Predicate key: opaque, namespaced, major-versioned'
+  summary: Release reference is pinned but not identity.
+related_nodes:
+- adr:0081
+- adr:0077
+- adr:0078
+- capability:factslot-identity-resolution
+- capability:bitemporal-canonical-commit
+- entity:fact-slot

@@ -435,6 +435,20 @@ adrs:
     path: planning-mds/architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md
     notes: Proposed F0009 design; Phase A and Phase B approved 2026-11-24 in plan run 2026-11-24-bfdbbf04.
       Runtime proofs and separate formal ADR acceptance remain pending.
+  - id: adr:0081
+    label: Foundation Ontology Authoring and Release Runtime
+    path: planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
+    notes: 'Proposed F0012 design (plan run 2026-11-25-120320e9): authoring schema, urn:nebula:ont identity,
+      content-addressed releases, migration 0017, release-backed predicates, ETERNAL/EVENT activation,
+      gated activation. Runtime proofs and formal acceptance pending.'
+    related_nodes:
+      - adr:0045
+      - adr:0070
+      - adr:0077
+      - adr:0078
+      - capability:foundation-ontology-release
+      - capability:ontology-release-compatibility
+      - capability:release-backed-predicate-registry
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -695,6 +709,32 @@ capabilities:
       - planning-mds/features/archive/F0007-factslot-model/PRD.md
       - planning-mds/features/archive/F0007-factslot-model/feature-assembly-plan.md
       - planning-mds/features/archive/F0007-factslot-model/worked-examples.md
+  - id: capability:foundation-ontology-release
+    label: Foundation ontology authoring, compile and immutable release install
+    notes: Proposed F0012 Phase B design, not implemented. Offline validation of ontology-module-authoring/v1
+      files, urn:nebula:ont identities, deterministic content-addressed compile with exact locks and projection
+      mapping, and atomic append-only install per tenant/KB under ontology_release:install.
+    rationale:
+      - adr: adr:0081
+        section: Decision
+        summary: Authoring files compile to content-addressed immutable releases installed as normalized
+          append-only rows.
+    related_nodes:
+      - adr:0012
+      - adr:0045
+      - adr:0081
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
+      - glossary_term:stable-term-iri
+      - schema:ontology-module-authoring-v1
+      - schema:ontology-release-manifest-v1
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
+      - planning-mds/features/F0012-foundation-ontology/PRD.md
+      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
+      - planning-mds/features/F0012-foundation-ontology/foundation-module-design.yaml
+      - planning-mds/features/F0012-foundation-ontology/migration-design.sql
   - id: capability:governed-evidence-retrieval
     label: Governed evidence retrieval
     notes: Planning direction only. F0035 owns authorized hybrid seeds, bounded typed expansion and one
@@ -807,6 +847,8 @@ capabilities:
       and evidence obligations. Bounded conservativity is one input; unsupported or undecided is not a
       pass. F0012/F0013 settle contracts; F0030/F0062 add later tooling. First-assessment lineage is already
       required by F0065/ADR-0026 and must not wait for these tools. See the handoff for formal plan prerequisites.
+      F0012 Phase B (ADR-0081, Proposed) designs the predecessor-to-candidate impact report and reviewed,
+      audited activation/rollback; not implemented.
     rationale:
       - adr: adr:0045
         section: Compatibility and impact gate
@@ -815,6 +857,7 @@ capabilities:
     related_nodes:
       - adr:0026
       - adr:0045
+      - adr:0081
       - entity:assessment-record
       - entity:ontology-module-version
       - entity:ontology-release
@@ -822,10 +865,13 @@ capabilities:
       - glossary_term:constraint-execution-context
       - glossary_term:ontology-projection-mapping
       - glossary_term:stable-term-iri
+      - schema:ontology-impact-report-v1
     source_docs:
       - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
+      - planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0015-extraction-profile-compiler/README.md
       - planning-mds/features/F0030-ontology-workbench/README.md
@@ -941,6 +987,30 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/PRD.md
       - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+  - id: capability:release-backed-predicate-registry
+    label: Release-backed predicate contracts and temporal-kind activation
+    notes: Proposed F0012 Phase B design, not implemented. PredicateContractRegistry serves sys predicates
+      plus predicates of releases installed in the tenant/KB, prepared per unit of work; no fallback to
+      the active release. Commits take temporal_kind from the contract (ETERNAL/EVENT over ADR-0078 D10
+      shapes, no DDL).
+    rationale:
+      - adr: adr:0081
+        section: D6. Release-backed predicate contracts
+        summary: Registry keeps the synchronous port and resolves only releases installed for the scope.
+      - adr: adr:0077
+        section: 'D2. Predicate key: opaque, namespaced, major-versioned'
+        summary: Release reference is pinned but not identity.
+    related_nodes:
+      - adr:0077
+      - adr:0078
+      - adr:0081
+      - capability:bitemporal-canonical-commit
+      - capability:factslot-identity-resolution
+      - entity:fact-slot
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
+      - planning-mds/features/F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md
+      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
   - id: capability:review-submission-attribution
     label: Durable non-applied review attribution
     notes: Implemented in F0009 feature run 2026-11-24-08701e37 (G4 operator approval 2026-11-25); as-built
@@ -1744,7 +1814,8 @@ entities:
     notes: Proposed immutable revision of one authored module, represented by ontology_version in the
       proposed data model. Locks content, authoring schema, supported semantics, constraints and dependency
       declarations. Physical schema and ownership details remain F0012/F0013 Phase B decisions; no runtime
-      implementation is claimed.
+      implementation is claimed. F0012 Phase B (ADR-0081, Proposed) settles the physical design in migration-design.sql
+      (0017); not implemented.
     rationale:
       - adr: adr:0045
         section: Identity and release records
@@ -1755,6 +1826,7 @@ entities:
     related_nodes:
       - adr:0011
       - adr:0045
+      - adr:0081
       - glossary_term:constraint-execution-context
       - glossary_term:stable-term-iri
     source_docs:
@@ -1762,6 +1834,7 @@ entities:
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/domain/glossary.md
       - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0012-foundation-ontology/migration-design.sql
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
   - id: entity:ontology-release
     label: Ontology release
@@ -1769,7 +1842,8 @@ entities:
       profile/template/compiler/validation/projection-mapping artifact references. PostgreSQL remains
       authoritative. Historical runs and assessments retain their original release; activation and rollback
       govern future processing. Stable term identity alone does not freeze meaning. Phase B schema and
-      ADR-0045 acceptance remain pending.
+      ADR-0045 acceptance remain pending. F0012 Phase B (ADR-0081, Proposed) settles the physical design
+      in migration-design.sql (0017); not implemented.
     rationale:
       - adr: adr:0045
         section: Identity and release records
@@ -1783,6 +1857,7 @@ entities:
     related_nodes:
       - adr:0002
       - adr:0045
+      - adr:0081
       - capability:ontology-release-compatibility
       - glossary_term:ontology-projection-mapping
       - glossary_term:stable-term-iri
@@ -1790,6 +1865,7 @@ entities:
       - planning-mds/architecture/data-model.md
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0012-foundation-ontology/migration-design.sql
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0015-extraction-profile-compiler/README.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
@@ -1798,6 +1874,8 @@ entities:
     notes: Proposed exact release-to-module-version membership. A release selects one version per module;
       dependencies resolve within that locked composition at exact versions and digests. Floating latest
       dependencies cannot define a reproducible release. Physical persistence remains a Phase B decision.
+      F0012 Phase B (ADR-0081, Proposed) settles the physical design in migration-design.sql (0017); not
+      implemented.
     rationale:
       - adr: adr:0045
         section: Identity and release records
@@ -1807,10 +1885,12 @@ entities:
       - entity:ontology-release
     related_nodes:
       - adr:0045
+      - adr:0081
     source_docs:
       - planning-mds/architecture/data-model.md
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/F0012-foundation-ontology/migration-design.sql
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
   - id: entity:outbox-event
     label: Outbox event
@@ -2529,6 +2609,30 @@ schemas:
     source_docs:
       - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml
       - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+  - id: schema:ontology-impact-report-v1
+    label: Ontology release impact report
+    path: planning-mds/schemas/ontology-impact-report-v1.schema.json
+    related_nodes:
+      - adr:0081
+    source_docs:
+      - planning-mds/features/F0012-foundation-ontology/contract-inventory.yaml
+      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
+  - id: schema:ontology-module-authoring-v1
+    label: Ontology module authoring file
+    path: planning-mds/schemas/ontology-module-authoring-v1.schema.json
+    related_nodes:
+      - adr:0081
+    source_docs:
+      - planning-mds/features/F0012-foundation-ontology/contract-inventory.yaml
+      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
+  - id: schema:ontology-release-manifest-v1
+    label: Compiled ontology release manifest
+    path: planning-mds/schemas/ontology-release-manifest-v1.schema.json
+    related_nodes:
+      - adr:0081
+    source_docs:
+      - planning-mds/features/F0012-foundation-ontology/contract-inventory.yaml
+      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
   - id: schema:problem-details
     label: ProblemDetails
     path: planning-mds/schemas/problem-details.schema.json
