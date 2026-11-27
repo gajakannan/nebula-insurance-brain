@@ -194,14 +194,26 @@ def convert(graph):  # type: ignore[no-untyped-def]
     return out
 
 
+def canonical_jsonld(value):  # type: ignore[no-untyped-def]
+    """Recursively sort JSON-LD arrays by their canonical JSON text."""
+    if isinstance(value, dict):
+        return {k: canonical_jsonld(v) for k, v in value.items()}
+    if isinstance(value, list):
+        items = [canonical_jsonld(v) for v in value]
+        return sorted(items, key=lambda v: json.dumps(v, sort_keys=True))
+    return value
+
+
 def outputs() -> dict[str, str]:
     from rdflib import Graph
 
     files: dict[str, str] = {}
     snapshot = convert(Graph().parse(SOURCE / "snapshot.ttl", format="turtle"))
     files["snapshot.ttl"] = HEADER + snapshot.serialize(format="turtle")
+    # rdflib's JSON-LD node and value order varies across versions; sort them so the
+    # file is byte-stable (JSON-LD arrays here are unordered sets, no @list).
     files["snapshot.jsonld"] = json.dumps(
-        json.loads(snapshot.serialize(format="json-ld")), indent=2, sort_keys=True
+        canonical_jsonld(json.loads(snapshot.serialize(format="json-ld"))), indent=2, sort_keys=True
     ) + "\n"
     for name, _ in BOUNDARIES:
         graph = convert(Graph().parse(SOURCE / "boundaries" / name, format="turtle"))
