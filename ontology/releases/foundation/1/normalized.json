@@ -1,0 +1,2571 @@
+{
+  "change_records": [],
+  "contract": "ontology-release-normalized/v1",
+  "modules": [
+    {
+      "digest": "5a057c7a0e0c67acb34b6baad9b5c25fcf1da755984cf8f6288e33cbaf48f020",
+      "id": "foundation",
+      "normalized": {
+        "authoring_schema": "ontology-module-authoring/v1",
+        "constraints": [
+          {
+            "applicability": "designated parent chain at one coordinate",
+            "construct": "custom",
+            "consumer": "F0017/F0018 canonical admission",
+            "data_basis": "asserted",
+            "expression": "An account is never its own parent or ancestor.",
+            "id": "foundation.constraint.no-parent-cycle",
+            "on_nonconformance": "refuse the commit",
+            "property": "foundation.account.parent-account",
+            "severity": "violation",
+            "stage": "canonical-admission",
+            "subject": "foundation.account"
+          },
+          {
+            "applicability": "every account",
+            "construct": "maxCardinality",
+            "consumer": "foundation compiler",
+            "data_basis": "asserted",
+            "id": "foundation.constraint.one-account-organization",
+            "on_nonconformance": "refuse the release",
+            "property": "foundation.account.organization",
+            "severity": "violation",
+            "stage": "authoring",
+            "subject": "foundation.account",
+            "value": 1
+          },
+          {
+            "applicability": "all knowledge bases of one tenant at one valid/known coordinate",
+            "construct": "custom",
+            "consumer": "F0017/F0018 canonical admission",
+            "data_basis": "asserted",
+            "expression": "At most one account with status CURRENT per organization per tenant; missing or unknown status cannot satisfy this check.",
+            "id": "foundation.constraint.one-current-account",
+            "on_nonconformance": "refuse the second current account",
+            "severity": "violation",
+            "stage": "canonical-admission",
+            "subject": "foundation.organization"
+          },
+          {
+            "applicability": "account snapshot at one valid/known coordinate",
+            "construct": "maxCardinality",
+            "consumer": "semantic-examples gate",
+            "data_basis": "asserted",
+            "id": "foundation.constraint.one-parent-account",
+            "on_nonconformance": "fail the example",
+            "property": "foundation.account.parent-account",
+            "severity": "violation",
+            "stage": "example-validation",
+            "subject": "foundation.account",
+            "value": 1
+          },
+          {
+            "applicability": "every supplied percentage",
+            "construct": "custom",
+            "consumer": "F0017/F0018 canonical admission",
+            "data_basis": "asserted",
+            "expression": "0 < percentage <= 100.",
+            "id": "foundation.constraint.percentage-range",
+            "on_nonconformance": "refuse the malformed value",
+            "property": "foundation.ownership-interest.percentage",
+            "severity": "violation",
+            "stage": "canonical-admission",
+            "subject": "foundation.ownership-interest"
+          },
+          {
+            "applicability": "recorded ownership of one organization at one valid/known coordinate",
+            "construct": "custom",
+            "consumer": "F0017/F0018 canonical admission",
+            "data_basis": "asserted",
+            "expression": "Recorded percentages for one owned organization total at most 100; less is allowed when owners are unknown.",
+            "id": "foundation.constraint.percentage-total",
+            "on_nonconformance": "refuse the commit that would exceed 100",
+            "severity": "violation",
+            "stage": "canonical-admission",
+            "subject": "foundation.organization"
+          },
+          {
+            "applicability": "every role-assignment scope declaration",
+            "construct": "range",
+            "consumer": "foundation compiler",
+            "data_basis": "asserted",
+            "id": "foundation.constraint.role-scope-range",
+            "on_nonconformance": "refuse the release",
+            "property": "foundation.role-assignment.scope",
+            "severity": "violation",
+            "stage": "authoring",
+            "subject": "foundation.role-assignment"
+          }
+        ],
+        "module": {
+          "dependencies": [],
+          "id": "foundation",
+          "predicate_namespace": "fnd",
+          "version": 1
+        },
+        "projection": [
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "ACCOUNT_ORGANIZATION",
+            "property": "foundation.account.organization"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "PARENT_ACCOUNT",
+            "property": "foundation.account.parent-account"
+          },
+          {
+            "disposition": "vertex_property",
+            "label": "account_status",
+            "property": "foundation.account.status"
+          },
+          {
+            "disposition": "omitted",
+            "property": "foundation.organization.child-organization",
+            "reason": "Inverse of parent organization; derived, never materialized as a duplicate edge."
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "OPERATES_AT",
+            "property": "foundation.organization.operates-at"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "PARENT_ORGANIZATION",
+            "property": "foundation.organization.parent-organization"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "OWNED_ORGANIZATION",
+            "property": "foundation.ownership-interest.owned-organization"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "OWNER",
+            "property": "foundation.ownership-interest.owner"
+          },
+          {
+            "disposition": "vertex_property",
+            "label": "percentage",
+            "property": "foundation.ownership-interest.percentage"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "EMPLOYED_BY",
+            "property": "foundation.person.employed-by"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "ACTED_FOR",
+            "property": "foundation.role-assignment.acted-for"
+          },
+          {
+            "disposition": "vertex_property",
+            "label": "authoritative_source",
+            "property": "foundation.role-assignment.authoritative-source"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "ROLE_COVERAGE_PART",
+            "property": "foundation.role-assignment.coverage-part"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "ROLE_PARTY",
+            "property": "foundation.role-assignment.party"
+          },
+          {
+            "disposition": "vertex_property",
+            "label": "role_kind",
+            "property": "foundation.role-assignment.role-kind"
+          },
+          {
+            "direction": "subject-to-object",
+            "disposition": "edge",
+            "label": "ROLE_SCOPE",
+            "property": "foundation.role-assignment.scope"
+          }
+        ],
+        "terms": [
+          {
+            "definition": "The carrier's customer relationship with exactly one insured or prospective insured organization, with at most one designated parent account.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.account",
+            "iri": "urn:nebula:ont:foundation.account",
+            "kind": "class",
+            "labels": {
+              "en-US": "Account"
+            },
+            "parents": [
+              "foundation.role-scope"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "definition": "The lifecycle state of an account in the teaching vocabulary: CURRENT means not closed.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.account-status",
+            "iri": "urn:nebula:ont:foundation.account-status",
+            "kind": "class",
+            "labels": {
+              "en-US": "Account status"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.account-status",
+            "definition": "Account status CLOSED in the teaching vocabulary (ADR-0070 section 2).",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.account-status.closed",
+            "iri": "urn:nebula:ont:foundation.account-status.closed",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Closed"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.account-status",
+            "definition": "Account status CURRENT in the teaching vocabulary (ADR-0070 section 2).",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.account-status.current",
+            "iri": "urn:nebula:ont:foundation.account-status.current",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Current"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The one organization the account is the customer relationship with; the link never changes.",
+            "domain": "foundation.account",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.account.organization",
+            "iri": "urn:nebula:ont:foundation.account.organization",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Account organization"
+            },
+            "predicate_key": "fnd:accountOrganization@v1",
+            "range": "foundation.organization",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "ETERNAL",
+            "value_type": "entity_ref"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The account designated as this account's parent for roll-up; never computed from ownership.",
+            "domain": "foundation.account",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.account.parent-account",
+            "iri": "urn:nebula:ont:foundation.account.parent-account",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Parent account"
+            },
+            "predicate_key": "fnd:parentAccount@v1",
+            "range": "foundation.account",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "entity_ref"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The account's lifecycle status at a valid and known time; unknown status is incomplete, not closed.",
+            "domain": "foundation.account",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.account.status",
+            "iri": "urn:nebula:ont:foundation.account.status",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Account status"
+            },
+            "predicate_key": "fnd:accountStatus@v1",
+            "range": "foundation.account-status",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "code"
+          },
+          {
+            "definition": "A binding arrangement between parties; insurance policies and programs are agreements defined by insurance modules.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.agreement",
+            "iri": "urn:nebula:ont:foundation.agreement",
+            "kind": "class",
+            "labels": {
+              "en-US": "Agreement"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          },
+          {
+            "definition": "A quantity with a unit or currency; money is an amount with a currency and a basis.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.amount",
+            "iri": "urn:nebula:ont:foundation.amount",
+            "kind": "class",
+            "labels": {
+              "en-US": "Amount"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          },
+          {
+            "definition": "An attributable choice made by a party or principal under stated authority.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.decision",
+            "iri": "urn:nebula:ont:foundation.decision",
+            "kind": "class",
+            "labels": {
+              "en-US": "Decision"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          },
+          {
+            "definition": "A source document whose versions are parsed once and retained as immutable evidence.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.document",
+            "iri": "urn:nebula:ont:foundation.document",
+            "kind": "class",
+            "labels": {
+              "en-US": "Document"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          },
+          {
+            "definition": "Something that happens at a point in time at its stated granularity.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.event",
+            "iri": "urn:nebula:ont:foundation.event",
+            "kind": "class",
+            "labels": {
+              "en-US": "Event"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          },
+          {
+            "definition": "A value that identifies a thing within a named issuing scheme.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.identifier",
+            "iri": "urn:nebula:ont:foundation.identifier",
+            "kind": "class",
+            "labels": {
+              "en-US": "Identifier"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          },
+          {
+            "definition": "An observed or reported quantity with its unit, method and observation time.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.measurement",
+            "iri": "urn:nebula:ont:foundation.measurement",
+            "kind": "class",
+            "labels": {
+              "en-US": "Measurement"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          },
+          {
+            "definition": "An identified organization. Broker, carrier, MGA and insured are roles it plays in a scope, not kinds of organization.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.organization",
+            "iri": "urn:nebula:ont:foundation.organization",
+            "kind": "class",
+            "labels": {
+              "en-US": "Organization"
+            },
+            "parents": [
+              "foundation.party"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "definition": "Inverse of parent organization; derived, never stored as a slot.",
+            "domain": "foundation.organization",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.organization.child-organization",
+            "inverse_of": "foundation.organization.parent-organization",
+            "iri": "urn:nebula:ont:foundation.organization.child-organization",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Child organization"
+            },
+            "range": "foundation.organization",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE"
+          },
+          {
+            "cardinality": "RELATIONSHIP",
+            "definition": "A place at which the organization operates during the valid period.",
+            "domain": "foundation.organization",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.organization.operates-at",
+            "iri": "urn:nebula:ont:foundation.organization.operates-at",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Operates at"
+            },
+            "predicate_key": "fnd:operatesAt@v1",
+            "range": "foundation.place",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "entity_ref"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The organization directly above this one in its hierarchy; the hierarchy has no fixed depth.",
+            "domain": "foundation.organization",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.organization.parent-organization",
+            "iri": "urn:nebula:ont:foundation.organization.parent-organization",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Parent organization"
+            },
+            "predicate_key": "fnd:parentOrganization@v1",
+            "range": "foundation.organization",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "entity_ref"
+          },
+          {
+            "definition": "A recorded ownership of one organization by a party with a percentage; majority is computed, never stored.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.ownership-interest",
+            "iri": "urn:nebula:ont:foundation.ownership-interest",
+            "kind": "class",
+            "labels": {
+              "en-US": "Ownership interest"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The organization the ownership interest is in.",
+            "domain": "foundation.ownership-interest",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.ownership-interest.owned-organization",
+            "iri": "urn:nebula:ont:foundation.ownership-interest.owned-organization",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Owned organization"
+            },
+            "predicate_key": "fnd:ownershipOwnedOrganization@v1",
+            "range": "foundation.organization",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "ETERNAL",
+            "value_type": "entity_ref"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The party holding the ownership interest.",
+            "domain": "foundation.ownership-interest",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.ownership-interest.owner",
+            "iri": "urn:nebula:ont:foundation.ownership-interest.owner",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Owner"
+            },
+            "predicate_key": "fnd:ownershipOwner@v1",
+            "range": "foundation.party",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "ETERNAL",
+            "value_type": "entity_ref"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The recorded percentage of the owned organization held, greater than 0 and at most 100.",
+            "domain": "foundation.ownership-interest",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.ownership-interest.percentage",
+            "iri": "urn:nebula:ont:foundation.ownership-interest.percentage",
+            "kind": "datatype_property",
+            "labels": {
+              "en-US": "Ownership percentage"
+            },
+            "predicate_key": "fnd:ownershipPercentage@v1",
+            "range": "xsd:decimal",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "decimal"
+          },
+          {
+            "definition": "A person or an organization capable of participating in a scoped insurance relationship.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.party",
+            "iri": "urn:nebula:ont:foundation.party",
+            "kind": "class",
+            "labels": {
+              "en-US": "Party"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "definition": "An individual human party; a role played in insurance does not make the person an application principal.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.person",
+            "iri": "urn:nebula:ont:foundation.person",
+            "kind": "class",
+            "labels": {
+              "en-US": "Person"
+            },
+            "parents": [
+              "foundation.party"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "cardinality": "RELATIONSHIP",
+            "definition": "The organization or branch that employs the person; separate from any role the person plays.",
+            "domain": "foundation.person",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.person.employed-by",
+            "iri": "urn:nebula:ont:foundation.person.employed-by",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Employed by"
+            },
+            "predicate_key": "fnd:employedBy@v1",
+            "range": "foundation.organization",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "entity_ref"
+          },
+          {
+            "definition": "A location such as an office, premises or yard at which an organization operates; operating there does not make it insured property.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.place",
+            "iri": "urn:nebula:ont:foundation.place",
+            "kind": "class",
+            "labels": {
+              "en-US": "Place"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "definition": "A sequence of activities with lifecycle states, defined in detail by later process modules.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.process",
+            "iri": "urn:nebula:ont:foundation.process",
+            "kind": "class",
+            "labels": {
+              "en-US": "Process"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          },
+          {
+            "definition": "A function a party performs within a scope; roles describe who does what and grant nothing by themselves.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role",
+            "iri": "urn:nebula:ont:foundation.role",
+            "kind": "class",
+            "labels": {
+              "en-US": "Role"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "definition": "A party playing a role kind in a scope, optionally acting for an organization, valid over a period.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-assignment",
+            "iri": "urn:nebula:ont:foundation.role-assignment",
+            "kind": "class",
+            "labels": {
+              "en-US": "Role assignment"
+            },
+            "parents": [
+              "foundation.role"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The organization or branch a person represents in this role.",
+            "domain": "foundation.role-assignment",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-assignment.acted-for",
+            "iri": "urn:nebula:ont:foundation.role-assignment.acted-for",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Acted for"
+            },
+            "predicate_key": "fnd:roleActedFor@v1",
+            "range": "foundation.organization",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "entity_ref"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The trusted source that confirmed the assignment; data only, it grants nothing.",
+            "domain": "foundation.role-assignment",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-assignment.authoritative-source",
+            "iri": "urn:nebula:ont:foundation.role-assignment.authoritative-source",
+            "kind": "datatype_property",
+            "labels": {
+              "en-US": "Authoritative source"
+            },
+            "predicate_key": "fnd:roleAuthoritativeSource@v1",
+            "range": "xsd:string",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "code"
+          },
+          {
+            "cardinality": "MULTI",
+            "definition": "A coverage part of a policy term that narrows a policy-term role; insurance modules narrow the range.",
+            "domain": "foundation.role-assignment",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-assignment.coverage-part",
+            "iri": "urn:nebula:ont:foundation.role-assignment.coverage-part",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Coverage part"
+            },
+            "predicate_key": "fnd:roleCoveragePart@v1",
+            "range": "foundation.thing",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "entity_ref"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The party filling the role during the valid period.",
+            "domain": "foundation.role-assignment",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-assignment.party",
+            "iri": "urn:nebula:ont:foundation.role-assignment.party",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Party in role"
+            },
+            "predicate_key": "fnd:roleParty@v1",
+            "range": "foundation.party",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "STATE",
+            "value_type": "entity_ref"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The kind of role assigned; fixed for the life of the assignment.",
+            "domain": "foundation.role-assignment",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-assignment.role-kind",
+            "iri": "urn:nebula:ont:foundation.role-assignment.role-kind",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Role kind"
+            },
+            "predicate_key": "fnd:roleKind@v1",
+            "range": "foundation.role-kind",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "ETERNAL",
+            "value_type": "code"
+          },
+          {
+            "cardinality": "SINGLE",
+            "definition": "The account, policy term or submission the assignment applies to; fixed for the life of the assignment.",
+            "domain": "foundation.role-assignment",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-assignment.scope",
+            "iri": "urn:nebula:ont:foundation.role-assignment.scope",
+            "kind": "object_property",
+            "labels": {
+              "en-US": "Role scope"
+            },
+            "predicate_key": "fnd:roleScope@v1",
+            "range": "foundation.role-scope",
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ],
+            "temporal_kind": "ETERNAL",
+            "value_type": "entity_ref"
+          },
+          {
+            "definition": "The open vocabulary of role kinds a role assignment can name.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-kind",
+            "iri": "urn:nebula:ont:foundation.role-kind",
+            "kind": "class",
+            "labels": {
+              "en-US": "Role kind"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The account contact role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "ACCOUNT_CONTACT",
+              "PartyRoleTypeCode_status": "proposed"
+            },
+            "id": "foundation.role-kind.account-contact",
+            "iri": "urn:nebula:ont:foundation.role-kind.account-contact",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Account contact"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The additional insured role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "ADDITIONAL_INSURED",
+              "PartyRoleTypeCode_status": "existing"
+            },
+            "id": "foundation.role-kind.additional-insured",
+            "iri": "urn:nebula:ont:foundation.role-kind.additional-insured",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Additional insured"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The additional named insured role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "ADDITIONAL_NAMED_INSURED",
+              "PartyRoleTypeCode_status": "proposed"
+            },
+            "id": "foundation.role-kind.additional-named-insured",
+            "iri": "urn:nebula:ont:foundation.role-kind.additional-named-insured",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Additional named insured"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The broker contact role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "BROKER_CONTACT",
+              "PartyRoleTypeCode_status": "proposed"
+            },
+            "id": "foundation.role-kind.broker-contact",
+            "iri": "urn:nebula:ont:foundation.role-kind.broker-contact",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Broker contact"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The broker of record role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "BROKER_OF_RECORD",
+              "PartyRoleTypeCode_status": "existing"
+            },
+            "id": "foundation.role-kind.broker-of-record",
+            "iri": "urn:nebula:ont:foundation.role-kind.broker-of-record",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Broker of record"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The distribution contact role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": null,
+              "PartyRoleTypeCode_status": "unmapped"
+            },
+            "id": "foundation.role-kind.distribution-contact",
+            "iri": "urn:nebula:ont:foundation.role-kind.distribution-contact",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Distribution contact"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The first named insured role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "FIRST_NAMED_INSURED",
+              "PartyRoleTypeCode_status": "proposed"
+            },
+            "id": "foundation.role-kind.first-named-insured",
+            "iri": "urn:nebula:ont:foundation.role-kind.first-named-insured",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "First named insured"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The marketing representative role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": null,
+              "PartyRoleTypeCode_status": "unmapped"
+            },
+            "id": "foundation.role-kind.marketing-representative",
+            "iri": "urn:nebula:ont:foundation.role-kind.marketing-representative",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Marketing representative"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The operations contact role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": null,
+              "PartyRoleTypeCode_status": "unmapped"
+            },
+            "id": "foundation.role-kind.operations-contact",
+            "iri": "urn:nebula:ont:foundation.role-kind.operations-contact",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Operations contact"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The organization contact role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": null,
+              "PartyRoleTypeCode_status": "unmapped"
+            },
+            "id": "foundation.role-kind.organization-contact",
+            "iri": "urn:nebula:ont:foundation.role-kind.organization-contact",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Organization contact"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The placement broker role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "PLACEMENT_BROKER",
+              "PartyRoleTypeCode_status": "proposed"
+            },
+            "id": "foundation.role-kind.placement-broker",
+            "iri": "urn:nebula:ont:foundation.role-kind.placement-broker",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Placement broker"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The risk manager role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "RISK_MANAGER",
+              "PartyRoleTypeCode_status": "proposed"
+            },
+            "id": "foundation.role-kind.risk-manager",
+            "iri": "urn:nebula:ont:foundation.role-kind.risk-manager",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Risk manager"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The underwriter role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": "UNDERWRITER",
+              "PartyRoleTypeCode_status": "proposed"
+            },
+            "id": "foundation.role-kind.underwriter",
+            "iri": "urn:nebula:ont:foundation.role-kind.underwriter",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Underwriter"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "code_of": "foundation.role-kind",
+            "definition": "The underwriting assistant role kind (ADR-0070 section 4); confers no access by itself.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "external_codes": {
+              "PartyRoleTypeCode": null,
+              "PartyRoleTypeCode_status": "unmapped"
+            },
+            "id": "foundation.role-kind.underwriting-assistant",
+            "iri": "urn:nebula:ont:foundation.role-kind.underwriting-assistant",
+            "kind": "code_value",
+            "labels": {
+              "en-US": "Underwriting assistant"
+            },
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "definition": "The thing a role assignment applies to. Account is a role scope; insurance modules add policy-term and submission scopes.",
+            "examples": [
+              "planning-mds/examples/commercial-pc-account/records.json"
+            ],
+            "id": "foundation.role-scope",
+            "iri": "urn:nebula:ont:foundation.role-scope",
+            "kind": "class",
+            "labels": {
+              "en-US": "Role scope"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/examples/commercial-pc-account/cases.md"
+            ]
+          },
+          {
+            "definition": "The root of every foundation class; anything the Brain can describe with evidence.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.thing",
+            "iri": "urn:nebula:ont:foundation.thing",
+            "kind": "class",
+            "labels": {
+              "en-US": "Thing"
+            },
+            "parents": [],
+            "regression_cases": [
+              "planning-mds/architecture/master-blueprint.md"
+            ]
+          },
+          {
+            "definition": "A span of time with a start and an end bound at stated granularities.",
+            "examples": [
+              "planning-mds/domain/glossary.md"
+            ],
+            "id": "foundation.time-interval",
+            "iri": "urn:nebula:ont:foundation.time-interval",
+            "kind": "class",
+            "labels": {
+              "en-US": "Time interval"
+            },
+            "parents": [
+              "foundation.thing"
+            ],
+            "regression_cases": [
+              "planning-mds/domain/glossary.md"
+            ]
+          }
+        ]
+      },
+      "version": 1
+    }
+  ],
+  "name": "foundation",
+  "sequence": 1,
+  "terms": [
+    {
+      "definition_digest": "612c3816e4c2548890069bfbaed62635abd3d70c2b18aed2afa2b7882acfc72a",
+      "iri": "urn:nebula:ont:foundation.account",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "The carrier's customer relationship with exactly one insured or prospective insured organization, with at most one designated parent account.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.account",
+        "iri": "urn:nebula:ont:foundation.account",
+        "kind": "class",
+        "labels": {
+          "en-US": "Account"
+        },
+        "parents": [
+          "foundation.role-scope"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "411de0ef1c80fcaead8f430f11d28bc986c66e988e8412970321d7872d0871cf",
+      "iri": "urn:nebula:ont:foundation.account-status",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "The lifecycle state of an account in the teaching vocabulary: CURRENT means not closed.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.account-status",
+        "iri": "urn:nebula:ont:foundation.account-status",
+        "kind": "class",
+        "labels": {
+          "en-US": "Account status"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "78d47b35f44c8625b200ff3722b439721c013438ed7a55c0806d94e946d597bf",
+      "iri": "urn:nebula:ont:foundation.account-status.closed",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.account-status",
+        "definition": "Account status CLOSED in the teaching vocabulary (ADR-0070 section 2).",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.account-status.closed",
+        "iri": "urn:nebula:ont:foundation.account-status.closed",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Closed"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "9bd25dd52d76a8f58550690ccffaf70605a055982ea439953a226f9f921136f6",
+      "iri": "urn:nebula:ont:foundation.account-status.current",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.account-status",
+        "definition": "Account status CURRENT in the teaching vocabulary (ADR-0070 section 2).",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.account-status.current",
+        "iri": "urn:nebula:ont:foundation.account-status.current",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Current"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "35ce87dd8f17858eff9f20dd0910b2dd60b2c0a7d10a36c2e0d1ec86ca830eda",
+      "iri": "urn:nebula:ont:foundation.account.organization",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The one organization the account is the customer relationship with; the link never changes.",
+        "domain": "foundation.account",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.account.organization",
+        "iri": "urn:nebula:ont:foundation.account.organization",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Account organization"
+        },
+        "predicate_key": "fnd:accountOrganization@v1",
+        "range": "foundation.organization",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "ETERNAL",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "5fb2ac814d6429534851a95030c5abfec55b985d72944126b8bb2dd0b03af2d4",
+      "iri": "urn:nebula:ont:foundation.account.parent-account",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The account designated as this account's parent for roll-up; never computed from ownership.",
+        "domain": "foundation.account",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.account.parent-account",
+        "iri": "urn:nebula:ont:foundation.account.parent-account",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Parent account"
+        },
+        "predicate_key": "fnd:parentAccount@v1",
+        "range": "foundation.account",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "3a811eaf1f40021ff07e411c1d727d5a9cd74068193de1a314e9d43ac52a1613",
+      "iri": "urn:nebula:ont:foundation.account.status",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The account's lifecycle status at a valid and known time; unknown status is incomplete, not closed.",
+        "domain": "foundation.account",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.account.status",
+        "iri": "urn:nebula:ont:foundation.account.status",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Account status"
+        },
+        "predicate_key": "fnd:accountStatus@v1",
+        "range": "foundation.account-status",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "code"
+      }
+    },
+    {
+      "definition_digest": "170ad9deac4139767fc6a5d6b4df412d062591aa9bb78b1f8f497c69edaee33b",
+      "iri": "urn:nebula:ont:foundation.agreement",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A binding arrangement between parties; insurance policies and programs are agreements defined by insurance modules.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.agreement",
+        "iri": "urn:nebula:ont:foundation.agreement",
+        "kind": "class",
+        "labels": {
+          "en-US": "Agreement"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "87524c8da154c5ade9d45f98963f5498157484a045d57cf4d7c5a4f1c3254f26",
+      "iri": "urn:nebula:ont:foundation.amount",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A quantity with a unit or currency; money is an amount with a currency and a basis.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.amount",
+        "iri": "urn:nebula:ont:foundation.amount",
+        "kind": "class",
+        "labels": {
+          "en-US": "Amount"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "0d37c2fcc0226e7300cf9388d58c22c33adfa22d691987d000d6ecb8b26ba1b2",
+      "iri": "urn:nebula:ont:foundation.decision",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "An attributable choice made by a party or principal under stated authority.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.decision",
+        "iri": "urn:nebula:ont:foundation.decision",
+        "kind": "class",
+        "labels": {
+          "en-US": "Decision"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "74208f202041bf200bc1e5520913073621eac12901b9e8ab3db152e5a96953b3",
+      "iri": "urn:nebula:ont:foundation.document",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A source document whose versions are parsed once and retained as immutable evidence.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.document",
+        "iri": "urn:nebula:ont:foundation.document",
+        "kind": "class",
+        "labels": {
+          "en-US": "Document"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "2ec0dc3eddd706ca17754aff984873f5c8d5a5254d164c208ddaf85986658de0",
+      "iri": "urn:nebula:ont:foundation.event",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "Something that happens at a point in time at its stated granularity.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.event",
+        "iri": "urn:nebula:ont:foundation.event",
+        "kind": "class",
+        "labels": {
+          "en-US": "Event"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "41e758242160c44fd0dc5cef3b39570924b00cbf1d368a3297c977f749911b5f",
+      "iri": "urn:nebula:ont:foundation.identifier",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A value that identifies a thing within a named issuing scheme.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.identifier",
+        "iri": "urn:nebula:ont:foundation.identifier",
+        "kind": "class",
+        "labels": {
+          "en-US": "Identifier"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "63ae3ea4611813e6f6cd7573be5b51091ebf700f54d1ca3a602ede71f44305f0",
+      "iri": "urn:nebula:ont:foundation.measurement",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "An observed or reported quantity with its unit, method and observation time.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.measurement",
+        "iri": "urn:nebula:ont:foundation.measurement",
+        "kind": "class",
+        "labels": {
+          "en-US": "Measurement"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "f027e3db562eb9750ad785c7ea2aec860727566b06ac3342bbdca3e087bd803b",
+      "iri": "urn:nebula:ont:foundation.organization",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "An identified organization. Broker, carrier, MGA and insured are roles it plays in a scope, not kinds of organization.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.organization",
+        "iri": "urn:nebula:ont:foundation.organization",
+        "kind": "class",
+        "labels": {
+          "en-US": "Organization"
+        },
+        "parents": [
+          "foundation.party"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "0f9958fa3317a8b6169711097700bc151ecaa43e947c435ea6fb296fd0a03ebb",
+      "iri": "urn:nebula:ont:foundation.organization.child-organization",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "definition": "Inverse of parent organization; derived, never stored as a slot.",
+        "domain": "foundation.organization",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.organization.child-organization",
+        "inverse_of": "foundation.organization.parent-organization",
+        "iri": "urn:nebula:ont:foundation.organization.child-organization",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Child organization"
+        },
+        "range": "foundation.organization",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE"
+      }
+    },
+    {
+      "definition_digest": "3e0c0a5dd1c5877e29379533d33727f9982f901cbf44b36befb9b82ed3b14aaa",
+      "iri": "urn:nebula:ont:foundation.organization.operates-at",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "RELATIONSHIP",
+        "definition": "A place at which the organization operates during the valid period.",
+        "domain": "foundation.organization",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.organization.operates-at",
+        "iri": "urn:nebula:ont:foundation.organization.operates-at",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Operates at"
+        },
+        "predicate_key": "fnd:operatesAt@v1",
+        "range": "foundation.place",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "408cab13f6bea3700de29ee364f0ae41c10f7d2d5dcee79ffd6068571af66c81",
+      "iri": "urn:nebula:ont:foundation.organization.parent-organization",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The organization directly above this one in its hierarchy; the hierarchy has no fixed depth.",
+        "domain": "foundation.organization",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.organization.parent-organization",
+        "iri": "urn:nebula:ont:foundation.organization.parent-organization",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Parent organization"
+        },
+        "predicate_key": "fnd:parentOrganization@v1",
+        "range": "foundation.organization",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "4d161d1d61751ef1c941a7753c2ec5fefec27e03c24e9ff88ba1caf528fa2ec9",
+      "iri": "urn:nebula:ont:foundation.ownership-interest",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A recorded ownership of one organization by a party with a percentage; majority is computed, never stored.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.ownership-interest",
+        "iri": "urn:nebula:ont:foundation.ownership-interest",
+        "kind": "class",
+        "labels": {
+          "en-US": "Ownership interest"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "760f4cffdcd486234847866032e4bc1f58f0bba6ab1ca10ecc730716d12c0b15",
+      "iri": "urn:nebula:ont:foundation.ownership-interest.owned-organization",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The organization the ownership interest is in.",
+        "domain": "foundation.ownership-interest",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.ownership-interest.owned-organization",
+        "iri": "urn:nebula:ont:foundation.ownership-interest.owned-organization",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Owned organization"
+        },
+        "predicate_key": "fnd:ownershipOwnedOrganization@v1",
+        "range": "foundation.organization",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "ETERNAL",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "5dcbac95276a2bb04e2c14e4db59c3e4c94374c304e3f03208dbeb47fab258c9",
+      "iri": "urn:nebula:ont:foundation.ownership-interest.owner",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The party holding the ownership interest.",
+        "domain": "foundation.ownership-interest",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.ownership-interest.owner",
+        "iri": "urn:nebula:ont:foundation.ownership-interest.owner",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Owner"
+        },
+        "predicate_key": "fnd:ownershipOwner@v1",
+        "range": "foundation.party",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "ETERNAL",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "88adda8edbd48ef0e1282845434a581ebd05d240dfd14c103a69704e294a51d4",
+      "iri": "urn:nebula:ont:foundation.ownership-interest.percentage",
+      "kind": "datatype_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The recorded percentage of the owned organization held, greater than 0 and at most 100.",
+        "domain": "foundation.ownership-interest",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.ownership-interest.percentage",
+        "iri": "urn:nebula:ont:foundation.ownership-interest.percentage",
+        "kind": "datatype_property",
+        "labels": {
+          "en-US": "Ownership percentage"
+        },
+        "predicate_key": "fnd:ownershipPercentage@v1",
+        "range": "xsd:decimal",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "decimal"
+      }
+    },
+    {
+      "definition_digest": "c917aac6408b59c523972dc6558a50e88cb20fd4756ea0ac828b96028a3a0aee",
+      "iri": "urn:nebula:ont:foundation.party",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A person or an organization capable of participating in a scoped insurance relationship.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.party",
+        "iri": "urn:nebula:ont:foundation.party",
+        "kind": "class",
+        "labels": {
+          "en-US": "Party"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "4d66cd88d85e7d36848a3bfa4273bd00d31a9a85f02c5533f17073b3feef387f",
+      "iri": "urn:nebula:ont:foundation.person",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "An individual human party; a role played in insurance does not make the person an application principal.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.person",
+        "iri": "urn:nebula:ont:foundation.person",
+        "kind": "class",
+        "labels": {
+          "en-US": "Person"
+        },
+        "parents": [
+          "foundation.party"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "f5a680e836e6ea557f609e850de6d33071e9b119463048e104ef3ee272cfde38",
+      "iri": "urn:nebula:ont:foundation.person.employed-by",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "RELATIONSHIP",
+        "definition": "The organization or branch that employs the person; separate from any role the person plays.",
+        "domain": "foundation.person",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.person.employed-by",
+        "iri": "urn:nebula:ont:foundation.person.employed-by",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Employed by"
+        },
+        "predicate_key": "fnd:employedBy@v1",
+        "range": "foundation.organization",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "58ad85772e85f462f5198d30a429ed2c3f89a00d7578e609cc84a7da343d844f",
+      "iri": "urn:nebula:ont:foundation.place",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A location such as an office, premises or yard at which an organization operates; operating there does not make it insured property.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.place",
+        "iri": "urn:nebula:ont:foundation.place",
+        "kind": "class",
+        "labels": {
+          "en-US": "Place"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "255f359f91fc9b57155fb3399e467faad04762a768353959960d1044d9f767f2",
+      "iri": "urn:nebula:ont:foundation.process",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A sequence of activities with lifecycle states, defined in detail by later process modules.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.process",
+        "iri": "urn:nebula:ont:foundation.process",
+        "kind": "class",
+        "labels": {
+          "en-US": "Process"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "4db38f2039b980d3f87181eaf12fb6a6046af8afb46887ca312ab147afd038b0",
+      "iri": "urn:nebula:ont:foundation.role",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A function a party performs within a scope; roles describe who does what and grant nothing by themselves.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role",
+        "iri": "urn:nebula:ont:foundation.role",
+        "kind": "class",
+        "labels": {
+          "en-US": "Role"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "8df9a563f542565dbd5890c4cbb1ac717b2c532dacc332880b42a41c0f3143ef",
+      "iri": "urn:nebula:ont:foundation.role-assignment",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A party playing a role kind in a scope, optionally acting for an organization, valid over a period.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-assignment",
+        "iri": "urn:nebula:ont:foundation.role-assignment",
+        "kind": "class",
+        "labels": {
+          "en-US": "Role assignment"
+        },
+        "parents": [
+          "foundation.role"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "4824d10ae3cd3b9ab16963632394e3d7d6fc7ade00bb929e940f92ab4571e9c5",
+      "iri": "urn:nebula:ont:foundation.role-assignment.acted-for",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The organization or branch a person represents in this role.",
+        "domain": "foundation.role-assignment",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-assignment.acted-for",
+        "iri": "urn:nebula:ont:foundation.role-assignment.acted-for",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Acted for"
+        },
+        "predicate_key": "fnd:roleActedFor@v1",
+        "range": "foundation.organization",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "46c979261a0b212fcffd2040560341aedca3908e3e8d00d926b1a5ea5828906b",
+      "iri": "urn:nebula:ont:foundation.role-assignment.authoritative-source",
+      "kind": "datatype_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The trusted source that confirmed the assignment; data only, it grants nothing.",
+        "domain": "foundation.role-assignment",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-assignment.authoritative-source",
+        "iri": "urn:nebula:ont:foundation.role-assignment.authoritative-source",
+        "kind": "datatype_property",
+        "labels": {
+          "en-US": "Authoritative source"
+        },
+        "predicate_key": "fnd:roleAuthoritativeSource@v1",
+        "range": "xsd:string",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "code"
+      }
+    },
+    {
+      "definition_digest": "29a8b9ca37c84ec75b6460e940955f28ab1788487dab494a66eb974c06033fd5",
+      "iri": "urn:nebula:ont:foundation.role-assignment.coverage-part",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "MULTI",
+        "definition": "A coverage part of a policy term that narrows a policy-term role; insurance modules narrow the range.",
+        "domain": "foundation.role-assignment",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-assignment.coverage-part",
+        "iri": "urn:nebula:ont:foundation.role-assignment.coverage-part",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Coverage part"
+        },
+        "predicate_key": "fnd:roleCoveragePart@v1",
+        "range": "foundation.thing",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "7d7ae9f2e290fb9fdc3201434ef80da2e79c7942f630325817c79f97400ef741",
+      "iri": "urn:nebula:ont:foundation.role-assignment.party",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The party filling the role during the valid period.",
+        "domain": "foundation.role-assignment",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-assignment.party",
+        "iri": "urn:nebula:ont:foundation.role-assignment.party",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Party in role"
+        },
+        "predicate_key": "fnd:roleParty@v1",
+        "range": "foundation.party",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "STATE",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "ca345c0f0f9357e32dfe4e9f3f9c4cabaf82e82b59b0f7fdabecfdb1361dc358",
+      "iri": "urn:nebula:ont:foundation.role-assignment.role-kind",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The kind of role assigned; fixed for the life of the assignment.",
+        "domain": "foundation.role-assignment",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-assignment.role-kind",
+        "iri": "urn:nebula:ont:foundation.role-assignment.role-kind",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Role kind"
+        },
+        "predicate_key": "fnd:roleKind@v1",
+        "range": "foundation.role-kind",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "ETERNAL",
+        "value_type": "code"
+      }
+    },
+    {
+      "definition_digest": "5669d49e420f5d03b1c42dd751de58cb91796225b6d0b098a69414b0a29c1e93",
+      "iri": "urn:nebula:ont:foundation.role-assignment.scope",
+      "kind": "object_property",
+      "module": "foundation",
+      "term": {
+        "cardinality": "SINGLE",
+        "definition": "The account, policy term or submission the assignment applies to; fixed for the life of the assignment.",
+        "domain": "foundation.role-assignment",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-assignment.scope",
+        "iri": "urn:nebula:ont:foundation.role-assignment.scope",
+        "kind": "object_property",
+        "labels": {
+          "en-US": "Role scope"
+        },
+        "predicate_key": "fnd:roleScope@v1",
+        "range": "foundation.role-scope",
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ],
+        "temporal_kind": "ETERNAL",
+        "value_type": "entity_ref"
+      }
+    },
+    {
+      "definition_digest": "7ceca6b7f5350dffd19ec251024948ba47792a008e4e1a8477eeff5a1f1f21f2",
+      "iri": "urn:nebula:ont:foundation.role-kind",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "The open vocabulary of role kinds a role assignment can name.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-kind",
+        "iri": "urn:nebula:ont:foundation.role-kind",
+        "kind": "class",
+        "labels": {
+          "en-US": "Role kind"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "6219a3b790f8d3463c0eca9147122890ecd580e9b68500b2768700debeed24bb",
+      "iri": "urn:nebula:ont:foundation.role-kind.account-contact",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The account contact role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "ACCOUNT_CONTACT",
+          "PartyRoleTypeCode_status": "proposed"
+        },
+        "id": "foundation.role-kind.account-contact",
+        "iri": "urn:nebula:ont:foundation.role-kind.account-contact",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Account contact"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "78e3033ef4a3dbb3573771c50553202efca4be371f1262a950c22578cdf5c0f1",
+      "iri": "urn:nebula:ont:foundation.role-kind.additional-insured",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The additional insured role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "ADDITIONAL_INSURED",
+          "PartyRoleTypeCode_status": "existing"
+        },
+        "id": "foundation.role-kind.additional-insured",
+        "iri": "urn:nebula:ont:foundation.role-kind.additional-insured",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Additional insured"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "779b751ea550da2e8ee851cc44514845cb1dfa37b20aa3f8bdb629eadaad424d",
+      "iri": "urn:nebula:ont:foundation.role-kind.additional-named-insured",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The additional named insured role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "ADDITIONAL_NAMED_INSURED",
+          "PartyRoleTypeCode_status": "proposed"
+        },
+        "id": "foundation.role-kind.additional-named-insured",
+        "iri": "urn:nebula:ont:foundation.role-kind.additional-named-insured",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Additional named insured"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "33afb401907303bb3ba650a6f8d5e57ad125477cddb6b5982d6f6dcb85dc73db",
+      "iri": "urn:nebula:ont:foundation.role-kind.broker-contact",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The broker contact role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "BROKER_CONTACT",
+          "PartyRoleTypeCode_status": "proposed"
+        },
+        "id": "foundation.role-kind.broker-contact",
+        "iri": "urn:nebula:ont:foundation.role-kind.broker-contact",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Broker contact"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "ea8c96b3ea1a2f90e507366b11a362ad20bd161c3ab61b296c10b5b07b93e6a9",
+      "iri": "urn:nebula:ont:foundation.role-kind.broker-of-record",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The broker of record role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "BROKER_OF_RECORD",
+          "PartyRoleTypeCode_status": "existing"
+        },
+        "id": "foundation.role-kind.broker-of-record",
+        "iri": "urn:nebula:ont:foundation.role-kind.broker-of-record",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Broker of record"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "edeb2e088e22fd9e61d8c53415074ec19e8bc00c6913090c097b6016da809279",
+      "iri": "urn:nebula:ont:foundation.role-kind.distribution-contact",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The distribution contact role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": null,
+          "PartyRoleTypeCode_status": "unmapped"
+        },
+        "id": "foundation.role-kind.distribution-contact",
+        "iri": "urn:nebula:ont:foundation.role-kind.distribution-contact",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Distribution contact"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "b083a2bd166c0467dc5739a5b31fc70118949516892ebd88ac236fccf7b6def8",
+      "iri": "urn:nebula:ont:foundation.role-kind.first-named-insured",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The first named insured role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "FIRST_NAMED_INSURED",
+          "PartyRoleTypeCode_status": "proposed"
+        },
+        "id": "foundation.role-kind.first-named-insured",
+        "iri": "urn:nebula:ont:foundation.role-kind.first-named-insured",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "First named insured"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "549a9730af0328bc114afd8465447c6dc281514c9dd9ff1d616aa173ae79839a",
+      "iri": "urn:nebula:ont:foundation.role-kind.marketing-representative",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The marketing representative role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": null,
+          "PartyRoleTypeCode_status": "unmapped"
+        },
+        "id": "foundation.role-kind.marketing-representative",
+        "iri": "urn:nebula:ont:foundation.role-kind.marketing-representative",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Marketing representative"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "24264d02f823c14a9919e3e2b57546c312a25b1cc6075cbceb1fda0eb351d63e",
+      "iri": "urn:nebula:ont:foundation.role-kind.operations-contact",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The operations contact role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": null,
+          "PartyRoleTypeCode_status": "unmapped"
+        },
+        "id": "foundation.role-kind.operations-contact",
+        "iri": "urn:nebula:ont:foundation.role-kind.operations-contact",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Operations contact"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "34504c5f4d47edd05cc123f9900136bc6e77d5bec48414d9b2e874c71ae24a51",
+      "iri": "urn:nebula:ont:foundation.role-kind.organization-contact",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The organization contact role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": null,
+          "PartyRoleTypeCode_status": "unmapped"
+        },
+        "id": "foundation.role-kind.organization-contact",
+        "iri": "urn:nebula:ont:foundation.role-kind.organization-contact",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Organization contact"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "1b5ae5e4707ba050236d3b6b0535ba2f4db9342ede3450c91f93f8c5baa42c07",
+      "iri": "urn:nebula:ont:foundation.role-kind.placement-broker",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The placement broker role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "PLACEMENT_BROKER",
+          "PartyRoleTypeCode_status": "proposed"
+        },
+        "id": "foundation.role-kind.placement-broker",
+        "iri": "urn:nebula:ont:foundation.role-kind.placement-broker",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Placement broker"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "a4627924505d34bc65ea9f3809d61118f824acefc8c785e5fdb08c1e20f300b7",
+      "iri": "urn:nebula:ont:foundation.role-kind.risk-manager",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The risk manager role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "RISK_MANAGER",
+          "PartyRoleTypeCode_status": "proposed"
+        },
+        "id": "foundation.role-kind.risk-manager",
+        "iri": "urn:nebula:ont:foundation.role-kind.risk-manager",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Risk manager"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "02c4a23f28167d56fb2fd7b8029a13073597d450fa47fbc45a7bda129d83e1d1",
+      "iri": "urn:nebula:ont:foundation.role-kind.underwriter",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The underwriter role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": "UNDERWRITER",
+          "PartyRoleTypeCode_status": "proposed"
+        },
+        "id": "foundation.role-kind.underwriter",
+        "iri": "urn:nebula:ont:foundation.role-kind.underwriter",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Underwriter"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "674a31b80f1808ef2dbbab2960727d34017441ce4ce254e7f1d329e7b67fbbb0",
+      "iri": "urn:nebula:ont:foundation.role-kind.underwriting-assistant",
+      "kind": "code_value",
+      "module": "foundation",
+      "term": {
+        "code_of": "foundation.role-kind",
+        "definition": "The underwriting assistant role kind (ADR-0070 section 4); confers no access by itself.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "external_codes": {
+          "PartyRoleTypeCode": null,
+          "PartyRoleTypeCode_status": "unmapped"
+        },
+        "id": "foundation.role-kind.underwriting-assistant",
+        "iri": "urn:nebula:ont:foundation.role-kind.underwriting-assistant",
+        "kind": "code_value",
+        "labels": {
+          "en-US": "Underwriting assistant"
+        },
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "636c74d348730cfb6179f3ec4b5d84b419e8ce8d8ffec3961f3d96a0fd6672ed",
+      "iri": "urn:nebula:ont:foundation.role-scope",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "The thing a role assignment applies to. Account is a role scope; insurance modules add policy-term and submission scopes.",
+        "examples": [
+          "planning-mds/examples/commercial-pc-account/records.json"
+        ],
+        "id": "foundation.role-scope",
+        "iri": "urn:nebula:ont:foundation.role-scope",
+        "kind": "class",
+        "labels": {
+          "en-US": "Role scope"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/examples/commercial-pc-account/cases.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "bbe860521d17ae6e9318833e36cb59a179fb2a0331da81cda9bf05c8e5c53fd7",
+      "iri": "urn:nebula:ont:foundation.thing",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "The root of every foundation class; anything the Brain can describe with evidence.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.thing",
+        "iri": "urn:nebula:ont:foundation.thing",
+        "kind": "class",
+        "labels": {
+          "en-US": "Thing"
+        },
+        "parents": [],
+        "regression_cases": [
+          "planning-mds/architecture/master-blueprint.md"
+        ]
+      }
+    },
+    {
+      "definition_digest": "cd6794eeec47f0b71f2c37b946e36f3792ea5aea2193e14ec4d54eb50856d595",
+      "iri": "urn:nebula:ont:foundation.time-interval",
+      "kind": "class",
+      "module": "foundation",
+      "term": {
+        "definition": "A span of time with a start and an end bound at stated granularities.",
+        "examples": [
+          "planning-mds/domain/glossary.md"
+        ],
+        "id": "foundation.time-interval",
+        "iri": "urn:nebula:ont:foundation.time-interval",
+        "kind": "class",
+        "labels": {
+          "en-US": "Time interval"
+        },
+        "parents": [
+          "foundation.thing"
+        ],
+        "regression_cases": [
+          "planning-mds/domain/glossary.md"
+        ]
+      }
+    }
+  ]
+}

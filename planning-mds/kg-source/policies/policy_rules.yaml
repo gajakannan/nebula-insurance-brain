@@ -79,3 +79,48 @@ policy_rules:
   - capability:parse-once-content-artifact
   source_docs:
   - planning-mds/security/policies/policy.csv
+- id: policy_rule:ontology-release-install
+  label: ontology_release:install
+  resource: ontology_release
+  action: install
+  allowed_roles:
+  - role:service-principal
+  related_nodes:
+  - capability:foundation-ontology-release
+  - capability:authorization-enforcement
+  source_docs:
+  - planning-mds/security/policies/policy.csv
+- id: policy_rule:ontology-release-read
+  label: ontology_release:read
+  resource: ontology_release
+  action: read
+  allowed_roles:
+  - role:service-principal
+  - role:ontology-steward
+  - role:tenant-member
+  related_nodes:
+  - capability:foundation-ontology-release
+  - capability:ontology-release-compatibility
+  source_docs:
+  - planning-mds/security/policies/policy.csv
+- id: policy_rule:ontology-release-review
+  label: ontology_release:review
+  resource: ontology_release
+  action: review
+  allowed_roles:
+  - role:ontology-steward
+  related_nodes:
+  - capability:ontology-release-compatibility
+  source_docs:
+  - planning-mds/security/policies/policy.csv
+- id: policy_rule:ontology-release-activate
+  label: ontology_release:activate
+  resource: ontology_release
+  action: activate
+  allowed_roles:
+  - role:ontology-steward
+  related_nodes:
+  - capability:ontology-release-compatibility
+  - capability:foundation-ontology-release
+  source_docs:
+  - planning-mds/security/policies/policy.csv

@@ -21,6 +21,7 @@ members = [
     "brain-engine-workspace",
     "brain-factslots",
     "brain-jobs",
+    "brain-ontology",
     "brain-persistence",
     "brain-provenance",
     "brain-review",
@@ -363,6 +364,7 @@ dependencies = [
     { name = "brain-content" },
     { name = "brain-domain" },
     { name = "brain-factslots" },
+    { name = "brain-ontology" },
     { name = "brain-persistence" },
     { name = "brain-provenance" },
     { name = "brain-review" },
@@ -400,6 +402,7 @@ requires-dist = [
     { name = "brain-content", editable = "packages/brain-content" },
     { name = "brain-domain", editable = "packages/brain-domain" },
     { name = "brain-factslots", editable = "packages/brain-factslots" },
+    { name = "brain-ontology", editable = "packages/brain-ontology" },
     { name = "brain-persistence", editable = "packages/brain-persistence" },
     { name = "brain-provenance", editable = "packages/brain-provenance" },
     { name = "brain-review", editable = "packages/brain-review" },
@@ -472,6 +475,40 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
     { name = "sqlalchemy", specifier = ">=2.0.52" },
 ]
+
+[[package]]
+name = "brain-ontology"
+version = "0.1.0"
+source = { editable = "packages/brain-ontology" }
+dependencies = [
+    { name = "brain-contracts" },
+    { name = "brain-domain" },
+    { name = "brain-persistence" },
+    { name = "brain-security" },
+    { name = "jsonschema" },
+    { name = "pyyaml" },
+]
+
+[package.optional-dependencies]
+test = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "brain-contracts", editable = "packages/brain-contracts" },
+    { name = "brain-domain", editable = "packages/brain-domain" },
+    { name = "brain-persistence", editable = "packages/brain-persistence" },
+    { name = "brain-security", editable = "packages/brain-security" },
+    { name = "jsonschema", specifier = ">=4.23" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.24" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=5.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+]
+provides-extras = ["test"]
 
 [[package]]
 name = "brain-persistence"

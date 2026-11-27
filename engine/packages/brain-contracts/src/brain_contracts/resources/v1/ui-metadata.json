@@ -161,6 +161,9 @@
     "": {
       "description": "F0011 documents the existing FactVersionOut wire shape (flat timestamps), including the F0008 additive metadata. It changes no runtime response. Legacy pilot values remain unwrapped; temporal is omitted for legacy versions.",
       "title": "FactVersionReadV1"
+    },
+    "/properties/valid_start": {
+      "description": "F0012 (ADR-0081 D7): null only for an ETERNAL version, whose valid time is unbounded below and above; temporal.temporal_kind is ETERNAL."
     }
   },
   "https://nebula.local/schemas/information-state-v1.schema.json": {
@@ -192,6 +195,27 @@
   "https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json": {
     "": {
       "title": "Reserved future learning identity v1"
+    }
+  },
+  "https://nebula.local/schemas/ontology-impact-report-v1.schema.json": {
+    "": {
+      "description": "Predecessor-to-candidate impact report (ADR-0081 D8, ADR-0045). Separates structural reach, inference change, constraint change and unexamined populations.",
+      "title": "Ontology release impact report v1"
+    }
+  },
+  "https://nebula.local/schemas/ontology-module-authoring-v1.schema.json": {
+    "": {
+      "description": "Design schema for one authored ontology module file (ADR-0081 D1/D2). Singular `parent` is intentionally absent; the validator reports it as AUTHORING_FIELD_RETIRED before schema validation.",
+      "title": "Ontology module authoring v1"
+    },
+    "/$defs/constraint/properties/expression": {
+      "description": "Natural-language statement of a custom constraint; executed only by its named consumer."
+    }
+  },
+  "https://nebula.local/schemas/ontology-release-manifest-v1.schema.json": {
+    "": {
+      "description": "Compiled, content-addressed composed release (ADR-0081 D3). release_ref is ontrel:sha256-<manifest_digest>.",
+      "title": "Ontology release manifest v1"
     }
   },
   "https://nebula.local/schemas/problem-details.schema.json": {

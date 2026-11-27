@@ -269,18 +269,18 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
   - [F0064-S0002](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0002-provide-agent-instructions-and-review-checklist.md) — Done
   - [F0064-S0003](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0003-validate-plan-readiness-structure.md) — Done
   - [F0064-S0004](features/archive/F0064-repository-instructions-and-planning-check-adoption/F0064-S0004-enforce-checks-in-ci-and-document-setup.md) — Done
+- [F0012 — Foundation ontology](features/archive/F0012-foundation-ontology/README.md) - Done / Archived 2026-11-26 (planned in plan run `2026-11-25-120320e9`; implemented in feature run `2026-11-26-54387a08`; migration 0017; ADR-0081 Proposed, proofs met)
+  - [F0012-S0001](features/archive/F0012-foundation-ontology/F0012-S0001-validate-foundation-module-authoring.md) — Done
+  - [F0012-S0002](features/archive/F0012-foundation-ontology/F0012-S0002-assign-stable-term-identities.md) — Done
+  - [F0012-S0003](features/archive/F0012-foundation-ontology/F0012-S0003-model-parties-accounts-and-scoped-roles.md) — Done
+  - [F0012-S0004](features/archive/F0012-foundation-ontology/F0012-S0004-compile-and-install-immutable-releases.md) — Done
+  - [F0012-S0005](features/archive/F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md) — Done
+  - [F0012-S0006](features/archive/F0012-foundation-ontology/F0012-S0006-gate-activation-with-impact-report.md) — Done
+  - [F0012-S0007](features/archive/F0012-foundation-ontology/F0012-S0007-prove-reproducible-release-delivery.md) — Done
 
-**v0.1A (remaining — Now: F0012; Next: F0010, F0013–F0017)**
+**v0.1A (remaining — Next: F0010, F0013–F0017)**
 
 - [F0010 — Change/retraction semantics](features/F0010-change-and-retraction-semantics/README.md) - Planned
-- [F0012 — Foundation ontology](features/F0012-foundation-ontology/README.md) - Planned; Phase A and Phase B approved 2026-11-25 in plan run `2026-11-25-120320e9` ([PRD](features/F0012-foundation-ontology/PRD.md)); plan-review next
-  - [F0012-S0001](features/F0012-foundation-ontology/F0012-S0001-validate-foundation-module-authoring.md) — Not Started
-  - [F0012-S0002](features/F0012-foundation-ontology/F0012-S0002-assign-stable-term-identities.md) — Not Started
-  - [F0012-S0003](features/F0012-foundation-ontology/F0012-S0003-model-parties-accounts-and-scoped-roles.md) — Not Started
-  - [F0012-S0004](features/F0012-foundation-ontology/F0012-S0004-compile-and-install-immutable-releases.md) — Not Started
-  - [F0012-S0005](features/F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md) — Not Started
-  - [F0012-S0006](features/F0012-foundation-ontology/F0012-S0006-gate-activation-with-impact-report.md) — Not Started
-  - [F0012-S0007](features/F0012-foundation-ontology/F0012-S0007-prove-reproducible-release-delivery.md) — Not Started
 - [F0013 — Insurance Core GL ontology](features/F0013-insurance-core-gl-ontology/README.md) - Planned
 - [F0014 — Document Profile model](features/F0014-document-profile-model/README.md) - Planned
 - [F0015 — Extraction Profile compiler](features/F0015-extraction-profile-compiler/README.md) - Planned
@@ -388,7 +388,7 @@ Eight architectural planes (section 4) implemented as a modular monolith across 
 
 ### 4.2 Data Model
 
-PostgreSQL is authoritative (ADR-0002). Kernel entities: Tenant, Workspace, KnowledgeBase, Principal, SourceDocument, DocumentVersion, ContentArtifact, ContentBlock, DocumentProfile, ExtractionProfile, SemanticInterpretationRun, Assertion, Entity, FactSlot, CanonicalFactVersion, CanonicalRelationshipVersion (a logical name: RELATIONSHIP FactSlot versions live in `canonical_fact_version`, ADR-0078), Derivation, ReviewItem, ReviewDecision, LearningCandidate, Conversation, AuditEvent, OutboxEvent (definitions in `domain/glossary.md`). Core tables are listed in section 78 and mirrored in `architecture/data-model.md`; AGE labels in section 79; content artifact layout in sections 80 and 81. Every authoritative row carries `tenant_id`, `knowledge_base_id`, and audit fields (`created_at`, `recorded_at`, actor). FactSlot identity (section 13; ADR-0077), bitemporal fact versions (section 14; ADR-0078), and change semantics (section 16) define canonical truth. Deployed schema (migrations 0001–0015) is mapped table by table in master blueprint section 78; F0009 adds migration 0016 (two append-only lineage tables and review-decision guards, section 4.18).
+PostgreSQL is authoritative (ADR-0002). Kernel entities: Tenant, Workspace, KnowledgeBase, Principal, SourceDocument, DocumentVersion, ContentArtifact, ContentBlock, DocumentProfile, ExtractionProfile, SemanticInterpretationRun, Assertion, Entity, FactSlot, CanonicalFactVersion, CanonicalRelationshipVersion (a logical name: RELATIONSHIP FactSlot versions live in `canonical_fact_version`, ADR-0078), Derivation, ReviewItem, ReviewDecision, LearningCandidate, Conversation, AuditEvent, OutboxEvent (definitions in `domain/glossary.md`). Core tables are listed in section 78 and mirrored in `architecture/data-model.md`; AGE labels in section 79; content artifact layout in sections 80 and 81. Every authoritative row carries `tenant_id`, `knowledge_base_id`, and audit fields (`created_at`, `recorded_at`, actor). FactSlot identity (section 13; ADR-0077), bitemporal fact versions (section 14; ADR-0078), and change semantics (section 16) define canonical truth. Deployed schema (migrations 0001–0015) is mapped table by table in master blueprint section 78; F0009 adds migration 0016 (two append-only lineage tables and review-decision guards, section 4.18). F0012 adds migration 0017 (eight append-only ontology release tables and the `ontology_release` access type, section 4.19).
 
 ### 4.3 Workflow Rules
 
@@ -618,9 +618,9 @@ The four design schemas use F0011 delivery in the later feature action; no runti
 Feature run `2026-11-24-08701e37` implemented the design, with operator G4 approval on 2026-11-25. It delivers `brain_domain.provenance`, the `brain-provenance` reader (exported, not routed), the opt-in `prepare_reads` authorization hook, review-boundary preflight with refused-attempt attribution and an atomic learning reservation, and migration 0016. All 41 ACs and EX-PROV-001–005 are proven on PostgreSQL 18 (changed-line coverage 94.4%; 1392/1392 shared conformance results). G2 recorded five design corrections, among them a nullable `fact_change.from_version_id` and attempt authorization bound by `audit_event.decision_id` (see the run reports). ADR-0080 runtime proofs are met; the ADR stays Proposed pending operator acceptance. Evidence: [PM closeout](operations/evidence/runs/2026-11-24-08701e37/pm-closeout.md). F0010 owns retraction semantics; F0020/F0022/F0023 own exposure and F0041/F0026 own learning/benchmark governance.
 
 
-### 4.19 F0012 foundation ontology (Phase B approved 2026-11-25)
+### 4.19 F0012 foundation ontology (Phase B approved 2026-11-25; implemented and archived 2026-11-26)
 
-Plan run `2026-11-25-120320e9`; Phase A approved by operator token `approve-phase-a` (seven stories, 46 ACs; G1 decisions D1–D8). The [assembly plan](features/F0012-foundation-ontology/feature-assembly-plan.md) and proposed [ADR-0081](architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md) define: YAML modules under `ontology/` validated by `ontology-module-authoring/v1` (`parents:` only; inference `subClassOf`/`subPropertyOf`/`inverseOf`; validation-only domain/range/disjoint/cardinality with execution context; other constructs refused); `urn:nebula:ont:` IRIs with reuse/collision refusal and change records; a deterministic compiler producing content-addressed releases (`ontrel:sha256-…`) with exact locks, projection mapping and RDF/JSON-LD export; migration 0017 with eight append-only, tenant/KB-owned release tables; a release-backed predicate registry (`fnd` namespace, 15 foundation predicates) and ETERNAL/EVENT activation over the ADR-0078 D10 shapes without DDL; an impact report and reviewed, audited activation/rollback under a new `ontology_release` resource and `OntologySteward` role. The foundation module carries the section 22 classes and the ADR-0070 party/account/ownership/role vocabulary; Policy/Submission/Program stay with F0013. Canonical-admission constraints are declared for F0017/F0018. No HTTP route, screen, parse or model call. ADR-0045/0070/0081 remain Proposed. The operator approved Phase B with `approve-phase-b` on 2026-11-25; plan-review precedes the feature run.
+Plan run `2026-11-25-120320e9`; Phase A approved by operator token `approve-phase-a` (seven stories, 46 ACs; G1 decisions D1–D8). The [assembly plan](features/archive/F0012-foundation-ontology/feature-assembly-plan.md) and proposed [ADR-0081](architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md) define: YAML modules under `ontology/` validated by `ontology-module-authoring/v1` (`parents:` only; inference `subClassOf`/`subPropertyOf`/`inverseOf`; validation-only domain/range/disjoint/cardinality with execution context; other constructs refused); `urn:nebula:ont:` IRIs with reuse/collision refusal and change records; a deterministic compiler producing content-addressed releases (`ontrel:sha256-…`) with exact locks, projection mapping and RDF/JSON-LD export; migration 0017 with eight append-only, tenant/KB-owned release tables; a release-backed predicate registry (`fnd` namespace, 15 foundation predicates) and ETERNAL/EVENT activation over the ADR-0078 D10 shapes without DDL; an impact report and reviewed, audited activation/rollback under a new `ontology_release` resource and `OntologySteward` role. The foundation module carries the section 22 classes and the ADR-0070 party/account/ownership/role vocabulary; Policy/Submission/Program stay with F0013. Canonical-admission constraints are declared for F0017/F0018. No HTTP route, screen, parse or model call. ADR-0045/0070/0081 remain Proposed. The operator approved Phase B with `approve-phase-b` on 2026-11-25. As built (feature run `2026-11-26-54387a08`, archived 2026-11-26; no plan-review ran, and the operator chose G0 reconciliation): foundation@1 is committed under `ontology/releases/foundation/1` (`ontrel:sha256-3602b71f…`). The `ontology_release` authorization resource is the KB's ontology scope with a required trusted `resource_access` row, and migration 0017 widens `ck_resource_access_type`. `fact-version-read-v1` `valid_start` is nullable for ETERNAL versions. RDF exports domain/range as `nebula:validationDomain`/`validationRange`. Reports require the steward's `review` grant.
 
 ---
 
@@ -647,12 +647,12 @@ Current position (2026-11-20): F0001 to F0008 are done and archived; ADR-0078 wa
 1. Now (2026-11-20 roadmap review, after F0008 closed): four lanes.
    - **F0011** (JSON Schema contract system) completed 2026-11-23 in feature run `2026-11-22-885e8734` (no migration added).
    - **F0009** (provenance + human-correction lineage) completed 2026-11-25 in feature run `2026-11-24-08701e37` (migration 0016); F0010 → F0018 continue the temporal/commit path.
-   - **F0012** (foundation ontology) is planned alongside F0011; with F0011 complete (2026-11-23), its feature run is unblocked.
+   - **F0012** (foundation ontology) completed 2026-11-26 in feature run `2026-11-26-54387a08` (migration 0017); F0013 composes its GL modules on foundation@1.
    - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.
 
    Next is reordered by dependency readiness: F0010, F0013, F0014, F0017, F0015, F0016. Each lane runs `plan-review` before its feature action.
 2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
-3. Run the `plan` action for F0012 alongside F0011 (its feature run waits for F0011), as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
+3. F0012 is done (2026-11-26); F0013 plans against the shipped foundation release, as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
 4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.
 
 

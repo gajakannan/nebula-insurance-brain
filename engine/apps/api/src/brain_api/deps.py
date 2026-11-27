@@ -11,12 +11,13 @@ from brain_content.store import ContentArtifactStore, LocalContentArtifactStore
 from brain_domain.authx import AuthenticationEvent, AuthenticationReason
 from brain_domain.principal import Principal
 from brain_factslots.ports import PredicateContractRegistry
-from brain_factslots.predicates import production_registry
+from brain_factslots.predicates import ReleasePredicateRegistry, production_registry
 from brain_persistence.authx import SqlAlchemyAuthorityStore
 from brain_persistence.identity import (
     SqlAlchemyAuthenticationEventSink,
     SqlAlchemyIdentityRepository,
 )
+from brain_persistence.ontology_releases import OntologyReleaseStore
 from brain_persistence.provenance import SqlAlchemyProvenanceRepository
 from brain_persistence.session import make_engine, make_session_factory
 from brain_provenance import ProvenanceReader
@@ -116,13 +117,17 @@ def get_casbin_adapter() -> CasbinAuthorizationAdapter:
     return _casbin_adapter
 
 
-# F0007: production composition registers only the `sys` system predicates. The
-# `test` namespace is wired only by test composition (dependency override).
+# F0007: the static registry holds only the `sys` system predicates. The `test`
+# namespace is wired only by test composition (dependency override).
+# F0012 (ADR-0081 D6): each request composes it with the predicates of ontology
+# releases installed in the slot's tenant/KB, loaded in the request's session.
 _predicate_registry = production_registry()
 
 
-def get_predicate_registry() -> PredicateContractRegistry:
-    return _predicate_registry
+def get_predicate_registry(
+    session: AsyncSession = Depends(get_db_session),
+) -> PredicateContractRegistry:
+    return ReleasePredicateRegistry(_predicate_registry, OntologyReleaseStore(session))
 
 
 def get_authentication_event_sink(

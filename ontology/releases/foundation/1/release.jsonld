@@ -1,0 +1,1640 @@
+[
+  {
+    "@id": "ontrel:sha256-3602b71f33d5283747e4545ccdc261ba1c3bfdf791a2893c9458b805011106c0",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Ontology"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#versionInfo": [
+      {
+        "@value": "foundation@1"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.account",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-scope"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The carrier's customer relationship with exactly one insured or prospective insured organization, with at most one designated parent account."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Account"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.account-status",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The lifecycle state of an account in the teaching vocabulary: CURRENT means not closed."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Account status"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.account-status.closed",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.account-status"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "Account status CLOSED in the teaching vocabulary (ADR-0070 section 2)."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Closed"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.account-status.current",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.account-status"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "Account status CURRENT in the teaching vocabulary (ADR-0070 section 2)."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Current"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.account.organization",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The one organization the account is the customer relationship with; the link never changes."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Account organization"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:accountOrganization@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "ETERNAL"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.account"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.account.parent-account",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The account designated as this account's parent for roll-up; never computed from ownership."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Parent account"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:parentAccount@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.account"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.account"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.account.status",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The account's lifecycle status at a valid and known time; unknown status is incomplete, not closed."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Account status"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:accountStatus@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.account"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.account-status"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.agreement",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A binding arrangement between parties; insurance policies and programs are agreements defined by insurance modules."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Agreement"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.amount",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A quantity with a unit or currency; money is an amount with a currency and a basis."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Amount"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.decision",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "An attributable choice made by a party or principal under stated authority."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Decision"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.document",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A source document whose versions are parsed once and retained as immutable evidence."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Document"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.event",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "Something that happens at a point in time at its stated granularity."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Event"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.identifier",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A value that identifies a thing within a named issuing scheme."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Identifier"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.measurement",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "An observed or reported quantity with its unit, method and observation time."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Measurement"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.organization",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.party"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "An identified organization. Broker, carrier, MGA and insured are roles it plays in a scope, not kinds of organization."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Organization"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.organization.child-organization",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2002/07/owl#inverseOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization.parent-organization"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "Inverse of parent organization; derived, never stored as a slot."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Child organization"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.organization.operates-at",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A place at which the organization operates during the valid period."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Operates at"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:operatesAt@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.place"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.organization.parent-organization",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The organization directly above this one in its hierarchy; the hierarchy has no fixed depth."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Parent organization"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:parentOrganization@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.ownership-interest",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A recorded ownership of one organization by a party with a percentage; majority is computed, never stored."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Ownership interest"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.ownership-interest.owned-organization",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The organization the ownership interest is in."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Owned organization"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:ownershipOwnedOrganization@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "ETERNAL"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.ownership-interest"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.ownership-interest.owner",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The party holding the ownership interest."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Owner"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:ownershipOwner@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "ETERNAL"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.ownership-interest"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.party"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.ownership-interest.percentage",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#DatatypeProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The recorded percentage of the owned organization held, greater than 0 and at most 100."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Ownership percentage"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:ownershipPercentage@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.ownership-interest"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#decimal"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.party",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A person or an organization capable of participating in a scoped insurance relationship."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Party"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.person",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.party"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "An individual human party; a role played in insurance does not make the person an application principal."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Person"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.person.employed-by",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The organization or branch that employs the person; separate from any role the person plays."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Employed by"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:employedBy@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.person"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.place",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A location such as an office, premises or yard at which an organization operates; operating there does not make it insured property."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Place"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.process",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A sequence of activities with lifecycle states, defined in detail by later process modules."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Process"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A function a party performs within a scope; roles describe who does what and grant nothing by themselves."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Role"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-assignment",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.role"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A party playing a role kind in a scope, optionally acting for an organization, valid over a period."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Role assignment"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-assignment.acted-for",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The organization or branch a person represents in this role."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Acted for"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:roleActedFor@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-assignment"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.organization"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-assignment.authoritative-source",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#DatatypeProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The trusted source that confirmed the assignment; data only, it grants nothing."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Authoritative source"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:roleAuthoritativeSource@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-assignment"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-assignment.coverage-part",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A coverage part of a policy term that narrows a policy-term role; insurance modules narrow the range."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Coverage part"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:roleCoveragePart@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-assignment"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-assignment.party",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The party filling the role during the valid period."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Party in role"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:roleParty@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "STATE"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-assignment"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.party"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-assignment.role-kind",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The kind of role assigned; fixed for the life of the assignment."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Role kind"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:roleKind@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "ETERNAL"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-assignment"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-assignment.scope",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#ObjectProperty"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The account, policy term or submission the assignment applies to; fixed for the life of the assignment."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Role scope"
+      }
+    ],
+    "urn:nebula:vocab:predicateKey": [
+      {
+        "@value": "fnd:roleScope@v1"
+      }
+    ],
+    "urn:nebula:vocab:temporalKind": [
+      {
+        "@value": "ETERNAL"
+      }
+    ],
+    "urn:nebula:vocab:validationDomain": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-assignment"
+      }
+    ],
+    "urn:nebula:vocab:validationRange": [
+      {
+        "@id": "urn:nebula:ont:foundation.role-scope"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The open vocabulary of role kinds a role assignment can name."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Role kind"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.account-contact",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The account contact role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Account contact"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=ACCOUNT_CONTACT"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=proposed"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.additional-insured",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The additional insured role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Additional insured"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=ADDITIONAL_INSURED"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=existing"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.additional-named-insured",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The additional named insured role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Additional named insured"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=ADDITIONAL_NAMED_INSURED"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=proposed"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.broker-contact",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The broker contact role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Broker contact"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=BROKER_CONTACT"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=proposed"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.broker-of-record",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The broker of record role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Broker of record"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=BROKER_OF_RECORD"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=existing"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.distribution-contact",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The distribution contact role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Distribution contact"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode_status=unmapped"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.first-named-insured",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The first named insured role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "First named insured"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=FIRST_NAMED_INSURED"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=proposed"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.marketing-representative",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The marketing representative role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Marketing representative"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode_status=unmapped"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.operations-contact",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The operations contact role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Operations contact"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode_status=unmapped"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.organization-contact",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The organization contact role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Organization contact"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode_status=unmapped"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.placement-broker",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The placement broker role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Placement broker"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=PLACEMENT_BROKER"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=proposed"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.risk-manager",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The risk manager role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Risk manager"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=RISK_MANAGER"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=proposed"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.underwriter",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The underwriter role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Underwriter"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode=UNDERWRITER"
+      },
+      {
+        "@value": "PartyRoleTypeCode_status=proposed"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-kind.underwriting-assistant",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#NamedIndividual"
+      },
+      {
+        "@id": "urn:nebula:ont:foundation.role-kind"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The underwriting assistant role kind (ADR-0070 section 4); confers no access by itself."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Underwriting assistant"
+      }
+    ],
+    "urn:nebula:vocab:externalCode": [
+      {
+        "@value": "PartyRoleTypeCode_status=unmapped"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.role-scope",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The thing a role assignment applies to. Account is a role scope; insurance modules add policy-term and submission scopes."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Role scope"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.thing",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "The root of every foundation class; anything the Brain can describe with evidence."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Thing"
+      }
+    ]
+  },
+  {
+    "@id": "urn:nebula:ont:foundation.time-interval",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": [
+      {
+        "@id": "http://www.w3.org/2002/07/owl#Class"
+      }
+    ],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [
+      {
+        "@id": "urn:nebula:ont:foundation.thing"
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#definition": [
+      {
+        "@language": "en-US",
+        "@value": "A span of time with a start and an end bound at stated granularities."
+      }
+    ],
+    "http://www.w3.org/2004/02/skos/core#prefLabel": [
+      {
+        "@language": "en-US",
+        "@value": "Time interval"
+      }
+    ]
+  }
+]

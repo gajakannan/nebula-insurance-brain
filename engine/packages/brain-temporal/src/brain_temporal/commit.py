@@ -15,6 +15,7 @@ from brain_domain.temporal import (
     DocumentDate,
     EndState,
     TemporalKind,
+    TemporalProposal,
     TemporalReason,
     TemporalRejected,
     VersionTemporal,
@@ -28,7 +29,13 @@ from brain_temporal.attestation import (
     ordered_refs,
     place,
 )
-from brain_temporal.bounds import parse_commit_temporal
+from brain_temporal.bounds import (
+    eternal_shape_ok,
+    parse_commit_temporal,
+    parse_expected_attestation,
+    period_end,
+    zone_info,
+)
 from brain_temporal.ranges import TimeRange, split_remainder
 
 
@@ -71,6 +78,9 @@ class CommitAnswerPolicy(Protocol):
         *,
         authorized_scope: tuple[UUID, UUID],
     ) -> Mapping[str, Any] | None: ...
+
+    # F0012 (G0-7), optional: `temporal_kind(slot_id, *, authorized_scope)` returns
+    # the kind of the slot's pinned predicate contract. Without it, STATE.
 
 
 class FactCommitRepository(Protocol):
@@ -167,6 +177,17 @@ def _state(value: Mapping[str, Any]) -> str | None:
 
 def _same_answer(a: Mapping[str, Any], b: Mapping[str, Any]) -> bool:
     return dict(a) == dict(b)
+
+
+def _one_period(placement: Placement) -> bool:
+    """An EVENT spans exactly one granularity period of its start (ADR-0078 D10)."""
+    start, end = placement.start, placement.end
+    return (
+        placement.end_state is EndState.BOUNDED
+        and end is not None
+        and end.granularity == start.granularity
+        and end.instant == period_end(start.instant, start.granularity, start.zone)
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -439,6 +460,16 @@ class CanonicalCommitService:
         if proposal.temporal is None or proposal.valid_from is not None:
             raise TemporalRejected(TemporalReason.TEMPORAL_FIELDS_REQUIRED)
         value = await self._canonical_value(proposal, scope)
+        # F0012 (ADR-0081 D7): the predicate contract decides the kind.
+        kind = await self._kind(proposal, scope)
+        if kind is TemporalKind.ETERNAL:
+            return await self._commit_eternal(
+                proposal,
+                value,
+                scope=scope,
+                authorization_decision_id=authorization_decision_id,
+                source_access=source_access,
+            )
         # Step 3: parse and validate bounds (S0001, S0002 AC1, S0005 AC1).
         temporal = parse_commit_temporal(proposal.temporal)
 
@@ -458,6 +489,9 @@ class CanonicalCommitService:
             placement = place(temporal, attestation)
         except TemporalRejected as refused:
             placement, pending = None, refused
+        if placement is not None and kind is TemporalKind.EVENT and not _one_period(placement):
+            # An EVENT is one bounded granularity period (ADR-0078 D10).
+            pending = TemporalRejected(TemporalReason.KIND_SHAPE_MISMATCH)
 
         # Step 8: current versions and the optimistic check.
         current = await self._current(proposal)
@@ -496,7 +530,7 @@ class CanonicalCommitService:
                 await disclosure_check(disclosed)
 
         new_temporal = VersionTemporal(
-            kind=TemporalKind.STATE,
+            kind=kind,
             valid_from=placement.start,
             valid_from_basis=placement.basis,
             valid_to_state=placement.end_state,
@@ -588,6 +622,122 @@ class CanonicalCommitService:
             version_ids=version_ids,
             now=now,
             temporals=temporals,
+        )
+
+    async def _kind(self, proposal: CommitProposal, scope: tuple[UUID, UUID]) -> TemporalKind:
+        resolver = getattr(self._answer_policy, "temporal_kind", None)
+        if resolver is None:
+            return TemporalKind.STATE
+        kind: TemporalKind = await resolver(proposal.slot_id, authorized_scope=scope)
+        return kind
+
+    async def _commit_eternal(
+        self,
+        proposal: CommitProposal,
+        value: Mapping[str, Any],
+        *,
+        scope: tuple[UUID, UUID],
+        authorization_decision_id: UUID | None,
+        source_access: SourceAccessProof | None,
+    ) -> CommitResult:
+        """F0012 (ADR-0081 D7): valid time `(,)` with NULL bound columns. A current
+        version with another value is refused (`eternal_conflict`); correcting an
+        ETERNAL value is F0010 scope. The same value replaces the current version
+        whole, like an end revision, with no remainder."""
+        raw = proposal.temporal
+        assert raw is not None
+        pending: TemporalRejected | None = None
+        expected = None
+        if not eternal_shape_ok(raw):
+            pending = TemporalRejected(TemporalReason.KIND_SHAPE_MISMATCH)
+        else:
+            try:
+                if raw.get("attestation_zone") is not None:
+                    zone_info(raw["attestation_zone"])
+                expected = parse_expected_attestation(raw.get("expected_attestation"))
+            except TemporalRejected as refused:
+                pending = refused
+        refs = ordered_refs(proposal.evidence_refs)
+        dates = await self._repository.evidence_document_dates(refs, authorized_scope=scope)
+        attestation = derive_attestation((dates.get(r) for r in proposal.evidence_refs), ())
+        if pending is None and expected is not None:
+            try:
+                check_expected(
+                    TemporalProposal(None, None, EndState.OPEN, None, None, (), expected),
+                    attestation,
+                )
+            except TemporalRejected as refused:
+                pending = refused
+        current = await self._current(proposal)
+        await self._repository.require_commit_sources(
+            evidence_refs=refs,
+            review_decision_id=proposal.review_decision_id,
+            authorized_scope=scope,
+            closes_existing=bool(current),
+            source_access=source_access,
+        )
+        if pending is not None:
+            raise pending
+        if any(not _same_answer(value, existing.value) for existing in current):
+            raise TemporalRejected(TemporalReason.ETERNAL_CONFLICT)
+        new_temporal = VersionTemporal(
+            kind=TemporalKind.ETERNAL,
+            valid_from=None,
+            valid_from_basis=None,
+            valid_to_state=EndState.OPEN,
+            valid_to=None,
+            attested_from=attestation.attested_from,
+            attested_through=attestation.attested_through,
+            attested_to=None,
+            validity_unknown_from=None,
+            split_of_version_id=None,
+        )
+        validate_contract(
+            ContractRef("fact-temporal-v1", "1", "/$defs/version_temporal"),
+            new_temporal.to_json(),
+            profile="native-compat/v1",
+        )
+        now = self._clock()
+        commit_id = uuid4()
+        await self._repository.register_commit(
+            commit_id=commit_id,
+            tenant_id=scope[0],
+            knowledge_base_id=scope[1],
+            authorization_decision_id=authorization_decision_id,
+            at=now,
+        )
+        superseded: list[UUID] = []
+        for existing in current:
+            await self._repository.close_recorded(existing.id, now)
+            superseded.append(existing.id)
+        new_version_id = uuid4()
+        await self._repository.insert_version(
+            version_id=new_version_id,
+            slot_id=proposal.slot_id,
+            tenant_id=scope[0],
+            knowledge_base_id=scope[1],
+            value=dict(value),
+            valid=TimeRange(None, None),
+            recorded=TimeRange(now, None),
+            change_reason=proposal.change_reason,
+            evidence_refs=proposal.evidence_refs,
+            review_decision_id=proposal.review_decision_id,
+            commit_id=commit_id,
+            source_received_at=proposal.source_received_at,
+            artifact_created_at=proposal.artifact_created_at,
+            assertion_created_at=proposal.assertion_created_at,
+            canonical_accepted_at=now,
+            temporal=new_temporal,
+        )
+        return await self._finish(
+            proposal=proposal,
+            scope=scope,
+            commit_id=commit_id,
+            new_version_id=new_version_id,
+            superseded=superseded,
+            version_ids=[new_version_id],
+            now=now,
+            temporals={new_version_id: new_temporal},
         )
 
     @staticmethod

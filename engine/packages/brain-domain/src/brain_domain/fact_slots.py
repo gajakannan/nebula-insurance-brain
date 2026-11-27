@@ -25,6 +25,7 @@ from brain_domain.fact_values import (
     canonical_value,
     jcs,
 )
+from brain_domain.temporal import TemporalKind
 
 IDENTITY_VERSION = 1
 FINGERPRINT_VERSION = 1
@@ -134,6 +135,9 @@ class PredicateContract:
     qualifiers: tuple[QualifierSpec, ...] = ()
     member_key_source: Literal["value", "entity"] | None = None
     basis_required: bool = False
+    # F0012 (ADR-0081 D6/D7): release-backed contracts declare their kind; `sys`
+    # and `test` predicates keep STATE, so existing commits are unchanged.
+    temporal_kind: TemporalKind = TemporalKind.STATE
 
     def checked_cardinality(self) -> Cardinality:
         try:

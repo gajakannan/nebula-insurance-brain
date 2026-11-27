@@ -208,6 +208,11 @@ def scope_slices(session: Session, principal_id: UUID) -> tuple[ScopeSlice, ...]
 
 def _semantic_owner(session: Session, key: ResourceKey) -> tuple[tuple[UUID, UUID], int] | None:
     """The protected record's own (tenant, kb) and resource revision, or None."""
+    if key.type == ResourceType.ONTOLOGY_RELEASE:
+        # F0012 G0-5: the KB's ontology scope; its record is the KB row. A trusted
+        # resource_access row with explicit classifications is still required.
+        kb = session.get(KnowledgeBaseRow, key.id, populate_existing=True)
+        return ((kb.tenant_id, kb.id), 1) if kb else None
     if key.type == ResourceType.CONTENT_ARTIFACT:
         artifact = session.get(ContentArtifact, key.id, populate_existing=True)
         return ((artifact.tenant_id, artifact.knowledge_base_id), 1) if artifact else None

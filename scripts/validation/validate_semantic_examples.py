@@ -103,15 +103,44 @@ def validate_records(root: Path, data: dict, schema: dict) -> list[str]:
     return findings
 
 
+def validate_foundation_examples(root: Path) -> list[str]:
+    """F0012-S0003 AC7: the account-scoped cases use only IRIs of the compiled foundation release,
+    and every expectation file exists. Reasoning itself runs in validate_semantic_rdf.py."""
+    folder = root / "planning-mds/examples/commercial-pc-account/foundation"
+    release = root / "ontology/releases/foundation/1/normalized.json"
+    if not folder.is_dir():
+        return ["F0012: foundation example folder is missing"]
+    terms = {t["iri"] for t in json.loads(release.read_text(encoding="utf-8"))["terms"]}
+    findings: list[str] = []
+    for path in sorted(folder.rglob("*")):
+        if path.suffix not in {".ttl", ".rq", ".jsonld", ".yaml"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        used = set(re.findall(r"urn:nebula:ont:[a-z][a-z0-9.-]*[a-z0-9]", text))
+        used |= {"urn:nebula:ont:foundation." + local for local in re.findall(r"\bfnd:([a-z][a-z0-9.-]*[a-z0-9])", text)}
+        used.discard("urn:nebula:ont:foundation")
+        for iri in sorted(used - terms):
+            findings.append(f"F0012 {path.relative_to(root)}: {iri} is not a foundation@1 term")
+    expected = yaml.safe_load((folder / "expected-results.yaml").read_text(encoding="utf-8"))
+    for row in expected["shacl"]:
+        for key in ("shape", "data"):
+            findings.extend(check_local_link(root, folder / "expected-results.yaml", row[key]))
+    for row in expected["queries"]:
+        findings.extend(check_local_link(root, folder / "expected-results.yaml", row["file"]))
+    return findings
+
+
 def validate_examples(root: Path) -> list[str]:
     data = json.loads((root / BUNDLE).read_text(encoding="utf-8"))
     schema = json.loads((root / SCHEMA).read_text(encoding="utf-8"))
     findings = validate_records(root, data, schema)
     findings.extend(validate_commercial_example(root))
+    findings.extend(validate_foundation_examples(root))
     examples = root / "planning-mds/examples"
     documents = [examples / "README.md", examples / "future-semantics.md"]
     documents.extend(sorted((examples / "neurosymbolic-gl").glob("*.md")))
     documents.extend(sorted((examples / "commercial-pc-account").glob("*.md")))
+    documents.extend(sorted((examples / "commercial-pc-account" / "foundation").glob("*.md")))
     for document in documents:
         for link in re.findall(r"\]\(([^)]+)\)", document.read_text(encoding="utf-8")):
             findings.extend(check_local_link(root, document, link))

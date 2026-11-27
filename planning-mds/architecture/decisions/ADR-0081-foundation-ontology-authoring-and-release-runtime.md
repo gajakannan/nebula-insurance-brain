@@ -12,7 +12,7 @@
 **Refines:** [ADR-0045](ADR-0045-ontology-release-compatibility.md) (Proposed) for the F0012 share: namespace, authoring schema, physical release storage, activation gate and consumer policy. [ADR-0012](ADR-0012-flexible-authoring-normalized-runtime.md) and [ADR-0011](ADR-0011-ontology-is-versioned-and-modular.md) stay Accepted and unchanged.
 **Activates:** the [ADR-0078](ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) D10 temporal kinds through [ADR-0077](ADR-0077-factslot-identity-and-typed-answer-carriers.md) D2 predicate contracts.
 **Plan approval:** Phase B approved 2026-11-25 by operator token `approve-phase-b` (approves the plan, not formal ADR acceptance).
-**Feature:** [F0012](../../features/F0012-foundation-ontology/README.md); [assembly plan](../../features/F0012-foundation-ontology/feature-assembly-plan.md).
+**Feature:** [F0012](../../features/archive/F0012-foundation-ontology/README.md); [assembly plan](../../features/archive/F0012-foundation-ontology/feature-assembly-plan.md).
 
 ## Context
 
@@ -47,7 +47,7 @@ Every constraint carries `stage` (`authoring` \| `canonical-admission` \| `examp
 
 ### D4. Physical storage (migration 0017)
 
-Append-only, tenant/KB-owned tables (ADR-0030): `ontology_module_version`, `ontology_release`, `ontology_release_module`, `ontology_term`, `ontology_change_record`, `ontology_impact_report`, `ontology_release_review`, `ontology_release_selection`. UPDATE, DELETE and TRUNCATE are refused by triggers on every table. `ontology_term` stores one normalized row per term with its definition digest and, for FactSlot properties, its predicate key, cardinality, value type and `temporal_kind`. Install writes all rows for one release in one transaction; an identical `release_ref` already installed in the tenant/KB is an idempotent no-op. The exact DDL is in [migration-design.sql](../../features/F0012-foundation-ontology/migration-design.sql). Downgrade is refused while any ontology row exists.
+Append-only, tenant/KB-owned tables (ADR-0030): `ontology_module_version`, `ontology_release`, `ontology_release_module`, `ontology_term`, `ontology_change_record`, `ontology_impact_report`, `ontology_release_review`, `ontology_release_selection`. UPDATE, DELETE and TRUNCATE are refused by triggers on every table. `ontology_term` stores one normalized row per term with its definition digest and, for FactSlot properties, its predicate key, cardinality, value type and `temporal_kind`. Install writes all rows for one release in one transaction; an identical `release_ref` already installed in the tenant/KB is an idempotent no-op. The exact DDL is in [migration-design.sql](../../features/archive/F0012-foundation-ontology/migration-design.sql). Downgrade is refused while any ontology row exists.
 
 ### D5. Authorization
 
@@ -110,8 +110,17 @@ The foundation module declares no `EVENT` property; `EVENT` is proven with a tes
 
 Accept when the F0012 feature run records: byte-identical recompilation; refused mutations of installed rows; refused reuse/collision; the release-backed registry with `PREDICATE_UNREGISTERED` for uninstalled releases; ETERNAL/EVENT commits and mismatches on PostgreSQL; an EX-ONT-003 entailment change and an EX-ONT-004 constraint tightening each reported; refused activation without a matching reviewed report; and rollback history preserved. Security review of `OntologySteward` and `ontology_release` passes.
 
+## Implementation notes (feature run 2026-11-26-54387a08)
+
+Status is unchanged: **Proposed**. The feature run implemented D1–D8 and recorded these refinements as Architect decisions. Each is in the [assembly plan G0 reconciliation](../../features/archive/F0012-foundation-ontology/feature-assembly-plan.md#g0-reconciliation--feature-run-2026-11-26-54387a08) or the [architect implementation review](../../operations/evidence/runs/2026-11-26-54387a08/architect-implementation-review.md).
+
+- **D5:** the authorization resource is `ResourceKey(ontology_release, knowledge_base_id)`. It requires a trusted `resource_access` row, and migration 0017 widens `ck_resource_access_type`. Report generation requires `review`, not `read`.
+- **D1:** a definition change that only adds `parents`/`sub_property_of` axioms is additive and needs no change record (EX-ONT-003). The impact report shows its entailment change.
+- **D3:** RDF export writes domain and range as `nebula:validationDomain`/`nebula:validationRange`, so no RDFS/OWL reasoner infers a type from them (D2).
+- **D7:** an ETERNAL version reads with `valid_start: null` (`fact-version-read-v1` widened). The new wire codes are lowercase: `kind_shape_mismatch`, `eternal_conflict`.
+
 ## References
 
 - [Master blueprint](../master-blueprint.md) §§19–22, 67, 79, 82, 112
-- [F0012 PRD](../../features/F0012-foundation-ontology/PRD.md), [assembly plan](../../features/F0012-foundation-ontology/feature-assembly-plan.md)
+- [F0012 PRD](../../features/archive/F0012-foundation-ontology/PRD.md), [assembly plan](../../features/archive/F0012-foundation-ontology/feature-assembly-plan.md)
 - [ADR-0045](ADR-0045-ontology-release-compatibility.md), [ADR-0070](ADR-0070-account-party-and-role-model.md), [ADR-0077](ADR-0077-factslot-identity-and-typed-answer-carriers.md), [ADR-0078](ADR-0078-bitemporal-version-contract-and-close-only-immutability.md), [ADR-0079](ADR-0079-offline-schema-bundle-and-cross-language-conformance.md)

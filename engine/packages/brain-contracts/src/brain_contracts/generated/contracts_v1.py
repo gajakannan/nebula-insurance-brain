@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Annotated, Any, Dict, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel, StringConstraints
+from typing_extensions import TypeAliasType
 
 
 class ServerEvidenceItem(BaseModel):
@@ -547,6 +548,256 @@ class ContractLearningCandidateReservationV1(BaseModel):
     review_decision_id: str
     reviewer_principal_id: str
     tenant_id: str
+
+
+class Change(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    class_: Annotated[
+        Literal[
+            'additive',
+            'constraint_tightening',
+            'rename_alias',
+            'semantic_change',
+            'split',
+            'merge',
+            'retirement',
+            'unclassified',
+        ],
+        Field(alias='class'),
+    ]
+    detail: str | None = None
+    term_iri: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class Constraint(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    change: Literal[
+        'added',
+        'removed',
+        'tightened',
+        'loosened',
+        'applicability_changed',
+        'stage_changed',
+        'data_basis_changed',
+    ]
+    constraint_id: str
+    consumer: str
+    detail: str | None = None
+
+
+class ReachItem(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    affected: Annotated[int, Field(ge=0)]
+    denominator: Annotated[int, Field(ge=0)]
+    population: Literal['fact_slot', 'assertion']
+    predicate_key: str | None = None
+
+
+class Scope1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    knowledge_base_id: str
+    tenant_id: str
+
+
+class UnexaminedItem(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    owner: str | None = None
+    population: str
+    reason: Annotated[str, Field(min_length=1)]
+
+
+class UnresolvedItem(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class Dependency(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}@[1-9][0-9]*#sha256:[0-9a-f]{64}$')
+    ]
+
+
+class Module(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    dependencies: list[Dependency]
+    id: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{0,47}$')]
+    predicate_namespace: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{0,31}$')]
+    version: Annotated[int, Field(ge=1)]
+
+
+class CompilerItem(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    ref: str
+
+
+class Profile(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    ref: str
+
+
+class Template(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    ref: str
+
+
+class ValidationItem(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    ref: str
+
+
+class ArtifactSlots(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    compiler: list[CompilerItem]
+    profiles: list[Profile]
+    templates: list[Template]
+    validation: list[ValidationItem]
+
+
+class ReplacementIri(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class SourceIri(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class ChangeRecord(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    class_: Annotated[
+        Literal['rename_alias', 'semantic_change', 'split', 'merge', 'retirement'],
+        Field(alias='class'),
+    ]
+    rationale: Annotated[str, Field(min_length=1)]
+    replacement_iris: list[ReplacementIri]
+    source_iris: Annotated[list[SourceIri], Field(min_length=1)]
+
+
+class DependencyLockItem(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    module: str
+    requires: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}@[1-9][0-9]*#sha256:[0-9a-f]{64}$')
+    ]
+
+
+class Module1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    id: str
+    version: Annotated[int, Field(ge=1)]
+
+
+class Predicate(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    basis_required: bool
+    cardinality: Literal['SINGLE', 'MULTI', 'RELATIONSHIP']
+    member_key_source: Literal['value', 'entity'] | None = None
+    predicate_key: Annotated[
+        str,
+        Field(
+            pattern='^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+        ),
+    ]
+    qualifiers: list[dict[str, Any]] | None = None
+    temporal_kind: Literal['STATE', 'EVENT', 'ETERNAL']
+    term_iri: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+    value_type: str
+
+
+class ProjectionMapping(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    required_context: list[str]
+    version: Literal['nebula-age-mapping/v1']
+
+
+class Semantics(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    inference: list[Literal['subClassOf', 'subPropertyOf', 'inverseOf']]
+    ruleset: Literal['nebula-tbox-subset/v1']
+    validation: list[
+        Literal[
+            'domain', 'range', 'disjoint', 'minCardinality', 'maxCardinality', 'custom'
+        ]
+    ]
+
+
+class ContractOntologyReleaseManifestV1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    artifact_slots: ArtifactSlots
+    authoring_schema: Literal['ontology-module-authoring/v1']
+    change_records: list[ChangeRecord]
+    compiler_version: Annotated[str, Field(min_length=1)]
+    contract: Literal['ontology-release-manifest/v1']
+    dependency_lock: list[DependencyLockItem]
+    manifest_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    modules: Annotated[list[Module1], Field(min_length=1)]
+    name: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{0,47}$')]
+    predicates: list[Predicate]
+    projection_mapping: ProjectionMapping
+    release_ref: Annotated[str, Field(pattern='^ontrel:sha256-[0-9a-f]{64}$')]
+    semantics: Semantics
+    sequence: Annotated[int, Field(ge=1)]
+    terms_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
 
 
 class ContractProblemDetails(BaseModel):
@@ -5197,8 +5448,13 @@ class ValidEnd(RootModel[str | None]):
     root: str | None
 
 
-class ValidStart(RootModel[str]):
-    root: str
+class ValidStart(RootModel[str | None]):
+    root: Annotated[
+        str | None,
+        Field(
+            description='F0012 (ADR-0081 D7): null only for an ETERNAL version, whose valid time is unbounded below and above; temporal.temporal_kind is ETERNAL.'
+        ),
+    ]
 
 
 class ValueModel11(BaseModel):
@@ -5590,19 +5846,1328 @@ class ReviewerPrincipalId(RootModel[str]):
     root: str
 
 
-class Code(RootModel[str]):
-    root: Annotated[str, Field(pattern='^[a-z][a-z0-9_]*$')]
+class Entailment(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    object: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+    relation: Literal['subClassOf', 'subPropertyOf', 'inverseOf']
+    subject: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class ObjectModel(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class Relation(RootModel[Literal['subClassOf', 'subPropertyOf', 'inverseOf']]):
+    root: Literal['subClassOf', 'subPropertyOf', 'inverseOf']
+
+
+class Subject(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class ReleaseId(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    manifest_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    release_ref: Annotated[str, Field(pattern='^ontrel:sha256-[0-9a-f]{64}$')]
+
+
+class ManifestDigest(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+
+
+class ReleaseRef(RootModel[str]):
+    root: Annotated[str, Field(pattern='^ontrel:sha256-[0-9a-f]{64}$')]
+
+
+class Field0Model50(RootModel[Any]):
+    root: Annotated[
+        Any,
+        Field(
+            json_schema_extra={
+                'if': {'properties': {'status': {'const': 'complete'}}},
+                'then': {
+                    'properties': {
+                        'changes': {
+                            'items': {
+                                'properties': {
+                                    'class': {'not': {'const': 'unclassified'}}
+                                }
+                            }
+                        },
+                        'inference': {
+                            'properties': {'result': {'not': {'const': 'unresolved'}}}
+                        },
+                        'unresolved': {'maxItems': 0},
+                    }
+                },
+            }
+        ),
+    ]
+
+
+class IfModel17(BaseModel):
+    status: Literal['complete'] | None = None
+
+
+class StatusModel2(RootModel[Literal['complete']]):
+    root: Literal['complete']
+
+
+class Change1(BaseModel):
+    class_: Annotated[
+        Any | None,
+        Field(alias='class', json_schema_extra={'not': {'const': 'unclassified'}}),
+    ] = None
+
+
+class Inference1(BaseModel):
+    result: Annotated[
+        Any | None, Field(json_schema_extra={'not': {'const': 'unresolved'}})
+    ] = None
+
+
+class ThenModel13(BaseModel):
+    changes: list[Change1] | None = None
+    inference: Inference1 | None = None
+    unresolved: Any | None = None
+
+
+class Changes(RootModel[list[Change1]]):
+    root: list[Change1]
+
+
+class ItemsModel28(BaseModel):
+    class_: Annotated[
+        Any | None,
+        Field(alias='class', json_schema_extra={'not': {'const': 'unclassified'}}),
+    ] = None
+
+
+class Class(RootModel[Any]):
+    root: Annotated[Any, Field(json_schema_extra={'not': {'const': 'unclassified'}})]
+
+
+class NotModel3(RootModel[Literal['unclassified']]):
+    root: Literal['unclassified']
+
+
+class Result(RootModel[Any]):
+    root: Annotated[Any, Field(json_schema_extra={'not': {'const': 'unresolved'}})]
+
+
+class NotModel4(RootModel[Literal['unresolved']]):
+    root: Literal['unresolved']
+
+
+class UnresolvedModel(RootModel[Any]):
+    root: Any
+
+
+class Candidate(RootModel[ReleaseId]):
+    root: ReleaseId
+
+
+class Change3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    class_: Annotated[
+        Literal[
+            'additive',
+            'constraint_tightening',
+            'rename_alias',
+            'semantic_change',
+            'split',
+            'merge',
+            'retirement',
+            'unclassified',
+        ],
+        Field(alias='class'),
+    ]
+    detail: str | None = None
+    term_iri: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class ChangesModel(RootModel[list[Change3]]):
+    root: list[Change3]
+
+
+class ItemsModel29(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    class_: Annotated[
+        Literal[
+            'additive',
+            'constraint_tightening',
+            'rename_alias',
+            'semantic_change',
+            'split',
+            'merge',
+            'retirement',
+            'unclassified',
+        ],
+        Field(alias='class'),
+    ]
+    detail: str | None = None
+    term_iri: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class ClassModel(
+    RootModel[
+        Literal[
+            'additive',
+            'constraint_tightening',
+            'rename_alias',
+            'semantic_change',
+            'split',
+            'merge',
+            'retirement',
+            'unclassified',
+        ]
+    ]
+):
+    root: Literal[
+        'additive',
+        'constraint_tightening',
+        'rename_alias',
+        'semantic_change',
+        'split',
+        'merge',
+        'retirement',
+        'unclassified',
+    ]
 
 
 class Detail(RootModel[str]):
     root: str
 
 
+class TermIri(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class Constraints(RootModel[list[Constraint]]):
+    root: list[Constraint]
+
+
+class ItemsModel30(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    change: Literal[
+        'added',
+        'removed',
+        'tightened',
+        'loosened',
+        'applicability_changed',
+        'stage_changed',
+        'data_basis_changed',
+    ]
+    constraint_id: str
+    consumer: str
+    detail: str | None = None
+
+
+class ChangeModel(
+    RootModel[
+        Literal[
+            'added',
+            'removed',
+            'tightened',
+            'loosened',
+            'applicability_changed',
+            'stage_changed',
+            'data_basis_changed',
+        ]
+    ]
+):
+    root: Literal[
+        'added',
+        'removed',
+        'tightened',
+        'loosened',
+        'applicability_changed',
+        'stage_changed',
+        'data_basis_changed',
+    ]
+
+
+class ConstraintId(RootModel[str]):
+    root: str
+
+
+class Consumer(RootModel[str]):
+    root: str
+
+
+class ContractModel1(RootModel[Literal['ontology-impact-report/v1']]):
+    root: Literal['ontology-impact-report/v1']
+
+
+class Inference(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    added: list[Entailment]
+    removed: list[Entailment]
+    result: Literal['changes_detected', 'no_change_within_scope', 'unresolved']
+    ruleset: Literal['nebula-tbox-subset/v1']
+    scope: str
+
+
+class Added(RootModel[list[Entailment]]):
+    root: list[Entailment]
+
+
+class ItemsModel31(RootModel[Entailment]):
+    root: Entailment
+
+
+class Removed(RootModel[list[Entailment]]):
+    root: list[Entailment]
+
+
+class ResultModel(
+    RootModel[Literal['changes_detected', 'no_change_within_scope', 'unresolved']]
+):
+    root: Literal['changes_detected', 'no_change_within_scope', 'unresolved']
+
+
+class Ruleset(RootModel[Literal['nebula-tbox-subset/v1']]):
+    root: Literal['nebula-tbox-subset/v1']
+
+
+class ScopeModel(RootModel[str]):
+    root: str
+
+
+class Predecessor(RootModel[ReleaseId | None]):
+    root: ReleaseId | None
+
+
+class Field0Model51(RootModel[None]):
+    root: None
+
+
+class Field1Model28(RootModel[ReleaseId]):
+    root: ReleaseId
+
+
+class Reach(RootModel[list[ReachItem]]):
+    root: list[ReachItem]
+
+
+class ItemsModel32(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    affected: Annotated[int, Field(ge=0)]
+    denominator: Annotated[int, Field(ge=0)]
+    population: Literal['fact_slot', 'assertion']
+    predicate_key: str | None = None
+
+
+class Affected(RootModel[int]):
+    root: Annotated[int, Field(ge=0)]
+
+
+class Denominator(RootModel[int]):
+    root: Annotated[int, Field(ge=0)]
+
+
+class Population(RootModel[Literal['fact_slot', 'assertion']]):
+    root: Literal['fact_slot', 'assertion']
+
+
+class PredicateKeyModel(RootModel[str]):
+    root: str
+
+
+class ReportDigest(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+
+
+class ScopeModel1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    knowledge_base_id: str
+    tenant_id: str
+
+
+class StatusModel3(RootModel[Literal['complete', 'incomplete']]):
+    root: Literal['complete', 'incomplete']
+
+
+class Unexamined(RootModel[list[UnexaminedItem]]):
+    root: list[UnexaminedItem]
+
+
+class ItemsModel33(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    owner: str | None = None
+    population: str
+    reason: Annotated[str, Field(min_length=1)]
+
+
+class Owner(RootModel[str]):
+    root: str
+
+
+class PopulationModel(RootModel[str]):
+    root: str
+
+
+class ReasonModel6(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class UnresolvedModel1(RootModel[list[UnresolvedItem]]):
+    root: list[UnresolvedItem]
+
+
+class ItemsModel34(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class DataBasis1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    inferred: Literal['nebula-tbox-subset/v1']
+
+
+class WithItem(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class ConstraintModel(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    applicability: Annotated[str, Field(min_length=1)]
+    construct_: Annotated[
+        Literal[
+            'domain', 'range', 'disjoint', 'minCardinality', 'maxCardinality', 'custom'
+        ],
+        Field(alias='construct'),
+    ]
+    consumer: Annotated[str, Field(min_length=1)]
+    data_basis: Literal['asserted'] | DataBasis1
+    expression: Annotated[
+        str | None,
+        Field(
+            description='Natural-language statement of a custom constraint; executed only by its named consumer.'
+        ),
+    ] = None
+    id: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+    on_nonconformance: Annotated[str, Field(min_length=1)]
+    property: Annotated[
+        str | None,
+        Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'),
+    ] = None
+    severity: Literal['violation', 'warning']
+    stage: Literal[
+        'authoring',
+        'canonical-admission',
+        'example-validation',
+        'assessment-preconditions',
+        'consumer-defined',
+    ]
+    subject: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+    value: Annotated[int | None, Field(ge=0)] = None
+    with_: Annotated[list[WithItem] | None, Field(alias='with')] = None
+
+
+class Applicability(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class Construct(
+    RootModel[
+        Literal[
+            'domain', 'range', 'disjoint', 'minCardinality', 'maxCardinality', 'custom'
+        ]
+    ]
+):
+    root: Literal[
+        'domain', 'range', 'disjoint', 'minCardinality', 'maxCardinality', 'custom'
+    ]
+
+
+class ConsumerModel(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class DataBasis(RootModel[Literal['asserted'] | DataBasis1]):
+    root: Literal['asserted'] | DataBasis1
+
+
+class Field0Model52(RootModel[Literal['asserted']]):
+    root: Literal['asserted']
+
+
+class Field1Model29(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    inferred: Literal['nebula-tbox-subset/v1']
+
+
+class Inferred(RootModel[Literal['nebula-tbox-subset/v1']]):
+    root: Literal['nebula-tbox-subset/v1']
+
+
+class Expression(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='Natural-language statement of a custom constraint; executed only by its named consumer.'
+        ),
+    ]
+
+
+class IdModel(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class OnNonconformance(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class Property(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class Severity(RootModel[Literal['violation', 'warning']]):
+    root: Literal['violation', 'warning']
+
+
+class Stage(
+    RootModel[
+        Literal[
+            'authoring',
+            'canonical-admission',
+            'example-validation',
+            'assessment-preconditions',
+            'consumer-defined',
+        ]
+    ]
+):
+    root: Literal[
+        'authoring',
+        'canonical-admission',
+        'example-validation',
+        'assessment-preconditions',
+        'consumer-defined',
+    ]
+
+
+class SubjectModel(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class ValueModel12(RootModel[int]):
+    root: Annotated[int, Field(ge=0)]
+
+
+class With(RootModel[list[WithItem]]):
+    root: list[WithItem]
+
+
+class ItemsModel35(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+LabelsAdditionalProperty = TypeAliasType(
+    "LabelsAdditionalProperty", Annotated[str, Field(max_length=200, min_length=1)]
+)
+
+
+class Labels(
+    RootModel[
+        dict[
+            Annotated[
+                str, StringConstraints(pattern=r'^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$')
+            ],
+            LabelsAdditionalProperty,
+        ]
+    ]
+):
+    root: dict[
+        Annotated[str, StringConstraints(pattern=r'^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$')],
+        LabelsAdditionalProperty,
+    ]
+
+
+class AdditionalPropertiesModel4(RootModel[str]):
+    root: Annotated[str, Field(max_length=200, min_length=1)]
+
+
+class ProjectionRule(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    direction: Literal['subject-to-object'] | None = None
+    disposition: Literal['edge', 'vertex_property', 'omitted']
+    label: Annotated[str | None, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,63}$')] = None
+    property: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+    reason: Annotated[str | None, Field(min_length=1)] = None
+
+
+class AdditionalPropertiesModel5(RootModel[Any]):
+    root: Any
+
+
+class Field0Model53(RootModel[Any]):
+    root: Annotated[
+        Any,
+        Field(
+            json_schema_extra={
+                'else': {'required': ['label']},
+                'if': {'properties': {'disposition': {'const': 'omitted'}}},
+                'then': {'required': ['reason']},
+            }
+        ),
+    ]
+
+
+class ElseModel8(RootModel[Any]):
+    root: Any
+
+
+class IfModel18(BaseModel):
+    disposition: Literal['omitted'] | None = None
+
+
+class DispositionModel3(RootModel[Literal['omitted']]):
+    root: Literal['omitted']
+
+
+class ThenModel14(RootModel[Any]):
+    root: Any
+
+
+class Direction(RootModel[Literal['subject-to-object']]):
+    root: Literal['subject-to-object']
+
+
+class DispositionModel4(RootModel[Literal['edge', 'vertex_property', 'omitted']]):
+    root: Literal['edge', 'vertex_property', 'omitted']
+
+
+class LabelModel1(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,63}$')]
+
+
+class Alias(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    tag: str
+    value: Annotated[str, Field(min_length=1)]
+
+
+class Example(RootModel[str]):
+    root: Annotated[str, Field(max_length=300, min_length=1)]
+
+
+class Parent(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class Predicate2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    local_name: Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9]{0,63}$')]
+    major: Annotated[int, Field(ge=1, le=9999)]
+
+
+class RegressionCase(RootModel[str]):
+    root: Annotated[str, Field(max_length=300, min_length=1)]
+
+
+class SubPropertyOfItem(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class Term(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    aliases: list[Alias] | None = None
+    cardinality: Literal['SINGLE', 'MULTI', 'RELATIONSHIP'] | None = None
+    code_of: Annotated[
+        str | None,
+        Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'),
+    ] = None
+    definition: Annotated[str, Field(min_length=20)]
+    domain: Annotated[
+        str | None,
+        Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'),
+    ] = None
+    examples: Annotated[list[Example], Field(min_length=1)]
+    external_codes: dict[str, str | None] | None = None
+    id: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+    inverse_of: Annotated[
+        str | None,
+        Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'),
+    ] = None
+    kind: Literal['class', 'object_property', 'datatype_property', 'code_value']
+    labels: Labels
+    parents: list[Parent] | None = None
+    predicate: Predicate2 | None = None
+    range: Annotated[str | None, Field(min_length=1)] = None
+    regression_cases: Annotated[list[RegressionCase], Field(min_length=1)]
+    sub_property_of: list[SubPropertyOfItem] | None = None
+    temporal_kind: Literal['STATE', 'EVENT', 'ETERNAL'] | None = None
+    value_type: (
+        Literal[
+            'text',
+            'code',
+            'decimal',
+            'date',
+            'boolean',
+            'entity_ref',
+            'money',
+            'identifier',
+            'name',
+        ]
+        | None
+    ) = None
+
+
+class Field0Model54(RootModel[Any]):
+    root: Annotated[
+        Any,
+        Field(
+            json_schema_extra={
+                'if': {
+                    'properties': {
+                        'kind': {'enum': ['object_property', 'datatype_property']}
+                    }
+                },
+                'then': {'required': ['domain', 'range', 'temporal_kind']},
+            }
+        ),
+    ]
+
+
+class IfModel19(BaseModel):
+    kind: Literal['object_property', 'datatype_property'] | None = None
+
+
+class KindModel9(RootModel[Literal['object_property', 'datatype_property']]):
+    root: Literal['object_property', 'datatype_property']
+
+
+class Field1Model30(RootModel[Any]):
+    root: Annotated[
+        Any,
+        Field(
+            json_schema_extra={
+                'if': {'properties': {'kind': {'const': 'class'}}},
+                'then': {'required': ['parents']},
+            }
+        ),
+    ]
+
+
+class IfModel20(BaseModel):
+    kind: Literal['class'] | None = None
+
+
+class KindModel10(RootModel[Literal['class']]):
+    root: Literal['class']
+
+
+class Field2Model8(RootModel[Any]):
+    root: Annotated[
+        Any,
+        Field(
+            json_schema_extra={
+                'if': {'required': ['predicate']},
+                'then': {'required': ['value_type', 'cardinality']},
+            }
+        ),
+    ]
+
+
+class IfModel21(RootModel[Any]):
+    root: Any
+
+
+class Aliases(RootModel[list[Alias]]):
+    root: list[Alias]
+
+
+class ItemsModel36(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    tag: str
+    value: Annotated[str, Field(min_length=1)]
+
+
+class Tag(RootModel[str]):
+    root: str
+
+
+class ValueModel13(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class CodeOf(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class Definition(RootModel[str]):
+    root: Annotated[str, Field(min_length=20)]
+
+
+class Domain(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class Examples(RootModel[list[Example]]):
+    root: Annotated[list[Example], Field(min_length=1)]
+
+
+class ItemsModel37(RootModel[str]):
+    root: Annotated[str, Field(max_length=300, min_length=1)]
+
+
+class ExternalCodes(RootModel[dict[str, str | None]]):
+    root: dict[str, str | None]
+
+
+class AdditionalPropertiesModel6(RootModel[str | None]):
+    root: str | None
+
+
+class InverseOf(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class KindModel11(
+    RootModel[Literal['class', 'object_property', 'datatype_property', 'code_value']]
+):
+    root: Literal['class', 'object_property', 'datatype_property', 'code_value']
+
+
+class Parents(RootModel[list[Parent]]):
+    root: list[Parent]
+
+
+class ItemsModel38(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class AdditionalPropertiesModel7(RootModel[Any]):
+    root: Any
+
+
+class LocalName(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9]{0,63}$')]
+
+
+class Major(RootModel[int]):
+    root: Annotated[int, Field(ge=1, le=9999)]
+
+
+class Range(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class RegressionCases(RootModel[list[RegressionCase]]):
+    root: Annotated[list[RegressionCase], Field(min_length=1)]
+
+
+class ItemsModel39(RootModel[str]):
+    root: Annotated[str, Field(max_length=300, min_length=1)]
+
+
+class SubPropertyOf(RootModel[list[SubPropertyOfItem]]):
+    root: list[SubPropertyOfItem]
+
+
+class ItemsModel40(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$')
+    ]
+
+
+class ValueType(
+    RootModel[
+        Literal[
+            'text',
+            'code',
+            'decimal',
+            'date',
+            'boolean',
+            'entity_ref',
+            'money',
+            'identifier',
+            'name',
+        ]
+    ]
+):
+    root: Literal[
+        'text',
+        'code',
+        'decimal',
+        'date',
+        'boolean',
+        'entity_ref',
+        'money',
+        'identifier',
+        'name',
+    ]
+
+
+class AuthoringSchema(RootModel[Literal['ontology-module-authoring/v1']]):
+    root: Literal['ontology-module-authoring/v1']
+
+
+class ConstraintsModel(RootModel[list[ConstraintModel]]):
+    root: list[ConstraintModel]
+
+
+class ItemsModel41(RootModel[ConstraintModel]):
+    root: ConstraintModel
+
+
+class ModuleModel(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    dependencies: list[Dependency]
+    id: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{0,47}$')]
+    predicate_namespace: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{0,31}$')]
+    version: Annotated[int, Field(ge=1)]
+
+
+class Dependencies(RootModel[list[Dependency]]):
+    root: list[Dependency]
+
+
+class ItemsModel42(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}@[1-9][0-9]*#sha256:[0-9a-f]{64}$')
+    ]
+
+
+class IdModel1(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{0,47}$')]
+
+
+class PredicateNamespace(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{0,31}$')]
+
+
+class VersionModel(RootModel[int]):
+    root: Annotated[int, Field(ge=1)]
+
+
+class Projection(RootModel[list[ProjectionRule]]):
+    root: list[ProjectionRule]
+
+
+class ItemsModel43(RootModel[ProjectionRule]):
+    root: ProjectionRule
+
+
+class Terms(RootModel[list[Term]]):
+    root: Annotated[list[Term], Field(min_length=1)]
+
+
+class ItemsModel44(RootModel[Term]):
+    root: Term
+
+
+class ArtifactSlotsModel(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    compiler: list[CompilerItem]
+    profiles: list[Profile]
+    templates: list[Template]
+    validation: list[ValidationItem]
+
+
+class Compiler(RootModel[list[CompilerItem]]):
+    root: list[CompilerItem]
+
+
+class ItemsModel45(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    ref: str
+
+
+class Digest(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+
+
+class Profiles(RootModel[list[Profile]]):
+    root: list[Profile]
+
+
+class Templates(RootModel[list[Template]]):
+    root: list[Template]
+
+
+class Validation(RootModel[list[ValidationItem]]):
+    root: list[ValidationItem]
+
+
+class ChangeRecord1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    class_: Annotated[
+        Literal['rename_alias', 'semantic_change', 'split', 'merge', 'retirement'],
+        Field(alias='class'),
+    ]
+    rationale: Annotated[str, Field(min_length=1)]
+    replacement_iris: list[ReplacementIri]
+    source_iris: Annotated[list[SourceIri], Field(min_length=1)]
+
+
+class ChangeRecords(RootModel[list[ChangeRecord1]]):
+    root: list[ChangeRecord1]
+
+
+class ItemsModel46(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    class_: Annotated[
+        Literal['rename_alias', 'semantic_change', 'split', 'merge', 'retirement'],
+        Field(alias='class'),
+    ]
+    rationale: Annotated[str, Field(min_length=1)]
+    replacement_iris: list[ReplacementIri]
+    source_iris: Annotated[list[SourceIri], Field(min_length=1)]
+
+
+class ClassModel1(
+    RootModel[
+        Literal['rename_alias', 'semantic_change', 'split', 'merge', 'retirement']
+    ]
+):
+    root: Literal['rename_alias', 'semantic_change', 'split', 'merge', 'retirement']
+
+
+class Rationale(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class ReplacementIris(RootModel[list[ReplacementIri]]):
+    root: list[ReplacementIri]
+
+
+class ItemsModel47(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+
+
+class SourceIris(RootModel[list[SourceIri]]):
+    root: Annotated[list[SourceIri], Field(min_length=1)]
+
+
+class CompilerVersion(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class ContractModel2(RootModel[Literal['ontology-release-manifest/v1']]):
+    root: Literal['ontology-release-manifest/v1']
+
+
+class DependencyLock(RootModel[list[DependencyLockItem]]):
+    root: list[DependencyLockItem]
+
+
+class ItemsModel48(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    module: str
+    requires: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}@[1-9][0-9]*#sha256:[0-9a-f]{64}$')
+    ]
+
+
+class ModuleModel1(RootModel[str]):
+    root: str
+
+
+class Requires(RootModel[str]):
+    root: Annotated[
+        str, Field(pattern='^[a-z][a-z0-9-]{0,47}@[1-9][0-9]*#sha256:[0-9a-f]{64}$')
+    ]
+
+
+class Module2(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    id: str
+    version: Annotated[int, Field(ge=1)]
+
+
+class Modules(RootModel[list[Module2]]):
+    root: Annotated[list[Module2], Field(min_length=1)]
+
+
+class ItemsModel49(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    id: str
+    version: Annotated[int, Field(ge=1)]
+
+
+class IdModel2(RootModel[str]):
+    root: str
+
+
+class NameModel(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{0,47}$')]
+
+
+class Predicate3(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    basis_required: bool
+    cardinality: Literal['SINGLE', 'MULTI', 'RELATIONSHIP']
+    member_key_source: Literal['value', 'entity'] | None = None
+    predicate_key: Annotated[
+        str,
+        Field(
+            pattern='^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+        ),
+    ]
+    qualifiers: list[dict[str, Any]] | None = None
+    temporal_kind: Literal['STATE', 'EVENT', 'ETERNAL']
+    term_iri: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+    value_type: str
+
+
+class Predicates(RootModel[list[Predicate3]]):
+    root: list[Predicate3]
+
+
+class ItemsModel50(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    basis_required: bool
+    cardinality: Literal['SINGLE', 'MULTI', 'RELATIONSHIP']
+    member_key_source: Literal['value', 'entity'] | None = None
+    predicate_key: Annotated[
+        str,
+        Field(
+            pattern='^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+        ),
+    ]
+    qualifiers: list[dict[str, Any]] | None = None
+    temporal_kind: Literal['STATE', 'EVENT', 'ETERNAL']
+    term_iri: Annotated[
+        str,
+        Field(
+            pattern='^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$'
+        ),
+    ]
+    value_type: str
+
+
+class BasisRequired(RootModel[bool]):
+    root: bool
+
+
+class MemberKeySource(RootModel[Literal['value', 'entity'] | None]):
+    root: Literal['value', 'entity'] | None
+
+
+class PredicateKeyModel1(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            pattern='^[a-z][a-z0-9-]{0,31}:[A-Za-z][A-Za-z0-9]{0,63}@v[1-9][0-9]{0,3}$'
+        ),
+    ]
+
+
+class QualifiersModel(RootModel[list[dict[str, Any]]]):
+    root: list[dict[str, Any]]
+
+
+class ItemsModel51(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+
+
+class ValueTypeModel(RootModel[str]):
+    root: str
+
+
+class RequiredContext(RootModel[list[str]]):
+    root: list[str]
+
+
+class ItemsModel52(RootModel[str]):
+    root: str
+
+
+class VersionModel1(RootModel[Literal['nebula-age-mapping/v1']]):
+    root: Literal['nebula-age-mapping/v1']
+
+
+class InferenceModel(
+    RootModel[list[Literal['subClassOf', 'subPropertyOf', 'inverseOf']]]
+):
+    root: list[Literal['subClassOf', 'subPropertyOf', 'inverseOf']]
+
+
+class ItemsModel53(RootModel[Literal['subClassOf', 'subPropertyOf', 'inverseOf']]):
+    root: Literal['subClassOf', 'subPropertyOf', 'inverseOf']
+
+
+class ValidationModel(
+    RootModel[
+        list[
+            Literal[
+                'domain',
+                'range',
+                'disjoint',
+                'minCardinality',
+                'maxCardinality',
+                'custom',
+            ]
+        ]
+    ]
+):
+    root: list[
+        Literal[
+            'domain', 'range', 'disjoint', 'minCardinality', 'maxCardinality', 'custom'
+        ]
+    ]
+
+
+class ItemsModel54(
+    RootModel[
+        Literal[
+            'domain', 'range', 'disjoint', 'minCardinality', 'maxCardinality', 'custom'
+        ]
+    ]
+):
+    root: Literal[
+        'domain', 'range', 'disjoint', 'minCardinality', 'maxCardinality', 'custom'
+    ]
+
+
+class TermsDigest(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+
+
+class Code(RootModel[str]):
+    root: Annotated[str, Field(pattern='^[a-z][a-z0-9_]*$')]
+
+
 class Instance(RootModel[str]):
     root: str
 
 
-class StatusModel2(RootModel[int]):
+class StatusModel4(RootModel[int]):
     root: Annotated[int, Field(ge=400, le=599)]
 
 
@@ -5622,11 +7187,11 @@ class TypeModel9(RootModel[Literal['fact_slot', 'review_task', 'content_artifact
     root: Literal['fact_slot', 'review_task', 'content_artifact']
 
 
-class ContractModel1(RootModel[Literal['provenance-query/v1']]):
+class ContractModel3(RootModel[Literal['provenance-query/v1']]):
     root: Literal['provenance-query/v1']
 
 
-class KindModel9(RootModel[Literal['assertion', 'fact_version']]):
+class KindModel12(RootModel[Literal['assertion', 'fact_version']]):
     root: Literal['assertion', 'fact_version']
 
 
@@ -5634,7 +7199,7 @@ class Completeness(RootModel[Literal['COMPLETE', 'INCOMPLETE']]):
     root: Literal['COMPLETE', 'INCOMPLETE']
 
 
-class ContractModel2(RootModel[Literal['provenance-result/v1']]):
+class ContractModel4(RootModel[Literal['provenance-result/v1']]):
     root: Literal['provenance-result/v1']
 
 
@@ -6426,7 +7991,7 @@ class Items17(BaseModel):
     target: Target50
 
 
-class ItemsModel28(
+class ItemsModel55(
     RootModel[
         Items1
         | Items2
@@ -6484,7 +8049,7 @@ class Target51(BaseModel):
     kind: Literal['assertion']
 
 
-class Field0Model50(BaseModel):
+class Field0Model55(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -6493,11 +8058,11 @@ class Field0Model50(BaseModel):
     target: Target51
 
 
-class KindModel10(RootModel[Literal['corrected_from']]):
+class KindModel13(RootModel[Literal['corrected_from']]):
     root: Literal['corrected_from']
 
 
-class KindModel11(RootModel[Literal['assertion']]):
+class KindModel14(RootModel[Literal['assertion']]):
     root: Literal['assertion']
 
 
@@ -6517,7 +8082,7 @@ class Target52(BaseModel):
     kind: Literal['evidence']
 
 
-class Field1Model28(BaseModel):
+class Field1Model31(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -6526,15 +8091,15 @@ class Field1Model28(BaseModel):
     target: Target52
 
 
-class KindModel12(RootModel[Literal['supported_by']]):
+class KindModel15(RootModel[Literal['supported_by']]):
     root: Literal['supported_by']
 
 
-class KindModel13(RootModel[Literal['assertion', 'fact_version']]):
+class KindModel16(RootModel[Literal['assertion', 'fact_version']]):
     root: Literal['assertion', 'fact_version']
 
 
-class KindModel14(RootModel[Literal['evidence']]):
+class KindModel17(RootModel[Literal['evidence']]):
     root: Literal['evidence']
 
 
@@ -6563,15 +8128,15 @@ class Field10(BaseModel):
     target: Target53
 
 
-class KindModel15(RootModel[Literal['reserved_learning']]):
+class KindModel18(RootModel[Literal['reserved_learning']]):
     root: Literal['reserved_learning']
 
 
-class KindModel16(RootModel[Literal['review_decision']]):
+class KindModel19(RootModel[Literal['review_decision']]):
     root: Literal['review_decision']
 
 
-class KindModel17(RootModel[Literal['learning_reservation']]):
+class KindModel20(RootModel[Literal['learning_reservation']]):
     root: Literal['learning_reservation']
 
 
@@ -6600,15 +8165,15 @@ class Field11(BaseModel):
     target: Target54
 
 
-class KindModel18(RootModel[Literal['recorded_decision']]):
+class KindModel21(RootModel[Literal['recorded_decision']]):
     root: Literal['recorded_decision']
 
 
-class KindModel19(RootModel[Literal['fact_version']]):
+class KindModel22(RootModel[Literal['fact_version']]):
     root: Literal['fact_version']
 
 
-class KindModel20(RootModel[Literal['review_decision']]):
+class KindModel23(RootModel[Literal['review_decision']]):
     root: Literal['review_decision']
 
 
@@ -6629,11 +8194,11 @@ class Field12(BaseModel):
     target: Target55
 
 
-class KindModel21(RootModel[Literal['split_of']]):
+class KindModel24(RootModel[Literal['split_of']]):
     root: Literal['split_of']
 
 
-class KindModel22(RootModel[Literal['fact_version']]):
+class KindModel25(RootModel[Literal['fact_version']]):
     root: Literal['fact_version']
 
 
@@ -6654,15 +8219,15 @@ class Field13(BaseModel):
     target: Target55
 
 
-class KindModel23(RootModel[Literal['changed_from']]):
+class KindModel26(RootModel[Literal['changed_from']]):
     root: Literal['changed_from']
 
 
-class KindModel24(RootModel[Literal['fact_change']]):
+class KindModel27(RootModel[Literal['fact_change']]):
     root: Literal['fact_change']
 
 
-class KindModel25(RootModel[Literal['fact_version']]):
+class KindModel28(RootModel[Literal['fact_version']]):
     root: Literal['fact_version']
 
 
@@ -6675,15 +8240,15 @@ class Field14(BaseModel):
     target: Target55
 
 
-class KindModel26(RootModel[Literal['changed_to']]):
+class KindModel29(RootModel[Literal['changed_to']]):
     root: Literal['changed_to']
 
 
-class KindModel27(RootModel[Literal['fact_change']]):
+class KindModel30(RootModel[Literal['fact_change']]):
     root: Literal['fact_change']
 
 
-class KindModel28(RootModel[Literal['fact_version']]):
+class KindModel31(RootModel[Literal['fact_version']]):
     root: Literal['fact_version']
 
 
@@ -6712,15 +8277,15 @@ class Field15(BaseModel):
     target: Target58
 
 
-class KindModel29(RootModel[Literal['attested_by']]):
+class KindModel32(RootModel[Literal['attested_by']]):
     root: Literal['attested_by']
 
 
-class KindModel30(RootModel[Literal['fact_version']]):
+class KindModel33(RootModel[Literal['fact_version']]):
     root: Literal['fact_version']
 
 
-class KindModel31(RootModel[Literal['content_artifact']]):
+class KindModel34(RootModel[Literal['content_artifact']]):
     root: Literal['content_artifact']
 
 
@@ -6749,15 +8314,15 @@ class Field16(BaseModel):
     target: Target59
 
 
-class KindModel32(RootModel[Literal['derived_from']]):
+class KindModel35(RootModel[Literal['derived_from']]):
     root: Literal['derived_from']
 
 
-class KindModel33(RootModel[Literal['assertion', 'fact_version']]):
+class KindModel36(RootModel[Literal['assertion', 'fact_version']]):
     root: Literal['assertion', 'fact_version']
 
 
-class KindModel34(RootModel[Literal['derivation_reference']]):
+class KindModel37(RootModel[Literal['derivation_reference']]):
     root: Literal['derivation_reference']
 
 
@@ -6777,7 +8342,7 @@ class Target60(BaseModel):
     kind: Literal['evidence']
 
 
-class Field2Model8(BaseModel):
+class Field2Model9(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -6786,15 +8351,15 @@ class Field2Model8(BaseModel):
     target: Target60
 
 
-class KindModel35(RootModel[Literal['ending_evidence']]):
+class KindModel38(RootModel[Literal['ending_evidence']]):
     root: Literal['ending_evidence']
 
 
-class KindModel36(RootModel[Literal['fact_version']]):
+class KindModel39(RootModel[Literal['fact_version']]):
     root: Literal['fact_version']
 
 
-class KindModel37(RootModel[Literal['evidence']]):
+class KindModel40(RootModel[Literal['evidence']]):
     root: Literal['evidence']
 
 
@@ -6823,15 +8388,15 @@ class Field3Model3(BaseModel):
     target: Target61
 
 
-class KindModel38(RootModel[Literal['located_in']]):
+class KindModel41(RootModel[Literal['located_in']]):
     root: Literal['located_in']
 
 
-class KindModel39(RootModel[Literal['evidence']]):
+class KindModel42(RootModel[Literal['evidence']]):
     root: Literal['evidence']
 
 
-class KindModel40(RootModel[Literal['content_artifact']]):
+class KindModel43(RootModel[Literal['content_artifact']]):
     root: Literal['content_artifact']
 
 
@@ -6860,15 +8425,15 @@ class Field4Model1(BaseModel):
     target: Target62
 
 
-class KindModel41(RootModel[Literal['interpreted_in']]):
+class KindModel44(RootModel[Literal['interpreted_in']]):
     root: Literal['interpreted_in']
 
 
-class KindModel42(RootModel[Literal['assertion']]):
+class KindModel45(RootModel[Literal['assertion']]):
     root: Literal['assertion']
 
 
-class KindModel43(RootModel[Literal['interpretation_run']]):
+class KindModel46(RootModel[Literal['interpretation_run']]):
     root: Literal['interpretation_run']
 
 
@@ -6897,15 +8462,15 @@ class Field5Model1(BaseModel):
     target: Target63
 
 
-class KindModel44(RootModel[Literal['interprets']]):
+class KindModel47(RootModel[Literal['interprets']]):
     root: Literal['interprets']
 
 
-class KindModel45(RootModel[Literal['interpretation_run']]):
+class KindModel48(RootModel[Literal['interpretation_run']]):
     root: Literal['interpretation_run']
 
 
-class KindModel46(RootModel[Literal['content_artifact']]):
+class KindModel49(RootModel[Literal['content_artifact']]):
     root: Literal['content_artifact']
 
 
@@ -6934,15 +8499,15 @@ class Field6Model(BaseModel):
     target: Target64
 
 
-class KindModel47(RootModel[Literal['artifact_of']]):
+class KindModel50(RootModel[Literal['artifact_of']]):
     root: Literal['artifact_of']
 
 
-class KindModel48(RootModel[Literal['content_artifact']]):
+class KindModel51(RootModel[Literal['content_artifact']]):
     root: Literal['content_artifact']
 
 
-class KindModel49(RootModel[Literal['document_version']]):
+class KindModel52(RootModel[Literal['document_version']]):
     root: Literal['document_version']
 
 
@@ -6971,15 +8536,15 @@ class Field7Model(BaseModel):
     target: Target65
 
 
-class KindModel50(RootModel[Literal['version_of']]):
+class KindModel53(RootModel[Literal['version_of']]):
     root: Literal['version_of']
 
 
-class KindModel51(RootModel[Literal['document_version']]):
+class KindModel54(RootModel[Literal['document_version']]):
     root: Literal['document_version']
 
 
-class KindModel52(RootModel[Literal['source_document']]):
+class KindModel55(RootModel[Literal['source_document']]):
     root: Literal['source_document']
 
 
@@ -7008,15 +8573,15 @@ class Field8Model(BaseModel):
     target: Target66
 
 
-class KindModel53(RootModel[Literal['reviews']]):
+class KindModel56(RootModel[Literal['reviews']]):
     root: Literal['reviews']
 
 
-class KindModel54(RootModel[Literal['review_decision', 'review_attempt']]):
+class KindModel57(RootModel[Literal['review_decision', 'review_attempt']]):
     root: Literal['review_decision', 'review_attempt']
 
 
-class KindModel55(RootModel[Literal['assertion']]):
+class KindModel58(RootModel[Literal['assertion']]):
     root: Literal['assertion']
 
 
@@ -7037,15 +8602,15 @@ class Field9(BaseModel):
     target: Target66
 
 
-class KindModel56(RootModel[Literal['created_assertion']]):
+class KindModel59(RootModel[Literal['created_assertion']]):
     root: Literal['created_assertion']
 
 
-class KindModel57(RootModel[Literal['review_decision']]):
+class KindModel60(RootModel[Literal['review_decision']]):
     root: Literal['review_decision']
 
 
-class KindModel58(RootModel[Literal['assertion']]):
+class KindModel61(RootModel[Literal['assertion']]):
     root: Literal['assertion']
 
 
@@ -7064,7 +8629,7 @@ class Gaps(RootModel[list[Gap1]]):
     root: list[Gap1]
 
 
-class ItemsModel29(BaseModel):
+class ItemsModel56(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -7079,7 +8644,7 @@ class FieldModel1(RootModel[str]):
     root: str
 
 
-class ReasonModel6(
+class ReasonModel7(
     RootModel[
         Literal['LEGACY_UNQUALIFIED', 'METADATA_UNAVAILABLE', 'DERIVATION_UNAVAILABLE']
     ]
@@ -7089,7 +8654,7 @@ class ReasonModel6(
     ]
 
 
-class KindModel59(
+class KindModel62(
     RootModel[
         Literal[
             'assertion',
@@ -7495,15 +9060,21 @@ class SemanticContractVersion(RootModel[Literal[1, 2]]):
     root: Literal[1, 2]
 
 
-class Field0Model51(RootModel[None]):
+class Field0Model56(RootModel[None]):
     root: None
 
 
-class VersionModel(RootModel[int]):
+class ValueModel14(BaseModel):
+    model_config = ConfigDict(
+        extra='allow',
+    )
+
+
+class VersionModel2(RootModel[int]):
     root: Annotated[int, Field(ge=1)]
 
 
-class KindModel60(RootModel[Literal['assertion']]):
+class KindModel63(RootModel[Literal['assertion']]):
     root: Literal['assertion']
 
 
@@ -7523,7 +9094,7 @@ class Data25(BaseModel):
     stored_content_record: dict[str, Any] | None
 
 
-class Field1Model29(BaseModel):
+class Field1Model32(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -7556,7 +9127,7 @@ class StoredContentRecord(RootModel[dict[str, Any] | None]):
     root: dict[str, Any] | None
 
 
-class KindModel61(RootModel[Literal['evidence']]):
+class KindModel64(RootModel[Literal['evidence']]):
     root: Literal['evidence']
 
 
@@ -7603,7 +9174,7 @@ class FromVersionId(RootModel[str | None]):
     ]
 
 
-class ReasonModel7(RootModel[str]):
+class ReasonModel8(RootModel[str]):
     root: str
 
 
@@ -7611,7 +9182,7 @@ class ToVersionId(RootModel[str]):
     root: str
 
 
-class KindModel62(RootModel[Literal['fact_change']]):
+class KindModel65(RootModel[Literal['fact_change']]):
     root: Literal['fact_change']
 
 
@@ -7637,7 +9208,7 @@ class InputVersionIds(RootModel[list[str]]):
     root: list[str]
 
 
-class ItemsModel30(RootModel[str]):
+class ItemsModel57(RootModel[str]):
     root: str
 
 
@@ -7651,7 +9222,7 @@ class StoredReference(BaseModel):
     )
 
 
-class KindModel63(RootModel[Literal['derivation_reference']]):
+class KindModel66(RootModel[Literal['derivation_reference']]):
     root: Literal['derivation_reference']
 
 
@@ -7668,7 +9239,7 @@ class Data28(BaseModel):
     recipe_sha256: str | None
 
 
-class Field2Model9(BaseModel):
+class Field2Model10(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -7697,7 +9268,7 @@ class RecipeSha256Model(RootModel[str | None]):
     root: str | None
 
 
-class KindModel64(RootModel[Literal['content_artifact']]):
+class KindModel67(RootModel[Literal['content_artifact']]):
     root: Literal['content_artifact']
 
 
@@ -7722,7 +9293,7 @@ class SourceDocumentId(RootModel[str]):
     root: str
 
 
-class KindModel65(RootModel[Literal['document_version']]):
+class KindModel68(RootModel[Literal['document_version']]):
     root: Literal['document_version']
 
 
@@ -7747,7 +9318,7 @@ class SourceSha256Model(RootModel[str]):
     root: str
 
 
-class KindModel66(RootModel[Literal['source_document']]):
+class KindModel69(RootModel[Literal['source_document']]):
     root: Literal['source_document']
 
 
@@ -7785,11 +9356,11 @@ class RunConfigurationModel(BaseModel):
     )
 
 
-class StatusModel3(RootModel[str]):
+class StatusModel5(RootModel[str]):
     root: str
 
 
-class KindModel67(RootModel[Literal['interpretation_run']]):
+class KindModel70(RootModel[Literal['interpretation_run']]):
     root: Literal['interpretation_run']
 
 
@@ -7806,7 +9377,7 @@ class Data(RootModel[ContractReviewDecision]):
     root: ContractReviewDecision
 
 
-class KindModel68(RootModel[Literal['review_decision']]):
+class KindModel71(RootModel[Literal['review_decision']]):
     root: Literal['review_decision']
 
 
@@ -7823,7 +9394,7 @@ class DataModel(RootModel[ContractReviewSubmissionAttemptV1]):
     root: ContractReviewSubmissionAttemptV1
 
 
-class KindModel69(RootModel[Literal['review_attempt']]):
+class KindModel72(RootModel[Literal['review_attempt']]):
     root: Literal['review_attempt']
 
 
@@ -7840,15 +9411,15 @@ class DataModel1(RootModel[ContractLearningCandidateReservationV1]):
     root: ContractLearningCandidateReservationV1
 
 
-class KindModel70(RootModel[Literal['learning_reservation']]):
+class KindModel73(RootModel[Literal['learning_reservation']]):
     root: Literal['learning_reservation']
 
 
-class KindModel71(RootModel[Literal['fact_version']]):
+class KindModel74(RootModel[Literal['fact_version']]):
     root: Literal['fact_version']
 
 
-class KindModel72(RootModel[Literal['assertion', 'fact_version']]):
+class KindModel75(RootModel[Literal['assertion', 'fact_version']]):
     root: Literal['assertion', 'fact_version']
 
 
@@ -7910,7 +9481,7 @@ class EvidenceModel(RootModel[Evidence3 | None]):
     ]
 
 
-class Field1Model30(BaseModel):
+class Field1Model33(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -7949,7 +9520,7 @@ class SelectorModel(RootModel[list[SelectorItem]]):
     ]
 
 
-class ItemsModel31(BaseModel):
+class ItemsModel58(BaseModel):
     model_config = ConfigDict(
         extra='allow',
     )
@@ -8024,7 +9595,7 @@ class ActionModel(RootModel[Literal['ACCEPT', 'CORRECT', 'REJECT', 'BLOCKED']]):
     root: Literal['ACCEPT', 'CORRECT', 'REJECT', 'BLOCKED']
 
 
-class ContractModel3(RootModel[Literal['review-submission-attempt/v1']]):
+class ContractModel5(RootModel[Literal['review-submission-attempt/v1']]):
     root: Literal['review-submission-attempt/v1']
 
 
@@ -11574,8 +13145,8 @@ class ContractFactVersionReadV1Fragment4(RootModel[ValueModel11]):
     root: ValueModel11
 
 
-class ContractFactVersionReadV1Fragment5(RootModel[ValidStart]):
-    root: ValidStart
+class ContractFactVersionReadV1Fragment5(RootModel[ValidStart | None]):
+    root: ValidStart | None
 
 
 class ContractFactVersionReadV1Fragment6(RootModel[ValidEnd | None]):
@@ -12135,8 +13706,1018 @@ class ContractLearningCandidateReservationV1Fragment9(RootModel[ReviewerPrincipa
     root: ReviewerPrincipalId
 
 
-class ContractProblemDetailsFragment1(RootModel[AdditionalPropertiesModel3]):
+class InferenceModel1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    added: list[Entailment]
+    removed: list[Entailment]
+    result: Literal['changes_detected', 'no_change_within_scope', 'unresolved']
+    ruleset: Literal['nebula-tbox-subset/v1']
+    scope: str
+
+
+class ContractOntologyImpactReportV1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    candidate: ReleaseId
+    changes: list[Change]
+    constraints: list[Constraint]
+    contract: Literal['ontology-impact-report/v1']
+    inference: InferenceModel1
+    predecessor: ReleaseId | None
+    reach: list[ReachItem]
+    report_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')]
+    scope: Scope1
+    status: Literal['complete', 'incomplete']
+    unexamined: list[UnexaminedItem]
+    unresolved: list[UnresolvedItem]
+
+
+class ContractOntologyImpactReportV1Fragment1(RootModel[AdditionalPropertiesModel3]):
     root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment10(RootModel[Field0Model51 | None]):
+    root: Field0Model51 | None
+
+
+class ContractOntologyImpactReportV1Fragment11(RootModel[Field1Model28]):
+    root: Field1Model28
+
+
+class ContractOntologyImpactReportV1Fragment12(RootModel[Candidate]):
+    root: Candidate
+
+
+class ContractOntologyImpactReportV1Fragment13(RootModel[ChangesModel]):
+    root: ChangesModel
+
+
+class ContractOntologyImpactReportV1Fragment14(RootModel[ItemsModel29]):
+    root: ItemsModel29
+
+
+class ContractOntologyImpactReportV1Fragment15(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment16(RootModel[TermIri]):
+    root: TermIri
+
+
+class ContractOntologyImpactReportV1Fragment17(RootModel[ClassModel]):
+    root: ClassModel
+
+
+class ContractOntologyImpactReportV1Fragment18(RootModel[Detail]):
+    root: Detail
+
+
+class ContractOntologyImpactReportV1Fragment19(RootModel[Inference]):
+    root: Inference
+
+
+class ContractOntologyImpactReportV1Fragment2(RootModel[ContractModel1]):
+    root: ContractModel1
+
+
+class ContractOntologyImpactReportV1Fragment20(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment21(RootModel[Ruleset]):
+    root: Ruleset
+
+
+class ContractOntologyImpactReportV1Fragment22(RootModel[ScopeModel]):
+    root: ScopeModel
+
+
+class ContractOntologyImpactReportV1Fragment23(RootModel[ResultModel]):
+    root: ResultModel
+
+
+class ContractOntologyImpactReportV1Fragment24(RootModel[Added]):
+    root: Added
+
+
+class ContractOntologyImpactReportV1Fragment25(RootModel[ItemsModel31]):
+    root: ItemsModel31
+
+
+class ContractOntologyImpactReportV1Fragment26(RootModel[Removed]):
+    root: Removed
+
+
+class ContractOntologyImpactReportV1Fragment27(RootModel[ItemsModel31]):
+    root: ItemsModel31
+
+
+class ContractOntologyImpactReportV1Fragment28(RootModel[Constraints]):
+    root: Constraints
+
+
+class ContractOntologyImpactReportV1Fragment29(RootModel[ItemsModel30]):
+    root: ItemsModel30
+
+
+class ContractOntologyImpactReportV1Fragment3(RootModel[ReportDigest]):
+    root: ReportDigest
+
+
+class ContractOntologyImpactReportV1Fragment30(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment31(RootModel[ConstraintId]):
+    root: ConstraintId
+
+
+class ContractOntologyImpactReportV1Fragment32(RootModel[Consumer]):
+    root: Consumer
+
+
+class ContractOntologyImpactReportV1Fragment33(RootModel[ChangeModel]):
+    root: ChangeModel
+
+
+class ContractOntologyImpactReportV1Fragment34(RootModel[Detail]):
+    root: Detail
+
+
+class ContractOntologyImpactReportV1Fragment35(RootModel[Reach]):
+    root: Reach
+
+
+class ContractOntologyImpactReportV1Fragment36(RootModel[ItemsModel32]):
+    root: ItemsModel32
+
+
+class ContractOntologyImpactReportV1Fragment37(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment38(RootModel[Population]):
+    root: Population
+
+
+class ContractOntologyImpactReportV1Fragment39(RootModel[PredicateKeyModel]):
+    root: PredicateKeyModel
+
+
+class ContractOntologyImpactReportV1Fragment4(RootModel[StatusModel3]):
+    root: StatusModel3
+
+
+class ContractOntologyImpactReportV1Fragment40(RootModel[Affected]):
+    root: Affected
+
+
+class ContractOntologyImpactReportV1Fragment41(RootModel[Denominator]):
+    root: Denominator
+
+
+class ContractOntologyImpactReportV1Fragment42(RootModel[Unexamined]):
+    root: Unexamined
+
+
+class ContractOntologyImpactReportV1Fragment43(RootModel[ItemsModel33]):
+    root: ItemsModel33
+
+
+class ContractOntologyImpactReportV1Fragment44(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment45(RootModel[PopulationModel]):
+    root: PopulationModel
+
+
+class ContractOntologyImpactReportV1Fragment46(RootModel[Owner]):
+    root: Owner
+
+
+class ContractOntologyImpactReportV1Fragment47(RootModel[ReasonModel6]):
+    root: ReasonModel6
+
+
+class ContractOntologyImpactReportV1Fragment48(RootModel[UnresolvedModel1]):
+    root: UnresolvedModel1
+
+
+class ContractOntologyImpactReportV1Fragment49(RootModel[ItemsModel34]):
+    root: ItemsModel34
+
+
+class ContractOntologyImpactReportV1Fragment5(RootModel[ScopeModel1]):
+    root: ScopeModel1
+
+
+class ContractOntologyImpactReportV1Fragment50(RootModel[Field0Model50]):
+    root: Field0Model50
+
+
+class ContractOntologyImpactReportV1Fragment51(RootModel[IfModel17]):
+    root: IfModel17
+
+
+class ContractOntologyImpactReportV1Fragment52(RootModel[StatusModel2]):
+    root: StatusModel2
+
+
+class ContractOntologyImpactReportV1Fragment53(RootModel[ThenModel13]):
+    root: ThenModel13
+
+
+class ContractOntologyImpactReportV1Fragment54(RootModel[UnresolvedModel]):
+    root: UnresolvedModel
+
+
+class ContractOntologyImpactReportV1Fragment55(RootModel[Inference1]):
+    root: Inference1
+
+
+class ContractOntologyImpactReportV1Fragment56(RootModel[Result]):
+    root: Result
+
+
+class ContractOntologyImpactReportV1Fragment57(RootModel[NotModel4]):
+    root: NotModel4
+
+
+class ContractOntologyImpactReportV1Fragment58(RootModel[Changes]):
+    root: Changes
+
+
+class ContractOntologyImpactReportV1Fragment59(RootModel[ItemsModel28]):
+    root: ItemsModel28
+
+
+class ContractOntologyImpactReportV1Fragment6(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment60(RootModel[Class]):
+    root: Class
+
+
+class ContractOntologyImpactReportV1Fragment61(RootModel[NotModel3]):
+    root: NotModel3
+
+
+class ContractOntologyImpactReportV1Fragment62(RootModel[ReleaseId]):
+    root: ReleaseId
+
+
+class ContractOntologyImpactReportV1Fragment63(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment64(RootModel[ReleaseRef]):
+    root: ReleaseRef
+
+
+class ContractOntologyImpactReportV1Fragment65(RootModel[ManifestDigest]):
+    root: ManifestDigest
+
+
+class ContractOntologyImpactReportV1Fragment66(RootModel[Entailment]):
+    root: Entailment
+
+
+class ContractOntologyImpactReportV1Fragment67(RootModel[AdditionalPropertiesModel3]):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyImpactReportV1Fragment68(RootModel[Subject]):
+    root: Subject
+
+
+class ContractOntologyImpactReportV1Fragment69(RootModel[Relation]):
+    root: Relation
+
+
+class ContractOntologyImpactReportV1Fragment7(RootModel[TenantId]):
+    root: TenantId
+
+
+class ContractOntologyImpactReportV1Fragment70(RootModel[ObjectModel]):
+    root: ObjectModel
+
+
+class ContractOntologyImpactReportV1Fragment8(RootModel[KnowledgeBaseId]):
+    root: KnowledgeBaseId
+
+
+class ContractOntologyImpactReportV1Fragment9(RootModel[Predecessor | None]):
+    root: Predecessor | None
+
+
+class ContractOntologyModuleAuthoringV1(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    authoring_schema: Literal['ontology-module-authoring/v1']
+    constraints: list[ConstraintModel] | None = None
+    module: Module
+    projection: list[ProjectionRule] | None = None
+    terms: Annotated[list[Term], Field(min_length=1)]
+
+
+class ContractOntologyModuleAuthoringV1Fragment1(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyModuleAuthoringV1Fragment10(RootModel[Terms]):
+    root: Terms
+
+
+class ContractOntologyModuleAuthoringV1Fragment11(RootModel[ItemsModel44]):
+    root: ItemsModel44
+
+
+class ContractOntologyModuleAuthoringV1Fragment12(RootModel[ConstraintsModel]):
+    root: ConstraintsModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment13(RootModel[ItemsModel41]):
+    root: ItemsModel41
+
+
+class ContractOntologyModuleAuthoringV1Fragment14(RootModel[Projection]):
+    root: Projection
+
+
+class ContractOntologyModuleAuthoringV1Fragment15(RootModel[ItemsModel43]):
+    root: ItemsModel43
+
+
+class ContractOntologyModuleAuthoringV1Fragment16(RootModel[Labels]):
+    root: Labels
+
+
+class ContractOntologyModuleAuthoringV1Fragment17(RootModel[PropertyNames]):
+    root: PropertyNames
+
+
+class ContractOntologyModuleAuthoringV1Fragment18(
+    RootModel[AdditionalPropertiesModel4]
+):
+    root: AdditionalPropertiesModel4
+
+
+class ContractOntologyModuleAuthoringV1Fragment19(RootModel[Term]):
+    root: Term
+
+
+class ContractOntologyModuleAuthoringV1Fragment2(RootModel[AuthoringSchema]):
+    root: AuthoringSchema
+
+
+class ContractOntologyModuleAuthoringV1Fragment20(
+    RootModel[AdditionalPropertiesModel5]
+):
+    root: AdditionalPropertiesModel5
+
+
+class ContractOntologyModuleAuthoringV1Fragment21(RootModel[IdModel]):
+    root: IdModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment22(RootModel[KindModel11]):
+    root: KindModel11
+
+
+class ContractOntologyModuleAuthoringV1Fragment23(RootModel[Labels]):
+    root: Labels
+
+
+class ContractOntologyModuleAuthoringV1Fragment24(RootModel[Aliases]):
+    root: Aliases
+
+
+class ContractOntologyModuleAuthoringV1Fragment25(RootModel[ItemsModel36]):
+    root: ItemsModel36
+
+
+class ContractOntologyModuleAuthoringV1Fragment26(
+    RootModel[AdditionalPropertiesModel5]
+):
+    root: AdditionalPropertiesModel5
+
+
+class ContractOntologyModuleAuthoringV1Fragment27(RootModel[Tag]):
+    root: Tag
+
+
+class ContractOntologyModuleAuthoringV1Fragment28(RootModel[ValueModel13]):
+    root: ValueModel13
+
+
+class ContractOntologyModuleAuthoringV1Fragment29(RootModel[Definition]):
+    root: Definition
+
+
+class ContractOntologyModuleAuthoringV1Fragment3(RootModel[ModuleModel]):
+    root: ModuleModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment30(RootModel[Examples]):
+    root: Examples
+
+
+class ContractOntologyModuleAuthoringV1Fragment31(RootModel[ItemsModel37]):
+    root: ItemsModel37
+
+
+class ContractOntologyModuleAuthoringV1Fragment32(RootModel[RegressionCases]):
+    root: RegressionCases
+
+
+class ContractOntologyModuleAuthoringV1Fragment33(RootModel[ItemsModel39]):
+    root: ItemsModel39
+
+
+class ContractOntologyModuleAuthoringV1Fragment34(RootModel[Parents]):
+    root: Parents
+
+
+class ContractOntologyModuleAuthoringV1Fragment35(RootModel[ItemsModel38]):
+    root: ItemsModel38
+
+
+class ContractOntologyModuleAuthoringV1Fragment36(RootModel[Domain]):
+    root: Domain
+
+
+class ContractOntologyModuleAuthoringV1Fragment37(RootModel[Range]):
+    root: Range
+
+
+class ContractOntologyModuleAuthoringV1Fragment38(RootModel[InverseOf]):
+    root: InverseOf
+
+
+class ContractOntologyModuleAuthoringV1Fragment39(RootModel[SubPropertyOf]):
+    root: SubPropertyOf
+
+
+class ContractOntologyModuleAuthoringV1Fragment4(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyModuleAuthoringV1Fragment40(RootModel[ItemsModel40]):
+    root: ItemsModel40
+
+
+class ContractOntologyModuleAuthoringV1Fragment41(RootModel[TemporalKind]):
+    root: TemporalKind
+
+
+class ContractOntologyModuleAuthoringV1Fragment42(RootModel[ValueType]):
+    root: ValueType
+
+
+class ContractOntologyModuleAuthoringV1Fragment43(RootModel[CardinalityModel]):
+    root: CardinalityModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment44(RootModel[Predicate2]):
+    root: Predicate2
+
+
+class ContractOntologyModuleAuthoringV1Fragment45(
+    RootModel[AdditionalPropertiesModel7]
+):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyModuleAuthoringV1Fragment46(RootModel[LocalName]):
+    root: LocalName
+
+
+class ContractOntologyModuleAuthoringV1Fragment47(RootModel[Major]):
+    root: Major
+
+
+class ContractOntologyModuleAuthoringV1Fragment48(RootModel[CodeOf]):
+    root: CodeOf
+
+
+class ContractOntologyModuleAuthoringV1Fragment49(RootModel[ExternalCodes]):
+    root: ExternalCodes
+
+
+class ContractOntologyModuleAuthoringV1Fragment5(RootModel[IdModel1]):
+    root: IdModel1
+
+
+class ContractOntologyModuleAuthoringV1Fragment50(
+    RootModel[AdditionalPropertiesModel6 | None]
+):
+    root: AdditionalPropertiesModel6 | None
+
+
+class ContractOntologyModuleAuthoringV1Fragment51(RootModel[Field0Model54]):
+    root: Field0Model54
+
+
+class ContractOntologyModuleAuthoringV1Fragment52(RootModel[IfModel19]):
+    root: IfModel19
+
+
+class ContractOntologyModuleAuthoringV1Fragment53(RootModel[KindModel9]):
+    root: KindModel9
+
+
+class ContractOntologyModuleAuthoringV1Fragment54(RootModel[ThenModel14]):
+    root: ThenModel14
+
+
+class ContractOntologyModuleAuthoringV1Fragment55(RootModel[Field1Model30]):
+    root: Field1Model30
+
+
+class ContractOntologyModuleAuthoringV1Fragment56(RootModel[IfModel20]):
+    root: IfModel20
+
+
+class ContractOntologyModuleAuthoringV1Fragment57(RootModel[KindModel10]):
+    root: KindModel10
+
+
+class ContractOntologyModuleAuthoringV1Fragment58(RootModel[ThenModel14]):
+    root: ThenModel14
+
+
+class ContractOntologyModuleAuthoringV1Fragment59(RootModel[Field2Model8]):
+    root: Field2Model8
+
+
+class ContractOntologyModuleAuthoringV1Fragment6(RootModel[VersionModel]):
+    root: VersionModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment60(RootModel[IfModel21]):
+    root: IfModel21
+
+
+class ContractOntologyModuleAuthoringV1Fragment61(RootModel[ThenModel14]):
+    root: ThenModel14
+
+
+class ContractOntologyModuleAuthoringV1Fragment62(RootModel[ConstraintModel]):
+    root: ConstraintModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment63(
+    RootModel[AdditionalPropertiesModel3]
+):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyModuleAuthoringV1Fragment64(RootModel[IdModel]):
+    root: IdModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment65(RootModel[Construct]):
+    root: Construct
+
+
+class ContractOntologyModuleAuthoringV1Fragment66(RootModel[SubjectModel]):
+    root: SubjectModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment67(RootModel[Property]):
+    root: Property
+
+
+class ContractOntologyModuleAuthoringV1Fragment68(RootModel[With]):
+    root: With
+
+
+class ContractOntologyModuleAuthoringV1Fragment69(RootModel[ItemsModel35]):
+    root: ItemsModel35
+
+
+class ContractOntologyModuleAuthoringV1Fragment7(RootModel[PredicateNamespace]):
+    root: PredicateNamespace
+
+
+class ContractOntologyModuleAuthoringV1Fragment70(RootModel[ValueModel12]):
+    root: ValueModel12
+
+
+class ContractOntologyModuleAuthoringV1Fragment71(RootModel[Expression]):
+    root: Expression
+
+
+class ContractOntologyModuleAuthoringV1Fragment72(RootModel[Stage]):
+    root: Stage
+
+
+class ContractOntologyModuleAuthoringV1Fragment73(RootModel[ConsumerModel]):
+    root: ConsumerModel
+
+
+class ContractOntologyModuleAuthoringV1Fragment74(RootModel[Applicability]):
+    root: Applicability
+
+
+class ContractOntologyModuleAuthoringV1Fragment75(RootModel[Severity]):
+    root: Severity
+
+
+class ContractOntologyModuleAuthoringV1Fragment76(RootModel[OnNonconformance]):
+    root: OnNonconformance
+
+
+class ContractOntologyModuleAuthoringV1Fragment77(RootModel[DataBasis]):
+    root: DataBasis
+
+
+class ContractOntologyModuleAuthoringV1Fragment78(RootModel[Field0Model52]):
+    root: Field0Model52
+
+
+class ContractOntologyModuleAuthoringV1Fragment79(RootModel[Field1Model29]):
+    root: Field1Model29
+
+
+class ContractOntologyModuleAuthoringV1Fragment8(RootModel[Dependencies]):
+    root: Dependencies
+
+
+class ContractOntologyModuleAuthoringV1Fragment80(
+    RootModel[AdditionalPropertiesModel3]
+):
+    root: AdditionalPropertiesModel3
+
+
+class ContractOntologyModuleAuthoringV1Fragment81(RootModel[Inferred]):
+    root: Inferred
+
+
+class ContractOntologyModuleAuthoringV1Fragment82(RootModel[ProjectionRule]):
+    root: ProjectionRule
+
+
+class ContractOntologyModuleAuthoringV1Fragment83(
+    RootModel[AdditionalPropertiesModel5]
+):
+    root: AdditionalPropertiesModel5
+
+
+class ContractOntologyModuleAuthoringV1Fragment84(RootModel[Property]):
+    root: Property
+
+
+class ContractOntologyModuleAuthoringV1Fragment85(RootModel[DispositionModel4]):
+    root: DispositionModel4
+
+
+class ContractOntologyModuleAuthoringV1Fragment86(RootModel[LabelModel1]):
+    root: LabelModel1
+
+
+class ContractOntologyModuleAuthoringV1Fragment87(RootModel[Direction]):
+    root: Direction
+
+
+class ContractOntologyModuleAuthoringV1Fragment88(RootModel[ReasonModel6]):
+    root: ReasonModel6
+
+
+class ContractOntologyModuleAuthoringV1Fragment89(RootModel[Field0Model53]):
+    root: Field0Model53
+
+
+class ContractOntologyModuleAuthoringV1Fragment9(RootModel[ItemsModel42]):
+    root: ItemsModel42
+
+
+class ContractOntologyModuleAuthoringV1Fragment90(RootModel[IfModel18]):
+    root: IfModel18
+
+
+class ContractOntologyModuleAuthoringV1Fragment91(RootModel[DispositionModel3]):
+    root: DispositionModel3
+
+
+class ContractOntologyModuleAuthoringV1Fragment92(RootModel[ThenModel14]):
+    root: ThenModel14
+
+
+class ContractOntologyModuleAuthoringV1Fragment93(RootModel[ElseModel8]):
+    root: ElseModel8
+
+
+class ContractOntologyReleaseManifestV1Fragment1(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyReleaseManifestV1Fragment10(
+    RootModel[AdditionalPropertiesModel7]
+):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyReleaseManifestV1Fragment11(RootModel[InferenceModel]):
+    root: InferenceModel
+
+
+class ContractOntologyReleaseManifestV1Fragment12(RootModel[ItemsModel53]):
+    root: ItemsModel53
+
+
+class ContractOntologyReleaseManifestV1Fragment13(RootModel[ValidationModel]):
+    root: ValidationModel
+
+
+class ContractOntologyReleaseManifestV1Fragment14(RootModel[ItemsModel54]):
+    root: ItemsModel54
+
+
+class ContractOntologyReleaseManifestV1Fragment15(RootModel[Ruleset]):
+    root: Ruleset
+
+
+class ContractOntologyReleaseManifestV1Fragment16(RootModel[Modules]):
+    root: Modules
+
+
+class ContractOntologyReleaseManifestV1Fragment17(RootModel[ItemsModel49]):
+    root: ItemsModel49
+
+
+class ContractOntologyReleaseManifestV1Fragment18(
+    RootModel[AdditionalPropertiesModel7]
+):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyReleaseManifestV1Fragment19(RootModel[IdModel2]):
+    root: IdModel2
+
+
+class ContractOntologyReleaseManifestV1Fragment2(RootModel[ContractModel2]):
+    root: ContractModel2
+
+
+class ContractOntologyReleaseManifestV1Fragment20(RootModel[VersionModel]):
+    root: VersionModel
+
+
+class ContractOntologyReleaseManifestV1Fragment21(RootModel[Digest]):
+    root: Digest
+
+
+class ContractOntologyReleaseManifestV1Fragment22(RootModel[DependencyLock]):
+    root: DependencyLock
+
+
+class ContractOntologyReleaseManifestV1Fragment23(RootModel[ItemsModel48]):
+    root: ItemsModel48
+
+
+class ContractOntologyReleaseManifestV1Fragment24(
+    RootModel[AdditionalPropertiesModel7]
+):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyReleaseManifestV1Fragment25(RootModel[ModuleModel1]):
+    root: ModuleModel1
+
+
+class ContractOntologyReleaseManifestV1Fragment26(RootModel[Requires]):
+    root: Requires
+
+
+class ContractOntologyReleaseManifestV1Fragment27(RootModel[TermsDigest]):
+    root: TermsDigest
+
+
+class ContractOntologyReleaseManifestV1Fragment28(RootModel[Predicates]):
+    root: Predicates
+
+
+class ContractOntologyReleaseManifestV1Fragment29(RootModel[ItemsModel50]):
+    root: ItemsModel50
+
+
+class ContractOntologyReleaseManifestV1Fragment3(RootModel[ReleaseRef]):
+    root: ReleaseRef
+
+
+class ContractOntologyReleaseManifestV1Fragment30(
+    RootModel[AdditionalPropertiesModel7]
+):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyReleaseManifestV1Fragment31(RootModel[TermIri]):
+    root: TermIri
+
+
+class ContractOntologyReleaseManifestV1Fragment32(RootModel[PredicateKeyModel1]):
+    root: PredicateKeyModel1
+
+
+class ContractOntologyReleaseManifestV1Fragment33(RootModel[CardinalityModel]):
+    root: CardinalityModel
+
+
+class ContractOntologyReleaseManifestV1Fragment34(RootModel[ValueTypeModel]):
+    root: ValueTypeModel
+
+
+class ContractOntologyReleaseManifestV1Fragment35(RootModel[TemporalKind]):
+    root: TemporalKind
+
+
+class ContractOntologyReleaseManifestV1Fragment36(RootModel[QualifiersModel]):
+    root: QualifiersModel
+
+
+class ContractOntologyReleaseManifestV1Fragment37(RootModel[ItemsModel51]):
+    root: ItemsModel51
+
+
+class ContractOntologyReleaseManifestV1Fragment38(RootModel[MemberKeySource]):
+    root: MemberKeySource
+
+
+class ContractOntologyReleaseManifestV1Fragment39(RootModel[BasisRequired]):
+    root: BasisRequired
+
+
+class ContractOntologyReleaseManifestV1Fragment4(RootModel[NameModel]):
+    root: NameModel
+
+
+class ContractOntologyReleaseManifestV1Fragment40(RootModel[ChangeRecords]):
+    root: ChangeRecords
+
+
+class ContractOntologyReleaseManifestV1Fragment41(RootModel[ItemsModel46]):
+    root: ItemsModel46
+
+
+class ContractOntologyReleaseManifestV1Fragment42(
+    RootModel[AdditionalPropertiesModel7]
+):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyReleaseManifestV1Fragment43(RootModel[ClassModel1]):
+    root: ClassModel1
+
+
+class ContractOntologyReleaseManifestV1Fragment44(RootModel[SourceIris]):
+    root: SourceIris
+
+
+class ContractOntologyReleaseManifestV1Fragment45(RootModel[ItemsModel47]):
+    root: ItemsModel47
+
+
+class ContractOntologyReleaseManifestV1Fragment46(RootModel[ReplacementIris]):
+    root: ReplacementIris
+
+
+class ContractOntologyReleaseManifestV1Fragment47(RootModel[ItemsModel47]):
+    root: ItemsModel47
+
+
+class ContractOntologyReleaseManifestV1Fragment48(RootModel[Rationale]):
+    root: Rationale
+
+
+class ContractOntologyReleaseManifestV1Fragment49(RootModel[ProjectionMapping]):
+    root: ProjectionMapping
+
+
+class ContractOntologyReleaseManifestV1Fragment5(RootModel[Sequence]):
+    root: Sequence
+
+
+class ContractOntologyReleaseManifestV1Fragment50(
+    RootModel[AdditionalPropertiesModel7]
+):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyReleaseManifestV1Fragment51(RootModel[VersionModel1]):
+    root: VersionModel1
+
+
+class ContractOntologyReleaseManifestV1Fragment52(RootModel[Digest]):
+    root: Digest
+
+
+class ContractOntologyReleaseManifestV1Fragment53(RootModel[RequiredContext]):
+    root: RequiredContext
+
+
+class ContractOntologyReleaseManifestV1Fragment54(RootModel[ItemsModel52]):
+    root: ItemsModel52
+
+
+class ContractOntologyReleaseManifestV1Fragment55(RootModel[ArtifactSlotsModel]):
+    root: ArtifactSlotsModel
+
+
+class ContractOntologyReleaseManifestV1Fragment56(
+    RootModel[AdditionalPropertiesModel7]
+):
+    root: AdditionalPropertiesModel7
+
+
+class ContractOntologyReleaseManifestV1Fragment57(RootModel[Profiles]):
+    root: Profiles
+
+
+class ContractOntologyReleaseManifestV1Fragment58(RootModel[ItemsModel45]):
+    root: ItemsModel45
+
+
+class ContractOntologyReleaseManifestV1Fragment59(RootModel[Ref]):
+    root: Ref
+
+
+class ContractOntologyReleaseManifestV1Fragment6(RootModel[ManifestDigest]):
+    root: ManifestDigest
+
+
+class ContractOntologyReleaseManifestV1Fragment60(RootModel[Digest]):
+    root: Digest
+
+
+class ContractOntologyReleaseManifestV1Fragment61(RootModel[Templates]):
+    root: Templates
+
+
+class ContractOntologyReleaseManifestV1Fragment62(RootModel[ItemsModel45]):
+    root: ItemsModel45
+
+
+class ContractOntologyReleaseManifestV1Fragment63(RootModel[Ref]):
+    root: Ref
+
+
+class ContractOntologyReleaseManifestV1Fragment64(RootModel[Digest]):
+    root: Digest
+
+
+class ContractOntologyReleaseManifestV1Fragment65(RootModel[Compiler]):
+    root: Compiler
+
+
+class ContractOntologyReleaseManifestV1Fragment66(RootModel[ItemsModel45]):
+    root: ItemsModel45
+
+
+class ContractOntologyReleaseManifestV1Fragment67(RootModel[Ref]):
+    root: Ref
+
+
+class ContractOntologyReleaseManifestV1Fragment68(RootModel[Digest]):
+    root: Digest
+
+
+class ContractOntologyReleaseManifestV1Fragment69(RootModel[Validation]):
+    root: Validation
+
+
+class ContractOntologyReleaseManifestV1Fragment7(RootModel[AuthoringSchema]):
+    root: AuthoringSchema
+
+
+class ContractOntologyReleaseManifestV1Fragment70(RootModel[ItemsModel45]):
+    root: ItemsModel45
+
+
+class ContractOntologyReleaseManifestV1Fragment71(RootModel[Ref]):
+    root: Ref
+
+
+class ContractOntologyReleaseManifestV1Fragment72(RootModel[Digest]):
+    root: Digest
+
+
+class ContractOntologyReleaseManifestV1Fragment8(RootModel[CompilerVersion]):
+    root: CompilerVersion
+
+
+class ContractOntologyReleaseManifestV1Fragment9(RootModel[Semantics]):
+    root: Semantics
+
+
+class ContractProblemDetailsFragment1(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProblemDetailsFragment2(RootModel[TypeModel8]):
@@ -12147,8 +14728,8 @@ class ContractProblemDetailsFragment3(RootModel[Title]):
     root: Title
 
 
-class ContractProblemDetailsFragment4(RootModel[StatusModel2]):
-    root: StatusModel2
+class ContractProblemDetailsFragment4(RootModel[StatusModel4]):
+    root: StatusModel4
 
 
 class ContractProblemDetailsFragment5(RootModel[Detail]):
@@ -12167,40 +14748,40 @@ class ContractProblemDetailsFragment8(RootModel[TraceId]):
     root: TraceId
 
 
-class ContractProvenanceQueryV1Fragment1(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceQueryV1Fragment1(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceQueryV1Fragment10(RootModel[Id]):
-    root: Id
+class ContractProvenanceQueryV1Fragment10(RootModel[IdModel2]):
+    root: IdModel2
 
 
-class ContractProvenanceQueryV1Fragment2(RootModel[ContractModel1]):
-    root: ContractModel1
+class ContractProvenanceQueryV1Fragment2(RootModel[ContractModel3]):
+    root: ContractModel3
 
 
 class ContractProvenanceQueryV1Fragment3(RootModel[Root]):
     root: Root
 
 
-class ContractProvenanceQueryV1Fragment4(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceQueryV1Fragment4(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceQueryV1Fragment5(RootModel[KindModel9]):
-    root: KindModel9
+class ContractProvenanceQueryV1Fragment5(RootModel[KindModel12]):
+    root: KindModel12
 
 
-class ContractProvenanceQueryV1Fragment6(RootModel[Id]):
-    root: Id
+class ContractProvenanceQueryV1Fragment6(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceQueryV1Fragment7(RootModel[Anchor]):
     root: Anchor
 
 
-class ContractProvenanceQueryV1Fragment8(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceQueryV1Fragment8(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceQueryV1Fragment9(RootModel[TypeModel9]):
@@ -12252,24 +14833,24 @@ class Records7(BaseModel):
     kind: Literal['review_attempt']
 
 
-class ContractProvenanceResultV1Fragment1(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment1(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment100(RootModel[Field7Model1]):
     root: Field7Model1
 
 
-class ContractProvenanceResultV1Fragment101(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment101(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment102(RootModel[KindModel69]):
-    root: KindModel69
+class ContractProvenanceResultV1Fragment102(RootModel[KindModel72]):
+    root: KindModel72
 
 
-class ContractProvenanceResultV1Fragment103(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment103(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment104(RootModel[DataModel]):
@@ -12280,56 +14861,56 @@ class ContractProvenanceResultV1Fragment105(RootModel[Field8Model1]):
     root: Field8Model1
 
 
-class ContractProvenanceResultV1Fragment106(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment106(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment107(RootModel[KindModel70]):
-    root: KindModel70
+class ContractProvenanceResultV1Fragment107(RootModel[KindModel73]):
+    root: KindModel73
 
 
-class ContractProvenanceResultV1Fragment108(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment108(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment109(RootModel[DataModel1]):
     root: DataModel1
 
 
-class ContractProvenanceResultV1Fragment111(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment111(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment112(RootModel[KindModel71]):
-    root: KindModel71
+class ContractProvenanceResultV1Fragment112(RootModel[KindModel74]):
+    root: KindModel74
 
 
-class ContractProvenanceResultV1Fragment113(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment113(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment115(RootModel[Field10Model]):
     root: Field10Model
 
 
-class ContractProvenanceResultV1Fragment116(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment116(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment117(RootModel[KindModel62]):
-    root: KindModel62
+class ContractProvenanceResultV1Fragment117(RootModel[KindModel65]):
+    root: KindModel65
 
 
-class ContractProvenanceResultV1Fragment118(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment118(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment119(RootModel[Data26]):
     root: Data26
 
 
-class ContractProvenanceResultV1Fragment120(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment120(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment121(RootModel[FromVersionId | None]):
@@ -12340,8 +14921,8 @@ class ContractProvenanceResultV1Fragment122(RootModel[ToVersionId]):
     root: ToVersionId
 
 
-class ContractProvenanceResultV1Fragment123(RootModel[ReasonModel7]):
-    root: ReasonModel7
+class ContractProvenanceResultV1Fragment123(RootModel[ReasonModel8]):
+    root: ReasonModel8
 
 
 class ContractProvenanceResultV1Fragment124(RootModel[CreatedAt]):
@@ -12360,44 +14941,44 @@ class ContractProvenanceResultV1Fragment127(RootModel[Field11Model]):
     root: Field11Model
 
 
-class ContractProvenanceResultV1Fragment128(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment128(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment129(RootModel[KindModel63]):
-    root: KindModel63
+class ContractProvenanceResultV1Fragment129(RootModel[KindModel66]):
+    root: KindModel66
 
 
-class ContractProvenanceResultV1Fragment13(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment13(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment130(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment130(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment131(RootModel[Data27]):
     root: Data27
 
 
-class ContractProvenanceResultV1Fragment132(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment132(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment133(RootModel[StoredReference]):
     root: StoredReference
 
 
-class ContractProvenanceResultV1Fragment134(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment134(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment135(RootModel[InputVersionIds]):
     root: InputVersionIds
 
 
-class ContractProvenanceResultV1Fragment136(RootModel[ItemsModel30]):
-    root: ItemsModel30
+class ContractProvenanceResultV1Fragment136(RootModel[ItemsModel57]):
+    root: ItemsModel57
 
 
 class ContractProvenanceResultV1Fragment137(RootModel[ProducerAvailable]):
@@ -12408,180 +14989,180 @@ class ContractProvenanceResultV1Fragment138(RootModel[EdgesModel]):
     root: EdgesModel
 
 
-class ContractProvenanceResultV1Fragment139(RootModel[ItemsModel28]):
-    root: ItemsModel28
+class ContractProvenanceResultV1Fragment139(RootModel[ItemsModel55]):
+    root: ItemsModel55
 
 
-class ContractProvenanceResultV1Fragment14(RootModel[KindModel60]):
-    root: KindModel60
+class ContractProvenanceResultV1Fragment14(RootModel[KindModel63]):
+    root: KindModel63
 
 
-class ContractProvenanceResultV1Fragment140(RootModel[Field0Model50]):
-    root: Field0Model50
+class ContractProvenanceResultV1Fragment140(RootModel[Field0Model55]):
+    root: Field0Model55
 
 
-class ContractProvenanceResultV1Fragment141(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment141(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment142(RootModel[KindModel10]):
-    root: KindModel10
+class ContractProvenanceResultV1Fragment142(RootModel[KindModel13]):
+    root: KindModel13
 
 
 class ContractProvenanceResultV1Fragment143(RootModel[Source51]):
     root: Source51
 
 
-class ContractProvenanceResultV1Fragment144(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment144(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment145(RootModel[KindModel11]):
-    root: KindModel11
+class ContractProvenanceResultV1Fragment145(RootModel[KindModel14]):
+    root: KindModel14
 
 
-class ContractProvenanceResultV1Fragment146(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment146(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment147(RootModel[Target51]):
     root: Target51
 
 
-class ContractProvenanceResultV1Fragment148(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment148(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment149(RootModel[KindModel11]):
-    root: KindModel11
+class ContractProvenanceResultV1Fragment149(RootModel[KindModel14]):
+    root: KindModel14
 
 
-class ContractProvenanceResultV1Fragment15(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment15(RootModel[IdModel2]):
+    root: IdModel2
 
 
-class ContractProvenanceResultV1Fragment150(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment150(RootModel[IdModel2]):
+    root: IdModel2
 
 
-class ContractProvenanceResultV1Fragment151(RootModel[Field1Model28]):
-    root: Field1Model28
+class ContractProvenanceResultV1Fragment151(RootModel[Field1Model31]):
+    root: Field1Model31
 
 
-class ContractProvenanceResultV1Fragment152(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment152(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment153(RootModel[KindModel12]):
-    root: KindModel12
+class ContractProvenanceResultV1Fragment153(RootModel[KindModel15]):
+    root: KindModel15
 
 
 class ContractProvenanceResultV1Fragment154(RootModel[Source52]):
     root: Source52
 
 
-class ContractProvenanceResultV1Fragment155(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment155(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment156(RootModel[KindModel13]):
-    root: KindModel13
+class ContractProvenanceResultV1Fragment156(RootModel[KindModel16]):
+    root: KindModel16
 
 
-class ContractProvenanceResultV1Fragment157(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment157(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment158(RootModel[Target52]):
     root: Target52
 
 
-class ContractProvenanceResultV1Fragment159(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment159(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment160(RootModel[KindModel14]):
-    root: KindModel14
+class ContractProvenanceResultV1Fragment160(RootModel[KindModel17]):
+    root: KindModel17
 
 
-class ContractProvenanceResultV1Fragment161(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment161(RootModel[IdModel2]):
+    root: IdModel2
 
 
-class ContractProvenanceResultV1Fragment162(RootModel[Field2Model8]):
-    root: Field2Model8
+class ContractProvenanceResultV1Fragment162(RootModel[Field2Model9]):
+    root: Field2Model9
 
 
-class ContractProvenanceResultV1Fragment163(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment163(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment164(RootModel[KindModel35]):
-    root: KindModel35
+class ContractProvenanceResultV1Fragment164(RootModel[KindModel38]):
+    root: KindModel38
 
 
 class ContractProvenanceResultV1Fragment165(RootModel[Source60]):
     root: Source60
 
 
-class ContractProvenanceResultV1Fragment166(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment166(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment167(RootModel[KindModel36]):
-    root: KindModel36
+class ContractProvenanceResultV1Fragment167(RootModel[KindModel39]):
+    root: KindModel39
 
 
-class ContractProvenanceResultV1Fragment168(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment168(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment169(RootModel[Target60]):
     root: Target60
 
 
-class ContractProvenanceResultV1Fragment17(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment17(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment170(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment170(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment171(RootModel[KindModel37]):
-    root: KindModel37
+class ContractProvenanceResultV1Fragment171(RootModel[KindModel40]):
+    root: KindModel40
 
 
-class ContractProvenanceResultV1Fragment172(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment172(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment173(RootModel[Field3Model3]):
     root: Field3Model3
 
 
-class ContractProvenanceResultV1Fragment174(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment174(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment175(RootModel[KindModel38]):
-    root: KindModel38
+class ContractProvenanceResultV1Fragment175(RootModel[KindModel41]):
+    root: KindModel41
 
 
 class ContractProvenanceResultV1Fragment176(RootModel[Source61]):
     root: Source61
 
 
-class ContractProvenanceResultV1Fragment177(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment177(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment178(RootModel[KindModel39]):
-    root: KindModel39
+class ContractProvenanceResultV1Fragment178(RootModel[KindModel42]):
+    root: KindModel42
 
 
-class ContractProvenanceResultV1Fragment179(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment179(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment18(RootModel[SemanticContractVersion]):
@@ -12592,128 +15173,128 @@ class ContractProvenanceResultV1Fragment180(RootModel[Target61]):
     root: Target61
 
 
-class ContractProvenanceResultV1Fragment181(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment181(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment182(RootModel[KindModel40]):
-    root: KindModel40
+class ContractProvenanceResultV1Fragment182(RootModel[KindModel43]):
+    root: KindModel43
 
 
-class ContractProvenanceResultV1Fragment183(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment183(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment184(RootModel[Field4Model1]):
     root: Field4Model1
 
 
-class ContractProvenanceResultV1Fragment185(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment185(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment186(RootModel[KindModel41]):
-    root: KindModel41
+class ContractProvenanceResultV1Fragment186(RootModel[KindModel44]):
+    root: KindModel44
 
 
 class ContractProvenanceResultV1Fragment187(RootModel[Source62]):
     root: Source62
 
 
-class ContractProvenanceResultV1Fragment188(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment188(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment189(RootModel[KindModel42]):
-    root: KindModel42
+class ContractProvenanceResultV1Fragment189(RootModel[KindModel45]):
+    root: KindModel45
 
 
-class ContractProvenanceResultV1Fragment19(RootModel[VersionModel]):
-    root: VersionModel
+class ContractProvenanceResultV1Fragment19(RootModel[VersionModel2]):
+    root: VersionModel2
 
 
-class ContractProvenanceResultV1Fragment190(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment190(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment191(RootModel[Target62]):
     root: Target62
 
 
-class ContractProvenanceResultV1Fragment192(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment192(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment193(RootModel[KindModel43]):
-    root: KindModel43
+class ContractProvenanceResultV1Fragment193(RootModel[KindModel46]):
+    root: KindModel46
 
 
-class ContractProvenanceResultV1Fragment194(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment194(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment195(RootModel[Field5Model1]):
     root: Field5Model1
 
 
-class ContractProvenanceResultV1Fragment196(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment196(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment197(RootModel[KindModel44]):
-    root: KindModel44
+class ContractProvenanceResultV1Fragment197(RootModel[KindModel47]):
+    root: KindModel47
 
 
 class ContractProvenanceResultV1Fragment198(RootModel[Source63]):
     root: Source63
 
 
-class ContractProvenanceResultV1Fragment199(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment199(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment2(RootModel[ContractModel2]):
-    root: ContractModel2
+class ContractProvenanceResultV1Fragment2(RootModel[ContractModel4]):
+    root: ContractModel4
 
 
 class ContractProvenanceResultV1Fragment20(RootModel[RunIdModel | None]):
     root: RunIdModel | None
 
 
-class ContractProvenanceResultV1Fragment200(RootModel[KindModel45]):
-    root: KindModel45
+class ContractProvenanceResultV1Fragment200(RootModel[KindModel48]):
+    root: KindModel48
 
 
-class ContractProvenanceResultV1Fragment201(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment201(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment202(RootModel[Target63]):
     root: Target63
 
 
-class ContractProvenanceResultV1Fragment203(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment203(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment204(RootModel[KindModel46]):
-    root: KindModel46
+class ContractProvenanceResultV1Fragment204(RootModel[KindModel49]):
+    root: KindModel49
 
 
-class ContractProvenanceResultV1Fragment205(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment205(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment206(RootModel[Field6Model]):
     root: Field6Model
 
 
-class ContractProvenanceResultV1Fragment207(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment207(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment208(RootModel[KindModel47]):
-    root: KindModel47
+class ContractProvenanceResultV1Fragment208(RootModel[KindModel50]):
+    root: KindModel50
 
 
 class ContractProvenanceResultV1Fragment209(RootModel[Source64]):
@@ -12724,44 +15305,44 @@ class ContractProvenanceResultV1Fragment21(RootModel[OriginModel]):
     root: OriginModel
 
 
-class ContractProvenanceResultV1Fragment210(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment210(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment211(RootModel[KindModel48]):
-    root: KindModel48
+class ContractProvenanceResultV1Fragment211(RootModel[KindModel51]):
+    root: KindModel51
 
 
-class ContractProvenanceResultV1Fragment212(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment212(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment213(RootModel[Target64]):
     root: Target64
 
 
-class ContractProvenanceResultV1Fragment214(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment214(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment215(RootModel[KindModel49]):
-    root: KindModel49
+class ContractProvenanceResultV1Fragment215(RootModel[KindModel52]):
+    root: KindModel52
 
 
-class ContractProvenanceResultV1Fragment216(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment216(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment217(RootModel[Field7Model]):
     root: Field7Model
 
 
-class ContractProvenanceResultV1Fragment218(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment218(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment219(RootModel[KindModel50]):
-    root: KindModel50
+class ContractProvenanceResultV1Fragment219(RootModel[KindModel53]):
+    root: KindModel53
 
 
 class ContractProvenanceResultV1Fragment22(RootModel[OriginalAssertionIdModel | None]):
@@ -12772,80 +15353,80 @@ class ContractProvenanceResultV1Fragment220(RootModel[Source65]):
     root: Source65
 
 
-class ContractProvenanceResultV1Fragment221(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment221(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment222(RootModel[KindModel51]):
-    root: KindModel51
+class ContractProvenanceResultV1Fragment222(RootModel[KindModel54]):
+    root: KindModel54
 
 
-class ContractProvenanceResultV1Fragment223(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment223(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment224(RootModel[Target65]):
     root: Target65
 
 
-class ContractProvenanceResultV1Fragment225(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment225(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment226(RootModel[KindModel52]):
-    root: KindModel52
+class ContractProvenanceResultV1Fragment226(RootModel[KindModel55]):
+    root: KindModel55
 
 
-class ContractProvenanceResultV1Fragment227(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment227(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment228(RootModel[Field8Model]):
     root: Field8Model
 
 
-class ContractProvenanceResultV1Fragment229(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment229(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment23(RootModel[SubjectType]):
     root: SubjectType
 
 
-class ContractProvenanceResultV1Fragment230(RootModel[KindModel53]):
-    root: KindModel53
+class ContractProvenanceResultV1Fragment230(RootModel[KindModel56]):
+    root: KindModel56
 
 
 class ContractProvenanceResultV1Fragment231(RootModel[Source66]):
     root: Source66
 
 
-class ContractProvenanceResultV1Fragment232(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment232(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment233(RootModel[KindModel54]):
-    root: KindModel54
+class ContractProvenanceResultV1Fragment233(RootModel[KindModel57]):
+    root: KindModel57
 
 
-class ContractProvenanceResultV1Fragment234(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment234(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment235(RootModel[Target66]):
     root: Target66
 
 
-class ContractProvenanceResultV1Fragment236(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment236(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment237(RootModel[KindModel55]):
-    root: KindModel55
+class ContractProvenanceResultV1Fragment237(RootModel[KindModel58]):
+    root: KindModel58
 
 
-class ContractProvenanceResultV1Fragment238(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment238(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment239(RootModel[Field9]):
@@ -12856,172 +15437,172 @@ class ContractProvenanceResultV1Fragment24(RootModel[SlotType]):
     root: SlotType
 
 
-class ContractProvenanceResultV1Fragment240(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment240(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment241(RootModel[KindModel56]):
-    root: KindModel56
+class ContractProvenanceResultV1Fragment241(RootModel[KindModel59]):
+    root: KindModel59
 
 
 class ContractProvenanceResultV1Fragment242(RootModel[Source67]):
     root: Source67
 
 
-class ContractProvenanceResultV1Fragment243(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment243(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment244(RootModel[KindModel57]):
-    root: KindModel57
+class ContractProvenanceResultV1Fragment244(RootModel[KindModel60]):
+    root: KindModel60
 
 
-class ContractProvenanceResultV1Fragment245(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment245(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment246(RootModel[Target66]):
     root: Target66
 
 
-class ContractProvenanceResultV1Fragment247(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment247(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment248(RootModel[KindModel58]):
-    root: KindModel58
+class ContractProvenanceResultV1Fragment248(RootModel[KindModel61]):
+    root: KindModel61
 
 
-class ContractProvenanceResultV1Fragment249(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment249(RootModel[IdModel2]):
+    root: IdModel2
 
 
-class ContractProvenanceResultV1Fragment25(RootModel[ValueModel11]):
-    root: ValueModel11
+class ContractProvenanceResultV1Fragment25(RootModel[ValueModel14]):
+    root: ValueModel14
 
 
 class ContractProvenanceResultV1Fragment250(RootModel[Field10]):
     root: Field10
 
 
-class ContractProvenanceResultV1Fragment251(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment251(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment252(RootModel[KindModel15]):
-    root: KindModel15
+class ContractProvenanceResultV1Fragment252(RootModel[KindModel18]):
+    root: KindModel18
 
 
 class ContractProvenanceResultV1Fragment253(RootModel[Source53]):
     root: Source53
 
 
-class ContractProvenanceResultV1Fragment254(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment254(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment255(RootModel[KindModel16]):
-    root: KindModel16
+class ContractProvenanceResultV1Fragment255(RootModel[KindModel19]):
+    root: KindModel19
 
 
-class ContractProvenanceResultV1Fragment256(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment256(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment257(RootModel[Target53]):
     root: Target53
 
 
-class ContractProvenanceResultV1Fragment258(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment258(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment259(RootModel[KindModel17]):
-    root: KindModel17
+class ContractProvenanceResultV1Fragment259(RootModel[KindModel20]):
+    root: KindModel20
 
 
-class ContractProvenanceResultV1Fragment26(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment26(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment260(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment260(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment261(RootModel[Field11]):
     root: Field11
 
 
-class ContractProvenanceResultV1Fragment262(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment262(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment263(RootModel[KindModel18]):
-    root: KindModel18
+class ContractProvenanceResultV1Fragment263(RootModel[KindModel21]):
+    root: KindModel21
 
 
 class ContractProvenanceResultV1Fragment264(RootModel[Source54]):
     root: Source54
 
 
-class ContractProvenanceResultV1Fragment265(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment265(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment266(RootModel[KindModel19]):
-    root: KindModel19
+class ContractProvenanceResultV1Fragment266(RootModel[KindModel22]):
+    root: KindModel22
 
 
-class ContractProvenanceResultV1Fragment267(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment267(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment268(RootModel[Target54]):
     root: Target54
 
 
-class ContractProvenanceResultV1Fragment269(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment269(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment27(RootModel[ModelConfidenceModel | None]):
     root: ModelConfidenceModel | None
 
 
-class ContractProvenanceResultV1Fragment270(RootModel[KindModel20]):
-    root: KindModel20
+class ContractProvenanceResultV1Fragment270(RootModel[KindModel23]):
+    root: KindModel23
 
 
-class ContractProvenanceResultV1Fragment271(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment271(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment272(RootModel[Field12]):
     root: Field12
 
 
-class ContractProvenanceResultV1Fragment273(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment273(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment274(RootModel[KindModel21]):
-    root: KindModel21
+class ContractProvenanceResultV1Fragment274(RootModel[KindModel24]):
+    root: KindModel24
 
 
 class ContractProvenanceResultV1Fragment275(RootModel[Source54]):
     root: Source54
 
 
-class ContractProvenanceResultV1Fragment276(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment276(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment277(RootModel[KindModel22]):
-    root: KindModel22
+class ContractProvenanceResultV1Fragment277(RootModel[KindModel25]):
+    root: KindModel25
 
 
-class ContractProvenanceResultV1Fragment278(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment278(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment279(RootModel[Target55]):
@@ -13032,44 +15613,44 @@ class ContractProvenanceResultV1Fragment28(RootModel[InterpretationBasisModel1])
     root: InterpretationBasisModel1
 
 
-class ContractProvenanceResultV1Fragment280(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment280(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment281(RootModel[KindModel22]):
-    root: KindModel22
+class ContractProvenanceResultV1Fragment281(RootModel[KindModel25]):
+    root: KindModel25
 
 
-class ContractProvenanceResultV1Fragment282(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment282(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment283(RootModel[Field13]):
     root: Field13
 
 
-class ContractProvenanceResultV1Fragment284(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment284(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment285(RootModel[KindModel23]):
-    root: KindModel23
+class ContractProvenanceResultV1Fragment285(RootModel[KindModel26]):
+    root: KindModel26
 
 
 class ContractProvenanceResultV1Fragment286(RootModel[Source56]):
     root: Source56
 
 
-class ContractProvenanceResultV1Fragment287(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment287(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment288(RootModel[KindModel24]):
-    root: KindModel24
+class ContractProvenanceResultV1Fragment288(RootModel[KindModel27]):
+    root: KindModel27
 
 
-class ContractProvenanceResultV1Fragment289(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment289(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment29(RootModel[CreatedAt]):
@@ -13080,224 +15661,224 @@ class ContractProvenanceResultV1Fragment290(RootModel[Target55]):
     root: Target55
 
 
-class ContractProvenanceResultV1Fragment291(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment291(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment292(RootModel[KindModel25]):
-    root: KindModel25
+class ContractProvenanceResultV1Fragment292(RootModel[KindModel28]):
+    root: KindModel28
 
 
-class ContractProvenanceResultV1Fragment293(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment293(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment294(RootModel[Field14]):
     root: Field14
 
 
-class ContractProvenanceResultV1Fragment295(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment295(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment296(RootModel[KindModel26]):
-    root: KindModel26
+class ContractProvenanceResultV1Fragment296(RootModel[KindModel29]):
+    root: KindModel29
 
 
 class ContractProvenanceResultV1Fragment297(RootModel[Source56]):
     root: Source56
 
 
-class ContractProvenanceResultV1Fragment298(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment298(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment299(RootModel[KindModel27]):
-    root: KindModel27
+class ContractProvenanceResultV1Fragment299(RootModel[KindModel30]):
+    root: KindModel30
 
 
 class ContractProvenanceResultV1Fragment3(RootModel[Root]):
     root: Root
 
 
-class ContractProvenanceResultV1Fragment300(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment300(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment301(RootModel[Target55]):
     root: Target55
 
 
-class ContractProvenanceResultV1Fragment302(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment302(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment303(RootModel[KindModel28]):
-    root: KindModel28
+class ContractProvenanceResultV1Fragment303(RootModel[KindModel31]):
+    root: KindModel31
 
 
-class ContractProvenanceResultV1Fragment304(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment304(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment305(RootModel[Field15]):
     root: Field15
 
 
-class ContractProvenanceResultV1Fragment306(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment306(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment307(RootModel[KindModel29]):
-    root: KindModel29
+class ContractProvenanceResultV1Fragment307(RootModel[KindModel32]):
+    root: KindModel32
 
 
 class ContractProvenanceResultV1Fragment308(RootModel[Source58]):
     root: Source58
 
 
-class ContractProvenanceResultV1Fragment309(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment309(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment31(RootModel[Field0Model51 | None]):
-    root: Field0Model51 | None
+class ContractProvenanceResultV1Fragment31(RootModel[Field0Model56 | None]):
+    root: Field0Model56 | None
 
 
-class ContractProvenanceResultV1Fragment310(RootModel[KindModel30]):
-    root: KindModel30
+class ContractProvenanceResultV1Fragment310(RootModel[KindModel33]):
+    root: KindModel33
 
 
-class ContractProvenanceResultV1Fragment311(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment311(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment312(RootModel[Target58]):
     root: Target58
 
 
-class ContractProvenanceResultV1Fragment313(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment313(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment314(RootModel[KindModel31]):
-    root: KindModel31
+class ContractProvenanceResultV1Fragment314(RootModel[KindModel34]):
+    root: KindModel34
 
 
-class ContractProvenanceResultV1Fragment315(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment315(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment316(RootModel[Field16]):
     root: Field16
 
 
-class ContractProvenanceResultV1Fragment317(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment317(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment318(RootModel[KindModel32]):
-    root: KindModel32
+class ContractProvenanceResultV1Fragment318(RootModel[KindModel35]):
+    root: KindModel35
 
 
 class ContractProvenanceResultV1Fragment319(RootModel[Source59]):
     root: Source59
 
 
-class ContractProvenanceResultV1Fragment320(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment320(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment321(RootModel[KindModel33]):
-    root: KindModel33
+class ContractProvenanceResultV1Fragment321(RootModel[KindModel36]):
+    root: KindModel36
 
 
-class ContractProvenanceResultV1Fragment322(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment322(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment323(RootModel[Target59]):
     root: Target59
 
 
-class ContractProvenanceResultV1Fragment324(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment324(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment325(RootModel[KindModel34]):
-    root: KindModel34
+class ContractProvenanceResultV1Fragment325(RootModel[KindModel37]):
+    root: KindModel37
 
 
-class ContractProvenanceResultV1Fragment326(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment326(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment327(RootModel[Gaps]):
     root: Gaps
 
 
-class ContractProvenanceResultV1Fragment328(RootModel[ItemsModel29]):
-    root: ItemsModel29
+class ContractProvenanceResultV1Fragment328(RootModel[ItemsModel56]):
+    root: ItemsModel56
 
 
-class ContractProvenanceResultV1Fragment329(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment329(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment33(RootModel[Field1Model29]):
-    root: Field1Model29
+class ContractProvenanceResultV1Fragment33(RootModel[Field1Model32]):
+    root: Field1Model32
 
 
 class ContractProvenanceResultV1Fragment330(RootModel[Record1]):
     root: Record1
 
 
-class ContractProvenanceResultV1Fragment331(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment331(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment332(RootModel[KindModel59]):
-    root: KindModel59
+class ContractProvenanceResultV1Fragment332(RootModel[KindModel62]):
+    root: KindModel62
 
 
-class ContractProvenanceResultV1Fragment333(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment333(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment334(RootModel[FieldModel1]):
     root: FieldModel1
 
 
-class ContractProvenanceResultV1Fragment335(RootModel[ReasonModel6]):
-    root: ReasonModel6
+class ContractProvenanceResultV1Fragment335(RootModel[ReasonModel7]):
+    root: ReasonModel7
 
 
-class ContractProvenanceResultV1Fragment34(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment34(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment35(RootModel[KindModel61]):
-    root: KindModel61
+class ContractProvenanceResultV1Fragment35(RootModel[KindModel64]):
+    root: KindModel64
 
 
-class ContractProvenanceResultV1Fragment36(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment36(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment37(RootModel[Data25]):
     root: Data25
 
 
-class ContractProvenanceResultV1Fragment38(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment38(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment39(RootModel[AssertionId]):
     root: AssertionId
 
 
-class ContractProvenanceResultV1Fragment4(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment4(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment40(RootModel[ArtifactId]):
@@ -13316,8 +15897,8 @@ class ContractProvenanceResultV1Fragment43(RootModel[BboxModel3 | None]):
     root: BboxModel3 | None
 
 
-class ContractProvenanceResultV1Fragment44(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment44(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment45(RootModel[CharStartModel6 | None]):
@@ -13340,36 +15921,36 @@ class ContractProvenanceResultV1Fragment49(RootModel[StoredContentRecord | None]
     root: StoredContentRecord | None
 
 
-class ContractProvenanceResultV1Fragment5(RootModel[KindModel72]):
-    root: KindModel72
+class ContractProvenanceResultV1Fragment5(RootModel[KindModel75]):
+    root: KindModel75
 
 
-class ContractProvenanceResultV1Fragment50(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment50(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment51(RootModel[Field2Model9]):
-    root: Field2Model9
+class ContractProvenanceResultV1Fragment51(RootModel[Field2Model10]):
+    root: Field2Model10
 
 
-class ContractProvenanceResultV1Fragment52(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment52(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment53(RootModel[KindModel64]):
-    root: KindModel64
+class ContractProvenanceResultV1Fragment53(RootModel[KindModel67]):
+    root: KindModel67
 
 
-class ContractProvenanceResultV1Fragment54(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment54(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment55(RootModel[Data28]):
     root: Data28
 
 
-class ContractProvenanceResultV1Fragment56(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment56(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment57(RootModel[DocumentVersionId]):
@@ -13386,8 +15967,8 @@ class ContractProvenanceResultV1Fragment59(
     root: ArtifactContractVersionModel1 | None
 
 
-class ContractProvenanceResultV1Fragment6(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment6(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment60(RootModel[ManifestSha256 | None]):
@@ -13410,24 +15991,24 @@ class ContractProvenanceResultV1Fragment64(RootModel[Field3Model4]):
     root: Field3Model4
 
 
-class ContractProvenanceResultV1Fragment65(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment65(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment66(RootModel[KindModel65]):
-    root: KindModel65
+class ContractProvenanceResultV1Fragment66(RootModel[KindModel68]):
+    root: KindModel68
 
 
-class ContractProvenanceResultV1Fragment67(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment67(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment68(RootModel[Data29]):
     root: Data29
 
 
-class ContractProvenanceResultV1Fragment69(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment69(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment7(RootModel[TenantId]):
@@ -13446,24 +16027,24 @@ class ContractProvenanceResultV1Fragment72(RootModel[Field4Model2]):
     root: Field4Model2
 
 
-class ContractProvenanceResultV1Fragment73(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment73(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment74(RootModel[KindModel66]):
-    root: KindModel66
+class ContractProvenanceResultV1Fragment74(RootModel[KindModel69]):
+    root: KindModel69
 
 
-class ContractProvenanceResultV1Fragment75(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment75(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment76(RootModel[Data30]):
     root: Data30
 
 
-class ContractProvenanceResultV1Fragment77(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment77(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment78(RootModel[SourceSha256Model]):
@@ -13482,24 +16063,24 @@ class ContractProvenanceResultV1Fragment80(RootModel[Field5Model2]):
     root: Field5Model2
 
 
-class ContractProvenanceResultV1Fragment81(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment81(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment82(RootModel[KindModel67]):
-    root: KindModel67
+class ContractProvenanceResultV1Fragment82(RootModel[KindModel70]):
+    root: KindModel70
 
 
-class ContractProvenanceResultV1Fragment83(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment83(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment84(RootModel[Data31]):
     root: Data31
 
 
-class ContractProvenanceResultV1Fragment85(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment85(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment86(RootModel[ArtifactId]):
@@ -13514,8 +16095,8 @@ class ContractProvenanceResultV1Fragment88(RootModel[ProfileVersion]):
     root: ProfileVersion
 
 
-class ContractProvenanceResultV1Fragment89(RootModel[StatusModel3]):
-    root: StatusModel3
+class ContractProvenanceResultV1Fragment89(RootModel[StatusModel5]):
+    root: StatusModel5
 
 
 class ContractProvenanceResultV1Fragment9(RootModel[Completeness]):
@@ -13526,16 +16107,16 @@ class ContractProvenanceResultV1Fragment90(RootModel[RunConfigurationModel]):
     root: RunConfigurationModel
 
 
-class ContractProvenanceResultV1Fragment91(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment91(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment92(RootModel[CountersModel]):
     root: CountersModel
 
 
-class ContractProvenanceResultV1Fragment93(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment93(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractProvenanceResultV1Fragment94(RootModel[CreatedAt]):
@@ -13546,16 +16127,16 @@ class ContractProvenanceResultV1Fragment95(RootModel[Field6Model1]):
     root: Field6Model1
 
 
-class ContractProvenanceResultV1Fragment96(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractProvenanceResultV1Fragment96(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractProvenanceResultV1Fragment97(RootModel[KindModel68]):
-    root: KindModel68
+class ContractProvenanceResultV1Fragment97(RootModel[KindModel71]):
+    root: KindModel71
 
 
-class ContractProvenanceResultV1Fragment98(RootModel[Id]):
-    root: Id
+class ContractProvenanceResultV1Fragment98(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractProvenanceResultV1Fragment99(RootModel[Data]):
@@ -13575,20 +16156,20 @@ class ContractQualifiedMoneyV1(RootModel[MoneyValue]):
     ]
 
 
-class ContractReviewDecisionFragment1(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractReviewDecisionFragment1(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
-class ContractReviewDecisionFragment10(RootModel[Field0Model51 | None]):
-    root: Field0Model51 | None
+class ContractReviewDecisionFragment10(RootModel[Field0Model56 | None]):
+    root: Field0Model56 | None
 
 
-class ContractReviewDecisionFragment11(RootModel[Field1Model30]):
-    root: Field1Model30
+class ContractReviewDecisionFragment11(RootModel[Field1Model33]):
+    root: Field1Model33
 
 
-class ContractReviewDecisionFragment12(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractReviewDecisionFragment12(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractReviewDecisionFragment13(RootModel[SourceModel]):
@@ -13611,16 +16192,16 @@ class ContractReviewDecisionFragment17(RootModel[SelectorModel]):
     root: SelectorModel
 
 
-class ContractReviewDecisionFragment18(RootModel[ItemsModel31]):
-    root: ItemsModel31
+class ContractReviewDecisionFragment18(RootModel[ItemsModel58]):
+    root: ItemsModel58
 
 
 class ContractReviewDecisionFragment19(RootModel[TypeModel10]):
     root: TypeModel10
 
 
-class ContractReviewDecisionFragment2(RootModel[Id]):
-    root: Id
+class ContractReviewDecisionFragment2(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractReviewDecisionFragment20(RootModel[ReviewerPrincipalIdModel]):
@@ -13675,8 +16256,8 @@ class ContractReviewDecisionFragment9(RootModel[EvidenceModel | None]):
     root: EvidenceModel | None
 
 
-class ContractReviewSubmissionAttemptV1Fragment1(RootModel[AdditionalPropertiesModel3]):
-    root: AdditionalPropertiesModel3
+class ContractReviewSubmissionAttemptV1Fragment1(RootModel[AdditionalPropertiesModel7]):
+    root: AdditionalPropertiesModel7
 
 
 class ContractReviewSubmissionAttemptV1Fragment10(RootModel[SubmittedAt]):
@@ -13704,9 +16285,9 @@ class ContractReviewSubmissionAttemptV1Fragment15(RootModel[CorrectedValue | Non
 
 
 class ContractReviewSubmissionAttemptV1Fragment16(
-    RootModel[AdditionalPropertiesModel3]
+    RootModel[AdditionalPropertiesModel7]
 ):
-    root: AdditionalPropertiesModel3
+    root: AdditionalPropertiesModel7
 
 
 class ContractReviewSubmissionAttemptV1Fragment17(RootModel[EvidenceModel1 | None]):
@@ -13714,17 +16295,17 @@ class ContractReviewSubmissionAttemptV1Fragment17(RootModel[EvidenceModel1 | Non
 
 
 class ContractReviewSubmissionAttemptV1Fragment18(
-    RootModel[AdditionalPropertiesModel3]
+    RootModel[AdditionalPropertiesModel7]
 ):
-    root: AdditionalPropertiesModel3
+    root: AdditionalPropertiesModel7
 
 
 class ContractReviewSubmissionAttemptV1Fragment19(RootModel[ReviewerComment | None]):
     root: ReviewerComment | None
 
 
-class ContractReviewSubmissionAttemptV1Fragment2(RootModel[ContractModel3]):
-    root: ContractModel3
+class ContractReviewSubmissionAttemptV1Fragment2(RootModel[ContractModel5]):
+    root: ContractModel5
 
 
 class ContractReviewSubmissionAttemptV1Fragment20(RootModel[OutcomeModel3]):
@@ -13735,8 +16316,8 @@ class ContractReviewSubmissionAttemptV1Fragment21(RootModel[AuthorizationDecisio
     root: AuthorizationDecisionId
 
 
-class ContractReviewSubmissionAttemptV1Fragment3(RootModel[Id]):
-    root: Id
+class ContractReviewSubmissionAttemptV1Fragment3(RootModel[IdModel2]):
+    root: IdModel2
 
 
 class ContractReviewSubmissionAttemptV1Fragment4(RootModel[TenantId]):
@@ -13830,7 +16411,7 @@ class Accepted(RootModel[list[AcceptedItem1]]):
     root: Annotated[list[AcceptedItem1], Field(min_length=0)]
 
 
-class ItemsModel32(BaseModel):
+class ItemsModel59(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -13867,15 +16448,15 @@ class IntroducingEvidence(RootModel[list[EvidenceClaim]]):
     root: Annotated[list[EvidenceClaim], Field(min_length=1)]
 
 
-class ItemsModel33(RootModel[EvidenceClaim]):
+class ItemsModel60(RootModel[EvidenceClaim]):
     root: EvidenceClaim
 
 
-class Field0Model52(RootModel[ContractContentArtifactManifest]):
+class Field0Model57(RootModel[ContractContentArtifactManifest]):
     root: ContractContentArtifactManifest
 
 
-class Field1Model31(RootModel[ContractContentArtifactManifestV2]):
+class Field1Model34(RootModel[ContractContentArtifactManifestV2]):
     root: ContractContentArtifactManifestV2
 
 
@@ -13896,7 +16477,7 @@ class Block(BaseModel):
     text_origin: Literal['STATED', 'OCR', 'TRANSCRIBED', 'DESCRIBED']
 
 
-class ThenModel13(BaseModel):
+class ThenModel15(BaseModel):
     origin_anchor: NativeText | Unresolved | None = None
 
 
@@ -13904,15 +16485,15 @@ class OriginAnchor(RootModel[NativeText | Unresolved]):
     root: NativeText | Unresolved
 
 
-class Field0Model53(RootModel[NativeText]):
+class Field0Model58(RootModel[NativeText]):
     root: NativeText
 
 
-class Field1Model32(RootModel[Unresolved]):
+class Field1Model35(RootModel[Unresolved]):
     root: Unresolved
 
 
-class ThenModel14(BaseModel):
+class ThenModel16(BaseModel):
     origin_anchor: PageRegion | Unresolved | None = None
 
 
@@ -13920,11 +16501,11 @@ class OriginAnchorModel(RootModel[PageRegion | Unresolved]):
     root: PageRegion | Unresolved
 
 
-class Field0Model54(RootModel[PageRegion]):
+class Field0Model59(RootModel[PageRegion]):
     root: PageRegion
 
 
-class ThenModel15(BaseModel):
+class ThenModel17(BaseModel):
     origin_anchor: TimeSpan | Unresolved | None = None
 
 
@@ -13932,11 +16513,11 @@ class OriginAnchorModel1(RootModel[TimeSpan | Unresolved]):
     root: TimeSpan | Unresolved
 
 
-class Field0Model55(RootModel[TimeSpan]):
+class Field0Model60(RootModel[TimeSpan]):
     root: TimeSpan
 
 
-class ThenModel16(BaseModel):
+class ThenModel18(BaseModel):
     origin_anchor: Figure | Unresolved | None = None
 
 
@@ -13944,7 +16525,7 @@ class OriginAnchorModel2(RootModel[Figure | Unresolved]):
     root: Figure | Unresolved
 
 
-class Field0Model56(RootModel[Figure]):
+class Field0Model61(RootModel[Figure]):
     root: Figure
 
 
@@ -13954,15 +16535,15 @@ class OriginAnchorModel3(
     root: NativeText | PageRegion | TimeSpan | Figure | Unresolved
 
 
-class Field0Model57(RootModel[NativeText]):
+class Field0Model62(RootModel[NativeText]):
     root: NativeText
 
 
-class Field1Model33(RootModel[PageRegion]):
+class Field1Model36(RootModel[PageRegion]):
     root: PageRegion
 
 
-class Field2Model10(RootModel[TimeSpan]):
+class Field2Model11(RootModel[TimeSpan]):
     root: TimeSpan
 
 
@@ -13974,11 +16555,11 @@ class Field4Model3(RootModel[Unresolved]):
     root: Unresolved
 
 
-class Field0Model58(RootModel[Block]):
+class Field0Model63(RootModel[Block]):
     root: Block
 
 
-class ValueModel12(RootModel[TypedValue]):
+class ValueModel15(RootModel[TypedValue]):
     root: TypedValue
 
 
@@ -14009,11 +16590,11 @@ class QualifierValue(
     ]
 
 
-class Field0Model59(RootModel[TextValue]):
+class Field0Model64(RootModel[TextValue]):
     root: TextValue
 
 
-class QualifiersModel(
+class QualifiersModel1(
     RootModel[
         dict[
             Annotated[str, StringConstraints(pattern=r'^[a-z][a-z0-9_]{0,63}$')],
@@ -14030,7 +16611,7 @@ class QualifiersModel(
     ]
 
 
-class AdditionalPropertiesModel4(RootModel[QualifierValue]):
+class AdditionalPropertiesModel8(RootModel[QualifierValue]):
     root: QualifierValue
 
 
@@ -14091,7 +16672,7 @@ class CommitTemporal(BaseModel):
     valid_to_state: EndState
 
 
-class IfModel17(BaseModel):
+class IfModel22(BaseModel):
     valid_from: Bound
 
 
@@ -14108,7 +16689,7 @@ class AttestationZone(RootModel[IanaZone]):
     ]
 
 
-class Field0Model60(RootModel[DocumentDate]):
+class Field0Model65(RootModel[DocumentDate]):
     root: DocumentDate
 
 
@@ -14121,7 +16702,7 @@ class ValidFromModel1(RootModel[Bound | None]):
     ]
 
 
-class Field0Model61(RootModel[Bound]):
+class Field0Model66(RootModel[Bound]):
     root: Bound
 
 
@@ -14169,11 +16750,11 @@ class ValidToModel1(RootModel[Bound | None]):
     ]
 
 
-class Field0Model62(RootModel[CommitTemporal]):
+class Field0Model67(RootModel[CommitTemporal]):
     root: CommitTemporal
 
 
-class Field1Model34(RootModel[VersionTemporal]):
+class Field1Model37(RootModel[VersionTemporal]):
     root: VersionTemporal
 
 
@@ -14198,7 +16779,7 @@ class Assertions(RootModel[list[ContractAssertionRecordV2]]):
     root: Annotated[list[ContractAssertionRecordV2], Field(min_length=0)]
 
 
-class ItemsModel34(RootModel[ContractAssertionRecordV2]):
+class ItemsModel61(RootModel[ContractAssertionRecordV2]):
     root: ContractAssertionRecordV2
 
 
@@ -14206,7 +16787,7 @@ class Entities(RootModel[list[EntityReference]]):
     root: Annotated[list[EntityReference], Field(min_length=0)]
 
 
-class ItemsModel35(RootModel[EntityReference]):
+class ItemsModel62(RootModel[EntityReference]):
     root: EntityReference
 
 
@@ -14228,7 +16809,7 @@ class Items18(BaseModel):
     kind: Literal['assertion']
 
 
-class Field0Model63(BaseModel):
+class Field0Model68(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -14237,11 +16818,11 @@ class Field0Model63(BaseModel):
     kind: Literal['assertion']
 
 
-class Semantics(RootModel[ContractAssertionRecordV2 | None]):
+class SemanticsModel(RootModel[ContractAssertionRecordV2 | None]):
     root: ContractAssertionRecordV2 | None
 
 
-class Field1Model35(RootModel[ContractAssertionRecordV2]):
+class Field1Model38(RootModel[ContractAssertionRecordV2]):
     root: ContractAssertionRecordV2
 
 
@@ -14284,8 +16865,8 @@ class ContractAssertionAdmissionResultV1Fragment5(RootModel[Accepted]):
     root: Accepted
 
 
-class ContractAssertionAdmissionResultV1Fragment6(RootModel[ItemsModel32]):
-    root: ItemsModel32
+class ContractAssertionAdmissionResultV1Fragment6(RootModel[ItemsModel59]):
+    root: ItemsModel59
 
 
 class ContractAssertionAdmissionResultV1Fragment70(RootModel[Admitted]):
@@ -14308,8 +16889,8 @@ class ContractAssertionRecordV2Fragment49(RootModel[IntroducingEvidence]):
     root: IntroducingEvidence
 
 
-class ContractAssertionRecordV2Fragment50(RootModel[ItemsModel33]):
-    root: ItemsModel33
+class ContractAssertionRecordV2Fragment50(RootModel[ItemsModel60]):
+    root: ItemsModel60
 
 
 class ContractCanonicalCommitRequest1(BaseModel):
@@ -14391,7 +16972,7 @@ class ContractCanonicalCommitRequest(
     ]
 
 
-class VersionModel1(BaseModel):
+class VersionModel3(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -14409,7 +16990,7 @@ class ContractCanonicalCommitResponse(BaseModel):
     canonical_accepted_at: str
     commit_id: str
     fact_version_ids: Annotated[list[str], Field(min_length=1)]
-    versions: Annotated[list[VersionModel1] | None, Field(min_length=1)] = None
+    versions: Annotated[list[VersionModel3] | None, Field(min_length=1)] = None
 
 
 class ContractContentArtifactManifestRead(
@@ -14418,12 +16999,12 @@ class ContractContentArtifactManifestRead(
     root: ContractContentArtifactManifest | ContractContentArtifactManifestV2
 
 
-class ContractContentArtifactManifestReadFragment1(RootModel[Field0Model52]):
-    root: Field0Model52
+class ContractContentArtifactManifestReadFragment1(RootModel[Field0Model57]):
+    root: Field0Model57
 
 
-class ContractContentArtifactManifestReadFragment2(RootModel[Field1Model31]):
-    root: Field1Model31
+class ContractContentArtifactManifestReadFragment2(RootModel[Field1Model34]):
+    root: Field1Model34
 
 
 class ContractContentRecordsV2(RootModel[Block | Table | Layout]):
@@ -15042,8 +17623,8 @@ class ContractContentRecordsV2(RootModel[Block | Table | Layout]):
     ]
 
 
-class ContractContentRecordsV2Fragment1(RootModel[Field0Model58]):
-    root: Field0Model58
+class ContractContentRecordsV2Fragment1(RootModel[Field0Model63]):
+    root: Field0Model63
 
 
 class ContractContentRecordsV2Fragment102(RootModel[Block]):
@@ -15054,16 +17635,16 @@ class ContractContentRecordsV2Fragment130(RootModel[OriginAnchorModel3]):
     root: OriginAnchorModel3
 
 
-class ContractContentRecordsV2Fragment131(RootModel[Field0Model57]):
-    root: Field0Model57
+class ContractContentRecordsV2Fragment131(RootModel[Field0Model62]):
+    root: Field0Model62
 
 
-class ContractContentRecordsV2Fragment132(RootModel[Field1Model33]):
-    root: Field1Model33
+class ContractContentRecordsV2Fragment132(RootModel[Field1Model36]):
+    root: Field1Model36
 
 
-class ContractContentRecordsV2Fragment133(RootModel[Field2Model10]):
-    root: Field2Model10
+class ContractContentRecordsV2Fragment133(RootModel[Field2Model11]):
+    root: Field2Model11
 
 
 class ContractContentRecordsV2Fragment134(RootModel[Field3Model5]):
@@ -15074,72 +17655,72 @@ class ContractContentRecordsV2Fragment135(RootModel[Field4Model3]):
     root: Field4Model3
 
 
-class ContractContentRecordsV2Fragment142(RootModel[ThenModel13]):
-    root: ThenModel13
+class ContractContentRecordsV2Fragment142(RootModel[ThenModel15]):
+    root: ThenModel15
 
 
 class ContractContentRecordsV2Fragment143(RootModel[OriginAnchor]):
     root: OriginAnchor
 
 
-class ContractContentRecordsV2Fragment144(RootModel[Field0Model53]):
-    root: Field0Model53
+class ContractContentRecordsV2Fragment144(RootModel[Field0Model58]):
+    root: Field0Model58
 
 
-class ContractContentRecordsV2Fragment145(RootModel[Field1Model32]):
-    root: Field1Model32
+class ContractContentRecordsV2Fragment145(RootModel[Field1Model35]):
+    root: Field1Model35
 
 
-class ContractContentRecordsV2Fragment149(RootModel[ThenModel14]):
-    root: ThenModel14
+class ContractContentRecordsV2Fragment149(RootModel[ThenModel16]):
+    root: ThenModel16
 
 
 class ContractContentRecordsV2Fragment150(RootModel[OriginAnchorModel]):
     root: OriginAnchorModel
 
 
-class ContractContentRecordsV2Fragment151(RootModel[Field0Model54]):
-    root: Field0Model54
+class ContractContentRecordsV2Fragment151(RootModel[Field0Model59]):
+    root: Field0Model59
 
 
-class ContractContentRecordsV2Fragment152(RootModel[Field1Model32]):
-    root: Field1Model32
+class ContractContentRecordsV2Fragment152(RootModel[Field1Model35]):
+    root: Field1Model35
 
 
-class ContractContentRecordsV2Fragment156(RootModel[ThenModel15]):
-    root: ThenModel15
+class ContractContentRecordsV2Fragment156(RootModel[ThenModel17]):
+    root: ThenModel17
 
 
 class ContractContentRecordsV2Fragment157(RootModel[OriginAnchorModel1]):
     root: OriginAnchorModel1
 
 
-class ContractContentRecordsV2Fragment158(RootModel[Field0Model55]):
-    root: Field0Model55
+class ContractContentRecordsV2Fragment158(RootModel[Field0Model60]):
+    root: Field0Model60
 
 
-class ContractContentRecordsV2Fragment159(RootModel[Field1Model32]):
-    root: Field1Model32
+class ContractContentRecordsV2Fragment159(RootModel[Field1Model35]):
+    root: Field1Model35
 
 
-class ContractContentRecordsV2Fragment163(RootModel[ThenModel16]):
-    root: ThenModel16
+class ContractContentRecordsV2Fragment163(RootModel[ThenModel18]):
+    root: ThenModel18
 
 
 class ContractContentRecordsV2Fragment164(RootModel[OriginAnchorModel2]):
     root: OriginAnchorModel2
 
 
-class ContractContentRecordsV2Fragment165(RootModel[Field0Model56]):
-    root: Field0Model56
+class ContractContentRecordsV2Fragment165(RootModel[Field0Model61]):
+    root: Field0Model61
 
 
-class ContractContentRecordsV2Fragment166(RootModel[Field1Model32]):
-    root: Field1Model32
+class ContractContentRecordsV2Fragment166(RootModel[Field1Model35]):
+    root: Field1Model35
 
 
-class ContractFactAnswerV1Fragment4(RootModel[ValueModel12]):
-    root: ValueModel12
+class ContractFactAnswerV1Fragment4(RootModel[ValueModel15]):
+    root: ValueModel15
 
 
 class ContractFactSlotKeyV1(BaseModel):
@@ -15182,20 +17763,20 @@ class ContractFactSlotKeyV1(BaseModel):
     subject_entity_id: str
 
 
-class ContractFactSlotKeyV1Fragment7(RootModel[QualifiersModel]):
-    root: QualifiersModel
+class ContractFactSlotKeyV1Fragment7(RootModel[QualifiersModel1]):
+    root: QualifiersModel1
 
 
 class ContractFactSlotKeyV1Fragment73(RootModel[QualifierValue]):
     root: QualifierValue
 
 
-class ContractFactSlotKeyV1Fragment74(RootModel[Field0Model59]):
-    root: Field0Model59
+class ContractFactSlotKeyV1Fragment74(RootModel[Field0Model64]):
+    root: Field0Model64
 
 
-class ContractFactSlotKeyV1Fragment9(RootModel[AdditionalPropertiesModel4]):
-    root: AdditionalPropertiesModel4
+class ContractFactSlotKeyV1Fragment9(RootModel[AdditionalPropertiesModel8]):
+    root: AdditionalPropertiesModel8
 
 
 class ContractFactTemporalV1Fragment15(RootModel[CommitTemporal]):
@@ -15206,8 +17787,8 @@ class ContractFactTemporalV1Fragment18(RootModel[ValidFromModel1 | None]):
     root: ValidFromModel1 | None
 
 
-class ContractFactTemporalV1Fragment19(RootModel[Field0Model61]):
-    root: Field0Model61
+class ContractFactTemporalV1Fragment19(RootModel[Field0Model66]):
+    root: Field0Model66
 
 
 class ContractFactTemporalV1Fragment22(RootModel[ValidToStateModel2]):
@@ -15234,28 +17815,28 @@ class ContractFactTemporalV1Fragment3(RootModel[Bound]):
     root: Bound
 
 
-class ContractFactTemporalV1Fragment30(RootModel[Field0Model60]):
-    root: Field0Model60
+class ContractFactTemporalV1Fragment30(RootModel[Field0Model65]):
+    root: Field0Model65
 
 
 class ContractFactTemporalV1Fragment32(RootModel[AttestedThrough | None]):
     root: AttestedThrough | None
 
 
-class ContractFactTemporalV1Fragment33(RootModel[Field0Model60]):
-    root: Field0Model60
+class ContractFactTemporalV1Fragment33(RootModel[Field0Model65]):
+    root: Field0Model65
 
 
 class ContractFactTemporalV1Fragment35(RootModel[AttestedTo | None]):
     root: AttestedTo | None
 
 
-class ContractFactTemporalV1Fragment36(RootModel[Field0Model60]):
-    root: Field0Model60
+class ContractFactTemporalV1Fragment36(RootModel[Field0Model65]):
+    root: Field0Model65
 
 
-class ContractFactTemporalV1Fragment39(RootModel[IfModel17]):
-    root: IfModel17
+class ContractFactTemporalV1Fragment39(RootModel[IfModel22]):
+    root: IfModel22
 
 
 class ContractFactTemporalV1Fragment40(RootModel[ValidFromModel]):
@@ -15274,8 +17855,8 @@ class ContractFactTemporalV1Fragment66(RootModel[ValidFromModel2 | None]):
     root: ValidFromModel2 | None
 
 
-class ContractFactTemporalV1Fragment67(RootModel[Field0Model61]):
-    root: Field0Model61
+class ContractFactTemporalV1Fragment67(RootModel[Field0Model66]):
+    root: Field0Model66
 
 
 class ContractFactTemporalV1Fragment7(RootModel[Zone]):
@@ -15286,16 +17867,16 @@ class ContractFactTemporalV1Fragment73(RootModel[ValidToModel1 | None]):
     root: ValidToModel1 | None
 
 
-class ContractFactTemporalV1Fragment74(RootModel[Field0Model61]):
-    root: Field0Model61
+class ContractFactTemporalV1Fragment74(RootModel[Field0Model66]):
+    root: Field0Model66
 
 
-class ContractFactTemporalV1Fragment94(RootModel[Field0Model62]):
-    root: Field0Model62
+class ContractFactTemporalV1Fragment94(RootModel[Field0Model67]):
+    root: Field0Model67
 
 
-class ContractFactTemporalV1Fragment95(RootModel[Field1Model34]):
-    root: Field1Model34
+class ContractFactTemporalV1Fragment95(RootModel[Field1Model37]):
+    root: Field1Model37
 
 
 class ContractFactVersionReadV1(BaseModel):
@@ -15327,7 +17908,12 @@ class ContractFactVersionReadV1(BaseModel):
     source_received_at: str | None = None
     temporal: VersionTemporal | None = None
     valid_end: str | None
-    valid_start: str
+    valid_start: Annotated[
+        str | None,
+        Field(
+            description='F0012 (ADR-0081 D7): null only for an ETERNAL version, whose valid time is unbounded below and above; temporal.temporal_kind is ETERNAL.'
+        ),
+    ]
     value: dict[str, Any]
 
 
@@ -15375,16 +17961,16 @@ class ContractInterpretationResultV2Fragment5(RootModel[Entities]):
     root: Entities
 
 
-class ContractInterpretationResultV2Fragment6(RootModel[ItemsModel35]):
-    root: ItemsModel35
+class ContractInterpretationResultV2Fragment6(RootModel[ItemsModel62]):
+    root: ItemsModel62
 
 
 class ContractInterpretationResultV2Fragment7(RootModel[Assertions]):
     root: Assertions
 
 
-class ContractInterpretationResultV2Fragment8(RootModel[ItemsModel34]):
-    root: ItemsModel34
+class ContractInterpretationResultV2Fragment8(RootModel[ItemsModel61]):
+    root: ItemsModel61
 
 
 class Records9(BaseModel):
@@ -15450,20 +18036,20 @@ class ContractProvenanceResultV1(BaseModel):
     tenant_id: str
 
 
-class ContractProvenanceResultV1Fragment12(RootModel[Field0Model63]):
-    root: Field0Model63
+class ContractProvenanceResultV1Fragment12(RootModel[Field0Model68]):
+    root: Field0Model68
 
 
 class ContractProvenanceResultV1Fragment16(RootModel[DataModel2]):
     root: DataModel2
 
 
-class ContractProvenanceResultV1Fragment30(RootModel[Semantics | None]):
-    root: Semantics | None
+class ContractProvenanceResultV1Fragment30(RootModel[SemanticsModel | None]):
+    root: SemanticsModel | None
 
 
-class ContractProvenanceResultV1Fragment32(RootModel[Field1Model35]):
-    root: Field1Model35
+class ContractProvenanceResultV1Fragment32(RootModel[Field1Model38]):
+    root: Field1Model38
 
 
 class TemporalModel(RootModel[CommitTemporal]):
@@ -15475,11 +18061,11 @@ class TemporalModel(RootModel[CommitTemporal]):
     ]
 
 
-class Versions(RootModel[list[VersionModel1]]):
-    root: Annotated[list[VersionModel1], Field(min_length=1)]
+class Versions(RootModel[list[VersionModel3]]):
+    root: Annotated[list[VersionModel3], Field(min_length=1)]
 
 
-class ItemsModel36(BaseModel):
+class ItemsModel63(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
@@ -15517,7 +18103,7 @@ class TemporalModel2(RootModel[VersionTemporal]):
     root: VersionTemporal
 
 
-class Field2Model11(RootModel[ValidityUnknownRead]):
+class Field2Model12(RootModel[ValidityUnknownRead]):
     root: ValidityUnknownRead
 
 
@@ -15539,7 +18125,7 @@ class EvidenceModel2(RootModel[list[EvidenceBinding]]):
     root: Annotated[list[EvidenceBinding], Field(min_length=1)]
 
 
-class ItemsModel37(RootModel[EvidenceBinding]):
+class ItemsModel64(RootModel[EvidenceBinding]):
     root: EvidenceBinding
 
 
@@ -15575,7 +18161,7 @@ class AssertionsModel(RootModel[list[CandidateAssertion]]):
     root: list[CandidateAssertion]
 
 
-class ItemsModel38(RootModel[CandidateAssertion]):
+class ItemsModel65(RootModel[CandidateAssertion]):
     root: CandidateAssertion
 
 
@@ -15583,7 +18169,7 @@ class EntitiesModel(RootModel[list[CandidateEntity]]):
     root: list[CandidateEntity]
 
 
-class ItemsModel39(RootModel[CandidateEntity]):
+class ItemsModel66(RootModel[CandidateEntity]):
     root: CandidateEntity
 
 
@@ -15591,7 +18177,7 @@ class RelationshipsModel(RootModel[list[CandidateRelationship]]):
     root: list[CandidateRelationship]
 
 
-class ItemsModel40(RootModel[CandidateRelationship]):
+class ItemsModel67(RootModel[CandidateRelationship]):
     root: CandidateRelationship
 
 
@@ -15641,7 +18227,7 @@ class Items27(BaseModel):
     kind: Literal['fact_version']
 
 
-class ItemsModel41(
+class ItemsModel68(
     RootModel[
         Items18
         | Items19
@@ -15698,8 +18284,8 @@ class ContractCanonicalCommitResponseFragment6(RootModel[Versions]):
     root: Versions
 
 
-class ContractCanonicalCommitResponseFragment7(RootModel[ItemsModel36]):
-    root: ItemsModel36
+class ContractCanonicalCommitResponseFragment7(RootModel[ItemsModel63]):
+    root: ItemsModel63
 
 
 class ContractFactTemporalV1(
@@ -16006,8 +18592,8 @@ class ContractFactTemporalV1Fragment93(RootModel[TemporalModel2]):
     root: TemporalModel2
 
 
-class ContractFactTemporalV1Fragment96(RootModel[Field2Model11]):
-    root: Field2Model11
+class ContractFactTemporalV1Fragment96(RootModel[Field2Model12]):
+    root: Field2Model12
 
 
 class ContractInterpretationResult(BaseModel):
@@ -16029,8 +18615,8 @@ class ContractInterpretationResult(BaseModel):
     warnings: list[str]
 
 
-class ContractInterpretationResultFragment10(RootModel[ItemsModel40]):
-    root: ItemsModel40
+class ContractInterpretationResultFragment10(RootModel[ItemsModel67]):
+    root: ItemsModel67
 
 
 class ContractInterpretationResultFragment5(RootModel[EntitiesModel]):
@@ -16041,16 +18627,16 @@ class ContractInterpretationResultFragment57(RootModel[CandidateEntity]):
     root: CandidateEntity
 
 
-class ContractInterpretationResultFragment6(RootModel[ItemsModel39]):
-    root: ItemsModel39
+class ContractInterpretationResultFragment6(RootModel[ItemsModel66]):
+    root: ItemsModel66
 
 
 class ContractInterpretationResultFragment63(RootModel[EvidenceModel3]):
     root: EvidenceModel3
 
 
-class ContractInterpretationResultFragment64(RootModel[ItemsModel37]):
-    root: ItemsModel37
+class ContractInterpretationResultFragment64(RootModel[ItemsModel64]):
+    root: ItemsModel64
 
 
 class ContractInterpretationResultFragment65(RootModel[CandidateAssertion]):
@@ -16065,24 +18651,24 @@ class ContractInterpretationResultFragment72(RootModel[EvidenceModel2]):
     root: EvidenceModel2
 
 
-class ContractInterpretationResultFragment73(RootModel[ItemsModel37]):
-    root: ItemsModel37
+class ContractInterpretationResultFragment73(RootModel[ItemsModel64]):
+    root: ItemsModel64
 
 
 class ContractInterpretationResultFragment76(RootModel[CandidateRelationship]):
     root: CandidateRelationship
 
 
-class ContractInterpretationResultFragment8(RootModel[ItemsModel38]):
-    root: ItemsModel38
+class ContractInterpretationResultFragment8(RootModel[ItemsModel65]):
+    root: ItemsModel65
 
 
 class ContractInterpretationResultFragment82(RootModel[EvidenceModel3]):
     root: EvidenceModel3
 
 
-class ContractInterpretationResultFragment83(RootModel[ItemsModel37]):
-    root: ItemsModel37
+class ContractInterpretationResultFragment83(RootModel[ItemsModel64]):
+    root: ItemsModel64
 
 
 class ContractInterpretationResultFragment9(RootModel[RelationshipsModel]):
@@ -16093,8 +18679,8 @@ class ContractProvenanceResultV1Fragment10(RootModel[RecordsModel]):
     root: RecordsModel
 
 
-class ContractProvenanceResultV1Fragment11(RootModel[ItemsModel41]):
-    root: ItemsModel41
+class ContractProvenanceResultV1Fragment11(RootModel[ItemsModel68]):
+    root: ItemsModel68
 
 
 class ContractProvenanceResultV1Fragment110(RootModel[Field9Model]):
@@ -20417,6 +23003,958 @@ class ContractModelsV1(BaseModel):
         ContractLearningCandidateReservationV1Fragment9 | None,
         Field(alias='ContractLearningCandidateReservationV1Fragment9'),
     ] = None
+    ContractOntologyImpactReportV1_1: Annotated[
+        ContractOntologyImpactReportV1 | None,
+        Field(alias='ContractOntologyImpactReportV1'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment1_1: Annotated[
+        ContractOntologyImpactReportV1Fragment1 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment1'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment10_1: Annotated[
+        ContractOntologyImpactReportV1Fragment10 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment10'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment11_1: Annotated[
+        ContractOntologyImpactReportV1Fragment11 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment11'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment12_1: Annotated[
+        ContractOntologyImpactReportV1Fragment12 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment12'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment13_1: Annotated[
+        ContractOntologyImpactReportV1Fragment13 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment13'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment14_1: Annotated[
+        ContractOntologyImpactReportV1Fragment14 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment14'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment15_1: Annotated[
+        ContractOntologyImpactReportV1Fragment15 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment15'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment16_1: Annotated[
+        ContractOntologyImpactReportV1Fragment16 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment16'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment17_1: Annotated[
+        ContractOntologyImpactReportV1Fragment17 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment17'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment18_1: Annotated[
+        ContractOntologyImpactReportV1Fragment18 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment18'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment19_1: Annotated[
+        ContractOntologyImpactReportV1Fragment19 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment19'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment2_1: Annotated[
+        ContractOntologyImpactReportV1Fragment2 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment2'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment20_1: Annotated[
+        ContractOntologyImpactReportV1Fragment20 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment20'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment21_1: Annotated[
+        ContractOntologyImpactReportV1Fragment21 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment21'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment22_1: Annotated[
+        ContractOntologyImpactReportV1Fragment22 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment22'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment23_1: Annotated[
+        ContractOntologyImpactReportV1Fragment23 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment23'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment24_1: Annotated[
+        ContractOntologyImpactReportV1Fragment24 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment24'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment25_1: Annotated[
+        ContractOntologyImpactReportV1Fragment25 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment25'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment26_1: Annotated[
+        ContractOntologyImpactReportV1Fragment26 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment26'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment27_1: Annotated[
+        ContractOntologyImpactReportV1Fragment27 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment27'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment28_1: Annotated[
+        ContractOntologyImpactReportV1Fragment28 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment28'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment29_1: Annotated[
+        ContractOntologyImpactReportV1Fragment29 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment29'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment3_1: Annotated[
+        ContractOntologyImpactReportV1Fragment3 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment3'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment30_1: Annotated[
+        ContractOntologyImpactReportV1Fragment30 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment30'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment31_1: Annotated[
+        ContractOntologyImpactReportV1Fragment31 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment31'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment32_1: Annotated[
+        ContractOntologyImpactReportV1Fragment32 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment32'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment33_1: Annotated[
+        ContractOntologyImpactReportV1Fragment33 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment33'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment34_1: Annotated[
+        ContractOntologyImpactReportV1Fragment34 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment34'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment35_1: Annotated[
+        ContractOntologyImpactReportV1Fragment35 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment35'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment36_1: Annotated[
+        ContractOntologyImpactReportV1Fragment36 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment36'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment37_1: Annotated[
+        ContractOntologyImpactReportV1Fragment37 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment37'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment38_1: Annotated[
+        ContractOntologyImpactReportV1Fragment38 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment38'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment39_1: Annotated[
+        ContractOntologyImpactReportV1Fragment39 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment39'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment4_1: Annotated[
+        ContractOntologyImpactReportV1Fragment4 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment4'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment40_1: Annotated[
+        ContractOntologyImpactReportV1Fragment40 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment40'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment41_1: Annotated[
+        ContractOntologyImpactReportV1Fragment41 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment41'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment42_1: Annotated[
+        ContractOntologyImpactReportV1Fragment42 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment42'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment43_1: Annotated[
+        ContractOntologyImpactReportV1Fragment43 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment43'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment44_1: Annotated[
+        ContractOntologyImpactReportV1Fragment44 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment44'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment45_1: Annotated[
+        ContractOntologyImpactReportV1Fragment45 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment45'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment46_1: Annotated[
+        ContractOntologyImpactReportV1Fragment46 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment46'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment47_1: Annotated[
+        ContractOntologyImpactReportV1Fragment47 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment47'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment48_1: Annotated[
+        ContractOntologyImpactReportV1Fragment48 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment48'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment49_1: Annotated[
+        ContractOntologyImpactReportV1Fragment49 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment49'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment5_1: Annotated[
+        ContractOntologyImpactReportV1Fragment5 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment5'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment50_1: Annotated[
+        ContractOntologyImpactReportV1Fragment50 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment50'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment51_1: Annotated[
+        ContractOntologyImpactReportV1Fragment51 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment51'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment52_1: Annotated[
+        ContractOntologyImpactReportV1Fragment52 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment52'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment53_1: Annotated[
+        ContractOntologyImpactReportV1Fragment53 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment53'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment54_1: Annotated[
+        ContractOntologyImpactReportV1Fragment54 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment54'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment55_1: Annotated[
+        ContractOntologyImpactReportV1Fragment55 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment55'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment56_1: Annotated[
+        ContractOntologyImpactReportV1Fragment56 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment56'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment57_1: Annotated[
+        ContractOntologyImpactReportV1Fragment57 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment57'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment58_1: Annotated[
+        ContractOntologyImpactReportV1Fragment58 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment58'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment59_1: Annotated[
+        ContractOntologyImpactReportV1Fragment59 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment59'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment6_1: Annotated[
+        ContractOntologyImpactReportV1Fragment6 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment6'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment60_1: Annotated[
+        ContractOntologyImpactReportV1Fragment60 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment60'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment61_1: Annotated[
+        ContractOntologyImpactReportV1Fragment61 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment61'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment62_1: Annotated[
+        ContractOntologyImpactReportV1Fragment62 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment62'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment63_1: Annotated[
+        ContractOntologyImpactReportV1Fragment63 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment63'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment64_1: Annotated[
+        ContractOntologyImpactReportV1Fragment64 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment64'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment65_1: Annotated[
+        ContractOntologyImpactReportV1Fragment65 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment65'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment66_1: Annotated[
+        ContractOntologyImpactReportV1Fragment66 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment66'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment67_1: Annotated[
+        ContractOntologyImpactReportV1Fragment67 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment67'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment68_1: Annotated[
+        ContractOntologyImpactReportV1Fragment68 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment68'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment69_1: Annotated[
+        ContractOntologyImpactReportV1Fragment69 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment69'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment7_1: Annotated[
+        ContractOntologyImpactReportV1Fragment7 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment7'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment70_1: Annotated[
+        ContractOntologyImpactReportV1Fragment70 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment70'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment8_1: Annotated[
+        ContractOntologyImpactReportV1Fragment8 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment8'),
+    ] = None
+    ContractOntologyImpactReportV1Fragment9_1: Annotated[
+        ContractOntologyImpactReportV1Fragment9 | None,
+        Field(alias='ContractOntologyImpactReportV1Fragment9'),
+    ] = None
+    ContractOntologyModuleAuthoringV1_1: Annotated[
+        ContractOntologyModuleAuthoringV1 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment1_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment1 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment1'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment10_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment10 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment10'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment11_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment11 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment11'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment12_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment12 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment12'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment13_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment13 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment13'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment14_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment14 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment14'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment15_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment15 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment15'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment16_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment16 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment16'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment17_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment17 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment17'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment18_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment18 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment18'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment19_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment19 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment19'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment2_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment2 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment2'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment20_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment20 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment20'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment21_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment21 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment21'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment22_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment22 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment22'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment23_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment23 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment23'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment24_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment24 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment24'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment25_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment25 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment25'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment26_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment26 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment26'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment27_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment27 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment27'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment28_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment28 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment28'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment29_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment29 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment29'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment3_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment3 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment3'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment30_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment30 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment30'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment31_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment31 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment31'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment32_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment32 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment32'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment33_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment33 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment33'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment34_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment34 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment34'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment35_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment35 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment35'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment36_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment36 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment36'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment37_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment37 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment37'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment38_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment38 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment38'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment39_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment39 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment39'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment4_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment4 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment4'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment40_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment40 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment40'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment41_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment41 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment41'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment42_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment42 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment42'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment43_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment43 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment43'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment44_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment44 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment44'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment45_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment45 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment45'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment46_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment46 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment46'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment47_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment47 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment47'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment48_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment48 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment48'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment49_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment49 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment49'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment5_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment5 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment5'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment50_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment50 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment50'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment51_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment51 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment51'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment52_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment52 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment52'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment53_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment53 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment53'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment54_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment54 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment54'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment55_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment55 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment55'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment56_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment56 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment56'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment57_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment57 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment57'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment58_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment58 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment58'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment59_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment59 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment59'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment6_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment6 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment6'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment60_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment60 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment60'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment61_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment61 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment61'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment62_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment62 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment62'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment63_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment63 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment63'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment64_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment64 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment64'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment65_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment65 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment65'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment66_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment66 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment66'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment67_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment67 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment67'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment68_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment68 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment68'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment69_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment69 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment69'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment7_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment7 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment7'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment70_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment70 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment70'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment71_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment71 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment71'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment72_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment72 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment72'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment73_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment73 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment73'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment74_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment74 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment74'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment75_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment75 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment75'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment76_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment76 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment76'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment77_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment77 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment77'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment78_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment78 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment78'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment79_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment79 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment79'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment8_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment8 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment8'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment80_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment80 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment80'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment81_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment81 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment81'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment82_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment82 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment82'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment83_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment83 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment83'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment84_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment84 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment84'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment85_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment85 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment85'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment86_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment86 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment86'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment87_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment87 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment87'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment88_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment88 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment88'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment89_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment89 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment89'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment9_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment9 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment9'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment90_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment90 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment90'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment91_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment91 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment91'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment92_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment92 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment92'),
+    ] = None
+    ContractOntologyModuleAuthoringV1Fragment93_1: Annotated[
+        ContractOntologyModuleAuthoringV1Fragment93 | None,
+        Field(alias='ContractOntologyModuleAuthoringV1Fragment93'),
+    ] = None
+    ContractOntologyReleaseManifestV1_1: Annotated[
+        ContractOntologyReleaseManifestV1 | None,
+        Field(alias='ContractOntologyReleaseManifestV1'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment1_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment1 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment1'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment10_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment10 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment10'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment11_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment11 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment11'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment12_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment12 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment12'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment13_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment13 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment13'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment14_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment14 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment14'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment15_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment15 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment15'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment16_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment16 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment16'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment17_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment17 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment17'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment18_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment18 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment18'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment19_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment19 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment19'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment2_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment2 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment2'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment20_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment20 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment20'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment21_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment21 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment21'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment22_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment22 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment22'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment23_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment23 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment23'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment24_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment24 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment24'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment25_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment25 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment25'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment26_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment26 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment26'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment27_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment27 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment27'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment28_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment28 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment28'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment29_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment29 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment29'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment3_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment3 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment3'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment30_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment30 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment30'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment31_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment31 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment31'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment32_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment32 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment32'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment33_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment33 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment33'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment34_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment34 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment34'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment35_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment35 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment35'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment36_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment36 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment36'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment37_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment37 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment37'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment38_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment38 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment38'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment39_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment39 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment39'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment4_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment4 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment4'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment40_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment40 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment40'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment41_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment41 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment41'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment42_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment42 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment42'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment43_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment43 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment43'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment44_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment44 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment44'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment45_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment45 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment45'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment46_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment46 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment46'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment47_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment47 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment47'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment48_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment48 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment48'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment49_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment49 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment49'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment5_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment5 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment5'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment50_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment50 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment50'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment51_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment51 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment51'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment52_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment52 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment52'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment53_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment53 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment53'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment54_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment54 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment54'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment55_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment55 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment55'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment56_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment56 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment56'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment57_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment57 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment57'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment58_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment58 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment58'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment59_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment59 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment59'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment6_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment6 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment6'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment60_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment60 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment60'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment61_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment61 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment61'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment62_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment62 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment62'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment63_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment63 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment63'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment64_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment64 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment64'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment65_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment65 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment65'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment66_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment66 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment66'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment67_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment67 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment67'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment68_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment68 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment68'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment69_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment69 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment69'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment7_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment7 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment7'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment70_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment70 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment70'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment71_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment71 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment71'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment72_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment72 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment72'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment8_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment8 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment8'),
+    ] = None
+    ContractOntologyReleaseManifestV1Fragment9_1: Annotated[
+        ContractOntologyReleaseManifestV1Fragment9 | None,
+        Field(alias='ContractOntologyReleaseManifestV1Fragment9'),
+    ] = None
     ContractProblemDetails_1: Annotated[
         ContractProblemDetails | None, Field(alias='ContractProblemDetails')
     ] = None
@@ -23119,6 +26657,244 @@ MODEL_INDEX = {
     ('learning-candidate-reservation-v1', '/properties/review_decision_id'): 'ContractLearningCandidateReservationV1Fragment6',
     ('learning-candidate-reservation-v1', '/properties/reviewer_principal_id'): 'ContractLearningCandidateReservationV1Fragment9',
     ('learning-candidate-reservation-v1', '/properties/tenant_id'): 'ContractLearningCandidateReservationV1Fragment4',
+    ('ontology-impact-report-v1', ''): 'ContractOntologyImpactReportV1',
+    ('ontology-impact-report-v1', '/$defs/entailment'): 'ContractOntologyImpactReportV1Fragment66',
+    ('ontology-impact-report-v1', '/$defs/entailment/additionalProperties'): 'ContractOntologyImpactReportV1Fragment67',
+    ('ontology-impact-report-v1', '/$defs/entailment/properties/object'): 'ContractOntologyImpactReportV1Fragment70',
+    ('ontology-impact-report-v1', '/$defs/entailment/properties/relation'): 'ContractOntologyImpactReportV1Fragment69',
+    ('ontology-impact-report-v1', '/$defs/entailment/properties/subject'): 'ContractOntologyImpactReportV1Fragment68',
+    ('ontology-impact-report-v1', '/$defs/release_id'): 'ContractOntologyImpactReportV1Fragment62',
+    ('ontology-impact-report-v1', '/$defs/release_id/additionalProperties'): 'ContractOntologyImpactReportV1Fragment63',
+    ('ontology-impact-report-v1', '/$defs/release_id/properties/manifest_digest'): 'ContractOntologyImpactReportV1Fragment65',
+    ('ontology-impact-report-v1', '/$defs/release_id/properties/release_ref'): 'ContractOntologyImpactReportV1Fragment64',
+    ('ontology-impact-report-v1', '/additionalProperties'): 'ContractOntologyImpactReportV1Fragment1',
+    ('ontology-impact-report-v1', '/allOf/0'): 'ContractOntologyImpactReportV1Fragment50',
+    ('ontology-impact-report-v1', '/allOf/0/if'): 'ContractOntologyImpactReportV1Fragment51',
+    ('ontology-impact-report-v1', '/allOf/0/if/properties/status'): 'ContractOntologyImpactReportV1Fragment52',
+    ('ontology-impact-report-v1', '/allOf/0/then'): 'ContractOntologyImpactReportV1Fragment53',
+    ('ontology-impact-report-v1', '/allOf/0/then/properties/changes'): 'ContractOntologyImpactReportV1Fragment58',
+    ('ontology-impact-report-v1', '/allOf/0/then/properties/changes/items'): 'ContractOntologyImpactReportV1Fragment59',
+    ('ontology-impact-report-v1', '/allOf/0/then/properties/changes/items/properties/class'): 'ContractOntologyImpactReportV1Fragment60',
+    ('ontology-impact-report-v1', '/allOf/0/then/properties/changes/items/properties/class/not'): 'ContractOntologyImpactReportV1Fragment61',
+    ('ontology-impact-report-v1', '/allOf/0/then/properties/inference'): 'ContractOntologyImpactReportV1Fragment55',
+    ('ontology-impact-report-v1', '/allOf/0/then/properties/inference/properties/result'): 'ContractOntologyImpactReportV1Fragment56',
+    ('ontology-impact-report-v1', '/allOf/0/then/properties/inference/properties/result/not'): 'ContractOntologyImpactReportV1Fragment57',
+    ('ontology-impact-report-v1', '/allOf/0/then/properties/unresolved'): 'ContractOntologyImpactReportV1Fragment54',
+    ('ontology-impact-report-v1', '/properties/candidate'): 'ContractOntologyImpactReportV1Fragment12',
+    ('ontology-impact-report-v1', '/properties/changes'): 'ContractOntologyImpactReportV1Fragment13',
+    ('ontology-impact-report-v1', '/properties/changes/items'): 'ContractOntologyImpactReportV1Fragment14',
+    ('ontology-impact-report-v1', '/properties/changes/items/additionalProperties'): 'ContractOntologyImpactReportV1Fragment15',
+    ('ontology-impact-report-v1', '/properties/changes/items/properties/class'): 'ContractOntologyImpactReportV1Fragment17',
+    ('ontology-impact-report-v1', '/properties/changes/items/properties/detail'): 'ContractOntologyImpactReportV1Fragment18',
+    ('ontology-impact-report-v1', '/properties/changes/items/properties/term_iri'): 'ContractOntologyImpactReportV1Fragment16',
+    ('ontology-impact-report-v1', '/properties/constraints'): 'ContractOntologyImpactReportV1Fragment28',
+    ('ontology-impact-report-v1', '/properties/constraints/items'): 'ContractOntologyImpactReportV1Fragment29',
+    ('ontology-impact-report-v1', '/properties/constraints/items/additionalProperties'): 'ContractOntologyImpactReportV1Fragment30',
+    ('ontology-impact-report-v1', '/properties/constraints/items/properties/change'): 'ContractOntologyImpactReportV1Fragment33',
+    ('ontology-impact-report-v1', '/properties/constraints/items/properties/constraint_id'): 'ContractOntologyImpactReportV1Fragment31',
+    ('ontology-impact-report-v1', '/properties/constraints/items/properties/consumer'): 'ContractOntologyImpactReportV1Fragment32',
+    ('ontology-impact-report-v1', '/properties/constraints/items/properties/detail'): 'ContractOntologyImpactReportV1Fragment34',
+    ('ontology-impact-report-v1', '/properties/contract'): 'ContractOntologyImpactReportV1Fragment2',
+    ('ontology-impact-report-v1', '/properties/inference'): 'ContractOntologyImpactReportV1Fragment19',
+    ('ontology-impact-report-v1', '/properties/inference/additionalProperties'): 'ContractOntologyImpactReportV1Fragment20',
+    ('ontology-impact-report-v1', '/properties/inference/properties/added'): 'ContractOntologyImpactReportV1Fragment24',
+    ('ontology-impact-report-v1', '/properties/inference/properties/added/items'): 'ContractOntologyImpactReportV1Fragment25',
+    ('ontology-impact-report-v1', '/properties/inference/properties/removed'): 'ContractOntologyImpactReportV1Fragment26',
+    ('ontology-impact-report-v1', '/properties/inference/properties/removed/items'): 'ContractOntologyImpactReportV1Fragment27',
+    ('ontology-impact-report-v1', '/properties/inference/properties/result'): 'ContractOntologyImpactReportV1Fragment23',
+    ('ontology-impact-report-v1', '/properties/inference/properties/ruleset'): 'ContractOntologyImpactReportV1Fragment21',
+    ('ontology-impact-report-v1', '/properties/inference/properties/scope'): 'ContractOntologyImpactReportV1Fragment22',
+    ('ontology-impact-report-v1', '/properties/predecessor'): 'ContractOntologyImpactReportV1Fragment9',
+    ('ontology-impact-report-v1', '/properties/predecessor/oneOf/0'): 'ContractOntologyImpactReportV1Fragment10',
+    ('ontology-impact-report-v1', '/properties/predecessor/oneOf/1'): 'ContractOntologyImpactReportV1Fragment11',
+    ('ontology-impact-report-v1', '/properties/reach'): 'ContractOntologyImpactReportV1Fragment35',
+    ('ontology-impact-report-v1', '/properties/reach/items'): 'ContractOntologyImpactReportV1Fragment36',
+    ('ontology-impact-report-v1', '/properties/reach/items/additionalProperties'): 'ContractOntologyImpactReportV1Fragment37',
+    ('ontology-impact-report-v1', '/properties/reach/items/properties/affected'): 'ContractOntologyImpactReportV1Fragment40',
+    ('ontology-impact-report-v1', '/properties/reach/items/properties/denominator'): 'ContractOntologyImpactReportV1Fragment41',
+    ('ontology-impact-report-v1', '/properties/reach/items/properties/population'): 'ContractOntologyImpactReportV1Fragment38',
+    ('ontology-impact-report-v1', '/properties/reach/items/properties/predicate_key'): 'ContractOntologyImpactReportV1Fragment39',
+    ('ontology-impact-report-v1', '/properties/report_digest'): 'ContractOntologyImpactReportV1Fragment3',
+    ('ontology-impact-report-v1', '/properties/scope'): 'ContractOntologyImpactReportV1Fragment5',
+    ('ontology-impact-report-v1', '/properties/scope/additionalProperties'): 'ContractOntologyImpactReportV1Fragment6',
+    ('ontology-impact-report-v1', '/properties/scope/properties/knowledge_base_id'): 'ContractOntologyImpactReportV1Fragment8',
+    ('ontology-impact-report-v1', '/properties/scope/properties/tenant_id'): 'ContractOntologyImpactReportV1Fragment7',
+    ('ontology-impact-report-v1', '/properties/status'): 'ContractOntologyImpactReportV1Fragment4',
+    ('ontology-impact-report-v1', '/properties/unexamined'): 'ContractOntologyImpactReportV1Fragment42',
+    ('ontology-impact-report-v1', '/properties/unexamined/items'): 'ContractOntologyImpactReportV1Fragment43',
+    ('ontology-impact-report-v1', '/properties/unexamined/items/additionalProperties'): 'ContractOntologyImpactReportV1Fragment44',
+    ('ontology-impact-report-v1', '/properties/unexamined/items/properties/owner'): 'ContractOntologyImpactReportV1Fragment46',
+    ('ontology-impact-report-v1', '/properties/unexamined/items/properties/population'): 'ContractOntologyImpactReportV1Fragment45',
+    ('ontology-impact-report-v1', '/properties/unexamined/items/properties/reason'): 'ContractOntologyImpactReportV1Fragment47',
+    ('ontology-impact-report-v1', '/properties/unresolved'): 'ContractOntologyImpactReportV1Fragment48',
+    ('ontology-impact-report-v1', '/properties/unresolved/items'): 'ContractOntologyImpactReportV1Fragment49',
+    ('ontology-module-authoring-v1', ''): 'ContractOntologyModuleAuthoringV1',
+    ('ontology-module-authoring-v1', '/$defs/constraint'): 'ContractOntologyModuleAuthoringV1Fragment62',
+    ('ontology-module-authoring-v1', '/$defs/constraint/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment63',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/applicability'): 'ContractOntologyModuleAuthoringV1Fragment74',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/construct'): 'ContractOntologyModuleAuthoringV1Fragment65',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/consumer'): 'ContractOntologyModuleAuthoringV1Fragment73',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/data_basis'): 'ContractOntologyModuleAuthoringV1Fragment77',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/data_basis/oneOf/0'): 'ContractOntologyModuleAuthoringV1Fragment78',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/data_basis/oneOf/1'): 'ContractOntologyModuleAuthoringV1Fragment79',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/data_basis/oneOf/1/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment80',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/data_basis/oneOf/1/properties/inferred'): 'ContractOntologyModuleAuthoringV1Fragment81',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/expression'): 'ContractOntologyModuleAuthoringV1Fragment71',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/id'): 'ContractOntologyModuleAuthoringV1Fragment64',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/on_nonconformance'): 'ContractOntologyModuleAuthoringV1Fragment76',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/property'): 'ContractOntologyModuleAuthoringV1Fragment67',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/severity'): 'ContractOntologyModuleAuthoringV1Fragment75',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/stage'): 'ContractOntologyModuleAuthoringV1Fragment72',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/subject'): 'ContractOntologyModuleAuthoringV1Fragment66',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/value'): 'ContractOntologyModuleAuthoringV1Fragment70',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/with'): 'ContractOntologyModuleAuthoringV1Fragment68',
+    ('ontology-module-authoring-v1', '/$defs/constraint/properties/with/items'): 'ContractOntologyModuleAuthoringV1Fragment69',
+    ('ontology-module-authoring-v1', '/$defs/labels'): 'ContractOntologyModuleAuthoringV1Fragment16',
+    ('ontology-module-authoring-v1', '/$defs/labels/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment18',
+    ('ontology-module-authoring-v1', '/$defs/labels/propertyNames'): 'ContractOntologyModuleAuthoringV1Fragment17',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule'): 'ContractOntologyModuleAuthoringV1Fragment82',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment83',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/allOf/0'): 'ContractOntologyModuleAuthoringV1Fragment89',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/allOf/0/else'): 'ContractOntologyModuleAuthoringV1Fragment93',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/allOf/0/if'): 'ContractOntologyModuleAuthoringV1Fragment90',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/allOf/0/if/properties/disposition'): 'ContractOntologyModuleAuthoringV1Fragment91',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/allOf/0/then'): 'ContractOntologyModuleAuthoringV1Fragment92',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/properties/direction'): 'ContractOntologyModuleAuthoringV1Fragment87',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/properties/disposition'): 'ContractOntologyModuleAuthoringV1Fragment85',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/properties/label'): 'ContractOntologyModuleAuthoringV1Fragment86',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/properties/property'): 'ContractOntologyModuleAuthoringV1Fragment84',
+    ('ontology-module-authoring-v1', '/$defs/projection_rule/properties/reason'): 'ContractOntologyModuleAuthoringV1Fragment88',
+    ('ontology-module-authoring-v1', '/$defs/term'): 'ContractOntologyModuleAuthoringV1Fragment19',
+    ('ontology-module-authoring-v1', '/$defs/term/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment20',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/0'): 'ContractOntologyModuleAuthoringV1Fragment51',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/0/if'): 'ContractOntologyModuleAuthoringV1Fragment52',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/0/if/properties/kind'): 'ContractOntologyModuleAuthoringV1Fragment53',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/0/then'): 'ContractOntologyModuleAuthoringV1Fragment54',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/1'): 'ContractOntologyModuleAuthoringV1Fragment55',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/1/if'): 'ContractOntologyModuleAuthoringV1Fragment56',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/1/if/properties/kind'): 'ContractOntologyModuleAuthoringV1Fragment57',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/1/then'): 'ContractOntologyModuleAuthoringV1Fragment58',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/2'): 'ContractOntologyModuleAuthoringV1Fragment59',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/2/if'): 'ContractOntologyModuleAuthoringV1Fragment60',
+    ('ontology-module-authoring-v1', '/$defs/term/allOf/2/then'): 'ContractOntologyModuleAuthoringV1Fragment61',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/aliases'): 'ContractOntologyModuleAuthoringV1Fragment24',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/aliases/items'): 'ContractOntologyModuleAuthoringV1Fragment25',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/aliases/items/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment26',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/aliases/items/properties/tag'): 'ContractOntologyModuleAuthoringV1Fragment27',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/aliases/items/properties/value'): 'ContractOntologyModuleAuthoringV1Fragment28',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/cardinality'): 'ContractOntologyModuleAuthoringV1Fragment43',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/code_of'): 'ContractOntologyModuleAuthoringV1Fragment48',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/definition'): 'ContractOntologyModuleAuthoringV1Fragment29',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/domain'): 'ContractOntologyModuleAuthoringV1Fragment36',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/examples'): 'ContractOntologyModuleAuthoringV1Fragment30',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/examples/items'): 'ContractOntologyModuleAuthoringV1Fragment31',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/external_codes'): 'ContractOntologyModuleAuthoringV1Fragment49',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/external_codes/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment50',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/id'): 'ContractOntologyModuleAuthoringV1Fragment21',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/inverse_of'): 'ContractOntologyModuleAuthoringV1Fragment38',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/kind'): 'ContractOntologyModuleAuthoringV1Fragment22',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/labels'): 'ContractOntologyModuleAuthoringV1Fragment23',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/parents'): 'ContractOntologyModuleAuthoringV1Fragment34',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/parents/items'): 'ContractOntologyModuleAuthoringV1Fragment35',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/predicate'): 'ContractOntologyModuleAuthoringV1Fragment44',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/predicate/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment45',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/predicate/properties/local_name'): 'ContractOntologyModuleAuthoringV1Fragment46',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/predicate/properties/major'): 'ContractOntologyModuleAuthoringV1Fragment47',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/range'): 'ContractOntologyModuleAuthoringV1Fragment37',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/regression_cases'): 'ContractOntologyModuleAuthoringV1Fragment32',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/regression_cases/items'): 'ContractOntologyModuleAuthoringV1Fragment33',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/sub_property_of'): 'ContractOntologyModuleAuthoringV1Fragment39',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/sub_property_of/items'): 'ContractOntologyModuleAuthoringV1Fragment40',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/temporal_kind'): 'ContractOntologyModuleAuthoringV1Fragment41',
+    ('ontology-module-authoring-v1', '/$defs/term/properties/value_type'): 'ContractOntologyModuleAuthoringV1Fragment42',
+    ('ontology-module-authoring-v1', '/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment1',
+    ('ontology-module-authoring-v1', '/properties/authoring_schema'): 'ContractOntologyModuleAuthoringV1Fragment2',
+    ('ontology-module-authoring-v1', '/properties/constraints'): 'ContractOntologyModuleAuthoringV1Fragment12',
+    ('ontology-module-authoring-v1', '/properties/constraints/items'): 'ContractOntologyModuleAuthoringV1Fragment13',
+    ('ontology-module-authoring-v1', '/properties/module'): 'ContractOntologyModuleAuthoringV1Fragment3',
+    ('ontology-module-authoring-v1', '/properties/module/additionalProperties'): 'ContractOntologyModuleAuthoringV1Fragment4',
+    ('ontology-module-authoring-v1', '/properties/module/properties/dependencies'): 'ContractOntologyModuleAuthoringV1Fragment8',
+    ('ontology-module-authoring-v1', '/properties/module/properties/dependencies/items'): 'ContractOntologyModuleAuthoringV1Fragment9',
+    ('ontology-module-authoring-v1', '/properties/module/properties/id'): 'ContractOntologyModuleAuthoringV1Fragment5',
+    ('ontology-module-authoring-v1', '/properties/module/properties/predicate_namespace'): 'ContractOntologyModuleAuthoringV1Fragment7',
+    ('ontology-module-authoring-v1', '/properties/module/properties/version'): 'ContractOntologyModuleAuthoringV1Fragment6',
+    ('ontology-module-authoring-v1', '/properties/projection'): 'ContractOntologyModuleAuthoringV1Fragment14',
+    ('ontology-module-authoring-v1', '/properties/projection/items'): 'ContractOntologyModuleAuthoringV1Fragment15',
+    ('ontology-module-authoring-v1', '/properties/terms'): 'ContractOntologyModuleAuthoringV1Fragment10',
+    ('ontology-module-authoring-v1', '/properties/terms/items'): 'ContractOntologyModuleAuthoringV1Fragment11',
+    ('ontology-release-manifest-v1', ''): 'ContractOntologyReleaseManifestV1',
+    ('ontology-release-manifest-v1', '/additionalProperties'): 'ContractOntologyReleaseManifestV1Fragment1',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots'): 'ContractOntologyReleaseManifestV1Fragment55',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/additionalProperties'): 'ContractOntologyReleaseManifestV1Fragment56',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/compiler'): 'ContractOntologyReleaseManifestV1Fragment65',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/compiler/items'): 'ContractOntologyReleaseManifestV1Fragment66',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/compiler/items/properties/digest'): 'ContractOntologyReleaseManifestV1Fragment68',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/compiler/items/properties/ref'): 'ContractOntologyReleaseManifestV1Fragment67',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/profiles'): 'ContractOntologyReleaseManifestV1Fragment57',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/profiles/items'): 'ContractOntologyReleaseManifestV1Fragment58',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/profiles/items/properties/digest'): 'ContractOntologyReleaseManifestV1Fragment60',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/profiles/items/properties/ref'): 'ContractOntologyReleaseManifestV1Fragment59',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/templates'): 'ContractOntologyReleaseManifestV1Fragment61',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/templates/items'): 'ContractOntologyReleaseManifestV1Fragment62',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/templates/items/properties/digest'): 'ContractOntologyReleaseManifestV1Fragment64',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/templates/items/properties/ref'): 'ContractOntologyReleaseManifestV1Fragment63',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/validation'): 'ContractOntologyReleaseManifestV1Fragment69',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/validation/items'): 'ContractOntologyReleaseManifestV1Fragment70',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/validation/items/properties/digest'): 'ContractOntologyReleaseManifestV1Fragment72',
+    ('ontology-release-manifest-v1', '/properties/artifact_slots/properties/validation/items/properties/ref'): 'ContractOntologyReleaseManifestV1Fragment71',
+    ('ontology-release-manifest-v1', '/properties/authoring_schema'): 'ContractOntologyReleaseManifestV1Fragment7',
+    ('ontology-release-manifest-v1', '/properties/change_records'): 'ContractOntologyReleaseManifestV1Fragment40',
+    ('ontology-release-manifest-v1', '/properties/change_records/items'): 'ContractOntologyReleaseManifestV1Fragment41',
+    ('ontology-release-manifest-v1', '/properties/change_records/items/additionalProperties'): 'ContractOntologyReleaseManifestV1Fragment42',
+    ('ontology-release-manifest-v1', '/properties/change_records/items/properties/class'): 'ContractOntologyReleaseManifestV1Fragment43',
+    ('ontology-release-manifest-v1', '/properties/change_records/items/properties/rationale'): 'ContractOntologyReleaseManifestV1Fragment48',
+    ('ontology-release-manifest-v1', '/properties/change_records/items/properties/replacement_iris'): 'ContractOntologyReleaseManifestV1Fragment46',
+    ('ontology-release-manifest-v1', '/properties/change_records/items/properties/replacement_iris/items'): 'ContractOntologyReleaseManifestV1Fragment47',
+    ('ontology-release-manifest-v1', '/properties/change_records/items/properties/source_iris'): 'ContractOntologyReleaseManifestV1Fragment44',
+    ('ontology-release-manifest-v1', '/properties/change_records/items/properties/source_iris/items'): 'ContractOntologyReleaseManifestV1Fragment45',
+    ('ontology-release-manifest-v1', '/properties/compiler_version'): 'ContractOntologyReleaseManifestV1Fragment8',
+    ('ontology-release-manifest-v1', '/properties/contract'): 'ContractOntologyReleaseManifestV1Fragment2',
+    ('ontology-release-manifest-v1', '/properties/dependency_lock'): 'ContractOntologyReleaseManifestV1Fragment22',
+    ('ontology-release-manifest-v1', '/properties/dependency_lock/items'): 'ContractOntologyReleaseManifestV1Fragment23',
+    ('ontology-release-manifest-v1', '/properties/dependency_lock/items/additionalProperties'): 'ContractOntologyReleaseManifestV1Fragment24',
+    ('ontology-release-manifest-v1', '/properties/dependency_lock/items/properties/module'): 'ContractOntologyReleaseManifestV1Fragment25',
+    ('ontology-release-manifest-v1', '/properties/dependency_lock/items/properties/requires'): 'ContractOntologyReleaseManifestV1Fragment26',
+    ('ontology-release-manifest-v1', '/properties/manifest_digest'): 'ContractOntologyReleaseManifestV1Fragment6',
+    ('ontology-release-manifest-v1', '/properties/modules'): 'ContractOntologyReleaseManifestV1Fragment16',
+    ('ontology-release-manifest-v1', '/properties/modules/items'): 'ContractOntologyReleaseManifestV1Fragment17',
+    ('ontology-release-manifest-v1', '/properties/modules/items/additionalProperties'): 'ContractOntologyReleaseManifestV1Fragment18',
+    ('ontology-release-manifest-v1', '/properties/modules/items/properties/digest'): 'ContractOntologyReleaseManifestV1Fragment21',
+    ('ontology-release-manifest-v1', '/properties/modules/items/properties/id'): 'ContractOntologyReleaseManifestV1Fragment19',
+    ('ontology-release-manifest-v1', '/properties/modules/items/properties/version'): 'ContractOntologyReleaseManifestV1Fragment20',
+    ('ontology-release-manifest-v1', '/properties/name'): 'ContractOntologyReleaseManifestV1Fragment4',
+    ('ontology-release-manifest-v1', '/properties/predicates'): 'ContractOntologyReleaseManifestV1Fragment28',
+    ('ontology-release-manifest-v1', '/properties/predicates/items'): 'ContractOntologyReleaseManifestV1Fragment29',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/additionalProperties'): 'ContractOntologyReleaseManifestV1Fragment30',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/basis_required'): 'ContractOntologyReleaseManifestV1Fragment39',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/cardinality'): 'ContractOntologyReleaseManifestV1Fragment33',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/member_key_source'): 'ContractOntologyReleaseManifestV1Fragment38',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/predicate_key'): 'ContractOntologyReleaseManifestV1Fragment32',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/qualifiers'): 'ContractOntologyReleaseManifestV1Fragment36',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/qualifiers/items'): 'ContractOntologyReleaseManifestV1Fragment37',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/temporal_kind'): 'ContractOntologyReleaseManifestV1Fragment35',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/term_iri'): 'ContractOntologyReleaseManifestV1Fragment31',
+    ('ontology-release-manifest-v1', '/properties/predicates/items/properties/value_type'): 'ContractOntologyReleaseManifestV1Fragment34',
+    ('ontology-release-manifest-v1', '/properties/projection_mapping'): 'ContractOntologyReleaseManifestV1Fragment49',
+    ('ontology-release-manifest-v1', '/properties/projection_mapping/additionalProperties'): 'ContractOntologyReleaseManifestV1Fragment50',
+    ('ontology-release-manifest-v1', '/properties/projection_mapping/properties/digest'): 'ContractOntologyReleaseManifestV1Fragment52',
+    ('ontology-release-manifest-v1', '/properties/projection_mapping/properties/required_context'): 'ContractOntologyReleaseManifestV1Fragment53',
+    ('ontology-release-manifest-v1', '/properties/projection_mapping/properties/required_context/items'): 'ContractOntologyReleaseManifestV1Fragment54',
+    ('ontology-release-manifest-v1', '/properties/projection_mapping/properties/version'): 'ContractOntologyReleaseManifestV1Fragment51',
+    ('ontology-release-manifest-v1', '/properties/release_ref'): 'ContractOntologyReleaseManifestV1Fragment3',
+    ('ontology-release-manifest-v1', '/properties/semantics'): 'ContractOntologyReleaseManifestV1Fragment9',
+    ('ontology-release-manifest-v1', '/properties/semantics/additionalProperties'): 'ContractOntologyReleaseManifestV1Fragment10',
+    ('ontology-release-manifest-v1', '/properties/semantics/properties/inference'): 'ContractOntologyReleaseManifestV1Fragment11',
+    ('ontology-release-manifest-v1', '/properties/semantics/properties/inference/items'): 'ContractOntologyReleaseManifestV1Fragment12',
+    ('ontology-release-manifest-v1', '/properties/semantics/properties/ruleset'): 'ContractOntologyReleaseManifestV1Fragment15',
+    ('ontology-release-manifest-v1', '/properties/semantics/properties/validation'): 'ContractOntologyReleaseManifestV1Fragment13',
+    ('ontology-release-manifest-v1', '/properties/semantics/properties/validation/items'): 'ContractOntologyReleaseManifestV1Fragment14',
+    ('ontology-release-manifest-v1', '/properties/sequence'): 'ContractOntologyReleaseManifestV1Fragment5',
+    ('ontology-release-manifest-v1', '/properties/terms_digest'): 'ContractOntologyReleaseManifestV1Fragment27',
     ('problem-details', ''): 'ContractProblemDetails',
     ('problem-details', '/additionalProperties'): 'ContractProblemDetailsFragment1',
     ('problem-details', '/properties/code'): 'ContractProblemDetailsFragment7',
@@ -23527,7 +27303,7 @@ MODEL_INDEX = {
     ('scoped-identifier-v1', ''): 'ContractScopedIdentifierV1',
 }
 
-SOURCE_METADATA = {'https://nebula.local/schemas/assertion-admission-result-v1.schema.json': {'': {'title': 'AssertionAdmissionResultV1', 'description': 'F0006 server-computed protected result. F0016 must durably persist outcomes before marking a run complete. This internal result is not an HTTP endpoint or general log payload. No field grants permission.'}}, 'https://nebula.local/schemas/assertion-record-v2.schema.json': {'': {'title': 'AssertionCandidateV2', 'description': 'F0006 design contract, Phase B approved by operator 2026-11-01. Untrusted source claim; structural schema validation does not establish admission, authorization or canonical eligibility.'}}, 'https://nebula.local/schemas/canonical-commit-request.schema.json': {'': {'title': 'CanonicalCommitRequest', 'description': 'Proposal for one canonical fact commit (master blueprint section 109.2; F0001-S0005). F0008 design: exactly one of valid_from (legacy pilot slots) or temporal (identity-v1 slots) is present.'}, '/properties/temporal': {'description': 'F0008 (ADR-0078, Accepted): required for identity-v1 slots (rejected as temporal_fields_required when absent); omitted for legacy pilot slots, which keep valid_from/valid_to semantics. When present, valid_from/valid_to above must be omitted and are derived from this block.'}}, 'https://nebula.local/schemas/canonical-commit-response.schema.json': {'': {'title': 'CanonicalCommitResponse', 'description': 'Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005). F0008 (S0002 AC7, remediation run 2026-11-18-bce4909b): a fact-temporal/v1 commit adds `versions`, one entry per written version in `fact_version_ids` order, carrying its temporal block; a legacy pilot commit omits it.'}, '/properties/versions/items/properties/temporal': {'description': 'Absent for a legacy remainder on an identity-v1 slot.'}}, 'https://nebula.local/schemas/content-artifact-manifest-read.schema.json': {'': {'title': 'ContentArtifactManifestRead'}}, 'https://nebula.local/schemas/content-artifact-manifest-v2.schema.json': {'': {'title': 'ContentArtifactManifestV2', 'description': 'F0004 proposed v2 parse bundle. Date metadata and interpretation outputs are external, append-only records. Cross-file hashes, identity, duplicate paths and native asset closure require service validation.'}, '/properties/extraction_quality/properties/ocr': {'description': 'F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.'}}, 'https://nebula.local/schemas/content-artifact-manifest.schema.json': {'': {'title': 'ContentArtifactManifest', 'description': 'Manifest of one accepted parse-once content artifact bundle (master blueprint sections 80, 81, 108.1; F0001-S0003). F0004 compatibility clarification: source.pdf is the observed retained-PDF filename; no v2 metadata is synthesized for legacy artifacts.'}, '/properties/extraction_quality/properties/ocr': {'description': 'F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.'}}, 'https://nebula.local/schemas/content-records-v2.schema.json': {'': {'title': 'ContentRecordsV2', 'description': 'One JSONL record. Relational uniqueness, bounds, native references and geometry consistency are service checks. Positions refer to exact block.text in Unicode code points; identity normalization never rewrites source text.'}}, 'https://nebula.local/schemas/document-date-record.schema.json': {'': {'title': 'DocumentDateRecord', 'description': 'Append-only candidates and explicit selections; no automatic precedence. HUMAN provenance needs a trusted verifier, not schema validity alone. In v0.1 every selection, including a clear, carries a verified human selection decision; a service principal may record candidates but cannot select. A null candidate explicitly clears the selected date; no selection means undated. YEAR/MONTH/DAY preserve supplied precision.'}, '/oneOf/1/properties/human_decision': {'description': "Verified human selection decision (F0022 producer). actor_principal_id here is the deciding human; the record's top-level actor_principal_id is the calling principal. Schema validity is not authority: the trusted verifier binds decision, document version, candidate (or clear) and expected previous selection."}}, 'https://nebula.local/schemas/fact-answer-v1.schema.json': {'': {'title': 'FactAnswerV1', 'description': 'F0007 answer carrier (ADR-0039 D1-D5, ADR-0077 D5). Stored as the canonical_fact_version.value of an identity-v1 slot; legacy pilot slots keep their unwrapped values. Only PRESENT carries a value. There is no access-denied state: authorization is decided before any answer is produced. Server canonicalization (decimal form, identifier and name normalization) happens before storage.'}, '/$defs/absence_scope': {'description': "Exact interpretation scope searched (ADR-0039 D2). Never implies global absence. The artifact must be readable by the caller and owned by the slot's tenant/KB."}, '/$defs/absence_scope/properties/profile_release_ref': {'description': 'Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity.'}}, 'https://nebula.local/schemas/fact-slot-key-v1.schema.json': {'': {'title': 'FactSlotKeyV1', 'description': 'F0007 internal slot-resolution request (ADR-0077). Not an HTTP route. Tenant comes from the authorized scope, never from this payload. Qualifier names are declared by the predicate contract; ordering of the input object is irrelevant to identity.'}, '/properties/predicate_key': {'description': 'Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference.'}, '/properties/predicate_release_ref': {'description': 'Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity.'}, '/properties/object_entity_id': {'description': 'Required for RELATIONSHIP predicates, forbidden otherwise.'}, '/properties/member': {'description': 'Required to address a member of a MULTI slot; forbidden otherwise.'}, '/$defs/decimal_value': {'description': 'Input and canonical value have at most 64 total characters including sign/point. Server semantic validation rejects exponent forms whose canonical expansion exceeds that bound before allocating it; every emitted canonical form is a valid reload input.'}, '/$defs/money_value': {'description': 'ADR-0039 D4. Amount is an exact decimal string; a JSON number is rejected (MONEY_FLOAT_REJECTED). Input and canonical amount are bounded to 64 total characters including sign/point; oversized canonical expansions reject DECIMAL_INVALID before allocation. Original currency only in F0007: any conversion marker is rejected (CONVERTED_MONEY_UNSUPPORTED) at the domain validator, so the schema does not admit one.'}, '/$defs/identifier_value': {'description': 'ADR-0039 D5 scoped identifier. normalized_value is server-computed from the identifier-type normalization table; a supplied value that differs is rejected.'}, '/$defs/name_value': {'description': "ADR-0066 name value. normalized is server-computed (NFC, casefold, whitespace collapse); evidence must name an admitted F0006 v2 assertion in the slot's tenant/KB."}, '/$defs/qualifier_value': {'description': 'Qualifiers use the scalar typed values only (no name values). Explicit null is rejected with QUALIFIER_NULL_REJECTED; an omitted qualifier contributes nothing to identity.'}}, 'https://nebula.local/schemas/fact-slot-resolution-result-v1.schema.json': {'': {'title': 'FactSlotResolutionResultV1', 'description': "F0007 server-computed resolution outcome (ADR-0077). Internal service result, not an HTTP payload. A rejection writes no slot, qualifier or member row. Authorization denial is not an outcome here: the caller receives the facade's non-disclosing denial before any validation detail."}, '/properties/predicate_key': {'description': 'Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference.'}}, 'https://nebula.local/schemas/fact-temporal-v1.schema.json': {'': {'title': 'FactTemporalV1', 'description': 'F0008 contract (ADR-0078, Accepted): the valid-time block of a canonical commit for identity-v1 slots, and the temporal block returned for a temporal-v1 version. Structural checks only; truncation in zone, attestation derivation from F0004 document-date selections, succession and state guards run in the commit service and database triggers.'}, '/$defs/iana_zone': {'description': "IANA time-zone name, for example America/Chicago or the fixed-offset Etc/GMT+6. Existence is validated against the server's zone database, not by this schema."}, '/$defs/start_basis': {'description': 'How the start was obtained. TEMPLATE_FIELD and HUMAN count as grade A (G1 decision 1). ATTESTATION_FLOOR is server-assigned when the start is unknown and is never accepted from a caller.'}, '/$defs/document_date': {'description': 'An F0004 document-date value at its own precision (YYYY, YYYY-MM or YYYY-MM-DD).'}, '/$defs/commit_temporal/properties/valid_from': {'description': 'Known start. Omit or null for an unknown start: the server floors it at attested_from or rejects START_UNATTESTED.'}, '/$defs/commit_temporal/properties/attestation_zone': {'description': 'Zone used to place bounds derived from document dates (an attestation-floor start or an UNKNOWN end).'}, '/$defs/commit_temporal/properties/ending_evidence_refs': {'description': 'Assertions whose documents state that the fact ended (UNKNOWN end only). attested_to is the earliest selected date among their documents.'}, '/$defs/commit_temporal/properties/expected_attestation': {'description': 'Optional echo. If present it must equal the server-derived values, otherwise ATTESTATION_MISMATCH.'}, '/$defs/version_temporal/properties/valid_to': {'description': 'BOUNDED: the stated end. UNKNOWN: the integrity bound placed at the end of the attested_to period. OPEN: null.'}, '/$defs/version_temporal/properties/validity_unknown_from': {'description': 'UNKNOWN end only: valid-time reads at or after this instant and before valid_to return validity-unknown.'}, '/$defs/validity_unknown_read/properties/version_id': {'description': 'The version whose unknown end or floored start produced the result. No value is returned.'}}, 'https://nebula.local/schemas/fact-version-read-v1.schema.json': {'': {'title': 'FactVersionReadV1', 'description': 'F0011 documents the existing FactVersionOut wire shape (flat timestamps), including the F0008 additive metadata. It changes no runtime response. Legacy pilot values remain unwrapped; temporal is omitted for legacy versions.'}}, 'https://nebula.local/schemas/information-state-v1.schema.json': {'': {'title': 'InformationStateV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'information-state', 'x-nebula-display-name': 'InformationStateV1'}}, 'https://nebula.local/schemas/interpretation-output-manifest.schema.json': {'': {'title': 'InterpretationOutputManifest', 'description': 'Run-owned outputs stay outside the parse bundle. V1 reflects the existing checkpoint marker; proposed v2 adds pipeline identity and exact date-basis selection. The selected output schema is independent of content artifact version.'}}, 'https://nebula.local/schemas/interpretation-result-v2.schema.json': {'': {'title': 'InterpretationResultV2', 'description': 'F0006 additive result version. No live producer is activated; the existing importer continues to accept only legacy v1. Candidate entities are document-local references, never canonical entities. Complete items may be checked independently; F0016 owns durable drops and run lifecycle.'}}, 'https://nebula.local/schemas/interpretation-result.schema.json': {'': {'title': 'InterpretationResult', 'description': 'Provider-neutral output of one semantic interpretation run over a persisted content artifact (master blueprint section 108.3; F0001-S0003).'}}, 'https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json': {'': {'title': 'Reserved future learning identity v1'}}, 'https://nebula.local/schemas/problem-details.schema.json': {'': {'title': 'ProblemDetails', 'description': 'RFC 9457 problem details with a stable machine `code` and a `traceId` extension member (camelCase to match the framework API contract validator; every other payload is snake_case). F0001-S0001.'}}, 'https://nebula.local/schemas/provenance-query-v1.schema.json': {'': {'title': 'Provenance query v1'}}, 'https://nebula.local/schemas/provenance-result-v1.schema.json': {'': {'title': 'Bounded authorized provenance result v1'}, '/properties/records/items/oneOf/10/properties/data/properties/from_version_id': {'description': "Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."}, '/properties/edges': {'description': "Every edge reads '<source> <kind> <target>'. Each kind admits only the endpoint record kinds listed in its branch. Edges are unique by (kind, source, target); domain checks additionally require both endpoints in records and every non-root record to be connected to the root (ignoring direction). Directional ancestry kinds (corrected_from, split_of) must be acyclic."}, '/properties/edges/items/oneOf/0': {'description': 'HUMAN_REVIEW child assertion -> its stored original (assertion.original_assertion_id).'}, '/properties/edges/items/oneOf/1': {'description': 'Assertion -> its assertion_evidence row; or fact_version -> an evidence.refs entry.'}, '/properties/edges/items/oneOf/2': {'description': 'fact_version -> an evidence.ending_refs entry; never relabelled as support.'}, '/properties/edges/items/oneOf/3': {'description': 'Evidence row -> the immutable artifact it cites (assertion_evidence.artifact_id).'}, '/properties/edges/items/oneOf/4': {'description': 'Assertion -> its producing interpretation run (assertion.run_id).'}, '/properties/edges/items/oneOf/5': {'description': 'Interpretation run -> the artifact it read (semantic_interpretation_run.artifact_id).'}, '/properties/edges/items/oneOf/6': {'description': 'Artifact -> its document version (content_artifact.document_version_id).'}, '/properties/edges/items/oneOf/7': {'description': 'Document version -> its source document (document_version.source_document_id).'}, '/properties/edges/items/oneOf/8': {'description': 'Decision (via its review item) or refused attempt (original_assertion_id) -> the assertion under review.'}, '/properties/edges/items/oneOf/9': {'description': 'Effective CORRECT decision -> its HUMAN_REVIEW child (corrected_assertion_id).'}, '/properties/edges/items/oneOf/10': {'description': 'Effective CORRECT decision -> its reserved future-learning identity.'}, '/properties/edges/items/oneOf/11': {'description': 'Canonical version -> the review decision stored on it (review_decision_id); implies no acceptance by review.'}, '/properties/edges/items/oneOf/12': {'description': 'Remainder -> its same-slot predecessor (split_of_version_id).'}, '/properties/edges/items/oneOf/13': {'description': 'canonical_fact_change -> from_version_id.'}, '/properties/edges/items/oneOf/14': {'description': 'canonical_fact_change -> to_version_id.'}, '/properties/edges/items/oneOf/15': {'description': 'Version with an exposed attested_* document date -> each artifact behind its refs/ending_refs (the current_attesting_artifact_keys join).'}, '/properties/edges/items/oneOf/16': {'description': 'Record -> a stored derivation/input reference; never a fabricated document locator.'}}, 'https://nebula.local/schemas/qualified-money-v1.schema.json': {'': {'title': 'QualifiedMoneyV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'qualified-money', 'x-nebula-display-name': 'QualifiedMoneyV1'}}, 'https://nebula.local/schemas/review-decision.schema.json': {'': {'title': 'ReviewDecision', 'description': 'Governed outcome of one human review submitted from the Nebula Review Panel; corrections append and never rewrite the original assertion (master blueprint sections 75 and 125, ADR-0037, ADR-0057, ADR-0058; F0001-S0004).'}, '/properties/action': {'description': 'ACCEPT, CORRECT, and REJECT are adjudications. BLOCKED is not: it records that the evidence could not be anchored, produces no assertion, and leaves the review item open (ADR-0058).'}, '/properties/reason_code': {'description': 'Required for CORRECT, REJECT, and BLOCKED. EVIDENCE_UNRESOLVED is the only reason code valid with BLOCKED.'}, '/properties/evidence': {'description': 'The locator the reviewer actually saw, at the precision it was shown, carried onto any assertion this decision creates.'}, '/properties/evidence/oneOf/1/properties/selector': {'description': 'W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points.'}, '/properties/reviewer_principal_id': {'description': 'Resolved from the authenticated session, never from the request payload (ADR-0049, ADR-0057).'}, '/properties/event_sha256': {'description': 'Hash of the submitted decision event; the idempotency key for resubmission of a batch.'}}, 'https://nebula.local/schemas/review-submission-attempt-v1.schema.json': {'': {'title': 'Non-applied review submission v1'}}, 'https://nebula.local/schemas/scoped-identifier-v1.schema.json': {'': {'title': 'ScopedIdentifierV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'scoped-identifier', 'x-nebula-display-name': 'ScopedIdentifierV1'}}}
+SOURCE_METADATA = {'https://nebula.local/schemas/assertion-admission-result-v1.schema.json': {'': {'title': 'AssertionAdmissionResultV1', 'description': 'F0006 server-computed protected result. F0016 must durably persist outcomes before marking a run complete. This internal result is not an HTTP endpoint or general log payload. No field grants permission.'}}, 'https://nebula.local/schemas/assertion-record-v2.schema.json': {'': {'title': 'AssertionCandidateV2', 'description': 'F0006 design contract, Phase B approved by operator 2026-11-01. Untrusted source claim; structural schema validation does not establish admission, authorization or canonical eligibility.'}}, 'https://nebula.local/schemas/canonical-commit-request.schema.json': {'': {'title': 'CanonicalCommitRequest', 'description': 'Proposal for one canonical fact commit (master blueprint section 109.2; F0001-S0005). F0008 design: exactly one of valid_from (legacy pilot slots) or temporal (identity-v1 slots) is present.'}, '/properties/temporal': {'description': 'F0008 (ADR-0078, Accepted): required for identity-v1 slots (rejected as temporal_fields_required when absent); omitted for legacy pilot slots, which keep valid_from/valid_to semantics. When present, valid_from/valid_to above must be omitted and are derived from this block.'}}, 'https://nebula.local/schemas/canonical-commit-response.schema.json': {'': {'title': 'CanonicalCommitResponse', 'description': 'Result of a canonical fact commit: the semantic commit id and the fact versions it produced (F0001-S0005). F0008 (S0002 AC7, remediation run 2026-11-18-bce4909b): a fact-temporal/v1 commit adds `versions`, one entry per written version in `fact_version_ids` order, carrying its temporal block; a legacy pilot commit omits it.'}, '/properties/versions/items/properties/temporal': {'description': 'Absent for a legacy remainder on an identity-v1 slot.'}}, 'https://nebula.local/schemas/content-artifact-manifest-read.schema.json': {'': {'title': 'ContentArtifactManifestRead'}}, 'https://nebula.local/schemas/content-artifact-manifest-v2.schema.json': {'': {'title': 'ContentArtifactManifestV2', 'description': 'F0004 proposed v2 parse bundle. Date metadata and interpretation outputs are external, append-only records. Cross-file hashes, identity, duplicate paths and native asset closure require service validation.'}, '/properties/extraction_quality/properties/ocr': {'description': 'F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.'}}, 'https://nebula.local/schemas/content-artifact-manifest.schema.json': {'': {'title': 'ContentArtifactManifest', 'description': 'Manifest of one accepted parse-once content artifact bundle (master blueprint sections 80, 81, 108.1; F0001-S0003). F0004 compatibility clarification: source.pdf is the observed retained-PDF filename; no v2 metadata is synthesized for legacy artifacts.'}, '/properties/extraction_quality/properties/ocr': {'description': 'F0005-S0001-AC2 (ADR-0073 amendment 2026-10-27): OCR observed during this conversion. Absent or null means not observed (historical producers); never inferred.'}}, 'https://nebula.local/schemas/content-records-v2.schema.json': {'': {'title': 'ContentRecordsV2', 'description': 'One JSONL record. Relational uniqueness, bounds, native references and geometry consistency are service checks. Positions refer to exact block.text in Unicode code points; identity normalization never rewrites source text.'}}, 'https://nebula.local/schemas/document-date-record.schema.json': {'': {'title': 'DocumentDateRecord', 'description': 'Append-only candidates and explicit selections; no automatic precedence. HUMAN provenance needs a trusted verifier, not schema validity alone. In v0.1 every selection, including a clear, carries a verified human selection decision; a service principal may record candidates but cannot select. A null candidate explicitly clears the selected date; no selection means undated. YEAR/MONTH/DAY preserve supplied precision.'}, '/oneOf/1/properties/human_decision': {'description': "Verified human selection decision (F0022 producer). actor_principal_id here is the deciding human; the record's top-level actor_principal_id is the calling principal. Schema validity is not authority: the trusted verifier binds decision, document version, candidate (or clear) and expected previous selection."}}, 'https://nebula.local/schemas/fact-answer-v1.schema.json': {'': {'title': 'FactAnswerV1', 'description': 'F0007 answer carrier (ADR-0039 D1-D5, ADR-0077 D5). Stored as the canonical_fact_version.value of an identity-v1 slot; legacy pilot slots keep their unwrapped values. Only PRESENT carries a value. There is no access-denied state: authorization is decided before any answer is produced. Server canonicalization (decimal form, identifier and name normalization) happens before storage.'}, '/$defs/absence_scope': {'description': "Exact interpretation scope searched (ADR-0039 D2). Never implies global absence. The artifact must be readable by the caller and owned by the slot's tenant/KB."}, '/$defs/absence_scope/properties/profile_release_ref': {'description': 'Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity.'}}, 'https://nebula.local/schemas/fact-slot-key-v1.schema.json': {'': {'title': 'FactSlotKeyV1', 'description': 'F0007 internal slot-resolution request (ADR-0077). Not an HTTP route. Tenant comes from the authorized scope, never from this payload. Qualifier names are declared by the predicate contract; ordering of the input object is irrelevant to identity.'}, '/properties/predicate_key': {'description': 'Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference.'}, '/properties/predicate_release_ref': {'description': 'Pinned ontology-release (or system-predicate registry) reference recorded at creation; never part of slot identity.'}, '/properties/object_entity_id': {'description': 'Required for RELATIONSHIP predicates, forbidden otherwise.'}, '/properties/member': {'description': 'Required to address a member of a MULTI slot; forbidden otherwise.'}, '/$defs/decimal_value': {'description': 'Input and canonical value have at most 64 total characters including sign/point. Server semantic validation rejects exponent forms whose canonical expansion exceeds that bound before allocating it; every emitted canonical form is a valid reload input.'}, '/$defs/money_value': {'description': 'ADR-0039 D4. Amount is an exact decimal string; a JSON number is rejected (MONEY_FLOAT_REJECTED). Input and canonical amount are bounded to 64 total characters including sign/point; oversized canonical expansions reject DECIMAL_INVALID before allocation. Original currency only in F0007: any conversion marker is rejected (CONVERTED_MONEY_UNSUPPORTED) at the domain validator, so the schema does not admit one.'}, '/$defs/identifier_value': {'description': 'ADR-0039 D5 scoped identifier. normalized_value is server-computed from the identifier-type normalization table; a supplied value that differs is rejected.'}, '/$defs/name_value': {'description': "ADR-0066 name value. normalized is server-computed (NFC, casefold, whitespace collapse); evidence must name an admitted F0006 v2 assertion in the slot's tenant/KB."}, '/$defs/qualifier_value': {'description': 'Qualifiers use the scalar typed values only (no name values). Explicit null is rejected with QUALIFIER_NULL_REJECTED; an omitted qualifier contributes nothing to identity.'}}, 'https://nebula.local/schemas/fact-slot-resolution-result-v1.schema.json': {'': {'title': 'FactSlotResolutionResultV1', 'description': "F0007 server-computed resolution outcome (ADR-0077). Internal service result, not an HTTP payload. A rejection writes no slot, qualifier or member row. Authorization denial is not an outcome here: the caller receives the facade's non-disclosing denial before any validation detail."}, '/properties/predicate_key': {'description': 'Opaque namespaced predicate key with its major contract version (ADR-0077 D2). Identity uses the key, not the release reference.'}}, 'https://nebula.local/schemas/fact-temporal-v1.schema.json': {'': {'title': 'FactTemporalV1', 'description': 'F0008 contract (ADR-0078, Accepted): the valid-time block of a canonical commit for identity-v1 slots, and the temporal block returned for a temporal-v1 version. Structural checks only; truncation in zone, attestation derivation from F0004 document-date selections, succession and state guards run in the commit service and database triggers.'}, '/$defs/iana_zone': {'description': "IANA time-zone name, for example America/Chicago or the fixed-offset Etc/GMT+6. Existence is validated against the server's zone database, not by this schema."}, '/$defs/start_basis': {'description': 'How the start was obtained. TEMPLATE_FIELD and HUMAN count as grade A (G1 decision 1). ATTESTATION_FLOOR is server-assigned when the start is unknown and is never accepted from a caller.'}, '/$defs/document_date': {'description': 'An F0004 document-date value at its own precision (YYYY, YYYY-MM or YYYY-MM-DD).'}, '/$defs/commit_temporal/properties/valid_from': {'description': 'Known start. Omit or null for an unknown start: the server floors it at attested_from or rejects START_UNATTESTED.'}, '/$defs/commit_temporal/properties/attestation_zone': {'description': 'Zone used to place bounds derived from document dates (an attestation-floor start or an UNKNOWN end).'}, '/$defs/commit_temporal/properties/ending_evidence_refs': {'description': 'Assertions whose documents state that the fact ended (UNKNOWN end only). attested_to is the earliest selected date among their documents.'}, '/$defs/commit_temporal/properties/expected_attestation': {'description': 'Optional echo. If present it must equal the server-derived values, otherwise ATTESTATION_MISMATCH.'}, '/$defs/version_temporal/properties/valid_to': {'description': 'BOUNDED: the stated end. UNKNOWN: the integrity bound placed at the end of the attested_to period. OPEN: null.'}, '/$defs/version_temporal/properties/validity_unknown_from': {'description': 'UNKNOWN end only: valid-time reads at or after this instant and before valid_to return validity-unknown.'}, '/$defs/validity_unknown_read/properties/version_id': {'description': 'The version whose unknown end or floored start produced the result. No value is returned.'}}, 'https://nebula.local/schemas/fact-version-read-v1.schema.json': {'': {'title': 'FactVersionReadV1', 'description': 'F0011 documents the existing FactVersionOut wire shape (flat timestamps), including the F0008 additive metadata. It changes no runtime response. Legacy pilot values remain unwrapped; temporal is omitted for legacy versions.'}, '/properties/valid_start': {'description': 'F0012 (ADR-0081 D7): null only for an ETERNAL version, whose valid time is unbounded below and above; temporal.temporal_kind is ETERNAL.'}}, 'https://nebula.local/schemas/information-state-v1.schema.json': {'': {'title': 'InformationStateV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'information-state', 'x-nebula-display-name': 'InformationStateV1'}}, 'https://nebula.local/schemas/interpretation-output-manifest.schema.json': {'': {'title': 'InterpretationOutputManifest', 'description': 'Run-owned outputs stay outside the parse bundle. V1 reflects the existing checkpoint marker; proposed v2 adds pipeline identity and exact date-basis selection. The selected output schema is independent of content artifact version.'}}, 'https://nebula.local/schemas/interpretation-result-v2.schema.json': {'': {'title': 'InterpretationResultV2', 'description': 'F0006 additive result version. No live producer is activated; the existing importer continues to accept only legacy v1. Candidate entities are document-local references, never canonical entities. Complete items may be checked independently; F0016 owns durable drops and run lifecycle.'}}, 'https://nebula.local/schemas/interpretation-result.schema.json': {'': {'title': 'InterpretationResult', 'description': 'Provider-neutral output of one semantic interpretation run over a persisted content artifact (master blueprint section 108.3; F0001-S0003).'}}, 'https://nebula.local/schemas/learning-candidate-reservation-v1.schema.json': {'': {'title': 'Reserved future learning identity v1'}}, 'https://nebula.local/schemas/ontology-impact-report-v1.schema.json': {'': {'title': 'Ontology release impact report v1', 'description': 'Predecessor-to-candidate impact report (ADR-0081 D8, ADR-0045). Separates structural reach, inference change, constraint change and unexamined populations.'}}, 'https://nebula.local/schemas/ontology-module-authoring-v1.schema.json': {'': {'title': 'Ontology module authoring v1', 'description': 'Design schema for one authored ontology module file (ADR-0081 D1/D2). Singular `parent` is intentionally absent; the validator reports it as AUTHORING_FIELD_RETIRED before schema validation.'}, '/$defs/constraint/properties/expression': {'description': 'Natural-language statement of a custom constraint; executed only by its named consumer.'}}, 'https://nebula.local/schemas/ontology-release-manifest-v1.schema.json': {'': {'title': 'Ontology release manifest v1', 'description': 'Compiled, content-addressed composed release (ADR-0081 D3). release_ref is ontrel:sha256-<manifest_digest>.'}}, 'https://nebula.local/schemas/problem-details.schema.json': {'': {'title': 'ProblemDetails', 'description': 'RFC 9457 problem details with a stable machine `code` and a `traceId` extension member (camelCase to match the framework API contract validator; every other payload is snake_case). F0001-S0001.'}}, 'https://nebula.local/schemas/provenance-query-v1.schema.json': {'': {'title': 'Provenance query v1'}}, 'https://nebula.local/schemas/provenance-result-v1.schema.json': {'': {'title': 'Bounded authorized provenance result v1'}, '/properties/records/items/oneOf/10/properties/data/properties/from_version_id': {'description': "Null for a slot's creation change (no predecessor); then no changed_from edge exists. Amended at feature G2 (run 2026-11-24-08701e37): the shipped commit writes from_version_id NULL for a first version."}, '/properties/edges': {'description': "Every edge reads '<source> <kind> <target>'. Each kind admits only the endpoint record kinds listed in its branch. Edges are unique by (kind, source, target); domain checks additionally require both endpoints in records and every non-root record to be connected to the root (ignoring direction). Directional ancestry kinds (corrected_from, split_of) must be acyclic."}, '/properties/edges/items/oneOf/0': {'description': 'HUMAN_REVIEW child assertion -> its stored original (assertion.original_assertion_id).'}, '/properties/edges/items/oneOf/1': {'description': 'Assertion -> its assertion_evidence row; or fact_version -> an evidence.refs entry.'}, '/properties/edges/items/oneOf/2': {'description': 'fact_version -> an evidence.ending_refs entry; never relabelled as support.'}, '/properties/edges/items/oneOf/3': {'description': 'Evidence row -> the immutable artifact it cites (assertion_evidence.artifact_id).'}, '/properties/edges/items/oneOf/4': {'description': 'Assertion -> its producing interpretation run (assertion.run_id).'}, '/properties/edges/items/oneOf/5': {'description': 'Interpretation run -> the artifact it read (semantic_interpretation_run.artifact_id).'}, '/properties/edges/items/oneOf/6': {'description': 'Artifact -> its document version (content_artifact.document_version_id).'}, '/properties/edges/items/oneOf/7': {'description': 'Document version -> its source document (document_version.source_document_id).'}, '/properties/edges/items/oneOf/8': {'description': 'Decision (via its review item) or refused attempt (original_assertion_id) -> the assertion under review.'}, '/properties/edges/items/oneOf/9': {'description': 'Effective CORRECT decision -> its HUMAN_REVIEW child (corrected_assertion_id).'}, '/properties/edges/items/oneOf/10': {'description': 'Effective CORRECT decision -> its reserved future-learning identity.'}, '/properties/edges/items/oneOf/11': {'description': 'Canonical version -> the review decision stored on it (review_decision_id); implies no acceptance by review.'}, '/properties/edges/items/oneOf/12': {'description': 'Remainder -> its same-slot predecessor (split_of_version_id).'}, '/properties/edges/items/oneOf/13': {'description': 'canonical_fact_change -> from_version_id.'}, '/properties/edges/items/oneOf/14': {'description': 'canonical_fact_change -> to_version_id.'}, '/properties/edges/items/oneOf/15': {'description': 'Version with an exposed attested_* document date -> each artifact behind its refs/ending_refs (the current_attesting_artifact_keys join).'}, '/properties/edges/items/oneOf/16': {'description': 'Record -> a stored derivation/input reference; never a fabricated document locator.'}}, 'https://nebula.local/schemas/qualified-money-v1.schema.json': {'': {'title': 'QualifiedMoneyV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'qualified-money', 'x-nebula-display-name': 'QualifiedMoneyV1'}}, 'https://nebula.local/schemas/review-decision.schema.json': {'': {'title': 'ReviewDecision', 'description': 'Governed outcome of one human review submitted from the Nebula Review Panel; corrections append and never rewrite the original assertion (master blueprint sections 75 and 125, ADR-0037, ADR-0057, ADR-0058; F0001-S0004).'}, '/properties/action': {'description': 'ACCEPT, CORRECT, and REJECT are adjudications. BLOCKED is not: it records that the evidence could not be anchored, produces no assertion, and leaves the review item open (ADR-0058).'}, '/properties/reason_code': {'description': 'Required for CORRECT, REJECT, and BLOCKED. EVIDENCE_UNRESOLVED is the only reason code valid with BLOCKED.'}, '/properties/evidence': {'description': 'The locator the reviewer actually saw, at the precision it was shown, carried onto any assertion this decision creates.'}, '/properties/evidence/oneOf/1/properties/selector': {'description': 'W3C Web Annotation selectors, plus nebula:TableCellSelector as a declared local extension; character offsets are Unicode code points.'}, '/properties/reviewer_principal_id': {'description': 'Resolved from the authenticated session, never from the request payload (ADR-0049, ADR-0057).'}, '/properties/event_sha256': {'description': 'Hash of the submitted decision event; the idempotency key for resubmission of a batch.'}}, 'https://nebula.local/schemas/review-submission-attempt-v1.schema.json': {'': {'title': 'Non-applied review submission v1'}}, 'https://nebula.local/schemas/scoped-identifier-v1.schema.json': {'': {'title': 'ScopedIdentifierV1', 'description': 'F0011 publication alias for the shipped definition. This adds no field, normalization rule or domain acceptance. ADR-0079 design; implementation proof pending.', 'x-nebula-concept': 'scoped-identifier', 'x-nebula-display-name': 'ScopedIdentifierV1'}}}
 
 for _ref, _class_name in MODEL_INDEX.items():
     _class = globals()[_class_name]

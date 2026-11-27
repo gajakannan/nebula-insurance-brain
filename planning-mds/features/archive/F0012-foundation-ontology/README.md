@@ -1,0 +1,81 @@
+# F0012 — Foundation ontology
+
+**Status:** Done / Archived 2026-11-26 (feature run `2026-11-26-54387a08`)
+**Phase:** v0.1A
+**Roadmap:** Completed
+**Planning:** plan run `2026-11-25-120320e9` (A+B, new) — Phase A approved 2026-11-25 (`approve-phase-a`); Phase B approved 2026-11-25 (`approve-phase-b`). Built in feature run `2026-11-26-54387a08` (G0–G8; operator G4 approval 2026-11-26). No plan-review ran; the operator chose G0 reconciliation. See [PRD](PRD.md), [STATUS](STATUS.md) and [personas](personas.md).
+
+## Overview
+
+The foundation ontology module is the versioned base that every insurance module composes on (sections 19 to 22).
+
+Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0011](../../../architecture/decisions/ADR-0011-ontology-is-versioned-and-modular.md), [ADR-0012](../../../architecture/decisions/ADR-0012-flexible-authoring-normalized-runtime.md).
+
+## Ontology authoring and release prerequisites (2026-10-06)
+
+Carry these requirements into the F0012 PRD before authoring the foundation vocabulary. [ADR-0045](../../../architecture/decisions/ADR-0045-ontology-release-compatibility.md) remains Proposed; its release contract and proof obligations must be settled before compiler implementation.
+
+- Specify the stable term namespace and deterministic ID-to-IRI mapping, including collision handling and tenant extensions. Labels and aliases may change; an IRI is never reassigned. Meaning changes, splits, merges, and retirement follow explicit change classes and migration mappings.
+- Distinguish inference semantics from validation constraints in the authoring schema. Each constraint declares its lifecycle stage, consumer, applicability, severity/action, and whether it examines asserted data or a named inferred closure. Unsupported constructs are explicit errors.
+- Resolve the existing authoring inconsistency: master blueprint section 20 uses `parents:` as a list, while section 82 uses singular `parent:`. The new interchange example uses `parents:`; the PRD must select the canonical field/cardinality and define whether legacy spelling is migrated or rejected. Neither example is a finalized schema.
+- Preserve missing, unknown, explicit negative, conflicting, and not-applicable states. A consumer's need for a complete limit does not become a universal canonical-commit requirement; see the [F0065 assessment contract](../../F0065-grounded-gl-guideline-assessment/assessment-contract.md).
+- Define immutable module versions and composed ontology releases with exact dependency locks, artifact hashes, supported semantics, and constraint metadata. Interpretation and assessment records retain their exact release references; see the [proposed release records](../../../architecture/data-model.md#proposed-ontology-release-records-f0012f0013-adr-0045).
+- Include versioned relation-to-projection mappings in each release: predicate IRI, edge label/direction, endpoints, qualifiers, exact canonical source/evidence references and temporal/ownership context. Explicitly declare unprojected predicates and rebuild impact. The [GL interchange example](../../../examples/ontology-interchange/README.md) demonstrates proposed mappings for `hasLimit`, `hasForm`, and `hasTrigger`.
+- Derived assessments need exact input and rule lineage from their first stored result, as already required by ADR-0026 and F0065. Full change propagation and external reasoning remain separately phased work.
+
+Worked and boundary cases: [ontology release contracts](../../../examples/ontology-release-contracts.md). This amendment defines planning inputs; feature status and the existing v0.1 scope guard are unchanged.
+
+## Requirement-ownership amendment (2026-11-08)
+
+The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+
+- **Dependencies:** F0011 (previously F0001).
+- Carry master blueprint 67: concept labels are language-tagged label metadata on one canonical concept ID; translation never duplicates knowledge. ADR-0045 decision direction recorded 2026-11-08; F0012 is its proving feature.
+
+## Shipped contract carry-in: ADR-0077/ADR-0078 (2026-11-21)
+
+F0007 and F0008 shipped [ADR-0077](../../../architecture/decisions/ADR-0077-factslot-identity-and-typed-answer-carriers.md) (FactSlot identity, `fact-answer/v1`) and [ADR-0078](../../../architecture/decisions/ADR-0078-bitemporal-version-contract-and-close-only-immutability.md) (`fact-temporal/v1`, close-only versions). Both are Accepted. The handoffs below come from those records' Consequences sections. Bind Phase B to the as-built contract (master blueprint sections 13 and 14, "As built"), not to the original sketch. The feature status is unchanged.
+
+- Activate `temporal_kind` (`EVENT`/`ETERNAL`) through predicate contracts. F0008 writes `STATE` only, and the CHECK shapes are reserved without DDL (ADR-0078 D10).
+- Register real predicates in the `PredicateContractRegistry` (`<namespace>:<localName>@v<major>`) and map the legacy pilot predicates. Until then every non-`sys` namespace is `PREDICATE_UNREGISTERED` (ADR-0077 D2).
+
+## Documents
+
+### Commercial P&C teaching expansion (2026-10-08)
+
+Use the [Cedar Bridge contractor account](../../../examples/commercial-pc-account/README.md) to exercise shared Party/Organization/Person, Account, scoped domain roles, policy identity and product composition before freezing the authoring schema. The account, ownership and role-assignment representation follows proposed [ADR-0070](../../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (amendment below) and must be reconciled with the production contracts in this PRD. Broker/carrier/MGA/underwriter roles do not grant application access. The [handoff](../../../architecture/commercial-pc-example-handoff.md) distinguishes example data from planning KG nodes and preserves the delivery scope; broader LOB content remains illustrative.
+
+### Account, party and role amendment (2026-10-10)
+
+[ADR-0070](../../../architecture/decisions/ADR-0070-account-party-and-role-model.md) (Proposed) answers BLUEPRINT section 4.8. Carry these into the foundation module:
+
+- Party (Organization, Person); organization hierarchy with no fixed depth; operating locations; employment.
+- Account: exactly one insured organization per account and one account per organization in a tenant; at most one designated parent account. Brokers are organizations, not accounts.
+- Ownership interest: owner, owned organization and percentage, any number of owners; majority is computed. A joint venture without a majority owner is normally a root account.
+- Role assignment: party, role kind, scope (account, submission or policy term) and acted-for organization. Broker of record and broker contacts are account-scoped and dated; a placement broker on a policy term can override for one line. Role kinds are open vocabulary aligned to the canonical `PartyRoleTypeCode`, with additional named insured and additional insured kept distinct.
+- A policy belongs to exactly one account, normally the first named insured's; a program belongs to the parent account and its master and local policies link to it, mirroring the canonical `MASTER_PROGRAM` Agreement. Declare `temporal_kind` for every property (ADR-0064); the [data model](../../../architecture/data-model.md#proposed-party-account-and-role-records-adr-0070) lists them.
+- Role assignments carry the authoritative source that the proposed access amendment needs (ADR-0070 section 5); the vocabulary itself grants nothing.
+
+The PRD, STATUS, personas and stories were authored by plan run `2026-11-25-120320e9` (Phase A); the feature shard is `planning-mds/kg-source/features/F0012.yaml`. The G1 operator decisions D1–D8 are listed in the [PRD](PRD.md#risks--assumptions).
+
+## Stories
+
+| ID | Title | Status |
+|----|-------|--------|
+| [F0012-S0001](F0012-S0001-validate-foundation-module-authoring.md) | Validate foundation module authoring | Done |
+| [F0012-S0002](F0012-S0002-assign-stable-term-identities.md) | Assign stable term identities | Done |
+| [F0012-S0003](F0012-S0003-model-parties-accounts-and-scoped-roles.md) | Model parties, accounts and scoped roles | Done |
+| [F0012-S0004](F0012-S0004-compile-and-install-immutable-releases.md) | Compile and install immutable releases | Done |
+| [F0012-S0005](F0012-S0005-register-predicates-and-activate-temporal-kinds.md) | Register predicates and activate temporal kinds | Done |
+| [F0012-S0006](F0012-S0006-gate-activation-with-impact-report.md) | Gate activation with an impact report | Done |
+| [F0012-S0007](F0012-S0007-prove-reproducible-release-delivery.md) | Prove reproducible release delivery | Done |
+
+**Total Stories:** 7
+
+## Statements, time, and governance scope amendment (2026-09-25)
+
+[ADR-0063](../../../architecture/decisions/ADR-0063-open-statements-and-signature-alignment.md), [ADR-0064](../../../architecture/decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) govern this planned work. Carry these requirements into the feature PRD and stories when the feature is planned; the feature status is unchanged. Examples: [statements, time, and governance](../../../examples/statements-time-and-governance.md).
+
+- Every ontology property declares `temporal_kind` (`STATE`, `EVENT`, `ETERNAL`) (ADR-0064).
+- Properties and classes carry a definition, examples, and regression cases, which alignment and the workbench rely on (ADR-0063).
+- **v0.1 scope guard (validate finding P-2):** this feature's Phase A admits only the storage fields, contract checks, and review/display hooks listed here. Alignment, automated deciders, fingerprint-driven scheduling, and time-mention resolution that replaces template fields stay in v0.2+ unless the operator amends the scope (BLUEPRINT §4.11).

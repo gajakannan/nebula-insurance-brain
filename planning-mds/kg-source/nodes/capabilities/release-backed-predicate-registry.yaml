@@ -1,8 +1,6 @@
 id: capability:release-backed-predicate-registry
 label: Release-backed predicate contracts and temporal-kind activation
-notes: Proposed F0012 Phase B design, not implemented. PredicateContractRegistry serves sys predicates plus predicates
-  of releases installed in the tenant/KB, prepared per unit of work; no fallback to the active release. Commits
-  take temporal_kind from the contract (ETERNAL/EVENT over ADR-0078 D10 shapes, no DDL).
+notes: Implemented in F0012 feature run 2026-11-26-54387a08 (ADR-0081 Proposed). ReleasePredicateRegistry serves sys predicates plus predicates of releases installed in the tenant/KB, prepared per unit of work by the resolver and answer policy; no fallback to the active release; sys/test namespaces reserved. Commits take temporal_kind from the contract (ETERNAL valid (,), EVENT one period, STATE unchanged; no DDL).
 source_docs:
 - F0012/feature-assembly-plan.md
 - F0012/F0012-S0005-register-predicates-and-activate-temporal-kinds.md

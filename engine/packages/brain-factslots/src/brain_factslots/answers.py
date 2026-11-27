@@ -24,8 +24,10 @@ from brain_domain.fact_answers import (
 )
 from brain_domain.fact_slots import PredicateKey, SlotRejected, SlotRole, member_key
 from brain_domain.fact_values import ValueType
+from brain_domain.temporal import TemporalKind
 
 from brain_factslots.ports import FactSlotStore, PredicateContractRegistry, StoredSlot
+from brain_factslots.predicates import prepare_registry
 
 
 def _uuid(raw: object) -> UUID | None:
@@ -81,6 +83,8 @@ class FactAnswerPolicy:
         if slot.owner != authorized_scope:  # pragma: no cover - the commit lock checks it first
             raise FactAnswerRejected(AnswerReason.ANSWER_CONTRACT_UNSUPPORTED)
         contract = None
+        # F0012 (S0005 AC6): an existing slot resolves its recorded release only.
+        await prepare_registry(self._registry, authorized_scope, [slot.predicate_release_ref])
         try:
             if slot.predicate_key and slot.predicate_release_ref:
                 contract = self._registry.find(
@@ -112,6 +116,24 @@ class FactAnswerPolicy:
         canonical = answer.to_json()
         validate_contract(ContractRef("fact-answer-v1", "1"), canonical, profile="native-compat/v1")
         return canonical
+
+    async def temporal_kind(
+        self, slot_id: UUID, *, authorized_scope: tuple[UUID, UUID]
+    ) -> TemporalKind:
+        """G0-7: the kind of the slot's pinned predicate contract. Legacy slots and
+        system predicates are STATE. A contract that cannot be resolved is left to
+        `canonical_value`, which refuses it."""
+        slot = await self._store.slot(slot_id)
+        if slot is None or slot.legacy or not slot.predicate_key or not slot.predicate_release_ref:
+            return TemporalKind.STATE
+        await prepare_registry(self._registry, authorized_scope, [slot.predicate_release_ref])
+        try:
+            contract = self._registry.find(
+                PredicateKey.parse(slot.predicate_key), slot.predicate_release_ref
+            )
+        except SlotRejected:
+            contract = None
+        return contract.temporal_kind if contract is not None else TemporalKind.STATE
 
     async def _check_value_detail(self, slot: StoredSlot, answer: FactAnswer) -> None:
         assert answer.value is not None

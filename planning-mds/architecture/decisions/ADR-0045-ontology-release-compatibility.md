@@ -80,9 +80,21 @@ The feature plans must assign stories and owners for these cases, record actual 
 - Until accepted, implementation treats the referenced master blueprint sections as requirements to prove, not as settled contracts.
 - Acceptance requires recording the executed test, the owner, and the release gate in this record.
 
+## F0012 evidence (feature run 2026-11-26-54387a08)
+
+Status is unchanged: **Proposed**. Acceptance is a separate operator decision. F0012 executed its share of the acceptance cases with recorded commands and results ([case log](../../operations/evidence/runs/2026-11-26-54387a08/test-execution-report.md#adr-0045-case-log)):
+
+- **Identity and locks:** content-addressed `ontrel:sha256-…` releases; byte-identical recompilation (`compile --check`); refused identity reuse, collision and removal without retirement; immutable installed rows.
+- **Inference change:** EX-ONT-003, where an added superclass is classified additive and the added entailment is reported.
+- **Constraint change:** EX-ONT-004, a constraint tightening reported with an unchanged closure.
+- **Split and rollback:** a split of `foundation.organization.operates-at` with reach counts; existing data keeps its release; rollback is appended to the selection history.
+- **Scope:** separate installs, reports and selections in two tenants/KBs.
+
+The missing-limit case is owned by F0013/F0065.
+
 ## References
 
 - [Master blueprint](../master-blueprint.md), sections 19, 82, 112, and 116
-- [F0012](../../features/F0012-foundation-ontology/README.md), [F0013](../../features/F0013-insurance-core-gl-ontology/README.md), [F0015](../../features/F0015-extraction-profile-compiler/README.md)
+- [F0012](../../features/archive/F0012-foundation-ontology/README.md), [F0013](../../features/F0013-insurance-core-gl-ontology/README.md), [F0015](../../features/F0015-extraction-profile-compiler/README.md)
 - [F0065 assessment contract](../../features/F0065-grounded-gl-guideline-assessment/assessment-contract.md)
 - [ADR-0002](ADR-0002-postgresql-is-the-authoritative-runtime-store.md), [ADR-0026](ADR-0026-derived-facts-have-dependency-lineage.md)

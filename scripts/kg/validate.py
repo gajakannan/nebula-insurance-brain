@@ -427,6 +427,7 @@ ROLE_SLUG_TO_CSV = {
     "reviewer": "Reviewer",
     "service-principal": "ServicePrincipal",
     "security-admin": "SecurityAdmin",
+    "ontology-steward": "OntologySteward",  # F0012, ADR-0081 D5
 }
 
 

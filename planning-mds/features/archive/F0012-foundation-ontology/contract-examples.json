@@ -1,0 +1,929 @@
+{
+ "provenance": "Synthetic F0012 design examples (feature run 2026-11-26-54387a08); shape only, not install, identity or activation behavior.",
+ "cases": [
+  {
+   "id": "authoring-valid",
+   "schema": "ontology-module-authoring-v1.schema.json",
+   "expected": true,
+   "value": {
+    "authoring_schema": "ontology-module-authoring/v1",
+    "module": {
+     "id": "demo",
+     "version": 1,
+     "predicate_namespace": "dmo",
+     "dependencies": []
+    },
+    "terms": [
+     {
+      "id": "demo.thing",
+      "kind": "class",
+      "labels": {
+       "en-US": "Thing"
+      },
+      "definition": "A synthetic root class for contract examples.",
+      "parents": [],
+      "examples": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "regression_cases": [
+       "planning-mds/domain/glossary.md"
+      ]
+     },
+     {
+      "id": "demo.thing.part-of",
+      "kind": "object_property",
+      "labels": {
+       "en-US": "Part of"
+      },
+      "definition": "A synthetic STATE relation for contract examples.",
+      "domain": "demo.thing",
+      "range": "demo.thing",
+      "temporal_kind": "STATE",
+      "examples": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "regression_cases": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "predicate": {
+       "local_name": "partOf",
+       "major": 1
+      },
+      "value_type": "entity_ref",
+      "cardinality": "SINGLE"
+     }
+    ],
+    "projection": [
+     {
+      "property": "demo.thing.part-of",
+      "disposition": "edge",
+      "label": "PART_OF",
+      "direction": "subject-to-object"
+     }
+    ]
+   }
+  },
+  {
+   "id": "authoring-retired-parent",
+   "schema": "ontology-module-authoring-v1.schema.json",
+   "expected": false,
+   "value": {
+    "authoring_schema": "ontology-module-authoring/v1",
+    "module": {
+     "id": "demo",
+     "version": 1,
+     "predicate_namespace": "dmo",
+     "dependencies": []
+    },
+    "terms": [
+     {
+      "id": "demo.thing",
+      "kind": "class",
+      "labels": {
+       "en-US": "Thing"
+      },
+      "definition": "A synthetic root class for contract examples.",
+      "examples": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "regression_cases": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "parent": "demo.thing"
+     },
+     {
+      "id": "demo.thing.part-of",
+      "kind": "object_property",
+      "labels": {
+       "en-US": "Part of"
+      },
+      "definition": "A synthetic STATE relation for contract examples.",
+      "domain": "demo.thing",
+      "range": "demo.thing",
+      "temporal_kind": "STATE",
+      "examples": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "regression_cases": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "predicate": {
+       "local_name": "partOf",
+       "major": 1
+      },
+      "value_type": "entity_ref",
+      "cardinality": "SINGLE"
+     }
+    ],
+    "projection": [
+     {
+      "property": "demo.thing.part-of",
+      "disposition": "edge",
+      "label": "PART_OF",
+      "direction": "subject-to-object"
+     }
+    ]
+   }
+  },
+  {
+   "id": "authoring-missing-temporal-kind",
+   "schema": "ontology-module-authoring-v1.schema.json",
+   "expected": false,
+   "value": {
+    "authoring_schema": "ontology-module-authoring/v1",
+    "module": {
+     "id": "demo",
+     "version": 1,
+     "predicate_namespace": "dmo",
+     "dependencies": []
+    },
+    "terms": [
+     {
+      "id": "demo.thing",
+      "kind": "class",
+      "labels": {
+       "en-US": "Thing"
+      },
+      "definition": "A synthetic root class for contract examples.",
+      "parents": [],
+      "examples": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "regression_cases": [
+       "planning-mds/domain/glossary.md"
+      ]
+     },
+     {
+      "id": "demo.thing.part-of",
+      "kind": "object_property",
+      "labels": {
+       "en-US": "Part of"
+      },
+      "definition": "A synthetic STATE relation for contract examples.",
+      "domain": "demo.thing",
+      "range": "demo.thing",
+      "examples": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "regression_cases": [
+       "planning-mds/domain/glossary.md"
+      ],
+      "predicate": {
+       "local_name": "partOf",
+       "major": 1
+      },
+      "value_type": "entity_ref",
+      "cardinality": "SINGLE"
+     }
+    ],
+    "projection": [
+     {
+      "property": "demo.thing.part-of",
+      "disposition": "edge",
+      "label": "PART_OF",
+      "direction": "subject-to-object"
+     }
+    ]
+   }
+  },
+  {
+   "id": "manifest-foundation-1",
+   "schema": "ontology-release-manifest-v1.schema.json",
+   "expected": true,
+   "value": {
+    "artifact_slots": {
+     "compiler": [],
+     "profiles": [],
+     "templates": [],
+     "validation": []
+    },
+    "authoring_schema": "ontology-module-authoring/v1",
+    "change_records": [],
+    "compiler_version": "brain-ontology-compiler/1",
+    "contract": "ontology-release-manifest/v1",
+    "dependency_lock": [],
+    "manifest_digest": "3602b71f33d5283747e4545ccdc261ba1c3bfdf791a2893c9458b805011106c0",
+    "modules": [
+     {
+      "digest": "5a057c7a0e0c67acb34b6baad9b5c25fcf1da755984cf8f6288e33cbaf48f020",
+      "id": "foundation",
+      "version": 1
+     }
+    ],
+    "name": "foundation",
+    "predicates": [
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:accountOrganization@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.account.organization",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:parentAccount@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.account.parent-account",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:accountStatus@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.account.status",
+      "value_type": "code"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "RELATIONSHIP",
+      "member_key_source": null,
+      "predicate_key": "fnd:operatesAt@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.organization.operates-at",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:parentOrganization@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.organization.parent-organization",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:ownershipOwnedOrganization@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.ownership-interest.owned-organization",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:ownershipOwner@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.ownership-interest.owner",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:ownershipPercentage@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.ownership-interest.percentage",
+      "value_type": "decimal"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "RELATIONSHIP",
+      "member_key_source": null,
+      "predicate_key": "fnd:employedBy@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.person.employed-by",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleActedFor@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.acted-for",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleAuthoritativeSource@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.authoritative-source",
+      "value_type": "code"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "MULTI",
+      "member_key_source": "entity",
+      "predicate_key": "fnd:roleCoveragePart@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.coverage-part",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleParty@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.party",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleKind@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.role-kind",
+      "value_type": "code"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleScope@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.scope",
+      "value_type": "entity_ref"
+     }
+    ],
+    "projection_mapping": {
+     "digest": "4ac41a9b4308dff61e0f61663a4f23a88e92e0a6094f602a08b24a4ed463a09b",
+     "required_context": [
+      "tenant_id",
+      "knowledge_base_id",
+      "valid_as_of",
+      "known_as_of",
+      "source_fact_version_ids",
+      "source_relationship_version_ids",
+      "assertion_refs",
+      "evidence_refs",
+      "ontology_release_ref",
+      "mapping_version",
+      "asserted_or_derived_basis"
+     ],
+     "version": "nebula-age-mapping/v1"
+    },
+    "release_ref": "ontrel:sha256-3602b71f33d5283747e4545ccdc261ba1c3bfdf791a2893c9458b805011106c0",
+    "semantics": {
+     "inference": [
+      "subClassOf",
+      "subPropertyOf",
+      "inverseOf"
+     ],
+     "ruleset": "nebula-tbox-subset/v1",
+     "validation": [
+      "domain",
+      "range",
+      "disjoint",
+      "minCardinality",
+      "maxCardinality",
+      "custom"
+     ]
+    },
+    "sequence": 1,
+    "terms_digest": "d2c0ba459cdf294f49c6294f5d820a9adfe81a995b75c941f6a4727a37c21e39"
+   }
+  },
+  {
+   "id": "manifest-missing-predicates",
+   "schema": "ontology-release-manifest-v1.schema.json",
+   "expected": false,
+   "value": {
+    "artifact_slots": {
+     "compiler": [],
+     "profiles": [],
+     "templates": [],
+     "validation": []
+    },
+    "authoring_schema": "ontology-module-authoring/v1",
+    "change_records": [],
+    "compiler_version": "brain-ontology-compiler/1",
+    "contract": "ontology-release-manifest/v1",
+    "dependency_lock": [],
+    "manifest_digest": "3602b71f33d5283747e4545ccdc261ba1c3bfdf791a2893c9458b805011106c0",
+    "modules": [
+     {
+      "digest": "5a057c7a0e0c67acb34b6baad9b5c25fcf1da755984cf8f6288e33cbaf48f020",
+      "id": "foundation",
+      "version": 1
+     }
+    ],
+    "name": "foundation",
+    "projection_mapping": {
+     "digest": "4ac41a9b4308dff61e0f61663a4f23a88e92e0a6094f602a08b24a4ed463a09b",
+     "required_context": [
+      "tenant_id",
+      "knowledge_base_id",
+      "valid_as_of",
+      "known_as_of",
+      "source_fact_version_ids",
+      "source_relationship_version_ids",
+      "assertion_refs",
+      "evidence_refs",
+      "ontology_release_ref",
+      "mapping_version",
+      "asserted_or_derived_basis"
+     ],
+     "version": "nebula-age-mapping/v1"
+    },
+    "release_ref": "ontrel:sha256-3602b71f33d5283747e4545ccdc261ba1c3bfdf791a2893c9458b805011106c0",
+    "semantics": {
+     "inference": [
+      "subClassOf",
+      "subPropertyOf",
+      "inverseOf"
+     ],
+     "ruleset": "nebula-tbox-subset/v1",
+     "validation": [
+      "domain",
+      "range",
+      "disjoint",
+      "minCardinality",
+      "maxCardinality",
+      "custom"
+     ]
+    },
+    "sequence": 1,
+    "terms_digest": "d2c0ba459cdf294f49c6294f5d820a9adfe81a995b75c941f6a4727a37c21e39"
+   }
+  },
+  {
+   "id": "manifest-bad-release-ref",
+   "schema": "ontology-release-manifest-v1.schema.json",
+   "expected": false,
+   "value": {
+    "artifact_slots": {
+     "compiler": [],
+     "profiles": [],
+     "templates": [],
+     "validation": []
+    },
+    "authoring_schema": "ontology-module-authoring/v1",
+    "change_records": [],
+    "compiler_version": "brain-ontology-compiler/1",
+    "contract": "ontology-release-manifest/v1",
+    "dependency_lock": [],
+    "manifest_digest": "3602b71f33d5283747e4545ccdc261ba1c3bfdf791a2893c9458b805011106c0",
+    "modules": [
+     {
+      "digest": "5a057c7a0e0c67acb34b6baad9b5c25fcf1da755984cf8f6288e33cbaf48f020",
+      "id": "foundation",
+      "version": 1
+     }
+    ],
+    "name": "foundation",
+    "predicates": [
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:accountOrganization@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.account.organization",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:parentAccount@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.account.parent-account",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:accountStatus@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.account.status",
+      "value_type": "code"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "RELATIONSHIP",
+      "member_key_source": null,
+      "predicate_key": "fnd:operatesAt@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.organization.operates-at",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:parentOrganization@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.organization.parent-organization",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:ownershipOwnedOrganization@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.ownership-interest.owned-organization",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:ownershipOwner@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.ownership-interest.owner",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:ownershipPercentage@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.ownership-interest.percentage",
+      "value_type": "decimal"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "RELATIONSHIP",
+      "member_key_source": null,
+      "predicate_key": "fnd:employedBy@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.person.employed-by",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleActedFor@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.acted-for",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleAuthoritativeSource@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.authoritative-source",
+      "value_type": "code"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "MULTI",
+      "member_key_source": "entity",
+      "predicate_key": "fnd:roleCoveragePart@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.coverage-part",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleParty@v1",
+      "qualifiers": [],
+      "temporal_kind": "STATE",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.party",
+      "value_type": "entity_ref"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleKind@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.role-kind",
+      "value_type": "code"
+     },
+     {
+      "basis_required": false,
+      "cardinality": "SINGLE",
+      "member_key_source": null,
+      "predicate_key": "fnd:roleScope@v1",
+      "qualifiers": [],
+      "temporal_kind": "ETERNAL",
+      "term_iri": "urn:nebula:ont:foundation.role-assignment.scope",
+      "value_type": "entity_ref"
+     }
+    ],
+    "projection_mapping": {
+     "digest": "4ac41a9b4308dff61e0f61663a4f23a88e92e0a6094f602a08b24a4ed463a09b",
+     "required_context": [
+      "tenant_id",
+      "knowledge_base_id",
+      "valid_as_of",
+      "known_as_of",
+      "source_fact_version_ids",
+      "source_relationship_version_ids",
+      "assertion_refs",
+      "evidence_refs",
+      "ontology_release_ref",
+      "mapping_version",
+      "asserted_or_derived_basis"
+     ],
+     "version": "nebula-age-mapping/v1"
+    },
+    "release_ref": "foundation@1",
+    "semantics": {
+     "inference": [
+      "subClassOf",
+      "subPropertyOf",
+      "inverseOf"
+     ],
+     "ruleset": "nebula-tbox-subset/v1",
+     "validation": [
+      "domain",
+      "range",
+      "disjoint",
+      "minCardinality",
+      "maxCardinality",
+      "custom"
+     ]
+    },
+    "sequence": 1,
+    "terms_digest": "d2c0ba459cdf294f49c6294f5d820a9adfe81a995b75c941f6a4727a37c21e39"
+   }
+  },
+  {
+   "id": "impact-ex-ont-003",
+   "schema": "ontology-impact-report-v1.schema.json",
+   "expected": true,
+   "value": {
+    "contract": "ontology-impact-report/v1",
+    "status": "complete",
+    "scope": {
+     "tenant_id": "00000000-0000-4000-8000-000000000001",
+     "knowledge_base_id": "00000000-0000-4000-8000-000000000002"
+    },
+    "predecessor": {
+     "release_ref": "ontrel:sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "manifest_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "candidate": {
+     "release_ref": "ontrel:sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "changes": [
+     {
+      "term_iri": "urn:nebula:ont:x.a",
+      "class": "additive",
+      "detail": "axioms added to an existing term"
+     }
+    ],
+    "inference": {
+     "ruleset": "nebula-tbox-subset/v1",
+     "scope": "entailments whose subject and object are both predecessor terms",
+     "result": "changes_detected",
+     "added": [
+      {
+       "subject": "urn:nebula:ont:x.a",
+       "relation": "subClassOf",
+       "object": "urn:nebula:ont:x.b"
+      }
+     ],
+     "removed": []
+    },
+    "constraints": [],
+    "reach": [
+     {
+      "population": "fact_slot",
+      "predicate_key": "xx:p@v1",
+      "affected": 0,
+      "denominator": 3
+     }
+    ],
+    "unexamined": [
+     {
+      "population": "extraction profiles and templates",
+      "owner": "F0015",
+      "reason": "no producer in this release"
+     },
+     {
+      "population": "stored assessments",
+      "owner": "F0065",
+      "reason": "no producer in this release"
+     },
+     {
+      "population": "graph projections",
+      "owner": "F0034",
+      "reason": "no producer in this release"
+     }
+    ],
+    "unresolved": [],
+    "report_digest": "09a9ccdd2e7966335d756309543a69fd652d17f218f0d99c7d116522bea73d2e"
+   }
+  },
+  {
+   "id": "impact-complete-with-unresolved",
+   "schema": "ontology-impact-report-v1.schema.json",
+   "expected": false,
+   "value": {
+    "contract": "ontology-impact-report/v1",
+    "status": "complete",
+    "scope": {
+     "tenant_id": "00000000-0000-4000-8000-000000000001",
+     "knowledge_base_id": "00000000-0000-4000-8000-000000000002"
+    },
+    "predecessor": {
+     "release_ref": "ontrel:sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "manifest_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "candidate": {
+     "release_ref": "ontrel:sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "changes": [
+     {
+      "term_iri": "urn:nebula:ont:x.a",
+      "class": "additive",
+      "detail": "axioms added to an existing term"
+     }
+    ],
+    "inference": {
+     "ruleset": "nebula-tbox-subset/v1",
+     "scope": "entailments whose subject and object are both predecessor terms",
+     "result": "changes_detected",
+     "added": [
+      {
+       "subject": "urn:nebula:ont:x.a",
+       "relation": "subClassOf",
+       "object": "urn:nebula:ont:x.b"
+      }
+     ],
+     "removed": []
+    },
+    "constraints": [],
+    "reach": [
+     {
+      "population": "fact_slot",
+      "predicate_key": "xx:p@v1",
+      "affected": 0,
+      "denominator": 3
+     }
+    ],
+    "unexamined": [
+     {
+      "population": "extraction profiles and templates",
+      "owner": "F0015",
+      "reason": "no producer in this release"
+     },
+     {
+      "population": "stored assessments",
+      "owner": "F0065",
+      "reason": "no producer in this release"
+     },
+     {
+      "population": "graph projections",
+      "owner": "F0034",
+      "reason": "no producer in this release"
+     }
+    ],
+    "unresolved": [
+     "x"
+    ],
+    "report_digest": "09a9ccdd2e7966335d756309543a69fd652d17f218f0d99c7d116522bea73d2e"
+   }
+  },
+  {
+   "id": "impact-complete-with-unclassified",
+   "schema": "ontology-impact-report-v1.schema.json",
+   "expected": false,
+   "value": {
+    "contract": "ontology-impact-report/v1",
+    "status": "complete",
+    "scope": {
+     "tenant_id": "00000000-0000-4000-8000-000000000001",
+     "knowledge_base_id": "00000000-0000-4000-8000-000000000002"
+    },
+    "predecessor": {
+     "release_ref": "ontrel:sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "manifest_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "candidate": {
+     "release_ref": "ontrel:sha256-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+     "manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "changes": [
+     {
+      "term_iri": "urn:nebula:ont:x.a",
+      "class": "unclassified"
+     }
+    ],
+    "inference": {
+     "ruleset": "nebula-tbox-subset/v1",
+     "scope": "entailments whose subject and object are both predecessor terms",
+     "result": "changes_detected",
+     "added": [
+      {
+       "subject": "urn:nebula:ont:x.a",
+       "relation": "subClassOf",
+       "object": "urn:nebula:ont:x.b"
+      }
+     ],
+     "removed": []
+    },
+    "constraints": [],
+    "reach": [
+     {
+      "population": "fact_slot",
+      "predicate_key": "xx:p@v1",
+      "affected": 0,
+      "denominator": 3
+     }
+    ],
+    "unexamined": [
+     {
+      "population": "extraction profiles and templates",
+      "owner": "F0015",
+      "reason": "no producer in this release"
+     },
+     {
+      "population": "stored assessments",
+      "owner": "F0065",
+      "reason": "no producer in this release"
+     },
+     {
+      "population": "graph projections",
+      "owner": "F0034",
+      "reason": "no producer in this release"
+     }
+    ],
+    "unresolved": [],
+    "report_digest": "09a9ccdd2e7966335d756309543a69fd652d17f218f0d99c7d116522bea73d2e"
+   }
+  },
+  {
+   "id": "fact-version-read-eternal",
+   "schema": "fact-version-read-v1.schema.json",
+   "expected": true,
+   "value": {
+    "id": "30000000-0000-0000-0000-000000000011",
+    "fact_slot_id": "30000000-0000-0000-0000-000000000012",
+    "value": {
+     "answer_contract": "fact-answer/v1",
+     "state": "PRESENT",
+     "value": {
+      "type": "entity_ref",
+      "entity_id": "30000000-0000-0000-0000-000000000013"
+     }
+    },
+    "valid_start": null,
+    "valid_end": null,
+    "recorded_start": "2026-11-26T00:00:00Z",
+    "recorded_end": null,
+    "change_reason": null,
+    "evidence_refs": [],
+    "commit_id": "30000000-0000-0000-0000-000000000014",
+    "canonical_accepted_at": "2026-11-26T00:00:00Z",
+    "temporal": {
+     "contract": "fact-temporal/v1",
+     "temporal_kind": "ETERNAL",
+     "valid_from": null,
+     "valid_from_basis": null,
+     "valid_to_state": "OPEN",
+     "valid_to": null,
+     "attested_from": null,
+     "attested_through": null,
+     "attested_to": null,
+     "validity_unknown_from": null,
+     "split_of_version_id": null
+    }
+   }
+  }
+ ]
+}

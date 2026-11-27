@@ -1,4 +1,5 @@
-# Planning artifacts and teaching examples; these bindings do not claim runtime code exists.
+# Planning artifacts and teaching examples. capability:ontology-release-compatibility also carries the
+# F0012 as-built code bound at feature G7 (run 2026-11-26-54387a08).
 bindings:
 - id: entity:ontology-release
   paths:
@@ -22,3 +23,9 @@ bindings:
     - planning-mds/examples/ontology-interchange/malformed-amount.ttl
     - planning-mds/examples/ontology-interchange/expected-inferences.ttl
     - planning-mds/examples/ontology-interchange/expected-results.yaml
+    backend:
+    - engine/packages/brain-ontology/src/brain_ontology/impact.py
+    - engine/packages/brain-ontology/src/brain_ontology/semantics.py
+    tests:
+    - engine/packages/brain-ontology/tests/test_semantics_impact.py
+    - engine/tests/integration/test_ontology_activation.py

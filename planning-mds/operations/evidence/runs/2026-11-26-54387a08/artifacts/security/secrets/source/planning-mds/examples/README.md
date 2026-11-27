@@ -1,0 +1,113 @@
+# Semantic examples and contributor reading path
+
+Start with the [GL neurosymbolic walkthrough](neurosymbolic-gl/README.md), then use the [domain glossary](../domain/glossary.md) and [feature registry](../features/REGISTRY.md). The [Review Panel prototype](nebula-review-panel-live-files.html) and the [Graph Observatory rendering options](graph-observatory-2d-options.html) are the runnable artifacts here. Persona files describe who contributes; these examples explain what the Brain represents and does.
+
+## Example contract
+
+Every introduced or changed semantic concept needs a plain-language definition, a worked example, a failure/boundary example, and a link to its owning feature/story and contract. Reuse stable example IDs across prose, structured records, tests, and review comments. Examples explain the authoritative requirements; they do not silently establish new insurance business rules.
+
+Each example declares synthetic/licensed provenance, delivery phase, and whether its outputs are illustrative or observed. Structured records declare their schema. Expected outcomes are authored independently from implementations. Once the corresponding runtime ships, its story must supply a reproduction command and compare actual output against those expectations. A planning schema pass is not runtime proof, model accuracy, or feature completion.
+
+Documentation/development examples remain outside the frozen evaluation holdout. Runtime evidence is recorded under operations evidence runs, with a link from the example; never replace an illustrative output with an unlabeled claim of observed execution.
+
+## Coverage map
+
+| Concept / boundary | Example | Owner / release |
+|---|---|---|
+| Commercial account, insured parties, broker/carrier/MGA/underwriter roles | [EX-PC-001/003/011](commercial-pc-account/README.md) | F0012/F0013/F0017; proposed synthetic teaching model |
+| Owned policies with missing/expired insured roles; dated account closure and replacement with retained history and current-only uniqueness | [EX-PC-020/021](commercial-pc-account/cases.md#ex-pc-020--owned-policies-survive-missing-or-expired-insured-roles), [glossary](../domain/glossary.md#account) | [F0012](../features/F0012-foundation-ontology/README.md), [F0017](../features/F0017-deterministic-entity-resolution/README.md), [F0023](../features/F0023-minimal-entity-360/README.md); proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md), [example shapes](commercial-pc-account/shapes.ttl); synthetic development examples |
+| BOP package versus GL/property coverages; auto and umbrella context; unissued WC/inland-marine requests | [EX-PC-002/004/005/007](commercial-pc-account/cases.md) | F0012/F0013 shared/core contracts; non-GL runtime delivery unassigned |
+| Evidence-backed relationship projection, bitemporal property endorsement, separate consumer completeness | [EX-PC-006/008/009/010/012](commercial-pc-account/cases.md) | F0008/F0010/F0015/F0018/F0034/F0065 contracts as scoped in the handoff; RDF checks run by the `semantic_rdf` gate |
+| Temporal kinds, unknown start and undated end; umbrella schedule review prompt | [EX-PC-013/014](commercial-pc-account/cases.md) | F0008/F0016 and ADR-0064 for time; F0012 relation contract for schedules |
+| One current account per organization, designated parent accounts, percentage ownership and joint ventures; one owning account per policy with additional named insureds; a master program with local policies; broker branches, broker of record per account, per-line placement brokers, who-does-what roles and role-based reach | [EX-PC-015 to 019](commercial-pc-account/cases.md) | F0012/F0017/F0023 under proposed ADR-0070; access by F0002-successor amendment |
+| Source authority; requested versus issued terms | [EX-OWN-001](source-authority-and-information-state.md#ex-own-001--requested-versus-issued-limit) | F0018/F0024, v0.1B; proposed ADR-0038 |
+| Package completeness; information state separate from value | [EX-OWN-002/003](source-authority-and-information-state.md#ex-own-002--listed-endorsement-not-supplied) | F0007/F0013/F0014/F0016/F0020/F0023, v0.1A–B; proposed ADR-0039 |
+| Deletion, retraction and revocation; restore re-applies deletion | [EX-OWN-004](source-authority-and-information-state.md#ex-own-004--deletion-survives-a-restore) | F0010/F0018/F0026, v0.1; proposed ADR-0043 |
+| Constrained policy question; revocation mid-conversation; instructions inside a document | [EX-OWN-005/006](source-authority-and-information-state.md#ex-own-005--constrained-policy-question-and-mid-conversation-revocation) | F0069/F0016/F0026, v0.1C; proposed ADR-0046/0053/0042 |
+| Neural interpretation plus symbolic evaluation | [EX-GL-001](neurosymbolic-gl/README.md) | F0065 S0001–S0006, v0.1B |
+| Concept versus instance; relationship versus requirement | [Representation notes](neurosymbolic-gl/README.md#representation-notes) | F0012/F0013/F0065, v0.1 |
+| Stable ontology identities and explicit meaning changes | [EX-ONT-001](ontology-release-contracts.md#stable-term-identity) | F0012/F0013, v0.1A; proposed ADR-0045 |
+| Constraint execution context and missing inputs | [EX-ONT-002](ontology-release-contracts.md#constraint-execution-and-missing-values) | F0012/F0013, v0.1A; F0065, v0.1B |
+| Historical reproducibility versus inference and consumer compatibility | [EX-ONT-003/004](ontology-release-contracts.md#reproducibility-and-compatibility) | F0012/F0013/F0015, v0.1A; proposed ADR-0045 |
+| Module versions, composed releases, and package completeness | [EX-ONT-005](ontology-release-contracts.md#composed-releases-and-packages) | F0012/F0013/F0015, v0.1A; advanced tooling F0030/F0062 |
+| Foundation release reference, installation, release-backed predicates and ETERNAL/EVENT kinds; impact report, reviewed activation, rollback and selection history; account-scoped Cedar Bridge cases on production foundation IRIs | [EX-ONT-007/008](ontology-release-contracts.md#foundation-release-runtime-f0012), [foundation cases](commercial-pc-account/foundation/README.md) | [F0012](../features/F0012-foundation-ontology/README.md) S0002–S0007, v0.1A; proposed ADR-0081; runtime reproduction in feature run 2026-11-26-54387a08 |
+| Lineage with the first stored assessment | [EX-ONT-006](ontology-release-contracts.md#first-stored-assessment-lineage) | F0065, v0.1B; ADR-0026 |
+| RDF/OWL vocabulary, Turtle/JSON-LD equivalence, SHACL consumer boundaries, projection mapping | [EX-INTEROP-001–004](ontology-interchange/README.md) | F0012/F0013/F0015, v0.1A; F0065, v0.1B; synthetic proposed fixtures; RDF/SHACL checks observed 2026-10-07 (Python 3.14.4), no Nebula component executed |
+| Immutable bundle identity, structure/text origin, document-date provenance, current access and legacy/restore boundaries | [EX-CONTENT-001–004](../features/archive/F0004-content-artifact-model/worked-examples.md) | F0004 S0001–S0004, v0.1A; [definitions](../domain/glossary.md#f0004-content-contract-refinements), worked/boundary expectations and [40 schema cases](../features/archive/F0004-content-artifact-model/contract-examples.json); [runtime reproduction](../features/archive/F0004-content-artifact-model/worked-examples.md#runtime-reproduction--feature-run-2026-10-17-8a6cc79f), feature run 2026-10-17-8a6cc79f (implementation approved; current proof and bounded follow-ups recorded) |
+| Source, artifact, assertion, review, canonical fact, confidence | [Source to fact](neurosymbolic-gl/README.md#source-to-fact) and CASE-05/06 | F0004–F0018/F0022, v0.1 |
+| FactSlot, typed money, basis, currency | CASE-01/02/03/09/10 | F0007/F0011/F0013/F0065 S0002, v0.1 |
+| Valid time, recorded time, correction, retraction | [Temporal walkthrough](neurosymbolic-gl/README.md#temporal-walkthrough), CASE-11–15 | F0008/F0010/F0019/F0025/F0065 S0004, v0.1 |
+| Derivation, rule authority, assessment versus approval | [Assessment](neurosymbolic-gl/README.md#assessment), CASE-16/17 | F0009/F0018/F0065 S0001/S0003, v0.1 |
+| Unknown, explicit negative, conflict | CASE-04/07/08 | F0006/F0018/F0065 S0002, v0.1 |
+| Structural tenancy, tenant entity identity and explicit KB access | [EX-AUTHX-001–003](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md) | F0002 S0001/S0003; ADR-0061; AuthX v1 schema |
+| Verified principal, membership and current resource scope | [EX-AUTHX-004–011](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md) | F0002 S0002–S0004; glossary F0002 refinements; AuthX v1 schema |
+| Resource envelope, delegation and durable decision/authentication events | [EX-AUTHX-012–018](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md), [structured shapes](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/contract-examples.json) | F0002 S0004–S0006; ADR-0062; synthetic planning examples, no runtime proof |
+| Derived-result and evidence authorization | CASE-18/19 | F0002/F0018/F0065 S0005/F0026, v0.1 |
+| Evidence anchoring, selector shapes, declared precision, unresolved evidence | [Review Panel prototype](nebula-review-panel-live-files.html) | F0001 S0004/F0022, v0.1B |
+| Recorded execution traces: observed, used in answer, considered not used, not instrumented; a learning run with zero canonical change | [EX-OBS-001/002](graph-observatory-2d-options.html) (synthetic; fixtures embedded in the page, validated against the draft [trace schema](../schemas/semantic-execution-trace.schema.json)) | F0036/F0038/F0041 carry-ins, F0067, v0.2; proposed ADR-0071/ADR-0072 |
+| Open statements, typed assertions, signature alignment, implication rules | [EX-SEM-001/002](statements-time-and-governance.md#open-statements-and-alignment) | F0006 storage, v0.1A; F0066 alignment, v0.2B; ADR-0063 |
+| Time mentions, document time context, resolution grade, precision, unknown ends, temporal kind | [EX-SEM-003/004](statements-time-and-governance.md#time-interpretation); F0008 contract cases in [contract-examples.json](../features/archive/F0008-bitemporal-canonical-facts/contract-examples.json) | F0004/F0008/F0016/F0019/F0025, v0.1; ADR-0064; F0008 design ADR-0078 (Proposed) |
+| Admission checks, drops, text origin, statement mood | [EX-SEM-005–007](statements-time-and-governance.md#admission-origin-and-mood) | F0004/F0006/F0016/F0022, v0.1; F0052 routing, v0.3; ADR-0065 |
+| F0006 assertion dimensions, kind storage, structural admission and eligibility boundaries | [EX-GL-001](neurosymbolic-gl/README.md), [EX-SEM-001/005–007](statements-time-and-governance.md), [glossary](../domain/glossary.md#assertion) | [F0006 S0001–S0005](../features/archive/F0006-assertion-plane-origin-and-interpretation-basis/PRD.md), [EX-ASSERT-001–009](../features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md), [structured fixtures](../features/archive/F0006-assertion-plane-origin-and-interpretation-basis/contract-examples.json); [candidate v2](../schemas/assertion-record-v2.schema.json), [result v2](../schemas/interpretation-result-v2.schema.json), [admission result](../schemas/assertion-admission-result-v1.schema.json). Synthetic design examples; no runtime delivery claimed |
+| Names as time-bounded claims; similarity only proposes | [EX-SEM-008](statements-time-and-governance.md#names) | F0007/F0017, v0.1A; F0027, v0.2B; ADR-0066 |
+| Impact holds, human precedent, automation fuse | [EX-SEM-009](statements-time-and-governance.md#automation-and-impact) | F0027/F0043, v0.2B; F0059, v0.4+; ADR-0067 |
+| Decision basis fingerprints and staleness | [EX-SEM-010](statements-time-and-governance.md#decision-basis) | F0016/F0066/F0032, v0.1–v0.2B; F0056, v0.4+; ADR-0068 |
+| External action attempts and uncertain outcomes | [EX-SEM-011](statements-time-and-governance.md#action-attempts) | F0050, v0.3; F0059, v0.4+; ADR-0069 |
+| Vector similarity versus accepted facts | [EX-FUTURE-001](future-semantics.md#retrieval-projection) | F0033/F0035, v0.2A |
+| Learned candidates and repeated model claims | [EX-FUTURE-002](future-semantics.md#learning-candidate) | F0041/F0042, v0.2B; F0060 rule promotion, v0.4+ |
+| Obligations versus observed facts | [EX-FUTURE-003](future-semantics.md#normative-obligation) | F0052, v0.3 |
+| Hypothetical assumptions versus canonical state | [EX-FUTURE-004](future-semantics.md#hypothetical-scenario) | F0053, v0.3 |
+
+## F0011 structural-contract carry-in
+
+The F0011 plan reuses these existing definitions and synthetic worked/
+boundary examples. Its runtime fixtures and cross-language results remain to be
+produced by the feature action; the examples do not establish new value semantics.
+
+| Contract boundary | Definition and worked/boundary examples | Owning story and existing contract |
+|-------------------|-----------------------------------------|-----------------------------------|
+| Nine information states; scoped absence versus explicit negative and missing endorsement | [Glossary](../domain/glossary.md#information-state), [EX-OWN-002/003](source-authority-and-information-state.md#ex-own-002--listed-endorsement-not-supplied), [F0007 worked cases](../features/archive/F0007-factslot-model/contract-examples.json) | [F0011-S0002](../features/archive/F0011-json-schema-contract-system/F0011-S0002-validate-information-state-and-scoped-absence.md), [fact-answer/v1](../schemas/fact-answer-v1.schema.json); completeness/display stays F0014/F0023 |
+| Exact money and identifiers scoped by scheme/type | [Glossary](../domain/glossary.md#qualified-money), [EX-GL-001](neurosymbolic-gl/README.md) and [CASE-01/02/03/09/10](neurosymbolic-gl/cases.md), [F0007 positive/failure cases](../features/archive/F0007-factslot-model/contract-examples.json) | [F0011-S0003](../features/archive/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md), [fact-slot-key-v1 definitions](../schemas/fact-slot-key-v1.schema.json); predicate semantics/resolution stays F0013/F0017 |
+
+F0011 [synthetic contract cases](../features/archive/F0011-json-schema-contract-system/contract-examples.json)
+use the [case inventory schema](../schemas/schema-conformance-cases-v1.schema.json).
+They distinguish structural shape from currency/basis/interval/normalization domain
+refusals. Only local planning-schema expectations are checked here; full runtime
+conformance and consumer proof remain required by [ADR-0079](../architecture/decisions/ADR-0079-offline-schema-bundle-and-cross-language-conformance.md).
+
+## F0009 provenance and correction coverage
+
+| Concept / boundary | Definition, worked and failure example | Owner / contract / release |
+|---|---|---|
+| Stored source explanation, honest missing metadata and derivation references | [EX-PROV-001](../features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-001--explain-a-source-claim) | F0009-S0001; ADR-0010/F0006; v0.1A approved planning |
+| Append-only human correction, attribution, replay/stale/competing outcomes | [EX-PROV-002](../features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-002--correct-without-erasing-or-accepting) | F0009-S0002; ADR-0037/0044/0058; existing review and assertion contracts |
+| Same-slot temporal remainder versus assertion correction; ending evidence | [EX-PROV-003](../features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-003--explain-an-unchanged-temporal-remainder) | F0009-S0003; accepted ADR-0077/0078 |
+| Current authority across historical, ancestor, ending and attestation sources | [EX-PROV-004](../features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-004--current-access-controls-old-history) | F0009-S0004; F0002/F0006/F0007/F0008 shipped boundaries |
+| Reserved LearningCandidate reference without learning or dataset effects | [EX-PROV-005](../features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-005--reserve-future-learning-with-zero-dataset-effect) | F0009-S0005/S0006; master blueprint §§88/106.3; future F0041/F0026 consumers |
+
+All EX-PROV examples are synthetic, illustrative development expectations extending EX-GL-001. No F0009 runtime proof is claimed. The Architect binds [query](../schemas/provenance-query-v1.schema.json), [result](../schemas/provenance-result-v1.schema.json), [reservation](../schemas/learning-candidate-reservation-v1.schema.json) and [non-applied submission](../schemas/review-submission-attempt-v1.schema.json) contracts in Phase B; [glossary definitions](../domain/glossary.md#f0009-provenance-refinements-phase-b-approved) and the assembly plan control their meaning. The later feature action supplies PostgreSQL reproduction.
+
+## Governed retrieval coverage
+
+Definitions: [retrieval glossary](../domain/glossary.md#governed-evidence-retrieval). All EX-RET cases are synthetic, illustrative development examples; no runtime or measured quality claim. Owning features remain Planned and bind story IDs/reproduction evidence during their own plan actions.
+
+| Concept / boundary | Worked and boundary example | Owner / contract / release |
+|---|---|---|
+| Evidence block; bridge evidence; exact budget and missing support | [EX-RET-001](governed-evidence-retrieval.md#ex-ret-001--bridge-evidence-under-a-budget) | F0033/F0036 RET-33-01/02, RET-36-01–06; ADR-0046/0058/0076; v0.2A |
+| Typed expansion; unauthorized topology non-influence | [EX-RET-002](governed-evidence-retrieval.md#ex-ret-002--authorized-expansion-and-hidden-influence) | F0034/F0035 RET-34-01/03, RET-35-01/03/06; F0068 RET-68-02; ADR-0053/0076; v0.2A and conditional v0.4+ |
+| Execution basis; source versus canonical evidence | [EX-RET-003](governed-evidence-retrieval.md#ex-ret-003--source-wording-and-canonical-state) | F0035/F0036 RET-35-04, RET-36-03/04; ADR-0064/0073/0075/0076; v0.2A |
+| Requested root versus broader grants | [EX-RET-004](governed-evidence-retrieval.md#ex-ret-004--requested-root-narrows-broader-grants) | F0035 RET-35-02/03; ADR-0062/0076; v0.2A |
+| Evidence context; selected versus used; partial trace | [EX-RET-005](governed-evidence-retrieval.md#ex-ret-005--selected-does-not-mean-used) | F0036 RET-36-07/08, F0067 RET-67-01; ADR-0046/0071/0072; v0.2A/B |
+| Retrieval mode; projection compatibility and fallback | [EX-RET-006](governed-evidence-retrieval.md#ex-ret-006--projection-compatibility-and-fallback) | F0033–F0035 RET-33-03, RET-34-02/04, RET-35-04/05/08; F0068 RET-68-01/02/04; ADR-0076; v0.2A and conditional v0.4+ |
+
+## Review Panel prototype
+
+[`nebula-review-panel-live-files.html`](nebula-review-panel-live-files.html) is a self-contained page that embeds four real files — a declarations PDF, an endorsement DOCX, an SOV XLSX, and a loss-run CSV — and parses them in the browser at load: pdf.js reads the PDF, fflate unzips the OOXML, `TextDecoder` handles the CSV. Every coordinate, paragraph path, cell reference, and character offset it displays is derived from the bytes at runtime, including the anchoring failures. It also accepts a dropped file of your own, and its anchor probe shows the locator any piece of text in that file resolves to.
+
+It is design evidence for [ADR-0057](../architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md) and [ADR-0058](../architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md) and illustrative under this document's contract: synthetic documents, no server, no persistence, no authorization, and no OCR path. It demonstrates that the selector crosswalk survives real parser output; it demonstrates nothing about the governed loop. Observed runtime evidence for that loop belongs to F0001-S0004 and is recorded under operations evidence runs.
+
+CASE identifiers refer to the [challenge table](neurosymbolic-gl/cases.md). F0065 owns the continuing example; upstream features own their domain contracts and cite the relevant step rather than duplicating the fixture.
+
+## Checks
+
+From the repository root, run `python3 scripts/validation/validate_semantic_examples.py`. It validates the educational JSON against its local schema and checks record and planning references. Reviewers still judge the meaning, the accuracy of expected outcomes, and completeness of concept coverage. The product checklist makes that review explicit.

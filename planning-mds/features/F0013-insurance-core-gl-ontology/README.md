@@ -12,7 +12,7 @@ Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap
 
 ## GL authoring prerequisites (2026-10-06)
 
-This feature depends on [F0012](../F0012-foundation-ontology/README.md), in addition to F0001. Author the GL vocabulary against its stable identity, semantics, constraint execution, and release contracts. [ADR-0045](../../architecture/decisions/ADR-0045-ontology-release-compatibility.md) remains Proposed.
+This feature depends on [F0012](../archive/F0012-foundation-ontology/README.md), in addition to F0001. Author the GL vocabulary against its stable identity, semantics, constraint execution, and release contracts. [ADR-0045](../../architecture/decisions/ADR-0045-ontology-release-compatibility.md) remains Proposed.
 
 - Pin the exact foundation module version in each GL release. Define GL terms, typed values, applicability, qualifiers, and missing-value behavior with worked and boundary cases.
 - State which GL rules infer conclusions and which validate data for a named consumer and lifecycle stage. The section 82 `min_cardinality` example is a completeness requirement for the consumer requesting a complete limit; it does not reject every commit with no extracted limit. F0065 returns `UNKNOWN` when required limit inputs are missing.

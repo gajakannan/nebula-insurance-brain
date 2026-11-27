@@ -315,6 +315,14 @@ def _key_json(key: ResourceKey) -> dict[str, str]:
 
 
 def _record_owner(session: Session, key: ResourceKey) -> tuple[UUID, UUID] | None:
+    if key.type == ResourceType.ONTOLOGY_RELEASE:
+        # F0012 G0-5: the ontology scope of a KB is identified by the KB itself.
+        kb = session.execute(
+            select(KnowledgeBaseRow.tenant_id, KnowledgeBaseRow.id).where(
+                KnowledgeBaseRow.id == key.id
+            )
+        ).one_or_none()
+        return (kb.tenant_id, kb.id) if kb is not None else None
     model: type[ContentArtifact] | type[ReviewItemRow] | type[FactSlotRow]
     if key.type == ResourceType.CONTENT_ARTIFACT:
         model = ContentArtifact

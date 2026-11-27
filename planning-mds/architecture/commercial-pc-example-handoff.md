@@ -6,7 +6,7 @@
 
 1. [Cedar Bridge walkthrough](../examples/commercial-pc-account/README.md): a holding company, a wholly owned subsidiary and a 60/40 joint venture, each with its own account; a BOP, standalone GL, auto and umbrella; WC and inland-marine requests.
 2. [Source package](../examples/commercial-pc-account/source-package.md), [structured records](../examples/commercial-pc-account/records.json) and [worked and boundary cases](../examples/commercial-pc-account/cases.md).
-3. [F0012](../features/F0012-foundation-ontology/README.md), [F0013](../features/F0013-insurance-core-gl-ontology/README.md), [F0015](../features/F0015-extraction-profile-compiler/README.md), [ADR-0045](decisions/ADR-0045-ontology-release-compatibility.md), [ADR-0064](decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) and [ADR-0070](decisions/ADR-0070-account-party-and-role-model.md).
+3. [F0012](../features/archive/F0012-foundation-ontology/README.md), [F0013](../features/F0013-insurance-core-gl-ontology/README.md), [F0015](../features/F0015-extraction-profile-compiler/README.md), [ADR-0045](decisions/ADR-0045-ontology-release-compatibility.md), [ADR-0064](decisions/ADR-0064-time-interpretation-and-valid-time-precision.md) and [ADR-0070](decisions/ADR-0070-account-party-and-role-model.md).
 
 ## Modeling decisions to carry into planning
 

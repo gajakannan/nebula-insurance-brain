@@ -712,4 +712,5 @@ class CanonicalCommitRow(Base):
 from brain_persistence import assertion_models as _assertion_models  # noqa: E402, F401
 from brain_persistence import content_models as _content_models  # noqa: E402, F401
 from brain_persistence import fact_slot_models as _fact_slot_models  # noqa: E402, F401
+from brain_persistence import ontology_models as _ontology_models  # noqa: E402, F401
 from brain_persistence import provenance_models as _provenance_models  # noqa: E402, F401
