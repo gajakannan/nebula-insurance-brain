@@ -27,6 +27,9 @@ class ResourceType(StrEnum):
     CONTENT_ARTIFACT = "content_artifact"
     REVIEW_TASK = "review_task"
     FACT_SLOT = "fact_slot"
+    # F0012 (ADR-0081 D5): the KB's ontology scope. Its resource id is the
+    # knowledge base id; its owner comes from the knowledge_base row itself.
+    ONTOLOGY_RELEASE = "ontology_release"
 
 
 class Action(StrEnum):
@@ -35,14 +38,19 @@ class Action(StrEnum):
     INGEST = "ingest"
     INTERPRET = "interpret"
     COMMIT = "commit"
+    INSTALL = "install"
+    REVIEW = "review"
+    ACTIVATE = "activate"
 
 
 class PilotRole(StrEnum):
-    """The three existing F0001 roles; F0002 adds none (PRD, G1 decision)."""
+    """The three F0001 roles plus F0012's `OntologySteward` (ADR-0081 D5), whose
+    grants are limited to `ontology_release`."""
 
     TENANT_MEMBER = "TenantMember"
     REVIEWER = "Reviewer"
     SERVICE_PRINCIPAL = "ServicePrincipal"
+    ONTOLOGY_STEWARD = "OntologySteward"
 
 
 class ScopedKind(StrEnum):

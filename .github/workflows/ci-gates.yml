@@ -89,6 +89,9 @@ jobs:
         run: python scripts/validation/validate_plan_readiness.py --plan-scope project --target project
       - name: Teaching RDF/OWL/SHACL expectations (strict; tools installed above)
         run: python scripts/validation/validate_semantic_rdf.py --require
+      # F0012-S0003 AC7: the foundation-IRI Cedar Bridge fixtures are generated; fail if stale.
+      - name: Foundation example fixtures are current
+        run: python scripts/validation/build_foundation_examples.py --check
       - name: Show configured lifecycle stages
         run: python3 scripts/run-lifecycle-gates.py --list
       - name: Run required gates for the current lifecycle stage
@@ -118,7 +121,11 @@ jobs:
           packages/brain-persistence/src packages/brain-domain/src packages/brain-security/src
           packages/brain-review/src packages/brain-temporal/src packages/brain-testing/src
           packages/brain-jobs/src packages/brain-contracts/src packages/brain-factslots/src
-          packages/brain-provenance/src
+          packages/brain-provenance/src packages/brain-ontology/src
+      # F0012 (ADR-0081 D3): committed release locks recompile byte for byte.
+      - name: engine/ — ontology release locks recompile byte-identically
+        working-directory: engine
+        run: uv run python -m brain_ontology.cli --root .. compile --check ../ontology/releases/foundation/1/release.yaml
       - name: engine/ — pytest, all packages (>=80% coverage each, checked per-package below)
         working-directory: engine
         run: uv run pytest -q
@@ -149,6 +156,10 @@ jobs:
       - name: engine/ — pytest brain_provenance coverage gate (>=80%)
         working-directory: engine
         run: uv run pytest packages/brain-provenance/tests --cov=brain_provenance --cov-fail-under=80
+      # F0012: offline authoring, compile, impact and CLI; PostgreSQL proof in runtime-stack.
+      - name: engine/ — pytest brain_ontology coverage gate (>=80%)
+        working-directory: engine
+        run: uv run pytest packages/brain-ontology/tests --cov=brain_ontology --cov-fail-under=80
       # F0007: pure and in-memory service tests; the PostgreSQL proof runs in runtime-stack.
       - name: engine/ — pytest brain_factslots coverage gate (>=80%)
         working-directory: engine
@@ -235,7 +246,10 @@ jobs:
       # repository paths (owned databases per test, migration 0016 up/down/up and
       # populated refusal, direct-SQL guards, the review boundary through the
       # unchanged HTTP route, and the metadata-first reader).
-      - name: Prove F0004/F0006/F0009 persistence, lineage and restore (>=80% persistence coverage)
+      # F0012 ontology releases (ADR-0081): migration 0017, install/immutability/concurrency,
+      # gated activation and rollback, and ETERNAL/EVENT commits are the only exercise of
+      # brain_persistence.ontology_releases.
+      - name: Prove F0004/F0006/F0009/F0012 persistence, lineage and restore (>=80% persistence coverage)
         timeout-minutes: 10
         env:
           BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@localhost:5432/brain
@@ -253,6 +267,10 @@ jobs:
           engine/tests/integration/test_f0009_corrections.py
           engine/tests/integration/test_f0009_provenance.py
           engine/tests/integration/test_f0009_temporal_lineage.py
+          engine/tests/integration/test_ontology_release_install.py
+          engine/tests/integration/test_ontology_activation.py
+          engine/tests/integration/test_temporal_kind_activation.py
+          engine/tests/integration/test_ontology_migration.py
           --cov=brain_persistence --cov-fail-under=80
           --cov-report=term-missing --cov-report=xml:engine/coverage/persistence.xml -q
       # F0007 FactSlot identity (ADR-0077): owned databases per test, real concurrency,

@@ -1,0 +1,10 @@
+PREFIX fnd: <urn:nebula:ont:foundation.>
+PREFIX d: <https://example.invalid/nebula/data/>
+# EX-PC-015 on foundation IRIs. Expected: Holdings 60.00 (designated account parent) and Ridge Builders
+# 40.00 (not). Ownership is a percentage fact; the account parent is designated separately.
+SELECT ?owner ?percent ?ownerAccount ?isAccountParent WHERE {
+  ?interest fnd:ownership-interest.owned-organization d:EX-PC-CONTRACTOR ;
+            fnd:ownership-interest.owner ?owner ; fnd:ownership-interest.percentage ?percent .
+  ?ownerAccount fnd:account.organization ?owner .
+  BIND (EXISTS { d:EX-PC-ACCOUNT-CONTRACTOR fnd:account.parent-account ?ownerAccount } AS ?isAccountParent)
+} ORDER BY DESC(?percent)

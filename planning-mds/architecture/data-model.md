@@ -158,7 +158,7 @@ Term IRIs identify concepts across releases, while the release identifies their 
 
 ### F0012 Phase B physical design (2026-11-25, proposed ADR-0081)
 
-F0012 settles the F0012 share of these records: `ontology_module_version`, `ontology_release` (content-addressed `release_ref = ontrel:sha256-<manifest digest>`), `ontology_release_module`, `ontology_term` (normalized terms with predicate contracts and `temporal_kind`), `ontology_change_record`, `ontology_impact_report`, `ontology_release_review` and `ontology_release_selection`, all tenant/KB-owned and append-only (migration 0017). See the [migration design](../features/F0012-foundation-ontology/migration-design.sql) and [ADR-0081](decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md). Design only until the F0012 feature run.
+F0012 settles the F0012 share of these records: `ontology_module_version`, `ontology_release` (content-addressed `release_ref = ontrel:sha256-<manifest digest>`), `ontology_release_module`, `ontology_term` (normalized terms with predicate contracts and `temporal_kind`), `ontology_change_record`, `ontology_impact_report`, `ontology_release_review` and `ontology_release_selection`, all tenant/KB-owned and append-only (migration 0017). See the [migration design](../features/archive/F0012-foundation-ontology/migration-design.sql) and [ADR-0081](decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md). Design only until the F0012 feature run.
 
 ## AGE Graph Labels (master blueprint section 79)
 

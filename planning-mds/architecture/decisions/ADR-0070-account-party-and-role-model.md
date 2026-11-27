@@ -152,6 +152,17 @@ Before acceptance:
 3. F0017 states how account identity and organization identity resolve and merge.
 4. The role-based reach and decision rights in section 5 (cases EX-PC-018 and EX-PC-019) are accepted in an F0002-successor scope amendment, or replaced there, with security review of the authoritative-source rule. That amendment needs a tracked feature identifier and dependencies. Its acceptance criteria bind confirmation to the exact role version and cover expiry, historical reads, renewal terms, and evidence that spans accounts.
 
+## F0012 evidence (feature run 2026-11-26-54387a08)
+
+Status is unchanged: **Proposed**. Proof gate 1 now has observed evidence. The production foundation module (`ontology/modules/foundation/module.yaml`, release foundation@1) authors these terms with `temporal_kind`, definitions, examples and regression cases:
+
+- parties;
+- one account per organization, with a designated parent;
+- ownership interests with percentages;
+- scoped role assignments with acted-for organizations and 14 role kinds, each carrying its PartyRoleTypeCode status.
+
+EX-PC-001/011/015/017/021 pass on foundation IRIs in the `semantic_examples` and `semantic_rdf --require` gates ([foundation cases](../../examples/commercial-pc-account/foundation/README.md)). Installing the vocabulary leaves authorization decisions unchanged (`test_vocabulary_grants_nothing`). Enforcement at admission remains F0017/F0018.
+
 ## References
 
 - [BLUEPRINT section 4.8](../../BLUEPRINT.md#48-open-decisions)

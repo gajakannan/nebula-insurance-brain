@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/ontology-impact-report-v1.schema.json",
+  "title": "Ontology release impact report v1",
+  "description": "Predecessor-to-candidate impact report (ADR-0081 D8, ADR-0045). Separates structural reach, inference change, constraint change and unexamined populations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "report_digest",
+    "status",
+    "scope",
+    "predecessor",
+    "candidate",
+    "changes",
+    "inference",
+    "constraints",
+    "reach",
+    "unexamined",
+    "unresolved"
+  ],
+  "properties": {
+    "contract": {
+      "const": "ontology-impact-report/v1"
+    },
+    "report_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "incomplete"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "knowledge_base_id"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "predecessor": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/release_id"
+        }
+      ]
+    },
+    "candidate": {
+      "$ref": "#/$defs/release_id"
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "term_iri",
+          "class"
+        ],
+        "properties": {
+          "term_iri": {
+            "type": "string",
+            "pattern": "^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$"
+          },
+          "class": {
+            "enum": [
+              "additive",
+              "constraint_tightening",
+              "rename_alias",
+              "semantic_change",
+              "split",
+              "merge",
+              "retirement",
+              "unclassified"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "inference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleset",
+        "scope",
+        "result",
+        "added",
+        "removed"
+      ],
+      "properties": {
+        "ruleset": {
+          "const": "nebula-tbox-subset/v1"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "changes_detected",
+            "no_change_within_scope",
+            "unresolved"
+          ]
+        },
+        "added": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entailment"
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entailment"
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "constraint_id",
+          "consumer",
+          "change"
+        ],
+        "properties": {
+          "constraint_id": {
+            "type": "string"
+          },
+          "consumer": {
+            "type": "string"
+          },
+          "change": {
+            "enum": [
+              "added",
+              "removed",
+              "tightened",
+              "loosened",
+              "applicability_changed",
+              "stage_changed",
+              "data_basis_changed"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reach": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "population",
+          "affected",
+          "denominator"
+        ],
+        "properties": {
+          "population": {
+            "enum": [
+              "fact_slot",
+              "assertion"
+            ]
+          },
+          "predicate_key": {
+            "type": "string"
+          },
+          "affected": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "denominator": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "unexamined": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "population",
+          "reason"
+        ],
+        "properties": {
+          "population": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "unresolved": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "complete"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "unresolved": {
+            "maxItems": 0
+          },
+          "inference": {
+            "properties": {
+              "result": {
+                "not": {
+                  "const": "unresolved"
+                }
+              }
+            }
+          },
+          "changes": {
+            "items": {
+              "properties": {
+                "class": {
+                  "not": {
+                    "const": "unclassified"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "release_id": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "release_ref",
+        "manifest_digest"
+      ],
+      "properties": {
+        "release_ref": {
+          "type": "string",
+          "pattern": "^ontrel:sha256-[0-9a-f]{64}$"
+        },
+        "manifest_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "entailment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "relation",
+        "object"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "pattern": "^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$"
+        },
+        "relation": {
+          "enum": [
+            "subClassOf",
+            "subPropertyOf",
+            "inverseOf"
+          ]
+        },
+        "object": {
+          "type": "string",
+          "pattern": "^urn:nebula:ont:[a-z][a-z0-9-]{0,47}(\\.[a-z][a-z0-9-]{0,47}){1,7}$"
+        }
+      }
+    }
+  }
+}

@@ -8,7 +8,7 @@ For concrete YAML, RDF/OWL, Turtle, JSON-LD and SHACL representations, read [EX-
 
 **EX-ONT-001.** A fictional namespace maps `insurance.coverage.limit` to `https://example.invalid/ont/insurance/coverage/limit`. Changing its display label from “Coverage limit” to “Limit” preserves that IRI. A release records the revised label and definition alongside its original version. This illustrates a mapping, not the selected production namespace.
 
-**Boundary:** The same IRI does not make a new definition compatible. If a general limit concept splits into occurrence and aggregate concepts, preserve the old definition in its release, assign distinct identities to the new concepts, and record the split/migration mapping. Do not reinterpret old facts by looking up today's definition. Owner: [F0012](../features/F0012-foundation-ontology/README.md), ADR-0045 identity/change classes.
+**Boundary:** The same IRI does not make a new definition compatible. If a general limit concept splits into occurrence and aggregate concepts, preserve the old definition in its release, assign distinct identities to the new concepts, and record the split/migration mapping. Do not reinterpret old facts by looking up today's definition. Owner: [F0012](../features/archive/F0012-foundation-ontology/README.md), ADR-0045 identity/change classes.
 
 ## Constraint execution and missing values
 
@@ -37,3 +37,15 @@ For concrete YAML, RDF/OWL, Turtle, JSON-LD and SHACL representations, read [EX-
 **EX-ONT-006.** A saved assessment references accepted fact versions FV1/FV2, immutable rule version G1, ontology release R1, its evaluator version, valid/known coordinates, and the evidence/derivation links behind those inputs. A later assessment using FV3 creates a distinct record.
 
 **Boundary:** A source-document link, a rule name without a version, or an input digest alone cannot identify the exact premises for historical reconstruction. General dependency propagation may ship later; recording these dependencies cannot. Owner: [ADR-0026](../architecture/decisions/ADR-0026-derived-facts-have-dependency-lineage.md) and [F0065](../features/F0065-grounded-gl-guideline-assessment/assessment-contract.md).
+
+## Foundation release runtime (F0012)
+
+**EX-ONT-007 — release reference and installation.** The foundation module (`ontology/modules/foundation/module.yaml`) compiles to `foundation@1`. Its release reference is `ontrel:sha256-` followed by the manifest digest, so it names the exact content: 53 terms, 15 predicates such as `fnd:accountOrganization@v1` (ETERNAL) and `fnd:accountStatus@v1` (STATE), and the projection mapping. Installing it into one tenant/KB writes immutable rows in one transaction. Installing the same reference again changes nothing; installing it into another KB writes that KB's own rows. A slot created with `predicate_release_ref = ontrel:sha256-…` keeps that reference when a later release is installed or activated.
+
+**Boundary:** A relabelled module that keeps `foundation@1` as its version is new content under an old version and is refused (`MODULE_VERSION_IMMUTABLE`). A predicate key from a release installed only in another KB stays `PREDICATE_UNREGISTERED`. Installation never selects a release.
+
+**EX-ONT-008 — impact report, review and selection.** A steward reports `foundation@1` → candidate, reviews the report and activates the candidate. One candidate splits `foundation.organization.operates-at` into premises and office properties. The report classifies the old and new IRIs as `split`, counts the existing `fnd:operatesAt@v1` slot against all identity-v1 slots in the KB, and lists profiles/templates (F0015), assessments (F0065) and projections (F0034) as unexamined. After activation, the existing slot still resolves through `foundation@1`; a rollback appends a third selection and returns new work to `foundation@1`.
+
+**Boundary:** A report with an unclassified change or an unresolved closure is `incomplete` and cannot be activated. A rejected review, a report for another candidate, or a report whose predecessor is no longer the selected release each refuses activation with a typed reason, and the refusal is audited. Selections are appended; no release, slot, version or assertion row is rewritten.
+
+Runtime reproduction: feature run `2026-11-26-54387a08`, engine suites `test_ontology_release_install.py`, `test_ontology_activation.py` and `test_temporal_kind_activation.py`, and the account-scoped Cedar Bridge cases on foundation IRIs in [commercial-pc-account/foundation](commercial-pc-account/foundation/README.md). Synthetic development data, outside the frozen holdout. Owner: [F0012](../features/archive/F0012-foundation-ontology/README.md) S0002/S0004–S0007; proposed [ADR-0081](../architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md).

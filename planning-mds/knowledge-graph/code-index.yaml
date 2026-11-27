@@ -204,6 +204,37 @@ node_bindings:
         - engine/tests/integration/test_factslot_names.py
         - engine/tests/integration/test_factslot_ownership.py
         - engine/tests/integration/test_factslot_resolution.py
+  - id: capability:foundation-ontology-release
+    paths:
+      backend:
+        - engine/packages/brain-domain/src/brain_domain/ontology.py
+        - engine/packages/brain-ontology/src/brain_ontology/__init__.py
+        - engine/packages/brain-ontology/src/brain_ontology/authoring.py
+        - engine/packages/brain-ontology/src/brain_ontology/cli.py
+        - engine/packages/brain-ontology/src/brain_ontology/compiler.py
+        - engine/packages/brain-ontology/src/brain_ontology/errors.py
+        - engine/packages/brain-ontology/src/brain_ontology/rdf_export.py
+        - engine/packages/brain-ontology/src/brain_ontology/runtime.py
+        - engine/packages/brain-ontology/src/brain_ontology/service.py
+        - engine/packages/brain-persistence/src/brain_persistence/ontology_models.py
+        - engine/packages/brain-persistence/src/brain_persistence/ontology_releases.py
+      content:
+        - ontology/modules/foundation/changes.yaml
+        - ontology/modules/foundation/module.yaml
+        - ontology/releases/foundation/1/manifest.json
+        - ontology/releases/foundation/1/normalized.json
+        - ontology/releases/foundation/1/projection-mapping.json
+        - ontology/releases/foundation/1/release.jsonld
+        - ontology/releases/foundation/1/release.ttl
+        - ontology/releases/foundation/1/release.yaml
+      tests:
+        - engine/packages/brain-ontology/tests/test_authoring.py
+        - engine/packages/brain-ontology/tests/test_cli.py
+        - engine/packages/brain-ontology/tests/test_compiler.py
+        - engine/tests/fixtures/ontology.py
+        - engine/tests/integration/test_ontology_release_install.py
+      validation:
+        - scripts/validation/build_foundation_examples.py
   - id: capability:governed-evidence-retrieval
     paths:
       architecture:
@@ -329,6 +360,9 @@ node_bindings:
       architecture:
         - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
         - planning-mds/architecture/ontology-planning-handoff.md
+      backend:
+        - engine/packages/brain-ontology/src/brain_ontology/impact.py
+        - engine/packages/brain-ontology/src/brain_ontology/semantics.py
       examples:
         - planning-mds/examples/ontology-interchange/README.md
         - planning-mds/examples/ontology-interchange/assessment-shapes.ttl
@@ -342,6 +376,9 @@ node_bindings:
         - planning-mds/examples/ontology-interchange/ontology.yaml
         - planning-mds/examples/ontology-interchange/shapes.ttl
         - planning-mds/examples/ontology-release-contracts.md
+      tests:
+        - engine/packages/brain-ontology/tests/test_semantics_impact.py
+        - engine/tests/integration/test_ontology_activation.py
   - id: capability:parse-once-content-artifact
     paths:
       ai:
@@ -418,6 +455,12 @@ node_bindings:
         - engine/tests/fixtures/f0009_provenance.py
         - engine/tests/integration/test_f0009_provenance.py
         - engine/tests/integration/test_f0009_temporal_lineage.py
+  - id: capability:release-backed-predicate-registry
+    paths:
+      backend:
+        - engine/packages/brain-factslots/src/brain_factslots/predicates.py
+      tests:
+        - engine/tests/integration/test_temporal_kind_activation.py
   - id: capability:review-submission-attribution
     paths:
       architecture:
@@ -739,6 +782,12 @@ node_bindings:
         - engine/migrations/versions/0016_f0009_provenance_hooks.py
       tests:
         - engine/tests/integration/test_f0009_migration.py
+  - id: migration:f0012-ontology-releases
+    paths:
+      backend:
+        - engine/migrations/versions/0017_f0012_ontology_releases.py
+      tests:
+        - engine/tests/integration/test_ontology_migration.py
   - id: schema:commercial-pc-example
     paths:
       architecture:

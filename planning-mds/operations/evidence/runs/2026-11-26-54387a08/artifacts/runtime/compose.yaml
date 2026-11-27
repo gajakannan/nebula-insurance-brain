@@ -1,0 +1,42 @@
+name: brain-f0012-54387a08
+services:
+  engine-validation:
+    image: brain-f0011-contract-engine:2026-11-22-885e8734
+    working_dir: /app/brain
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+      - /home/gajap/uSandbox/repos/nebula/nebula-agents:/app/framework:ro
+    environment:
+      XDG_CACHE_HOME: /tmp/.cache
+      UV_PROJECT_ENVIRONMENT: /tmp/f0012-engine-venv
+      UV_PYTHON_DOWNLOADS: never
+      BRAIN_DATABASE_URL: postgresql+asyncpg://brain:brain@postgres:5432/brain_f0012
+      BRAIN_WORKER_DATABASE_URL: postgresql+psycopg://brain:brain@postgres:5432/brain_f0012
+      BRAIN_MIGRATION_ADMIN_URL: postgresql://brain:brain@postgres:5432/brain
+    command: [python, -c, "from threading import Event; Event().wait()"]
+    healthcheck:
+      test: [CMD, python, -c, "import socket; socket.create_connection(('postgres', 5432), 3).close()"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+    networks: [dependencies]
+  node-validation:
+    image: node:22
+    user: "1000:1000"
+    working_dir: /app/brain
+    volumes:
+      - /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain:/app/brain
+    environment:
+      XDG_CACHE_HOME: /tmp/.cache
+      COREPACK_HOME: /tmp/corepack
+      PNPM_HOME: /tmp/pnpm
+    command: [node, -e, "setInterval(() => {}, 2147483647)"]
+    healthcheck:
+      test: [CMD, node, -e, "if (+process.versions.node.split('.')[0] < 22) process.exit(1)"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+networks:
+  dependencies:
+    external: true
+    name: nebula-insurance-brain_default

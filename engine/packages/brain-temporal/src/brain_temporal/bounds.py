@@ -199,6 +199,28 @@ _ALLOWED_KEYS = frozenset(
 _ATTESTATION_KEYS = frozenset({"attested_from", "attested_through", "attested_to"})
 
 
+def parse_expected_attestation(raw_expected: object) -> ExpectedAttestation | None:
+    """The caller's optional attestation echo (S0002 AC6)."""
+    if raw_expected is None:
+        return None
+    if not isinstance(raw_expected, Mapping) or set(raw_expected) - _ATTESTATION_KEYS:
+        raise TemporalRejected(TemporalReason.ATTESTATION_MISMATCH)
+    return ExpectedAttestation({key: _document_date(value) for key, value in raw_expected.items()})
+
+
+ETERNAL_KEYS = frozenset({"contract", "valid_to_state", "attestation_zone", "expected_attestation"})
+
+
+def eternal_shape_ok(raw: Mapping[str, Any]) -> bool:
+    """F0012 (ADR-0081 D7): an ETERNAL commit states no valid-time bound. The block
+    is the contract, `valid_to_state: OPEN` and optionally the attestation echo."""
+    return (
+        raw.get("contract") == TEMPORAL_CONTRACT
+        and set(raw) <= ETERNAL_KEYS
+        and raw.get("valid_to_state") == EndState.OPEN.value
+    )
+
+
 def parse_commit_temporal(raw: Mapping[str, Any]) -> TemporalProposal:
     """Parse `fact-temporal-v1#/$defs/commit_temporal` into a proposal. Every
     structural fault is refused with the story's reason code, before any effect.
@@ -264,14 +286,7 @@ def parse_commit_temporal(raw: Mapping[str, Any]) -> TemporalProposal:
         # zone is missing (S0001 AC1).
         raise TemporalRejected(TemporalReason.TIME_ZONE_INVALID)
 
-    expected: ExpectedAttestation | None = None
-    raw_expected = raw.get("expected_attestation")
-    if raw_expected is not None:
-        if not isinstance(raw_expected, Mapping) or set(raw_expected) - _ATTESTATION_KEYS:
-            raise TemporalRejected(TemporalReason.ATTESTATION_MISMATCH)
-        expected = ExpectedAttestation(
-            {key: _document_date(value) for key, value in raw_expected.items()}
-        )
+    expected = parse_expected_attestation(raw.get("expected_attestation"))
 
     return TemporalProposal(
         valid_from=valid_from,

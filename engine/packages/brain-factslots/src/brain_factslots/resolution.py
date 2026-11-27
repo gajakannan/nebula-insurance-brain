@@ -43,6 +43,7 @@ from brain_domain.fact_values import (
 )
 
 from brain_factslots.ports import FactSlotStore, PredicateContractRegistry, StoredSlot
+from brain_factslots.predicates import prepare_registry
 
 KEY_SCHEMA_VERSION = 1
 _KEY_FIELDS = frozenset(
@@ -218,6 +219,8 @@ class FactSlotResolver:
         """Return the existing or newly created slot. Raises `SlotRejected`."""
         if not isinstance(key, Mapping):
             raise SlotRejected(SlotReason.PREDICATE_KEY_INVALID)
+        # F0012: load the pinned release's contracts for this scope before parsing.
+        await prepare_registry(self._registry, authorized_scope, [key.get("predicate_release_ref")])
         request = self._parse(key)
         tenant_id, knowledge_base_id = authorized_scope
         subject = _uuid(key.get("subject_entity_id"))

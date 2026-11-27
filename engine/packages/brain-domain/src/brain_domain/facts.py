@@ -66,12 +66,13 @@ class CommitResult:
 @dataclass(frozen=True, slots=True)
 class FactVersion:
     """One row read back from `canonical_fact_version` (API/read-side shape;
-    `valid`/`recorded` are resolved half-open ranges, `end=None` means open)."""
+    `valid`/`recorded` are resolved half-open ranges, `end=None` means open;
+    `valid_start=None` only for an ETERNAL version, unbounded below)."""
 
     id: UUID
     fact_slot_id: UUID
     value: Mapping[str, Any]
-    valid_start: datetime
+    valid_start: datetime | None
     valid_end: datetime | None
     recorded_start: datetime
     recorded_end: datetime | None

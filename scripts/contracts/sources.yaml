@@ -441,7 +441,7 @@ resources:
   version: '1'
   id: https://nebula.local/schemas/fact-version-read-v1.schema.json
   source: planning-mds/schemas/fact-version-read-v1.schema.json
-  source_sha256_at_design: 4f6adc53018bc204ca24bf70674d9f3727e422ba54963b56c98526645aa75964
+  source_sha256_at_design: 0ebe83938e97cf42814f710fa0a6ed57e7c69515975cc6c90cfc48865e774d2d
   owner: api
   disposition: adopt
   consumer_entry_points:
@@ -579,6 +579,70 @@ resources:
   integration_notes: Moves from retained_boundaries/openapi_only_resources into resources
     because a bundled schema now references it. Existing review DTOs, hashing and audit are
     unchanged; no generated CRUD.
+- name: ontology-module-authoring-v1
+  version: '1'
+  id: https://nebula.local/schemas/ontology-module-authoring-v1.schema.json
+  source: planning-mds/schemas/ontology-module-authoring-v1.schema.json
+  source_sha256_at_design: d334db26b32185967900a9a2f1750bd562091c994477630e5f26e8f83b06ca83
+  owner: ontology
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_ontology.authoring.validate_module
+    path: engine/packages/brain-ontology/src/brain_ontology/authoring.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-ontology/tests/test_authoring.py
+    state: existing
+  version_selector: authoring_schema is the constant ontology-module-authoring/v1; any other
+    value is refused.
+  wire_profile: portable-json/v1
+  integration_notes: Validated after YAML load and after the retired-field pre-check (parent
+    → AUTHORING_FIELD_RETIRED). Semantic checks (identity, references, constructs) run in Python
+    after schema validation.
+- name: ontology-release-manifest-v1
+  version: '1'
+  id: https://nebula.local/schemas/ontology-release-manifest-v1.schema.json
+  source: planning-mds/schemas/ontology-release-manifest-v1.schema.json
+  source_sha256_at_design: f55712a86bf15dd5ff3e2db6423ed9982850801485615701f5e20ccf23f141f6
+  owner: ontology
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_ontology.compiler.compile_release (output guard)
+    path: engine/packages/brain-ontology/src/brain_ontology/compiler.py
+    state: existing
+  - entry_point: brain_persistence.ontology_releases.OntologyReleaseStore.install (input guard)
+    path: engine/packages/brain-persistence/src/brain_persistence/ontology_releases.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-ontology/tests/test_compiler.py
+    state: existing
+  - path: engine/tests/integration/test_ontology_release_install.py
+    state: existing
+  version_selector: contract is the constant ontology-release-manifest/v1.
+  wire_profile: portable-json/v1
+  integration_notes: Install recomputes manifest_digest from content and refuses a mismatch
+    before any row is written.
+- name: ontology-impact-report-v1
+  version: '1'
+  id: https://nebula.local/schemas/ontology-impact-report-v1.schema.json
+  source: planning-mds/schemas/ontology-impact-report-v1.schema.json
+  source_sha256_at_design: f52c5a82c554fc0bfa0b73ebc52b8d09931f7863dc9662b0ecf54ddd4ad94f51
+  owner: ontology
+  disposition: adopt
+  consumer_entry_points:
+  - entry_point: brain_ontology.impact.build_report (output guard before persistence)
+    path: engine/packages/brain-ontology/src/brain_ontology/impact.py
+    state: existing
+  compatibility_tests:
+  - path: engine/packages/brain-ontology/tests/test_impact.py
+    state: existing
+  - path: engine/tests/integration/test_ontology_activation.py
+    state: existing
+  version_selector: contract is the constant ontology-impact-report/v1.
+  wire_profile: portable-json/v1
+  integration_notes: status complete forbids unresolved items, unclassified changes and an unresolved
+    inference result (schema allOf). Tenant/KB come from the authorized scope, never from the
+    wire.
 retained_boundaries:
 - name: authx-kernel
   reason: Internal F0002 server-derived identity/policy carrier, not public validation

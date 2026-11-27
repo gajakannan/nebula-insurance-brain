@@ -31,7 +31,6 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 | Feature ID | Name | Status | Phase | Folder |
 |------------|------|--------|-------|--------|
 | F0010 | Change/retraction semantics | Planned | v0.1A | `F0010-change-and-retraction-semantics/` |
-| F0012 | Foundation ontology | Planned | v0.1A | `F0012-foundation-ontology/` |
 | F0013 | Insurance Core GL ontology | Planned | v0.1A | `F0013-insurance-core-gl-ontology/` |
 | F0014 | Document Profile model | Planned | v0.1A | `F0014-document-profile-model/` |
 | F0015 | Extraction Profile compiler | Planned | v0.1A | `F0015-extraction-profile-compiler/` |
@@ -95,6 +94,7 @@ Per §19 of the feature-evidence package contract. Retired features are registry
 <!-- generated:begin registry:archived -->
 | Feature ID | Name | Archived Date | Evidence Reentry Date | Folder |
 |------------|------|---------------|-----------------------|--------|
+| F0012 | Foundation ontology | 2026-11-26 |  | `archive/F0012-foundation-ontology/` |
 | F0009 | Provenance + human-correction lineage | 2026-11-25 |  | `archive/F0009-provenance-and-human-correction-lineage/` |
 | F0011 | JSON Schema contract system | 2026-11-23 |  | `archive/F0011-json-schema-contract-system/` |
 | F0008 | Bitemporal canonical facts | 2026-11-19 |  | `archive/F0008-bitemporal-canonical-facts/` |

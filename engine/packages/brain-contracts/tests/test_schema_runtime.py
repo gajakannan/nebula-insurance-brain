@@ -296,8 +296,12 @@ def test_installed_bundle_resource_count_and_identity():
     bundle = ContractBundle.installed()
     # F0011 shipped 21; F0009 adds provenance-query/result, the reservation and
     # attempt carriers, and review-decision as their closed $ref dependency.
-    assert len(bundle._manifest["resources"]) == 26
+    # F0012 adds the ontology module authoring, release manifest and impact report.
+    assert len(bundle._manifest["resources"]) == 29
     for name in (
+        "ontology-module-authoring-v1",
+        "ontology-release-manifest-v1",
+        "ontology-impact-report-v1",
         "provenance-query-v1",
         "provenance-result-v1",
         "learning-candidate-reservation-v1",

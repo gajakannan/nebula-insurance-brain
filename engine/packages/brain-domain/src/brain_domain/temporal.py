@@ -72,6 +72,10 @@ class TemporalReason(StrEnum):
     START_BASIS_INVALID = "start_basis_invalid"
     SUCCESSION_START_UNANCHORED = "succession_start_unanchored"
     STATE_SUPERSESSION_REFUSED = "state_supersession_refused"
+    # F0012 (ADR-0081 D7): the request shape does not match the predicate's kind,
+    # or a SINGLE ETERNAL slot already holds another value.
+    KIND_SHAPE_MISMATCH = "kind_shape_mismatch"
+    ETERNAL_CONFLICT = "eternal_conflict"
 
 
 class TemporalRejected(Exception):

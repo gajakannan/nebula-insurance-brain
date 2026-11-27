@@ -711,9 +711,11 @@ capabilities:
       - planning-mds/features/archive/F0007-factslot-model/worked-examples.md
   - id: capability:foundation-ontology-release
     label: Foundation ontology authoring, compile and immutable release install
-    notes: Proposed F0012 Phase B design, not implemented. Offline validation of ontology-module-authoring/v1
-      files, urn:nebula:ont identities, deterministic content-addressed compile with exact locks and projection
-      mapping, and atomic append-only install per tenant/KB under ontology_release:install.
+    notes: Implemented in F0012 feature run 2026-11-26-54387a08 (ADR-0081 Proposed). Offline validation
+      of ontology-module-authoring/v1 files, urn:nebula:ont identities, deterministic content-addressed
+      compile with exact locks and projection mapping (foundation@1 committed under ontology/releases),
+      and atomic append-only install per tenant/KB under ontology_release:install with a required trusted
+      resource_access row.
     rationale:
       - adr: adr:0081
         section: Decision
@@ -731,10 +733,10 @@ capabilities:
       - schema:ontology-release-manifest-v1
     source_docs:
       - planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
-      - planning-mds/features/F0012-foundation-ontology/PRD.md
-      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
-      - planning-mds/features/F0012-foundation-ontology/foundation-module-design.yaml
-      - planning-mds/features/F0012-foundation-ontology/migration-design.sql
+      - planning-mds/features/archive/F0012-foundation-ontology/PRD.md
+      - planning-mds/features/archive/F0012-foundation-ontology/feature-assembly-plan.md
+      - planning-mds/features/archive/F0012-foundation-ontology/foundation-module-design.yaml
+      - planning-mds/features/archive/F0012-foundation-ontology/migration-design.sql
   - id: capability:governed-evidence-retrieval
     label: Governed evidence retrieval
     notes: Planning direction only. F0035 owns authorized hybrid seeds, bounded typed expansion and one
@@ -842,13 +844,14 @@ capabilities:
       - planning-mds/features/archive/F0011-json-schema-contract-system/feature-assembly-plan.md
   - id: capability:ontology-release-compatibility
     label: Ontology release compatibility analysis
-    notes: Proposed contract and future tooling, not implemented. Historical reproducibility uses pinned
-      releases and exact inputs. Consumer compatibility also covers constraints, applicability, profiles
-      and evidence obligations. Bounded conservativity is one input; unsupported or undecided is not a
-      pass. F0012/F0013 settle contracts; F0030/F0062 add later tooling. First-assessment lineage is already
-      required by F0065/ADR-0026 and must not wait for these tools. See the handoff for formal plan prerequisites.
-      F0012 Phase B (ADR-0081, Proposed) designs the predecessor-to-candidate impact report and reviewed,
-      audited activation/rollback; not implemented.
+    notes: ADR-0045 contract Proposed; the F0012 share is implemented. Historical reproducibility uses
+      pinned releases and exact inputs. Consumer compatibility also covers constraints, applicability,
+      profiles and evidence obligations. Bounded conservativity is one input; unsupported or undecided
+      is not a pass. F0012/F0013 settle contracts; F0030/F0062 add later tooling. First-assessment lineage
+      is already required by F0065/ADR-0026 and must not wait for these tools. See the handoff for formal
+      plan prerequisites. F0012 feature run 2026-11-26-54387a08 (ADR-0081, Proposed) implements the predecessor-to-candidate
+      impact report (nebula-tbox-subset/v1 closure and constraint diffs, reach, unexamined populations)
+      and reviewed, audited activation/rollback; extended reasoning remains F0030/F0062.
     rationale:
       - adr: adr:0045
         section: Compatibility and impact gate
@@ -870,13 +873,13 @@ capabilities:
       - planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md
       - planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
       - planning-mds/architecture/ontology-planning-handoff.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
-      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0015-extraction-profile-compiler/README.md
       - planning-mds/features/F0030-ontology-workbench/README.md
       - planning-mds/features/F0062-advanced-reasoners/README.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/feature-assembly-plan.md
   - id: capability:parse-once-content-artifact
     label: Parse-once content artifact
     notes: 'As built (F0005, 2026-10-28): Docling converts in a supervised conversion-only child with
@@ -989,10 +992,11 @@ capabilities:
       - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
   - id: capability:release-backed-predicate-registry
     label: Release-backed predicate contracts and temporal-kind activation
-    notes: Proposed F0012 Phase B design, not implemented. PredicateContractRegistry serves sys predicates
-      plus predicates of releases installed in the tenant/KB, prepared per unit of work; no fallback to
-      the active release. Commits take temporal_kind from the contract (ETERNAL/EVENT over ADR-0078 D10
-      shapes, no DDL).
+    notes: Implemented in F0012 feature run 2026-11-26-54387a08 (ADR-0081 Proposed). ReleasePredicateRegistry
+      serves sys predicates plus predicates of releases installed in the tenant/KB, prepared per unit
+      of work by the resolver and answer policy; no fallback to the active release; sys/test namespaces
+      reserved. Commits take temporal_kind from the contract (ETERNAL valid (,), EVENT one period, STATE
+      unchanged; no DDL).
     rationale:
       - adr: adr:0081
         section: D6. Release-backed predicate contracts
@@ -1009,8 +1013,8 @@ capabilities:
       - entity:fact-slot
     source_docs:
       - planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
-      - planning-mds/features/F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md
-      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
+      - planning-mds/features/archive/F0012-foundation-ontology/F0012-S0005-register-predicates-and-activate-temporal-kinds.md
+      - planning-mds/features/archive/F0012-foundation-ontology/feature-assembly-plan.md
   - id: capability:review-submission-attribution
     label: Durable non-applied review attribution
     notes: Implemented in F0009 feature run 2026-11-24-08701e37 (G4 operator approval 2026-11-25); as-built
@@ -1361,10 +1365,10 @@ entities:
       - planning-mds/architecture/commercial-pc-example-handoff.md
       - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0017-deterministic-entity-resolution/README.md
       - planning-mds/features/F0023-minimal-entity-360/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
   - id: entity:assertion
     label: Assertion
     notes: Source claim distinct from canonical truth. F0006 run 2026-11-02-5a00b0ff adds versioned typed/open
@@ -1727,8 +1731,8 @@ entities:
     source_docs:
       - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0017-deterministic-entity-resolution/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
   - id: entity:insurance-party-role-assignment
     label: Scoped insurance party role
     notes: 'A party acting as named insured, broker of record, placement broker, broker contact, risk
@@ -1763,8 +1767,8 @@ entities:
       - planning-mds/architecture/commercial-pc-example-handoff.md
       - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
   - id: entity:knowledge-base
     label: Knowledge base
     notes: Proposed F0002 design; implementation pending. Exactly one tenant/workspace owner; semantic
@@ -1833,9 +1837,9 @@ entities:
       - planning-mds/architecture/data-model.md
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
-      - planning-mds/features/F0012-foundation-ontology/migration-design.sql
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/migration-design.sql
   - id: entity:ontology-release
     label: Ontology release
     notes: Proposed immutable composition of exact module versions with dependency locks and associated
@@ -1864,11 +1868,11 @@ entities:
     source_docs:
       - planning-mds/architecture/data-model.md
       - planning-mds/architecture/ontology-planning-handoff.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
-      - planning-mds/features/F0012-foundation-ontology/migration-design.sql
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0015-extraction-profile-compiler/README.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/migration-design.sql
   - id: entity:ontology-release-module
     label: Ontology release module membership
     notes: Proposed exact release-to-module-version membership. A release selects one version per module;
@@ -1889,9 +1893,9 @@ entities:
     source_docs:
       - planning-mds/architecture/data-model.md
       - planning-mds/architecture/ontology-planning-handoff.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
-      - planning-mds/features/F0012-foundation-ontology/migration-design.sql
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/migration-design.sql
   - id: entity:outbox-event
     label: Outbox event
     notes: Transactional outbox row written with every canonical commit and consumed idempotently by projectors;
@@ -1924,8 +1928,8 @@ entities:
     source_docs:
       - planning-mds/architecture/decisions/ADR-0070-account-party-and-role-model.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0023-minimal-entity-360/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
   - id: entity:policy-term
     label: Insurance policy term
     notes: A particular period of an identified policy. Preserve issuer-scoped policy identifiers, scoped
@@ -2101,9 +2105,9 @@ glossary_terms:
     source_docs:
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0065-grounded-gl-guideline-assessment/assessment-contract.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
   - id: glossary_term:evidence-block
     label: Evidence block
     related_nodes:
@@ -2138,8 +2142,8 @@ glossary_terms:
     source_docs:
       - planning-mds/architecture/commercial-pc-example-handoff.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
   - id: glossary_term:ontology-projection-mapping
     label: Ontology projection mapping
     notes: Proposed versioned release artifact mapping predicate IRIs to directed AGE edges or properties,
@@ -2159,9 +2163,9 @@ glossary_terms:
       - planning-mds/architecture/data-model.md
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
       - planning-mds/features/F0015-extraction-profile-compiler/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
   - id: glossary_term:projection-compatibility
     label: Projection compatibility
     related_nodes:
@@ -2203,7 +2207,7 @@ glossary_terms:
     source_docs:
       - planning-mds/architecture/ontology-planning-handoff.md
       - planning-mds/domain/glossary.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
 migrations:
   - id: migration:f0004-content-contract
     label: F0004 additive content contracts and document dates (revision 0008)
@@ -2282,6 +2286,24 @@ migrations:
       - entity:learning-candidate-reservation
       - entity:review-decision
       - entity:review-submission-attempt
+  - id: migration:f0012-ontology-releases
+    label: F0012 ontology release records, append-only selections and the ontology_release access type
+      (revision 0017)
+    path: engine/migrations/versions/0017_f0012_ontology_releases.py
+    notes: Adds eight tenant/KB-owned append-only tables (module versions, releases, release membership,
+      terms, change records, impact reports, reviews, selections) with composite owner FKs, UPDATE/DELETE/TRUNCATE
+      refusal triggers and brain_f0012_selection_guard (consecutive sequence; activation needs an approved
+      complete report for the candidate and current head; rollback only to a previously activated release).
+      Widens resource_access.ck_resource_access_type to admit ontology_release (existing rows revalidated,
+      none rewritten). No DDL on canonical_fact_version. Downgrade refuses under ACCESS EXCLUSIVE locks
+      while any ontology row or ontology_release access row exists. Implemented in feature run 2026-11-26-54387a08.
+    related_nodes:
+      - adr:0081
+      - capability:foundation-ontology-release
+      - capability:ontology-release-compatibility
+      - entity:ontology-module-version
+      - entity:ontology-release
+      - entity:ontology-release-module
 policy_rules:
   - id: policy_rule:content-artifact-ingest
     label: content_artifact:ingest
@@ -2340,6 +2362,51 @@ policy_rules:
     resource: fact_slot
     source_docs:
       - planning-mds/security/policies/policy.csv
+  - id: policy_rule:ontology-release-activate
+    label: ontology_release:activate
+    action: activate
+    allowed_roles:
+      - role:ontology-steward
+    related_nodes:
+      - capability:foundation-ontology-release
+      - capability:ontology-release-compatibility
+    resource: ontology_release
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:ontology-release-install
+    label: ontology_release:install
+    action: install
+    allowed_roles:
+      - role:service-principal
+    related_nodes:
+      - capability:authorization-enforcement
+      - capability:foundation-ontology-release
+    resource: ontology_release
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:ontology-release-read
+    label: ontology_release:read
+    action: read
+    allowed_roles:
+      - role:ontology-steward
+      - role:service-principal
+      - role:tenant-member
+    related_nodes:
+      - capability:foundation-ontology-release
+      - capability:ontology-release-compatibility
+    resource: ontology_release
+    source_docs:
+      - planning-mds/security/policies/policy.csv
+  - id: policy_rule:ontology-release-review
+    label: ontology_release:review
+    action: review
+    allowed_roles:
+      - role:ontology-steward
+    related_nodes:
+      - capability:ontology-release-compatibility
+    resource: ontology_release
+    source_docs:
+      - planning-mds/security/policies/policy.csv
   - id: policy_rule:review-task-annotate
     label: review_task:annotate
     action: annotate
@@ -2364,6 +2431,16 @@ policy_rules:
     source_docs:
       - planning-mds/security/policies/policy.csv
 roles:
+  - id: role:ontology-steward
+    label: OntologySteward
+    notes: F0012 (ADR-0081 D5). Human domain steward who reviews ontology impact reports and activates
+      or rolls back releases in one tenant/KB; holds no grant outside ontology_release and gains nothing
+      from vocabulary data.
+    related_nodes:
+      - capability:foundation-ontology-release
+      - entity:principal
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md
   - id: role:reviewer
     label: Reviewer
     notes: Verified user principal; reviews evidence in the native Review Panel as its own session principal
@@ -2462,8 +2539,8 @@ schemas:
       - glossary_term:insurance-product-composition
     source_docs:
       - planning-mds/architecture/commercial-pc-example-handoff.md
-      - planning-mds/features/F0012-foundation-ontology/README.md
       - planning-mds/features/F0013-insurance-core-gl-ontology/README.md
+      - planning-mds/features/archive/F0012-foundation-ontology/README.md
   - id: schema:content-artifact-manifest
     label: ContentArtifactManifest
     path: planning-mds/schemas/content-artifact-manifest.schema.json
@@ -2615,24 +2692,24 @@ schemas:
     related_nodes:
       - adr:0081
     source_docs:
-      - planning-mds/features/F0012-foundation-ontology/contract-inventory.yaml
-      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
+      - planning-mds/features/archive/F0012-foundation-ontology/contract-inventory.yaml
+      - planning-mds/features/archive/F0012-foundation-ontology/feature-assembly-plan.md
   - id: schema:ontology-module-authoring-v1
     label: Ontology module authoring file
     path: planning-mds/schemas/ontology-module-authoring-v1.schema.json
     related_nodes:
       - adr:0081
     source_docs:
-      - planning-mds/features/F0012-foundation-ontology/contract-inventory.yaml
-      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
+      - planning-mds/features/archive/F0012-foundation-ontology/contract-inventory.yaml
+      - planning-mds/features/archive/F0012-foundation-ontology/feature-assembly-plan.md
   - id: schema:ontology-release-manifest-v1
     label: Compiled ontology release manifest
     path: planning-mds/schemas/ontology-release-manifest-v1.schema.json
     related_nodes:
       - adr:0081
     source_docs:
-      - planning-mds/features/F0012-foundation-ontology/contract-inventory.yaml
-      - planning-mds/features/F0012-foundation-ontology/feature-assembly-plan.md
+      - planning-mds/features/archive/F0012-foundation-ontology/contract-inventory.yaml
+      - planning-mds/features/archive/F0012-foundation-ontology/feature-assembly-plan.md
   - id: schema:problem-details
     label: ProblemDetails
     path: planning-mds/schemas/problem-details.schema.json

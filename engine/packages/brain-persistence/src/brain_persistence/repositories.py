@@ -549,7 +549,7 @@ def _to_pg_range(span: TimeRange) -> Range:
 
 
 def _from_pg_range(value: Range) -> TimeRange:
-    assert value.lower is not None  # our ranges are always lower-bounded
+    # Only an ETERNAL version's valid range is unbounded below (F0012 G0-6).
     return TimeRange(start=value.lower, end=value.upper)
 
 
@@ -615,6 +615,7 @@ def _temporal_columns(temporal: VersionTemporal | None) -> dict[str, object]:
 def _fact_version_from_row(row: CanonicalFactVersionRow) -> FactVersion:
     valid = _from_pg_range(row.valid)
     recorded = _from_pg_range(row.recorded)
+    assert recorded.start is not None  # recorded time always has a start
     return FactVersion(
         id=row.id,
         fact_slot_id=row.slot_id,
@@ -824,7 +825,11 @@ class SqlAlchemyFactCommitRepository:
                 (temporal.attested_from, temporal.attested_through, temporal.attested_to)
             ):
                 continue
-            if valid_to is not None and version.valid_start >= valid_to:
+            if (
+                valid_to is not None
+                and version.valid_start is not None
+                and version.valid_start >= valid_to
+            ):
                 continue
             end = version.valid_end
             if valid_from is not None and end is not None and end <= valid_from:

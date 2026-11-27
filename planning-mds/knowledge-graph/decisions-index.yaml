@@ -1,14 +1,14 @@
 version: 0
-generated_at: '2026-11-25T05:43:04+00:00'
+generated_at: '2026-11-27T02:19:18+00:00'
 summary:
-  total_decisions: 32
+  total_decisions: 33
   by_kind:
     DECISION: 0
     SUPERSEDES: 0
     TRADEOFF: 0
-    WHY: 32
-  resolved_node_count: 15
-  resolved_symbol_count: 28
+    WHY: 33
+  resolved_node_count: 16
+  resolved_symbol_count: 29
   ambiguous_count: 0
 decisions:
 - id: decision:engine-apps-api-src-brain-api-contract-openapi-l12-why
@@ -73,6 +73,13 @@ decisions:
   text: ACCESS EXCLUSIVE in a fixed lexical order makes the emptiness check and
   resolved_node: migration:f0009-provenance-hooks
   resolved_symbol: symbol:migration-f0009-provenance-hooks:0016-f0009-provenance-hooks.downgrade
+- id: decision:engine-migrations-versions-0017-f0012-ontology-releases-l302-why
+  file: engine/migrations/versions/0017_f0012_ontology_releases.py
+  line: 302
+  kind: WHY
+  text: ACCESS EXCLUSIVE in a fixed order makes the emptiness check and the
+  resolved_node: migration:f0012-ontology-releases
+  resolved_symbol: symbol:migration-f0012-ontology-releases:0017-f0012-ontology-releases.downgrade
 - id: decision:engine-packages-brain-contracts-src-brain-contracts-assertions-l155-why
   file: engine/packages/brain-contracts/src/brain_contracts/assertions.py
   line: 155
@@ -108,16 +115,16 @@ decisions:
   text: exponent text is short even when its expanded value is enormous.
   resolved_node: capability:typed-fact-answer
   resolved_symbol: symbol:capability-typed-fact-answer:fact-values.canonical-decimal
-- id: decision:engine-packages-brain-factslots-src-brain-factslots-answers-l105-why
+- id: decision:engine-packages-brain-factslots-src-brain-factslots-answers-l109-why
   file: engine/packages/brain-factslots/src/brain_factslots/answers.py
-  line: 105
+  line: 109
   kind: WHY
   text: a member's immutable identity is derived from its value; a
   resolved_node: capability:typed-fact-answer
   resolved_symbol: symbol:capability-typed-fact-answer:fact-answer-policy.canonical-value
-- id: decision:engine-packages-brain-factslots-src-brain-factslots-resolution-l228-why
+- id: decision:engine-packages-brain-factslots-src-brain-factslots-resolution-l231-why
   file: engine/packages/brain-factslots/src/brain_factslots/resolution.py
-  line: 228
+  line: 231
   kind: WHY
   text: native callers may omit qualifiers or use noncanonical UUID
   resolved_node: capability:factslot-identity-resolution
@@ -143,9 +150,9 @@ decisions:
   text: READ COMMITTED candidate/selection queries need one stable
   resolved_node: capability:document-date-provenance
   resolved_symbol: symbol:capability-document-date-provenance:document-date-service.read
-- id: decision:engine-packages-brain-persistence-src-brain-persistence-tenancy-l325-why
+- id: decision:engine-packages-brain-persistence-src-brain-persistence-tenancy-l333-why
   file: engine/packages/brain-persistence/src/brain_persistence/tenancy.py
-  line: 325
+  line: 333
   kind: WHY
   text: select only the owner columns. AuthX reconciliation runs between
   resolved_node: capability:structural-tenancy-and-entity-identity

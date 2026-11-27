@@ -1,0 +1,17 @@
+id: migration:f0012-ontology-releases
+label: F0012 ontology release records, append-only selections and the ontology_release access type (revision 0017)
+path: engine/migrations/versions/0017_f0012_ontology_releases.py
+notes: Adds eight tenant/KB-owned append-only tables (module versions, releases, release membership, terms, change
+  records, impact reports, reviews, selections) with composite owner FKs, UPDATE/DELETE/TRUNCATE refusal triggers and
+  brain_f0012_selection_guard (consecutive sequence; activation needs an approved complete report for the candidate and
+  current head; rollback only to a previously activated release). Widens resource_access.ck_resource_access_type to
+  admit ontology_release (existing rows revalidated, none rewritten). No DDL on canonical_fact_version. Downgrade
+  refuses under ACCESS EXCLUSIVE locks while any ontology row or ontology_release access row exists. Implemented in
+  feature run 2026-11-26-54387a08.
+related_nodes:
+- capability:foundation-ontology-release
+- capability:ontology-release-compatibility
+- entity:ontology-release
+- entity:ontology-module-version
+- entity:ontology-release-module
+- adr:0081

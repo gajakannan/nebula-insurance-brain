@@ -1,0 +1,498 @@
+# Nebula Insurance Brain — Domain Glossary
+
+Essential terminology for Nebula Insurance Brain product specifications. Definitions are sourced from `../architecture/master-blueprint.md` (section numbers in parentheses) and are refined per feature during Phase A and Phase B.
+
+## Purpose
+
+This glossary keeps the semantic kernel vocabulary and the insurance vocabulary consistent across requirements, architecture, code, and the knowledge graph, and lets agents understand domain concepts without inventing definitions.
+
+**Rule:** If a term is not in this glossary and its meaning is unclear, ASK rather than assume.
+
+---
+
+## Semantic Kernel Entities
+
+### Tenant
+**Type:** Entity
+**Definition:** The top of the structural tenancy hierarchy (Tenant → Workspace → KnowledgeBase); every authoritative semantic row carries `tenant_id` (65, ADR-0030)
+**In the Brain:** Resolved from verified identity and trusted grants, never from request filters
+
+### Workspace
+**Type:** Entity
+**Definition:** A tenant-scoped grouping of knowledge bases (65)
+
+### Knowledge Base
+**Type:** Entity
+**Definition:** The unit of knowledge ownership under a workspace; every authoritative row carries `knowledge_base_id` and retrieval, graph traversal, and commits are scoped to it (65, 66)
+
+### Principal
+**Type:** Entity
+**Definition:** A verified identity acting on the Brain: UserPrincipal, ServicePrincipal, or AgentPrincipal, mapped from `(issuer, subject)` to a stable internal id (66, ADR-0049)
+**In the Brain:** Agents acting for a user carry both identities and a bounded, expiring delegation
+
+### Source Document
+**Type:** Entity
+**Definition:** An original file or system record received by the Brain; versioned, immutable, preserved as evidence (5, 6, 18)
+
+### Document Version
+**Type:** Entity
+**Definition:** One received version of a source document; the identity that content extraction happens against exactly once (6, ADR-0003, ADR-0004)
+
+### Content Artifact
+**Type:** Entity
+**Definition:** The immutable parse-once output for a document version, produced by Docling conversion (ADR-0040; the Docling-Graph pipeline proposed by ADR-0060 was Rejected on 2026-11-08): normalized text, blocks, tables, coordinates, and a manifest with parser identity and hashes (5, 80, 81)
+**In the Brain:** Reinterpretation always reads the persisted artifact and never re-parses the source
+
+### Content Block
+**Type:** Entity
+**Definition:** An addressable unit of a content artifact (paragraph, table cell, heading) with page coordinates, bounding box, and character offsets; the target of evidence locators (5, 18)
+
+### Document Profile
+**Type:** Entity
+**Definition:** Declares a document's type plus business context and selects which ontology modules and extraction profiles apply (7, ADR-0014)
+
+### Extraction Profile
+**Type:** Entity
+**Definition:** A composable specification of what to extract for a document profile, built from a shared base plus line-of-business or product extensions (8, ADR-0015)
+
+### Semantic Interpretation Run
+**Type:** Entity
+**Definition:** A versioned execution of interpretation over persisted content that produces assertions; many runs may target one content artifact (28, 29, ADR-0016)
+
+### Interpretation Basis
+**Type:** Entity
+**Definition:** How directly evidence supports an interpretation: `EXPLICIT`, `INFERRED`, or `AMBIGUOUS`; independent of fact mode (ADR-0035)
+
+### Assertion
+**Type:** Entity
+**Definition:** What a source, system, model, or person claims, with its evidence; never truth by itself (11, ADR-0005)
+
+### Entity
+**Type:** Entity
+**Definition:** A canonical resolved thing in the world model such as an account, policy, coverage, location, or claim (12, 53)
+
+### FactSlot
+**Type:** Entity
+**Definition:** The canonical semantic identity of one fact about an entity, for example the EachOccurrence limit of a coverage; the unit that fact versions attach to (13, ADR-0006)
+**Refinement (F0007, ADR-0077 Accepted):** Identity is tenant + knowledge base + subject entity + predicate key + normalized qualifiers. Relationship slots add the object entity. Slots are KB-owned. Pilot slots without a predicate key are labelled legacy and never acquire a fabricated identity.
+
+### Predicate Key
+**Type:** Value Object
+**Definition:** An opaque, namespaced, major-versioned FactSlot predicate reference such as `sys:hasLegalName@v1`. A pinned release reference is recorded beside it but is not identity. It is the key the ADR-0038 SourceAuthorityPolicy references (ADR-0077; F0012/F0013 register real predicates)
+
+### FactSlot Qualifier
+**Type:** Entity
+**Definition:** A typed, normalized part of a FactSlot's identity (for example basis or currency), stored as an authoritative row. An omitted qualifier contributes nothing; an explicit null is rejected (ADR-0077)
+
+### FactSlot Member
+**Type:** Entity
+**Definition:** One element of a multi-valued FactSlot, such as one additional insured or one trade name. It is a child slot keyed by the canonical member value or entity, so its versions are temporally independent of other members (109.1, ADR-0077)
+
+### Fact Answer
+**Type:** Value Object
+**Definition:** The `fact-answer/v1` carrier of a FactSlot version: an information state, a typed value only when `PRESENT`, and an absence scope for `NOT_FOUND`/`NOT_STATED` (ADR-0039, ADR-0077)
+
+### Canonical Fact Version
+**Type:** Entity
+**Definition:** An accepted value for a FactSlot carrying both a valid-time period and a recorded-time period, with change semantics when it ends (14, 16, ADR-0007, ADR-0009)
+
+### Canonical Relationship Version
+**Type:** Entity
+**Definition:** A bitemporal accepted relationship between two entities (14, 15). Under ADR-0077/ADR-0078 it is a version of a RELATIONSHIP FactSlot stored in `canonical_fact_version`; master blueprint §78's separate `canonical_relationship_version` table is not created
+
+### Derivation
+**Type:** Entity
+**Definition:** The lineage of a derived fact to the exact input fact versions it depends on, enabling invalidation when inputs change (55, 56, ADR-0026)
+
+### Review Item
+**Type:** Entity
+**Definition:** A Nebula-owned unit of human adjudication (low-confidence assertion, extraction, provenance, entity, or relationship correction) routed to the Nebula Review Panel (75, 125, ADR-0057)
+
+### Review Batch
+**Type:** Entity
+**Definition:** The set of review items a reviewer is shown together, typically the fields of one submission package across its artifacts; submitted in one transaction (125, ADR-0057)
+
+### Review Panel
+**Type:** Term
+**Definition:** Nebula's native evidence review surface: renders the immutable content artifact per content type, anchors each assertion in its source region at a declared precision, and submits governed decisions (111, 125, ADR-0057)
+
+### Review Decision
+**Type:** Entity
+**Definition:** The governed outcome of human review (`ACCEPT`, `CORRECT`, `REJECT`) with correction lineage; corrections append and never rewrite evidence. `BLOCKED` records that evidence could not be anchored and is not an adjudication (75, 125, ADR-0037, ADR-0058)
+
+### Evidence Locator
+**Type:** Entity
+**Definition:** The stored target that binds an assertion to its source region: W3C Web Annotation selectors per content type plus the declared precision, with `unresolved` a valid value (108.2, 125, ADR-0058)
+
+### Evidence Precision
+**Type:** Term
+**Definition:** How exactly an assertion is grounded — `exact-span`, `table-cell`, `block`, `page`, `document`, or `unresolved` — declared rather than inferred, and rendered as claimed (108.2, 125, ADR-0058)
+
+### Learning Candidate
+**Type:** Entity
+**Definition:** A proposed concept, pattern, relationship, rule, or gap discovered by the Brain or a conversation, held outside canonical truth until governed promotion (31 to 35, ADR-0020, ADR-0021)
+
+### Conversation
+**Type:** Entity
+**Definition:** A scoped chat rooted on an explicit object (document, entity, account, policy, claim) whose turns may produce candidates but never canonical facts by default (36 to 44, ADR-0018, ADR-0019)
+
+### Audit Event
+**Type:** Entity
+**Definition:** Append-only record of canonical commits, review decisions, and authorization decisions, including policy version and actor (66, 78)
+
+### Outbox Event
+**Type:** Entity
+**Definition:** Transactional outbox record emitted with a canonical commit so projections (AGE, pgvector, FTS) rebuild consistently (78, proposed ADR-0041)
+
+## Insurance Core Entities (v0.1 General Liability slice)
+
+### Account
+**Type:** Entity
+**Definition:** The customer relationship with exactly one organization seeking or holding insurance coverage; at most one current account per organization in a tenant, with at most one designated parent account. Its organization identity link survives closure. Dated lifecycle state distinguishes current and closed accounts, so retained closed history does not block a replacement ([EX-PC-021](../examples/commercial-pc-account/cases.md#ex-pc-021--closed-accounts-retain-history-and-allow-a-replacement)). The root of Account (Entity) 360 (70, 86; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+Each account owns its policies (each policy belongs to exactly one account) and has a broker of record and broker contacts.
+**Not:** a grouping of several organizations, a broker, or an authorization scope by itself. An organization named on a policy another account owns is a named insured there, not an owner.
+
+### Party
+**Type:** Entity
+**Definition:** A person or an organization. Broker, carrier, MGA, insured and underwriter are scoped roles a party plays, not kinds of party (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+
+### Organization Hierarchy
+**Type:** Term
+**Definition:** An organization's effective-dated parent organization, with no fixed depth: a brokerage's branches and offices, or a company's divisions. Distinct from ownership and from the account hierarchy (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+
+### Ownership Interest
+**Type:** Term
+**Definition:** One party's percentage interest in an organization, with valid time; an organization can have several owners. Majority ownership is computed (more than 50 percent), never stored. Any split works (50/50, three or four owners), and the owners need not match the account parent (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+
+### Parent Account
+**Type:** Term
+**Definition:** The single account, if any, designated as an account's parent for roll-up and Account 360. Designated, not computed from ownership. One parent at most, so a joint venture is never counted twice; one without a majority owner is normally a root account (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+
+### Account 360
+**Type:** Term
+**Definition:** One account's organization, broker of record and contacts, the policies it owns, the policies it is named on, its role assignments, its ownership interests and its parent and child accounts. The hierarchy view rolls owned policies up, so each appears once (70; F0023; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+Owned policies remain visible without a current named-insured assignment; role details are optional. A non-owned policy needs a current named-insured role to appear in the named-on section ([EX-PC-020](../examples/commercial-pc-account/cases.md#ex-pc-020--owned-policies-survive-missing-or-expired-insured-roles)).
+
+### Program
+**Type:** Term
+**Definition:** A master program agreement belonging to the parent account. Its master policy and each covered entity's local policy link to it. The family view comes from those links; each policy still belongs to one account (the data contracts' `MASTER_PROGRAM` Agreement) (proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+
+### Insured
+**Type:** Entity
+**Definition:** The named party covered by a policy. A policy can name several: a first named insured, whose account normally owns the policy, and additional named insureds. An additional insured is different: a third party added by endorsement with narrower rights (86; proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md))
+
+### Policy
+**Type:** Entity
+**Definition:** An insurance contract identified by a scoped policy number with one or more policy terms (86, 107.3)
+
+### Policy Term
+**Type:** Entity
+**Definition:** The valid-time period of a policy; endorsements change facts within a term effective from a date that may precede their receipt (86, 87)
+
+### Endorsement
+**Type:** Entity
+**Definition:** A document that changes policy facts with a valid-time effective date; the canonical example of bitemporal supersession (87, ADR-0007)
+
+### Coverage
+**Type:** Entity
+**Definition:** A coverage part of a policy, for example Commercial General Liability, with its form, trigger, limits, and deductible or retention as FactSlots (24, 86)
+
+### Coverage Form
+**Type:** Entity
+**Definition:** The standard or manuscript form that defines a coverage's terms (24, 86)
+
+### Limit
+**Type:** Entity
+**Definition:** A typed monetary value with a limit basis, for example EachOccurrence, GeneralAggregate, or ProductsCompletedOperationsAggregate (24, 86, 107.3)
+
+### Deductible
+**Type:** Entity
+**Definition:** The retained amount per claim or occurrence, recorded with its basis where present in the policy (86, 107.3)
+
+## Terms
+
+### Valid Time
+**Type:** Term
+**Definition:** When a fact is true in the world (14)
+
+### Recorded Time
+**Type:** Term
+**Definition:** When the Brain accepted a fact as known; distinct from receipt and assertion timestamps (14, 116.1)
+
+### Fact Mode
+**Type:** Term
+**Definition:** `ASSERTED`, `OBSERVED`, or `DERIVED`; what kind of knowledge a fact represents (ADR-0027, ADR-0035)
+
+### Parse Once
+**Type:** Term
+**Definition:** Each document version is physically parsed exactly once; all later semantic work operates on the persisted content artifact (5, ADR-0003)
+
+### Projection
+**Type:** Term
+**Definition:** A rebuildable read model (Apache AGE graph, pgvector embeddings, full-text search) that never defines truth (46 to 52, ADR-0022, ADR-0023)
+
+### Promotion
+**Type:** Term
+**Definition:** The governed step by which a learning candidate or conversation artifact becomes canonical knowledge (42, ADR-0019, ADR-0020)
+
+### Golden Corpus
+**Type:** Term
+**Definition:** Version-controlled labeled documents and expected results exported from Nebula review decisions, used for evaluation and regression (96, 115.1, ADR-0057)
+
+### Loss Run
+**Type:** Term
+**Definition:** A carrier report of claims history for an insured; property and casualty loss runs share a base extraction profile and diverge by line of business (9, ADR-0015)
+
+---
+
+## Genericness-Blocked Terms
+
+The following terms are specific to the Nebula Insurance Brain domain and must not appear in the external agent framework (generic, reusable content). The framework's genericness validator can read this denylist with `--glossary`. Generic words the framework legitimately uses (policy, coverage, limit, retention, claim) are deliberately excluded from this list even though they are insurance terms here.
+
+- Insurance
+- Insured
+- Policyholder
+- Endorsement
+- Loss run
+- Underwriter
+- Underwriting
+- Broker
+- MGA
+- Premium
+- Deductible
+- ACORD
+- General Liability
+- Casualty
+- Reinsurance
+- FactSlot
+- Docling
+- Docling-Graph
+- Insurance Brain
+
+## Neurosymbolic assessment vocabulary (F0065)
+
+These definitions accompany the [worked example](../examples/neurosymbolic-gl/README.md) and [assessment contract](../features/F0065-grounded-gl-guideline-assessment/assessment-contract.md). They describe planned v0.1 behavior; later concepts carry their release phase in the [coverage map](../examples/README.md).
+
+| Term | Meaning in the Brain | Concrete example / boundary | Owning feature |
+|---|---|---|---|
+| Neurosymbolic processing | Neural interpretation and explicit symbolic representations/rules participate in one governed workflow | EX-GL-001: model extracts the limit; accepted typed facts feed a deterministic rule | F0015/F0016/F0018/F0065 |
+| Concept | A versioned definition of a kind of thing, distinct from an instance | insurance.coverage defines the kind; EX-COV-001 identifies one coverage | F0012/F0013 |
+| Guideline rule version | Immutable, reviewed operation with scoped inputs, authority, and effective/release context | EX-RULE-001-v1 compares a USD each-occurrence amount to a fictional minimum; no arbitrary logic strings | F0065 S0001 |
+| Assessment record | Immutable result of applying a selected rule to exact accepted inputs at a snapshot | EX-ASSESS-001 is BELOW_GUIDELINE; it does not reject the policy or become canonical automatically | F0065 S0002/S0003 |
+| Semantic snapshot | A consistent read basis for selected valid/known coordinates and versioned inputs | A concurrent endorsement cannot mix old and new inputs in one assessment | F0020/F0065 S0004 |
+| Extraction confidence | A signal about one model interpretation, distinct from evidence quality, authority, or approval | CASE-05: 0.99 confidence in a wrong amount still needs correction | F0006/F0016/F0022 |
+| Assessment outcome | MEETS_GUIDELINE, BELOW_GUIDELINE, UNKNOWN, CONFLICT, or NOT_APPLICABLE under the bounded contract | Missing input is UNKNOWN; denied access is an error, not a revealing gap outcome | F0065 S0002 |
+| Embedding | Model-produced numeric representation for retrieval, versioned separately from its source | EX-FUTURE-001: a similar aggregate-limit passage cannot supply an each-occurrence fact | F0033, v0.2A |
+| Normative constraint | An obligation with authority, condition, requirement, and valid period, distinct from observed facts | EX-FUTURE-003: an issuance deadline does not establish that issuance occurred | F0052, v0.3 |
+| Hypothetical scenario | A base snapshot plus explicit assumption overrides with isolated results | EX-FUTURE-004: an assumed higher limit does not overwrite the policy fact | F0053, v0.3 |
+
+Existing Assertion, FactSlot, Canonical Fact Version, Derivation, and Review Decision definitions are illustrated by the source-to-fact and temporal sections of EX-GL-001. Every changed or new concept must link a worked/boundary example and owning story/contract before its plan is considered ready.
+
+## Ontology release vocabulary (proposed ADR-0045 contract)
+
+These planning definitions are governed by [ADR-0045](../architecture/decisions/ADR-0045-ontology-release-compatibility.md) and the [proposed release records](../architecture/data-model.md#proposed-ontology-release-records-f0012f0013-adr-0045). F0012/F0013 PRDs must assign their stories before readiness approval.
+
+| Term | Meaning in the Brain | Concrete example / boundary | Owning feature |
+|---|---|---|---|
+| Stable term IRI | Persistent identity of a term, distinct from its mutable label and release-specific definition; never reassigned | [EX-ONT-001](../examples/ontology-release-contracts.md#stable-term-identity): an unchanged IRI alone does not prove unchanged meaning | F0012/F0013, v0.1A |
+| Constraint execution context | Declared stage, consumer, applicability, severity/action, and asserted or inferred data basis for a constraint | [EX-ONT-002](../examples/ontology-release-contracts.md#constraint-execution-and-missing-values): a missing limit produces an assessment gap without a universal commit rejection | F0012/F0013, v0.1A; F0065, v0.1B |
+| Ontology module version | Immutable revision of one module with its definitions, semantics, constraints, and dependency declarations | [EX-ONT-005](../examples/ontology-release-contracts.md#composed-releases-and-packages): GL version 2 declares its foundation dependency | F0012/F0013, v0.1A |
+| Ontology release | Immutable composition of exact module versions and associated artifact/contract references | [EX-ONT-005](../examples/ontology-release-contracts.md#composed-releases-and-packages): an interpretation pins the composed release, not floating latest modules | F0012/F0013/F0015, v0.1A |
+| Historical reproducibility | Reconstruction using retained releases, exact inputs/rules, and original valid/known coordinates | [EX-ONT-003](../examples/ontology-release-contracts.md#reproducibility-and-compatibility): R1 remains interpretable even when R2 changes conclusions | F0012/F0013/F0065, v0.1 |
+| Release compatibility | Preservation of declared consumer contracts, considering inference, validation, profiles, applicability, and evidence requirements | [EX-ONT-004](../examples/ontology-release-contracts.md#reproducibility-and-compatibility): unchanged inference does not make shape tightening compatible | F0012/F0013/F0015; ADR-0045 |
+| Conservative extension check | Analysis of whether an extension changes conclusions over a specified existing vocabulary within a declared logic and scope | [EX-ONT-003](../examples/ontology-release-contracts.md#reproducibility-and-compatibility): bounded success is not unrestricted proof or complete compatibility | ADR-0045; optional tooling F0030/F0062 |
+| Release reference | `ontrel:sha256-<manifest digest>`: the content-addressed name of one compiled release, recorded on every slot it pins; a release can never be republished under it with other content (ADR-0081 D3) | [EX-ONT-007](../examples/ontology-release-contracts.md#foundation-release-runtime-f0012): `fnd:accountOrganization@v1` slots pin the foundation@1 reference; a relabelled module under the old version is refused | F0012 S0004/S0005, v0.1A |
+| Foundation vocabulary | The `foundation` module: §22 base classes and the ADR-0070 party, account, ownership and scoped-role terms with temporal kinds, PartyRoleTypeCode status and constraint execution context; IRIs `urn:nebula:ont:foundation.*`, predicates `fnd:*@v1` | [EX-PC-001/011/015/017/021 on foundation IRIs](../examples/commercial-pc-account/foundation/README.md): broker, carrier and insured are roles, not organization subclasses | F0012 S0003, v0.1A |
+| Impact report | `ontology-impact-report/v1` from the selected release to a candidate: change classes, the closure diff over `nebula-tbox-subset/v1`, per-consumer constraint diff, reach with denominators and unexamined populations; `incomplete` when anything is unclassified or unresolved | [EX-ONT-008](../examples/ontology-release-contracts.md#foundation-release-runtime-f0012): a split lists the affected predicate and slot count; an unclassified removal blocks activation | F0012 S0006, v0.1A |
+| Release selection | An append-only, audited activation or rollback that chooses the release for future work in one tenant/KB; it never rewrites releases or the release reference on existing slots, versions or assertions | [EX-ONT-008](../examples/ontology-release-contracts.md#foundation-release-runtime-f0012): activate @1, activate @2, roll back to @1 leaves three ordered selections | F0012 S0006, v0.1A |
+| Ontology projection mapping | Versioned rule mapping a predicate to a graph edge or property, retaining endpoint identity, qualifiers, exact source lineage, ownership and time, or explicitly omitting it | [EX-INTEROP-001](../examples/ontology-interchange/README.md#evidence-time-and-projection-boundaries): hasLimit maps to HAS_LIMIT; the inferred inverse is explicitly omitted | F0012/F0013 and projection consumer; proposed ADR-0045 |
+
+## Commercial P&C teaching refinements (proposed)
+
+The [Cedar Bridge walkthrough](../examples/commercial-pc-account/README.md) gives these concepts worked and boundary cases. Its account, ownership and role representation follows proposed [ADR-0070](../architecture/decisions/ADR-0070-account-party-and-role-model.md); it is a planning refinement for F0012/F0013, not an accepted runtime schema.
+
+| Term | Example meaning and boundary | Worked/boundary case | Owner |
+|---|---|---|---|
+| Scoped insurance party role | A party acts as named insured, broker, broker contact, risk manager, account contact, carrier, MGA or underwriter in a specific account/submission/policy-term context, acting for a named organization or branch. A policy-term role covers the whole term unless narrowed to coverage parts, such as a package's property section. One person can hold roles on several accounts. Once confirmed by an authoritative source, it decides an external person's reach and a carrier employee's decision rights | [EX-PC-001/011](../examples/commercial-pc-account/cases.md#ex-pc-011--domain-roles-are-not-grants-by-themselves) | F0012/F0013; F0002-successor amendment for access |
+| Broker | Organization, with its own hierarchy, branches, offices and people, that brings accounts to a carrier; not itself an account. A shared broker does not merge accounts or permissions | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012/F0013 |
+| Broker of record | The broker organization or branch on an account, as a dated role so a change keeps history; a policy term's placement broker can override it for one line | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012/F0013 |
+| Broker contact | A person employed by a broker organization or branch, assigned to one account; works for neither the insured nor the carrier. Reaches only what their roles name: an assigned account and its policies, or a single policy | [EX-PC-017](../examples/commercial-pc-account/cases.md#ex-pc-017--brokers-are-parties-and-roles-show-who-does-what) | F0012 role vocabulary; F0023 |
+| Program | A program agreement under the parent account; its master and local policies link to it, each under its own entity's account | [EX-PC-019](../examples/commercial-pc-account/cases.md#ex-pc-019--a-program-links-its-policies-it-does-not-own-them) | F0012/F0013 |
+| Additional named insured | An organization named on a policy after the first named insured, with named-insured rights; the policy belongs to the first named insured's account. First and additional named insured are separate role kinds, never derived from the policy's account | [EX-PC-016](../examples/commercial-pc-account/cases.md#ex-pc-016--a-policy-belongs-to-exactly-one-account) | F0012/F0013 |
+| Additional insured | A third party, such as a landlord or general contractor, added by endorsement with narrower rights; a separate role kind, not a named insured | Not in the fixture | F0013 |
+| Carrier | Organization identified as insurer for a particular policy term; distinguish it from the MGA that handled the submission | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--domain-roles-are-not-grants-by-themselves) | F0013 |
+| MGA and underwriter | A submission-handling organization and a person acting in a scoped underwriting role; the fixture establishes no delegated authority or authenticated principal | [EX-PC-011](../examples/commercial-pc-account/cases.md#ex-pc-011--domain-roles-are-not-grants-by-themselves) | F0012/F0013 |
+| Insurance product composition | Product/package classification differs from its coverage lines; a BOP may package property and liability while standalone GL reuses common liability concepts | [EX-PC-002](../examples/commercial-pc-account/cases.md#ex-pc-002--package-versus-coverage) | F0012/F0013 contract; additional LOB runtime ownership unassigned |
+| Qualified monetary provision | Limit or deductible with coverage, basis, currency and applicable location/term context; it is not an account-wide total | [EX-PC-004](../examples/commercial-pc-account/cases.md#ex-pc-004--money-needs-context) | F0013, ADR-0039; F0065 for GL comparison |
+| Scheduled underlying term | Explicit reference from an umbrella's supplied schedule to an exact underlying policy term; not a claim attachment or exhaustion result | [EX-PC-007](../examples/commercial-pc-account/cases.md#ex-pc-007--underlying-schedule-is-not-attachment) | F0012 relation contract; umbrella runtime ownership unassigned |
+| Requested line | A source request for quotations/coverage, which does not prove an issued policy or global absence of coverage | [EX-PC-005](../examples/commercial-pc-account/cases.md#ex-pc-005--requested-is-not-issued) | F0014/F0016, ADR-0065 |
+| Unscheduled primary liability | A named insured's primary liability term that the umbrella's supplied schedule omits; a prompt for underwriter review, never a coverage conclusion | [EX-PC-013](../examples/commercial-pc-account/cases.md#ex-pc-013--an-unscheduled-primary-is-a-review-prompt) | F0012 relation contract; umbrella runtime ownership unassigned |
+
+## F0002 identity and authorization refinements (proposed design)
+
+These definitions refine the existing Tenant/Workspace/Knowledge Base/Principal terms for the approved F0002 requirements. Runtime proof and Phase B approval remain pending. Contract: [AuthX v1 schema](../schemas/authx-kernel.schema.json), [assembly plan](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md); worked and boundary examples: [EX-AUTHX](../features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/worked-examples.md).
+
+### Tenant entity identity
+A stable entity identity within one tenant, which may have explicit associations to several KBs of that tenant. An association is not a membership or access grant. F0002-S0001; EX-AUTHX-002/003; ADR-0061. Distinct from the globally stable verified principal identity.
+
+### Membership
+A current trusted principal-to-tenant/KB association carrying a role, validity/revocation, revision and complete resource restriction slice. Matching dimensions from unrelated grants cannot be combined into broader authority. F0002-S0003; EX-AUTHX-007–009.
+
+### Resource scope
+The actual permitted tenant/KB and broker/account/policy resource population derived from trusted grants and authoritative resource metadata. Request filters only intersect this authority. F0002-S0003/S0004; EX-AUTHX-007/010/011.
+
+### Resource envelope
+The server-hydrated ownership, parent chain, classification/source requirements, evidence dependencies and revisions for a resource. It is not a public request DTO. F0002-S0004; EX-AUTHX-010–012.
+
+### Delegation
+An explicit binding between a verified executor and acting principal, with a finite action/resource ceiling, expiry and revocation. Effective permission is the intersection of current acting authority and that ceiling; no onward delegation in v1. F0002-S0005; EX-AUTHX-014–016.
+
+### Authorization context
+A current trusted carrier of verified identities, complete grant slices, optional delegation, policy release and trace; business query dates are separate from enforcement time. F0002-S0002/S0003/S0005; EX-AUTHX-004/008/014.
+
+### Authorization decision
+An append-only record of permission evaluation under exact current revisions; allowed does not mean a business mutation succeeded. A durable outcome and decision reference distinguish success, denial and failure. F0002-S0006; EX-AUTHX-017/018.
+
+### Authentication failure event
+A durable sanitized record of rejected credentials without looking up protected data or inventing a principal. Invalid tokens never appear in its payload. F0002-S0002/S0006; EX-AUTHX-005.
+
+## Statements, time, and automated governance (ADR-0063 to ADR-0069)
+
+These definitions come from the 2026-09-25 architecture amendments, which were informed by Utopia's decisions since 2026-09-05. ADR-0063 is accepted as direction. ADR-0064 to ADR-0069 are Proposed. Worked and boundary examples: [statements, time, and governance](../examples/statements-time-and-governance.md).
+
+| Term | Meaning in the Brain | Concrete example / boundary | Owning feature |
+|---|---|---|---|
+| Open statement | An assertion of kind `OPEN_STATEMENT` holding what a source says in its own words: a relation phrase, role-word qualifiers, time-mention references, a mandatory quote, and no predicate | EX-SEM-001: "subcontracts all tear-off work to"; never bound to a generic "related to" | F0006 (storage), F0066 (extraction) |
+| Typed assertion | An assertion expressed in an ontology property, produced by template extraction or signature alignment and marked with its ontology release; only typed assertions reach canonical resolution | EX-SEM-001: `usesSubcontractor` materialized from the open statement | F0006/F0015/F0066 |
+| Signature | The normalized relation phrase with the subject's class set and the object's class set (or `VALUE`); alignment decides each signature once per knowledge base and ontology release | EX-SEM-001; EX-SEM-010 when the class hierarchy changes | F0066 |
+| Signature binding | The decision that a signature is a property in a direction, or `NONE`, or `UNDECIDED`, with its decision basis and decider; a person's binding is final | Two votes with candidates in opposite orders must agree | F0066 |
+| Implication rule | An approved rule that a statement shape implies a typed assertion of another property, with the object read from a cached per-phrase reading; its results are `INFERRED` | EX-SEM-002: "a Texas limited liability company" implies the jurisdiction of formation | F0066 |
+| Interpretation route | A document profile section's declared route to typed assertions: `TEMPLATE`, `OPEN`, or `TEMPLATE_AND_OPEN` | Declarations pages use `TEMPLATE`; broker correspondence uses `OPEN` | F0014 |
+| Time mention | A verbatim time expression located in a block, with a model interpretation (shape, reference, granularity) and a code-computed interval and resolution grade | EX-SEM-003: "Effective as of 12:01 a.m. on July 1, 2026" | F0016 |
+| Document time context | A document's own date and its source, the periods and calendars it defines, its narrative anchors, and its time-of-day/time-zone conventions; never upload or receipt time | EX-SEM-003b: "as of inception" waits without the policy period | F0004/F0016 |
+| Resolution grade | `A` absolute, `B` anchored, `C` unanchored; only `A`/`B` starts may close a predecessor in a single-valued FactSlot | A grade-C successor opens review instead of closing | F0008/F0019 |
+| Valid-time precision | The granularity stored on each valid-time bound, with values truncated to it | "July 2026" is month precision, not July 1 | F0008 |
+| Unknown end | `valid_to_state = UNKNOWN` with `attested_to`: the fact ended, but the source gives no date; distinct from an open end | EX-SEM-004: "no longer on the account"; [EX-PC-014](../examples/commercial-pc-account/cases.md#ex-pc-014--unknown-start-and-unknown-end): the yard | F0008 |
+| Temporal kind | A property's declared `STATE`, `EVENT`, or `ETERNAL`, which normalizes writes and reads | A loss occurrence is an `EVENT`; a limit is a `STATE` | F0012/F0013 |
+| Start basis | How a version's valid-time start was obtained: `TEMPLATE_FIELD` or `HUMAN` (grade `A`), `MENTION_A/B/C`, or server-assigned `ATTESTATION_FLOOR`; only an anchored start may close a predecessor | A template effective date is `TEMPLATE_FIELD`; a guessed date is grade `C` and closes nothing | F0008 (ADR-0078) |
+| Attestation floor | An unknown start placed at the earliest selected document date among the evidence, never earlier; reads before it are validity-unknown | EX-PC-014: the yard fact starts at 2025-12-15 | F0008 (ADR-0078) |
+| Validity-unknown read | A two-coordinate read that falls inside an unknown-end window or before an attestation floor; it returns no value and is not an ADR-0039 information state | EX-SEM-004 at 2026-07-15 | F0008 (ADR-0078) |
+| Close-only immutability | The rule that the only permitted update to a canonical fact version is closing its open recorded interval, enforced by database triggers | A correction closes and replaces; it never rewrites the old row | F0008 (ADR-0078) |
+| Admission check | A server-side structural check on interpretation output before persistence: the quote is in the block, names are in their quote, time words are in their quote; offsets are computed by the server | EX-SEM-005b: a fabricated quote is dropped | F0006/F0016 |
+| Interpretation drop | A persisted record of a rejected, malformed, truncated, or uninterpreted item with its reason code; drops make a run `PARTIAL` and feed `NOT_PROCESSED` | `QUOTE_NOT_IN_SOURCE`, `BLOCK_UNINTERPRETED` | F0016/F0022 |
+| Text origin | How a block's words were obtained: `STATED`, `OCR`, `TRANSCRIBED`, or `DESCRIBED`; described-only evidence cannot supersede a fact | EX-SEM-006: a chart description versus the SOV table | F0004 |
+| Statement mood | A qualifier holding the passage's own words when a statement is required, conditional, planned, quoted, or offered; mood-bearing statements are never materialized as facts | EX-SEM-007: "subject to receipt of a signed application" | F0006, F0052 |
+| Name fact | A name held as a time-bounded, evidenced assertion on `hasLegalName`, `hasTradeName`, `hasFormerName`, or `knownAs`; a rename keeps the entity | EX-SEM-008: named-insured change by endorsement | F0007/F0017 |
+| Impact hold | Holding an automated change for a person because its effects would leave what a revert can recall (`CONFLICT`, `DERIVED`, `CITED`, `EXPORTED`) | EX-SEM-009: a merge an assessment rests on | F0027/F0043/F0059 |
+| Precedent | A human-actor review decision, with its optional free-text reason, that automated deciders may read; an agent's own decisions are never precedent | A person's "keep apart" blocks an automatic merge of the same pair | F0043 |
+| Automation fuse | The per-knowledge-base automatic disabling of an automation type after a configured number of reverts within a window | Default: two reverts in seven days | F0043 |
+| Decision basis | A fingerprint of every input a cached decision considered; the decision is stale when the fingerprint of current inputs differs | EX-SEM-010: a changed ancestor closure reopens a binding | F0016/F0032/F0056/F0066 |
+| Action attempt | A persisted external side-effect attempt with a request identity and the states `PREPARED`, `DISPATCHING`, `NOT_SENT`, `RESPONSE_RECEIVED`, or `OUTCOME_UNKNOWN`; never retried blindly | EX-SEM-011: a worker dies after sending | F0050/F0059 |
+
+## F0004 content contract refinements
+
+These are proposed storage refinements under ADR-0073; they do not activate broader temporal interpretation or assertion admission. Owner: F0004 S0001–S0004. [Worked and boundary examples EX-CONTENT-001–004](../features/archive/F0004-content-artifact-model/worked-examples.md) and [schema examples](../features/archive/F0004-content-artifact-model/contract-examples.json) are synthetic.
+
+| Term | Definition | Worked / boundary case |
+|---|---|---|
+| Versioned content bundle | Immutable parse files plus retained source/assets under an explicit manifest version and recipe identity; interpretation outputs remain separate | EX-CONTENT-001; an unknown version or corrupted marker cannot trigger reparse |
+| Content index | Owned metadata pointing to exact immutable block/table lines and their hashes, without duplicating canonical text into mutable rows | EX-CONTENT-002; one block can have multiple regions but only one observed text origin |
+| Document-date candidate | An append-only proposed date preserving YEAR/MONTH/DAY precision and CONTENT, SOURCE_METADATA or verified HUMAN basis | EX-CONTENT-003; upload/receipt time and forged human provenance are invalid bases |
+| Document-date selection | An explicit append-only choice of one candidate or clear, with predecessor, per-version sequence and, in v0.1, a verified human selection decision; consumers can pin the exact historical selection | EX-CONTENT-003; conflicting candidates do not create automatic precedence, a service principal cannot select on its own authority, and absent selection remains undated |
+| Ready artifact | A verified completion marker whose same identity, indexes and publication audit committed under current authority and generation fence | EX-CONTENT-004; an orphan marker after DB failure is not advertised as ready |
+| Artifact publication state | `legacy_unverified` (pre-F0004 v1, readable through the v1 verifier), `ready` or `quarantined`; each change is an append-only state event with audit | EX-CONTENT-004; a read that finds a hash mismatch fails with 409, and the operator-run integrity sweep quarantines the row. A transient storage error never quarantines, and leaving quarantine needs an authorized repair |
+
+
+## F0006 assertion contract refinements (proposed design)
+
+These terms refine representation and admission under [ADR-0075](../architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md); Phase B design was approved by operator on 2026-11-01; runtime proofs remain pending. All examples are synthetic and illustrative in [EX-ASSERT-001–009](../features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md).
+
+| Term | Definition | Worked / boundary | Owning story / contract |
+|---|---|---|---|
+| Assertion semantic extension | Immutable version-2 representation keyed to the existing assertion identity, retaining typed/open kind, independent mode/origin/basis, source wording and server-verified evidence | EX-ASSERT-001/003/009: preserve two claims and old raw history; never backfill a missing quote or ontology release | F0006 S0001/S0002/S0005; assertion-record-v2, interpretation-result-v2 |
+| Document-local assertion reference | A subject/object declaration scoped to one document version, with an evidenced introducing name; it is not a resolved canonical entity | EX-ASSERT-002: a named contractor is retained locally; a foreign or unlisted subject cannot be attached | F0006 S0002/S0003; assertion-record-v2 entity_reference |
+| Admission name claim | A document-scoped normalized-name ownership registry used solely to reject a name already claimed by another local reference | EX-ASSERT-002: no silent merge; not a canonical name FactSlot | F0006 S0003; NAME_CLAIMED_BY_ANOTHER outcome |
+| Structural grounding | Server location of a claim's quote in its claimed immutable source, with a deterministic map back to original text/native selectors | EX-ASSERT-004/005: a real quote with a misread value passes grounding; repeated text does not yield invented offsets | F0006 S0003; assertion-admission-result-v1 |
+| Assertion eligibility guard | Conjunctive source restrictions from kind, mood, verified origin and review/correction lineage before resolution/canonical effects; satisfying structural preconditions is not automatic acceptance | EX-ASSERT-007/008/009: mood remains blocked and described-only support cannot auto-accept/close/supersede | F0006 S0004/S0005; blocked_operations/review hook and existing commit contract |
+
+## Governed evidence retrieval
+
+These are proposed retrieval design terms for v0.2A F0033–F0036, with optional numerical derivatives in v0.4+ F0068. Definitions follow [ADR-0076](../architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md); examples and boundary cases are [EX-RET-001–006](../examples/governed-evidence-retrieval.md). They do not alter canonical fact, assertion or permission semantics.
+
+### Evidence block
+
+An immutable content block within a pinned source artifact version, addressed with the original locator and declared precision. It may have zero or many source/canonical binding references. The block itself has no single canonical acceptance status or business-validity interval; resolve each binding at the query's mode and time. Indexing it does not re-parse the document (EX-RET-001/003; F0033/F0036).
+
+### Evidence context
+
+The selected evidence set and its execution basis, locators, reasons, paths, complete serialized token count, payload identity and explicit gaps. Selection is preparation for an answer, not proof of use or truth; only answer-basis linkage establishes use (EX-RET-001/005; F0036).
+
+### Retrieval execution basis
+
+The pinned semantic snapshot, both temporal coordinates/precision, ontology, root/requested scope, knowledge mode, current-authorization decision reference, actual projection versions, retrieval profile/effective mode and model/tokenizer profile for one retrieval. Recorded authority is not a reusable access grant (EX-RET-003/004/006; F0035/F0036).
+
+### Retrieval mode
+
+The selected algorithm path: baseline hybrid or bounded expansion, optional PageRank, or a separately approved spectral/heat experiment. This differs from knowledge mode (`canonical`/`source`/`scenario`), Fact Mode (`ASSERTED`/`OBSERVED`/`DERIVED`) and assertion mood. Unsupported or disabled modes reject explicitly (EX-RET-006; F0035/F0068).
+
+### Projection compatibility
+
+Evidence that a projection's complete influence domain and input revisions match the requested scope, current authority, mode and pinned temporal/snapshot contract. A matching tenant, fresh build date or post-filtered output alone is insufficient. An incompatible artifact requires a compatible authorized fallback or gap (EX-RET-002/006; F0033–F0035/F0068).
+
+### Bridge evidence
+
+Admissible source support that connects otherwise separate pieces needed to answer a question, such as an endorsement and its effective clause connecting original wording to the applicable amendment. Graph closeness alone does not establish that connection's meaning or acceptance. Missing bridge support yields a gap rather than fabricated completeness (EX-RET-001/002; F0035/F0036).
+
+## Requirement-ownership decisions (2026-11-08, proposed)
+
+These terms follow the operator decisions recorded on 2026-11-08 in proposed ADR-0038, ADR-0039, ADR-0042, ADR-0043 and ADR-0053 (master blueprint section 106.3). Worked and boundary examples are [EX-OWN-001–006](../examples/source-authority-and-information-state.md). The records stay Proposed until their owning features prove them.
+
+### Information state
+
+The state of a FactSlot answer, kept separate from its value: `NOT_PROCESSED`, `NOT_FOUND`, `NOT_STATED`, `ILLEGIBLE`, `AMBIGUOUS`, `CONFLICTING`, `EXPLICIT_NEGATIVE`, `NOT_APPLICABLE`, or a present value. Absence states carry the exact scope searched. Access denial is never an information state (EX-OWN-002/003; ADR-0039; F0007/F0011/F0016/F0020/F0023).
+
+### Package completeness
+
+The comparison between the forms, pages and attachments a document profile expects and those actually received. A missing expected component makes the package `INCOMPLETE`; it never creates a negative fact (EX-OWN-002; ADR-0039; F0013/F0014/F0023).
+
+### Qualified money
+
+An exact decimal amount with an ISO 4217 currency and, where the predicate needs it, a basis such as per occurrence or aggregate. Floating-point storage is not allowed (ADR-0039; F0007/F0011/F0013).
+
+### Scoped identifier
+
+An identifier expressed as (issuer or scheme, identifier type, value). Equal strings from different schemes are different identifiers (ADR-0039; F0007/F0013/F0017).
+
+### Source authority policy
+
+A versioned rule set keyed by tenant, domain, FactSlot predicate, business context and effective interval that classifies each source family as authoritative, advisory or requested terms. It decides which assertion may become canonical; it never discards the others (EX-OWN-001; ADR-0038; F0018/F0024).
+
+### Requested terms
+
+What a submission or broker correspondence asks for, kept as an assertion and shown beside the issued terms. Higher extraction confidence never promotes requested terms (EX-OWN-001; ADR-0038).
+
+### Deletion tombstone
+
+The record left when an authorized deletion removes content: it keeps identity and audit but not the content, and a restore re-applies it before restored data becomes readable (EX-OWN-004; ADR-0043; F0018/F0026).
+
+### Constrained policy question
+
+The v0.1C "chat with this policy" surface: a conversation rooted on one entitled policy that answers through typed fact queries with scope, time basis, information state, citations and abstention. It has no broad retrieval or learning (EX-OWN-005; F0069; ADR-0046 v0.1 subset).
+
+
+## F0009 provenance refinements (Phase B approved)
+
+### Provenance Explanation
+
+**Type:** Value Object
+**Definition:** A bounded, currently authorized explanation of one exact assertion or canonical version. It retains typed source, correction, split and change links and explicitly marks unavailable legacy/producer metadata; it is not a second authoritative graph or canonical acceptance. [EX-PROV-001/003/004](../features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md), F0009-S0001/S0003/S0004; [result schema](../schemas/provenance-result-v1.schema.json), proposed [ADR-0080](../architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md).
+
+### Learning Candidate Reservation
+
+**Type:** Entity
+**Definition:** An immutable server-owned UUID linked to one new effective human correction's decision, original/child assertions, reviewer and time. It reserves future F0041 identity and confers no learning job, candidate approval, independent support or Golden Corpus/holdout membership. [EX-PROV-005](../features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-005--reserve-future-learning-with-zero-dataset-effect), F0009-S0005; [reservation schema](../schemas/learning-candidate-reservation-v1.schema.json).
+
+### Refused Review Submission
+
+**Type:** Entity
+**Definition:** Attributed non-applied input retained when an already-decided item causes the existing review batch to be refused. It is distinct from an applied/stale ReviewDecision; it produces no corrected assertion or reservation and preserves the existing HTTP 422. [EX-PROV-002](../features/archive/F0009-provenance-and-human-correction-lineage/worked-examples.md#ex-prov-002--correct-without-erasing-or-accepting), F0009-S0002; [attempt schema](../schemas/review-submission-attempt-v1.schema.json).

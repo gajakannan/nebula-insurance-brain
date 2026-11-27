@@ -111,7 +111,8 @@ class FactVersionOut(BaseModel):
     id: UUID
     fact_slot_id: UUID
     value: dict
-    valid_start: datetime
+    # F0012: null only for an ETERNAL version (fact-version-read-v1, widened).
+    valid_start: datetime | None
     valid_end: datetime | None
     recorded_start: datetime
     recorded_end: datetime | None

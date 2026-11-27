@@ -1,0 +1,48 @@
+# F0012 bindings. As-built code bound by the Architect at feature G7 (run 2026-11-26-54387a08).
+# Code paths only: stable across the G8 archive move. Committed release locks and modules under
+# ontology/** are product content, not planning artifacts. capability:ontology-release-compatibility
+# code paths live with its planning bindings in ontology-planning.yaml (one shard per node).
+node_bindings:
+- id: capability:foundation-ontology-release
+  paths:
+    backend:
+    - engine/packages/brain-ontology/src/brain_ontology/__init__.py
+    - engine/packages/brain-ontology/src/brain_ontology/errors.py
+    - engine/packages/brain-ontology/src/brain_ontology/authoring.py
+    - engine/packages/brain-ontology/src/brain_ontology/compiler.py
+    - engine/packages/brain-ontology/src/brain_ontology/rdf_export.py
+    - engine/packages/brain-ontology/src/brain_ontology/service.py
+    - engine/packages/brain-ontology/src/brain_ontology/runtime.py
+    - engine/packages/brain-ontology/src/brain_ontology/cli.py
+    - engine/packages/brain-domain/src/brain_domain/ontology.py
+    - engine/packages/brain-persistence/src/brain_persistence/ontology_releases.py
+    - engine/packages/brain-persistence/src/brain_persistence/ontology_models.py
+    content:
+    - ontology/modules/foundation/module.yaml
+    - ontology/modules/foundation/changes.yaml
+    - ontology/releases/foundation/1/release.yaml
+    - ontology/releases/foundation/1/manifest.json
+    - ontology/releases/foundation/1/normalized.json
+    - ontology/releases/foundation/1/projection-mapping.json
+    - ontology/releases/foundation/1/release.ttl
+    - ontology/releases/foundation/1/release.jsonld
+    validation:
+    - scripts/validation/build_foundation_examples.py
+    tests:
+    - engine/packages/brain-ontology/tests/test_authoring.py
+    - engine/packages/brain-ontology/tests/test_compiler.py
+    - engine/packages/brain-ontology/tests/test_cli.py
+    - engine/tests/integration/test_ontology_release_install.py
+    - engine/tests/fixtures/ontology.py
+- id: capability:release-backed-predicate-registry
+  paths:
+    backend:
+    - engine/packages/brain-factslots/src/brain_factslots/predicates.py
+    tests:
+    - engine/tests/integration/test_temporal_kind_activation.py
+- id: migration:f0012-ontology-releases
+  paths:
+    backend:
+    - engine/migrations/versions/0017_f0012_ontology_releases.py
+    tests:
+    - engine/tests/integration/test_ontology_migration.py

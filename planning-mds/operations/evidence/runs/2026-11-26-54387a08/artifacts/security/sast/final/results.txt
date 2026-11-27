@@ -1,0 +1,18 @@
+                   
+                   
+┌─────────────────┐
+│ 2 Code Findings │
+└─────────────────┘
+                                                                     
+    source/engine/migrations/versions/0017_f0012_ontology_releases.py
+   ❯❯❱ python.sqlalchemy.security.audit.avoid-sqlalchemy-text.avoid-sqlalchemy-text
+          ❰❰ Blocking ❱❱
+          sqlalchemy.text passes the constructed SQL statement to the database mostly unchanged. This means  
+          that the usual SQL injection protections are not applied and this function is vulnerable to SQL    
+          injection if user input can reach here. Use normal SQLAlchemy operators (such as `or_()`, `and_()`,
+          etc.) to construct SQL.                                                                            
+          Details: https://sg.run/yP1O                                                                       
+                                                                                                             
+          305┆ bind.execute(text(f"LOCK TABLE {table} IN ACCESS EXCLUSIVE MODE"))
+            ⋮┆----------------------------------------
+          306┆ counts = {t: bind.execute(text(f"SELECT count(*) FROM {t}")).scalar_one() for t in TABLES}
