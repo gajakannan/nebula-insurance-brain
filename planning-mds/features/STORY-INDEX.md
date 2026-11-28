@@ -2,7 +2,7 @@
 
 Auto-generated index of all user stories across feature folders.
 
-**Total Stories:** 73
+**Total Stories:** 82
 
 ---
 
@@ -146,6 +146,22 @@ Auto-generated index of all user stories across feature folders.
 
 ---
 
+## F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+
+| Story ID | Title | Priority | Phase | Persona |
+|----------|-------|----------|-------|---------|
+| [F0021-S0001](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) | Sign in through the BFF with an opaque session | Critical | MVP — v0.1B | business reviewer (Rosa) |
+| [F0021-S0002](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks | Critical | MVP — v0.1B | security administrator (Noor) |
+| [F0021-S0003](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md) | Renew once and bound session lifetime | Critical | MVP — v0.1B | business reviewer (Rosa) |
+| [F0021-S0004](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) | Re-authenticate without losing work or replaying mutations | Critical | MVP — v0.1B | business reviewer (Rosa) |
+| [F0021-S0005](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) | Log out with upstream revocation and cache hygiene | Critical | MVP — v0.1B | security administrator (Noor) |
+| [F0021-S0006](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) | Show identity and knowledge-base context in the shell | High | MVP — v0.1B | GL underwriter (Priya) |
+| [F0021-S0007](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) | Provide the route seam and rehost the review panel | High | MVP — v0.1B | platform engineer (Dana) |
+| [F0021-S0008](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md) | Throttle rejected credentials | High | MVP — v0.1B | security administrator (Noor) |
+| [F0021-S0009](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md) | Prove session transport and mutation continuity | Critical | MVP — v0.1B | security administrator (Noor) |
+
+---
+
 ## F0064 — Repository instructions and planning-check adoption
 
 | Story ID | Title | Priority | Phase | Persona |
@@ -177,6 +193,7 @@ Auto-generated index of all user stories across feature folders.
 | Infrastructure | 11 |
 | MVP | 30 |
 | MVP — v0.1A | 22 |
+| MVP — v0.1B | 9 |
 | v0.1A | 4 |
 | v0.1B | 6 |
 
@@ -186,8 +203,8 @@ Auto-generated index of all user stories across feature folders.
 
 | Priority | Count |
 |----------|-------|
-| Critical | 42 |
-| High | 27 |
+| Critical | 48 |
+| High | 30 |
 | Medium | 4 |
 
 ---

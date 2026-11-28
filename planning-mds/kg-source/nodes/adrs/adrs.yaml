@@ -410,3 +410,17 @@ adrs:
   - capability:foundation-ontology-release
   - capability:release-backed-predicate-registry
   - capability:ontology-release-compatibility
+- id: adr:0082
+  label: BFF Session Runtime and Shell Foundation
+  path: planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md
+  notes: 'Proposed F0021 design (plan run 2026-11-27-6cda122a): BFF inside the engine API behind one public origin,
+    confidential brain client, PostgreSQL session store with encrypted tokens, __Host- cookies, synchronizer CSRF
+    plus origin checks, row-lock coalesced renewal, RFC 7009 logout, popup re-auth over BroadcastChannel, PostgreSQL
+    rejected-credential throttle, session endpoint and shell stack. Refines ADR-0051; Phase B approved 2026-11-27 (approve-phase-b); acceptance with F0021-S0009.'
+  related_nodes:
+  - adr:0051
+  - adr:0049
+  - adr:0072
+  - capability:browser-session-bff
+  - capability:credential-rejection-throttle
+  - capability:shell-route-seam

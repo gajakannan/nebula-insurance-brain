@@ -467,3 +467,37 @@ erDiagram
     REVIEW_ITEM ||--o{ REVIEW_SUBMISSION_ATTEMPT : non_applied
     ASSERTION ||--o{ REVIEW_SUBMISSION_ATTEMPT : original_claim
 ```
+
+## F0021 browser sessions and throttle (Phase B design 2026-11-27, proposed ADR-0082)
+
+Migration 0018 (design: [migration-design.sql](../features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql)) is expand-only.
+
+**`browser_login_attempt`:** one row per sign-in started.
+
+- Stores only digests of the state, browser binding and nonce, plus the encrypted PKCE verifier.
+- Holds the mode (`redirect` or `popup`, with a popup reference) and the sanitized return route.
+- Expires after 10 minutes and can be consumed once.
+
+**`browser_session`:** the server-side session behind the opaque cookie.
+
+- Keyed by a UUID session reference. Only the cookie's SHA-256 digest is stored.
+- Holds the principal, issuer, subject and display name.
+- Holds the idle deadline (30 min), absolute deadline (8 h) and access-token expiry.
+- Tokens are an AES-256-GCM ciphertext under a key ID; ending a session sets it to NULL.
+- Also holds the renewal count, CSRF digest, active tenant/knowledge base (composite FK to `knowledge_base(id, tenant_id)`) and the end reason.
+- CHECKs tie together:
+  - lifetime and D1;
+  - ended state and token absence;
+  - the active pair.
+
+**`session_event`:** append-only session lifecycle audit, using the migration 0007 trigger.
+
+- Records creation, replacement, renewal and its failure, idle and absolute endings, and principal endings.
+- Records logout, with the revocation and end-session outcomes.
+- Records active knowledge-base changes.
+
+**`credential_rejection_window`:** mutable per-client counters for 60-second windows. One atomic upsert per rejected credential; rows older than 10 minutes are pruned.
+
+**Display names:** `tenant.display_name` and `knowledge_base.display_name` are nullable, server-owned names for the shell.
+
+Rejected credentials keep using `authentication_event`, with twelve new reason codes and an optional payload (session reference, CSRF cause, client key for `rate_limited`). Authorization never reads session state: the active knowledge base narrows shell requests only.

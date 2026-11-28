@@ -122,11 +122,11 @@ Locked unless changed by an accepted ADR (master blueprint section 3).
 - Content artifacts: provider-neutral `ContentArtifactStore` port over an object-store port; v0.1 implements `LocalFilesystemObjectStore` using committed `config/local.yaml` and ignored `./content/` runtime state; S3, Azure Blob, GCS, and other adapters are future composition-root implementations (ADR-0059)
 - Direct specialist dependency: Docling converts documents into the persisted native bundle; the bounded direct-baseline client (ADR-0055) extracts from saved content under the ADR-0074 execution controls. [ADR-0060](architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md), which proposed Docling-Graph coordination, was **Rejected** on 2026-11-08 after Graph dense failed F0005 live qualification. Native evidence review remains governed by ADR-0057; `pdf.js` and `fflate` are rendering libraries in `experience/`.
 - Frontend: React, TypeScript, Vite, React Router, TanStack Query, Zustand, React Hook Form, AJV with JSON Schema 2020-12, shadcn/ui, Tailwind CSS, TanStack Table, Cytoscape.js (v0.2), react-i18next
-- AuthN: authentik OIDC. AuthZ: native Casbin adapter behind an AuthorizationService with typed resource scopes. Session transport: same-origin BFF with server-held tokens is the proposed direction (ADR-0051, open)
+- AuthN: authentik OIDC. AuthZ: native Casbin adapter behind an AuthorizationService with typed resource scopes. Session transport: same-origin BFF with an opaque HttpOnly session cookie and server-held tokens (ADR-0051 decision recorded 2026-11-08; runtime choices in ADR-0082, both Proposed until F0021-S0009 proves master blueprint section 121.2 items 8 and 9)
 - Semantic interchange: JSON Schema 2020-12, JSON-LD, RDF and N-Triples, OWL, RDFS, SKOS, OKF, YAML, JSONL (authoring and interchange only, never runtime truth)
 - Local configuration: non-secret runtime defaults are committed under `config/`; local content storage must not require exported environment variables or a `.env` file. Secrets are never committed and are introduced only when a deployment integration requires them.
 - Deploy: Docker + docker-compose for local development; the production host is an open decision (section 117.1). Clarification decisions recorded at F0001 G1 (2026-09-06): PostgreSQL 18 is the pinned major for the pgvector and Apache AGE build (fallback 17 only on build failure); the review surface is the native Nebula Review Panel (ADR-0057, 2026-09-08); the F0001 proofs use `microsoft/Phi-4-mini-instruct` served by vLLM as an OpenAI-compatible service on the host GPU (the local profile the CRM validated in nebula-insurance-crm ADR-035; 4,096-token context, bearer auth, no prompt persistence) and run in local Docker Compose. F0001-S0002/S0006 pinned and twice-verified the exact local host image: `brain-postgres:18-pgvector-age` (PostgreSQL 18, `postgres:18.0-trixie` base — server measured at 18.6, a documented in-place base-tag drift, `docker/DEPENDENCY-MATRIX.md`), pgvector v0.8.6, Apache AGE `PG18/v1.8.0-rc0`, `btree_gist` from contrib; `\dx` and `docker exec ... psql` both re-confirmed this live at S0006 with no regression across two `down -v`/`up -d` cycles. The model-provider data policy proven at S0003/S0006: the inference service is self-hosted (no third-party model API), receives chunk text only — never a user token, principal id, or tenant identifier — and persists no prompt data. The production host itself (beyond local Docker Compose) remains open, owned by F0026 (section 117.1 item 3, partially answered — see section 4.8)
-- Testing: pytest for `engine/` and `neuron/` (unit, integration, evaluation against the Golden Corpus). Frontend stack proposed as Vitest + Playwright + axe following the CRM baseline, to be confirmed in Phase B. Cross-cutting scans per the framework evidence contract (dependency, secrets, SAST, DAST)
+- Testing: pytest for `engine/` and `neuron/` (unit, integration, evaluation against the Golden Corpus). Frontend testing confirmed at F0021 Phase B (ADR-0082 D12): Vitest with Testing Library, and Playwright with `@axe-core/playwright` for end-to-end, real-browser and accessibility proof. The F0021 shell also confirms React Router 7, TanStack Query 5, Zustand 5 (memory only), Tailwind CSS 4 with shadcn/ui, and react-i18next. Cross-cutting scans per the framework evidence contract (dependency, secrets, SAST, DAST)
 
 ### 2.2 Contract locations
 
@@ -202,6 +202,8 @@ planned first and its stories are written against them:
 
 Remaining end-user personas (analysts, and any further steward or governance roles) are authored with the
 first user-facing features, F0021 to F0023.
+
+F0021 Phase A (2026-11-27) adds Noor the Security Administrator — `examples/personas/security-administrator.md` — and reuses Rosa, Priya and Dana.
 
 ### 3.3 Epics & Features
 
@@ -292,7 +294,16 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0018 — Canonical commit service + action authorization and policy-version audit](features/F0018-canonical-commit-service-and-action-authorization/README.md) - Planned
 - [F0019 — Basic endorsement supersession](features/F0019-basic-endorsement-supersession/README.md) - Planned
 - [F0020 — Minimal graph/temporal query API](features/F0020-minimal-graph-and-temporal-query-api/README.md) - Planned
-- [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned
+- [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned (Phase A and B approved 2026-11-27, plan run `2026-11-27-6cda122a`; nine stories, 55 ACs; ADR-0082 Proposed)
+  - [F0021-S0001](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) - Not Started
+  - [F0021-S0002](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) - Not Started
+  - [F0021-S0003](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md) - Not Started
+  - [F0021-S0004](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) - Not Started
+  - [F0021-S0005](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) - Not Started
+  - [F0021-S0006](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) - Not Started
+  - [F0021-S0007](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) - Not Started
+  - [F0021-S0008](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md) - Not Started
+  - [F0021-S0009](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md) - Not Started
 - [F0022 — Document 360 + native evidence review panel + parent/classification and reviewer authority](features/F0022-document-360-and-native-evidence-review/README.md) - Planned
 - [F0023 — Minimal Entity 360](features/F0023-minimal-entity-360/README.md) - Planned
 - [F0065 — Grounded GL guideline assessment](features/F0065-grounded-gl-guideline-assessment/README.md) - Planned (Phase A and B approved 2026-10-29, plan run `2026-10-28-5f9c6d6f`; plan-review `2026-10-30-ff4c758d` H1–H3 need targeted rework before implementation)
@@ -621,6 +632,43 @@ Feature run `2026-11-24-08701e37` implemented the design, with operator G4 appro
 ### 4.19 F0012 foundation ontology (Phase B approved 2026-11-25; implemented and archived 2026-11-26)
 
 Plan run `2026-11-25-120320e9`; Phase A approved by operator token `approve-phase-a` (seven stories, 46 ACs; G1 decisions D1–D8). The [assembly plan](features/archive/F0012-foundation-ontology/feature-assembly-plan.md) and proposed [ADR-0081](architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md) define: YAML modules under `ontology/` validated by `ontology-module-authoring/v1` (`parents:` only; inference `subClassOf`/`subPropertyOf`/`inverseOf`; validation-only domain/range/disjoint/cardinality with execution context; other constructs refused); `urn:nebula:ont:` IRIs with reuse/collision refusal and change records; a deterministic compiler producing content-addressed releases (`ontrel:sha256-…`) with exact locks, projection mapping and RDF/JSON-LD export; migration 0017 with eight append-only, tenant/KB-owned release tables; a release-backed predicate registry (`fnd` namespace, 15 foundation predicates) and ETERNAL/EVENT activation over the ADR-0078 D10 shapes without DDL; an impact report and reviewed, audited activation/rollback under a new `ontology_release` resource and `OntologySteward` role. The foundation module carries the section 22 classes and the ADR-0070 party/account/ownership/role vocabulary; Policy/Submission/Program stay with F0013. Canonical-admission constraints are declared for F0017/F0018. No HTTP route, screen, parse or model call. ADR-0045/0070/0081 remain Proposed. The operator approved Phase B with `approve-phase-b` on 2026-11-25. As built (feature run `2026-11-26-54387a08`, archived 2026-11-26; no plan-review ran, and the operator chose G0 reconciliation): foundation@1 is committed under `ontology/releases/foundation/1` (`ontrel:sha256-3602b71f…`). The `ontology_release` authorization resource is the KB's ontology scope with a required trusted `resource_access` row, and migration 0017 widens `ck_resource_access_type`. `fact-version-read-v1` `valid_start` is nullable for ETERNAL versions. RDF exports domain/range as `nebula:validationDomain`/`validationRange`. Reports require the steward's `review` grant.
+
+### 4.20 F0021 native React shell and BFF session (Phase B approved 2026-11-27)
+
+Plan run `2026-11-27-6cda122a`. Phase A was approved on 2026-11-27 with nine stories and 55 ACs. G1 decisions:
+
+- D1: 30-minute idle and 8-hour absolute session limits;
+- D2: the shell includes the rehosted Review Panel;
+- D3: re-authentication in a popup, with explicit re-confirmation of blocked actions;
+- D4: 20 rejected credentials per client per 60 seconds, then 429.
+
+The [assembly plan](features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md) and proposed [ADR-0082](architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md) fix the runtime choices that ADR-0051 leaves to F0021:
+
+- **BFF placement and origin:** the BFF runs inside the engine API process. One public origin serves the shell at `/` and the engine under a stripped `/api` mount; contract paths stay at the root.
+- **Identity client:** the authentik `brain` client becomes confidential, keeping the same issuer, audience and principals.
+- **Session store:** migration 0018 adds:
+  - `browser_login_attempt`;
+  - `browser_session`, with AES-256-GCM token ciphertext under a key ring;
+  - append-only `session_event`;
+  - `credential_rejection_window`;
+  - nullable tenant and knowledge-base display names.
+- **Cookies:** `__Host-nebula_session` and `__Host-nebula_login` are 256-bit, `Secure`, `HttpOnly`, `SameSite=Lax`.
+- **CSRF:** a synchronizer token from `GET /session`, plus `Origin`, `Referer` and `Sec-Fetch-Site` checks. Sending both a cookie and a bearer token is refused.
+- **Renewal:** one upstream refresh per burst, coalesced by a PostgreSQL row lock (60-second margin, one bounded retry).
+- **Logout:** RFC 7009 revocation with a truthful outcome, and an end-session URL without `id_token_hint`.
+- **Re-authentication and other tabs:** the popup signals completion over BroadcastChannel and `postMessage`. Tabs learn about sign-out through BroadcastChannel and a 30-second background session poll.
+- **Throttle:** an atomic per-client window counter in PostgreSQL, bounded at 21 events per window.
+- **Session endpoint:** `browser-session-v1` carries memberships, an opaque `grant_revision`, the active knowledge base and server-side flags. The active knowledge base never authorizes anything.
+- **Return routes:** a server-side allowlist.
+- **Shell:** the section 2.1 stack. It has a route, flag and lazy-loading registry with a 180 kB gzip entry-chunk budget, one API client, and hygiene triggers.
+- **Real-browser proof:** Playwright with a test-only IdP recorder that counts refresh grants and injects revocation failures.
+
+The operator approved Phase B with `approve-phase-b` on 2026-11-27, confirming reconciliations R1 and R2 (wording fixes to two Phase A ACs, made by the PM at feature G0):
+
+- R1: engine denials stay the non-disclosing 404;
+- R2: verification stays local while a client is throttled.
+
+ADR-0051 and ADR-0082 remain Proposed until S0009 passes.
 
 ---
 

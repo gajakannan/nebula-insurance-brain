@@ -1,6 +1,6 @@
 # F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
 
-**Status:** Planned
+**Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`); next: plan-review
 **Phase:** v0.1B
 **Roadmap:** Now (2026-11-20 roadmap review; pulled forward from Later on 2026-11-10)
 
@@ -19,14 +19,31 @@ The 2026-11-08 review of the master blueprint against the feature portfolio assi
 
 ## Documents
 
-The PRD, STATUS, GETTING-STARTED, and story files are authored by the `plan` action (Phase A and Phase B). Until then this folder is a reserved identifier; the feature shard is `planning-mds/kg-source/features/F0021.yaml`.
+- [PRD](PRD.md) — scope, operator decisions D1–D4, PM assumptions A1–A8, screens
+- [Personas](personas.md)
+- [Acceptance criteria checklist](acceptance-criteria-checklist.md) — 55 ACs
+- [STATUS](STATUS.md)
+- [Feature assembly plan](feature-assembly-plan.md) — build order, reconciliation R1–R7, AC-to-proof map
+- [GETTING-STARTED](GETTING-STARTED.md)
+- [BFF API design](bff-api-design.yaml), [migration design](migration-design.sql), [contract inventory](contract-inventory.yaml)
+- Governing design: proposed [ADR-0082](../../architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md), refining [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md)
+- The feature shard is `planning-mds/kg-source/features/F0021.yaml`.
 
 ## Stories
 
 | ID | Title | Status |
 |----|-------|--------|
+| [F0021-S0001](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) | Sign in through the BFF with an opaque session | Not Started |
+| [F0021-S0002](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks | Not Started |
+| [F0021-S0003](F0021-S0003-renew-once-and-bound-session-lifetime.md) | Renew once and bound session lifetime | Not Started |
+| [F0021-S0004](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) | Re-authenticate without losing work or replaying mutations | Not Started |
+| [F0021-S0005](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) | Log out with upstream revocation and cache hygiene | Not Started |
+| [F0021-S0006](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) | Show identity and knowledge-base context in the shell | Not Started |
+| [F0021-S0007](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) | Provide the route seam and rehost the review panel | Not Started |
+| [F0021-S0008](F0021-S0008-throttle-rejected-credentials.md) | Throttle rejected credentials | Not Started |
+| [F0021-S0009](F0021-S0009-prove-session-transport-and-mutation-continuity.md) | Prove session transport and mutation continuity | Not Started |
 
-**Total Stories:** 0
+**Total Stories:** 9
 
 ## F0002 closeout carry-in (2026-09-28)
 

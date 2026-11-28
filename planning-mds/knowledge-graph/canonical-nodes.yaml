@@ -449,6 +449,21 @@ adrs:
       - capability:foundation-ontology-release
       - capability:ontology-release-compatibility
       - capability:release-backed-predicate-registry
+  - id: adr:0082
+    label: BFF Session Runtime and Shell Foundation
+    path: planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md
+    notes: 'Proposed F0021 design (plan run 2026-11-27-6cda122a): BFF inside the engine API behind one
+      public origin, confidential brain client, PostgreSQL session store with encrypted tokens, __Host-
+      cookies, synchronizer CSRF plus origin checks, row-lock coalesced renewal, RFC 7009 logout, popup
+      re-auth over BroadcastChannel, PostgreSQL rejected-credential throttle, session endpoint and shell
+      stack. Refines ADR-0051; Phase B approved 2026-11-27 (approve-phase-b); acceptance with F0021-S0009.'
+    related_nodes:
+      - adr:0049
+      - adr:0051
+      - adr:0072
+      - capability:browser-session-bff
+      - capability:credential-rejection-throttle
+      - capability:shell-route-seam
 api_contracts:
   - id: api:brain-api
     label: Nebula Insurance Brain API
@@ -560,6 +575,37 @@ capabilities:
     source_docs:
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/PRD.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: capability:browser-session-bff
+    label: Same-origin BFF browser session
+    notes: Proposed in F0021 Phase B (ADR-0082, refining ADR-0051). The engine API signs users in with
+      authorization code + PKCE against the confidential authentik brain client, holds tokens server-side
+      (encrypted), issues an opaque __Host-nebula_session cookie, enforces CSRF and origin checks on unsafe
+      cookie requests, renews once per burst under a row lock, enforces 30-minute idle and 8-hour absolute
+      limits, revokes upstream on logout with a truthful outcome, and serves the session endpoint with
+      memberships, grant revision, active knowledge base and flags. The bearer path is unchanged.
+    rationale:
+      - adr: adr:0082
+        section: Decision
+        summary: Opaque cookie, server-held tokens, CSRF, coalesced renewal and truthful upstream revocation
+          in the engine process.
+    related_nodes:
+      - adr:0049
+      - adr:0051
+      - adr:0082
+      - capability:credential-verification-and-principal-resolution
+      - entity:browser-session
+      - entity:principal
+      - entity:session-event
+      - schema:active-knowledge-base-update-v1
+      - schema:browser-session-v1
+      - schema:logout-result-v1
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md
+      - planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql
   - id: capability:budgeted-evidence-context
     label: Budgeted evidence context and answer linkage
     notes: Planning direction only. Exact final-payload tokenizer/model budget, precision-preserving locator
@@ -582,6 +628,25 @@ capabilities:
       - planning-mds/architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md
       - planning-mds/architecture/governed-evidence-retrieval-design.md
       - planning-mds/features/F0036-evidence-aware-retrieval-and-grounded-generation/README.md
+  - id: capability:credential-rejection-throttle
+    label: Rejected-credential throttle
+    notes: 'Proposed in F0021 Phase B (ADR-0082 D9, operator decision D4). Per-client fixed 60-second
+      windows counted by an atomic PostgreSQL upsert: the first 20 rejected credentials are answered and
+      recorded as today, the 21st writes one rate_limited authentication_event, later ones get 429 with
+      Retry-After and no row. Applies to bearer rejections, unknown or ended session cookies and sign-in
+      callback failures; client key from the peer or a configured trusted proxy.'
+    rationale:
+      - adr: adr:0082
+        section: Decision
+        summary: A bounded, multi-worker-safe counter caps audit volume at 21 rows per client per window.
+    related_nodes:
+      - adr:0082
+      - capability:browser-session-bff
+      - capability:credential-verification-and-principal-resolution
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
   - id: capability:credential-verification-and-principal-resolution
     label: Credential verification and principal resolution
     notes: OIDC token verification (issuer, audience, signature, expiry) before any storage read; verified
@@ -1076,6 +1141,27 @@ capabilities:
       - planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/PRD.md
+  - id: capability:shell-route-seam
+    label: Shell route, flag and lazy-load seam
+    notes: Proposed in F0021 Phase B (ADR-0082 D12, ADR-0072 carry-in). One registry of {path, flag key,
+      lazy module}; flags come from server configuration through the session endpoint; flagged-off or
+      unknown routes render not-found without fetching their chunk; each lazy route builds to its own
+      chunk under a 180 kB gzip entry budget. F0022, F0023 and F0067 register routes here and inherit
+      the shell stack.
+    rationale:
+      - adr: adr:0082
+        section: Decision
+        summary: Later screens add routes without touching session code or growing the base bundle.
+    related_nodes:
+      - adr:0072
+      - adr:0082
+      - capability:browser-session-bff
+      - capability:evidence-review-round-trip
+    source_docs:
+      - planning-mds/architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md
+      - planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
   - id: capability:spectral-retrieval-experiments
     label: Conditional spectral graph retrieval experiments
     notes: Future conditional v0.4+ experiment only. Versioned sparse adjacency/eigenpairs, spectral/heat
@@ -1498,6 +1584,22 @@ entities:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0005-proof-bitemporal-commit.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
       - planning-mds/features/archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/feature-assembly-plan.md
+  - id: entity:browser-session
+    label: Browser session
+    notes: 'Proposed F0021 server-side session (migration 0018, ADR-0082 D3): opaque cookie digest, principal,
+      idle and absolute deadlines, encrypted token bundle, CSRF digest, active tenant/knowledge base and
+      end reason. Login attempts (browser_login_attempt) are single-use companions. Never read by authorization.'
+    related_entities:
+      - entity:knowledge-base
+      - entity:principal
+      - entity:tenant
+    related_nodes:
+      - adr:0082
+      - capability:browser-session-bff
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql
   - id: entity:canonical-fact-change
     label: Canonical fact change
     notes: Existing append-only reason/from_version_id/to_version_id/created_at from the shipped temporal
@@ -2039,6 +2141,22 @@ entities:
     source_docs:
       - planning-mds/architecture/master-blueprint.md
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0003-proof-parse-once-reinterpret-evidence.md
+  - id: entity:session-event
+    label: Session event
+    notes: 'Proposed F0021 append-only session lifecycle audit (migration 0018): created, replaced, renewed,
+      renewal failed, idle/absolute/principal endings, logout with revocation and end-session outcomes,
+      and active knowledge-base changes. Rejected credentials stay in authentication_event.'
+    related_entities:
+      - entity:audit-event
+      - entity:browser-session
+      - entity:principal
+    related_nodes:
+      - adr:0082
+      - capability:browser-session-bff
+    source_docs:
+      - planning-mds/architecture/data-model.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql
   - id: entity:tenant
     label: Tenant
     notes: Proposed F0002 design; implementation pending. Structural tenancy root; no fabricated KB owner
@@ -2469,6 +2587,15 @@ roles:
     source_docs:
       - planning-mds/features/archive/F0001-repository-and-engineering-foundation/F0001-S0006-proof-access-boundaries-extension-build-and-restore.md
 schemas:
+  - id: schema:active-knowledge-base-update-v1
+    label: Active knowledge-base update request
+    path: planning-mds/schemas/active-knowledge-base-update-v1.schema.json
+    related_nodes:
+      - adr:0082
+      - capability:browser-session-bff
+    source_docs:
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
   - id: schema:assertion-admission-result-v1
     label: Assertion Admission Result V1
     path: planning-mds/schemas/assertion-admission-result-v1.schema.json
@@ -2506,6 +2633,15 @@ schemas:
       - entity:delegation
       - entity:principal
       - entity:resource-scope
+  - id: schema:browser-session-v1
+    label: Browser session snapshot (GET /session)
+    path: planning-mds/schemas/browser-session-v1.schema.json
+    related_nodes:
+      - adr:0082
+      - capability:browser-session-bff
+    source_docs:
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
   - id: schema:canonical-commit-request
     label: CanonicalCommitRequest
     path: planning-mds/schemas/canonical-commit-request.schema.json
@@ -2686,6 +2822,15 @@ schemas:
     source_docs:
       - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/contract-inventory.yaml
       - planning-mds/features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md
+  - id: schema:logout-result-v1
+    label: Logout result with revocation outcome
+    path: planning-mds/schemas/logout-result-v1.schema.json
+    related_nodes:
+      - adr:0082
+      - capability:browser-session-bff
+    source_docs:
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml
+      - planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
   - id: schema:ontology-impact-report-v1
     label: Ontology release impact report
     path: planning-mds/schemas/ontology-impact-report-v1.schema.json
