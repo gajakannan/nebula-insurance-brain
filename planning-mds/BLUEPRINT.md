@@ -294,7 +294,7 @@ The runtime epic inventory is the master blueprint section 95 roadmap (original 
 - [F0018 — Canonical commit service + action authorization and policy-version audit](features/F0018-canonical-commit-service-and-action-authorization/README.md) - Planned
 - [F0019 — Basic endorsement supersession](features/F0019-basic-endorsement-supersession/README.md) - Planned
 - [F0020 — Minimal graph/temporal query API](features/F0020-minimal-graph-and-temporal-query-api/README.md) - Planned
-- [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned (Phase A and B approved 2026-11-27, plan run `2026-11-27-6cda122a`; nine stories, 55 ACs; ADR-0082 Proposed)
+- [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned (Phase A and B approved 2026-11-27, plan run `2026-11-27-6cda122a`; Phase A and B rework approved 2026-11-28, rework run `2026-11-28-831962b8`; nine stories, 55 ACs; ADR-0082 Proposed)
   - [F0021-S0001](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) - Not Started
   - [F0021-S0002](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) - Not Started
   - [F0021-S0003](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md) - Not Started

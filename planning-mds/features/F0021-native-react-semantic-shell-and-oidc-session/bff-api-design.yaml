@@ -80,14 +80,20 @@ paths:
     post:
       tags: [Session]
       operationId: signOut
-      summary: End the session, revoke upstream, clear the cookie (S0005 AC1–AC4, AC7)
+      summary: End the session, revoke upstream, start the IdP end-session, clear the cookie (S0005 AC1–AC4, AC7)
+      description: >-
+        For a live session all D5 checks apply. For an already-ended session the origin checks apply and
+        X-CSRF-Token is validated when present but not required (ADR-0082 D7); revocation is `not_attempted`
+        and the IdP end-session still starts.
       security:
       - sessionCookie: []
       parameters:
       - $ref: '#/components/parameters/CsrfToken'
       responses:
         '200':
-          description: Session ended and cookie cleared in every case; the body reports the revocation and end-session outcomes truthfully.
+          description: >-
+            Session ended and cookie cleared in every case; the body reports the revocation outcome and the
+            end-session start (`pending` with the URL, or `failed`/`no_endpoint`) truthfully.
           headers:
             Set-Cookie: {schema: {type: string}, description: Expired __Host-nebula_session with the same attributes}
           content:
@@ -97,11 +103,32 @@ paths:
           $ref: '#/components/responses/AmbiguousCredentials'
         '403':
           $ref: '#/components/responses/CsrfRejected'
+  /auth/end-session/return:
+    get:
+      tags: [Session]
+      operationId: completeEndSession
+      summary: post_logout_redirect_uri target; records the IdP end-session outcome once (S0005 AC7, ADR-0082 D7)
+      security: []
+      parameters:
+      - {name: state, in: query, required: false, schema: {type: string, maxLength: 128}}
+      - {name: error, in: query, required: false, schema: {type: string, maxLength: 128}}
+      responses:
+        '302':
+          description: >-
+            Known pending state: within 2 minutes of the logout and no `error` → `completed`; an `error` → `failed`;
+            later than 2 minutes → `unconfirmed`. Records one session_event and redirects to
+            /signed-out?end_session=<outcome>. Unknown, used or missing state → /signed-out with no outcome and
+            nothing recorded. Never sets a cookie.
+          headers:
+            Location: {schema: {type: string}}
   /session:
     get:
       tags: [Session]
       operationId: getSession
       summary: Current session, identity, memberships, CSRF token and flags (S0006 AC1/AC6, S0007 AC4)
+      description: >-
+        csrf_token is the per-session secret decrypted from the session row; it is identical on every read of the
+        same live session (any worker, tab or reload) and changes only with a new session (ADR-0082 D5).
       security:
       - sessionCookie: []
       parameters:
@@ -185,7 +212,7 @@ components:
         application/problem+json:
           schema: {$ref: '#/components/schemas/ProblemDetails'}
     SessionUnauthenticated:
-      description: '`unauthenticated` (no, unknown or ended session; principal mismatch or disabled) or `session_expired` (idle, absolute or failed renewal; recoverable by re-authentication). The internal reason is recorded only in authentication_event.'
+      description: '`session_expired` when the session is past, or was ended by, its idle or absolute deadline or a failed renewal (by whichever request, for as long as the row exists; recoverable by re-authentication). `unauthenticated` for no or unknown session and for sessions ended by logout, replacement or a principal change, mismatch or disablement. The internal reason is recorded only in authentication_event.'
       content:
         application/problem+json:
           schema: {$ref: '#/components/schemas/ProblemDetails'}
@@ -195,9 +222,9 @@ components:
         application/problem+json:
           schema: {$ref: '#/components/schemas/ProblemDetails'}
     RateLimited:
-      description: '`rate_limited`: more than 20 rejected credentials from this client in the current 60-second window.'
+      description: '`rate_limited`: more than BRAIN_THROTTLE_LIMIT (default 20) rejected credentials from this client in the current clock-aligned window (BRAIN_THROTTLE_WINDOW_SECONDS, default 60). After the window''s single rate_limited event, a throttled request writes nothing.'
       headers:
-        Retry-After: {schema: {type: integer, minimum: 1, maximum: 60}}
+        Retry-After: {schema: {type: integer, minimum: 1, maximum: 3600}}
       content:
         application/problem+json:
           schema: {$ref: '#/components/schemas/ProblemDetails'}

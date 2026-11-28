@@ -20,7 +20,7 @@ F0002 closeout carry-in (2026-09-28, medium): every unauthenticated or rejected-
 ## Acceptance Criteria
 
 - [ ] **AC1:** For one client address, the first 20 rejected credentials within a 60-second window are answered and recorded exactly as today (generic `401`, one `authentication_event` each).
-- [ ] **AC2:** From the 21st rejected credential in that window, the client receives `429` with a `Retry-After` header and a stable `rate_limited` problem code; no credential verification runs and no per-request `authentication_event` row is written. Exactly one `rate_limited` event is recorded for that client and window.
+- [ ] **AC2:** From the 21st rejected credential in that window, the client receives `429` with a `Retry-After` header and a stable `rate_limited` problem code; the credential is checked only locally (cached signing keys or session lookup, no call to the identity provider), and no per-request `authentication_event` row is written. Exactly one `rate_limited` event is recorded for that client and window.
 - [ ] **AC3:** A burst of 1,000 rejected credentials from one client within 60 seconds writes at most 21 `authentication_event` rows for that window.
 - [ ] **AC4:** While a client is throttled, a request from it with a valid credential or session is still served normally; the throttle counts only rejected credentials, and requests from other clients are unaffected.
 - [ ] **AC5:** The rule applies equally to bearer-API requests, cookie-authenticated requests with an unknown or ended session, and sign-in callback failures (S0001 AC4). The client address is the immediate peer, or a forwarded address only from a configured trusted proxy (PM assumption A6).
@@ -43,7 +43,7 @@ Not role-dependent; applies before principal resolution.
 
 ## Non-Functional Expectations
 
-Limit and window are configuration values with D4 defaults. The throttle check adds no database write for throttled requests. At least 80% changed executable-code coverage in the later feature run.
+Limit and window are configuration values with D4 defaults (20 and 60 s); windows are aligned to the clock, so the window length must divide one hour. Once a client's `rate_limited` event for a window is written, each further throttled request in that window only reads the counter and adds no database write; concurrent workers may record a small, bounded overshoot of the counter but never an extra event row. At least 80% changed executable-code coverage in the later feature run.
 
 ## Dependencies
 

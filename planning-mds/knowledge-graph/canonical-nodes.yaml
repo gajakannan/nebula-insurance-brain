@@ -581,8 +581,10 @@ capabilities:
       authorization code + PKCE against the confidential authentik brain client, holds tokens server-side
       (encrypted), issues an opaque __Host-nebula_session cookie, enforces CSRF and origin checks on unsafe
       cookie requests, renews once per burst under a row lock, enforces 30-minute idle and 8-hour absolute
-      limits, revokes upstream on logout with a truthful outcome, and serves the session endpoint with
-      memberships, grant revision, active knowledge base and flags. The bearer path is unchanged.
+      limits, revokes upstream on logout with a truthful outcome, records the IdP end-session outcome
+      (completed, failed or unconfirmed) through a BFF return route, maps timeout-ended sessions to session_expired,
+      keeps one encrypted CSRF secret per session, and serves the session endpoint with memberships, grant
+      revision, active knowledge base and flags. The bearer path is unchanged.
     rationale:
       - adr: adr:0082
         section: Decision
@@ -630,11 +632,12 @@ capabilities:
       - planning-mds/features/F0036-evidence-aware-retrieval-and-grounded-generation/README.md
   - id: capability:credential-rejection-throttle
     label: Rejected-credential throttle
-    notes: 'Proposed in F0021 Phase B (ADR-0082 D9, operator decision D4). Per-client fixed 60-second
-      windows counted by an atomic PostgreSQL upsert: the first 20 rejected credentials are answered and
-      recorded as today, the 21st writes one rate_limited authentication_event, later ones get 429 with
-      Retry-After and no row. Applies to bearer rejections, unknown or ended session cookies and sign-in
-      callback failures; client key from the peer or a configured trusted proxy.'
+    notes: 'Proposed in F0021 Phase B (ADR-0082 D9, operator decision D4). Per-client clock-aligned windows
+      (default 20 per 60 s, configurable): each rejection reads the counter first and upserts atomically
+      only at or below the limit; the first 20 rejected credentials are answered and recorded as today,
+      the 21st writes one rate_limited authentication_event, later ones get 429 with Retry-After and write
+      nothing (plan-review rework 2026-11-28). Applies to bearer rejections, unknown or ended session
+      cookies and sign-in callback failures; client key from the peer or a configured trusted proxy.'
     rationale:
       - adr: adr:0082
         section: Decision
@@ -1587,8 +1590,9 @@ entities:
   - id: entity:browser-session
     label: Browser session
     notes: 'Proposed F0021 server-side session (migration 0018, ADR-0082 D3): opaque cookie digest, principal,
-      idle and absolute deadlines, encrypted token bundle, CSRF digest, active tenant/knowledge base and
-      end reason. Login attempts (browser_login_attempt) are single-use companions. Never read by authorization.'
+      idle and absolute deadlines, encrypted token bundle, CSRF digest and encrypted CSRF secret, IdP
+      end-session state and outcome, active tenant/knowledge base and end reason. Login attempts (browser_login_attempt)
+      are single-use companions. Never read by authorization.'
     related_entities:
       - entity:knowledge-base
       - entity:principal
@@ -2144,8 +2148,9 @@ entities:
   - id: entity:session-event
     label: Session event
     notes: 'Proposed F0021 append-only session lifecycle audit (migration 0018): created, replaced, renewed,
-      renewal failed, idle/absolute/principal endings, logout with revocation and end-session outcomes,
-      and active knowledge-base changes. Rejected credentials stay in authentication_event.'
+      renewal failed, idle/absolute/principal endings, logout with revocation outcome and end-session
+      start, end-session completed/failed/unconfirmed, and active knowledge-base changes. Rejected credentials
+      stay in authentication_event.'
     related_entities:
       - entity:audit-event
       - entity:browser-session

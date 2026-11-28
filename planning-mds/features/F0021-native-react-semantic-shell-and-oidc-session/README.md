@@ -1,6 +1,6 @@
 # F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
 
-**Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`); next: plan-review
+**Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`); plan-review CONDITIONALLY READY; Phase A and B rework approved 2026-11-28 (rework run `2026-11-28-831962b8`); next: feature run
 **Phase:** v0.1B
 **Roadmap:** Now (2026-11-20 roadmap review; pulled forward from Later on 2026-11-10)
 

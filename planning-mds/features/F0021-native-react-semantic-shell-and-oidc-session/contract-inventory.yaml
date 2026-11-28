@@ -1,5 +1,5 @@
 feature: F0021
-status: Phase B design (plan run 2026-11-27-6cda122a); source_sha256_at_design recorded at Phase B and re-checked at feature G0
+status: Phase B design (plan run 2026-11-27-6cda122a; rework run 2026-11-28-831962b8); source_sha256_at_design recorded at Phase B and re-checked at feature G0
 existing_bundle: brain-contracts/v1
 runtime_policy: The feature action copies each resource below into scripts/contracts/sources.yaml, merges
   bff-api-design.yaml into planning-mds/api/brain-api.yaml (0.7.0), and regenerates the root snapshot, installed
@@ -10,7 +10,7 @@ resources:
   version: '1'
   id: https://nebula.local/schemas/browser-session-v1.schema.json
   source: planning-mds/schemas/browser-session-v1.schema.json
-  source_sha256_at_design: e0f1c3f3b6f1f5a628477e9d41fe68e81808f5ffdb27e7eb563b91b2c3f13b30
+  source_sha256_at_design: 4e57861f9f33b1567db48f93737285a1feae7861117fbdb0d093d64ed4157171
   owner: session
   disposition: adopt
   consumer_entry_points:
@@ -49,7 +49,7 @@ resources:
   version: '1'
   id: https://nebula.local/schemas/logout-result-v1.schema.json
   source: planning-mds/schemas/logout-result-v1.schema.json
-  source_sha256_at_design: a99139b38c10f0b8a70a42803391b5bdef1be1ef45f469ec33ba1140ec13cdd2
+  source_sha256_at_design: 783660fbd66c3c8bfd29f9ff8b4510117eb455b855b425927f4ddd07a64b88cb
   owner: session
   disposition: adopt
   consumer_entry_points:
@@ -66,11 +66,11 @@ resources:
     state: planned
   version_selector: contract is the constant logout-result/v1.
   wire_profile: portable-json/v1
-  integration_notes: The conditional schema forbids a reason on success and requires one on failed/not_attempted, so a failed revocation cannot be serialized as success.
+  integration_notes: The conditional schema forbids a reason on success and requires one on failed/not_attempted, so a failed revocation cannot be serialized as success. end_session is `pending` (with url) or `failed` (`no_endpoint`); the final end-session outcome is server-side (GET /auth/end-session/return), never in this body.
 openapi_changes:
 - source: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml
   target: planning-mds/api/brain-api.yaml
-  change: Add the Session tag, five BFF paths, the sessionCookie security scheme, the CsrfToken and ActivityHint
+  change: Add the Session tag, six BFF paths, the sessionCookie security scheme, the CsrfToken and ActivityHint
     parameters and the AmbiguousCredentials, SessionUnauthenticated, CsrfRejected and RateLimited responses; add
     sessionCookie as an alternative scheme on /reviews/*, /content/* and /facts/*. Bump info.version to 0.7.0.
   state: planned

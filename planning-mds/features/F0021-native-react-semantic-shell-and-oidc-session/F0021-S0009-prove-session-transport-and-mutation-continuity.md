@@ -27,7 +27,7 @@ ADR-0051's formal acceptance needs master blueprint §121.2 items 8 (session tra
 
 ## Edge Cases & Error Scenarios
 
-The suite runs from a clean volume and is repeatable; a flaky IdP start is a harness failure, not a pass. Results record authentik and browser versions.
+The suite runs from a clean volume and is repeatable; a flaky IdP start is a harness failure, not a pass. Results record the authentik version and, per browser, the browser version and pass/fail; both Chromium and Firefox must pass.
 
 ## Interaction Contract
 
