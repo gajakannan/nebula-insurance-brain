@@ -1,0 +1,206 @@
+# F0021 BFF API design (ADR-0082, Proposed). OpenAPI 3.1 fragment.
+# The feature run merges these paths, the sessionCookie scheme and the responses into
+# planning-mds/api/brain-api.yaml (version 0.7.0) and regenerates the contract snapshot with the
+# F0011 toolchain. It is kept out of brain-api.yaml during planning so the shipped snapshot stays
+# consistent with the running engine.
+#
+# Paths are engine paths. The browser reaches them under BRAIN_PUBLIC_API_PREFIX (/api), which the
+# same-origin front strips. Every response here carries Cache-Control: no-store and Vary: Cookie.
+openapi: 3.1.0
+info:
+  title: Nebula Insurance Brain API — F0021 BFF additions
+  version: 0.7.0-design
+paths:
+  /auth/login:
+    get:
+      tags: [Session]
+      operationId: startSignIn
+      summary: Start an OIDC authorization-code + PKCE sign-in (S0001 AC1, S0004 AC2/AC6)
+      security: []
+      parameters:
+      - name: return_to
+        in: query
+        required: false
+        description: Relative shell route; validated against config/experience-routes.yaml (ADR-0082 D11). Invalid values become /.
+        schema: {type: string, maxLength: 512}
+      - name: mode
+        in: query
+        required: false
+        schema: {type: string, enum: [redirect, popup], default: redirect}
+      - name: reauth
+        in: query
+        required: false
+        description: Popup correlation reference (128 random bits, base64url). Required when mode=popup, refused otherwise.
+        schema: {type: string, pattern: '^[A-Za-z0-9_-]{22}$'}
+      - name: prompt
+        in: query
+        required: false
+        description: Only `login` is accepted; forwarded to the IdP (used after an explicit sign-out, ADR-0082 D7).
+        schema: {type: string, enum: [login]}
+      responses:
+        '302':
+          description: Redirect to the IdP authorization endpoint. Sets __Host-nebula_login (Max-Age=600). No token, verifier or nonce in any cookie or body.
+          headers:
+            Location: {schema: {type: string, format: uri}}
+            Set-Cookie: {schema: {type: string}}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          description: IdP discovery unavailable (`idp_unavailable`); the shell shows "sign-in unavailable".
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/ProblemDetails'}
+  /auth/callback:
+    get:
+      tags: [Session]
+      operationId: completeSignIn
+      summary: OIDC redirect target (S0001 AC2/AC4/AC6/AC7, S0004 AC2/AC7)
+      security: []
+      parameters:
+      - {name: code, in: query, required: false, schema: {type: string, maxLength: 2048}}
+      - {name: state, in: query, required: false, schema: {type: string, maxLength: 128}}
+      - {name: error, in: query, required: false, schema: {type: string, maxLength: 128}}
+      responses:
+        '302':
+          description: >-
+            Redirect mode. Success → sanitized return route with the new __Host-nebula_session cookie and the
+            login cookie cleared. Any failure (state missing/unknown/expired/used, binding or nonce mismatch, IdP
+            error, code-exchange failure, non-human client, disabled principal) → /sign-in-failed with no session,
+            no session cookie, one authentication_event with the internal reason. A throttled client → /too-many-attempts.
+        '200':
+          description: >-
+            Popup mode success: minimal HTML (CSP default-src 'none'; script-src 'nonce-…') that posts
+            {type: "nebula.reauth", ref} on BroadcastChannel("nebula-session") and to window.opener with the exact
+            public origin, then closes. Popup-mode failure renders the failure page and posts nothing.
+          content:
+            text/html: {schema: {type: string}}
+  /auth/logout:
+    post:
+      tags: [Session]
+      operationId: signOut
+      summary: End the session, revoke upstream, clear the cookie (S0005 AC1–AC4, AC7)
+      security:
+      - sessionCookie: []
+      parameters:
+      - $ref: '#/components/parameters/CsrfToken'
+      responses:
+        '200':
+          description: Session ended and cookie cleared in every case; the body reports the revocation and end-session outcomes truthfully.
+          headers:
+            Set-Cookie: {schema: {type: string}, description: Expired __Host-nebula_session with the same attributes}
+          content:
+            application/json:
+              schema: {$ref: 'https://nebula.local/schemas/logout-result-v1.schema.json'}
+        '400':
+          $ref: '#/components/responses/AmbiguousCredentials'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+  /session:
+    get:
+      tags: [Session]
+      operationId: getSession
+      summary: Current session, identity, memberships, CSRF token and flags (S0006 AC1/AC6, S0007 AC4)
+      security:
+      - sessionCookie: []
+      parameters:
+      - $ref: '#/components/parameters/ActivityHint'
+      responses:
+        '200':
+          description: The session snapshot. Never contains an access, refresh or ID token.
+          content:
+            application/json:
+              schema: {$ref: 'https://nebula.local/schemas/browser-session-v1.schema.json'}
+        '400':
+          $ref: '#/components/responses/AmbiguousCredentials'
+        '401':
+          $ref: '#/components/responses/SessionUnauthenticated'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+  /session/active-knowledge-base:
+    put:
+      tags: [Session]
+      operationId: setActiveKnowledgeBase
+      summary: Change the active knowledge base; narrows shell requests only (S0006 AC4/AC5)
+      security:
+      - sessionCookie: []
+      parameters:
+      - $ref: '#/components/parameters/CsrfToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: 'https://nebula.local/schemas/active-knowledge-base-update-v1.schema.json'}
+      responses:
+        '200':
+          description: Updated session snapshot.
+          content:
+            application/json:
+              schema: {$ref: 'https://nebula.local/schemas/browser-session-v1.schema.json'}
+        '400':
+          $ref: '#/components/responses/AmbiguousCredentials'
+        '401':
+          $ref: '#/components/responses/SessionUnauthenticated'
+        '403':
+          $ref: '#/components/responses/CsrfRejected'
+        '422':
+          description: '`knowledge_base_not_available`: the pair is not a current membership; the active value is unchanged.'
+          content:
+            application/problem+json:
+              schema: {$ref: '#/components/schemas/ProblemDetails'}
+# Existing engine paths (/reviews/*, /content/*, /facts/*) gain `sessionCookie` as an alternative to
+# `bearerAuth` (security: [{bearerAuth: []}, {sessionCookie: []}]) and the responses below where they apply:
+# 400 AmbiguousCredentials, 401 SessionUnauthenticated (adds session_expired), 403 CsrfRejected on unsafe
+# methods, 429 RateLimited. Route handlers, bodies and the non-disclosing 404 are unchanged.
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Host-nebula_session
+      description: Opaque 256-bit session identifier set by the BFF (Secure, HttpOnly, SameSite=Lax, Path=/, no Domain). Unsafe methods also require X-CSRF-Token and a same-origin Origin/Referer.
+  parameters:
+    CsrfToken:
+      name: X-CSRF-Token
+      in: header
+      required: true
+      description: The csrf_token from GET /session (browser-session-v1).
+      schema: {type: string, pattern: '^[A-Za-z0-9_-]{43}$'}
+    ActivityHint:
+      name: X-Nebula-Activity
+      in: header
+      required: false
+      description: '`background` marks a status check that must not extend the idle deadline (PM assumption A5).'
+      schema: {type: string, enum: [background]}
+  responses:
+    BadRequest:
+      description: Validation failure
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemDetails'}
+    AmbiguousCredentials:
+      description: '`ambiguous_credentials`: both a session cookie and an Authorization header were sent; nothing ran.'
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemDetails'}
+    SessionUnauthenticated:
+      description: '`unauthenticated` (no, unknown or ended session; principal mismatch or disabled) or `session_expired` (idle, absolute or failed renewal; recoverable by re-authentication). The internal reason is recorded only in authentication_event.'
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemDetails'}
+    CsrfRejected:
+      description: '`csrf_rejected`: cross-site fetch metadata, foreign or missing Origin/Referer, or a missing or mismatched CSRF token. The session is kept; no handler or write ran.'
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemDetails'}
+    RateLimited:
+      description: '`rate_limited`: more than 20 rejected credentials from this client in the current 60-second window.'
+      headers:
+        Retry-After: {schema: {type: integer, minimum: 1, maximum: 60}}
+      content:
+        application/problem+json:
+          schema: {$ref: '#/components/schemas/ProblemDetails'}
+  schemas:
+    ProblemDetails:
+      $ref: ../../api/brain-api.yaml#/components/schemas/ProblemDetails

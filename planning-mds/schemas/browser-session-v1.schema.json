@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/browser-session-v1.schema.json",
+  "title": "Browser session v1",
+  "description": "GET /session response for the same-origin BFF (ADR-0082 D10, F0021-S0006). Carries the CSRF token for state-changing calls; never carries an access, refresh or ID token.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "principal",
+    "session",
+    "csrf_token",
+    "memberships",
+    "grant_revision",
+    "active_knowledge_base",
+    "flags"
+  ],
+  "properties": {
+    "contract": {
+      "const": "browser-session/v1"
+    },
+    "principal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "display_name",
+        "kind",
+        "issuer"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "ID-token name, then preferred_username, else null; never the subject."
+        },
+        "kind": {
+          "enum": [
+            "USER"
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idle_expires_at",
+        "absolute_expires_at",
+        "idle_warning_seconds",
+        "server_time"
+      ],
+      "properties": {
+        "idle_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "absolute_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idle_warning_seconds": {
+          "type": "integer",
+          "const": 120
+        },
+        "server_time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "csrf_token": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "description": "256-bit synchronizer token, base64url without padding; held in page memory only."
+    },
+    "memberships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/membership"
+      }
+    },
+    "grant_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Opaque digest of the principal's current memberships; changes on any grant, revocation or revision change."
+    },
+    "active_knowledge_base": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/kb_ref"
+        }
+      ]
+    },
+    "flags": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]{0,63}$"
+      },
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    }
+  },
+  "$defs": {
+    "kb_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "knowledge_base_id"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "membership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "tenant_name",
+        "knowledge_base_id",
+        "knowledge_base_name",
+        "role"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "tenant_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    }
+  }
+}

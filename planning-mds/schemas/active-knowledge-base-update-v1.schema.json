@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/active-knowledge-base-update-v1.schema.json",
+  "title": "Active knowledge-base update v1",
+  "description": "PUT /session/active-knowledge-base request (ADR-0082 D10, F0021-S0006 AC4). The pair must be a current membership of the session principal; null clears the selection. The value only narrows what the shell requests and never authorizes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "active_knowledge_base"
+  ],
+  "properties": {
+    "contract": {
+      "const": "active-knowledge-base-update/v1"
+    },
+    "active_knowledge_base": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tenant_id",
+            "knowledge_base_id"
+          ],
+          "properties": {
+            "tenant_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "knowledge_base_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

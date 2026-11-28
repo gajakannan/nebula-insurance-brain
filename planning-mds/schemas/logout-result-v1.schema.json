@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/logout-result-v1.schema.json",
+  "title": "Logout result v1",
+  "description": "POST /auth/logout response (ADR-0082 D7, F0021-S0005). Reports the upstream revocation outcome truthfully; a failed revocation is never reported as success. The end-session URL carries client_id, post_logout_redirect_uri and state only (no id_token_hint).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "signed_out",
+    "revocation",
+    "end_session"
+  ],
+  "properties": {
+    "contract": {
+      "const": "logout-result/v1"
+    },
+    "signed_out": {
+      "const": true,
+      "description": "The server session is ended and its tokens discarded in every case."
+    },
+    "revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "not_attempted"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "idp_unreachable",
+            "idp_timeout",
+            "idp_rejected",
+            "no_live_tokens",
+            "session_already_ended"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "enum": [
+                  "idp_unreachable",
+                  "idp_timeout",
+                  "idp_rejected"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "not_attempted"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "enum": [
+                  "no_live_tokens",
+                  "session_already_ended"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "succeeded"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "reason"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "end_session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "url"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "redirect",
+            "unavailable"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "redirect"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unavailable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

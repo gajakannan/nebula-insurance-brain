@@ -3,9 +3,15 @@ name: Native React semantic shell + OIDC/session contract and safe re-auth behav
 path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session
 status: planned
 registry_section: Planned
-coverage_excluded:
-  reason: Planned feature reserved from master blueprint section 95; no PRD, stories, or implementation to bind
-    yet. The plan action removes this exclusion at Phase B.
+affects:
+- capability:browser-session-bff
+- capability:credential-rejection-throttle
+- capability:shell-route-seam
+- capability:credential-verification-and-principal-resolution
+- capability:evidence-review-round-trip
+- entity:browser-session
+- entity:session-event
+- entity:principal
 phase: v0.1B
 roadmap_section: Now
 roadmap_order: 4
@@ -22,9 +28,111 @@ governed_by:
 - adr:0049
 - adr:0051
 - adr:0072
+- adr:0082
 notes:
 - Provide the route, feature-flag and lazy-load seam that F0067 uses; app-wide state, caching and styling choices are made here, not in F0067.
 - Requirement-ownership amendment 2026-11-08 - ADR-0051 decision recorded 2026-11-08 - same-origin BFF
   with an opaque HttpOnly session cookie, server-held tokens and renewal, CSRF and origin checks, and
   upstream revocation on logout. No browser token storage. Formal acceptance needs section 121.2 items
   8 and 9.
+- 'Plan run 2026-11-27-6cda122a G1 operator decisions D1-D4: 30m idle / 8h absolute server-enforced; shell + Home/memberships
+  + narrowing active-KB selector + route/flag/lazy seam + Review Panel rehosted behind the cookie; popup re-auth with
+  explicit re-confirmation; 20 rejected credentials per client per 60 s then 429.'
+- 'Phase A approved 2026-11-27 (nine stories, 55 ACs). Phase B drafted 2026-11-27: ADR-0082 (Proposed) refines ADR-0051;
+  assembly plan, bff-api-design.yaml, migration-design.sql (0018), contract-inventory.yaml and three design schemas.
+  Phase B approved 2026-11-27 with exact operator token approve-phase-b, confirming R1 (denials stay 404) and R2 (local verification while throttled).'
+uses_schema:
+- schema:browser-session-v1
+- schema:active-knowledge-base-update-v1
+- schema:logout-result-v1
+- schema:problem-details
+story_mappings:
+- id: story:F0021-S0001
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md
+  affects:
+  - capability:browser-session-bff
+  - capability:credential-verification-and-principal-resolution
+  - entity:browser-session
+  governed_by:
+  - adr:0082
+  - adr:0051
+  - adr:0049
+- id: story:F0021-S0002
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md
+  affects:
+  - capability:browser-session-bff
+  - capability:credential-verification-and-principal-resolution
+  governed_by:
+  - adr:0082
+  - adr:0051
+  uses_schema:
+  - schema:problem-details
+- id: story:F0021-S0003
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md
+  affects:
+  - capability:browser-session-bff
+  - entity:browser-session
+  - entity:session-event
+  governed_by:
+  - adr:0082
+  - adr:0051
+- id: story:F0021-S0004
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md
+  affects:
+  - capability:browser-session-bff
+  - capability:evidence-review-round-trip
+  governed_by:
+  - adr:0082
+  - adr:0051
+  uses_schema:
+  - schema:browser-session-v1
+- id: story:F0021-S0005
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md
+  affects:
+  - capability:browser-session-bff
+  - entity:session-event
+  governed_by:
+  - adr:0082
+  - adr:0051
+  uses_schema:
+  - schema:logout-result-v1
+- id: story:F0021-S0006
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md
+  affects:
+  - capability:browser-session-bff
+  - entity:principal
+  governed_by:
+  - adr:0082
+  - adr:0051
+  uses_schema:
+  - schema:browser-session-v1
+  - schema:active-knowledge-base-update-v1
+- id: story:F0021-S0007
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md
+  affects:
+  - capability:shell-route-seam
+  - capability:evidence-review-round-trip
+  governed_by:
+  - adr:0082
+  - adr:0072
+  - adr:0036
+  uses_schema:
+  - schema:browser-session-v1
+- id: story:F0021-S0008
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md
+  affects:
+  - capability:credential-rejection-throttle
+  - capability:credential-verification-and-principal-resolution
+  governed_by:
+  - adr:0082
+  - adr:0049
+  uses_schema:
+  - schema:problem-details
+- id: story:F0021-S0009
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md
+  affects:
+  - capability:browser-session-bff
+  - capability:evidence-review-round-trip
+  governed_by:
+  - adr:0082
+  - adr:0051

@@ -1,0 +1,17 @@
+id: capability:shell-route-seam
+label: Shell route, flag and lazy-load seam
+notes: 'Proposed in F0021 Phase B (ADR-0082 D12, ADR-0072 carry-in). One registry of {path, flag key, lazy module}; flags come from server configuration through the session endpoint; flagged-off or unknown routes render not-found without fetching their chunk; each lazy route builds to its own chunk under a 180 kB gzip entry budget. F0022, F0023 and F0067 register routes here and inherit the shell stack.'
+source_docs:
+- F0021/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md
+- F0021/feature-assembly-plan.md
+- planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md
+- planning-mds/architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md
+rationale:
+- adr: adr:0082
+  section: Decision
+  summary: Later screens add routes without touching session code or growing the base bundle.
+related_nodes:
+- adr:0082
+- adr:0072
+- capability:browser-session-bff
+- capability:evidence-review-round-trip
