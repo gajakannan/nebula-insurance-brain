@@ -1,0 +1,219 @@
+
+FILE: planning-mds/features/TRACKER-GOVERNANCE.md
+1: ---
+2: template: tracker-governance
+3: version: 1.1
+4: applies_to: product-manager, architect, code-reviewer, quality-engineer
+5: ---
+6: 
+7: # Tracker Governance Contract
+8: 
+9: This document defines how planning trackers stay current and trustworthy.
+10: 
+11: ## Why This Exists
+12: 
+13: - `REGISTRY.md`, `ROADMAP.md`, `STORY-INDEX.md`, `BLUEPRINT.md`, and per-feature `STATUS.md` are operational controls.
+14: - Feature/story state transitions must update tracker state in the same change set.
+15: 
+16: ## Authoritative Tracker Roles
+17: 
+18: - `{PRODUCT_ROOT}/planning-mds/features/REGISTRY.md`: authoritative feature inventory, status, and folder paths. (In a compiled-projection repo, the feature **tables** are generated fenced regions from the feature shards via `tracker_gen.py`; the surrounding prose stays authored.)
+19: - `{PRODUCT_ROOT}/planning-mds/features/ROADMAP.md`: authoritative sequencing view (`Now / Next / Later / Completed`).
+20: - `{PRODUCT_ROOT}/planning-mds/features/STORY-INDEX.md`: auto-generated story rollup from strict story filenames.
+21: - `{PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/STATUS.md`: authoritative feature execution state and deferred follow-ups.
+22: - `{PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`: baseline strategy snapshot; must not contradict tracker state.
+23: 
+24: ## Ownership
+25: 
+26: - Product Manager: updates tracker docs during planning changes.
+27: - Architect: validates tracker consistency at planning-to-build handoff. Owns the required signoff matrix at planning time — sets which roles are mandatory for each feature's completion.
+28: - Implementers: update feature `STATUS.md` when story state changes.
+29: - Code Reviewer: blocks approval when tracker drift is detected.
+30: - Quality Engineer: validates acceptance criteria coverage and records test signoff evidence.
+31: - Security Reviewer: records security signoff when included in required signoff roles.
+32: 
+33: ## Signoff Governance (Mandatory)
+34: 
+35: - Every feature `STATUS.md` must include:
+36:   - `Required Signoff Roles`
+37:   - `Story Signoff Provenance`
+38: - Minimum required roles for features marked `Done` or moved to archive:
+39:   - `Quality Engineer`
+40:   - `Code Reviewer`
+41: - Architect adds additional required roles based on risk/scope:
+42:   - `Security Reviewer` — for authn/authz, access control, identity/session, secrets, sensitive data boundaries, or policy changes
+43:   - `DevOps` — for runtime/deployability or environment-contract changes
+44:   - `Architect` — when architecture-sensitive exceptions or tradeoffs require explicit acceptance
+45: - Every required role must have story-level provenance entries for every story in scope with:
+46:   - pass verdict (`PASS` or `APPROVED`)
+47:   - reviewer identity
+48:   - review date
+49:   - concrete evidence path(s)
+50: - Product Manager must not close or archive a feature until all required signoffs pass.
+51: 
+52: ## Provenance Boundary Rules (Mandatory)
+53: 
+54: - Signoff provenance is solution execution evidence and must live outside `agents/`.
+55: - `agents/**` may define process/templates/checklists, but is never accepted as completion evidence.
+56: - Provenance `Evidence` should point to project outputs such as:
+57:   - `{PRODUCT_ROOT}/planning-mds/**` (reviews, test plans, security evidence, tracker updates)
+58:   - implementation/test artifacts in `{PRODUCT_ROOT}/engine/**`, `{PRODUCT_ROOT}/experience/**`, `{PRODUCT_ROOT}/neuron/**`, `docs/**`, or CI outputs
+59: 
+60: ## Lifecycle Rules
+61: 
+62: - Feature lifecycle states: `Draft` -> `In Progress` -> `Done` -> `Archived`.
+63: - `Done` means implementation complete and signoff evidence captured in `STATUS.md`.
+64: - `Done` may include a `Deferred Non-Blocking Follow-ups` section in `STATUS.md`; deferments must not change overall completion state.
+65: - Archived features must:
+66:   - live under `{PRODUCT_ROOT}/planning-mds/features/archive/`
+67:   - be listed under `Archived Features` in `REGISTRY.md`
+68:   - appear in `ROADMAP.md` under `Completed`, not `Now/Next/Later`.
+69: 
+70: ## Orphaned Story Rule (Mandatory)
+71: 
+72: Before marking a feature `Done` or moving to `Archived`, the PM must verify that all non-completed stories are either:
+73: 
+74: 1. **Explicitly deferred** in `STATUS.md` `Deferred Non-Blocking Follow-ups` with a tracking link to a new or existing feature, or
+75: 2. **Promoted** to a new feature ID in `REGISTRY.md` if the scope warrants standalone tracking.
+76: 
+77: No story file may be archived in a `Not Started` or `In Progress` state without a rehoming decision recorded in the closeout. This prevents future work from being silently buried in the archive.
+78: 
+79: ## Story File Rules
+80: 
+81: - Story files must follow `F{NNNN}-S{NNNN}-{slug}.md`.
+82: - Non-story documents in feature folders must not start with `F{NNNN}-S{NNNN}`.
+83: - Story IDs in file content must match filename prefix.
+84: 
+85: ## Mandatory Sync Triggers
+86: 
+87: Update trackers immediately when any of the following occurs:
+88: 
+89: 1. A feature is created, renamed, moved, or archived.
+90: 2. A story is added, removed, renamed, or moved.
+91: 3. A feature/story status changes (including done/archive transitions).
+92: 4. Roadmap prioritization or sequencing changes.
+93: 5. Blueprint feature/story status text changes.
+94: 
+95: ## Required Validation Commands
+96: 
+97: Run these before declaring planning or feature execution complete:
+98: 
+99: ```bash
+100: python3 agents/product-manager/scripts/validate-stories.py {PRODUCT_ROOT}/planning-mds/features/F{NNNN}-{slug}/
+101: python3 agents/product-manager/scripts/generate-story-index.py {PRODUCT_ROOT}/planning-mds/features/
+102: python3 agents/product-manager/scripts/validate-trackers.py
+103: ```
+104: 
+105: ## Definition of Fresh Trackers
+106: 
+107: All conditions must pass:
+108: 
+109: - [ ] Every `REGISTRY.md` folder path exists and points to the correct active/archive location.
+110: - [ ] `ROADMAP.md` links resolve and align with current feature state.
+111: - [ ] `STORY-INDEX.md` story count and links match current strict story files.
+112: - [ ] `BLUEPRINT.md` linked feature/story paths resolve and match archive status.
+113: - [ ] No non-story file is parsed as a story.
+114: - [ ] For every feature in `Done` or `Archived`, required signoff roles have story-level passing provenance evidence for each story in `STATUS.md`.
+115: 
+116: ## Feature Evidence Contract
+117: 
+118: Done / Archived governed features must cite canonical feature evidence package files, not broad solution artifacts:
+119: 
+120: - Story signoff `Evidence` paths must resolve under `{PRODUCT_ROOT}/planning-mds/operations/evidence/runs/{RUN_ID}/...`.
+121: - The feature index root must carry an approved `latest-run.json`.
+122: - `validate-trackers.py` calls `validate-feature-evidence.py --stage G6` after tracker validation; final `G8`/`closeout` validation runs by the closeout action after tracker results are logged. This non-circular sequence is mandatory.
+123: - Retired features (`Terminal Status = Abandoned` or `Superseded`) are registry-only and never satisfy completion-evidence requirements.
+124: - Product effective-date baseline: governed completed-terminal features closed or archived on or after `2026-05-19` require canonical feature evidence. Pre-contract archived features are skipped unless an `Evidence Reentry Date` on or after `2026-05-19` is present.
+
+
+FILE: planning-mds/features/ROADMAP.md
+3: **Last Reviewed:** 2026-11-26 (F0012 completed and archived in feature run `2026-11-26-54387a08`, leaving Now = F0021; F0010 heads Next and F0013 can compose on foundation@1. Earlier, 2026-11-25: F0009 completed and archived in feature run `2026-11-24-08701e37`, leaving Now = F0012 and F0021; F0010 heads Next on the temporal/commit path. Earlier, 2026-11-23: F0011 completed and archived in feature run `2026-11-22-885e8734`, leaving Now = F0009, F0012 and F0021; F0012's feature run is unblocked. Earlier, 2026-11-20: PM roadmap review after F0008 closed: Now = F0011, F0009, F0012 and F0021. F0009 and F0021 are dependency-ready. F0012 is planned alongside F0011 and built after it. Next is reordered by dependency readiness: F0010, F0013, F0014, F0017, F0015, F0016. Earlier, 2026-11-19: F0008 re-closed after second remediation run `2026-11-19-8cfcd0ff` (earlier `2026-11-18-bce4909b`); originally completed in `2026-11-17-1a4ae2f0`, leaving Now = F0011. Earlier, 2026-11-14: F0064 retroactive closeout completed and archived in feature run `2026-11-14-3325803a`, leaving Now = F0008 + F0011. Earlier, the 2026-11-10 product-manager roadmap review after F0007 closeout: Now = F0008 + F0011 as parallel temporal and contract/ontology lanes, plus the F0064 retroactive closeout; Next reordered by dependency readiness, with F0021 pulled forward from Later as an independent UI lane; F0065 rationale records approved planning and its open plan-review H1–H3. Earlier the same day F0007 was rearchived after operator-approved remediation in `2026-11-09-81798e61`; on 2026-11-06 governed retrieval carry-ins landed for F0033–F0036/F0067.)
+30: | [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](./F0021-native-react-semantic-shell-and-oidc-session/README.md) | Planned | Now (2026-11-20 roadmap review): takes the Now slot freed by F0008, as the 2026-11-10 review promised; its only dependency, F0002, is done and the ADR-0051 session-transport decision is recorded. An independent UI lane, de-risking F0022 (native review round trip, a section 115.4 pre-build proof) and F0023. The native React semantic shell with the OIDC session contract and safe re-auth behavior is the first user-facing surface (section 3, 120.5). | F0002 complete; plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner and date); feature run closes G0–G8 with the OIDC session contract and safe re-auth behavior proven. |
+
+
+FILE: planning-mds/features/REGISTRY.md
+42: | F0021 | Native React semantic shell + OIDC/session contract and safe re-auth behavior | Planned | v0.1B | `F0021-native-react-semantic-shell-and-oidc-session/` |
+
+
+FILE: planning-mds/features/STORY-INDEX.md
+149: ## F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+153: | [F0021-S0001](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) | Sign in through the BFF with an opaque session | Critical | MVP — v0.1B | business reviewer (Rosa) |
+154: | [F0021-S0002](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks | Critical | MVP — v0.1B | security administrator (Noor) |
+155: | [F0021-S0003](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md) | Renew once and bound session lifetime | Critical | MVP — v0.1B | business reviewer (Rosa) |
+156: | [F0021-S0004](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) | Re-authenticate without losing work or replaying mutations | Critical | MVP — v0.1B | business reviewer (Rosa) |
+157: | [F0021-S0005](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) | Log out with upstream revocation and cache hygiene | Critical | MVP — v0.1B | security administrator (Noor) |
+158: | [F0021-S0006](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) | Show identity and knowledge-base context in the shell | High | MVP — v0.1B | GL underwriter (Priya) |
+159: | [F0021-S0007](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) | Provide the route seam and rehost the review panel | High | MVP — v0.1B | platform engineer (Dana) |
+160: | [F0021-S0008](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md) | Throttle rejected credentials | High | MVP — v0.1B | security administrator (Noor) |
+161: | [F0021-S0009](./F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md) | Prove session transport and mutation continuity | Critical | MVP — v0.1B | security administrator (Noor) |
+
+
+FILE: planning-mds/BLUEPRINT.md
+125: - AuthN: authentik OIDC. AuthZ: native Casbin adapter behind an AuthorizationService with typed resource scopes. Session transport: same-origin BFF with an opaque HttpOnly session cookie and server-held tokens (ADR-0051 decision recorded 2026-11-08; runtime choices in ADR-0082, both Proposed until F0021-S0009 proves master blueprint section 121.2 items 8 and 9)
+129: - Testing: pytest for `engine/` and `neuron/` (unit, integration, evaluation against the Golden Corpus). Frontend testing confirmed at F0021 Phase B (ADR-0082 D12): Vitest with Testing Library, and Playwright with `@axe-core/playwright` for end-to-end, real-browser and accessibility proof. The F0021 shell also confirms React Router 7, TanStack Query 5, Zustand 5 (memory only), Tailwind CSS 4 with shadcn/ui, and react-i18next. Cross-cutting scans per the framework evidence contract (dependency, secrets, SAST, DAST)
+197: End-user personas established by F0065 Phase A (2026-09-07), ahead of F0021 to F0023, because F0065 was
+204: first user-facing features, F0021 to F0023.
+206: F0021 Phase A (2026-11-27) adds Noor the Security Administrator — `examples/personas/security-administrator.md` — and reuses Rosa, Priya and Dana.
+210: The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065–F0068), sequenced per sections 115.3, 124 and 127. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. F0066 adds open-statement extraction and signature alignment in v0.2B under ADR-0063, accepted as direction on 2026-09-25. F0067 adds the read-only Graph Observatory in v0.2B under proposed ADR-0071 and ADR-0072 (2026-10-13); its trace contract is carried into F0016, F0021, F0034, F0036 to F0038, F0040 to F0042, F0045 and F0058 first. F0068 reserves conditional spectral/heat retrieval experiments at v0.4+ after the measured F0035/F0036 baseline (2026-11-06); it adds no baseline dependency or runtime activation. Story links are appended by the plan action as each feature is planned.
+297: - [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned (Phase A and B approved 2026-11-27, plan run `2026-11-27-6cda122a`; nine stories, 55 ACs; ADR-0082 Proposed)
+298:   - [F0021-S0001](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) - Not Started
+299:   - [F0021-S0002](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) - Not Started
+300:   - [F0021-S0003](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md) - Not Started
+301:   - [F0021-S0004](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) - Not Started
+302:   - [F0021-S0005](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) - Not Started
+303:   - [F0021-S0006](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) - Not Started
+304:   - [F0021-S0007](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) - Not Started
+305:   - [F0021-S0008](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md) - Not Started
+306:   - [F0021-S0009](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md) - Not Started
+636: ### 4.20 F0021 native React shell and BFF session (Phase B approved 2026-11-27)
+645: The [assembly plan](features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md) and proposed [ADR-0082](architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md) fix the runtime choices that ADR-0051 leaves to F0021:
+699:    - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.
+
+
+FILE: planning-mds/examples/personas/security-administrator.md
+1: # Persona: Noor the Security Administrator
+2: 
+3: **Role/Title:** Identity and access administrator for the Nebula Insurance Brain deployment
+4: **Archetype:** Internal platform user — operates the identity provider, sessions, principals and grants (master blueprint §1.2, §65, §66)
+5: **Priority:** Secondary (F0021); primary for F0026 AuthX hardening
+6: 
+7: ## Demographics & Background
+8: 
+9: **Experience Level:** 8+ years running enterprise SSO and access reviews; reads audit trails daily
+10: **Technical Proficiency:** High for identity tooling and logs; not a frontend developer
+11: **Daily Responsibilities:**
+12: - Provision and disable users and service clients at the identity provider
+13: - Revoke grants and confirm the revocation took effect
+14: - Investigate failed sign-ins, credential stuffing and unusual session activity
+15: 
+16: ## Goals & Motivations
+17: 
+18: ### Primary Goals
+19: 1. Know that no browser holds a reusable token: a stolen laptop or a script injected into the page cannot lift a refresh token (ADR-0051 D5)
+20: 2. Know that "signed out" means the upstream session and refresh token are revoked, and be told when that failed (ADR-0051 D4)
+21: 3. Keep audit storage bounded when an attacker floods bad credentials (F0002 carry-in)
+22: 
+23: ### Success Metrics
+24: - Zero tokens found in browser storage during review; every logout has a recorded upstream outcome; rejected-credential rows stay within the configured bound per client per window
+25: 
+26: ## Pain Points & Frustrations
+27: 
+28: 1. **Logout that only clears a cookie** — Impact: a refresh token keeps working upstream; Frequency: every logout; Severity: Critical
+29: 2. **Audit tables flooded by bad-credential bursts** — Impact: storage growth and noisy investigations; Frequency: during attacks; Severity: High
+30: 3. **UI-only session timeouts** — Impact: a modal is dismissed and the server session lives on; Frequency: daily; Severity: High
+31: 
+32: ## Jobs-to-be-Done
+33: 
+34: 1. **When** I disable a user or revoke a grant, **I want to** see the next request refused, **so I can** close an incident with evidence.
+35: 2. **When** a logout cannot reach the identity provider, **I want to** find a recorded failure, **so I can** revoke the session manually.
+36: 3. **When** one address floods bad credentials, **I want to** see it throttled with one summary event per window, **so I can** investigate without wading through thousands of rows.
+37: 
+38: ## Constraints & Considerations
+39: 
+40: - Authorization: administers the identity provider and policy releases; holds no special data-read authority inside Nebula through the shell.
+41: - Does not use the shell for administration in v0.1; evidence comes from audit rows and logs.
+42: 
+43: ## Related Features
+44: 
+45: F0021 (session, logout, throttling), F0026 (retention, production ingress, AuthX negative tests).
+

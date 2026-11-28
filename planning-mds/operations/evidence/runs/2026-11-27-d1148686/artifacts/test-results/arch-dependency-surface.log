@@ -1,0 +1,142 @@
+   130	    return ReleasePredicateRegistry(_predicate_registry, OntologyReleaseStore(session))
+   131	
+   132	
+   133	def get_authentication_event_sink(
+   134	    session_factory: async_sessionmaker[AsyncSession] = Depends(get_session_factory),
+   135	) -> AuthenticationEventSink:
+   136	    return SqlAlchemyAuthenticationEventSink(session_factory)
+   137	
+   138	
+   139	async def _reject(
+   140	    request: Request, sink: AuthenticationEventSink, reason_code: str
+   141	) -> UnauthenticatedError:
+   142	    """Durably record the rejected credential (no principal or resource lookup), then
+   143	    return the generic 401. If the event cannot be persisted, the caller gets a
+   144	    sanitized 503 instead and no protected operation runs."""
+   145	    trace_id = new_trace_id()
+   146	    _record_credential_failure(request, reason_code, trace_id)
+   147	    try:
+   148	        await sink.record(
+   149	            AuthenticationEvent(
+   150	                event_id=uuid4(),
+   151	                occurred_at=datetime.now(UTC),
+   152	                reason_code=AuthenticationReason(reason_code),
+   153	                route_template=_route_template(request),
+   154	                trace_id=trace_id,
+   155	            )
+   156	        )
+   157	    except Exception as exc:  # noqa: BLE001 - any sink failure is an availability failure
+   158	        logger.error("authentication_event_unavailable", extra={"reason_code": reason_code})
+   159	        raise ServiceUnavailableError() from exc
+   160	    return UnauthenticatedError(reason_code)
+   161	
+   162	
+   163	async def current_principal(
+   164	    request: Request,
+   165	    authorization: str | None = Header(default=None),
+   166	    session: AsyncSession = Depends(get_db_session),
+   167	    credential_verifier: CredentialVerifier = Depends(get_credential_verifier),
+   168	    identity_profile: IdentityProfile = Depends(get_identity_profile),
+   169	    authentication_sink: AuthenticationEventSink = Depends(get_authentication_event_sink),
+   170	) -> Principal:
+   171	    """Verify before any storage read, then resolve the stable principal and commit
+   172	    the identity mapping before any protected operation (F0002-S0002)."""
+   173	    if not authorization or not authorization.startswith("Bearer "):
+   174	        raise await _reject(request, authentication_sink, "malformed")
+   175	    token = authorization.removeprefix("Bearer ")
+   176	    try:
+   177	        credential = await credential_verifier.verify(token)
+   178	    except CredentialError as exc:
+   179	        raise await _reject(request, authentication_sink, exc.code) from exc
+   180	    resolver = PrincipalResolver(SqlAlchemyIdentityRepository(session), identity_profile)
+   181	    try:
+   182	        principal = await resolver.resolve(credential)
+   183	        await session.commit()
+   184	    except CredentialError as exc:
+   185	        await session.rollback()
+   186	        raise await _reject(request, authentication_sink, exc.code) from exc
+   187	    except SQLAlchemyError as exc:
+   188	        await session.rollback()
+   189	        raise ServiceUnavailableError() from exc
+   190	    return principal
+   191	
+   192	
+   193	async def get_authorization_execution(
+   194	    session: AsyncSession = Depends(get_db_session),
+   195	    casbin_adapter: CasbinAuthorizationAdapter = Depends(get_casbin_adapter),
+   196	) -> AuthorizationExecution:
+   197	    """Composes the shared evaluator, current-state store, clock and policy release
+   198	    over the request's unit of work. No caller-assembled membership snapshot."""
+   199	    return AuthorizationExecution(
+   200	        SqlAlchemyAuthorityStore(session), casbin_adapter, casbin_adapter.release
+13:   UPDATE and DELETE. (TRUNCATE is a DBA operation outside this guard.)
+79:        CREATE FUNCTION brain_forbid_owner_change() RETURNS trigger
+101:        CREATE FUNCTION brain_append_only() RETURNS trigger
+114:            f"FOR EACH ROW EXECUTE FUNCTION brain_forbid_owner_change({arguments})"
+118:            f"CREATE TRIGGER trg_{table}_append_only BEFORE UPDATE OR DELETE ON {table} "
+119:            "FOR EACH ROW EXECUTE FUNCTION brain_append_only()"
+131:        op.execute(f"DROP TRIGGER trg_{table}_append_only ON {table}")
+134:    op.execute("DROP FUNCTION brain_append_only()")
+135:    op.execute("DROP FUNCTION brain_forbid_owner_change()")
+planning-mds/security/authorization-review.md:3:Status: Baseline (F0002 bounded scope implemented; F0018, F0021, F0022 and F0026 extend it)
+planning-mds/security/authorization-review.md:9:This review seeds the Brain's authorization model from the master blueprint (sections 65, 66, 110, and 118 to 122). F0002 delivered the Casbin model and policy files under `policies/`, the verified principal and scope kernel, and its AuthX cases (EX-AUTHX-001–018). The remaining section 121.2 carryover cases are owned by F0018, F0021, F0022 and F0026; this review is updated as each lands.
+     1	# F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     2	
+     3	**Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`); next: plan-review
+     4	**Phase:** v0.1B
+     5	**Roadmap:** Now (2026-11-20 roadmap review; pulled forward from Later on 2026-11-10)
+     6	
+     7	## Overview
+     8	
+     9	The native React semantic shell with the OIDC session contract and safe re-auth behavior is the first user-facing surface (section 3, 120.5).
+    10	
+    11	Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0036](../../architecture/decisions/ADR-0036-nebula-keeps-a-native-semantic-ux-onyx-is-a-reference-implementation.md), [ADR-0049](../../architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md), [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md).
+    12	
+    13	## Requirement-ownership amendment (2026-11-08)
+    14	
+    15	The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+    16	
+    17	- **Dependencies:** F0002 (previously F0001).
+    18	- ADR-0051 decision recorded 2026-11-08 - same-origin BFF with an opaque HttpOnly session cookie, server-held tokens and renewal, CSRF and origin checks, and upstream revocation on logout. No browser token storage. Formal acceptance needs section 121.2 items 8 and 9.
+    19	
+    20	## Documents
+    21	
+    22	- [PRD](PRD.md) — scope, operator decisions D1–D4, PM assumptions A1–A8, screens
+    23	- [Personas](personas.md)
+    24	- [Acceptance criteria checklist](acceptance-criteria-checklist.md) — 55 ACs
+    25	- [STATUS](STATUS.md)
+    26	- [Feature assembly plan](feature-assembly-plan.md) — build order, reconciliation R1–R7, AC-to-proof map
+    27	- [GETTING-STARTED](GETTING-STARTED.md)
+    28	- [BFF API design](bff-api-design.yaml), [migration design](migration-design.sql), [contract inventory](contract-inventory.yaml)
+    29	- Governing design: proposed [ADR-0082](../../architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md), refining [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md)
+    30	- The feature shard is `planning-mds/kg-source/features/F0021.yaml`.
+    31	
+    32	## Stories
+    33	
+    34	| ID | Title | Status |
+    35	|----|-------|--------|
+    36	| [F0021-S0001](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) | Sign in through the BFF with an opaque session | Not Started |
+    37	| [F0021-S0002](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks | Not Started |
+    38	| [F0021-S0003](F0021-S0003-renew-once-and-bound-session-lifetime.md) | Renew once and bound session lifetime | Not Started |
+    39	| [F0021-S0004](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) | Re-authenticate without losing work or replaying mutations | Not Started |
+    40	| [F0021-S0005](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) | Log out with upstream revocation and cache hygiene | Not Started |
+    41	| [F0021-S0006](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) | Show identity and knowledge-base context in the shell | Not Started |
+    42	| [F0021-S0007](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) | Provide the route seam and rehost the review panel | Not Started |
+    43	| [F0021-S0008](F0021-S0008-throttle-rejected-credentials.md) | Throttle rejected credentials | Not Started |
+    44	| [F0021-S0009](F0021-S0009-prove-session-transport-and-mutation-continuity.md) | Prove session transport and mutation continuity | Not Started |
+    45	
+    46	**Total Stories:** 9
+    47	
+    48	## F0002 closeout carry-in (2026-09-28)
+    49	
+    50	F0002 (tenancy-aware AuthX kernel) closed with one recommendation assigned to this feature. It is recorded in the [F0002 security review](../../operations/evidence/runs/2026-09-27-bb7c8d1d/security-review-report.md) and accepted as deferred in the [F0002 PM closeout](../../operations/evidence/runs/2026-09-27-bb7c8d1d/pm-closeout.md). Carry it into this feature's PRD and stories when the feature is planned. The feature status is unchanged.
+    51	
+    52	- **[medium] Rate-limit rejected credentials at the BFF/edge.** Since F0002, every unauthenticated or rejected-credential request writes one durable `authentication_event` row (null principal, route template, reason, no token). Without edge rate limiting, this lets an attacker amplify storage. The session/BFF boundary this feature introduces must throttle rejected-credential traffic before it reaches the engine. Acceptance evidence is a negative test showing that a burst of bad credentials produces bounded `authentication_event` growth. Retention of those rows belongs to F0026.
+    53	
+    54	## Graph Observatory carry-in (2026-10-13)
+    55	
+    56	[ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Design: [design note section 10](../../architecture/graph-observatory-design.md#10-delivery-approach-carry-the-contract-in-now-land-the-observatory-in-v02b). The scoped Observatory is [F0067](../F0067-graph-observatory/README.md).
+    57	
+    58	- Provide a route-level feature flag and lazy-loading seam, so a heavy view such as F0067 can load on demand without growing the base bundle.
+    59	- State management, server-state caching and styling are app-wide choices made here; F0067 inherits them and adds only rendering dependencies.
+    60	- **No new v0.1 scope** beyond the seam: no Observatory dependency enters v0.1.

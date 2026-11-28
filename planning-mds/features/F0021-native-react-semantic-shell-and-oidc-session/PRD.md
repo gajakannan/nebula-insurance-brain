@@ -2,7 +2,7 @@
 
 **Feature ID:** F0021
 **Phase:** MVP — v0.1B
-**Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`)
+**Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`); Phase A and B rework approved 2026-11-28 (rework run `2026-11-28-831962b8`)
 **Owner:** Product Manager (Phase A); Architect (Phase B)
 **Governing ADRs:** [ADR-0036](../../architecture/decisions/ADR-0036-nebula-keeps-a-native-semantic-ux-onyx-is-a-reference-implementation.md) (Accepted), [ADR-0049](../../architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md) (Accepted for the F0001-S0006 boundary), [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md) (Proposed; decision recorded 2026-11-08; this feature is its proving feature), [ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) (Proposed; carry-in seam only)
 
@@ -72,10 +72,12 @@ Nine stories, 55 acceptance criteria; the per-AC proof map is in [acceptance-cri
 | Shell frame + Home | Show who is signed in, the session state, current memberships and the active knowledge base | Switch active knowledge base; sign out; open a mounted route |
 | Session-expired dialog | Re-authenticate without leaving the page; list any blocked action as not submitted | Sign in again (popup); discard and sign out |
 | Blocked-action re-confirmation | Ask the user to confirm a mutation that was blocked by session expiry | Re-submit (re-checked); cancel |
-| Signed-out page | Confirm sign-out and state whether upstream revocation succeeded | Sign in again |
+| Signed-out page | Confirm sign-out and state whether upstream revocation and the IdP end-session succeeded | Sign in again |
 | Access denied / not found | Explain a denied or unavailable resource without disclosing that it exists | Return home |
 | Review Panel (rehosted) | The existing F0001-S0004 proof panel at a session-backed route | Existing panel actions only |
 | Too many attempts | Explain throttling after repeated rejected credentials | Wait and retry |
+| Route load error | Explain that a lazily loaded route failed to load, without signing the user out | Reload; return home |
+| Sign-in unavailable | Explain that the identity provider can't be reached | Try again |
 
 ## Screen Layouts (ASCII)
 
@@ -155,12 +157,68 @@ Nine stories, 55 acceptance criteria; the per-AC proof map is in [acceptance-cri
 ```
 +------------------------------------------+
 |  You are signed out of Nebula.           |
+|  Signed out at the identity provider.    |   <- end-session confirmed (S0005 AC7)
+|  (!) We could not revoke your sign-in    |
+|      at the identity provider. Close the |
+|      browser or contact your admin.      |   <- only when revocation failed (AC3)
 |  (!) We could not confirm sign-out at    |
 |      the identity provider. Close the    |
-|      browser or contact your admin.      |   <- only when revocation failed
+|      browser before someone else uses it.|   <- end-session failed or unconfirmed (AC7)
 |              [ Sign in again ]           |
 +------------------------------------------+
 ```
+
+Only the lines that apply are shown; the two warnings can appear together. A logout of an already-expired session shows "Your session had already ended" in place of the confirmation line.
+
+**Status and error pages (one shared content block)**
+
+Sign-in failed, Too many attempts and Sign-in unavailable have no session, so they use one centered status layout outside the shell frame. Not found / access denied and Route load error render inside the shell frame (header, navigation and session status stay usable, S0007 AC2), using the same content block in the main area. None of these pages shows an internal reason, a resource name or whether a resource exists.
+
+Desktop (≥ 1024 px), outside the shell frame (inside it, the block sits in the main area):
+
+```
++----------------------------------------------------------------------------------+
+| NEBULA  Insurance Brain                                                          |
++----------------------------------------------------------------------------------+
+|                                                                                  |
+|                 +----------------------------------------------+                 |
+|                 |  (icon)  <Title>                             |                 |
+|                 |                                              |                 |
+|                 |  <One-sentence message>                      |                 |
+|                 |  <Optional detail line, e.g. wait time>      |                 |
+|                 |                                              |                 |
+|                 |  [ <Primary action> ]   <Secondary link>     |                 |
+|                 |  Reference: 4f9a-…  (trace ID, copyable)     |                 |
+|                 +----------------------------------------------+                 |
+|                                                                                  |
++----------------------------------------------------------------------------------+
+```
+
+Narrow (360–767 px): the same block fills the width under a one-line `NEBULA` header; the actions stack full-width, primary first.
+
+```
++------------------------------------+
+| NEBULA                             |
++------------------------------------+
+| (icon) <Title>                     |
+| <One-sentence message>             |
+| <Optional detail line>             |
+|                                    |
+| [        <Primary action>        ] |
+| [        <Secondary link>        ] |
+| Reference: 4f9a-…                  |
++------------------------------------+
+```
+
+| Page | Title | Message | Detail line | Primary action | Secondary |
+|---|---|---|---|---|---|
+| Sign-in failed (S0001 AC4) | Sign-in didn't complete | "We couldn't sign you in. No session was created." | — | Try again (starts a new sign-in) | Return home |
+| Too many attempts (S0008) | Too many attempts | "Sign-in is paused for this device after repeated failures." | "Try again in N seconds" (from `Retry-After`; counts down; the button stays disabled until 0) | Try again | — |
+| Not found / access denied (S0002 AC4) | Page not available | "This page doesn't exist or you don't have access to it." | — | Return home | — |
+| Route load error (S0007 AC2) | This page couldn't load | "Part of Nebula didn't load. Your session is still active." | — | Reload | Return home |
+| Sign-in unavailable (S0001 edge case, IdP unreachable) | Sign-in is unavailable | "Nebula can't reach the identity provider right now." | — | Try again | — |
+
+Every page sets the document title and moves focus to the heading on load. The reference is the request's trace ID, never a session or principal identifier.
 
 ## Data Requirements
 

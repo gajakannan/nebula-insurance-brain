@@ -1,0 +1,453 @@
+# Reference Router
+
+20,700+ lines of reference docs across 11 agent roles. Loading all references
+for a role wastes context on material irrelevant to the current task.
+
+**Rule**: Before loading any file from `agents/<role>/references/`, consult
+the table below and load only the references matched to your current task.
+Load multiple rows when the task spans categories. Skip this router only
+when the full reference corpus is explicitly requested.
+
+## How to Use
+
+1. Identify your active agent role.
+2. Find the task row(s) that match what you are doing.
+3. Load only those reference files.
+4. If no row matches, load nothing — the SKILL.md and solution-specific
+   artifacts in `{NEBULA_PRODUCT_ROOT}/planning-mds/` are usually sufficient.
+
+---
+
+## Architect (9,080 lines → ~700–1,000 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| API endpoint design, OpenAPI contracts | `references/api-design-guide.md` |
+| Data model, entity design, ERD | `references/data-modeling-guide.md` |
+| Workflow, state machine design | `references/workflow-design.md` |
+| Authorization, Casbin, ABAC | `references/authorization-patterns.md` |
+| JSON Schema contracts, validation | `references/json-schema-validation-architecture.md` |
+| Security architecture review | `references/security-architecture-guide.md` |
+| Performance, scaling, caching | `references/performance-design-guide.md` |
+| Service boundaries, module design | `references/service-architecture-patterns.md` |
+| AI/ML integration architecture | `references/ai-integration-patterns.md`, `references/ai-architecture-patterns.md` |
+| General architecture review, ADR | `references/architecture-best-practices.md` |
+| Architecture examples | `references/architecture-examples.md` |
+
+All paths relative to `agents/architect/`.
+
+## Frontend Developer (5,184 lines → ~700–900 per task)
+
+**Always load**: `references/ux-audit-ruleset.md` (mandatory UX gate on every UI change, 133 lines)
+
+| Task | References to Load |
+|------|--------------------|
+| React component implementation | `references/code-patterns.md`, `references/react-best-practices.md` |
+| Form handling, JSON Schema forms | `references/json-schema-forms-guide.md` |
+| API calls, data fetching, caching | `references/tanstack-query-guide.md` |
+| Frontend testing (Vitest, RTL) | `references/testing-guide.md` |
+| Accessibility, WCAG compliance | `references/accessibility-guide.md` |
+| UX principles, interaction design | `references/ux-principles.md` |
+| Layout, visual design, inspiration | `references/design-inspiration.md` |
+| TypeScript patterns | `references/typescript-patterns.md` |
+| Legacy form comparison only | `references/form-handling-guide.md` |
+
+All paths relative to `agents/frontend-developer/`.
+
+## Product Manager (2,382 lines → ~300–600 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| Blueprint refinement, project scope | `references/blueprint-requirements.md` |
+| User story writing, acceptance criteria | `references/story-examples.md`, `references/vertical-slicing-guide.md` |
+| Persona definition | `references/persona-examples.md` |
+| Prioritization, backlog management | `references/prioritization-frameworks.md`, `references/prioritization-examples.md` |
+| Screen specification | `references/screen-spec-examples.md` |
+| Feature definition, MVP scoping | `references/feature-examples.md`, `references/pm-best-practices.md` |
+| General PM practices | `references/pm-best-practices.md` |
+
+All paths relative to `agents/product-manager/`.
+
+## DevOps (1,754 lines → ~650–1,085 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| Docker, Compose, containerization | `references/containerization-guide.md` |
+| CI/CD pipelines, deployment scripts | `references/code-patterns.md` |
+| General DevOps practices | `references/devops-best-practices.md` |
+
+All paths relative to `agents/devops/`.
+
+## Backend Developer (701 lines → ~665 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| Domain entities, services, endpoints | `references/code-patterns.md` |
+| Clean architecture patterns | `references/clean-architecture-guide.md` |
+| .NET best practices | `references/dotnet-best-practices.md` |
+| EF Core, database patterns | `references/ef-core-patterns.md` |
+
+All paths relative to `agents/backend-developer/`.
+
+## AI Engineer (610 lines)
+
+| Task | References to Load |
+|------|--------------------|
+| Python AI/LLM implementation | `references/code-patterns.md` |
+
+All paths relative to `agents/ai-engineer/`.
+
+## Quality Engineer (577 lines → ~555 per task)
+
+| Task | References to Load |
+|------|--------------------|
+| Test implementation, patterns | `references/code-patterns.md` |
+| Test case mapping, coverage | `references/test-case-mapping.md` |
+| E2E testing | `references/e2e-testing-guide.md` |
+| Performance testing | `references/performance-testing-guide.md` |
+| General testing practices | `references/testing-best-practices.md` |
+
+All paths relative to `agents/quality-engineer/`.
+
+## Code Reviewer (314 lines)
+
+| Task | References to Load |
+|------|--------------------|
+| Code quality review | `references/clean-code-guide.md`, `references/code-smells-guide.md` |
+| Review checklist | `references/code-review-checklist.md` |
+
+All paths relative to `agents/code-reviewer/`.
+
+## Security (116 lines)
+
+| Task | References to Load |
+|------|--------------------|
+| Threat modeling | `references/threat-modeling-guide.md` |
+| OWASP review | `references/owasp-top-10-guide.md` |
+| Secure coding standards | `references/secure-coding-standards.md` |
+| General security practices | `references/security-best-practices.md` |
+
+All paths relative to `agents/security/`.
+
+## Blogger (14 lines), Technical Writer (15 lines)
+
+These roles have minimal references. Load on demand — no routing needed.
+
+## Integrator (no references)
+
+`agents/integrator/SKILL.md` plus `agents/actions/integrate.md` are the full
+contract. Tool semantics live in the product repo's `scripts/kg/README.md`
+(merge3, tracker merge, canonical serialization) and
+`agents/docs/KNOWLEDGE-GRAPH.md`.
+
+---
+
+## KG Tools
+
+Task-to-tool routing only. The full CLI reference, mental model, lifecycle
+triggers, and failure modes live in `agents/docs/KNOWLEDGE-GRAPH.md`.
+
+| When | Command |
+|------|---------|
+| Before searching code | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/hint.py <path>` |
+| Before editing shared entities/workflows | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/blast.py <node-or-file>` |
+| Starting feature work | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py <feature-id>` (see KNOWLEDGE-GRAPH.md for `--tier`, `--fields`, `--allow-missing`) |
+| After ontology changes | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/validate.py --check-drift` |
+| Merging KG YAML across branches (never by hand/git) | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/merge3.py <file> --base <ref> --ours <ref> --theirs <ref>` (also REGISTRY.md/ROADMAP.md; see `scripts/kg/README.md`) |
+| Long session start / decisions / escalations / post-compaction | `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/workstate.py …` (see KNOWLEDGE-GRAPH.md for subcommands) |
+| Resuming an in-flight run in a fresh session (read this FIRST, before exploring) | `python3 agents/scripts/resume-brief.py --run-id <run-id>` — emits position, next gate, recorded decisions, current story, and scope in one read |
+| Hub / risk / undeclared-edge analysis | `pagerank.py`, `risk.py`, `cochange.py --coverage-gaps` (see KNOWLEDGE-GRAPH.md) |
+
+---
+
+## Evidence / Ops
+
+Task-to-tool routing only. The full contract — package shape, gate timeline
+of who writes what when, manifest, `commands.log` telemetry, verdicts,
+eligibility, and waivers — lives in `agents/docs/AGENT-OPS.md`.
+
+Honor `{NEBULA_PRODUCT_ROOT}/.agentignore` before broad product discovery. Treat
+`{NEBULA_PRODUCT_ROOT}/planning-mds/operations/**` as cold archive: start from
+`operations/evidence/README.md`, feature `latest-run.json`, and the selected
+run's `evidence-manifest.json`; read raw reports, logs, screenshots, and
+`artifacts/**` only when the current audit, validation, or failure-triage task
+requires those exact files. Full retrieval semantics live in
+`agents/docs/AGENTIGNORE.md`.
+
+| When | Command |
+|------|---------|
+| Validate evidence mid-run (G0–G5) | `python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root {NEBULA_PRODUCT_ROOT} --feature F#### --run-id <run-id> --stage <Gn>` |
+| Final closeout validation | `python3 agents/product-manager/scripts/validate-feature-evidence.py --product-root {NEBULA_PRODUCT_ROOT} --feature F#### --stage closeout` (see AGENT-OPS.md for the stage matrix) |
+| Closeout supersession (before writing `latest-run.json`) | `python3 agents/product-manager/scripts/patch-prior-manifest.py --product-root {NEBULA_PRODUCT_ROOT} --feature F#### --new-run-id <run-id>` |
+| Run lifecycle gates (writes `lifecycle-gates.log`) | `python3 agents/scripts/run-lifecycle-gates.py` |
+| New run artifact / report | copy the matching skeleton from `agents/templates/` (see AGENT-OPS.md → Package Anatomy) |
+     1	# SOLUTION-PATTERNS.md — Nebula Insurance Brain
+     2	
+     3	Project-level implementation conventions every role follows. Seeded by the Architect at F0001 Phase B from the master blueprint and the accepted ADRs; changes go through an ADR first.
+     4	
+     5	## Metadata
+     6	
+     7	- Project: Nebula Insurance Brain
+     8	- Version: 0.1
+     9	- Last Updated: 2026-09-28 (F0002: authorization enforcement point, ADR-0062)
+    10	- Owners: Architect (patterns), Security (pattern 1 co-sign)
+    11	- Scope: `engine/`, `neuron/`, `experience/` (from F0021), runtime assets, contracts under `planning-mds/`
+    12	
+    13	## Pattern Categories
+    14	
+    15	- `MUST` - mandatory convention for this solution
+    16	- `SHOULD` - recommended convention unless a documented exception exists
+    17	- `MAY` - optional convention based on feature needs
+    18	
+    19	## Pattern Scope Labels
+    20	
+    21	- `Universal` - technology-agnostic rule expected in any stack
+    22	- `Stack-Specific` - tied to a concrete framework/tool choice
+    23	- `Hybrid` - universal policy with stack-specific implementation details
+    24	
+    25	---
+    26	
+    27	## 1. Authorization Pattern
+    28	
+    29	### Scope
+    30	- Label: `Hybrid`
+    31	- Stack context: authentik OIDC, native Casbin adapter in `brain_security`, PostgreSQL-backed principals and memberships
+    32	
+    33	### Decision
+    34	- Policy model: verified `(issuer, subject)` → stable internal principal; structural tenancy (tenant, knowledge base) resolved from current grants; Casbin evaluates `(role, resource type, action, condition)` over server-hydrated typed attributes; authorization is the conjunction of membership, action, resource or parent scope, classification, and delegation limits.
+    35	- Enforcement point: every API route authenticates through `brain_api.deps.current_principal` and runs its protected operation through `brain_security.execution.AuthorizationExecution` (`read` / `mutate`), which locks current authority, evaluates with the pure `brain_security.evaluation.evaluate`, and commits the decision audit before any payload or together with the mutation. Background workers use the same `execution.decide` orchestration over a sync store. No consumer assembles its own resource snapshot. Commit services run inside the facade's unit of work. Search, vector, and graph paths filter before rows, counts, facets, and snippets; MCP uses the same path.
+    36	
+    37	### Rationale
+    38	- Master blueprint sections 66, 118 to 120; ADR-0030; proposed ADR-0049, ADR-0050, ADR-0053. The CRM gaps in section 119 are not copied.
+    39	
+    40	### Applied In
+    41	- Backend: `brain_security` (verifier, identity profile, resolver, Casbin adapter, evaluator, execution facade, delegation rules, audit); trusted state in `brain_persistence` (`authx`, `tenancy`, `identity`, `grants`); routes in `brain_api.routes.*`
+    42	- Frontend: renders what the API returns; never derives permissions client-side (F0021)
+    43	- AI layer: `neuron/` calls the engine as the acting principal; the model server receives no identity data
+    44	
+    45	### Enforcement Level
+    46	- `MUST`
+    47	
+    48	### Example
+    49	
+    50	```text
+    51	p, TenantMember, content_artifact, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+    52	p, Reviewer, review_task, annotate, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+    53	p, ServicePrincipal, fact_slot, commit, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+    54	```
+    55	
+    56	Denials are reported as 404; reason codes live only in `audit_event`.
+    57	
+    58	---
+    59	
+    60	## 2. Audit and Timeline Pattern
+    61	
+    62	### Scope
+    63	- Label: `Hybrid`
+    64	- Stack context: PostgreSQL append-only tables written inside the same transaction as the change
+    65	
+    66	### Decision
+    67	- What gets logged: every authorization decision (policy hash, grant revision, actor and delegate, resource, action, decision, reason code, trace id); every canonical commit (commit id, fact versions, change reason, evidence); every review decision; every interpretation run.
+    68	- Event immutability policy: `audit_event`, `outbox_event`, `canonical_fact_change`, `review_event`, and `review_decision` are append-only; corrections create new rows linked to the originals (ADR-0037).
+    69	
+    70	### Rationale
+    71	- Sections 17, 66, 109.3; ADR-0009, ADR-0010, ADR-0037; proposed ADR-0041.
+    72	
+    73	### Applied In
+    74	- Data model: `audit_event`, `outbox_event`, `canonical_fact_change`, `review_event`
+    75	- Workflow engine: none in v0.1; Temporal (F0050) proposes state changes only through commit services (ADR-0028)
+    76	
+    77	### Enforcement Level
+    78	- `MUST`
+    79	
+    80	### Example
+    81	
+    82	```json
+    83	{"actor_principal_id": "…", "resource_type": "fact_slot", "action": "commit", "decision": "allow", "policy_hash": "sha256:…", "grant_revision": 7, "trace_id": "…"}
+    84	```
+    85	
+    86	---
+    87	
+    88	## 3. API Design Pattern
+    89	
+    90	### Scope
+    91	- Label: `Hybrid`
+    92	- Stack context: FastAPI, OpenAPI 3.1 contract in `planning-mds/api/brain-api.yaml`, JSON Schema 2020-12 in `planning-mds/schemas/`
+    93	
+    94	### Decision
+    95	- API style: REST over root resource paths (`/content/{id}`, `/facts/{id}`, `/reviews/{id}`); no `/api` prefix; nouns only; versioning by OpenAPI `info.version` until a breaking change forces a path version.
+    96	- Error format: RFC 9457 `ProblemDetails` with a stable `code` and a `traceId` extension member (the one camelCase field, required by the framework API contract validator), media type `application/problem+json`.
+    97	- Pagination approach: cursor-based (`cursor`, `limit` up to 100) for list endpoints (none in F0001).
+    98	- Time coordinates: `validAsOf` and `knownAsOf` query parameters on canonical reads, defaulting to now.
+    99	
+   100	### Rationale
+   101	- Section 68; ADR-0013; the framework API validator rejects `/api` prefixes and requires ProblemDetails on error responses.
+   102	
+   103	### Applied In
+   104	- API contracts: `planning-mds/api/brain-api.yaml`
+   105	- Service endpoints: `brain_api.routes.*`
+   106	
+   107	### Enforcement Level
+   108	- `MUST`
+   109	
+   110	### Example
+   111	
+   112	```http
+   113	GET /facts/8b2c…?validAsOf=2026-07-01T00:00:00Z&knownAsOf=2026-06-05T00:00:00Z
+   114	```
+   115	
+   116	---
+   117	
+   118	## 4. Clean Architecture Pattern
+   119	
+   120	### Scope
+   121	- Label: `Hybrid`
+   122	- Stack context: Python packages under `engine/packages/` and `neuron/packages/`
+   123	
+   124	### Decision
+   125	- Layer boundaries: `brain_domain` (frozen dataclasses, enums, invariants, no I/O) → application packages (`brain_security`, `brain_temporal`, `brain_review`, `brain_content` ports) → infrastructure adapters (`brain_persistence`, local filesystem content adapter) → `brain_api` and `brain_worker`.
+   126	- Dependency direction: inward only; adapters implement `Protocol` ports declared in application packages; `brain_api` wires them in `create_app()`.
+   127	- `neuron/` mirrors the split: `brain_interpretation` (models, ports) → `brain_ingestion` (bundle writer and durable publication callback) and `brain_extraction` (the pipeline-neutral extraction port, the direct-baseline adapter, and result/evidence mapping). ADR-0060's Docling-Graph target was Rejected on 2026-11-08. Keep any pipeline-specific IDs and output directories outside domain contracts.
+   128	
+   129	### Rationale
+   130	- Master blueprint section 114.3 (package list as code boundaries); BLUEPRINT 2.3 boundary rules.
+   131	
+   132	### Applied In
+   133	- `engine/`: as above
+   134	- `neuron/`: as above; writes to canonical truth only through engine commit services (section 64)
+   135	
+   136	### Enforcement Level
+   137	- `MUST`
+   138	
+   139	### Example
+   140	
+   141	```text
+   142	brain_domain -> brain_temporal (port: CanonicalFactRepository) -> brain_persistence (SQLAlchemy) -> brain_api
+   143	```
+   144	
+   145	---
+   146	
+   147	## 5. Frontend Pattern
+   148	
+   149	### Scope
+   150	- Label: `Stack-Specific`
+   151	- Stack context: React, TypeScript, Vite, TanStack Query, React Hook Form, AJV (BLUEPRINT 2.1)
+   152	
+   153	### Decision
+   154	- Form strategy: React Hook Form with AJV validation against the shared JSON Schemas.
+   155	- Data-fetching strategy: TanStack Query over the OpenAPI contract; no client-side permission derivation.
+   156	- Validation strategy: the same JSON Schema files the backend validates against (ADR-0013).
+   157	
+   158	### Rationale
+   159	- ADR-0013, ADR-0036; the semantic-first UX in section 72.
+   160	
+   161	### Applied In
+   162	- `experience/`: from F0021; feature-slice folders `src/features/<feature>/`
+   163	
+   164	### Enforcement Level
+   165	- `SHOULD` until F0021 lands, then `MUST`
+   166	
+   167	### Example
+   168	
+   169	```text
+   170	React Hook Form + AJV (draft 2020-12) + TanStack Query, semantic theme tokens only
+   171	```
+   172	
+   173	---
+   174	
+   175	## 6. Data Modeling Pattern
+   176	
+   177	### Scope
+   178	- Label: `Hybrid`
+   179	- Stack context: PostgreSQL 18, SQLAlchemy 2, Alembic, range types with btree_gist
+   180	
+   181	### Decision
+   182	- Entity identity strategy: UUID primary keys; external identifiers scoped by namespace and version (section 107.3); every authoritative row carries `tenant_id` and `knowledge_base_id` (ADR-0030).
+   183	- Soft delete policy: canonical facts are never deleted or soft-deleted; they end with a change reason (ADR-0009); governed retention and deletion arrive with F0026 (proposed ADR-0043).
+   184	- Temporal/audit fields: canonical fact and relationship versions carry `valid tstzrange` and `recorded tstzrange` with a two-range GiST exclusion; `source_received_at`, `artifact_created_at`, `assertion_created_at`, `canonical_accepted_at` are stored separately; all rows carry `created_at`.
+   185	
+   186	### Rationale
+   187	- Sections 13 to 16, 78, 109.1, 109.2; ADR-0006 to ADR-0009.
+   188	
+   189	### Applied In
+   190	- Entity model docs: `planning-mds/architecture/data-model.md`
+   191	- Migrations: `engine/migrations/versions/`
+   192	
+   193	### Enforcement Level
+   194	- `MUST`
+   195	
+   196	### Example
+   197	
+   198	```sql
+   199	canonical_fact_version(id, slot_id, tenant_id, knowledge_base_id, value jsonb, valid tstzrange, recorded tstzrange, change_reason, commit_id,
+   200	  EXCLUDE USING gist (slot_id WITH =, valid WITH &&, recorded WITH &&))
+   201	```
+   202	
+   203	---
+   204	
+   205	## 7. Testing Pattern
+   206	
+   207	### Scope
+   208	- Label: `Hybrid`
+   209	- Stack context: pytest with coverage for `engine/` and `neuron/`; Playwright for `experience/` (from F0021)
+   210	
+   211	### Decision
+   212	- Unit/integration/e2e split: unit tests own domain invariants and pure logic; integration tests run against the Compose stack (database, object store, authentik); evaluation tests run against the Golden Corpus fixtures; contract tests validate JSON Schemas and the OpenAPI document.
+   213	- Coverage targets: 80% line coverage per workspace (framework evidence contract); severe-error rate and precision/recall reported with sample sizes (section 115.2).
+   214	- Test data policy: synthetic or licensed fixtures only; no production documents; fixture text never enters telemetry.
+   215	
+   216	### Rationale
+   217	- Sections 96 to 98, 115; framework feature evidence contract.
+   218	
+   219	### Applied In
+   220	- Test plans: per feature under the run's `test-plan.md`
+   460	
+   461	New table UPDATE/DELETE/TRUNCATE are denied, and populated downgrade refuses under table locks. Existing canonical version rows retain ADR-0078 close-only immutability. The lineage reader is derived/on-demand and has no authoritative graph/cache table. Existing F0018 RLS/DB-role and F0041 learning ownership remain unchanged.
+   462	
+   463	```mermaid
+   464	erDiagram
+   465	    REVIEW_DECISION ||--o| LEARNING_CANDIDATE_RESERVATION : effective_correction
+   466	    ASSERTION ||--o| LEARNING_CANDIDATE_RESERVATION : corrected_child
+   467	    REVIEW_ITEM ||--o{ REVIEW_SUBMISSION_ATTEMPT : non_applied
+   468	    ASSERTION ||--o{ REVIEW_SUBMISSION_ATTEMPT : original_claim
+   469	```
+   470	
+   471	## F0021 browser sessions and throttle (Phase B design 2026-11-27, proposed ADR-0082)
+   472	
+   473	Migration 0018 (design: [migration-design.sql](../features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql)) is expand-only.
+   474	
+   475	**`browser_login_attempt`:** one row per sign-in started.
+   476	
+   477	- Stores only digests of the state, browser binding and nonce, plus the encrypted PKCE verifier.
+   478	- Holds the mode (`redirect` or `popup`, with a popup reference) and the sanitized return route.
+   479	- Expires after 10 minutes and can be consumed once.
+   480	
+   481	**`browser_session`:** the server-side session behind the opaque cookie.
+   482	
+   483	- Keyed by a UUID session reference. Only the cookie's SHA-256 digest is stored.
+   484	- Holds the principal, issuer, subject and display name.
+   485	- Holds the idle deadline (30 min), absolute deadline (8 h) and access-token expiry.
+   486	- Tokens are an AES-256-GCM ciphertext under a key ID; ending a session sets it to NULL.
+   487	- Also holds the renewal count, CSRF digest, active tenant/knowledge base (composite FK to `knowledge_base(id, tenant_id)`) and the end reason.
+   488	- CHECKs tie together:
+   489	  - lifetime and D1;
+   490	  - ended state and token absence;
+   491	  - the active pair.
+   492	
+   493	**`session_event`:** append-only session lifecycle audit, using the migration 0007 trigger.
+   494	
+   495	- Records creation, replacement, renewal and its failure, idle and absolute endings, and principal endings.
+   496	- Records logout, with the revocation and end-session outcomes.
+   497	- Records active knowledge-base changes.
+   498	
+   499	**`credential_rejection_window`:** mutable per-client counters for 60-second windows. One atomic upsert per rejected credential; rows older than 10 minutes are pruned.
+   500	
+   501	**Display names:** `tenant.display_name` and `knowledge_base.display_name` are nullable, server-owned names for the shell.
+   502	
+   503	Rejected credentials keep using `authentication_event`, with twelve new reason codes and an optional payload (session reference, CSRF cause, client key for `rate_limited`). Authorization never reads session state: the active knowledge base narrows shell requests only.
+[KG] engine/apps/api/src/brain_api/deps.py -> capability:runtime-roots-and-toolchain
+  Features: feature:F0001
+  Stories: story:F0001-S0001
+  Symbols: current_principal:L163, get_authentication_event_sink:L133, get_authorization_execution:L193, get_casbin_adapter:L116, get_content_store:L214, get_credential_verifier:L108, get_db_session:L99, get_identity_profile:L112, get_predicate_registry:L127, get_provenance_reader:L204 (+7 more)
+  Risk: capability:runtime-roots-and-toolchain: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius

@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/logout-result-v1.schema.json",
+  "title": "Logout result v1",
+  "description": "POST /auth/logout response (ADR-0082 D7, F0021-S0005). Reports the upstream revocation outcome truthfully; a failed revocation is never reported as success. The end-session URL carries client_id, post_logout_redirect_uri and state only (no id_token_hint).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "signed_out",
+    "revocation",
+    "end_session"
+  ],
+  "properties": {
+    "contract": {
+      "const": "logout-result/v1"
+    },
+    "signed_out": {
+      "const": true,
+      "description": "The server session is ended and its tokens discarded in every case."
+    },
+    "revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "not_attempted"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "idp_unreachable",
+            "idp_timeout",
+            "idp_rejected",
+            "no_live_tokens",
+            "session_already_ended"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "enum": [
+                  "idp_unreachable",
+                  "idp_timeout",
+                  "idp_rejected"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "not_attempted"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "enum": [
+                  "no_live_tokens",
+                  "session_already_ended"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "succeeded"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "reason"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "end_session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "url"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "redirect",
+            "unavailable"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "redirect"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unavailable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/browser-session-v1.schema.json",
+  "title": "Browser session v1",
+  "description": "GET /session response for the same-origin BFF (ADR-0082 D10, F0021-S0006). Carries the CSRF token for state-changing calls; never carries an access, refresh or ID token.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "principal",
+    "session",
+    "csrf_token",
+    "memberships",
+    "grant_revision",
+    "active_knowledge_base",
+    "flags"
+  ],
+  "properties": {
+    "contract": {
+      "const": "browser-session/v1"
+    },
+    "principal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "display_name",
+        "kind",
+        "issuer"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "ID-token name, then preferred_username, else null; never the subject."
+        },
+        "kind": {
+          "enum": [
+            "USER"
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idle_expires_at",
+        "absolute_expires_at",
+        "idle_warning_seconds",
+        "server_time"
+      ],
+      "properties": {
+        "idle_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "absolute_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idle_warning_seconds": {
+          "type": "integer",
+          "const": 120
+        },
+        "server_time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "csrf_token": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "description": "256-bit synchronizer token, base64url without padding; held in page memory only."
+    },
+    "memberships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/membership"
+      }
+    },
+    "grant_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Opaque digest of the principal's current memberships; changes on any grant, revocation or revision change."
+    },
+    "active_knowledge_base": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/kb_ref"
+        }
+      ]
+    },
+    "flags": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]{0,63}$"
+      },
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    }
+  },
+  "$defs": {
+    "kb_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "knowledge_base_id"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "membership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "tenant_name",
+        "knowledge_base_id",
+        "knowledge_base_name",
+        "role"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "tenant_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    }
+  }
+}
+     1	# F0021 acceptance criteria checklist
+     2	
+     3	55 independently reviewable ACs across nine stories. Each row needs observed proof in the later feature run; the AC-to-test map is written at feature G0.
+     4	
+     5	| Story / AC | Required observed proof | Status |
+     6	|---|---|---|
+     7	| [F0021-S0001 AC1](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+     8	| [F0021-S0001 AC2](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+     9	| [F0021-S0001 AC3](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    10	| [F0021-S0001 AC4](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    11	| [F0021-S0001 AC5](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    12	| [F0021-S0001 AC6](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    13	| [F0021-S0001 AC7](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    14	| [F0021-S0002 AC1](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    15	| [F0021-S0002 AC2](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    16	| [F0021-S0002 AC3](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    17	| [F0021-S0002 AC4](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    18	| [F0021-S0002 AC5](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    19	| [F0021-S0002 AC6](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    20	| [F0021-S0003 AC1](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    21	| [F0021-S0003 AC2](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    22	| [F0021-S0003 AC3](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    23	| [F0021-S0003 AC4](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    24	| [F0021-S0003 AC5](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    25	| [F0021-S0003 AC6](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    26	| [F0021-S0004 AC1](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    27	| [F0021-S0004 AC2](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    28	| [F0021-S0004 AC3](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    29	| [F0021-S0004 AC4](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    30	| [F0021-S0004 AC5](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    31	| [F0021-S0004 AC6](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    32	| [F0021-S0004 AC7](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    33	| [F0021-S0005 AC1](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    34	| [F0021-S0005 AC2](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    35	| [F0021-S0005 AC3](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    36	| [F0021-S0005 AC4](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    37	| [F0021-S0005 AC5](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    38	| [F0021-S0005 AC6](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    39	| [F0021-S0005 AC7](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    40	| [F0021-S0006 AC1](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    41	| [F0021-S0006 AC2](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    42	| [F0021-S0006 AC3](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    43	| [F0021-S0006 AC4](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    44	| [F0021-S0006 AC5](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    45	| [F0021-S0006 AC6](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    46	| [F0021-S0007 AC1](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    47	| [F0021-S0007 AC2](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    48	| [F0021-S0007 AC3](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    49	| [F0021-S0007 AC4](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    50	| [F0021-S0007 AC5](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    51	| [F0021-S0007 AC6](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    52	| [F0021-S0008 AC1](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    53	| [F0021-S0008 AC2](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    54	| [F0021-S0008 AC3](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    55	| [F0021-S0008 AC4](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    56	| [F0021-S0008 AC5](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    57	| [F0021-S0009 AC1](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+    58	| [F0021-S0009 AC2](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+    59	| [F0021-S0009 AC3](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+    60	| [F0021-S0009 AC4](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+    61	| [F0021-S0009 AC5](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |

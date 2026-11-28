@@ -1,0 +1,158 @@
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** When any call returns `401 session_expired`, the shell keeps the current page and its unsaved in-memory input, shows the session-expired dialog, and lists each blocked state-changing request by a human-readable label as "not submitted". No state-changing request is retried.
+    23	- [ ] **AC2:** "Sign in again" opens the IdP sign-in in a popup through the BFF (S0001 flow). On success the popup closes, the page receives only a completion signal (never a token or code), and the dialog closes with the page and its input unchanged.
+    24	- [ ] **AC3:** After re-authentication, a blocked read (`GET`) is retried once automatically; each blocked state-changing request is shown in the re-confirmation dialog and is sent only when the user chooses "Submit now". "Cancel" discards it and keeps the page input.
+    25	- [ ] **AC4:** A re-confirmed request is a new request: it carries the new session's CSRF token and the engine re-checks current authority and current resource revision; a stale item or a lost grant is rejected with the engine's existing denied or not found response, which the shell shows in context without retrying; the engine's existing audit records the re-confirmed request like any other.
+    26	- [ ] **AC5:** If the re-authenticated principal differs from the one that owned the page, the shell discards all in-memory work and blocked requests, clears caches (S0005 AC5) and lands on Home; nothing from the previous principal is shown or sent.
+    27	- [ ] **AC6:** If the popup is blocked or closed without completing, the dialog offers "Sign in on this page", which performs a full redirect sign-in and returns to the sanitized current route (S0001 AC5); the dialog states beforehand that unsaved input will be lost, and no input is written to browser storage.
+    28	- [ ] **AC7:** The popup completion signal is accepted only from the shell's own origin and only for the pending re-authentication it started; any other message is ignored.
+    29	
+    30	## Edge Cases & Error Scenarios
+    31	
+    32	Several tabs expired at once: each tab shows its own dialog; completing sign-in in one tab lets the others continue after their own "Sign in again" or on their next call (the session cookie is shared). The user dismisses the dialog: the page stays read-only for engine calls until signed in. Absolute-lifetime expiry (S0003 AC5) uses the same dialog.
+    33	
+    34	## Interaction Contract
+    35	
+    36	Entry: any `401 session_expired` response while on a shell page. Actions: "Sign in again" (popup), "Sign in on this page" (redirect), "Discard and sign out", then per blocked mutation "Submit now" or "Cancel". Result: page resumes with input intact, or a sanitized-route reload. Persistence evidence: the re-confirmed mutation's engine response and its existing audit row; the blocked attempt has no engine-side effect. Read-only behavior: blocked reads retry once; blocked mutations never retry without the explicit action. Audit: the re-confirmed request is audited as a normal request.
+    37	
+    38	## Data Requirements
+    39	
+    40	In-memory list of blocked requests with label, method, route and body, held only in page memory. No browser storage.
+    41	
+    42	## Role-Based Visibility
+    43	
+    44	Applies to every signed-in principal; the engine's existing authority decides the re-confirmed request.
+    45	
+    46	## Non-Functional Expectations
+    47	
+    48	No automatic replay of any state-changing request under any timing. At least 80% changed executable-code coverage in the later feature run; component and end-to-end tests cover AC1–AC7.
+    49	
+    50	## Dependencies
+    51	
+    52	S0001, S0002, S0003; S0007 (the Review Panel decision submission is the reference mutation); S0009 proves AC3–AC5 against real authentik.
+    53	
+    54	## Out of Scope
+    55	
+    56	An idempotent command protocol for controlled retry (§120.5 later work); draft persistence across reloads.
+    57	
+    58	## Questions & Assumptions
+    59	
+    60	No open business-rule question. Operator decision D3 is in the [PRD](PRD.md#risks--assumptions). The popup messaging mechanism and blocked-request queue design are Phase B decisions.
+    61	
+    62	## Definition of Done
+    63	
+    64	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    65	- [ ] Negative test proving zero engine-side effects from a blocked mutation until "Submit now".
+    66	- [ ] Principal-change test (AC5) and popup-blocked fallback test (AC6).
+    67	- [ ] Documentation and tracker state reflect observed results.
+    68	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** "Sign out" sends a CSRF-protected request authenticated by the session cookie; the BFF revokes the session's refresh token at authentik's revocation endpoint (RFC 7009), ends the server session, and clears the session cookie (expired `Set-Cookie` with the same attributes).
+    23	- [ ] **AC2:** The token revoked is the one the session actually holds after any rotation (S0003 AC3); after logout, a refresh-token grant with that token fails at authentik.
+    24	- [ ] **AC3:** If revocation fails (IdP unreachable, non-2xx, timeout), the server session is still ended and its tokens discarded, the failure is recorded durably in the audit log with the principal and reason, and the signed-out page shows the revocation-failed warning. The response never reports success for a failed revocation.
+    25	- [ ] **AC4:** After logout, the old session identifier is rejected with HTTP 401 `unauthenticated` for every route, including when replayed from another client.
+    26	- [ ] **AC5:** On logout, principal change (S0001 AC7, S0004 AC5), active knowledge-base switch (S0006 AC4) or a change in the principal's grant revision reported by the session endpoint, the shell aborts in-flight requests and clears all query caches and in-memory resource data before rendering anything for the new state.
+    27	- [ ] **AC6:** Other open tabs of the same browser show the signed-out state on their next server call and within 60 seconds of the logout (PM assumption A8), without showing data loaded before the logout.
+    28	- [ ] **AC7:** After revocation, the BFF ends the user's IdP session through authentik's end-session endpoint, so the next "Sign in" asks for credentials; if that step fails it is reported the same way as AC3.
+    29	
+    30	## Edge Cases & Error Scenarios
+    31	
+    32	Logout while a renewal is in flight: logout wins and any newly issued tokens are revoked (S0003). Logout with an already-expired session: cookie cleared, signed-out page shown, no revocation attempted for discarded tokens, and the outcome says so. Double-click on "Sign out": one revocation attempt.
+    33	
+    34	## Interaction Contract
+    35	
+    36	Entry: "Sign out" in the shell header or the session-expired dialog's "Discard and sign out". Result: signed-out page with the revocation outcome. Persistence evidence: session record ended; revocation outcome recorded; authentik rejects the revoked refresh token. Audit: a durable record of every logout outcome, including failures (event shape is Phase B).
+    37	
+    38	## Data Requirements
+    39	
+    40	Logout outcome record: principal, session reference (not the cookie value), revocation result, end-session result, timestamp. Grant revision exposed by the session endpoint (S0006).
+    41	
+    42	## Role-Based Visibility
+    43	
+    44	Every signed-in principal can sign out. No data is shown after logout.
+    45	
+    46	## Non-Functional Expectations
+    47	
+    48	Revocation timeout is bounded (Phase B value) so sign-out never hangs. At least 80% changed executable-code coverage in the later feature run.
+    49	
+    50	## Dependencies
+    51	
+    52	S0001, S0003, S0006; authentik revocation and end-session endpoints.
+    53	
+    54	## Out of Scope
+    55	
+    56	Administrator-initiated session termination screens; back-channel logout from the IdP (later hardening, F0026).
+    57	
+    58	## Questions & Assumptions
+    59	
+    60	No open business-rule question. PM assumption A8 is in the [PRD](PRD.md#risks--assumptions). The cross-tab signal mechanism and grant-revision polling interval are Phase B decisions.
+    61	
+    62	## Definition of Done
+    63	
+    64	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    65	- [ ] Forced upstream-failure test for AC3 (shared with S0009).
+    66	- [ ] Cache-clearing tests for each AC5 trigger.
+    67	- [ ] Documentation and tracker state reflect observed results.
+    68	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+planning-mds/features/ROADMAP.md:3:**Last Reviewed:** 2026-11-26 (F0012 completed and archived in feature run `2026-11-26-54387a08`, leaving Now = F0021; F0010 heads Next and F0013 can compose on foundation@1. Earlier, 2026-11-25: F0009 completed and archived in feature run `2026-11-24-08701e37`, leaving Now = F0012 and F0021; F0010 heads Next on the temporal/commit path. Earlier, 2026-11-23: F0011 completed and archived in feature run `2026-11-22-885e8734`, leaving Now = F0009, F0012 and F0021; F0012's feature run is unblocked. Earlier, 2026-11-20: PM roadmap review after F0008 closed: Now = F0011, F0009, F0012 and F0021. F0009 and F0021 are dependency-ready. F0012 is planned alongside F0011 and built after it. Next is reordered by dependency readiness: F0010, F0013, F0014, F0017, F0015, F0016. Earlier, 2026-11-19: F0008 re-closed after second remediation run `2026-11-19-8cfcd0ff` (earlier `2026-11-18-bce4909b`); originally completed in `2026-11-17-1a4ae2f0`, leaving Now = F0011. Earlier, 2026-11-14: F0064 retroactive closeout completed and archived in feature run `2026-11-14-3325803a`, leaving Now = F0008 + F0011. Earlier, the 2026-11-10 product-manager roadmap review after F0007 closeout: Now = F0008 + F0011 as parallel temporal and contract/ontology lanes, plus the F0064 retroactive closeout; Next reordered by dependency readiness, with F0021 pulled forward from Later as an independent UI lane; F0065 rationale records approved planning and its open plan-review H1–H3. Earlier the same day F0007 was rearchived after operator-approved remediation in `2026-11-09-81798e61`; on 2026-11-06 governed retrieval carry-ins landed for F0033–F0036/F0067.)
+planning-mds/features/ROADMAP.md:30:| [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](./F0021-native-react-semantic-shell-and-oidc-session/README.md) | Planned | Now (2026-11-20 roadmap review): takes the Now slot freed by F0008, as the 2026-11-10 review promised; its only dependency, F0002, is done and the ADR-0051 session-transport decision is recorded. An independent UI lane, de-risking F0022 (native review round trip, a section 115.4 pre-build proof) and F0023. The native React semantic shell with the OIDC session contract and safe re-auth behavior is the first user-facing surface (section 3, 120.5). | F0002 complete; plan action Phase A and Phase B approved and plan-review READY (or High findings accepted with owner and date); feature run closes G0–G8 with the OIDC session contract and safe re-auth behavior proven. |
+planning-mds/features/ROADMAP.md:116:| [F0002 — Tenancy-aware domain kernel + verified stable principal and scope contracts](./archive/F0002-tenancy-aware-domain-kernel-and-principal-contracts/README.md) | 2026-09-28 | All six stories implemented and proven on PostgreSQL through every existing consumer (feature run 2026-09-27-bb7c8d1d): EX-AUTHX-001–018 observed as expected, changed-kernel coverage 94.04%; migrations 0005–0007 (0007 = BLUEPRINT §4.11 safeguards by operator scope amendment); ADR-0061/0062 accepted for the bounded F0002 scope; six capabilities bound to as-built source at G7; signoff complete for all five required roles. |
+planning-mds/features/ROADMAP.md:117:| [F0003 — PostgreSQL persistence](./archive/F0003-postgresql-persistence/README.md) | 2026-10-04 | All four stories verified in feature run 2026-10-03-57d14a51: the approved persistence ownership and phase boundaries are recorded; clean PostgreSQL upgrade reached revision 0007; all 12 live PostgreSQL acceptance tests and the 11-test persistence package CI coverage gate passed; G7 bound the as-built persistence contract to source; signoff is complete for all five required roles. No implementation source files changed in this feature run. |
+planning-mds/features/ROADMAP.md:118:| [F0004 — Content artifact model](./archive/F0004-content-artifact-model/README.md) | 2026-10-21 | All four stories and 25 ACs verified in feature run 2026-10-17-8a6cc79f; G4 explicitly approved; twenty required story/role signoffs. Engine 229, neuron 93 and restore four pass; four optional inference/tokenizer skips; changed runtime 90.60%. G7 as-built bindings and generated layers pass. V2 remains disabled; security and activation follow-ups retained. |
+planning-mds/features/ROADMAP.md:120:| [F0006 — Assertion plane + origin + interpretation basis](./archive/F0006-assertion-plane-origin-and-interpretation-basis/README.md) | 2026-11-05 | Five Done stories, 35 observed ACs, 336 unique passing final product cases; changed-code coverage 1170/1266 (92.4171%). Both implementation review findings repaired. SEC-01 dependency/resource-isolation remediation is required before untrusted or production PDF ingestion. |
+planning-mds/features/TRACKER-GOVERNANCE.md:36:  - `Required Signoff Roles`
+planning-mds/BLUEPRINT.md:116:Locked unless changed by an accepted ADR (master blueprint section 3).
+planning-mds/BLUEPRINT.md:125:- AuthN: authentik OIDC. AuthZ: native Casbin adapter behind an AuthorizationService with typed resource scopes. Session transport: same-origin BFF with an opaque HttpOnly session cookie and server-held tokens (ADR-0051 decision recorded 2026-11-08; runtime choices in ADR-0082, both Proposed until F0021-S0009 proves master blueprint section 121.2 items 8 and 9)
+planning-mds/BLUEPRINT.md:129:- Testing: pytest for `engine/` and `neuron/` (unit, integration, evaluation against the Golden Corpus). Frontend testing confirmed at F0021 Phase B (ADR-0082 D12): Vitest with Testing Library, and Playwright with `@axe-core/playwright` for end-to-end, real-browser and accessibility proof. The F0021 shell also confirms React Router 7, TanStack Query 5, Zustand 5 (memory only), Tailwind CSS 4 with shadcn/ui, and react-i18next. Cross-cutting scans per the framework evidence contract (dependency, secrets, SAST, DAST)
+planning-mds/BLUEPRINT.md:163:| `neuron/**/migrations/**` | `runtime_bearing = true` and `deployment_config_changed = true` |
+planning-mds/BLUEPRINT.md:197:End-user personas established by F0065 Phase A (2026-09-07), ahead of F0021 to F0023, because F0065 was
+planning-mds/BLUEPRINT.md:204:first user-facing features, F0021 to F0023.
+planning-mds/BLUEPRINT.md:206:F0021 Phase A (2026-11-27) adds Noor the Security Administrator — `examples/personas/security-administrator.md` — and reuses Rosa, Priya and Dana.
+planning-mds/BLUEPRINT.md:210:The runtime epic inventory is the master blueprint section 95 roadmap (original F0001 to F0063, plus F0065–F0068), sequenced per sections 115.3, 124 and 127. F0064 tracks repository tooling separately. The authoritative registry is `features/REGISTRY.md` and the sequencing view is `features/ROADMAP.md`, both generated from `kg-source/features/**`. The original 63 runtime features retain their identifiers and stages. F0065 adds a bounded neurosymbolic assessment in v0.1B under the user-authorized 2026-09-07 amendment; its draft architecture remains subject to proof and review. F0066 adds open-statement extraction and signature alignment in v0.2B under ADR-0063, accepted as direction on 2026-09-25. F0067 adds the read-only Graph Observatory in v0.2B under proposed ADR-0071 and ADR-0072 (2026-10-13); its trace contract is carried into F0016, F0021, F0034, F0036 to F0038, F0040 to F0042, F0045 and F0058 first. F0068 reserves conditional spectral/heat retrieval experiments at v0.4+ after the measured F0035/F0036 baseline (2026-11-06); it adds no baseline dependency or runtime activation. Story links are appended by the plan action as each feature is planned.
+planning-mds/BLUEPRINT.md:297:- [F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior](features/F0021-native-react-semantic-shell-and-oidc-session/README.md) - Planned (Phase A and B approved 2026-11-27, plan run `2026-11-27-6cda122a`; nine stories, 55 ACs; ADR-0082 Proposed)
+planning-mds/BLUEPRINT.md:298:  - [F0021-S0001](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) - Not Started
+planning-mds/BLUEPRINT.md:299:  - [F0021-S0002](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) - Not Started
+planning-mds/BLUEPRINT.md:300:  - [F0021-S0003](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md) - Not Started
+planning-mds/BLUEPRINT.md:301:  - [F0021-S0004](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) - Not Started
+planning-mds/BLUEPRINT.md:302:  - [F0021-S0005](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) - Not Started
+planning-mds/BLUEPRINT.md:303:  - [F0021-S0006](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) - Not Started
+planning-mds/BLUEPRINT.md:304:  - [F0021-S0007](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) - Not Started
+planning-mds/BLUEPRINT.md:305:  - [F0021-S0008](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md) - Not Started
+planning-mds/BLUEPRINT.md:306:  - [F0021-S0009](features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md) - Not Started
+planning-mds/BLUEPRINT.md:382:Every new or changed semantic concept needs a definition, worked example, boundary case, and owning feature/story/contract links. Start with [EX-GL-001](examples/neurosymbolic-gl/README.md) and the [coverage map](examples/README.md). Structured examples validate against declared local schemas; runtime stories must later reproduce observed outcomes. Synthetic examples, observed proof evidence, and independent frozen evaluation data remain explicitly distinguished. F0065 carries six unstarted stories; its drafted examples do not constitute runtime delivery.
+planning-mds/BLUEPRINT.md:398:Eight architectural planes (section 4) implemented as a modular monolith across `engine/` (semantic kernel, commit services, governance, review, search, security), `neuron/` (interpretation, conversation, learning, agent tools), and `experience/` (native semantic UX, including the Review Panel), with Docling, the direct-baseline vLLM client, PostgreSQL extensions, and (from v0.3) Temporal as engines around the semantic core (ADR-0001 as amended by ADR-0057, sections 100 and 125; Docling-Graph was rejected with ADR-0060 on 2026-11-08, section 126). Engine packages as built through F0008 are listed in master blueprint section 77; the container topology is unchanged (`architecture/c4-container.md`). The deployable topology and dependency matrix are a P0 pre-build requirement (section 106.2).
+planning-mds/BLUEPRINT.md:479:ADR-0061/0062 (accepted 2026-09-28 for the bounded F0002 scope after feature run `2026-09-27-bb7c8d1d`; originally Proposed), AuthX v1 schema and OpenAPI design version 0.2.0 specify compatible migrations and existing-consumer integration. No new runtime or policy grants are delivered. F0002 proves review and canonical commit authorization independently; F0018 owns full review-to-canonical orchestration and F0022 owns review UI. This explicitly reconciles the old master-blueprint §116.1 F0002 wiring shorthand without broadening the approved PRD. Existing C4 deployment topology is unchanged; the feature README adds its ERD and component diagram. ADR-0042/0052/0053 remain Proposed for broader obligations.
+planning-mds/BLUEPRINT.md:513:**Not changed:** F0002's approved plan. Utopia's same-knowledge-base provenance record (0048) matches F0002's composite ownership keys. Its extra safeguards were left as a follow-up for the F0002 implementation run, and the operator brought them into that run at its G4 approval gate (2026-09-28, scope amendment recorded in run `2026-09-27-bb7c8d1d` gate-decisions.md). Engine migration 0007 implements them:
+planning-mds/BLUEPRINT.md:525:No new deployable, assertion HTTP route, UI, grants or extraction activation. Current authorization's mutation facade gains optional source READ requirements in the same unit of work; it must not nest a read facade that commits the outer transaction. Existing `direct-baseline` and v1 content writer defaults follow F0005's final approved rejection decision. Full durable drops/run adoption stays F0016; full source-completeness/commit orchestration stays F0018; display stays F0022; open extraction/alignment stays F0066. New restrictions apply to attributable v2 evidence/review/correction lineage; unregistered legacy pilot references remain an explicit compatibility boundary. ADR-0065 and ADR-0075 remain Proposed until their required runtime proofs. Existing C4 topology is unchanged; feature README contains ER/component diagrams. Bounded implementation is complete: 336 unique final product cases pass and changed executable-line coverage is 1170/1266 (92.4171%). The operator approved SEC-01 only for trusted local synthetic fixtures; dependencies and resource isolation must be remediated/qualified before untrusted or production PDFs (AI Engineer + DevOps; Security verification; target 2026-11-10). Broader ADR proof/activation gates remain separate. Evidence: [PM closeout](operations/evidence/runs/2026-11-02-5a00b0ff/pm-closeout.md).
+planning-mds/BLUEPRINT.md:554:The design schemas are `fact-slot-key-v1`, `fact-answer-v1` and `fact-slot-resolution-result-v1`. The C4 topology is unchanged, and the feature README carries the ER and component views.
+planning-mds/BLUEPRINT.md:579:Feature run `2026-11-17-1a4ae2f0` implemented the design and was approved by the operator at G4 on 2026-11-18. It delivers migration 0014, `brain_domain.temporal`, `brain_temporal` bounds/attestation/commit/reader and the additive `/facts` changes. All 46 ACs and the six ADR-0078 proof gates pass on PostgreSQL 18 (1081 engine tests; 98.0% changed-line coverage). The operator accepted ADR-0078 on 2026-11-19 (decision run `2026-11-19-12422004`). SEC-F8-02 (the application connects as a superuser) and refusal reason persistence move to F0018. Independent review `2026-11-18-d34a095e` returned NOT DONE. Remediation run `2026-11-18-bce4909b` (approved 2026-11-19) added the commit-response temporal metadata, the legacy read shape and migration 0015 (same-slot lineage), amended S0004 AC1 and S0007 AC6, and recorded the F0018 handoffs. A second review, `2026-11-19-b21ec2de`, found that the new commit response could return a predecessor's attestation dates without READ on their documents (SEC-F8-NEW-01, High). Second remediation run `2026-11-19-8cfcd0ff` (approved 2026-11-19) refuses the whole commit with the non-disclosing 404 in that case. Evidence: [PM closeout](operations/evidence/runs/2026-11-19-8cfcd0ff/pm-closeout.md).
+planning-mds/BLUEPRINT.md:609:Security follow-up due at feature G3. Existing C4 topology is unchanged.
+planning-mds/BLUEPRINT.md:629:Feature run `2026-11-24-08701e37` implemented the design, with operator G4 approval on 2026-11-25. It delivers `brain_domain.provenance`, the `brain-provenance` reader (exported, not routed), the opt-in `prepare_reads` authorization hook, review-boundary preflight with refused-attempt attribution and an atomic learning reservation, and migration 0016. All 41 ACs and EX-PROV-001–005 are proven on PostgreSQL 18 (changed-line coverage 94.4%; 1392/1392 shared conformance results). G2 recorded five design corrections, among them a nullable `fact_change.from_version_id` and attempt authorization bound by `audit_event.decision_id` (see the run reports). ADR-0080 runtime proofs are met; the ADR stays Proposed pending operator acceptance. Evidence: [PM closeout](operations/evidence/runs/2026-11-24-08701e37/pm-closeout.md). F0010 owns retraction semantics; F0020/F0022/F0023 own exposure and F0041/F0026 own learning/benchmark governance.
+planning-mds/BLUEPRINT.md:636:### 4.20 F0021 native React shell and BFF session (Phase B approved 2026-11-27)
+planning-mds/BLUEPRINT.md:645:The [assembly plan](features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md) and proposed [ADR-0082](architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md) fix the runtime choices that ADR-0051 leaves to F0021:
+planning-mds/BLUEPRINT.md:699:   - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.
+   236	**Accessibility, language and budget**
+   237	
+   238	- WCAG 2.2 AA with semantic theme tokens. All strings come from `en-US.json`.
+   239	- Budget script: the entry chunk's initial JavaScript must be at most 180 kB gzip, measured from the Vite manifest.
+   240	
+   241	## Step 8 — Real-Browser Proof (S0009)
+   242	
+   243	**Stack and run conditions**
+   244	
+   245	- `docker-compose.e2e.yml` starts:
+   246	  - PostgreSQL and authentik from the dev blueprint;
+   247	  - the engine, with `BRAIN_OIDC_BACKCHANNEL_URL` pointing at `idp-recorder`;
+   248	  - the built shell under `vite preview` on 4173.
+   249	- Runs start from a clean volume. Results record the authentik, Chromium and Playwright versions.
+   250	
+   251	**Proofs**
+   252	
+   253	- **Token absence (S0009 AC1):** inspect cookies, every storage API, every URL, and every response body and header.
+   254	- **Single refresh (AC2):** the recorder counts refresh grants per refresh-token family while 20 parallel requests run against an expired access token. The test-only `BRAIN_TEST_ACCESS_SKEW` setting is absent outside the e2e composition, and startup refuses it when `BRAIN_PUBLIC_ORIGIN` is not localhost.
+   255	- **Revocation failure (AC3):** the recorder injects a 503 or a drop on `/revoke`. A follow-up refresh grant with the revoked token is refused by authentik.
+   256	- **Principal isolation (AC4):** alice and bob; a list of malicious return routes.
+   257	- **Mutation continuity (AC5):** a Review Panel decision is blocked by an expired session, is not received (the engine decision count is unchanged), and is sent only on "Submit now". A stale or revoked variant is refused without retry.
+   258	

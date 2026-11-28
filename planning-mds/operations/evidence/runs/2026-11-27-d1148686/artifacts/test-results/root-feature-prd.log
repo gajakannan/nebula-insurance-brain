@@ -1,0 +1,271 @@
+    68 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md
+    67 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md
+    67 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md
+    68 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md
+    68 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md
+    67 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md
+    67 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md
+    66 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md
+    66 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md
+    48 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/GETTING-STARTED.md
+   251 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md
+    60 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/README.md
+    71 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/STATUS.md
+    61 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/acceptance-criteria-checklist.md
+   206 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml
+    76 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml
+   366 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md
+   111 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql
+    12 planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/personas.md
+  1866 total
+# F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+
+**Feature ID:** F0021
+**Phase:** MVP — v0.1B
+**Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`)
+**Owner:** Product Manager (Phase A); Architect (Phase B)
+**Governing ADRs:** [ADR-0036](../../architecture/decisions/ADR-0036-nebula-keeps-a-native-semantic-ux-onyx-is-a-reference-implementation.md) (Accepted), [ADR-0049](../../architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md) (Accepted for the F0001-S0006 boundary), [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md) (Proposed; decision recorded 2026-11-08; this feature is its proving feature), [ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) (Proposed; carry-in seam only)
+
+## Feature Statement
+
+**As an** insurance knowledge worker or reviewer
+**I want** to sign in once to a native Nebula web application that keeps my session on the server, renews it safely and never replays my decisions behind my back
+**So that** I can work in Nebula's semantic views without tokens in my browser, without losing work when a session expires, and without an action being submitted that I did not confirm.
+
+## Business Objective
+
+- **Goal:** deliver the first user-facing surface (master blueprint §3, §120.5): a same-origin backend-for-frontend (BFF) session, the React shell every later screen mounts into, and the re-authentication behavior that keeps reviewer decisions safe.
+- **Metric:** master blueprint §121.2 items 8 (session transport) and 9 (mutation continuity) pass against the real authentik issuance, storage, renewal and logout flow, including an upstream revocation failure. These are ADR-0051's formal acceptance conditions.
+- **Baseline:** today the proof-scope Review Panel (F0001-S0004) takes a bearer token from the URL or a text field. No session, renewal, logout, CSRF protection or shell exists.
+- **Target:** zero access or refresh tokens in any browser-readable storage, URL, or response body; exactly one upstream refresh per renewal burst; zero automatically replayed mutations; bounded `authentication_event` growth under a rejected-credential burst.
+
+## Problem Statement
+
+- **Current State:** the only UI is a proof page that asks for a raw bearer token. The CRM reference mixes an HttpOnly-cookie model with browser-direct renewal that writes tokens to `sessionStorage`, and its logout revokes a refresh token the browser never set (§119.3). Since F0002, every rejected credential writes one durable `authentication_event` row with no edge throttle (F0002 security review, medium).
+- **Desired State:** one BFF session model (ADR-0051 D1–D6), an application shell with app-wide routing, server-state caching, state and styling choices that F0022, F0023 and F0067 inherit, and re-authentication that preserves in-memory work and requires explicit re-confirmation of any blocked mutation.
+- **Impact:** F0022 (native review round trip) and F0023 (Entity 360) cannot ship a user-facing screen without this feature. ADR-0051 cannot be accepted without its proof.
+
+## Scope & Boundaries
+
+**In Scope:**
+- Sign-in through a same-origin BFF using the OIDC authorization-code flow with PKCE, state and nonce against authentik; an opaque `Secure`, `HttpOnly`, `SameSite` session cookie; server-held access and refresh tokens (S0001).
+- Cookie-authenticated calls to the existing engine routes with CSRF and origin checks on every state-changing request, and distinct unauthenticated / session-expired / denied / not-found outcomes (S0002).
+- A single coalesced server-side renewal path, refresh-token rotation, and server-enforced idle (30 min) and absolute (8 h) session bounds (S0003; operator decision D1).
+- Re-authentication in a popup that keeps the page's in-memory work, shows a blocked mutation as not submitted and requires explicit re-confirmation; a redirect fallback that restores only a sanitized route (S0004; D3).
+- Logout that revokes the server-held refresh token upstream, ends the server session and reports an upstream failure; cache and in-flight-work clearing on logout, principal change, active knowledge-base switch and grant-revision change (S0005).
+- The shell: signed-in home with the principal's display name and current tenant/knowledge-base memberships, an active knowledge-base selector that only narrows, and denied / not-found / signed-out / error screens (S0006; D2).
+- The route-level feature-flag and lazy-loading seam F0067 needs, and the existing proof Review Panel rehosted behind the session with the token-in-URL entry removed (S0007; D2).
+- Throttling of rejected credentials on both the bearer API and the BFF cookie path: 20 per client per 60 s, then `429` (S0008; D4; F0002 carry-in).
+- The §121.2 items 8 and 9 proof against real authentik, PostgreSQL and the rehosted Review Panel decision submission (S0009).
+
+**Out of Scope:**
+- Document 360, the full review batch workflow, renderer changes and reviewer-authority rules (F0022). The rehosted panel keeps its current F0001-S0004 behavior.
+- Entity 360 (F0023), search, chat and graph views (v0.2), and the Graph Observatory itself (F0067; only the seam is delivered).
+- New authorization grants, roles, resources or policy rows. The shell reads the principal's existing memberships; the engine stays the authorization boundary.
+- Retention of `authentication_event` rows (F0026) and production host, TLS termination and ingress choices (F0026, §117.1 item 3).
+- An idempotent command protocol for controlled mutation retry (§120.5 names it as later work).
+- External users (brokers, MGAs), self-registration, account linking and IdP migration (§121.2 item 2 remainder).
+- Locales other than `en-US`.
+
+## Personas
+
+See [personas.md](personas.md). Primary: Rosa (Business Reviewer) and Priya (GL Underwriter). Secondary: Noor (Security Administrator, new) and Dana (Platform Engineer).
+
+## Acceptance Criteria Overview
+
+Nine stories, 55 acceptance criteria; the per-AC proof map is in [acceptance-criteria-checklist.md](acceptance-criteria-checklist.md).
+
+- [ ] Tokens never reach the browser: no access, refresh or ID token in cookies readable by script, `localStorage`, `sessionStorage`, IndexedDB, URLs or response bodies (S0001, S0009).
+- [ ] Every state-changing cookie-authenticated request without a valid CSRF token or with a foreign origin is refused before any engine handler runs (S0002).
+- [ ] A burst of concurrent requests after access-token expiry causes exactly one upstream refresh (S0003).
+- [ ] A mutation blocked by an expired session is never sent again without the user's explicit re-confirmation, and the re-confirmed request re-checks current revision and authority (S0004, S0009).
+- [ ] Logout revokes the refresh token at authentik; an upstream failure is shown to the user and recorded, never reported as success (S0005, S0009).
+- [ ] Query caches and in-flight work are cleared on logout, principal change, active knowledge-base switch and grant-revision change (S0005, S0006).
+- [ ] A flagged, lazily loaded route adds nothing to the base bundle and is not fetched while its flag is off (S0007).
+- [ ] A burst of 1,000 rejected credentials from one client writes at most 21 `authentication_event` rows per 60-second window (S0008).
+
+## UX / Screens
+
+| Screen | Purpose | Key Actions |
+|--------|---------|-------------|
+| Sign-in redirect / callback | Start and complete the OIDC flow; show a sign-in failure without creating a session | Continue to IdP; retry sign-in |
+| Shell frame + Home | Show who is signed in, the session state, current memberships and the active knowledge base | Switch active knowledge base; sign out; open a mounted route |
+| Session-expired dialog | Re-authenticate without leaving the page; list any blocked action as not submitted | Sign in again (popup); discard and sign out |
+| Blocked-action re-confirmation | Ask the user to confirm a mutation that was blocked by session expiry | Re-submit (re-checked); cancel |
+| Signed-out page | Confirm sign-out and state whether upstream revocation succeeded | Sign in again |
+| Access denied / not found | Explain a denied or unavailable resource without disclosing that it exists | Return home |
+| Review Panel (rehosted) | The existing F0001-S0004 proof panel at a session-backed route | Existing panel actions only |
+| Too many attempts | Explain throttling after repeated rejected credentials | Wait and retry |
+
+## Screen Layouts (ASCII)
+
+**Shell + Home — Desktop (≥ 1024 px)**
+
+```
++----------------------------------------------------------------------------------+
+| NEBULA  Insurance Brain        [KB: Tenant A / GL Pilot  v]   Rosa M.  [Sign out] |
++---------------+------------------------------------------------------------------+
+| Home          |  Welcome, Rosa M.                                                |
+| Reviews       |  Signed in via authentik  ·  session active (idle limit 30 min)  |
+| (flagged      |                                                                  |
+|  routes only  |  Your access                                                     |
+|  when on)     |  +------------+----------------+-----------+                     |
+|               |  | Tenant     | Knowledge base | Role      |                     |
+|               |  | Tenant A   | GL Pilot       | Reviewer  |  <- active          |
+|               |  | Tenant A   | Property Pilot | Member    |                     |
+|               |  +------------+----------------+-----------+                     |
+|               |  Switching the active knowledge base clears loaded data.         |
++---------------+------------------------------------------------------------------+
+| status bar: [Session expires in 2:00 — Stay signed in]  (shown at 28 min idle)    |
++----------------------------------------------------------------------------------+
+```
+
+**Shell + Home — Narrow (360–767 px)**
+
+```
++------------------------------------+
+| [=] NEBULA            Rosa M. [⎋]  |
++------------------------------------+
+| KB: [Tenant A / GL Pilot       v]  |
++------------------------------------+
+| Welcome, Rosa M.                   |
+| Session active                     |
+|                                    |
+| Your access                        |
+|  Tenant A · GL Pilot · Reviewer *  |
+|  Tenant A · Property Pilot · Member|
++------------------------------------+
+| [=] opens: Home / Reviews          |
++------------------------------------+
+```
+
+**Session-expired dialog with a blocked action — Desktop (narrow: full-screen sheet, same content)**
+
+```
++-------------------------------------------------------------+
+|  Your session has expired                                   |
+|                                                             |
+|  Your work on this page is still here. Sign in again to     |
+|  continue.                                                  |
+|                                                             |
+|  NOT SUBMITTED:  Review decision for item 7f3c… (2 fields)  |
+|  You will be asked to confirm it again after signing in.    |
+|                                                             |
+|        [ Sign in again ]          [ Discard and sign out ]  |
+|                                                             |
+|  Pop-up blocked? [Sign in on this page] (unsaved input will |
+|  be lost; you return to this page)                          |
++-------------------------------------------------------------+
+```
+
+**Blocked-action re-confirmation**
+
+```
++-------------------------------------------------------------+
+|  Confirm action                                             |
+|  "Review decision for item 7f3c…" was not submitted because |
+|  your session expired. It will be checked again against the |
+|  current item and your current access.                      |
+|              [ Submit now ]              [ Cancel ]         |
++-------------------------------------------------------------+
+```
+
+**Signed-out page (desktop and narrow share one centered column)**
+
+```
++------------------------------------------+
+|  You are signed out of Nebula.           |
+|  (!) We could not confirm sign-out at    |
+|      the identity provider. Close the    |
+|      browser or contact your admin.      |   <- only when revocation failed
+|              [ Sign in again ]           |
++------------------------------------------+
+```
+
+## Data Requirements
+
+**Core Entities:**
+- **Browser session** (new, server-side): opaque session identifier (cookie value), stable principal ID, issuer, display name, server-held access/refresh/ID tokens, created-at, last-activity-at, absolute expiry, idle expiry, CSRF secret, active knowledge base, grant revision seen. Storage, encryption at rest and table design are Phase B decisions.
+- **Principal / Membership** (existing, F0002): read-only here. Memberships carry tenant, knowledge base, role and grant revision.
+- **AuthenticationEvent** (existing, F0001/F0002): gains new reason codes for session and throttling outcomes (`rate_limited`, session expiry and revocation-failure reasons); exact codes are Phase B.
+
+**Validation Rules:**
+- Return routes are same-origin relative paths that match a registered route pattern; anything else becomes `/` (S0001 AC5).
+- The active knowledge base must be one of the principal's current memberships; otherwise it resets to none (S0006 AC4).
+
+**Data Relationships:**
+- Browser session → Principal: N:1. A session never changes principal; a different principal at re-authentication ends it (S0004 AC5).
+
+## Role-Based Access
+
+The shell adds no role, resource or grant. Every protected read and write keeps the engine's existing authorization (F0002, ADR-0061/0062); UI guards and hidden controls are convenience only (§120.5).
+
+| Role | Access Level | Notes |
+|------|-------------|-------|
+| Any verified USER principal with no membership | Sign in, see Home with a "no access yet" state, sign out | First-sight provisioning stays as in F0002 (no grants) |
+| TenantMember | Shell, Home, own memberships; reads the engine already allows | Unchanged policy |
+| Reviewer | Above, plus the rehosted Review Panel's existing read and decision actions | Unchanged policy; F0022 owns reviewer authority changes |
+| Service / agent principals | No browser session; bearer API only | BFF sign-in refused for non-human clients (S0001 AC6) |
+| Unauthenticated | Sign-in entry, signed-out page, throttling page | No protected data |
+
+## Success Criteria
+
+- §121.2 items 8 and 9 pass against real authentik and PostgreSQL in the later feature run, which makes ADR-0051 eligible for operator acceptance.
+- F0022 and F0023 can mount routes into the shell without changing session, cache or styling choices.
+- The rejected-credential burst proof closes the F0002 medium recommendation.
+
+## Risks & Assumptions
+
+**Operator decisions (G1, 2026-11-27):**
+
+| ID | Question | Decision |
+|---|---|---|
+| D1 | Session bounds | Server-enforced 30-minute idle timeout and 8-hour absolute lifetime; idle warning 2 minutes before expiry; after the absolute limit the user signs in again at the IdP with no silent renewal |
+| D2 | Shell scope in v0.1 | Sign-in/out, session status, Home with identity and memberships, active knowledge-base selector (narrowing only; switching clears caches), the route/flag/lazy-load seam, and the proof Review Panel rehosted behind the cookie session with the token-in-URL entry removed; its decision submission is the real mutation for §121.2 item 9 |
+| D3 | Re-authentication UX | Popup re-authentication keeps in-memory work; blocked mutations are shown as not submitted and need explicit re-confirmation; if the popup is blocked, a full redirect restores only the sanitized route |
+| D4 | Rejected-credential throttling | Per client: up to 20 rejected credentials per 60 s each write the normal event; then `429` with `Retry-After`, no per-request row, and one `rate_limited` event per client per window; applies to the bearer API and the BFF cookie path |
+
+**PM assumptions (for operator review at G3):**
+
+- **A1 — Browsers:** the latest two major versions of desktop Chrome, Edge, Firefox and Safari; layouts work from 360 px wide.
+- **A2 — Accessibility:** WCAG 2.2 AA for every F0021 screen, with zero serious or critical axe violations.
+- **A3 — Locale:** `en-US` only; all user-facing strings come from translation resources so later locales need no code change.
+- **A4 — Non-browser clients:** the bearer-token API stays for service, agent, Neuron and test callers. The BFF is the only browser path; the shell never sends a bearer token.
+- **A5 — Idle activity:** only a user-initiated request extends the idle timer. Background session-status checks do not.
+- **A6 — Client address for throttling:** the immediate peer address, or a forwarded address only when it comes from a configured trusted proxy.
+- **A7 — Active knowledge base:** a narrowing preference held with the server session, so it survives reload, and reset on principal change. It never grants access.
+- **A8 — Other tabs:** after logout or session end in one tab, other tabs of the same browser show the signed-out state on their next server call and within 60 seconds.
+
+**Risks:**
+- Popup blockers: mitigated by the redirect fallback (D3).
+- `Secure` cookies on local `http://localhost`: the local proof profile and TLS approach are Phase B decisions; production ingress is F0026.
+- authentik revocation behavior: the upstream-failure path must be forced in the proof (S0009), not assumed.
+
+## Dependencies
+
+- **F0002** (Done): verified principals, memberships, grant revisions, `authentication_event`, authorization execution.
+- **F0001-S0004** (Done): the proof Review Panel and its review routes, rehosted unchanged in behavior.
+- **F0011** (Done): generated contracts under `experience/src/generated/contracts/v1/` that the shell consumes.
+- **Downstream:** F0022, F0023 (mount routes; inherit session and app-wide choices), F0067 (route seam), F0026 (event retention, production ingress).
+
+## Related Stories
+
+| Story | Title |
+|---|---|
+| [F0021-S0001](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) | Sign in through the BFF with an opaque session |
+| [F0021-S0002](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks |
+| [F0021-S0003](F0021-S0003-renew-once-and-bound-session-lifetime.md) | Renew once and bound session lifetime |
+| [F0021-S0004](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) | Re-authenticate without losing work or replaying mutations |
+| [F0021-S0005](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) | Log out with upstream revocation and cache hygiene |
+| [F0021-S0006](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) | Show identity and knowledge-base context in the shell |
+| [F0021-S0007](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) | Provide the route seam and rehost the review panel |
+| [F0021-S0008](F0021-S0008-throttle-rejected-credentials.md) | Throttle rejected credentials |
+| [F0021-S0009](F0021-S0009-prove-session-transport-and-mutation-continuity.md) | Prove session transport and mutation continuity |
+
+## Rollout & Enablement
+
+The shell replaces the proof-scope launch form; the old `?token=` entry is removed, not flagged. Local development uses the authentik dev blueprint. GETTING-STARTED is written at Phase B.
+
+## Sources
+
+Master blueprint §3, §118.1, §119.3, §119.5, §120.1, §120.5, §121.2; ADR-0036, ADR-0049, ADR-0051, ADR-0072; graph-observatory-design §10; F0002 security review and PM closeout (run `2026-09-27-bb7c8d1d`); F0021 README amendments (2026-09-28, 2026-10-13, 2026-11-08).

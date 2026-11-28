@@ -1,0 +1,288 @@
+engine/packages/brain-security/tests/test_verification.py
+engine/packages/brain-security/tests/conftest.py
+engine/packages/brain-security/tests/test_payload_reads.py
+engine/packages/brain-security/tests/test_delegation.py
+engine/packages/brain-security/tests/test_provenance_prepared_read.py
+engine/packages/brain-security/tests/test_evaluation.py
+engine/packages/brain-security/tests/test_principals.py
+engine/packages/brain-security/tests/test_casbin_adapter.py
+engine/packages/brain-security/tests/test_execution.py
+engine/packages/brain-security/tests/test_identity_profile.py
+engine/apps/api/tests/test_f0009_review_compatibility.py
+engine/apps/api/tests/test_facts.py
+engine/apps/api/tests/test_content.py
+engine/apps/api/tests/test_security_headers.py
+engine/apps/api/tests/test_facts_temporal_helpers.py
+engine/apps/api/tests/test_health.py
+engine/apps/api/tests/test_errors.py
+engine/apps/api/tests/test_reviews.py
+engine/apps/api/tests/test_contract_openapi.py
+experience/src/review-panel/Viewport.tsx
+experience/src/review-panel/ReviewPanel.tsx
+experience/src/review-panel/FieldList.tsx
+experience/src/review-panel/api.ts
+experience/src/review-panel/types.ts
+experience/src/review-panel/__tests__/Viewport.test.tsx
+experience/src/review-panel/__tests__/ReviewPanel.test.tsx
+experience/src/review-panel/__tests__/FieldList.test.tsx
+     1	# F0021 BFF API design (ADR-0082, Proposed). OpenAPI 3.1 fragment.
+     2	# The feature run merges these paths, the sessionCookie scheme and the responses into
+     3	# planning-mds/api/brain-api.yaml (version 0.7.0) and regenerates the contract snapshot with the
+     4	# F0011 toolchain. It is kept out of brain-api.yaml during planning so the shipped snapshot stays
+     5	# consistent with the running engine.
+     6	#
+     7	# Paths are engine paths. The browser reaches them under BRAIN_PUBLIC_API_PREFIX (/api), which the
+     8	# same-origin front strips. Every response here carries Cache-Control: no-store and Vary: Cookie.
+     9	openapi: 3.1.0
+    10	info:
+    11	  title: Nebula Insurance Brain API — F0021 BFF additions
+    12	  version: 0.7.0-design
+    13	paths:
+    14	  /auth/login:
+    15	    get:
+    16	      tags: [Session]
+    17	      operationId: startSignIn
+    18	      summary: Start an OIDC authorization-code + PKCE sign-in (S0001 AC1, S0004 AC2/AC6)
+    19	      security: []
+    20	      parameters:
+    21	      - name: return_to
+    22	        in: query
+    23	        required: false
+    24	        description: Relative shell route; validated against config/experience-routes.yaml (ADR-0082 D11). Invalid values become /.
+    25	        schema: {type: string, maxLength: 512}
+    26	      - name: mode
+    27	        in: query
+    28	        required: false
+    29	        schema: {type: string, enum: [redirect, popup], default: redirect}
+    30	      - name: reauth
+    31	        in: query
+    32	        required: false
+    33	        description: Popup correlation reference (128 random bits, base64url). Required when mode=popup, refused otherwise.
+    34	        schema: {type: string, pattern: '^[A-Za-z0-9_-]{22}$'}
+    35	      - name: prompt
+    36	        in: query
+    37	        required: false
+    38	        description: Only `login` is accepted; forwarded to the IdP (used after an explicit sign-out, ADR-0082 D7).
+    39	        schema: {type: string, enum: [login]}
+    40	      responses:
+    41	        '302':
+    42	          description: Redirect to the IdP authorization endpoint. Sets __Host-nebula_login (Max-Age=600). No token, verifier or nonce in any cookie or body.
+    43	          headers:
+    44	            Location: {schema: {type: string, format: uri}}
+    45	            Set-Cookie: {schema: {type: string}}
+    46	        '400':
+    47	          $ref: '#/components/responses/BadRequest'
+    48	        '429':
+    49	          $ref: '#/components/responses/RateLimited'
+    50	        '503':
+    51	          description: IdP discovery unavailable (`idp_unavailable`); the shell shows "sign-in unavailable".
+    52	          content:
+    53	            application/problem+json:
+    54	              schema: {$ref: '#/components/schemas/ProblemDetails'}
+    55	  /auth/callback:
+    56	    get:
+    57	      tags: [Session]
+    58	      operationId: completeSignIn
+    59	      summary: OIDC redirect target (S0001 AC2/AC4/AC6/AC7, S0004 AC2/AC7)
+    60	      security: []
+    61	      parameters:
+    62	      - {name: code, in: query, required: false, schema: {type: string, maxLength: 2048}}
+    63	      - {name: state, in: query, required: false, schema: {type: string, maxLength: 128}}
+    64	      - {name: error, in: query, required: false, schema: {type: string, maxLength: 128}}
+    65	      responses:
+    66	        '302':
+    67	          description: >-
+    68	            Redirect mode. Success → sanitized return route with the new __Host-nebula_session cookie and the
+    69	            login cookie cleared. Any failure (state missing/unknown/expired/used, binding or nonce mismatch, IdP
+    70	            error, code-exchange failure, non-human client, disabled principal) → /sign-in-failed with no session,
+    71	            no session cookie, one authentication_event with the internal reason. A throttled client → /too-many-attempts.
+    72	        '200':
+    73	          description: >-
+    74	            Popup mode success: minimal HTML (CSP default-src 'none'; script-src 'nonce-…') that posts
+    75	            {type: "nebula.reauth", ref} on BroadcastChannel("nebula-session") and to window.opener with the exact
+    76	            public origin, then closes. Popup-mode failure renders the failure page and posts nothing.
+    77	          content:
+    78	            text/html: {schema: {type: string}}
+    79	  /auth/logout:
+    80	    post:
+    81	      tags: [Session]
+    82	      operationId: signOut
+    83	      summary: End the session, revoke upstream, clear the cookie (S0005 AC1–AC4, AC7)
+    84	      security:
+    85	      - sessionCookie: []
+    86	      parameters:
+    87	      - $ref: '#/components/parameters/CsrfToken'
+    88	      responses:
+    89	        '200':
+    90	          description: Session ended and cookie cleared in every case; the body reports the revocation and end-session outcomes truthfully.
+    91	          headers:
+    92	            Set-Cookie: {schema: {type: string}, description: Expired __Host-nebula_session with the same attributes}
+    93	          content:
+    94	            application/json:
+    95	              schema: {$ref: 'https://nebula.local/schemas/logout-result-v1.schema.json'}
+    96	        '400':
+    97	          $ref: '#/components/responses/AmbiguousCredentials'
+    98	        '403':
+    99	          $ref: '#/components/responses/CsrfRejected'
+   100	  /session:
+   101	    get:
+   102	      tags: [Session]
+   103	      operationId: getSession
+   104	      summary: Current session, identity, memberships, CSRF token and flags (S0006 AC1/AC6, S0007 AC4)
+   105	      security:
+   106	      - sessionCookie: []
+   107	      parameters:
+   108	      - $ref: '#/components/parameters/ActivityHint'
+   109	      responses:
+   110	        '200':
+   111	          description: The session snapshot. Never contains an access, refresh or ID token.
+   112	          content:
+   113	            application/json:
+   114	              schema: {$ref: 'https://nebula.local/schemas/browser-session-v1.schema.json'}
+   115	        '400':
+   116	          $ref: '#/components/responses/AmbiguousCredentials'
+   117	        '401':
+   118	          $ref: '#/components/responses/SessionUnauthenticated'
+   119	        '429':
+   120	          $ref: '#/components/responses/RateLimited'
+   121	  /session/active-knowledge-base:
+   122	    put:
+   123	      tags: [Session]
+   124	      operationId: setActiveKnowledgeBase
+   125	      summary: Change the active knowledge base; narrows shell requests only (S0006 AC4/AC5)
+   126	      security:
+   127	      - sessionCookie: []
+   128	      parameters:
+   129	      - $ref: '#/components/parameters/CsrfToken'
+   130	      requestBody:
+   131	        required: true
+   132	        content:
+   133	          application/json:
+   134	            schema: {$ref: 'https://nebula.local/schemas/active-knowledge-base-update-v1.schema.json'}
+   135	      responses:
+   136	        '200':
+   137	          description: Updated session snapshot.
+   138	          content:
+   139	            application/json:
+   140	              schema: {$ref: 'https://nebula.local/schemas/browser-session-v1.schema.json'}
+   141	        '400':
+   142	          $ref: '#/components/responses/AmbiguousCredentials'
+   143	        '401':
+   144	          $ref: '#/components/responses/SessionUnauthenticated'
+   145	        '403':
+   146	          $ref: '#/components/responses/CsrfRejected'
+   147	        '422':
+   148	          description: '`knowledge_base_not_available`: the pair is not a current membership; the active value is unchanged.'
+   149	          content:
+   150	            application/problem+json:
+     1	-- F0021 migration design: 0018_f0021_browser_sessions (ADR-0082 D3, D9; Proposed).
+     2	-- Design input for the feature run; Alembic revision down_revision = 0017_f0012_ontology_releases.
+     3	-- Expand-only: four new tables, two nullable columns, one append-only trigger.
+     4	-- The 8-hour and 30-minute CHECKs encode operator decision D1; changing D1 needs a new migration.
+     5	-- Downgrade drops the four tables and two columns only when browser_session and session_event are empty;
+     6	-- otherwise it refuses (sessions are live security state; session_event is audit).
+     7	
+     8	-- Server-owned display names for the shell (F0021-S0006 AC1). Nullable; dev seed sets them.
+     9	ALTER TABLE tenant         ADD COLUMN display_name text NULL CHECK (display_name IS NULL OR length(display_name) BETWEEN 1 AND 200);
+    10	ALTER TABLE knowledge_base ADD COLUMN display_name text NULL CHECK (display_name IS NULL OR length(display_name) BETWEEN 1 AND 200);
+    11	
+    12	-- One row per started sign-in (F0021-S0001 AC1/AC4). Single use by conditional UPDATE … RETURNING.
+    13	CREATE TABLE browser_login_attempt (
+    14	    id                         uuid        PRIMARY KEY,
+    15	    state_digest               bytea       NOT NULL UNIQUE CHECK (length(state_digest) = 32),
+    16	    binding_digest             bytea       NOT NULL CHECK (length(binding_digest) = 32),
+    17	    nonce_digest               bytea       NOT NULL CHECK (length(nonce_digest) = 32),
+    18	    code_verifier_ciphertext   bytea       NOT NULL,
+    19	    key_id                     text        NOT NULL CHECK (key_id ~ '^[a-z0-9-]{1,32}$'),
+    20	    mode                       text        NOT NULL CHECK (mode IN ('redirect', 'popup')),
+    21	    reauth_ref                 text        NULL CHECK (reauth_ref IS NULL OR reauth_ref ~ '^[A-Za-z0-9_-]{22}$'),
+    22	    return_to                  text        NOT NULL CHECK (left(return_to, 1) = '/' AND length(return_to) <= 512),
+    23	    prompt_login               boolean     NOT NULL DEFAULT false,
+    24	    created_at                 timestamptz NOT NULL,
+    25	    expires_at                 timestamptz NOT NULL,
+    26	    consumed_at                timestamptz NULL,
+    27	    CHECK (expires_at = created_at + interval '10 minutes'),
+    28	    CHECK ((mode = 'popup') = (reauth_ref IS NOT NULL)),
+    29	    CHECK (consumed_at IS NULL OR consumed_at >= created_at)
+    30	);
+    31	CREATE INDEX ix_browser_login_attempt_expires ON browser_login_attempt (expires_at);
+    32	
+    33	-- Server-side session (ADR-0051 D1, ADR-0082 D3). The cookie value is never stored; only its SHA-256.
+    34	CREATE TABLE browser_session (
+    35	    id                         uuid        PRIMARY KEY,
+    36	    cookie_digest              bytea       NOT NULL UNIQUE CHECK (length(cookie_digest) = 32),
+    37	    principal_id               uuid        NOT NULL REFERENCES principal (id),
+    38	    issuer                     text        NOT NULL,
+    39	    subject                    text        NOT NULL,
+    40	    display_name               text        NULL CHECK (display_name IS NULL OR length(display_name) BETWEEN 1 AND 200),
+    41	    created_at                 timestamptz NOT NULL,
+    42	    last_activity_at           timestamptz NOT NULL,
+    43	    idle_expires_at            timestamptz NOT NULL,
+    44	    absolute_expires_at        timestamptz NOT NULL,
+    45	    access_expires_at          timestamptz NULL,
+    46	    token_ciphertext           bytea       NULL,
+    47	    key_id                     text        NULL CHECK (key_id IS NULL OR key_id ~ '^[a-z0-9-]{1,32}$'),
+    48	    renewal_count              integer     NOT NULL DEFAULT 0 CHECK (renewal_count >= 0),
+    49	    csrf_digest                bytea       NOT NULL CHECK (length(csrf_digest) = 32),
+    50	    active_tenant_id           uuid        NULL,
+    51	    active_knowledge_base_id   uuid        NULL,
+    52	    ended_at                   timestamptz NULL,
+    53	    end_reason                 text        NULL CHECK (end_reason IS NULL OR end_reason IN (
+    54	                                   'logout', 'idle_timeout', 'absolute_timeout', 'renewal_failed',
+    55	                                   'replaced', 'principal_changed', 'principal_disabled', 'principal_mismatch')),
+    56	    CHECK (absolute_expires_at = created_at + interval '8 hours'),
+    57	    CHECK (idle_expires_at <= absolute_expires_at),
+    58	    CHECK (idle_expires_at = last_activity_at + interval '30 minutes' OR idle_expires_at = absolute_expires_at),
+    59	    CHECK ((ended_at IS NULL) = (end_reason IS NULL)),
+    60	    CHECK ((token_ciphertext IS NULL) = (key_id IS NULL)),
+    61	    CHECK (ended_at IS NULL OR token_ciphertext IS NULL),          -- an ended session holds no tokens
+    62	    CHECK (ended_at IS NOT NULL OR token_ciphertext IS NOT NULL),  -- a live session always holds tokens
+    63	    CHECK ((active_tenant_id IS NULL) = (active_knowledge_base_id IS NULL)),
+    64	    FOREIGN KEY (active_knowledge_base_id, active_tenant_id) REFERENCES knowledge_base (id, tenant_id)
+    65	);
+    66	CREATE INDEX ix_browser_session_principal_live ON browser_session (principal_id) WHERE ended_at IS NULL;
+    67	
+    68	-- Append-only session lifecycle audit (F0021-S0003 AC3 renewal record, S0005 AC3/AC7 logout outcome, S0006 AC4).
+    69	CREATE TABLE session_event (
+    70	    event_id                   uuid        PRIMARY KEY,
+    71	    occurred_at                timestamptz NOT NULL,
+    72	    session_id                 uuid        NOT NULL REFERENCES browser_session (id),
+    73	    principal_id               uuid        NOT NULL REFERENCES principal (id),
+    74	    event_type                 text        NOT NULL CHECK (event_type IN (
+    75	                                   'session_created', 'session_replaced', 'renewed', 'renewal_failed',
+    76	                                   'ended_idle', 'ended_absolute', 'ended_principal_changed',
+    77	                                   'ended_principal_disabled', 'ended_principal_mismatch',
+    78	                                   'logout', 'active_knowledge_base_changed')),
+    79	    trace_id                   text        NOT NULL,
+    80	    payload                    jsonb       NOT NULL DEFAULT '{}'::jsonb,
+    81	    -- logout payload: {"revocation": {"status", "reason"?}, "end_session": {"status"}}; never a token or cookie value.
+    82	    CHECK (event_type <> 'logout' OR (payload ? 'revocation' AND payload ? 'end_session'))
+    83	);
+    84	CREATE INDEX ix_session_event_session ON session_event (session_id, occurred_at);
+    85	-- Reuse the migration 0007 append-only trigger function brain_append_only(): UPDATE and DELETE are refused,
+    86	-- exactly as for audit_event and authentication_event.
+    87	CREATE TRIGGER trg_session_event_append_only
+    88	    BEFORE UPDATE OR DELETE ON session_event
+    89	    FOR EACH ROW EXECUTE FUNCTION brain_append_only();
+    90	
+    91	-- Rejected-credential counters (F0021-S0008, ADR-0082 D9). Mutable; not audit.
+    92	CREATE TABLE credential_rejection_window (
+    93	    client_key                 text        NOT NULL CHECK (length(client_key) BETWEEN 1 AND 64),
+    94	    window_start               timestamptz NOT NULL CHECK (date_trunc('minute', window_start) = window_start),
+    95	    rejected_count             integer     NOT NULL CHECK (rejected_count >= 1),
+    96	    PRIMARY KEY (client_key, window_start)
+    97	);
+    98	CREATE INDEX ix_credential_rejection_window_start ON credential_rejection_window (window_start);
+    99	
+   100	-- Counting statement (one round trip, atomic across workers):
+   101	--   INSERT INTO credential_rejection_window (client_key, window_start, rejected_count)
+   102	--   VALUES ($1, date_trunc('minute', now()), 1)
+   103	--   ON CONFLICT (client_key, window_start) DO UPDATE SET rejected_count = credential_rejection_window.rejected_count + 1
+   104	--   RETURNING rejected_count;
+   105	-- Pruning: DELETE FROM credential_rejection_window WHERE window_start < now() - interval '10 minutes'
+   106	--   (run when the returned count is 1, i.e. once per new window per client).
+   107	
+   108	-- Renewal lock (ADR-0082 D6), separate short transaction:
+   109	--   SET LOCAL lock_timeout = '15s';
+   110	--   SELECT … FROM browser_session WHERE id = $1 AND ended_at IS NULL FOR UPDATE;
+   111	--   (re-check access_expires_at; refresh only if still within the 60 s margin; UPDATE; COMMIT)

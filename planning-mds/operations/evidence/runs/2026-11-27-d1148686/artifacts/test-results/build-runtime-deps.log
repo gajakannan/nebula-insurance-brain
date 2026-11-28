@@ -1,0 +1,392 @@
+    90	            "reason_code": reason_code,
+    91	            "method": request.method,
+    92	            "path": request.url.path,
+    93	            "trace_id": request.headers.get("x-request-id") or str(uuid4()),
+    94	            "event_trace_id": event_trace_id,
+    95	        },
+    96	    )
+    97	
+    98	
+    99	async def get_db_session() -> AsyncGenerator[AsyncSession]:
+   100	    async with _session_factory() as session:
+   101	        yield session
+   102	
+   103	
+   104	def get_session_factory() -> async_sessionmaker[AsyncSession]:
+   105	    return _session_factory
+   106	
+   107	
+   108	def get_credential_verifier() -> CredentialVerifier:
+   109	    return _credential_verifier
+   110	
+   111	
+   112	def get_identity_profile() -> IdentityProfile:
+   113	    return _identity_profile
+   114	
+   115	
+   116	def get_casbin_adapter() -> CasbinAuthorizationAdapter:
+   117	    return _casbin_adapter
+   118	
+   119	
+   120	# F0007: the static registry holds only the `sys` system predicates. The `test`
+   121	# namespace is wired only by test composition (dependency override).
+   122	# F0012 (ADR-0081 D6): each request composes it with the predicates of ontology
+   123	# releases installed in the slot's tenant/KB, loaded in the request's session.
+   124	_predicate_registry = production_registry()
+   125	
+   126	
+   127	def get_predicate_registry(
+   128	    session: AsyncSession = Depends(get_db_session),
+   129	) -> PredicateContractRegistry:
+   130	    return ReleasePredicateRegistry(_predicate_registry, OntologyReleaseStore(session))
+   131	
+   132	
+   133	def get_authentication_event_sink(
+   134	    session_factory: async_sessionmaker[AsyncSession] = Depends(get_session_factory),
+   135	) -> AuthenticationEventSink:
+   136	    return SqlAlchemyAuthenticationEventSink(session_factory)
+   137	
+   138	
+   139	async def _reject(
+   140	    request: Request, sink: AuthenticationEventSink, reason_code: str
+   141	) -> UnauthenticatedError:
+   142	    """Durably record the rejected credential (no principal or resource lookup), then
+   143	    return the generic 401. If the event cannot be persisted, the caller gets a
+   144	    sanitized 503 instead and no protected operation runs."""
+   145	    trace_id = new_trace_id()
+   146	    _record_credential_failure(request, reason_code, trace_id)
+   147	    try:
+   148	        await sink.record(
+   149	            AuthenticationEvent(
+   150	                event_id=uuid4(),
+   151	                occurred_at=datetime.now(UTC),
+   152	                reason_code=AuthenticationReason(reason_code),
+   153	                route_template=_route_template(request),
+   154	                trace_id=trace_id,
+   155	            )
+   156	        )
+   157	    except Exception as exc:  # noqa: BLE001 - any sink failure is an availability failure
+   158	        logger.error("authentication_event_unavailable", extra={"reason_code": reason_code})
+   159	        raise ServiceUnavailableError() from exc
+   160	    return UnauthenticatedError(reason_code)
+   161	
+   162	
+   163	async def current_principal(
+   164	    request: Request,
+   165	    authorization: str | None = Header(default=None),
+   166	    session: AsyncSession = Depends(get_db_session),
+   167	    credential_verifier: CredentialVerifier = Depends(get_credential_verifier),
+   168	    identity_profile: IdentityProfile = Depends(get_identity_profile),
+   169	    authentication_sink: AuthenticationEventSink = Depends(get_authentication_event_sink),
+   170	) -> Principal:
+   171	    """Verify before any storage read, then resolve the stable principal and commit
+   172	    the identity mapping before any protected operation (F0002-S0002)."""
+   173	    if not authorization or not authorization.startswith("Bearer "):
+   174	        raise await _reject(request, authentication_sink, "malformed")
+   175	    token = authorization.removeprefix("Bearer ")
+   176	    try:
+   177	        credential = await credential_verifier.verify(token)
+   178	    except CredentialError as exc:
+   179	        raise await _reject(request, authentication_sink, exc.code) from exc
+   180	    resolver = PrincipalResolver(SqlAlchemyIdentityRepository(session), identity_profile)
+   181	    try:
+   182	        principal = await resolver.resolve(credential)
+   183	        await session.commit()
+   184	    except CredentialError as exc:
+   185	        await session.rollback()
+   186	        raise await _reject(request, authentication_sink, exc.code) from exc
+   187	    except SQLAlchemyError as exc:
+   188	        await session.rollback()
+   189	        raise ServiceUnavailableError() from exc
+   190	    return principal
+   191	
+   192	
+   193	async def get_authorization_execution(
+   194	    session: AsyncSession = Depends(get_db_session),
+   195	    casbin_adapter: CasbinAuthorizationAdapter = Depends(get_casbin_adapter),
+   196	) -> AuthorizationExecution:
+   197	    """Composes the shared evaluator, current-state store, clock and policy release
+   198	    over the request's unit of work. No caller-assembled membership snapshot."""
+   199	    return AuthorizationExecution(
+   200	        SqlAlchemyAuthorityStore(session), casbin_adapter, casbin_adapter.release
+   201	    )
+   202	
+   203	
+   204	async def get_provenance_reader(
+   205	    session: AsyncSession = Depends(get_db_session),
+     1	import type { ReviewDecisionAction, ReviewDecisionReasonCode, ReviewDecisionReceipt, ReviewItem } from "./types";
+     2	
+     3	export class ApiError extends Error {
+     4	  constructor(
+     5	    public status: number,
+     6	    public code: string,
+     7	    message: string,
+     8	  ) {
+     9	    super(message);
+    10	  }
+    11	}
+    12	
+    13	async function handle<T>(response: Response): Promise<T> {
+    14	  if (!response.ok) {
+    15	    const body = await response.json().catch(() => ({ code: "unknown", title: response.statusText }));
+    16	    throw new ApiError(response.status, body.code ?? "unknown", body.title ?? response.statusText);
+    17	  }
+    18	  return (await response.json()) as T;
+    19	}
+    20	
+    21	export async function fetchReviewItem(reviewItemId: string, bearerToken: string): Promise<ReviewItem> {
+    22	  const response = await fetch(`/reviews/${reviewItemId}`, {
+    23	    headers: { Authorization: `Bearer ${bearerToken}` },
+    24	  });
+    25	  return handle<ReviewItem>(response);
+    26	}
+    27	
+    28	export interface SubmitDecisionInput {
+    29	  reviewItemId: string;
+    30	  action: ReviewDecisionAction;
+    31	  assertionVersion: number;
+    32	  reasonCode?: ReviewDecisionReasonCode;
+    33	  correctedValue?: Record<string, unknown>;
+    34	  evidence?: ReviewItem["evidence"];
+    35	  reviewerComment?: string;
+    36	}
+    37	
+    38	export async function submitReviewDecisions(
+    39	  reviewBatchId: string,
+    40	  decisions: SubmitDecisionInput[],
+    41	  bearerToken: string,
+    42	): Promise<ReviewDecisionReceipt> {
+    43	  const response = await fetch(`/reviews/batches/${reviewBatchId}/decisions`, {
+    44	    method: "POST",
+    45	    headers: {
+    46	      Authorization: `Bearer ${bearerToken}`,
+    47	      "Content-Type": "application/json",
+    48	    },
+    49	    body: JSON.stringify({
+    50	      decisions: decisions.map((decision) => ({
+    51	        review_item_id: decision.reviewItemId,
+    52	        action: decision.action,
+    53	        assertion_version: decision.assertionVersion,
+    54	        reason_code: decision.reasonCode ?? null,
+    55	        corrected_value: decision.correctedValue ?? null,
+    56	        evidence: decision.evidence ?? null,
+    57	        reviewer_comment: decision.reviewerComment ?? null,
+    58	      })),
+    59	    }),
+    60	  });
+    61	  return handle<ReviewDecisionReceipt>(response);
+    62	}
+     1	{
+     2	  "name": "nebula-insurance-brain-experience",
+     3	  "private": true,
+     4	  "version": "0.1.0",
+     5	  "packageManager": "pnpm@12.21.0",
+     6	  "type": "module",
+     7	  "description": "Proof-scope Nebula Review Panel (F0001-S0004). The full application shell is F0021.",
+     8	  "scripts": {
+     9	    "dev": "vite",
+    10	    "build": "tsc -b && vite build",
+    11	    "lint": "eslint .",
+    12	    "test": "vitest run",
+    13	    "test:watch": "vitest",
+    14	    "test:coverage": "vitest run --coverage",
+    15	    "contracts:check": "node scripts/contracts/check.mjs",
+    16	    "contracts:test": "node --test scripts/contracts/runtime.test.mjs"
+    17	  },
+    18	  "dependencies": {
+    19	    "fflate": "0.8.3",
+    20	    "pdfjs-dist": "4.10.38",
+    21	    "react": "^18.3.1",
+    22	    "react-dom": "^18.3.1"
+    23	  },
+    24	  "devDependencies": {
+    25	    "@eslint/js": "^9.17.0",
+    26	    "@testing-library/jest-dom": "^6.6.3",
+    27	    "@testing-library/react": "^16.3.0",
+    28	    "@testing-library/user-event": "^14.5.2",
+    29	    "@types/react": "^18.3.18",
+    30	    "@types/react-dom": "^18.3.5",
+    31	    "@vitejs/plugin-react": "^4.3.4",
+    32	    "@vitest/coverage-v8": "^5.0.0",
+    33	    "ajv": "8.20.0",
+    34	    "ajv-formats": "3.0.1",
+    35	    "eslint": "^9.17.0",
+    36	    "eslint-plugin-react-hooks": "^5.1.0",
+    37	    "eslint-plugin-react-refresh": "^0.4.16",
+    38	    "globals": "^15.14.0",
+    39	    "jsdom": "^25.0.1",
+    40	    "jsonc-parser": "3.3.1",
+    41	    "typescript": "^5.7.3",
+    42	    "typescript-eslint": "^8.19.0",
+    43	    "vite": "^6.4.0",
+    44	    "vitest": "^5.0.0"
+    45	  }
+    46	}
+     1	import { configDefaults, defineConfig } from "vitest/config";
+     2	import react from "@vitejs/plugin-react";
+     3	
+     4	export default defineConfig({
+     5	  plugins: [react()],
+     6	  server: {
+     7	    proxy: {
+     8	      "/reviews": "http://localhost:8100",
+     9	      "/health": "http://localhost:8100",
+    10	    },
+    11	  },
+    12	  test: {
+    13	    exclude: [...configDefaults.exclude, "scripts/contracts/*.test.mjs"],
+    14	    environment: "jsdom",
+    15	    globals: true,
+    16	    setupFiles: ["./src/test-setup.ts"],
+    17	  },
+    18	});
+# SOLUTION-PATTERNS.md — Nebula Insurance Brain
+
+Project-level implementation conventions every role follows. Seeded by the Architect at F0001 Phase B from the master blueprint and the accepted ADRs; changes go through an ADR first.
+
+## Metadata
+
+- Project: Nebula Insurance Brain
+- Version: 0.1
+- Last Updated: 2026-09-28 (F0002: authorization enforcement point, ADR-0062)
+- Owners: Architect (patterns), Security (pattern 1 co-sign)
+- Scope: `engine/`, `neuron/`, `experience/` (from F0021), runtime assets, contracts under `planning-mds/`
+
+## Pattern Categories
+
+- `MUST` - mandatory convention for this solution
+- `SHOULD` - recommended convention unless a documented exception exists
+- `MAY` - optional convention based on feature needs
+
+## Pattern Scope Labels
+
+- `Universal` - technology-agnostic rule expected in any stack
+- `Stack-Specific` - tied to a concrete framework/tool choice
+- `Hybrid` - universal policy with stack-specific implementation details
+
+---
+
+## 1. Authorization Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: authentik OIDC, native Casbin adapter in `brain_security`, PostgreSQL-backed principals and memberships
+
+### Decision
+- Policy model: verified `(issuer, subject)` → stable internal principal; structural tenancy (tenant, knowledge base) resolved from current grants; Casbin evaluates `(role, resource type, action, condition)` over server-hydrated typed attributes; authorization is the conjunction of membership, action, resource or parent scope, classification, and delegation limits.
+- Enforcement point: every API route authenticates through `brain_api.deps.current_principal` and runs its protected operation through `brain_security.execution.AuthorizationExecution` (`read` / `mutate`), which locks current authority, evaluates with the pure `brain_security.evaluation.evaluate`, and commits the decision audit before any payload or together with the mutation. Background workers use the same `execution.decide` orchestration over a sync store. No consumer assembles its own resource snapshot. Commit services run inside the facade's unit of work. Search, vector, and graph paths filter before rows, counts, facets, and snippets; MCP uses the same path.
+
+### Rationale
+- Master blueprint sections 66, 118 to 120; ADR-0030; proposed ADR-0049, ADR-0050, ADR-0053. The CRM gaps in section 119 are not copied.
+
+### Applied In
+- Backend: `brain_security` (verifier, identity profile, resolver, Casbin adapter, evaluator, execution facade, delegation rules, audit); trusted state in `brain_persistence` (`authx`, `tenancy`, `identity`, `grants`); routes in `brain_api.routes.*`
+- Frontend: renders what the API returns; never derives permissions client-side (F0021)
+- AI layer: `neuron/` calls the engine as the acting principal; the model server receives no identity data
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```text
+p, TenantMember, content_artifact, read, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, Reviewer, review_task, annotate, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+p, ServicePrincipal, fact_slot, commit, r.obj.knowledge_base_id == r.sub.knowledge_base_id
+```
+
+Denials are reported as 404; reason codes live only in `audit_event`.
+
+---
+
+## 2. Audit and Timeline Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: PostgreSQL append-only tables written inside the same transaction as the change
+
+### Decision
+- What gets logged: every authorization decision (policy hash, grant revision, actor and delegate, resource, action, decision, reason code, trace id); every canonical commit (commit id, fact versions, change reason, evidence); every review decision; every interpretation run.
+- Event immutability policy: `audit_event`, `outbox_event`, `canonical_fact_change`, `review_event`, and `review_decision` are append-only; corrections create new rows linked to the originals (ADR-0037).
+
+### Rationale
+- Sections 17, 66, 109.3; ADR-0009, ADR-0010, ADR-0037; proposed ADR-0041.
+
+### Applied In
+- Data model: `audit_event`, `outbox_event`, `canonical_fact_change`, `review_event`
+- Workflow engine: none in v0.1; Temporal (F0050) proposes state changes only through commit services (ADR-0028)
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```json
+{"actor_principal_id": "…", "resource_type": "fact_slot", "action": "commit", "decision": "allow", "policy_hash": "sha256:…", "grant_revision": 7, "trace_id": "…"}
+```
+
+---
+
+## 3. API Design Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: FastAPI, OpenAPI 3.1 contract in `planning-mds/api/brain-api.yaml`, JSON Schema 2020-12 in `planning-mds/schemas/`
+
+### Decision
+- API style: REST over root resource paths (`/content/{id}`, `/facts/{id}`, `/reviews/{id}`); no `/api` prefix; nouns only; versioning by OpenAPI `info.version` until a breaking change forces a path version.
+- Error format: RFC 9457 `ProblemDetails` with a stable `code` and a `traceId` extension member (the one camelCase field, required by the framework API contract validator), media type `application/problem+json`.
+- Pagination approach: cursor-based (`cursor`, `limit` up to 100) for list endpoints (none in F0001).
+- Time coordinates: `validAsOf` and `knownAsOf` query parameters on canonical reads, defaulting to now.
+
+### Rationale
+- Section 68; ADR-0013; the framework API validator rejects `/api` prefixes and requires ProblemDetails on error responses.
+
+### Applied In
+- API contracts: `planning-mds/api/brain-api.yaml`
+- Service endpoints: `brain_api.routes.*`
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```http
+GET /facts/8b2c…?validAsOf=2026-07-01T00:00:00Z&knownAsOf=2026-06-05T00:00:00Z
+```
+
+---
+
+## 4. Clean Architecture Pattern
+
+### Scope
+- Label: `Hybrid`
+- Stack context: Python packages under `engine/packages/` and `neuron/packages/`
+
+### Decision
+- Layer boundaries: `brain_domain` (frozen dataclasses, enums, invariants, no I/O) → application packages (`brain_security`, `brain_temporal`, `brain_review`, `brain_content` ports) → infrastructure adapters (`brain_persistence`, local filesystem content adapter) → `brain_api` and `brain_worker`.
+- Dependency direction: inward only; adapters implement `Protocol` ports declared in application packages; `brain_api` wires them in `create_app()`.
+- `neuron/` mirrors the split: `brain_interpretation` (models, ports) → `brain_ingestion` (bundle writer and durable publication callback) and `brain_extraction` (the pipeline-neutral extraction port, the direct-baseline adapter, and result/evidence mapping). ADR-0060's Docling-Graph target was Rejected on 2026-11-08. Keep any pipeline-specific IDs and output directories outside domain contracts.
+
+### Rationale
+- Master blueprint section 114.3 (package list as code boundaries); BLUEPRINT 2.3 boundary rules.
+
+### Applied In
+- `engine/`: as above
+- `neuron/`: as above; writes to canonical truth only through engine commit services (section 64)
+
+### Enforcement Level
+- `MUST`
+
+### Example
+
+```text
+brain_domain -> brain_temporal (port: CanonicalFactRepository) -> brain_persistence (SQLAlchemy) -> brain_api
+```
+
+---
+
+## 5. Frontend Pattern
+
+### Scope
+- Label: `Stack-Specific`

@@ -468,7 +468,7 @@ erDiagram
     ASSERTION ||--o{ REVIEW_SUBMISSION_ATTEMPT : original_claim
 ```
 
-## F0021 browser sessions and throttle (Phase B design 2026-11-27, proposed ADR-0082)
+## F0021 browser sessions and throttle (Phase B design 2026-11-27, plan-review rework 2026-11-28; proposed ADR-0082)
 
 Migration 0018 (design: [migration-design.sql](../features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql)) is expand-only.
 
@@ -484,7 +484,10 @@ Migration 0018 (design: [migration-design.sql](../features/F0021-native-react-se
 - Holds the principal, issuer, subject and display name.
 - Holds the idle deadline (30 min), absolute deadline (8 h) and access-token expiry.
 - Tokens are an AES-256-GCM ciphertext under a key ID; ending a session sets it to NULL.
-- Also holds the renewal count, CSRF digest, active tenant/knowledge base (composite FK to `knowledge_base(id, tenant_id)`) and the end reason.
+- Holds the CSRF secret twice: a SHA-256 digest for constant-time checks, and an AES-256-GCM ciphertext under the same key ID so `GET /session` returns the same token on every read. The ciphertext is NULL once the session ends.
+- Holds the IdP end-session lifecycle: state digest, request time, outcome (`pending`, then `completed`, `failed` or `unconfirmed`, set once) and outcome time.
+- An ended row's end reason decides the response: timeout and renewal-failure endings give `session_expired`; other endings give `unauthenticated`.
+- Also holds the renewal count, active tenant/knowledge base (composite FK to `knowledge_base(id, tenant_id)`) and the end reason.
 - CHECKs tie together:
   - lifetime and D1;
   - ended state and token absence;
@@ -493,10 +496,10 @@ Migration 0018 (design: [migration-design.sql](../features/F0021-native-react-se
 **`session_event`:** append-only session lifecycle audit, using the migration 0007 trigger.
 
 - Records creation, replacement, renewal and its failure, idle and absolute endings, and principal endings.
-- Records logout, with the revocation and end-session outcomes.
+- Records logout, with the revocation outcome and the end-session start, and later one `end_session_completed`, `end_session_failed` or `end_session_unconfirmed` event.
 - Records active knowledge-base changes.
 
-**`credential_rejection_window`:** mutable per-client counters for 60-second windows. One atomic upsert per rejected credential; rows older than 10 minutes are pruned.
+**`credential_rejection_window`:** mutable per-client counters for clock-aligned windows (default 60 s, configurable to a divisor of one hour). Each rejection reads the row first; it upserts only while the count is at or below the limit, so throttled requests after the window's `rate_limited` event write nothing. Old windows are pruned.
 
 **Display names:** `tenant.display_name` and `knowledge_base.display_name` are nullable, server-owned names for the shell.
 

@@ -1,0 +1,56 @@
+{
+  "stage": "PR2",
+  "status": "pass",
+  "checks": [
+    {
+      "check": "check-plan-approvals",
+      "exit_code": 0,
+      "summary": "One current approved A+B planning run: 2026-11-27-6cda122a; no approval errors.",
+      "artifact": "artifacts/test-results/PR2-approval-details.log",
+      "command": "python3 agents/scripts/check-plan-approvals.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --plan-scope feature --target F0021"
+    },
+    {
+      "check": "validate-stories",
+      "exit_code": 0,
+      "summary": "All nine strict F0021 stories pass with no issues (55 raw ACs reviewed).",
+      "artifact": "artifacts/test-results/PR2-story-details.log",
+      "command": "python3 agents/product-manager/scripts/validate-stories.py /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session"
+    },
+    {
+      "check": "validate-trackers",
+      "exit_code": 0,
+      "summary": "0 errors, 0 warnings; feature evidence audit not requested by this read-only action.",
+      "artifact": "artifacts/test-results/PR2-tracker-details.log",
+      "command": "python3 agents/product-manager/scripts/validate-trackers.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain"
+    },
+    {
+      "check": "kg-validate",
+      "exit_code": 0,
+      "summary": "Integrity passes; 19 mapped features, 82 stories, 0 uncovered features. Two nonblocking unused-edge warnings: validated_by, supersedes.",
+      "artifact": "artifacts/test-results/PR2-kg-details.log",
+      "command": "python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py"
+    },
+    {
+      "check": "kg-check-drift",
+      "exit_code": 0,
+      "summary": "Drift/integrity pass; same two nonblocking unused-edge warnings; no regeneration or repair performed.",
+      "artifact": "artifacts/test-results/PR2-drift-details.log",
+      "command": "python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/kg/validate.py --check-drift"
+    },
+    {
+      "check": "validate-templates",
+      "exit_code": 0,
+      "summary": "Prompt templates align with action contracts.",
+      "artifact": "artifacts/test-results/PR2-template-details.log",
+      "command": "python3 agents/scripts/validate_templates.py"
+    },
+    {
+      "check": "required project plan-readiness",
+      "exit_code": 0,
+      "summary": "Required before_stage_complete check passed through PR2 gate runner; no local findings.",
+      "artifact": "artifacts/project-checks/PR2-plan-readiness-75b6d5791c6f4905bf567031c613dbab.stdout.json",
+      "command": "/usr/bin/python3 /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/validation/validate_plan_readiness.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --plan-scope feature --target F0021"
+    }
+  ],
+  "note": "All six core operations completed in declared order through run-gate.py before the required product check. The runner retained core exits but no stdout artifact references; supplemental read-only invocations captured full stdout afterward to satisfy command-level evidence. They do not replace the ordered gate pass."
+}

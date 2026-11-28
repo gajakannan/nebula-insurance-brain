@@ -1,0 +1,81 @@
+    75	          "type": "integer",
+    76	          "const": 120
+    77	        },
+    78	        "server_time": {
+    79	          "type": "string",
+    80	          "format": "date-time"
+    81	        }
+    82	      }
+    83	    },
+    84	    "csrf_token": {
+    85	      "type": "string",
+    86	      "pattern": "^[A-Za-z0-9_-]{43}$",
+    87	      "description": "256-bit synchronizer token, base64url without padding; held in page memory only."
+    88	    },
+    89	    "memberships": {
+    90	      "type": "array",
+    91	      "items": {
+    92	        "$ref": "#/$defs/membership"
+    93	      }
+    94	    },
+    95	    "grant_revision": {
+    96	      "type": "string",
+    97	      "pattern": "^[0-9a-f]{64}$",
+    98	      "description": "Opaque digest of the principal's current memberships; changes on any grant, revocation or revision change."
+    99	    },
+   100	    "active_knowledge_base": {
+   101	      "oneOf": [
+   102	        {
+   103	          "type": "null"
+   104	        },
+   105	        {
+   106	          "$ref": "#/$defs/kb_ref"
+   107	        }
+   108	      ]
+   109	    },
+   110	    "flags": {
+   111	      "type": "object",
+   112	      "propertyNames": {
+   113	        "pattern": "^[a-z][a-z0-9-]{0,63}$"
+   114	      },
+   115	      "additionalProperties": {
+   105	            }
+   106	          }
+   107	        }
+   108	      ]
+   109	    },
+   110	    "end_session": {
+   111	      "type": "object",
+   112	      "additionalProperties": false,
+   113	      "required": [
+   114	        "status",
+   115	        "url"
+   116	      ],
+   117	      "properties": {
+   118	        "status": {
+   119	          "enum": [
+   120	            "redirect",
+   121	            "unavailable"
+   122	          ]
+   123	        },
+   124	        "url": {
+   125	          "type": [
+   126	            "string",
+   127	            "null"
+   128	          ],
+   129	          "format": "uri"
+   130	        }
+   131	      },
+   132	      "allOf": [
+   133	        {
+   134	          "if": {
+   135	            "properties": {
+README.md
+action-context.md
+artifact-trace.md
+artifacts
+commands.log
+gate-decisions.md
+gate-state.json
+lifecycle-gates.log
+plan-review-report.md

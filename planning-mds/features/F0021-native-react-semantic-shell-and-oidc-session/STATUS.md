@@ -1,10 +1,10 @@
 # F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior — Status
 
-**Overall Status:** Planned — Phase A and Phase B approved; plan-review next
+**Overall Status:** Planned — plan-review `2026-11-27-d1148686` CONDITIONALLY READY; rework run `2026-11-28-831962b8` approved 2026-11-28 (Phase A and B); all six findings resolved; ready for the feature run
 **Last Updated:** 2026-11-27
 **Plan Run:** `2026-11-27-6cda122a` (A+B, new)
-**Phase A:** Approved 2026-11-27 (`approve-phase-a`)
-**Phase B:** Approved 2026-11-27 (`approve-phase-b`, confirming R1 and R2); design in [assembly plan](feature-assembly-plan.md) and proposed [ADR-0082](../../architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md)
+**Phase A:** Approved 2026-11-27 (`approve-phase-a`); rework approved 2026-11-28 (`approve-phase-a`, run `2026-11-28-831962b8`: PM-01 layouts, S0005 AC7 end-session outcomes, S0008 read-only throttle, S0009 per-browser proof, R1/R2 wording)
+**Phase B:** Approved 2026-11-27 (`approve-phase-b`, confirming R1 and R2); design in [assembly plan](feature-assembly-plan.md) and proposed [ADR-0082](../../architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md); rework approved 2026-11-28 (`approve-phase-b`, run `2026-11-28-831962b8`: ARCH-01/02/03, BUILD-01/02)
 **Implementation:** Not started
 
 ## Story Checklist

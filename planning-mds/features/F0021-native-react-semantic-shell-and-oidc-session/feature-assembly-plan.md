@@ -2,8 +2,8 @@
 
 **Created:** 2026-11-27
 **Author:** Claude / Architect
-**Status:** Phase B approved 2026-11-27 by operator token `approve-phase-b` (confirms R1 and R2)
-**Plan Run:** 2026-11-27-6cda122a (A+B, new)
+**Status:** Phase B approved 2026-11-27 by operator token `approve-phase-b` (confirms R1 and R2); plan-review rework approved 2026-11-28 by operator token `approve-phase-b` (run 2026-11-28-831962b8)
+**Plan Run:** 2026-11-27-6cda122a (A+B, new); plan-review rework run 2026-11-28-831962b8 (A+B, existing)
 **Requirements:** Phase A approved on 2026-11-27 (operator reply recorded as `approve-phase-a`); nine stories, 55 ACs; G1 decisions D1–D4; PM assumptions A1–A8.
 **Governing design:** [ADR-0082](../../architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md) (Proposed), refining [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md) (Proposed; decision recorded 2026-11-08). Uses [ADR-0049](../../architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md) for verification and principal resolution, and [ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) for the route seam.
 
@@ -28,13 +28,28 @@ Design inputs in this folder:
 - [contract-inventory.yaml](contract-inventory.yaml)
 - Three design schemas under `planning-mds/schemas/`: `browser-session-v1`, `active-knowledge-base-update-v1` and `logout-result-v1`.
 
+## Plan Review Rework (run 2026-11-28-831962b8)
+
+Plan review `2026-11-27-d1148686` was CONDITIONALLY READY with five High findings and one Medium. The operator chose rework (not risk acceptance) and answered the three requirement questions; Phase A rework was approved with `approve-phase-a` on 2026-11-28.
+
+| Finding | Resolution | Where |
+|---|---|---|
+| ARCH-01 CSRF token not recoverable from a digest | The CSRF secret is stored encrypted under the session key ring (same key ID as the tokens; re-encrypted on each token write) beside its digest. Every `GET /session` for one live session returns the same token from any worker, tab or reload; a new session gets a new token. | ADR-0082 D3, D5; `browser_session.csrf_ciphertext`; Step 1, Step 6; proof S0006 AC1, S0002 AC2 |
+| ARCH-02 ended timeout session lost `session_expired` | The response follows the stored end reason: `idle_timeout`, `absolute_timeout`, `renewal_failed` → `401 session_expired` for as long as the row exists; logout, replacement, principal endings and unknown digests → `401 unauthenticated`. Renewal waiters re-read the end reason; a lock timeout is `503`. | ADR-0082 D5 step 3, D6; Step 5; proof S0002 AC4, S0003 AC2, S0004 AC1 |
+| ARCH-03 end-session outcome not observable | authentik returns to the BFF route `GET /auth/end-session/return`, which sets `completed` (within 2 min), `failed` (`error` parameter or no endpoint) or `unconfirmed` (late) once and appends a `session_event`; a sweep marks never-returned logouts `unconfirmed` after 2 minutes. The signed-out page confirms only on `completed`. | ADR-0082 D7; migration columns `end_session_*`; `logout-result-v1`; bff-api-design.yaml; Step 6, Step 7, Step 8; proof S0005 AC7, S0009 AC3 |
+| BUILD-01 Chromium-only proof | S0009 runs as two Playwright projects, `chromium` and `firefox`, against one stack; both must pass in CI; per-browser versions and results recorded. | ADR-0082 D4; Step 8; S0009 rows |
+| BUILD-02 throttle writes while throttled | Read first; upsert only while the count is at or below the limit; throttled requests after the window's `rate_limited` event write nothing. Limit and window are settings; the window divides one hour and is clock-aligned. | ADR-0082 D9; migration-design.sql; Step 4; proof S0008 AC2/AC3 |
+| PM-01 status/error layouts | PRD now has one shared status/error block (desktop and narrow) with a per-page table; `SignInUnavailable` page added. | PRD; New Files; Step 7 |
+
+R1 and R2 wording fixes were applied to S0002 AC4 and S0008 AC2 in the same rework (no longer deferred to feature G0).
+
 ## Phase B Reconciliation (for operator review at G5)
 
 | # | Item | Resolution |
 |---|---|---|
 | R1 | **S0002 AC4 says "an authorization denial → `403`".** No engine route returns 403 for a denial. Every denial is the non-disclosing 404 (`brain-api.yaml` `Forbidden`: "user denials are reported as 404"; master blueprint section 118.2). | The design keeps the engine unchanged. 403 is used only for `csrf_rejected`, and a denial stays the existing 404 with the session kept (never 401). The AC4 proof shows each outcome is distinct and the session survives a denial. **Proposed PM wording correction at feature G0:** "an authorization denial → the engine's existing non-disclosing `404`, with the session kept". Confirmed by the operator with `approve-phase-b` (2026-11-27). |
 | R2 | **S0008 AC2 says "no credential verification runs"**, but AC4 requires a valid credential from a throttled client to be served, which needs verification. | Verification stays local while throttled: cached JWKS, session lookup, no JWKS refetch, no IdP call. A rejected credential then gets 429 with no event row. AC2 is proven as "no per-request `authentication_event`, no upstream IdP call". **Proposed PM wording correction at feature G0.** Confirmed by the operator with `approve-phase-b` (2026-11-27). |
-| R3 | S0005 AC7 depends on authentik's end-session behavior. | The provider's invalidation flow becomes `default-invalidation-flow` (ADR-0082 D2). The end-session URL carries `client_id` and `post_logout_redirect_uri`, with no `id_token_hint`. The signed-out page's "Sign in" sends `prompt=login`. Feature G0 verifies both against authentik 2026.2 before S0005 is built. |
+| R3 | S0005 AC7 depends on authentik's end-session behavior. | The provider's invalidation flow becomes `default-invalidation-flow` (ADR-0082 D2). The end-session URL carries `client_id`, `post_logout_redirect_uri` (the BFF return route) and `state`, with no `id_token_hint`. The signed-out page's "Sign in" sends `prompt=login`. Feature G0 verifies against authentik 2026.2, before S0005 is built, that it ends the session, returns to `post_logout_redirect_uri` with `state`, and what it does on error (the 2-minute `unconfirmed` bound covers an IdP that never returns). |
 | R4 | S0006 AC1 needs tenant and knowledge-base display names; `tenant` and `knowledge_base` have no name column. | Migration 0018 adds nullable `display_name` (expand-only). Null names show a localized "Unnamed knowledge base" with a short ID suffix. Dev seed data sets names. |
 | R5 | `/reviews/{id}` is both an engine path and the natural shell route. | One public origin: the shell at `/`, the engine under `/api/`, with the prefix stripped by the front. The OpenAPI paths stay at the root (SOLUTION-PATTERNS section 3: no `/api` prefix in the contract). The shell route is `/reviews/:reviewItemId`. |
 | R6 | ADR-0051 says "tenant switch". | Implemented as the active knowledge-base selector (Phase A reconciliation 3). A change of tenant is a change of selected membership. |
@@ -57,7 +72,7 @@ Design inputs in this folder:
 
 | Path | Change |
 |---|---|
-| `engine/apps/api/src/brain_api/config.py` | Add `public_origin`, `public_api_prefix`, `oidc_client_secret`, `oidc_backchannel_url`, `session_keys`, `trusted_proxies`, `experience_flags_path`, `experience_routes_path`; the BFF is enabled only when the secret and key ring are present |
+| `engine/apps/api/src/brain_api/config.py` | Add `public_origin`, `public_api_prefix`, `oidc_client_secret`, `oidc_backchannel_url`, `session_keys`, `trusted_proxies`, `throttle_limit`, `throttle_window_seconds` (must divide 3600), `experience_flags_path`, `experience_routes_path`; the BFF is enabled only when the secret and key ring are present |
 | `engine/apps/api/src/brain_api/deps.py` | `current_principal` becomes the ADR-0082 D5 pipeline: ambiguity check, bearer path unchanged, cookie path; the throttle wraps `_reject`; compose the session store and OIDC client |
 | `engine/apps/api/src/brain_api/app.py` | Mount `auth` and `session` routers when the BFF is enabled; add a `Cache-Control: no-store` / `Vary: Cookie` middleware for cookie requests |
 | `engine/apps/api/src/brain_api/errors.py` | `SessionExpiredError` (401 `session_expired`), `CsrfRejectedError` (403), `AmbiguousCredentialsError` (400), `RateLimitedError` (429 with `Retry-After`), `KnowledgeBaseNotAvailableError` (422), `IdpUnavailableError` (503) |
@@ -65,7 +80,7 @@ Design inputs in this folder:
 | `engine/packages/brain-persistence/src/brain_persistence/models.py` | ORM models for the four tables; `display_name` on `Tenant` and `KnowledgeBase`; composite FK targets declared (F0009 lesson) |
 | `engine/packages/brain-persistence/src/brain_persistence/identity.py` | Authentication-event sink accepts a payload (session reference, CSRF cause, client key for `rate_limited`) |
 | `config/authx-identity-profile.yaml` | Unchanged (issuer, audience and `human_clients: [brain]` stay); comment notes that the client is confidential |
-| `docker/authentik/blueprints/nebula-brain-dev.yaml` | `brain` provider: `client_type: confidential`, dev-only `client_secret`, redirect URIs `http://localhost:5173/api/auth/callback` and `http://localhost:4173/api/auth/callback` (stale `:8100` removed), `invalidation_flow: default-invalidation-flow`, `post_logout_redirect_uris` (or authentik's equivalent field) for `/signed-out` on both origins |
+| `docker/authentik/blueprints/nebula-brain-dev.yaml` | `brain` provider: `client_type: confidential`, dev-only `client_secret`, redirect URIs `http://localhost:5173/api/auth/callback` and `http://localhost:4173/api/auth/callback` (stale `:8100` removed), `invalidation_flow: default-invalidation-flow`, `post_logout_redirect_uris` (or authentik's equivalent field) for `/api/auth/end-session/return` on both origins |
 | `scripts/dev/seed_principals.py` and engine test token fixtures | Send the dev client secret on ROPC token requests; seed tenant and knowledge-base display names |
 | `experience/vite.config.ts` | Replace the `/reviews` and `/health` proxies with one `/api` proxy (prefix rewrite, `xfwd: true`); same proxy for `vite preview` on 4173; manual chunks for `pdfjs-dist`/`fflate` |
 | `experience/package.json` | Add `react-router` 7, `@tanstack/react-query` 5, `zustand` 5, `tailwindcss` 4 with `@tailwindcss/vite`, shadcn/ui primitives (`@radix-ui/*`, `class-variance-authority`, `clsx`, `tailwind-merge`), `i18next` with `react-i18next`, `@playwright/test`, `@axe-core/playwright`; scripts `e2e`, `budget`; description updated |
@@ -92,7 +107,7 @@ Design inputs in this folder:
   - `router.tsx`, `routes/registry.ts`
   - `api/client.ts`, `api/hygiene.ts`
   - `session/sessionStore.ts`, `session/bootstrap.ts`, `session/signOut.ts`, `session/reauth.ts`, `session/blockedQueue.ts`, `session/crossTab.ts`, `session/idleWarning.tsx`
-  - `pages/Home.tsx`, `pages/SignedOut.tsx`, `pages/SignInFailed.tsx`, `pages/TooManyAttempts.tsx`, `pages/NotFound.tsx`, `pages/RouteLoadError.tsx`
+  - `pages/StatusPage.tsx` (the shared PRD status/error block), `pages/Home.tsx`, `pages/SignedOut.tsx`, `pages/SignInFailed.tsx`, `pages/SignInUnavailable.tsx`, `pages/TooManyAttempts.tsx`, `pages/NotFound.tsx`, `pages/RouteLoadError.tsx`
   - `layout/ShellFrame.tsx`, `layout/Header.tsx`, `layout/KnowledgeBaseSelector.tsx`
   - `dialogs/SessionExpiredDialog.tsx`, `dialogs/ReconfirmDialog.tsx`
   - `i18n/en-US.json`
@@ -104,7 +119,7 @@ Design inputs in this folder:
   - `experience/eslint.config.js`: storage-API and `Authorization` header bans.
 - **Real-browser suite:**
   - `experience/e2e/**`: Playwright suite with `session-transport.spec.ts`, `mutation-continuity.spec.ts`, `principal-isolation.spec.ts`, `return-routes.spec.ts` and `a11y.spec.ts`.
-  - `experience/e2e/harness/idp-recorder/`: test-only HTTP proxy between the BFF and authentik. It counts refresh grants and injects revocation failures.
+  - `experience/e2e/harness/idp-recorder/`: test-only HTTP proxy between the BFF and authentik. It counts refresh grants and injects revocation failures and end-session failures (an error redirect, or no return).
   - `docker-compose.e2e.yml`
 
 ## Step 1 — Persistence and Settings
@@ -118,7 +133,9 @@ Design inputs in this folder:
   - `lookup(cookie_digest)`;
   - `touch`, at most once every 30 s;
   - `renew_locked`: separate transaction, `FOR UPDATE`, `lock_timeout` 15 s;
-  - `end` and `record_event`.
+  - `end` and `record_event`;
+  - `csrf_token(session)`: decrypts the stored CSRF secret; `verify_csrf` compares digests in constant time;
+  - `begin_end_session`, `complete_end_session(state_digest, error)` (single use, 2-minute rule) and `sweep_unconfirmed(limit=100)` (`FOR UPDATE SKIP LOCKED`).
 - Key ring parsing refuses an empty ring, duplicate key IDs and any key that is not 32 bytes.
 
 ## Step 2 — Identity Provider Client
@@ -152,7 +169,8 @@ Every failure writes exactly one `authentication_event` and sets no session cook
 ## Step 4 — Cookie Request Path, CSRF, Throttle (S0002, S0008)
 
 - Implement the ADR-0082 D5 order in `current_principal`. CSRF and origin checks run in the dependency, before any route handler.
-- The throttle (D9) wraps every rejection point: bearer, cookie and callback. The 21st rejection in a window writes one `rate_limited` event; later ones return 429 with `Retry-After` and write nothing.
+- The throttle (D9) wraps every rejection point: bearer, cookie and callback. It reads the window row first; at a count above the limit it returns 429 with `Retry-After` and writes nothing. Otherwise it upserts: returned ≤ 20 → normal 401 and event; = 21 → one `rate_limited` event and 429; > 21 (concurrent overshoot) → 429, no event.
+- The cookie lookup maps the stored end reason to the response (ADR-0082 D5 step 3): timeout and renewal-failure endings → `session_expired`; all other endings and unknown digests → `unauthenticated`.
 - Every response to a cookie request carries `Cache-Control: no-store` and `Vary: Cookie`. No CORS middleware is added.
 
 ## Step 5 — Renewal and Lifetime (S0003)
@@ -163,6 +181,7 @@ Every failure writes exactly one `authentication_event` and sets no session cook
 - Idle limit 30 min and absolute limit 8 h, enforced at lookup. The absolute limit is never extended.
 - `X-Nebula-Activity: background` does not touch the idle deadline.
 - Disabled principal or principal mismatch ends the session and returns `401 unauthenticated`.
+- A waiter that gets the lock after the session ended re-reads `end_reason` and applies the D5 mapping (`renewal_failed` → `session_expired`); `lock_timeout` → `503`, never `unauthenticated`.
 
 ## Step 6 — Logout and Session Endpoint (S0005, S0006 server)
 
@@ -171,12 +190,14 @@ Every failure writes exactly one `authentication_event` and sets no session cook
 - Takes the same row lock as renewal.
 - Revocation uses RFC 7009 with a 5 s timeout and no retry.
 - The outcome is recorded in `session_event` `logout`, and the response follows `logout-result-v1`.
-- An expired session gives `not_attempted` (`no_live_tokens`).
+- An expired session gives `not_attempted` (`no_live_tokens`). Its logout needs the origin checks; `X-CSRF-Token` is checked when present but not required (ADR-0082 D7).
+- End-session: store the `state` digest and `pending`; the response carries `end_session: {status: pending, url}` or `{status: failed, reason: no_endpoint}`.
+- `GET /auth/end-session/return` applies the 2-minute rule once and redirects to `/signed-out?end_session=<outcome>`. Login, logout and `GET /session` sweep stale `pending` rows to `unconfirmed` first.
 - A double submit: the second request finds the session ended and returns `not_attempted` (`session_already_ended`), so only one revocation is attempted.
 
 **Session endpoint and active knowledge base (ADR-0082 D10)**
 
-- `GET /session` and `PUT /session/active-knowledge-base`.
+- `GET /session` and `PUT /session/active-knowledge-base`. `csrf_token` is the decrypted per-session secret, identical on every read of the same session.
 - `grant_revision` is SHA-256 over the sorted current `(membership_id, grant_revision)` pairs; revoked and expired memberships are excluded.
 - Flags are read from `config/experience-flags.yaml`, with an mtime cache.
 
@@ -196,7 +217,7 @@ Every failure writes exactly one `authentication_event` and sets no session cook
 **API client**
 
 - One `apiClient` handles every request. It maps the D5 outcomes and never retries an unsafe method.
-- `401 session_expired`:
+- `401 session_expired` (from any request, including the background poll, because the server maps by end reason):
   - unsafe request → push it to the blocked queue (label, method, route, body; memory only);
   - GET → mark it for one retry;
   - then open `SessionExpiredDialog`.
@@ -219,6 +240,7 @@ Every failure writes exactly one `authentication_event` and sets no session cook
   - is awaited before rendering the new state.
 - Triggers: sign-out, principal change, active knowledge-base change, `grant_revision` change.
 - Cross-tab: BroadcastChannel messages, plus a background session poll every 30 s while the page is visible and on focus.
+- Sign-out: `signOut.ts` stores `{revocation, end_session: pending, started_at}` under `nebula.signout`, then navigates to the end-session URL. `SignedOut.tsx` shows the confirmation line only for `?end_session=completed` and the end-session warning for `failed`, `unconfirmed`, or a `pending` record older than 2 minutes found on any shell load.
 
 **Idle warning**
 
@@ -246,13 +268,15 @@ Every failure writes exactly one `authentication_event` and sets no session cook
   - PostgreSQL and authentik from the dev blueprint;
   - the engine, with `BRAIN_OIDC_BACKCHANNEL_URL` pointing at `idp-recorder`;
   - the built shell under `vite preview` on 4173.
-- Runs start from a clean volume. Results record the authentik, Chromium and Playwright versions.
+- Runs start from a clean volume. Results record the authentik and Playwright versions.
+- **Browser matrix (BUILD-01):** `playwright.config.ts` defines two projects, `chromium` and `firefox`, over the same specs and fixtures (one stack, distinct synthetic sessions per project; projects run one after the other so recorder counts stay per project). The report records each browser's version and per-spec result. The CI job fails unless both projects pass. Firefox needs no special flag for `Secure` cookies on `http://localhost`; feature G0 confirms it, and if not, both projects use the HTTPS profile (ADR-0082 D4).
 
 **Proofs**
 
 - **Token absence (S0009 AC1):** inspect cookies, every storage API, every URL, and every response body and header.
 - **Single refresh (AC2):** the recorder counts refresh grants per refresh-token family while 20 parallel requests run against an expired access token. The test-only `BRAIN_TEST_ACCESS_SKEW` setting is absent outside the e2e composition, and startup refuses it when `BRAIN_PUBLIC_ORIGIN` is not localhost.
 - **Revocation failure (AC3):** the recorder injects a 503 or a drop on `/revoke`. A follow-up refresh grant with the revoked token is refused by authentik.
+- **End-session outcomes (S0005 AC7):** success → `completed` and the next sign-in asks for credentials; recorder makes authentik's end-session redirect back with `error` → `failed`; recorder holds the browser (no return) → after 2 minutes (test clock) a `GET /session` sweep records `unconfirmed` and the next shell load shows the warning; discovery without an end-session endpoint → `failed` (`no_endpoint`).
 - **Principal isolation (AC4):** alice and bob; a list of malicious return routes.
 - **Mutation continuity (AC5):** a Review Panel decision is blocked by an expired session, is not received (the engine decision count is unchanged), and is sent only on "Submit now". A stale or revoked variant is refused without retry.
 
@@ -270,16 +294,16 @@ Every failure writes exactly one `authentication_event` and sets no session cook
 | S0002 AC1 | 4 | Cookie request to `/reviews`, `/content` and `/facts` reaches the handler under the session principal; verifier and resolver call order asserted |
 | S0002 AC2 | 4 | Matrix: missing or wrong token, foreign Origin, missing Origin and Referer, Referer fallback, `Sec-Fetch-Site: cross-site` → 403 `csrf_rejected`; handler spy not called; zero writes; event cause recorded |
 | S0002 AC3 | 4 | Cross-site GET answered under normal authorization; no `Access-Control-*` headers |
-| S0002 AC4 | 4, 5 | Distinct codes: unauthenticated, session_expired (idle, absolute, renewal), denial = existing 404 with the session still valid afterwards (R1), csrf 403 |
+| S0002 AC4 | 4, 5 | Distinct codes: unauthenticated, session_expired (idle, absolute, renewal), denial = existing 404 with the session still valid afterwards (R1), csrf 403. For each of idle, absolute and renewal-failed: a background poll ends the session first, then a user mutation still gets `session_expired`; a logged-out or replaced cookie gets `unauthenticated` |
 | S0002 AC5 | 4, 7 | Cookie plus `Authorization` → 400 `ambiguous_credentials`; shell lint rule and client test confirm no `Authorization` header |
 | S0002 AC6 | 4 | Existing bearer suites pass unchanged |
 | S0003 AC1 | 5 | Expired access token → one refresh, request served, `Set-Cookie` absent |
-| S0003 AC2 | 5, 8 | Two-worker PostgreSQL test with N concurrent requests → one token-endpoint call (stub) and all succeed or all `session_expired`; e2e recorder count = 1 |
+| S0003 AC2 | 5, 8 | Two-worker PostgreSQL test with N concurrent requests → one token-endpoint call (stub) and all succeed or all `session_expired` (including waiters that lock after the failure); e2e recorder count = 1 |
 | S0003 AC3 | 5, 8 | Rotated refresh token stored atomically; each failure kind ends the session, writes `renewal_failed` and returns 401 |
 | S0003 AC4 | 5 | Frozen-clock idle test; background header does not extend the deadline |
 | S0003 AC5 | 5 | 8 h absolute limit despite activity and renewals; no renewal attempted after it |
 | S0003 AC6 | 7 | Component test: warning at 28 min (server time), countdown, "Stay signed in" sends one request, dismissing changes nothing |
-| S0004 AC1 | 7 | Client test: page and input kept; dialog lists blocked mutations as "not submitted"; zero retries |
+| S0004 AC1 | 7, 8 | Client test: page and input kept; dialog lists blocked mutations as "not submitted"; zero retries. e2e: another tab or the background poll ends the timed-out session first; the later mutation still keeps its input and needs re-confirmation |
 | S0004 AC2 | 7, 8 | Popup flow; completion signal carries only `ref`; dialog closes with input intact |
 | S0004 AC3 | 7, 8 | GET retried once; mutation sent only on "Submit now"; "Cancel" discards it |
 | S0004 AC4 | 7, 8 | Re-confirmed request carries the new CSRF token; stale or revoked variant → engine 404 or 409 shown in context, no retry; engine audit row present |
@@ -292,8 +316,8 @@ Every failure writes exactly one `authentication_event` and sets no session cook
 | S0005 AC4 | 6 | Old cookie → 401 from every route, including when replayed from another client |
 | S0005 AC5 | 7 | One hygiene test per trigger: requests aborted, cache empty before the new render |
 | S0005 AC6 | 7, 8 | BroadcastChannel and a 30 s poll; e2e second tab shows signed-out within 60 s without old data |
-| S0005 AC7 | 6, 8 | End-session URL has no `id_token_hint`; e2e next sign-in asks for credentials; discovery without end-session → `unavailable` warning |
-| S0006 AC1 | 6 | Schema-validated response; no token; only the caller's memberships; display-name fallbacks |
+| S0005 AC7 | 6, 7, 8 | End-session URL has no `id_token_hint`; return route single use and 2-minute rule (API tests); e2e `completed`, `failed` (error redirect and no endpoint) and `unconfirmed` (no return, sweep) each with its `session_event` and page text; next sign-in after `completed` asks for credentials |
+| S0006 AC1 | 6 | Schema-validated response; no OIDC token; only the caller's memberships; display-name fallbacks. `csrf_token` identical across repeated reads from two workers and after reload; two tabs both mutate with it; after re-authentication the old token is refused |
 | S0006 AC2 | 7 | Home and header component tests; axe at desktop and 360 px |
 | S0006 AC3 | 7 | No-membership principal: "no access yet", empty selector, zero engine data calls |
 | S0006 AC4 | 6, 7 | Member switch persists across reload; non-member → 422 and value unchanged; hygiene runs before render |
@@ -306,13 +330,13 @@ Every failure writes exactly one `authentication_event` and sets no session cook
 | S0007 AC5 | 7, 8 | Review Panel at `/reviews/:id` through the cookie; receipt and audit row as before; denied item → not found |
 | S0007 AC6 | 7 | Launch form and token field gone; `?token=` stripped and never sent (network spy) |
 | S0008 AC1 | 4 | First 20 rejections: generic 401 and one event each |
-| S0008 AC2 | 4 | 21st: 429, `Retry-After`, one `rate_limited` event; later: 429 and no event (R2) |
-| S0008 AC3 | 4 | 1,000 rejections across two workers → at most 21 rows in the window |
+| S0008 AC2 | 4 | 21st: 429, `Retry-After`, one `rate_limited` event; later: 429 and no event (R2). Sequential: the counter row's `xmin` and `pg_stat_user_tables` insert/update counts are unchanged across 100 further throttled requests. No IdP or JWKS call while throttled |
+| S0008 AC3 | 4 | 1,000 rejections across two workers → at most 21 rows in the window; counter updates past 21 ≤ requests in flight when the threshold is crossed; a 30 s window setting is honored and a 7 s setting is refused at startup |
 | S0008 AC4 | 4 | Throttled client with a valid bearer or session is served; other clients unaffected |
 | S0008 AC5 | 3, 4 | Bearer, unknown cookie and callback failures all count; spoofed `X-Forwarded-For` from an untrusted peer ignored; trusted proxy honored |
-| S0009 AC1 | 8 | `session-transport.spec.ts` |
+| S0009 AC1 | 8 | `session-transport.spec.ts` (all S0009 rows run in the `chromium` and `firefox` projects; both must pass) |
 | S0009 AC2 | 8 | Recorder refresh count = 1 for 20 parallel requests; revoked token = rotated token |
-| S0009 AC3 | 8 | Injected revocation failure; then the success path with authentik refusing the revoked token |
+| S0009 AC3 | 8 | Injected revocation failure; then the success path with authentik refusing the revoked token; end-session outcomes as S0005 AC7 |
 | S0009 AC4 | 8 | `principal-isolation.spec.ts`, `return-routes.spec.ts` |
 | S0009 AC5 | 8 | `mutation-continuity.spec.ts` (fresh, stale and revoked variants) |
 
@@ -343,7 +367,8 @@ Every failure writes exactly one `authentication_event` and sets no session cook
 |---|---|
 | authentik 2026.2 field names or behavior for post-logout redirect, rotation and invalidation differ | Feature G0 verification (R3) before Step 6; the `prompt=login` fallback keeps AC7's user-visible rule |
 | IdP opener policy severs `window.opener` | BroadcastChannel is the primary completion signal (D8) |
-| Safari rejects `Secure` cookies on `http://localhost` | Chromium is the proof browser; the optional HTTPS profile covers Safari (D4) |
+| Safari (or Firefox) rejects `Secure` cookies on `http://localhost` | Chromium and Firefox are the proof browsers; G0 confirms Firefox; the HTTPS profile covers Safari and is the fallback for both (D4) |
+| authentik does not return to `post_logout_redirect_uri` on error | Outcome becomes `unconfirmed` after 2 minutes and the user is warned (D7) |
 | A renewal holds the row lock while calling the IdP | Bounded at about 11 s; per session only; separate transaction |
 | Bundle growth from Radix and Tailwind | 180 kB gzip budget enforced in CI; lazy routes |
 | Test-only access-token skew could leak into production | Absent outside the e2e composition; startup refuses it on non-localhost origins |
@@ -355,12 +380,13 @@ Every failure writes exactly one `authentication_event` and sets no session cook
   - `TokenCipher` (key ring);
   - `BrowserSessionStore` and `CredentialThrottle` factories over the session factory;
   - `ReturnRouteAllowlist` and `FlagSource` (mtime-cached files).
-- New environment variables: `BRAIN_PUBLIC_ORIGIN`, `BRAIN_PUBLIC_API_PREFIX`, `BRAIN_OIDC_CLIENT_SECRET`, `BRAIN_OIDC_BACKCHANNEL_URL`, `BRAIN_SESSION_KEYS`, `BRAIN_TRUSTED_PROXIES`.
+- New environment variables: `BRAIN_PUBLIC_ORIGIN`, `BRAIN_PUBLIC_API_PREFIX`, `BRAIN_OIDC_CLIENT_SECRET`, `BRAIN_OIDC_BACKCHANNEL_URL`, `BRAIN_SESSION_KEYS`, `BRAIN_TRUSTED_PROXIES`, `BRAIN_THROTTLE_LIMIT`, `BRAIN_THROTTLE_WINDOW_SECONDS`.
 - Committed non-secret configuration: `config/experience-flags.yaml`, `config/experience-routes.yaml`.
 - Secrets are never committed except the dev-only client secret in the dev blueprint, which follows the existing dev-password pattern.
 
 ## Planning Status and Follow-ups
 
-- Phase B approved 2026-11-27 with `approve-phase-b`; R1 and R2 confirmed (PM wording fixes at feature G0).
-- Run the independent plan-review action before the feature run.
+- Phase B approved 2026-11-27 with `approve-phase-b`; R1 and R2 confirmed.
+- Plan review `2026-11-27-d1148686`: CONDITIONALLY READY (5 High, 1 Medium); all six resolved by rework run `2026-11-28-831962b8` (see Plan Review Rework), approved 2026-11-28 (`approve-phase-a`, `approve-phase-b`). R1/R2 wording applied in that run.
+- Next: the feature run (feature G0 performs the R3 authentik checks and the Firefox cookie check).
 - ADR-0051 and ADR-0082 stay Proposed until S0009 passes.

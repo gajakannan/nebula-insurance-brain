@@ -1,0 +1,284 @@
+4808-| P0 | Tenancy, ACL inheritance, derived-data access | Enforcement points listed | Resource-policy model and isolation proof |
+4809-| P0 | Durable ingestion and commit recovery | Outbox table and idempotency tests listed | State machine, idempotency keys, transactional outbox |
+4810-| P0 | Review surface and evidence mapping | Native panel chosen (ADR-0057); selector contract proposed (ADR-0058) | Working review proof in the native panel with anchors resolving across the four renderers |
+4811-| P0 | Ontology release and migration contract | Versions and modules listed | Immutable releases, compatibility and impact rules |
+4812-| P0 | Application boundary and deployable topology | Large package list | Modular monolith boundary and dependency matrix |
+4813-| P1 | Context/answer contract and analytic query routing | Rich conversation model | Scoped answers, abstention, exact calculations |
+4814:| P1 | Retention, revocation, deletion, restore behavior | Indefinite retention; forgetting deferred | Policy-driven lifecycle spanning all copies |
+4815-| P1 | Learning evidence independence and change budgets | Candidate lifecycle present | Prevent self-reinforcement and uncontrolled work |
+4816:| P1 | Measurable release gates and operations | Metrics without targets | Frozen evaluation set, agreed SLOs, restore drill |
+4817-| P2 | Broad LOB packs and external vocabulary mapping | Modules reserved | Add one validated domain pack at a time |
+4818-
+4819-## 106.3 Requirement ownership (2026-11-08)
+4820-
+4821-A review of this blueprint against the feature portfolio on 2026-11-08 found requirements with no owning feature. Each is now carried into the owning feature's shard notes and README; the feature plan turns it into PRD requirements and stories. Owners are listed for v0.1 unless marked.
+4822-
+4823-| Requirement | Section | Owner | Governing record |
+4824-| --- | --- | --- | --- |
+4825-| Source authority policy and requested-versus-issued resolution | 107.1 | F0018 (policy, commit); F0024 (acceptance example); F0022 (shows rule applied) | ADR-0038 |
+4826-| FactSlot identity beyond the first scalar | 109.1 | F0007 | ADR-0006 |
+4827-| Information state separate from value; scoped absence | 107.4 | F0007 (carrier), F0011 (schemas), F0016 (scope searched), F0020/F0023 (return and display) | ADR-0039 |
+4828-| Qualified money and scoped identifiers | 107.3 | F0007, F0011, F0013, F0017 | ADR-0039 |
+4829-| Package completeness (expected versus received) | 107.4 | F0014 (profile), F0013 (GL forms), F0023 (display) | ADR-0039 |
+4830-| Authorization envelope, tenant ownership binding, row security as defense in depth | 110.1 | F0018 (design), F0007 onward (new tables), F0026 (isolation proof) | ADR-0042 |
+4831-| Derived results inherit evidence restrictions | 110.2 | F0018, F0065, F0069; F0026 proves | ADR-0042 |
+4832:| Four distinct lifecycle events; deletion and restore minimum | 110.3 | F0010 (events), F0018 (tombstones), F0026 (drill) | ADR-0043 |
+4833-| Untrusted inputs and prompt-injection acceptance; worker credential separation | 110.4 | F0016; F0026 (challenge suite) | ADR-0042 |
+4834-| Model/provider routing (local only, no external fallback) | 110.4 | F0016 | ADR-0055 |
+4835-| Current grants on historical and projected reads | 110.1, 120.3 | F0020, F0023, F0069; F0026 proves | ADR-0053 |
+4836-| Browser session transport | 119.3, 120.5 | F0021 | ADR-0051 |
+4837-| Reviewer authority; no agent delegation in v0.1 | 120.4 | F0022, F0018; delegation in F0047 (v0.2) | ADR-0052 |
+4838-| Constrained "chat with this policy"; read-only knowledge gaps | 113.1, 113.3 | F0069 (new, v0.1C); gap assignment in F0043 (v0.2) | ADR-0046 (v0.1 subset) |
+4839-| Foundation hook: ConversationContext | 88 | F0069 | — |
+4840-| Foundation hook: LearningCandidate | 88 | F0009 (reserved reference only) | ADR-0020 |
+4841-| Foundation hook: derivation dependency tables | 88 | F0018 (commit records dependencies); F0065 (assessment input lineage) | ADR-0026 |
+4842-| Foundation hook: AGE projection IDs | 88 | F0018 (reserved in outbox events); F0034 implements | ADR-0022 |
+4843-| Foundation hook: embedding abstraction | 88 | F0016 (port, no adapter); F0033 implements | ADR-0023 |
+4844-| Multilingual labels as metadata | 67 | F0012 | ADR-0011 |
+4845-| Per-run operational telemetry | 114.2 | F0016; budgets and SLOs in F0026 | ADR-0048 |
+4846-| Evaluation metrics and regression testing | 97, 98 | F0026 | ADR-0048 |
+4847-| Connector contract (source-system identity, change cursor, withdrawal) | 114.1 | F0050 (v0.3); v0.1 intake is local files only | ADR-0028 |
+--
+5091-Sections 0 and 5 use indefinite-preservation language, while section 94 defers verifiable forgetting. Before a production pilot, reconcile that wording with an explicit lifecycle for original files, parsed content, assertions, chat history, review exports, embeddings, derived candidates, caches, and backups.
+5092-
+5093-Proposed wording: **Preserve immutable evidence for its authorized retention period; apply approved hold, deletion, and access policies across dependent representations.**
+5094-
+5095-This blueprint does not prescribe jurisdiction-specific retention periods. The responsible records, security, and legal owners must supply applicable schedules and holds; implement those as versioned policy inputs.
+5096-
+5097:Differentiate source withdrawal, canonical retraction, access revocation, and authorized deletion. They have different effects. A deletion workflow needs a dependency inventory, tombstones where permitted, backup expiration behavior, and restore-time reapplication of deletion/revocation records so restored copies do not become accessible again.
+5098-
+5099:Advanced formal forgetting can remain future work; a practical delete/revoke/restore contract cannot.
+5100-
+5101-## 110.4 Treat documents and conversations as untrusted inputs
+5102-
+5103-Extracted text, annotations, and retrieved passages are evidence, including when they contain instructions. They do not acquire authority over agents, tools, or canonical commits.
+5104-
+5105-Add document intake controls for malformed files, oversized/compressed inputs, parser resource limits, and permitted external fetches. Keep extraction workers separated from business-write credentials. Store secret references, not secrets, in manifests and run metadata.
+5106-
+5107-An approved provider/model routing policy should define which data classifications may be processed where, allowed logging, budgets, and fallback behavior. A timeout must not silently send restricted content to another provider.
+5108-
+5109-**Acceptance:** A PDF contains a prompt instructing the model to change a limit or reveal another account. It can produce no authorized tool action, cross-account retrieval, or canonical mutation.
+5110-
+5111-## 110.5 Prevent learning from becoming self-confirmation
+5112-
+5113-Sections 31–35 support candidate learning, but repeated mentions are not independent evidence. The same assertion quoted in 20 conversations remains one underlying source of support.
+5114-
+--
+5266-port. The v0.1 local profile implements that port with a filesystem directory; treat the package list as code
+5267-boundaries, not 25 independently deployed services. Keep parser/model workers separately resource-controlled where
+5268-required.
+5269-
+5270-Specify a tested dependency matrix: exact Python/runtime build, Docling commit/release, model weights, PostgreSQL major/minor, AGE build, pgvector, and the pinned `pdf.js` and `fflate` versions the Review Panel renders with. PostgreSQL 18 is not inherently ruled out by AGE: the official download page lists a PG18 release. Select and test an exact combination instead of relying on generic compatibility claims. [R4]
+5271-
+5272:Validate availability on the intended hosting environment, extension upgrade path, backup/restore, and operational ownership before deployment assumptions harden. No new graph or vector platform is justified solely by this blueprint.
+5273-
+5274:Set recovery point/time objectives for a pilot and prove a restore of relational state, original content, artifact manifests, ontology releases, and review evidence — all of which now live in one system, with no external annotation store to reconcile. Rebuild graph/vector views and reapply deletion/revocation controls. A backup that omits original evidence or cannot restore stable citations is insufficient.
+5275-
+5276-# 115. Evaluation, Release Gates, and Delivery Sequence
+5277-
+5278-## 115.1 Make the Golden Corpus representative of the first slice
+5279-
+5280-The proposed 20–30 documents are useful for an initial harness. Spread across 15 document categories, they cannot establish reliable performance for every category.
+5281-
+5282-Concentrate initial labeling on GL policy packages and endorsements. Include native and scanned PDFs, repeated schedules, rotated pages, missing forms, conflicting limits, identical policy numbers from different carriers, retroactive changes, and deliberately wrong high-confidence extraction.
+5283-
+5284-Separate development/tuning examples from a frozen holdout. Split by related account/policy package and template family where practical so near-duplicate renewals or endorsements do not leak across sets. Production corrections should first enter a governed candidate benchmark pool; they must not silently alter the holdout or expected answers.
+5285-
+5286-Add a small property/casualty loss-run contrast set to test the proposed schema's extensibility. Do not treat that as certification of complete extraction support for those LOBs.
+5287-
+5288-## 115.2 Proposed acceptance gates
+5289-
+--
+5300-| Review integrity | Duplicate and stale review cases preserve lineage and cannot bypass approval policy |
+5301-| Authorization | No unauthorized content returned in the isolation, revocation, graph, vector, export, and chat suite |
+5302-| Ingestion recovery | All designed retry/crash cases recover without duplicate accepted effects |
+5303-| Unknown/conflict handling | Missing package, missing value, explicit negative, and source-conflict cases produce the intended distinct outcomes |
+5304-| Learning containment | Repetition adds no independent evidence; unsupported candidates do not auto-promote |
+5305-| Projection recovery | Rebuild and lag scenarios preserve accurate canonical reads and authorized retrieval |
+5306:| Restore | A timed restore recovers evidence, identity, history, and applicable access/deletion policies |
+5307-| Measured quality | Field precision/recall, severe-error rate, abstention, review workload, latency, and cost meet agreed targets on the frozen slice |
+5308-
+5309-Passing a finite security test suite is a release gate, not proof that every possible leak is impossible. Report sample sizes and uncertainty for measured extraction performance; avoid a single aggregate accuracy score that hides financially material mistakes.
+5310-
+5311-## 115.3 Revised sequencing proposal
+5312-
+5313-Preserve the existing F0001–F0063 identifiers. F0064 separately tracks repository tooling. F0069 (2026-11-08) owns the v0.1C constrained policy question. Add F0065 for the user-authorized bounded v0.1B assessment (section 124), with integration criteria in F0024/F0025/F0026; do not renumber the backlog.
+5314-
+5315-| Stage | Scope | Existing roadmap mapping |
+5316-| --- | --- | --- |
+5317-| Pre-build contract proofs | Docling reuse, native review round trip and evidence anchoring, temporal mutation, authorization/deployment compatibility | F0001–F0005, F0008, F0009, F0022 |
+5318-| v0.1A | Typed domain contracts, durable ingestion, immutable evidence, assertion extraction | F0002–F0017 |
+5319-| v0.1B | Authorized canonical commits, source resolution minimum, GL limits, temporal endorsement, human review, bounded neurosymbolic guideline assessment | F0018–F0023 → F0065 → F0024/F0025 integration |
+5320-| v0.1C | Recovery, deletion/revocation minimum, audit, independent frozen evaluation, constrained policy question, assessment challenge suite | F0069 constrained policy question → F0026 including F0065 cases |
+5321-| v0.2A | Governed hybrid seeding, bounded typed expansion, budget-aware evidence sets, chat with document/entity/data, projection operations | F0033–F0040, F0044–F0047 |
+--
+5329-
+5330-| Proof | Concrete outcome | Suggested owner role |
+5331-| --- | --- | --- |
+5332-| Parse/reinterpret/evidence | One GL package, two profiles, unchanged content artifact, correct citation mapping | Document intelligence engineer |
+5333-| Review round trip | Wrong amount corrected once in the native panel; duplicate and stale submissions handled with lineage; anchors resolve or declare themselves unresolved | Application engineer + frontend + business reviewer |
+5334-| Bitemporal commit | Retroactive and concurrent changes, interval splitting, distinct received/accepted times | Persistence engineer |
+5335:| Access and hosting | Two security scopes, revocation, object/review access, exact extension build and restore | Platform/security engineer |
+5336-
+5337-These are small implementation investigations, not a reason to design every future ontology pack before coding. Record actual results and unresolved limitations in ADRs before treating the respective interfaces as stable.
+5338-
+5339-# 116. Proposed ADRs and Explicit Corrections
+5340-
+5341-The following ADR IDs are reserved suggestions, all with **status: Proposed**. They extend the existing decision log without implying approval.
+5342-
+5343-| Proposed ADR | Decision to settle | Example and reference |
+5344-| --- | --- | --- |
+5345-| ADR-0038 — Semantic Authority and Source Ownership | Field/context-specific authority; transactional systems retain their business role | Requested versus issued limit; section 107.1 |
+5346-| ADR-0039 — Typed Insurance Values and Completeness | Qualified values, scoped identifiers, explicit unknowns and incomplete packages | Missing endorsement is not absent exclusion; section 107 |
+5347-| ADR-0040 — Lossless Content and Evidence Contract | Native DoclingDocument plus normalized views; honest evidence precision | Reinterpret without OCR; section 108 |
+5348-| ADR-0041 — Atomic Semantic Commit and Projection Delivery | Canonical transaction + audit + outbox; versioned/rebuildable projections | Crash after commit; section 109 |
+5349-| ADR-0042 — Resource and Derivation Authorization | Enforce current grants across facts, evidence, reviews, derived results, and caches | Restricted note cannot leak via summary; section 110 |
+5350:| ADR-0043 — Retention and Revocation Lifecycle | Immutable content within authorized retention; dependency-aware deletion and restore | Deleted source stays unavailable after restore; section 110.3 |
+5351-| ADR-0044 — Review Surface and Approval Contract | Annotation, adjudication, and business approval as separate authorities (the edition half is closed by ADR-0057) | Stale reviewer correction; section 111.2 |
+5352-| ADR-0045 — Ontology Release Compatibility | Immutable module releases, dependency locks, explicit semantic migration | Concept split preserves history; section 112 |
+5353-| ADR-0046 — Grounded Answer and Analytic Query Contract | Scope/time/evidence in every answer; exact queries for totals | Complete open-claim count; section 113 |
+5354-| ADR-0047 — Controlled Learning and Reinterpretation | Independent support, candidate scope, budgeted jobs, separate executable releases | Repeated hallucination earns no support; sections 110.5 and 114 |
+5355-| ADR-0048 — Pilot Evidence and Operational Readiness | Frozen evaluation slice and recovery/access/review gates | Demonstrated GL end-to-end proof; section 115 |
+5356-| ADR-0058 — Evidence Anchoring and Selector Contract | W3C selectors per format, code-point offsets, declared precision, unresolved blocks the decision | Quote recovery after coordinate drift; section 125 |
+5357-
+5358-**Decision status (2026-11-08):** the operator recorded decisions for ADR-0038, ADR-0039, ADR-0042 and ADR-0043 (and confirmed the ADR-0045 direction). Each record names its owner, proving feature and acceptance proof, and stays Proposed until that proof passes. ADR-0040, ADR-0041, ADR-0044 and ADR-0058 are already Accepted. ADR-0046, ADR-0047 and ADR-0048 remain open for their v0.1C/v0.2 owners.
+5359-
+5360-## 116.1 Original statements that need reconciliation
+5361-
+5362-| Existing section | Issue | Proposed correction |
+5363-| --- | --- | --- |
+5364:| 0, 5, 94 | Indefinite evidence retention versus future forgetting | Authorized retention, holds, deletion, and restore behavior |
+5365-| 6 | “Deterministic” parsing overstates a model-backed pipeline guarantee | Immutable versioned artifact; execution reproducibility metadata. **Partially reconciled at F0004/F0005:** explicit content-contract version dispatch with one verifier (ADR-0073, Proposed) and a pinned engine per job (ADR-0074) |
+5366-| 14 | Received time appears to stand in for accepted recorded time | **Reconciled at F0001-S0005/S0007 (2026-09-10):** `canonical_fact_version` stores `source_received_at`, `artifact_created_at`, `assertion_created_at`, and `canonical_accepted_at` as four distinct columns; `recorded`'s lower bound equals `canonical_accepted_at` specifically, never one of the other three (ADR-0041, accepted) |
+5367-| 13, 15 | Scalar overlap rule versus multivalued slots | **Reconciled at F0007/F0008 (2026-11-10/19):** MULTI members are child slots versioned independently, and RELATIONSHIP slots carry the object entity in their identity and version in `canonical_fact_version` (ADR-0077 D4, ADR-0078 D6) |
+5368-| 47–49 | Projection consistency and historical topology are unspecified | **Partially reconciled at F0001-S0005/S0007 (2026-09-10):** the commit/outbox contract itself is settled (one transaction writes the fact version, lineage, audit, and outbox rows together; a killed worker's replay processes each outbox event exactly once — ADR-0041, accepted). Time-aware *relationship* (graph) traversal is not yet built — no graph projection exists in this feature; F0033/F0034 own it |
+5369-| 53 | Stable identifiers lack namespace/term qualification | Scoped identifiers and collision handling. **Partially reconciled at F0007:** identifier values are `(scheme, identifier_type, value)` with server normalization, and equality includes the scheme (ADR-0077 D5). Collision handling in entity resolution remains F0017 |
+5370-| 65 | Tenant/KB ownership leaves shared entity identity unresolved | Explicit identity scope and authorized KB membership |
+5371-| 75 | Human annotation can be read as canonical approval | **Reconciled at F0001-S0004/S0007 (2026-09-10):** the Casbin policy grants `Reviewer` the `review:annotate` action but never `fact_slot:commit`, which only `ServicePrincipal` holds — a Review Panel decision cannot itself write canonical truth, structurally, not just by convention (ADR-0044, accepted). The review-decision-to-canonical-commit wiring itself is F0002's integration |
+5372-| 3, 75, 96, 100, 111 | Label Studio named as the adjudication engine | Native Review Panel; ADR-0034 superseded by ADR-0057 (section 125) |
+5373-| 80–81 | Native DoclingDocument is missing from the bundle | **Reconciled at F0001-S0003/S0007 (2026-09-10):** `docling-document.json` is one of the six persisted bundle files, and every extracted value carries a declared evidence precision (`span`/`block`/`page`/`unresolved`), never a fabricated location (ADR-0040, accepted). The evidence *locator* shape itself is narrower than originally proposed (ADR-0058, amended) — see that record |
+5374-| 89, 92 | Full governance delayed while initial writes already occur | Baseline authorization and audit in v0.1 |
+5375-| 90 | v0.2 combines too many large capabilities | Split retrieval/chat delivery from ontology/learning workbenches |
+5376-| 96–97 | Broad small corpus and metrics without release targets | Narrow frozen slice, representative challenge set, measured thresholds |
+5377-| 104 | Docling-Graph dependency and orchestration | **Rejected (2026-11-08):** the locked 1.9.1 candidate proved native JSON reuse, pre-extraction publication, PostgreSQL recovery, and bounded evidence mapping, but Graph dense failed F0005 live qualification (2026-10-27) and the operator rejected ADR-0060. The direct-baseline pipeline and ADR-0074 controls stand. F0001's rejected invocation and direct-vLLM measurements remain historical records in `docker/DEPENDENCY-MATRIX.md`. |
+5378-
+5379-# 117. Sources and Remaining Decisions
+--
+5396-1. **Source authority owner and policy — decided.** The operator owns and approves source-authority policy releases; ADR-0038 records the v0.1 GL policy (issued package authoritative; submissions and broker correspondence are requested terms). F0018 implements it and F0024 proves it.
+5397-2. **Tenant/entity/knowledge-base identity scope — resolved for v0.1** by F0002 (ADR-0061/ADR-0062 accepted for the bounded scope). The pilot access model is proven in F0026.
+5398-3. **Host, build and model/provider data policy — local profile resolved; production open.** The local topology (ADR-0054) and dependency matrix are fixed. v0.1 inference is local only with no fallback to an external provider (ADR-0055; F0016). The production host and extension build remain a pre-pilot decision.
+5399-4. **F0005 — closed.** F0005 closed on 2026-10-28 on its rejection branch: Graph dense failed live qualification and ADR-0074's execution controls were accepted. The operator rejected ADR-0060 on 2026-11-08. The direct-baseline pipeline is the v0.1 path; SEC-01 dependency remediation and converter memory/CPU/process ceilings were delivered on 2026-11-08 and converter network isolation on 2026-11-09 (ADR-0074 §1a); a separate OS user or container for the converter (SEC-F5-M1 remainder) remains required before untrusted or production PDFs (F0026).
+5400-5. **Licensed policy packages and reviewers — open.** v0.1 development uses synthetic fixtures; a licensed or authorized corpus and named reviewers are an F0026 prerequisite (also required for real guideline authority under F0065).
+5401-6. **Thresholds, review capacity, budgets and recovery objectives — partially decided.** Extraction thresholds were approved for F0005. Release thresholds, SLOs, budgets and RPO/RTO are set in F0026 under ADR-0048.
+5402:7. **Retention, holds, sharing and deletion — v0.1 minimum decided.** ADR-0043 records operator-initiated deletion with tombstones and restore-time re-application for v0.1 (F0026). Legal retention schedules, holds and conversation-sharing policy remain open before a production pilot.
+5403-
+5404-Recommended first build objective: a single GL policy package and retroactive endorsement that can be ingested once, interpreted, corrected visually in the Review Panel, committed with the right authority and time semantics, and queried with trustworthy evidence. Use that proof to stabilize the kernel before expanding the ontology and learning surfaces.
+5405-
+5406----
+5407-
+5408-# 118. AuthX Reference Architecture
+5409-
+5410-**Reference snapshot:** 2026-09-03. **Repository:** `gajakannan/nebula-insurance-crm`. **Reviewed default branch:** `main`, commit `47375571b19e3f917c1d22cbc076df41320100ff` (2026-09-03). All CRM references in this blueprint are pinned to that commit.
+5411-
+5412-Here, **AuthX** means authentication, authorization, identity mapping, session lifecycle, and enforcement. It does not mean adopting a Python package named AuthX.
+5413-
+5414-**Disposition:** Carry the relevant CRM architecture into the Insurance Brain, with the corrections and extensions below. Existing CRM implementation is evidence of a pattern, not automatic proof that the pattern is fully enforced on every route. New ADRs remain proposed implementation decisions; the selected patterns and their required corrections are incorporated in the main blueprint and detailed here.
+5415-
+5416-The source assessment inspected the .NET API, native Casbin adapter, broker/distribution scope services, document gates, search projection queries, React OIDC/session code, Neuron thread/action code, selected tests, and related ADRs. This is a source-level review plus focused offline checks, not a penetration test or a certification of a deployed environment.
+5417-
+--
+5481-## 119.3 High design inconsistency — token storage and logout do not form one contract
+5482-
+5483-**Observed:** The older token-storage ADR describes an in-memory access token and an HttpOnly refresh cookie. ADR-024 instead specifies browser-direct renewal. The frontend configures `WebStorageStateStore` on `sessionStorage`, and `sessionRenewal.ts` calls `signinSilent()`. The lockfile selects `oidc-client-ts` 3.4.1; its pinned `User.toStorageString()` serializes access/refresh tokens when present and `UserManager.storeUser()` writes that serialization to the configured store. The comment that this is memory-only is therefore incorrect.
+5484-
+5485-The backend `/auth/logout` implementation attempts revocation using a `refresh_token` cookie. The OIDC callback does not establish that cookie. The shown flow therefore does not demonstrate that the refresh token actually used by browser renewal is the token revoked by logout. Browser-state removal is not evidence of successful upstream token/session revocation.
+5486-
+5487:**Brain proposal:** Adopt a same-origin backend-for-frontend session pattern: browser holds an opaque Secure/HttpOnly session cookie; server owns tokens and renewal; state-changing cookie-authenticated requests have CSRF protection and origin validation. Preserve the CRM's PKCE/state protections, error distinctions, coalescing, work-restoration UX, and no-auto-mutation-replay rule. This is a proposed deliberate change from the current SPA token transport, not an existing CRM capability.
+5488-
+5489-If direct SPA tokens are retained instead, approve one explicit storage, rotation, revocation, logout, CSP, and refresh-concurrency contract and revise the contradictory comments/ADRs. Do not mix the two models. Test logout with actual issuance/storage/renewal, including upstream failure, rather than only asserting that a cookie-clear response was sent.
+5490-
+5491-## 119.4 Medium — policy parity has drifted
+5492-
+5493-**Executed check:** `python3 scripts/check-policy-parity.py` against the downloaded pinned files exits 1. It finds six BrokerUser allow decisions in matrix section 2.10 and thirteen BrokerUser rows in `policy.csv`.
+5494-
+5495-Seven policy entries are not represented in the matrix section the script checks:
+5496-
+5497-| Resource | Actions |
+5498-| --- | --- |
+5499-| account | read |
+5500-| document | create, download, read |
+5501-| document_template | create, link, read |
+5502-
+5503-This proves a contract/parity mismatch, not that every additional permission is unjustified. Some may be described in later feature sections. Reconcile the normative matrix and the checker rather than deleting permissions blindly.
+5504-
+5505-**Brain requirement:** One versioned permission catalog, machine-readable expected cases, full role/action coverage, and adapters tested against the same cases. A BrokerUser-only parser of one document section is insufficient for tenant/KB, review, learning, service principals, and agent delegation.
+5506-
+5507:## 119.5 Additional adaptations before reuse
+5508-
+5509-- **Development bypass:** The CRM's Development JWT branch disables key, issuer, audience, and lifetime checks. The local Compose file selects Development. Keep synthetic identity limited to isolated development/testing; require a production startup/deployment guard and negative tests against the real validator. A frontend build guard cannot secure a backend accidentally deployed in Development.
+5510-- **Freshness and account status:** The shown principal mapper provisions by `(iss, sub)` but does not itself reject an inactive profile. Define disabled-user, role-change, grant-revocation, and bounded revocation-latency enforcement. A JWT failure labeled “revoked” is not proof that active revocation detection exists.
+5511-- **Policy lifecycle:** The native Casbin adapter loads embedded policy once at construction. That is a deployment-time policy model, not dynamic policy distribution. Add policy version/hash to decisions; specify refresh/invalidation if runtime policy updates are introduced.
+5512-- **Role combination:** The current role helper allows when any role allows. For Brain, tenant isolation, classification, explicit restrictions, and delegation ceilings must not be bypassed by adding another permissive role. Test mixed internal/external roles explicitly.
+5513:- **Time semantics:** Distribution scope currently accepts an `asOf` date. The Brain must distinguish historical business relationships from authorization now: a historical query must not restore a revoked user's permission. Historical authorization reconstruction is a separate privileged audit operation.
+5514:- **Session restoration:** The CRM keys drafts by a user identifier and bounds them by size/TTL. Brain restores should use stable principal + tenant/KB context and a field allowlist. Browser storage and a user-scoped key do not encrypt sensitive drafts or shield them from scripts running in that origin.
+5515-- **Service identity:** Forwarded user credentials work for interactive delegated calls only within their audience and scope. Background reinterpretation needs a separate service/agent principal, bounded job grant, expiration, and revocation; never retain a user's refresh token in a job payload.
+5516-
+5517-# 120. Concrete AuthX Contract for Insurance Brain
+5518-
+5519-## 120.1 Principal and policy services
+5520-
+5521-Introduce interfaces inside `brain-security`, not additional mandatory microservices:
+5522-
+5523-| Interface | Responsibility |
+5524-| --- | --- |
+5525-| `CredentialVerifier` | Validate token/session authenticity, intended audience, times, and required security policy |
+5526-| `PrincipalResolver` | Map verified external identity to stable internal user/service/agent principal |
+5527-| `ResourceScopeResolver` | Resolve current tenant/KB/resource entitlements from trusted state |
+5528-| `AuthorizationService` | Evaluate typed subject/resource/action/context through the chosen native policy adapter |
+5529-| `EvidenceAccessService` | Enforce document parent, classification, source ACL, and derived dependency access |
+--
+5618-| Existing `scripts/check-policy-parity.py` | Failed with 7 mismatches | BrokerUser matrix-section/policy synchronization is incomplete |
+5619-| Locked OIDC dependency source inspection | 3.4.1 serializes token-bearing user state to configured store | The memory-only comment conflicts with `sessionStorage` configuration |
+5620-| Parent resolver → Casbin adapter → document-service trace | Parent attributes are not part of the active object/matcher contract | The inspected parent-access path does not implement record-specific parent authorization |
+5621-
+5622-The .NET integration suite, browser session flow, actual IdP, PostgreSQL deployment, review round trip, and production ingress were not executed. Test files demonstrating intended audience, role, and distribution-scope behavior serve as design/coverage evidence only. No production data, tokens, or remote service state were changed.
+5623-
+5624:## 121.2 Required carryover test matrix
+5625-
+5626-1. **Credential verification:** wrong signature, issuer/audience, expiry/not-before, key rotation, invalid token type, empty/malformed bearer, disabled principal, and service-specific audience.
+5627-2. **Principal mapping:** repeated login, concurrent provisioning, same subject at different issuers, IdP migration, linked identity approval, and stable audit ownership.
+5628-3. **Scope:** two tenants, two KBs, two broker relationships, hierarchical siblings, expired membership, mixed roles, and explicit filters outside authority.
+5629-4. **Parent/classification conjunction:** entitled parent with denied classification; permitted classification with denied parent; document versions, binary download, and declassification.
+5630-5. **Projection leakage:** rows, counts, facets, snippets, titles, graph edges/path existence, embeddings, analytic aggregates, exports, and shared entity references.
+5631-6. **Conversation access:** list/history/mutation by owner and non-owner, forged identity, tenant switch, evidence revoked after creation, and unauthorized sharing.
+5632-7. **Review authority:** annotation versus adjudication, forged/duplicate callbacks, stale tasks, changed reviewer entitlement, and approval of a critical canonical change.
+5633-8. **Session transport:** actual storage contents, cookie/CSRF configuration when applicable, refresh burst/rotation, true logout/revocation, same-browser principal change, cache clearing, and sanitized return routes.
+5634-9. **Mutation continuity:** expired session while correcting/promoting a fact never silently replays the mutation; re-confirmed request checks current fact revision and authority.
+5635-10. **Delegation:** constrained agent acting for a user, revoked grant during a job, service credential with no human delegate, excessive tool requests, and attempted direct canonical writes.
+5636-11. **Policy parity:** catalog-to-matrix-to-runtime fixtures across all relevant roles/resources/actions, denial conditions, missing attributes, and Python/.NET expression semantics.
+5637-12. **Temporal separation:** querying a prior policy period cannot recover a revoked access grant; privileged audit can reconstruct prior decisions without executing them.
+5638-
+5639-# 122. Blueprint Integration and Proposed AuthX ADRs
+--
+5661-| A3 | [HttpCurrentUserService](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Api/Services/HttpCurrentUserService.cs) and [identity index](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Infrastructure/Persistence/Configurations/UserProfileConfiguration.cs) | `(iss, sub)` mapping and UUID identity |
+5662-| A4 | [Casbin adapter](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Infrastructure/Authorization/CasbinAuthorizationService.cs), [DI binding](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Infrastructure/DependencyInjection.cs), [model](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/planning-mds/security/policies/model.conf), and [policy](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/planning-mds/security/policies/policy.csv) | Active policy semantics and hydrated attributes |
+5663-| A5 | [BrokerScopeResolver](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Application/Services/BrokerScopeResolver.cs), [BrokerService](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Application/Services/BrokerService.cs), and [DistributionScopeService](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Application/Services/DistributionScopeService.cs) | Scope resolution, external DTOs, authority union and requested narrowing |
+5664-| A6 | [SearchDocumentRepository](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Infrastructure/Repositories/SearchDocumentRepository.cs) | Visibility before facets/counts/pages |
+5665-| A7 | [DocumentParentAccessResolver](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Infrastructure/Documents/DocumentParentAccessResolver.cs), [classification gate](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Infrastructure/Documents/DocumentClassificationGate.cs), and [DocumentService](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Application/Services/DocumentService.cs) | Intended parent AND classification gate and concrete parent-attribute gap |
+5666-| A8 | [OIDC configuration](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/src/features/auth/oidcUserManager.ts), [callback](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/src/pages/AuthCallbackPage.tsx), and [lockfile](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/pnpm-lock.yaml) | Browser storage choice and locked OIDC version |
+5667:| A9 | [Session renewal](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/src/features/session-continuity/sessionRenewal.ts), [API client](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/src/services/api.ts), and [session restore](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/src/features/session-continuity/sessionRestore.ts) | Renewal coalescing, mutation behavior, scoped restoration |
+5668-| A10 | [AuthEndpoints](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/src/Nebula.Api/Endpoints/AuthEndpoints.cs), [session teardown](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/src/features/auth/useSessionTeardown.ts), and [ADR-024](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/planning-mds/architecture/decisions/ADR-024-session-continuity-and-token-refresh.md) | Cookie logout versus browser-direct renewal |
+5669-| A11 | [Neuron auth](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/neuron/app/auth.py), [routes](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/neuron/app/main.py), [threads](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/neuron/app/threads.py), and [in-memory repository](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/neuron/app/persistence/in_memory.py) | Unverified owner selection and actual ownership predicates |
+5670-| A12 | [Engine client](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/neuron/app/engine_client.py), [actions](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/neuron/app/actions.py), and [ADR-028](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/planning-mds/architecture/decisions/ADR-028-neuron-companion-persistence-and-outreach-authorization.md) | Forwarded-user calls, action allowlist, authoritative engine writes |
+5671-| A13 | [Parity script](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/scripts/check-policy-parity.py) and [authorization matrix](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/planning-mds/security/authorization-matrix.md) | Executed policy mismatch evidence |
+5672-| A14 | [JWT audience tests](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/tests/Nebula.Tests/Integration/JwtAudienceValidationTests.cs), [Casbin tests](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/tests/Nebula.Tests/Unit/CasbinAuthorizationServiceTests.cs), and [distribution-scope tests](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/engine/tests/Nebula.Tests/Integration/DistributionScopeReadScopingTests.cs) | Existing negative-test patterns, inspected but not executed |
+5673-| A15 | [Local Compose](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/docker-compose.yml) and [Vite configuration](https://github.com/gajakannan/nebula-insurance-crm/blob/47375571b19e3f917c1d22cbc076df41320100ff/experience/vite.config.ts) | Development boundary and Neuron ingress assumptions |
+5674-| A16 | [OIDC 3.4.1 User serialization](https://github.com/authts/oidc-client-ts/blob/e4c730cd0e73a607bbc706f74893930ff9694c1a/src/User.ts) and [UserManager storage](https://github.com/authts/oidc-client-ts/blob/e4c730cd0e73a607bbc706f74893930ff9694c1a/src/UserManager.ts) | Primary upstream source confirms serialization at the CRM's locked dependency version |
+5675-
+5676-# 124. Bounded Neurosymbolic Assessment and Worked Examples
+5677-
+5678-**Scope amendment:** Authorized 2026-09-07. F0065 adds a bounded GL guideline assessment in v0.1B; F0024/F0025 integrate it and F0026 qualifies it. This revises the original general reasoning exclusion without claiming that a runtime or formal architecture signoff already exists. [ADR-0056](decisions/ADR-0056-bounded-neurosymbolic-assessment.md) remains Proposed until its proofs are recorded.
+5679-
+5680-## 124.1 Neural interpretation and symbolic evaluation
+5681-
+5682-The ontology and extraction profile guide neural interpretation of immutable content into candidate assertions. Governed source resolution and canonical acceptance produce qualified, bitemporal facts. A reviewed, versioned rule then compares the applicable each-occurrence amount with a specified minimum. An immutable assessment stores exact input facts, rule/ontology/evaluator versions, time/snapshot, evidence lineage, actor, and audit reference. The assessment is separate from canonical facts and business approval.

@@ -1,0 +1,98 @@
+   150	          "if": {
+   151	            "properties": {
+   152	              "status": {
+   153	                "const": "unavailable"
+   154	              }
+   155	            }
+   156	          },
+   157	          "then": {
+   158	            "properties": {
+   159	              "url": {
+   160	                "type": "null"
+   161	              }
+   162	            }
+   163	          }
+   164	        }
+   165	      ]
+   166	    }
+   167	  }
+   168	}
+   105	        {
+   106	          "$ref": "#/$defs/kb_ref"
+   107	        }
+   108	      ]
+   109	    },
+   110	    "flags": {
+   111	      "type": "object",
+   112	      "propertyNames": {
+   113	        "pattern": "^[a-z][a-z0-9-]{0,63}$"
+   114	      },
+   115	      "additionalProperties": {
+   116	        "type": "boolean"
+   117	      }
+   118	    }
+   119	  },
+   120	  "$defs": {
+   121	    "kb_ref": {
+   122	      "type": "object",
+   123	      "additionalProperties": false,
+   124	      "required": [
+   125	        "tenant_id",
+   126	        "knowledge_base_id"
+   127	      ],
+   128	      "properties": {
+   129	        "tenant_id": {
+   130	          "type": "string",
+   131	          "format": "uuid"
+   132	        },
+planning-mds/examples/README.md:7:Every introduced or changed semantic concept needs a plain-language definition, a worked example, a failure/boundary example, and a link to its owning feature/story and contract. Reuse stable example IDs across prose, structured records, tests, and review comments. Examples explain the authoritative requirements; they do not silently establish new insurance business rules.
+planning-mds/examples/README.md:20:| Evidence-backed relationship projection, bitemporal property endorsement, separate consumer completeness | [EX-PC-006/008/009/010/012](commercial-pc-account/cases.md) | F0008/F0010/F0015/F0018/F0034/F0065 contracts as scoped in the handoff; RDF checks run by the `semantic_rdf` gate |
+planning-mds/examples/README.md:47:| Recorded execution traces: observed, used in answer, considered not used, not instrumented; a learning run with zero canonical change | [EX-OBS-001/002](graph-observatory-2d-options.html) (synthetic; fixtures embedded in the page, validated against the draft [trace schema](../schemas/semantic-execution-trace.schema.json)) | F0036/F0038/F0041 carry-ins, F0067, v0.2; proposed ADR-0071/ADR-0072 |
+planning-mds/examples/README.md:56:| Vector similarity versus accepted facts | [EX-FUTURE-001](future-semantics.md#retrieval-projection) | F0033/F0035, v0.2A |
+planning-mds/examples/README.md:57:| Learned candidates and repeated model claims | [EX-FUTURE-002](future-semantics.md#learning-candidate) | F0041/F0042, v0.2B; F0060 rule promotion, v0.4+ |
+planning-mds/examples/README.md:58:| Obligations versus observed facts | [EX-FUTURE-003](future-semantics.md#normative-obligation) | F0052, v0.3 |
+planning-mds/examples/README.md:59:| Hypothetical assumptions versus canonical state | [EX-FUTURE-004](future-semantics.md#hypothetical-scenario) | F0053, v0.3 |
+planning-mds/examples/README.md:65:produced by the feature action; the examples do not establish new value semantics.
+planning-mds/examples/README.md:70:| Exact money and identifiers scoped by scheme/type | [Glossary](../domain/glossary.md#qualified-money), [EX-GL-001](neurosymbolic-gl/README.md) and [CASE-01/02/03/09/10](neurosymbolic-gl/cases.md), [F0007 positive/failure cases](../features/archive/F0007-factslot-model/contract-examples.json) | [F0011-S0003](../features/archive/F0011-json-schema-contract-system/F0011-S0003-validate-qualified-money-and-scoped-identifiers.md), [fact-slot-key-v1 definitions](../schemas/fact-slot-key-v1.schema.json); predicate semantics/resolution stays F0013/F0017 |
+planning-mds/examples/README.md:113:From the repository root, run `python3 scripts/validation/validate_semantic_examples.py`. It validates the educational JSON against its local schema and checks record and planning references. Reviewers still judge the meaning, the accuracy of expected outcomes, and completeness of concept coverage. The product checklist makes that review explicit.
+planning-mds/domain/glossary.md:7:This glossary keeps the semantic kernel vocabulary and the insurance vocabulary consistent across requirements, architecture, code, and the knowledge graph, and lets agents understand domain concepts without inventing definitions.
+planning-mds/domain/glossary.md:17:**Definition:** The top of the structural tenancy hierarchy (Tenant → Workspace → KnowledgeBase); every authoritative semantic row carries `tenant_id` (65, ADR-0030)
+planning-mds/domain/glossary.md:76:**Definition:** The canonical semantic identity of one fact about an entity, for example the EachOccurrence limit of a coverage; the unit that fact versions attach to (13, ADR-0006)
+planning-mds/domain/glossary.md:97:**Definition:** An accepted value for a FactSlot carrying both a valid-time period and a recorded-time period, with change semantics when it ends (14, 16, ADR-0007, ADR-0009)
+planning-mds/domain/glossary.md:228:**Definition:** Each document version is physically parsed exactly once; all later semantic work operates on the persisted content artifact (5, ADR-0003)
+planning-mds/domain/glossary.md:299:| Ontology module version | Immutable revision of one module with its definitions, semantics, constraints, and dependency declarations | [EX-ONT-005](../examples/ontology-release-contracts.md#composed-releases-and-packages): GL version 2 declares its foundation dependency | F0012/F0013, v0.1A |
+planning-mds/domain/glossary.md:408:These terms refine representation and admission under [ADR-0075](../architecture/decisions/ADR-0075-versioned-assertion-semantics-and-admission.md); Phase B design was approved by operator on 2026-11-01; runtime proofs remain pending. All examples are synthetic and illustrative in [EX-ASSERT-001–009](../features/archive/F0006-assertion-plane-origin-and-interpretation-basis/worked-examples.md).
+planning-mds/domain/glossary.md:412:| Assertion semantic extension | Immutable version-2 representation keyed to the existing assertion identity, retaining typed/open kind, independent mode/origin/basis, source wording and server-verified evidence | EX-ASSERT-001/003/009: preserve two claims and old raw history; never backfill a missing quote or ontology release | F0006 S0001/S0002/S0005; assertion-record-v2, interpretation-result-v2 |
+planning-mds/domain/glossary.md:420:These are proposed retrieval design terms for v0.2A F0033–F0036, with optional numerical derivatives in v0.4+ F0068. Definitions follow [ADR-0076](../architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md); examples and boundary cases are [EX-RET-001–006](../examples/governed-evidence-retrieval.md). They do not alter canonical fact, assertion or permission semantics.
+planning-mds/domain/glossary.md:432:The pinned semantic snapshot, both temporal coordinates/precision, ontology, root/requested scope, knowledge mode, current-authorization decision reference, actual projection versions, retrieval profile/effective mode and model/tokenizer profile for one retrieval. Recorded authority is not a reusable access grant (EX-RET-003/004/006; F0035/F0036).
+     1	feature: F0021
+     2	status: Phase B design (plan run 2026-11-27-6cda122a); source_sha256_at_design recorded at Phase B and re-checked at feature G0
+     3	existing_bundle: brain-contracts/v1
+     4	runtime_policy: The feature action copies each resource below into scripts/contracts/sources.yaml, merges
+     5	  bff-api-design.yaml into planning-mds/api/brain-api.yaml (0.7.0), and regenerates the root snapshot, installed
+     6	  bundle, generated Pydantic, AJV assets and OpenAPI snapshot with the shipped F0011 toolchain. `planned` marks a path
+     7	  the feature run creates; it becomes `existing` in sources.yaml once that file exists.
+     8	resources:
+     9	- name: browser-session-v1
+    10	  version: '1'
+    11	  id: https://nebula.local/schemas/browser-session-v1.schema.json
+    12	  source: planning-mds/schemas/browser-session-v1.schema.json
+    13	  source_sha256_at_design: e0f1c3f3b6f1f5a628477e9d41fe68e81808f5ffdb27e7eb563b91b2c3f13b30
+    14	  owner: session
+    15	  disposition: adopt
+    16	  consumer_entry_points:
+    17	  - entry_point: brain_api.routes.session.get_session (output guard)
+    18	    path: engine/apps/api/src/brain_api/routes/session.py
+    19	    state: planned
+    20	  - entry_point: experience shell session store (generated AJV validator)
+    21	    path: experience/src/shell/session/sessionStore.ts
+    22	    state: planned
+    23	  compatibility_tests:
+    24	  - path: engine/apps/api/tests/test_session_routes.py
+    25	    state: planned
+    26	  - path: experience/src/shell/session/__tests__/sessionStore.test.ts
+    27	    state: planned
+    28	  version_selector: contract is the constant browser-session/v1; any other value is refused by the shell.
+    29	  wire_profile: portable-json/v1
+    30	  integration_notes: Generated Pydantic model is the response model; the shell validates every GET /session body with the generated AJV validator and treats a failure as the retryable error state (S0006 edge case), never as signed out.
+    31	- name: active-knowledge-base-update-v1

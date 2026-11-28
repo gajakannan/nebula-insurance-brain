@@ -1,0 +1,177 @@
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** Given an unauthenticated browser opens any shell route, the BFF starts an OIDC authorization-code flow against authentik with PKCE (`S256`), a single-use `state` and a `nonce`, and stores the verifier, state, nonce and requested return route server-side only. The browser receives no token and no verifier.
+    23	- [ ] **AC2:** On a successful callback, the BFF exchanges the code, verifies the ID token (signature, issuer, audience, expiry, nonce) and the access token through the existing verifier, resolves the stable principal through the F0002 resolver, and creates a server-side session. The response sets exactly one session cookie whose value is an opaque random identifier of at least 128 bits, with `Secure`, `HttpOnly`, `SameSite=Lax` or stricter, `Path=/` and no `Domain` attribute.
+    24	- [ ] **AC3:** Access, refresh and ID tokens never appear in a cookie value, a URL, a response body, a response header other than the BFF's own upstream calls, or any browser storage (`localStorage`, `sessionStorage`, IndexedDB, Cache Storage).
+    25	- [ ] **AC4:** A callback with a missing, unknown, expired (older than 10 minutes) or already-used `state`, a nonce mismatch, an IdP `error` parameter, or a code exchange failure is rejected: it creates no session, sets no session cookie, writes one `authentication_event` audit row with a specific internal reason, and shows a sign-in failure page with a "Sign in again" action and no internal reason text.
+    26	- [ ] **AC5:** After sign-in the browser lands on the requested return route only if it is a same-origin relative path matching a registered shell route; absolute URLs, scheme-relative `//` paths, backslash variants, encoded variants of these and unregistered paths land on `/` instead.
+    27	- [ ] **AC6:** A token whose client (`azp`/`client_id`) is not a declared human client, or whose principal is DISABLED, creates no session and lands on the sign-in failure page; the refusal is recorded with its reason.
+    28	- [ ] **AC7:** Signing in again in the same browser while a session exists for the same principal replaces the old session (the old identifier is invalid immediately); a different principal ends the old session first and clears all shell caches (S0005 AC5 behavior).
+    29	
+    30	## Edge Cases & Error Scenarios
+    31	
+    32	Two tabs starting sign-in concurrently each get their own `state`; only the completed one creates a session, and the other's callback fails as AC4 (used/unknown state). IdP unreachable at start: a "sign-in unavailable" page with retry and no session. Session-fixation: a cookie value presented before sign-in is never adopted (AC7 issues a fresh identifier).
+    33	
+    34	## Interaction Contract
+    35	
+    36	Entry: any shell route without a valid session, or the "Sign in" / "Sign in again" action. Action: redirect to authentik and back to the BFF callback. Result: session created and redirect to the sanitized return route, or the sign-in failure page. Persistence evidence: a server-side session row/record exists for the principal and the cookie authenticates `GET /session` (S0006). No editable state. Audit: one `authentication_event` per refusal; a success event is a Phase B decision.
+    37	
+    38	## Data Requirements
+    39	
+    40	Session record fields listed in the [PRD](PRD.md#data-requirements); pending-authorization record (state, nonce, PKCE verifier, return route, created-at). Storage and encryption at rest are Phase B decisions.
+    41	
+    42	## Role-Based Visibility
+    43	
+    44	Any verified human USER principal may sign in; a principal with no memberships lands on the Home "no access yet" state (S0006). Service and agent clients cannot create browser sessions. See the [PRD role matrix](PRD.md#role-based-access).
+    45	
+    46	## Non-Functional Expectations
+    47	
+    48	Sign-in completes without client-side token handling. The session identifier comes from a CSPRNG. At least 80% changed executable-code coverage in the later feature run.
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** When any call returns `401 session_expired`, the shell keeps the current page and its unsaved in-memory input, shows the session-expired dialog, and lists each blocked state-changing request by a human-readable label as "not submitted". No state-changing request is retried.
+    23	- [ ] **AC2:** "Sign in again" opens the IdP sign-in in a popup through the BFF (S0001 flow). On success the popup closes, the page receives only a completion signal (never a token or code), and the dialog closes with the page and its input unchanged.
+    24	- [ ] **AC3:** After re-authentication, a blocked read (`GET`) is retried once automatically; each blocked state-changing request is shown in the re-confirmation dialog and is sent only when the user chooses "Submit now". "Cancel" discards it and keeps the page input.
+    25	- [ ] **AC4:** A re-confirmed request is a new request: it carries the new session's CSRF token and the engine re-checks current authority and current resource revision; a stale item or a lost grant is rejected with the engine's existing denied or not found response, which the shell shows in context without retrying; the engine's existing audit records the re-confirmed request like any other.
+    26	- [ ] **AC5:** If the re-authenticated principal differs from the one that owned the page, the shell discards all in-memory work and blocked requests, clears caches (S0005 AC5) and lands on Home; nothing from the previous principal is shown or sent.
+    27	- [ ] **AC6:** If the popup is blocked or closed without completing, the dialog offers "Sign in on this page", which performs a full redirect sign-in and returns to the sanitized current route (S0001 AC5); the dialog states beforehand that unsaved input will be lost, and no input is written to browser storage.
+    28	- [ ] **AC7:** The popup completion signal is accepted only from the shell's own origin and only for the pending re-authentication it started; any other message is ignored.
+    29	
+    30	## Edge Cases & Error Scenarios
+    31	
+    32	Several tabs expired at once: each tab shows its own dialog; completing sign-in in one tab lets the others continue after their own "Sign in again" or on their next call (the session cookie is shared). The user dismisses the dialog: the page stays read-only for engine calls until signed in. Absolute-lifetime expiry (S0003 AC5) uses the same dialog.
+    33	
+    34	## Interaction Contract
+    35	
+    36	Entry: any `401 session_expired` response while on a shell page. Actions: "Sign in again" (popup), "Sign in on this page" (redirect), "Discard and sign out", then per blocked mutation "Submit now" or "Cancel". Result: page resumes with input intact, or a sanitized-route reload. Persistence evidence: the re-confirmed mutation's engine response and its existing audit row; the blocked attempt has no engine-side effect. Read-only behavior: blocked reads retry once; blocked mutations never retry without the explicit action. Audit: the re-confirmed request is audited as a normal request.
+    37	
+    38	## Data Requirements
+    39	
+    40	In-memory list of blocked requests with label, method, route and body, held only in page memory. No browser storage.
+    41	
+    42	## Role-Based Visibility
+    43	
+    44	Applies to every signed-in principal; the engine's existing authority decides the re-confirmed request.
+    45	
+    46	## Non-Functional Expectations
+    47	
+    48	No automatic replay of any state-changing request under any timing. At least 80% changed executable-code coverage in the later feature run; component and end-to-end tests cover AC1–AC7.
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** "Sign out" sends a CSRF-protected request authenticated by the session cookie; the BFF revokes the session's refresh token at authentik's revocation endpoint (RFC 7009), ends the server session, and clears the session cookie (expired `Set-Cookie` with the same attributes).
+    23	- [ ] **AC2:** The token revoked is the one the session actually holds after any rotation (S0003 AC3); after logout, a refresh-token grant with that token fails at authentik.
+    24	- [ ] **AC3:** If revocation fails (IdP unreachable, non-2xx, timeout), the server session is still ended and its tokens discarded, the failure is recorded durably in the audit log with the principal and reason, and the signed-out page shows the revocation-failed warning. The response never reports success for a failed revocation.
+    25	- [ ] **AC4:** After logout, the old session identifier is rejected with HTTP 401 `unauthenticated` for every route, including when replayed from another client.
+    26	- [ ] **AC5:** On logout, principal change (S0001 AC7, S0004 AC5), active knowledge-base switch (S0006 AC4) or a change in the principal's grant revision reported by the session endpoint, the shell aborts in-flight requests and clears all query caches and in-memory resource data before rendering anything for the new state.
+    27	- [ ] **AC6:** Other open tabs of the same browser show the signed-out state on their next server call and within 60 seconds of the logout (PM assumption A8), without showing data loaded before the logout.
+    28	- [ ] **AC7:** After revocation, the BFF ends the user's IdP session through authentik's end-session endpoint, so the next "Sign in" asks for credentials; if that step fails it is reported the same way as AC3.
+    29	
+    30	## Edge Cases & Error Scenarios
+    31	
+    32	Logout while a renewal is in flight: logout wins and any newly issued tokens are revoked (S0003). Logout with an already-expired session: cookie cleared, signed-out page shown, no revocation attempted for discarded tokens, and the outcome says so. Double-click on "Sign out": one revocation attempt.
+    33	
+    34	## Interaction Contract
+    35	
+    36	Entry: "Sign out" in the shell header or the session-expired dialog's "Discard and sign out". Result: signed-out page with the revocation outcome. Persistence evidence: session record ended; revocation outcome recorded; authentik rejects the revoked refresh token. Audit: a durable record of every logout outcome, including failures (event shape is Phase B).
+    37	
+    38	## Data Requirements
+    39	
+    40	Logout outcome record: principal, session reference (not the cookie value), revocation result, end-session result, timestamp. Grant revision exposed by the session endpoint (S0006).
+    41	
+    42	## Role-Based Visibility
+    43	
+    44	Every signed-in principal can sign out. No data is shown after logout.
+    45	
+    46	## Non-Functional Expectations
+    47	
+    48	Revocation timeout is bounded (Phase B value) so sign-out never hangs. At least 80% changed executable-code coverage in the later feature run.
+   165	## Data Requirements
+   166	
+   167	**Core Entities:**
+   168	- **Browser session** (new, server-side): opaque session identifier (cookie value), stable principal ID, issuer, display name, server-held access/refresh/ID tokens, created-at, last-activity-at, absolute expiry, idle expiry, CSRF secret, active knowledge base, grant revision seen. Storage, encryption at rest and table design are Phase B decisions.
+   169	- **Principal / Membership** (existing, F0002): read-only here. Memberships carry tenant, knowledge base, role and grant revision.
+   170	- **AuthenticationEvent** (existing, F0001/F0002): gains new reason codes for session and throttling outcomes (`rate_limited`, session expiry and revocation-failure reasons); exact codes are Phase B.
+   171	
+   172	**Validation Rules:**
+   173	- Return routes are same-origin relative paths that match a registered route pattern; anything else becomes `/` (S0001 AC5).
+   174	- The active knowledge base must be one of the principal's current memberships; otherwise it resets to none (S0006 AC4).
+   175	
+   176	**Data Relationships:**
+   177	- Browser session → Principal: N:1. A session never changes principal; a different principal at re-authentication ends it (S0004 AC5).
+   178	
+   179	## Role-Based Access
+   180	
+   181	The shell adds no role, resource or grant. Every protected read and write keeps the engine's existing authorization (F0002, ADR-0061/0062); UI guards and hidden controls are convenience only (§120.5).
+   182	
+   183	| Role | Access Level | Notes |
+   184	|------|-------------|-------|
+   185	| Any verified USER principal with no membership | Sign in, see Home with a "no access yet" state, sign out | First-sight provisioning stays as in F0002 (no grants) |
+   186	| TenantMember | Shell, Home, own memberships; reads the engine already allows | Unchanged policy |
+   187	| Reviewer | Above, plus the rehosted Review Panel's existing read and decision actions | Unchanged policy; F0022 owns reviewer authority changes |
+   188	| Service / agent principals | No browser session; bearer API only | BFF sign-in refused for non-human clients (S0001 AC6) |
+   189	| Unauthenticated | Sign-in entry, signed-out page, throttling page | No protected data |
+   190	
+   191	## Success Criteria
+   192	
+   193	- §121.2 items 8 and 9 pass against real authentik and PostgreSQL in the later feature run, which makes ADR-0051 eligible for operator acceptance.
+   194	- F0022 and F0023 can mount routes into the shell without changing session, cache or styling choices.
+   195	- The rejected-credential burst proof closes the F0002 medium recommendation.
+   196	
+   197	## Risks & Assumptions
+   198	
+   199	**Operator decisions (G1, 2026-11-27):**
+   200	
+   201	| ID | Question | Decision |
+   202	|---|---|---|
+   203	| D1 | Session bounds | Server-enforced 30-minute idle timeout and 8-hour absolute lifetime; idle warning 2 minutes before expiry; after the absolute limit the user signs in again at the IdP with no silent renewal |
+   204	| D2 | Shell scope in v0.1 | Sign-in/out, session status, Home with identity and memberships, active knowledge-base selector (narrowing only; switching clears caches), the route/flag/lazy-load seam, and the proof Review Panel rehosted behind the cookie session with the token-in-URL entry removed; its decision submission is the real mutation for §121.2 item 9 |
+   205	| D3 | Re-authentication UX | Popup re-authentication keeps in-memory work; blocked mutations are shown as not submitted and need explicit re-confirmation; if the popup is blocked, a full redirect restores only the sanitized route |
+   206	| D4 | Rejected-credential throttling | Per client: up to 20 rejected credentials per 60 s each write the normal event; then `429` with `Retry-After`, no per-request row, and one `rate_limited` event per client per window; applies to the bearer API and the BFF cookie path |
+   207	
+   208	**PM assumptions (for operator review at G3):**
+   209	
+   210	- **A1 — Browsers:** the latest two major versions of desktop Chrome, Edge, Firefox and Safari; layouts work from 360 px wide.
+   211	- **A2 — Accessibility:** WCAG 2.2 AA for every F0021 screen, with zero serious or critical axe violations.
+   212	- **A3 — Locale:** `en-US` only; all user-facing strings come from translation resources so later locales need no code change.
+   213	- **A4 — Non-browser clients:** the bearer-token API stays for service, agent, Neuron and test callers. The BFF is the only browser path; the shell never sends a bearer token.
+   214	- **A5 — Idle activity:** only a user-initiated request extends the idle timer. Background session-status checks do not.
+   215	- **A6 — Client address for throttling:** the immediate peer address, or a forwarded address only when it comes from a configured trusted proxy.
+   216	- **A7 — Active knowledge base:** a narrowing preference held with the server session, so it survives reload, and reset on principal change. It never grants access.
+   217	- **A8 — Other tabs:** after logout or session end in one tab, other tabs of the same browser show the signed-out state on their next server call and within 60 seconds.
+   218	
+   219	**Risks:**
+   220	- Popup blockers: mitigated by the redirect fallback (D3).
+   221	- `Secure` cookies on local `http://localhost`: the local proof profile and TLS approach are Phase B decisions; production ingress is F0026.
+   222	- authentik revocation behavior: the upstream-failure path must be forced in the proof (S0009), not assumed.
+   223	
+   224	## Dependencies
+   225	
+   226	- **F0002** (Done): verified principals, memberships, grant revisions, `authentication_event`, authorization execution.
+   227	- **F0001-S0004** (Done): the proof Review Panel and its review routes, rehosted unchanged in behavior.
+   228	- **F0011** (Done): generated contracts under `experience/src/generated/contracts/v1/` that the shell consumes.
+   229	- **Downstream:** F0022, F0023 (mount routes; inherit session and app-wide choices), F0067 (route seam), F0026 (event retention, production ingress).
+   230	
+   231	## Related Stories
+   232	
+   233	| Story | Title |
+   234	|---|---|
+   235	| [F0021-S0001](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) | Sign in through the BFF with an opaque session |
+   236	| [F0021-S0002](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks |
+   237	| [F0021-S0003](F0021-S0003-renew-once-and-bound-session-lifetime.md) | Renew once and bound session lifetime |
+   238	| [F0021-S0004](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) | Re-authenticate without losing work or replaying mutations |
+   239	| [F0021-S0005](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) | Log out with upstream revocation and cache hygiene |
+   240	| [F0021-S0006](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) | Show identity and knowledge-base context in the shell |
+   241	| [F0021-S0007](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) | Provide the route seam and rehost the review panel |
+   242	| [F0021-S0008](F0021-S0008-throttle-rejected-credentials.md) | Throttle rejected credentials |
+   243	| [F0021-S0009](F0021-S0009-prove-session-transport-and-mutation-continuity.md) | Prove session transport and mutation continuity |
+   244	
+   245	## Rollout & Enablement
+   246	
+   247	The shell replaces the proof-scope launch form; the old `?token=` entry is removed, not flagged. Local development uses the authentik dev blueprint. GETTING-STARTED is written at Phase B.
+   248	
+   249	## Sources
+   250	
+   251	Master blueprint §3, §118.1, §119.3, §119.5, §120.1, §120.5, §121.2; ADR-0036, ADR-0049, ADR-0051, ADR-0072; graph-observatory-design §10; F0002 security review and PM closeout (run `2026-09-27-bb7c8d1d`); F0021 README amendments (2026-09-28, 2026-10-13, 2026-11-08).
+planning-mds/architecture/data-model.md:481:**`browser_session`:** the server-side session behind the opaque cookie.
+planning-mds/architecture/data-model.md:487:- Also holds the renewal count, CSRF digest, active tenant/knowledge base (composite FK to `knowledge_base(id, tenant_id)`) and the end reason.
+planning-mds/architecture/data-model.md:503:Rejected credentials keep using `authentication_event`, with twelve new reason codes and an optional payload (session reference, CSRF cause, client key for `rate_limited`). Authorization never reads session state: the active knowledge base narrows shell requests only.

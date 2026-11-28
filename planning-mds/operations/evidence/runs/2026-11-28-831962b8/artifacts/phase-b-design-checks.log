@@ -1,0 +1,12 @@
+# Phase B rework design checks (2026-11-28)
+1. migration-design.sql applied to a scratch PostgreSQL database (brain-postgres container, database f0021_scratch,
+   stub principal/tenant/knowledge_base tables and brain_append_only()); exit 0; database dropped afterwards.
+   - live session insert with token + csrf ciphertext: ok
+   - logout with pending end-session, return 3 minutes later -> end_session_outcome = unconfirmed (2-minute rule)
+   - negative: csrf_ciphertext without tokens -> rejected (check: token/csrf ciphertext pairing)
+   - negative: settled outcome back to pending -> rejected (check: outcome_at iff settled)
+2. logout-result-v1.schema.json: Draft 2020-12 check_schema ok; 2 valid examples accepted
+   (pending+url; failed+no_endpoint), 3 invalid rejected (pending without url, unknown status, failed with url).
+3. bff-api-design.yaml parses as YAML.
+4. contract-inventory.yaml source_sha256_at_design recomputed for browser-session-v1 and logout-result-v1;
+   active-knowledge-base-update-v1 unchanged.

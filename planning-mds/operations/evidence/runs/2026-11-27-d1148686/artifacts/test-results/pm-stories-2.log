@@ -1,0 +1,278 @@
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md
+   1: # F0021-S0006 — Show identity and knowledge-base context in the shell
+   2: 
+   3: **Story ID:** F0021-S0006
+   4: **Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+   5: **Title:** Show identity and knowledge-base context in the shell
+   6: **Priority:** High
+   7: **Phase:** MVP — v0.1B
+   8: **Status:** Not Started
+   9: 
+  10: ## User Story
+  11: 
+  12: **As a** GL underwriter (Priya)
+  13: **I want** the shell to show who I am signed in as, which tenants and knowledge bases I can work in, and which one is active
+  14: **So that** I always know whose data I am looking at, and switching context never shows me stale data.
+  15: 
+  16: ## Context & Background
+  17: 
+  18: Operator decision D2 (2026-11-27) puts a Home page with identity and current memberships, and an active knowledge-base selector that only narrows, into F0021. F0002 memberships carry tenant, knowledge base, role and grant revision; authorization stays resource-based in the engine. ADR-0051 D6 requires cache clearing on tenant switch and relevant grant revision.
+  19: 
+  20: ## Acceptance Criteria
+  21: 
+  22: - [ ] **AC1:** A signed-in session can read a session endpoint that returns the principal's display name, principal kind, issuer, session idle and absolute deadlines, the CSRF token for state-changing calls, the principal's current (unrevoked) memberships as tenant, knowledge base and role with display names, the current grant revision, and the active knowledge base. It returns no token and no other principal's data.
+  23: - [ ] **AC2:** Home shows the display name, the session state, and the membership list with the active knowledge base marked. The shell header shows the display name, the active knowledge-base selector and "Sign out" on every shell route.
+  24: - [ ] **AC3:** A principal with no current membership sees Home with a "no access yet" message naming no tenant or knowledge base, an empty selector and "Sign out"; no engine data route is called.
+  25: - [ ] **AC4:** Choosing another membership in the selector updates the active knowledge base through a CSRF-protected request, clears caches and in-flight work (S0005 AC5) before rendering, and persists across reload within the session (PM assumption A7). A requested knowledge base that is not a current membership is rejected and the active value is unchanged.
+  26: - [ ] **AC5:** The active knowledge base only narrows what the shell asks for. A direct engine request for a resource in another knowledge base that the principal may read is still decided by the engine's existing authorization policy; the selector never grants or denies access by itself.
+  27: - [ ] **AC6:** If a membership is revoked while the session is active (the revocation itself is audited by F0002), the next session-endpoint read shows the new grant revision and membership list; if the active knowledge base was revoked, it resets to none and caches are cleared.
+  28: 
+  29: ## Edge Cases & Error Scenarios
+  30: 
+  31: A display name missing from the ID token falls back to the preferred username, then to "Signed-in user"; the subject identifier is never shown as a name. Tenant and knowledge-base display names come from server data, never from token claims. Session endpoint failure: the shell shows a retryable error state, not a signed-out state.
+  32: 
+  33: ## Interaction Contract
+  34: 
+  35: Entry: Home (`/`) and the header selector on every shell route. Editable state: only the active knowledge base. Action: select a membership → CSRF-protected update → caches cleared → views reload. Persistence evidence: the value survives reload and is returned by the session endpoint. Read-only: identity and membership list. Validation failure: a non-member knowledge base is refused with a message, value unchanged. Audit: the active-context change is a session preference, not an authorization event; whether it is recorded is a Phase B decision.
+  36: 
+  37: ## Data Requirements
+  38: 
+  39: Session endpoint response shape (Phase B schema); active knowledge base stored with the session.
+  40: 
+  41: ## Role-Based Visibility
+  42: 
+  43: A principal sees only its own memberships. No role sees another principal's memberships.
+  44: 
+  45: ## Non-Functional Expectations
+  46: 
+  47: WCAG 2.2 AA with zero serious or critical axe violations (A2); desktop and 360-px layouts per the [PRD screen layouts](PRD.md#screen-layouts-ascii); all strings from translation resources (A3). At least 80% changed executable-code coverage in the later feature run.
+  48: 
+  49: ## Dependencies
+  50: 
+  51: S0001, S0005; F0002 membership store.
+  52: 
+  53: ## Out of Scope
+  54: 
+  55: Membership administration, tenant creation, role requests; lists of documents or entities (F0022, F0023).
+  56: 
+  57: ## Questions & Assumptions
+  58: 
+  59: No open business-rule question. Operator decision D2 and PM assumptions A2, A3 and A7 are in the [PRD](PRD.md#risks--assumptions). The session endpoint path and schema are Phase B decisions.
+  60: 
+  61: ## Definition of Done
+  62: 
+  63: - [ ] Every AC above has a concrete observed proof in the later feature run.
+  64: - [ ] Component tests for the empty-membership state, selector switch and revocation reset.
+  65: - [ ] axe results for Home at desktop and 360-px widths.
+  66: - [ ] Documentation and tracker state reflect observed results.
+  67: - [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md
+   1: # F0021-S0007 — Provide the route seam and rehost the review panel
+   2: 
+   3: **Story ID:** F0021-S0007
+   4: **Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+   5: **Title:** Provide the route seam and rehost the review panel
+   6: **Priority:** High
+   7: **Phase:** MVP — v0.1B
+   8: **Status:** Not Started
+   9: 
+  10: ## User Story
+  11: 
+  12: **As a** platform engineer (Dana)
+  13: **I want** one place where later screens register a route, a feature flag and a lazily loaded module, and the existing Review Panel moved onto it behind the session
+  14: **So that** F0022, F0023 and F0067 add screens without growing the base bundle or touching session code, and reviewers stop pasting tokens into URLs.
+  15: 
+  16: ## Context & Background
+  17: 
+  18: Graph Observatory carry-in (2026-10-13, ADR-0072, design note §10): F0021 provides a route-level feature flag and lazy-loading seam, and makes the app-wide state, server-state caching and styling choices that F0067 inherits; no Observatory dependency enters v0.1. Operator decision D2 (2026-11-27): rehost the F0001-S0004 proof Review Panel behind the cookie session and remove the token-in-URL entry. BLUEPRINT §2.1 names the frontend stack; Phase B confirms it.
+  19: 
+  20: ## Acceptance Criteria
+  21: 
+  22: - [ ] **AC1:** A route is registered in one place with its path, a feature-flag key and a lazily imported module. With the flag off, the route renders the not-found screen, its module is never requested, and it does not appear in navigation.
+  23: - [ ] **AC2:** With the flag on, the module loads on first navigation and renders inside the shell frame; a failed module load shows a retryable error screen and leaves the shell usable.
+  24: - [ ] **AC3:** A production build places each lazily registered route's code in its own chunk; the base entry chunk contains none of it, shown by a build report kept as evidence. A size budget for the base entry chunk is recorded at Phase B and checked in CI.
+  25: - [ ] **AC4:** Flag values come from server configuration through the session endpoint (no build-time-only switch), so a flag can change without a rebuild; an unknown flag key is treated as off.
+  26: - [ ] **AC5:** The Review Panel is reachable at a shell route taking the review item identifier as a path parameter, behind the session. Its reads and decision submission go through the cookie session (S0002) with the panel's existing behavior and engine routes unchanged: the engine's decision receipt and audit row are produced as today, and an item the principal is denied shows not found.
+  27: - [ ] **AC6:** The proof-scope launch form and the `?token=` / bearer text-field entry are removed; a URL carrying a `token` query parameter is not read, and the shell strips it from the address bar without sending it anywhere.
+  28: 
+  29: ## Edge Cases & Error Scenarios
+  30: 
+  31: Navigating directly to a flagged-off route URL shows not-found without fetching the chunk. Toggling a flag off while the route is open takes effect on the next navigation. A review item the principal may not read shows the engine's non-disclosing not-found.
+  32: 
+  33: ## Interaction Contract
+  34: 
+  35: Entry: shell navigation or a direct URL. The route seam is configuration, not a user mutation. The rehosted panel keeps its existing decision submission (entry: panel → decide → submit; persistence evidence: the engine's existing decision receipt and audit row; role: Reviewer under existing policy; validation failures: the engine's existing problem responses). Re-authentication during a submission follows S0004.
+  36: 
+  37: ## Data Requirements
+  38: 
+  39: Route registry entries (path, flag key, module); flag values in the session endpoint response (Phase B schema).
+  40: 
+  41: ## Role-Based Visibility
+  42: 
+  43: Flags control visibility only; they never authorize. The Review Panel's data and decisions are authorized by the engine as today.
+  44: 
+  45: ## Non-Functional Expectations
+  46: 
+  47: App-wide choices made here are recorded in Phase B (router, server-state cache, client state, styling, component library, test stack) and inherited by F0022, F0023 and F0067. WCAG 2.2 AA for the shell frame and error screens (A2). At least 80% changed executable-code coverage in the later feature run.
+  48: 
+  49: ## Dependencies
+  50: 
+  51: S0001, S0002, S0004, S0006; F0001-S0004 Review Panel and its routes; F0011 generated contracts.
+  52: 
+  53: ## Out of Scope
+  54: 
+  55: Changes to the panel's renderers, batching or reviewer authority (F0022); the Observatory and its rendering dependencies (F0067); a remote flag service.
+  56: 
+  57: ## Questions & Assumptions
+  58: 
+  59: No open business-rule question. Operator decision D2 is in the [PRD](PRD.md#risks--assumptions). Route paths, flag configuration source, chunk budget and the stack confirmation are Phase B decisions.
+  60: 
+  61: ## Definition of Done
+  62: 
+  63: - [ ] Every AC above has a concrete observed proof in the later feature run.
+  64: - [ ] Build report showing the base chunk free of flagged-route code (AC3).
+  65: - [ ] Existing Review Panel component tests pass under the rehosted route.
+  66: - [ ] Documentation and tracker state reflect observed results.
+  67: - [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md
+   1: # F0021-S0008 — Throttle rejected credentials
+   2: 
+   3: **Story ID:** F0021-S0008
+   4: **Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+   5: **Title:** Throttle rejected credentials
+   6: **Priority:** High
+   7: **Phase:** MVP — v0.1B
+   8: **Status:** Not Started
+   9: 
+  10: ## User Story
+  11: 
+  12: **As a** security administrator (Noor)
+  13: **I want** repeated bad credentials from one client throttled before they reach the engine, with one summary record per window
+  14: **So that** an attacker cannot grow the audit tables without bound, and I can still see that the attack happened.
+  15: 
+  16: ## Context & Background
+  17: 
+  18: F0002 closeout carry-in (2026-09-28, medium): every unauthenticated or rejected-credential request writes one durable `authentication_event` row; the session/BFF boundary must throttle rejected-credential traffic, proven by a negative test showing bounded growth. Retention is F0026. Operator decision D4 (2026-11-27): 20 per client per 60 s, then `429` with `Retry-After`, no per-request row, one `rate_limited` event per client per window, on both the bearer API and the BFF cookie path.
+  19: 
+  20: ## Acceptance Criteria
+  21: 
+  22: - [ ] **AC1:** For one client address, the first 20 rejected credentials within a 60-second window are answered and recorded exactly as today (generic `401`, one `authentication_event` each).
+  23: - [ ] **AC2:** From the 21st rejected credential in that window, the client receives `429` with a `Retry-After` header and a stable `rate_limited` problem code; no credential verification runs and no per-request `authentication_event` row is written. Exactly one `rate_limited` event is recorded for that client and window.
+  24: - [ ] **AC3:** A burst of 1,000 rejected credentials from one client within 60 seconds writes at most 21 `authentication_event` rows for that window.
+  25: - [ ] **AC4:** While a client is throttled, a request from it with a valid credential or session is still served normally; the throttle counts only rejected credentials, and requests from other clients are unaffected.
+  26: - [ ] **AC5:** The rule applies equally to bearer-API requests, cookie-authenticated requests with an unknown or ended session, and sign-in callback failures (S0001 AC4). The client address is the immediate peer, or a forwarded address only from a configured trusted proxy (PM assumption A6).
+  27: 
+  28: ## Edge Cases & Error Scenarios
+  29: 
+  30: A window boundary mid-burst starts a new allowance of 20 plus one summary event. Counter state lost on restart: the allowance resets, which keeps the bound per window. Spoofed `X-Forwarded-For` from an untrusted peer is ignored. The "Too many attempts" page shows for browser sign-in throttling with the wait time.
+  31: 
+  32: ## Interaction Contract
+  33: 
+  34: Entry: any request with a rejected credential. No user action; the result is `429` with `Retry-After`. Persistence evidence: `authentication_event` row counts per window. Audit: per-request events up to the limit, then one `rate_limited` event per client per window.
+  35: 
+  36: ## Data Requirements
+  37: 
+  38: A new `rate_limited` authentication reason (schema change is Phase B); per-client counters with 60-second windows. Counter storage is a Phase B decision.
+  39: 
+  40: ## Role-Based Visibility
+  41: 
+  42: Not role-dependent; applies before principal resolution.
+  43: 
+  44: ## Non-Functional Expectations
+  45: 
+  46: Limit and window are configuration values with D4 defaults. The throttle check adds no database write for throttled requests. At least 80% changed executable-code coverage in the later feature run.
+  47: 
+  48: ## Dependencies
+  49: 
+  50: F0002 `authentication_event` and reasons; S0001, S0002.
+  51: 
+  52: ## Out of Scope
+  53: 
+  54: Retention of `authentication_event` rows (F0026); a global cap across clients; IdP-side lockout policy.
+  55: 
+  56: ## Questions & Assumptions
+  57: 
+  58: No open business-rule question. Operator decision D4 and PM assumption A6 are in the [PRD](PRD.md#risks--assumptions). Counter store and multi-worker consistency are Phase B decisions; the bound in AC3 must hold across workers.
+  59: 
+  60: ## Definition of Done
+  61: 
+  62: - [ ] Every AC above has a concrete observed proof in the later feature run.
+  63: - [ ] The AC3 burst test against PostgreSQL, counting rows.
+  64: - [ ] Trusted-proxy and untrusted-forwarded-header tests.
+  65: - [ ] Documentation and tracker state reflect observed results.
+  66: - [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md
+   1: # F0021-S0009 — Prove session transport and mutation continuity
+   2: 
+   3: **Story ID:** F0021-S0009
+   4: **Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+   5: **Title:** Prove session transport and mutation continuity
+   6: **Priority:** Critical
+   7: **Phase:** MVP — v0.1B
+   8: **Status:** Not Started
+   9: 
+  10: ## User Story
+  11: 
+  12: **As a** security administrator (Noor)
+  13: **I want** the session contract proven in a real browser against the real identity provider, including the failure cases
+  14: **So that** ADR-0051 is accepted on observed evidence rather than on assertions that a cookie was cleared.
+  15: 
+  16: ## Context & Background
+  17: 
+  18: ADR-0051's formal acceptance needs master blueprint §121.2 items 8 (session transport) and 9 (mutation continuity) to pass against the real issuance, storage, renewal and logout flow, including an upstream revocation failure. §119.3: test logout with actual issuance, storage and renewal, not only a cookie-clear response. ADR-0049 leaves items 8 and 9 open for F0021.
+  19: 
+  20: ## Acceptance Criteria
+  21: 
+  22: - [ ] **AC1:** An end-to-end suite runs a real browser against the local stack (authentik from the dev blueprint, PostgreSQL, engine, BFF, built shell) and, after sign-in, renewal and logout, inspects cookies, `localStorage`, `sessionStorage`, IndexedDB, Cache Storage, URLs and response bodies: no access, refresh or ID token appears, and the session cookie has the S0001 AC2 attributes.
+  23: - [ ] **AC2:** The suite forces access-token expiry and fires at least 20 parallel requests; authentik observes exactly one refresh grant for the session, and the rotated refresh token is the one later revoked at logout.
+  24: - [ ] **AC3:** The suite forces an upstream revocation failure (IdP revocation endpoint unreachable or erroring) and observes the server session ended, the failure recorded, and the revocation-failed warning shown; with revocation available, it observes the revoked refresh token rejected by authentik afterwards.
+  25: - [ ] **AC4:** In one browser, principal A signs out and principal B signs in (and separately, principal B completes a popup re-authentication on A's page): no data, cache entry or blocked request from A is shown to or sent for B; and every tested malicious return route lands on `/`.
+  26: - [ ] **AC5:** Mutation continuity with the rehosted Review Panel: the session is expired while a reviewer has an unsent decision; the decision is not received by the engine until "Submit now"; after re-confirmation the engine checks current item state and authority, and a variant where the item became stale or the grant was revoked during the gap is refused without retry.
+  27: 
+  28: ## Edge Cases & Error Scenarios
+  29: 
+  30: The suite runs from a clean volume and is repeatable; a flaky IdP start is a harness failure, not a pass. Results record authentik and browser versions.
+  31: 
+  32: ## Interaction Contract
+  33: 
+  34: Entry: the proof harness command run by a developer or CI job. Result: a pass/fail report with per-check evidence (storage dumps, IdP event logs, engine audit rows) stored in the feature run's evidence. No product state is changed beyond the disposable local stack.
+  35: 
+  36: ## Data Requirements
+  37: 
+  38: Synthetic principals and review fixtures from the dev blueprint and seed scripts; no real tenant data.
+  39: 
+  40: ## Role-Based Visibility
+  41: 
+  42: Uses synthetic TenantMember and Reviewer principals in two tenants (existing dev blueprint principals plus any Phase B additions).
+  43: 
+  44: ## Non-Functional Expectations
+  45: 
+  46: Deterministic and repeatable from a clean environment; total runtime recorded. Browser matrix for this proof: at least Chromium and Firefox (A1 covers the full support list).
+  47: 
+  48: ## Dependencies
+  49: 
+  50: S0001–S0008; dev authentik blueprint; existing review fixtures (F0001-S0004, F0002).
+  51: 
+  52: ## Out of Scope
+  53: 
+  54: §121.2 items 1–7 and 10–12 beyond what F0001/F0002 already proved (F0018, F0022, F0026); production ingress.
+  55: 
+  56: ## Questions & Assumptions
+  57: 
+  58: No open business-rule question. The end-to-end tool (Playwright is proposed in BLUEPRINT §2.1), how the upstream failure is injected, and how IdP-side refresh grants are counted are Phase B decisions.
+  59: 
+  60: ## Definition of Done
+  61: 
+  62: - [ ] Every AC above has a concrete observed proof in the later feature run.
+  63: - [ ] Evidence package contains storage inspections, IdP-side observations and audit rows for each AC.
+  64: - [ ] ADR-0051 acceptance is presented to the operator with this evidence (acceptance itself is a separate operator decision).
+  65: - [ ] Documentation and tracker state reflect observed results.
+  66: - [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+

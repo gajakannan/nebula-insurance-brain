@@ -25,7 +25,7 @@ ADR-0051 D4: logout revokes the server-held refresh token at the IdP and ends th
 - [ ] **AC4:** After logout, the old session identifier is rejected with HTTP 401 `unauthenticated` for every route, including when replayed from another client.
 - [ ] **AC5:** On logout, principal change (S0001 AC7, S0004 AC5), active knowledge-base switch (S0006 AC4) or a change in the principal's grant revision reported by the session endpoint, the shell aborts in-flight requests and clears all query caches and in-memory resource data before rendering anything for the new state.
 - [ ] **AC6:** Other open tabs of the same browser show the signed-out state on their next server call and within 60 seconds of the logout (PM assumption A8), without showing data loaded before the logout.
-- [ ] **AC7:** After revocation, the BFF ends the user's IdP session through authentik's end-session endpoint, so the next "Sign in" asks for credentials; if that step fails it is reported the same way as AC3.
+- [ ] **AC7:** After revocation, the BFF ends the user's IdP session through authentik's end-session endpoint, so the next "Sign in" asks for credentials. The end-session outcome is observed and recorded as one of: `completed` (authentik returned the browser to the signed-out page), `failed` (authentik returned an error, or no end-session endpoint is available), or `unconfirmed` (the browser did not come back within 2 minutes). `failed` and `unconfirmed` are reported the same way as AC3: a durable record with the principal and outcome, and the signed-out page (or the next shell load) shows the "could not confirm sign-out at the identity provider" warning. Nothing reports `completed` without the return.
 
 ## Edge Cases & Error Scenarios
 
@@ -33,11 +33,11 @@ Logout while a renewal is in flight: logout wins and any newly issued tokens are
 
 ## Interaction Contract
 
-Entry: "Sign out" in the shell header or the session-expired dialog's "Discard and sign out". Result: signed-out page with the revocation outcome. Persistence evidence: session record ended; revocation outcome recorded; authentik rejects the revoked refresh token. Audit: a durable record of every logout outcome, including failures (event shape is Phase B).
+Entry: "Sign out" in the shell header or the session-expired dialog's "Discard and sign out". Result: signed-out page with the revocation outcome and the end-session outcome (AC7). Persistence evidence: session record ended; revocation outcome recorded; authentik rejects the revoked refresh token. Audit: a durable record of every logout outcome, including failures (event shape is Phase B).
 
 ## Data Requirements
 
-Logout outcome record: principal, session reference (not the cookie value), revocation result, end-session result, timestamp. Grant revision exposed by the session endpoint (S0006).
+Logout outcome record: principal, session reference (not the cookie value), revocation result, end-session result (initially pending, then `completed`, `failed` or `unconfirmed`, each a durable record), timestamp. Grant revision exposed by the session endpoint (S0006).
 
 ## Role-Based Visibility
 

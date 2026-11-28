@@ -1,0 +1,94 @@
+    95	              "status": {
+    96	                "const": "succeeded"
+    97	              }
+    98	            }
+    99	          },
+   100	          "then": {
+   101	            "not": {
+   102	              "required": [
+   103	                "reason"
+   104	              ]
+   105	            }
+   106	          }
+   107	        }
+   108	      ]
+   109	    },
+   110	    "end_session": {
+   111	      "type": "object",
+   112	      "additionalProperties": false,
+   113	      "required": [
+   114	        "status",
+   115	        "url"
+   116	      ],
+   117	      "properties": {
+   118	        "status": {
+   119	          "enum": [
+   120	            "redirect",
+   121	            "unavailable"
+   122	          ]
+   123	        },
+   124	        "url": {
+   125	          "type": [
+   126	            "string",
+   127	            "null"
+   128	          ],
+   129	          "format": "uri"
+   130	        }
+   131	      },
+   132	      "allOf": [
+   133	        {
+   134	          "if": {
+   135	            "properties": {
+   136	              "status": {
+   137	                "const": "redirect"
+   138	              }
+   139	            }
+   140	          },
+   141	          "then": {
+   142	            "properties": {
+   143	              "url": {
+   144	                "type": "string"
+   145	              }
+   146	            }
+   147	          }
+   148	        },
+   149	        {
+   150	          "if": {
+   151	            "properties": {
+   152	              "status": {
+   153	                "const": "unavailable"
+   154	              }
+   155	            }
+   156	          },
+   157	          "then": {
+   158	            "properties": {
+   159	              "url": {
+   160	                "type": "null"
+   161	              }
+   162	            }
+   163	          }
+   164	        }
+   165	      ]
+    68	          "format": "date-time"
+    69	        },
+    70	        "absolute_expires_at": {
+    71	          "type": "string",
+    72	          "format": "date-time"
+    73	        },
+    74	        "idle_warning_seconds": {
+    75	          "type": "integer",
+    76	          "const": 120
+    77	        },
+    78	        "server_time": {
+    79	          "type": "string",
+    80	          "format": "date-time"
+    81	        }
+    82	      }
+    83	    },
+    84	    "csrf_token": {
+    85	      "type": "string",
+    86	      "pattern": "^[A-Za-z0-9_-]{43}$",
+    87	      "description": "256-bit synchronizer token, base64url without padding; held in page memory only."
+    88	    },
+    89	    "memberships": {
+    90	      "type": "array",

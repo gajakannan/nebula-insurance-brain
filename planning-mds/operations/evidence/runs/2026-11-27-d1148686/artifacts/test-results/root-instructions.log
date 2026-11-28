@@ -1,0 +1,314 @@
+# Project instructions and required checks (v1)
+
+A product can own local instructions and Python validation scripts without adding product rules to the framework. The optional `{NEBULA_PRODUCT_ROOT}/.nebula-project.yaml` declares them. This is a framework invocation convention, not a native hook API supplied by an agent host.
+
+## Ownership and discovery
+
+The framework owns discovery, schema validation, execution, and gate evidence. Products own the declared documents, scripts, and criteria. Instructions supplement the blueprint and do not override framework approvals or authorize additional scope. Resolve conflicts explicitly.
+
+From the framework checkout, before action work and after every session resume:
+
+```bash
+python3 agents/scripts/project_context.py --product-root /absolute/product --action plan-review
+```
+
+Read the returned text, not only the listed filenames. The loader reads the product blueprint first and then applicable instruction files in declaration order. Explicit instruction loads are targeted reads even when `.agentignore` excludes those paths from broad discovery. It prints source paths and content hashes. `--json` returns the same context as structured data.
+
+Both new commands require `--product-root` or `NEBULA_PRODUCT_ROOT`; the flag wins and there is no default product. Relative root inputs resolve against the invocation CWD; normalize once at session start and pass the absolute root thereafter. Product instruction/check paths resolve against that root. No manifest preserves the legacy action context procedure; `checks: []` enables instructions alone. A malformed manifest, missing instruction, unsupported version, or unsupported check point is an error. For `init`, a not-yet-created blueprint is allowed.
+
+When upgrading existing products, update root placeholders in `.nebula-project.yaml`
+checks and reusable prompts to `{NEBULA_PRODUCT_ROOT}`. Alternate root variable
+names are rejected in executable configuration. Historical evidence remains readable
+and does not need to be rewritten.
+
+## Manifest
+
+```yaml
+version: 1
+instructions:
+  - path: docs/agent-instructions.md
+  - path: docs/review-checklist.md
+    actions: [plan-review]
+checks:
+  - id: plan-readiness
+    action: plan-review
+    stage: PR2
+    event: before_stage_complete
+    argv:
+      - python3
+      - "{NEBULA_PRODUCT_ROOT}/scripts/validation/check_plan.py"
+      - --product-root
+      - "{NEBULA_PRODUCT_ROOT}"
+      - --plan-scope
+      - "{PLAN_SCOPE}"
+      - --target
+      - "{TARGET}"
+    cwd: product
+    timeout_seconds: 60
+    inputs:
+      - planning-mds/features/**/*.md
+      - scripts/validation/**/*.py
+```
+
+The schema is `agents/scripts/schemas/project.schema.json`. Fields are strict; check IDs must be unique. The only initial check point is `plan-review:PR2:before_stage_complete`, declared in the action spec. All declared checks are required. There are no replacement, optional-success, or arbitrary shell hooks.
+
+`argv` is an argument array, never shell text. V1 accepts `python` or `python3` followed by a product-local `.py` script and uses the runner's Python interpreter. No inline `-c`, `-m`, shell executable, path traversal, or symlink escape is accepted. Timeouts are 1–300 seconds. Inputs are nonempty glob patterns; every pattern must match files. Declare all local dependencies and governing sources read by the check. Do not include its generated evidence directory in its inputs.
+
+Supported placeholders are `{NEBULA_PRODUCT_ROOT}`, `{PLAN_SCOPE}`, and `{TARGET}`; feature scope also supplies `{FEATURE_ID}` and `{FEATURE_PATH}`. Unknown placeholders block execution. Features are resolved from `planning-mds/features/REGISTRY.md`, not arbitrary supplied directories. Feature-set targets are comma-separated IDs. Project scope requires target `project` and selects active or PRD-bearing, nonarchived registry entries; reserved IDs without plans are excluded. An active feature with a missing PRD is not silently excluded.
+
+## Gate usage
+
+Start or resume the normal action run and its base evidence package first. Use the same root, scope, target, and run ID throughout:
+
+```bash
+python3 agents/scripts/run-gate.py --product-root /absolute/product \
+  --action plan-review --plan-scope feature --target F0001 --list
+python3 agents/scripts/run-gate.py --product-root /absolute/product \
+  --action plan-review --plan-scope feature --target F0001 \
+  --run-id 2026-09-07-aabbccdd --stage PR2
+```
+
+The example run ID must be replaced with the actual action run ID. PR2 runs framework operations first, then required product checks. For opted-in feature-set/project scope, the runner expands story validation across the resolved features. A product failure cannot clear a framework failure. PR4 refuses to proceed without completed PR2 and current passing product-check evidence. Review roles still own the readiness judgment; neither a script pass nor a paused manual checkpoint is approval.
+
+`--list` and `--dry-run` do not run checks or write state. Resume reuses only passing results with unchanged fingerprints and intact evidence. `--from` cannot skip an unfinished framework operation in a stage with required product checks. `--force` reruns checks but does not bypass prior required checks or approval checkpoints.
+
+The run journal binds the product, action, scope, and manifest. Changing that identity—including deleting the manifest—requires a new run context. Fingerprints cover instruction contents, validator and declared inputs, the input file set, registry, relevant framework source files, and framework Git revision. Input changes during execution fail the check. Every attempt preserves separate stdout, stderr, and result metadata under the base run's `artifacts/project-checks/`, with hashes, command logs, and lifecycle logs. These are additive journal fields; historical evidence contracts remain unchanged. The optional project manifest/result contract is independently versioned at 1.
+
+## Script result and CI
+
+Scripts emit exactly one JSON object to stdout:
+
+```json
+{"schema_version":1,"check_id":"plan-readiness","status":"pass","findings":[]}
+```
+
+For failure, use `status: "fail"` and findings containing exactly `rule_id`, `message`, and product-relative `path`. Exit 0 means pass; 1 means validation failure; 2 means invocation/configuration error. Invalid JSON, inconsistent output/exit status, crashes, and timeouts block completion. Diagnostics belong on stderr.
+
+CI uses the same resolver/executor without running an LLM or marking action stages complete:
+
+```bash
+python3 agents/scripts/project_checks.py --product-root /absolute/product \
+  --action plan-review --plan-scope project --target project \
+  --run-id 2026-09-07-aabbccdd
+```
+
+This writes `project-check-state.json` plus the same check evidence and logs; it does not imply reviewer approval. Pin a framework commit containing these commands before enabling them in consumer CI. Update the consumer blueprint and CI checkout pin together.
+
+## Host boundary and limitations
+
+Shell-capable hosts can invoke these same commands; no platform-specific hook translation is required. Generated operator and automation prompts both require explicit context loading on start/resume. This is not automatic enforcement of every command issued by a model.
+
+The native launcher now reads `NEBULA_PRODUCT_ROOT` and binds its absolute workspace path into both the provider prompt and child environment, overriding stale tmux environment values. It still uses a single workspace for product and framework assets; separate sibling framework discovery is not supported by that adapter. For sibling consumption, use the documented framework-root shell session with explicit root arguments. Native host adapters have not been integration-tested for project extensions.
+
+Local checks are trusted repository code, not sandboxed programs. Host permissions still govern execution. Structural validation checks artifacts and declared rules; semantic adequacy, security approval, and regulatory determinations remain human/reviewer responsibilities.
+# Agent and Action Usage Guide
+
+## Purpose
+
+This guide shows how to invoke the framework in a fresh session:
+
+- how to set up the session so `{NEBULA_PRODUCT_ROOT}` resolves
+- when to use an **action** versus a direct **agent**
+- how to structure prompts so agents read the right artifacts
+- what each agent typically reads, updates, and validates
+
+Use this guide with:
+
+- `agents/README.md`
+- `agents/actions/README.md`
+- `agents/docs/MANUAL-ORCHESTRATION-RUNBOOK.md`
+- `agents/agent-map.yaml`
+- `CONSUMER-CONTRACT.md`
+
+`agents/agent-map.yaml` is the authoritative action-to-agent wiring source. Action `.md` files remain the human-readable execution docs.
+
+## Session Setup
+
+The framework is consumed as a sibling repo. Every session runs with these two fixed ideas:
+
+- **Session working directory:** `nebula-agents` — the agent reads role definitions, actions, and templates from `agents/` here.
+- **Implementation target:** `{NEBULA_PRODUCT_ROOT}` — a sibling product repo. All product-owned artifacts — `{NEBULA_PRODUCT_ROOT}/planning-mds/`, `{NEBULA_PRODUCT_ROOT}/engine/`, `{NEBULA_PRODUCT_ROOT}/experience/`, `{NEBULA_PRODUCT_ROOT}/neuron/`, and `{NEBULA_PRODUCT_ROOT}/scripts/kg/` — live under the product repo.
+
+### Expected workspace layout
+
+```
+WORKSPACE_ROOT/
+  nebula-agents/          # session working directory (this repo)
+  <product-repo>/         # {NEBULA_PRODUCT_ROOT}, e.g. nebula-insurance-crm
+```
+
+`WORKSPACE_ROOT` must be outside any source backup of `nebula-crm`.
+
+### Resolving `{NEBULA_PRODUCT_ROOT}`
+
+`NEBULA_PRODUCT_ROOT` is the canonical product selection, whether supplied in a
+pasted action prompt or exported in the shell. Normalize its value once to an
+absolute path, then use `{NEBULA_PRODUCT_ROOT}` throughout the action.
+
+1. Explicit operator selection (prompt `NEBULA_PRODUCT_ROOT` or script
+   `--product-root`) wins over the environment. Conflicting explicit selections
+   require clarification; no alternate root variable is supported.
+2. Otherwise read the `NEBULA_PRODUCT_ROOT` environment variable.
+3. If neither is supplied, ask for a product path. Scripts fail with an error.
+   There is no default sibling product and no automatic selection of CWD.
+
+A prompt value is valid even when the shell environment is empty. Pass that value
+explicitly to the resolver; do not discard it because an environment check is empty.
+Resolve `../` against the session's starting directory (normally `nebula-agents`)
+**once, before changing directories**, using:
+
+```sh
+python3 agents/scripts/_product_root.py --product-root ../my-product
+```
+
+Omit the flag only when reading the actual environment. The command prints the
+absolute path to stdout and its source to stderr. Echo that selection before
+product discovery or writes. Use this absolute value for every `{NEBULA_PRODUCT_ROOT}`
+reference, every `--product-root` argument (including init and resume), and every
+agent handoff. An export in one tool shell may not persist into the next shell.
+On resume, reuse the recorded absolute root and reject a conflicting selection.
+Never infer the product from a feature ID or choose among sibling repositories.
+
+Example pasted prompt (no shell export required):
+
+```text
+NEBULA_PRODUCT_ROOT = "../my-product"
+FEATURE_ID = "F0002"
+Follow agents/templates/prompts/evidence-contract/feature-operator-friendly.md.
+```
+
+Keep run-specific values in the invocation, rather than editing generated templates.
+
+### Honoring `.agentignore`
+
+For an opted-in product, load its blueprint and declared instruction text before work and after resume with `python3 agents/scripts/project_context.py --product-root <absolute-product-root> --action <action>`. Resolve the root explicitly; extension commands do not use the legacy fallback. A context error blocks the action. See [Project extensions](PROJECT-EXTENSIONS.md) for gate/CI usage and the current native-launcher limitation.
+
+After resolving `{NEBULA_PRODUCT_ROOT}`, check for `{NEBULA_PRODUCT_ROOT}/.agentignore`
+before broad product discovery. This file is a gitignore-style retrieval guard
+for agents, not a Git ignore file. Honor it for broad reads, globs, greps, and
+file-list operations. For product searches, prefer running from
+`{NEBULA_PRODUCT_ROOT}` with `rg --ignore-file .agentignore ...`.
+
+Bypass ignored paths only for explicit audit, validation, closeout, failure
+triage, or user-requested inspection, and then read exact files rather than
+whole folders. Full semantics live in `agents/docs/AGENTIGNORE.md`.
+
+### What `{NEBULA_PRODUCT_ROOT}` prefixes
+
+Every reference from `agents/**` to product-owned paths uses the `{NEBULA_PRODUCT_ROOT}` placeholder. At baseline the placeholder prefixes all product-owned trees: `{NEBULA_PRODUCT_ROOT}/scripts/kg/...`, `{NEBULA_PRODUCT_ROOT}/planning-mds/...`, `{NEBULA_PRODUCT_ROOT}/engine/...`, `{NEBULA_PRODUCT_ROOT}/experience/...`, `{NEBULA_PRODUCT_ROOT}/neuron/...`, and `{NEBULA_PRODUCT_ROOT}/bruno/...`.
+
+Examples:
+
+- `python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py <feature-id>` (product-owned KG tool)
+- `pnpm --dir {NEBULA_PRODUCT_ROOT}/experience lint` (product frontend)
+- Write scope: `{NEBULA_PRODUCT_ROOT}/engine/**` (product backend)
+
+Framework-owned scripts stay framework-relative (no `{NEBULA_PRODUCT_ROOT}` prefix): `python3 agents/scripts/validate-genericness.py`, `python3 agents/scripts/run-lifecycle-gates.py`, `python3 agents/scripts/validate_templates.py`.
+
+### Discovering product-specific concretes
+
+Framework docs and templates do not hardcode product namespaces, API filenames, or entity names. The agent discovers these at session time from the product repo:
+
+- **Tech stack** → `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`
+- **Entity-to-file bindings** → `{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/code-index.yaml` and `canonical-nodes.yaml`
+- **API spec location** → declared in `{NEBULA_PRODUCT_ROOT}/planning-mds/BLUEPRINT.md`; agents do not assume a filename
+
+## Default Rule
+
+Prefer **actions** for end-to-end workflows, approval gates, and multi-agent sequencing.
+
+Use a direct **agent** prompt when:
+
+- the work belongs to one role
+- you are revising only one phase artifact set
+- a gate requested targeted rework from a specific role
+- you already know the exact feature and artifact scope
+
+## Prompt Anatomy
+
+Good direct-agent prompts usually include these parts:
+
+1. Explicit activation
+2. Target feature or scope path
+3. Current status or problem statement
+4. Ontology context when coverage exists
+5. Required context files to read
+6. Deliverables to create or update
+7. Precedence rules if artifacts conflict
+8. Validation commands and tracker updates
+
+### Direct Agent Template
+
+```text
+Switch to <Agent Name> agent mode (agents/<role>/SKILL.md).
+
+Work on <feature or scope> at <path>. The current state is <status>.
+
+Read:
+- <required file 1>
+- <required file 2>
+- <dependent artifacts>
+
+Deliverables:
+1. <deliverable 1>
+2. <deliverable 2>
+
+Constraints:
+- <scope boundary>
+- <precedence rule if artifacts conflict>
+
+When done:
+- update <status/tracker/docs files>
+- run <validation command(s)>
+```
+
+### Ontology-Backed Addendum
+
+When the target feature or story exists in
+`{NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/feature-mappings.yaml`, add this block before the
+raw file list:
+
+```text
+Ontology context:
+- target: <feature or story id>
+- retrieve via the CLIs (they join the KG yamls for you — do not load raw yamls into context):
+  - python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/lookup.py <feature or story id>   # feature/story slice
+  - python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/hint.py <path>                    # before any code search
+  - python3 {NEBULA_PRODUCT_ROOT}/scripts/kg/blast.py <node-or-file>          # impact radius before editing shared semantics
+- use the returned slice (matching mapping entry + one hop) as the first-pass routing context
+- open raw yamls under {NEBULA_PRODUCT_ROOT}/planning-mds/knowledge-graph/ ONLY to verify a
+  detail or repair drift — never as the default retrieval path
+- source precedence: raw feature/ADR/schema/API artifacts win over ontology mappings
+- if ontology drift is found, repair the authoritative source first if needed,
+  then repair the ontology mapping in the same change set
+requirement applies from G2 (QE scan handoff) onward; G0/G1 validations do not
+require scans, so setup never needs placeholder waivers.
+
+## Telemetry: the Command Log
+
+`commands.log` is **JSON Lines** — one JSON object per non-empty line,
+append-only across the whole run:
+
+```json
+{"schema_version":1,"timestamp":"2026-05-19T14:20:00-04:00","cwd":"{NEBULA_PRODUCT_ROOT}","command":"pnpm test","exit_code":0,"artifacts":["…/artifacts/test-results/pnpm-test.log"],"redactions":[]}
+```
+
+| Field | Notes |
+|-------|-------|
+| `schema_version` | supported integer |
+| `timestamp` | ISO 8601 with timezone or `Z` |
+| `cwd` | repo-relative or `{NEBULA_PRODUCT_ROOT}` preferred; absolute paths warn unless justified in `artifact-trace.md` → `Run Environment` |
+| `command` | non-empty, sanitized |
+| `exit_code` | integer |
+| `artifacts` | paths produced; resolve where committed |
+| `redactions` | names of redacted fields/token classes |
+
+**Secret scanning is mandatory and self-contained.** The validator scans a
+per-record surface (`command` + `artifacts` strings) against named patterns
+in `agents/product-manager/scripts/secret_patterns.json` — bearer tokens,
+cookies, private keys, raw connection strings, access keys (single-line
+regex), and `env_dump` / `env_file_contents` (multi-line scanners). The
+pattern file is the maintained source of truth and is loaded at startup;
+products may extend it (name conflicts error). Public scanners like
+`detect-secrets`/`trufflehog` may inform the pattern set but are **not**
+invoked at runtime, so validation stays deterministic. Each class has a
