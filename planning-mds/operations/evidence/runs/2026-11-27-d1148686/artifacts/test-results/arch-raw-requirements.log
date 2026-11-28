@@ -1,0 +1,422 @@
+     1	# F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     2	
+     3	**Feature ID:** F0021
+     4	**Phase:** MVP — v0.1B
+     5	**Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`)
+     6	**Owner:** Product Manager (Phase A); Architect (Phase B)
+     7	**Governing ADRs:** [ADR-0036](../../architecture/decisions/ADR-0036-nebula-keeps-a-native-semantic-ux-onyx-is-a-reference-implementation.md) (Accepted), [ADR-0049](../../architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md) (Accepted for the F0001-S0006 boundary), [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md) (Proposed; decision recorded 2026-11-08; this feature is its proving feature), [ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) (Proposed; carry-in seam only)
+     8	
+     9	## Feature Statement
+    10	
+    11	**As an** insurance knowledge worker or reviewer
+    12	**I want** to sign in once to a native Nebula web application that keeps my session on the server, renews it safely and never replays my decisions behind my back
+    13	**So that** I can work in Nebula's semantic views without tokens in my browser, without losing work when a session expires, and without an action being submitted that I did not confirm.
+    14	
+    15	## Business Objective
+    16	
+    17	- **Goal:** deliver the first user-facing surface (master blueprint §3, §120.5): a same-origin backend-for-frontend (BFF) session, the React shell every later screen mounts into, and the re-authentication behavior that keeps reviewer decisions safe.
+    18	- **Metric:** master blueprint §121.2 items 8 (session transport) and 9 (mutation continuity) pass against the real authentik issuance, storage, renewal and logout flow, including an upstream revocation failure. These are ADR-0051's formal acceptance conditions.
+    19	- **Baseline:** today the proof-scope Review Panel (F0001-S0004) takes a bearer token from the URL or a text field. No session, renewal, logout, CSRF protection or shell exists.
+    20	- **Target:** zero access or refresh tokens in any browser-readable storage, URL, or response body; exactly one upstream refresh per renewal burst; zero automatically replayed mutations; bounded `authentication_event` growth under a rejected-credential burst.
+    21	
+    22	## Problem Statement
+    23	
+    24	- **Current State:** the only UI is a proof page that asks for a raw bearer token. The CRM reference mixes an HttpOnly-cookie model with browser-direct renewal that writes tokens to `sessionStorage`, and its logout revokes a refresh token the browser never set (§119.3). Since F0002, every rejected credential writes one durable `authentication_event` row with no edge throttle (F0002 security review, medium).
+    25	- **Desired State:** one BFF session model (ADR-0051 D1–D6), an application shell with app-wide routing, server-state caching, state and styling choices that F0022, F0023 and F0067 inherit, and re-authentication that preserves in-memory work and requires explicit re-confirmation of any blocked mutation.
+    26	- **Impact:** F0022 (native review round trip) and F0023 (Entity 360) cannot ship a user-facing screen without this feature. ADR-0051 cannot be accepted without its proof.
+    27	
+    28	## Scope & Boundaries
+    29	
+    30	**In Scope:**
+    31	- Sign-in through a same-origin BFF using the OIDC authorization-code flow with PKCE, state and nonce against authentik; an opaque `Secure`, `HttpOnly`, `SameSite` session cookie; server-held access and refresh tokens (S0001).
+    32	- Cookie-authenticated calls to the existing engine routes with CSRF and origin checks on every state-changing request, and distinct unauthenticated / session-expired / denied / not-found outcomes (S0002).
+    33	- A single coalesced server-side renewal path, refresh-token rotation, and server-enforced idle (30 min) and absolute (8 h) session bounds (S0003; operator decision D1).
+    34	- Re-authentication in a popup that keeps the page's in-memory work, shows a blocked mutation as not submitted and requires explicit re-confirmation; a redirect fallback that restores only a sanitized route (S0004; D3).
+    35	- Logout that revokes the server-held refresh token upstream, ends the server session and reports an upstream failure; cache and in-flight-work clearing on logout, principal change, active knowledge-base switch and grant-revision change (S0005).
+    36	- The shell: signed-in home with the principal's display name and current tenant/knowledge-base memberships, an active knowledge-base selector that only narrows, and denied / not-found / signed-out / error screens (S0006; D2).
+    37	- The route-level feature-flag and lazy-loading seam F0067 needs, and the existing proof Review Panel rehosted behind the session with the token-in-URL entry removed (S0007; D2).
+    38	- Throttling of rejected credentials on both the bearer API and the BFF cookie path: 20 per client per 60 s, then `429` (S0008; D4; F0002 carry-in).
+    39	- The §121.2 items 8 and 9 proof against real authentik, PostgreSQL and the rehosted Review Panel decision submission (S0009).
+    40	
+    41	**Out of Scope:**
+    42	- Document 360, the full review batch workflow, renderer changes and reviewer-authority rules (F0022). The rehosted panel keeps its current F0001-S0004 behavior.
+    43	- Entity 360 (F0023), search, chat and graph views (v0.2), and the Graph Observatory itself (F0067; only the seam is delivered).
+    44	- New authorization grants, roles, resources or policy rows. The shell reads the principal's existing memberships; the engine stays the authorization boundary.
+    45	- Retention of `authentication_event` rows (F0026) and production host, TLS termination and ingress choices (F0026, §117.1 item 3).
+    46	- An idempotent command protocol for controlled mutation retry (§120.5 names it as later work).
+    47	- External users (brokers, MGAs), self-registration, account linking and IdP migration (§121.2 item 2 remainder).
+    48	- Locales other than `en-US`.
+    49	
+    50	## Personas
+    51	
+    52	See [personas.md](personas.md). Primary: Rosa (Business Reviewer) and Priya (GL Underwriter). Secondary: Noor (Security Administrator, new) and Dana (Platform Engineer).
+    53	
+    54	## Acceptance Criteria Overview
+    55	
+    56	Nine stories, 55 acceptance criteria; the per-AC proof map is in [acceptance-criteria-checklist.md](acceptance-criteria-checklist.md).
+    57	
+    58	- [ ] Tokens never reach the browser: no access, refresh or ID token in cookies readable by script, `localStorage`, `sessionStorage`, IndexedDB, URLs or response bodies (S0001, S0009).
+    59	- [ ] Every state-changing cookie-authenticated request without a valid CSRF token or with a foreign origin is refused before any engine handler runs (S0002).
+    60	- [ ] A burst of concurrent requests after access-token expiry causes exactly one upstream refresh (S0003).
+    61	- [ ] A mutation blocked by an expired session is never sent again without the user's explicit re-confirmation, and the re-confirmed request re-checks current revision and authority (S0004, S0009).
+    62	- [ ] Logout revokes the refresh token at authentik; an upstream failure is shown to the user and recorded, never reported as success (S0005, S0009).
+    63	- [ ] Query caches and in-flight work are cleared on logout, principal change, active knowledge-base switch and grant-revision change (S0005, S0006).
+    64	- [ ] A flagged, lazily loaded route adds nothing to the base bundle and is not fetched while its flag is off (S0007).
+    65	- [ ] A burst of 1,000 rejected credentials from one client writes at most 21 `authentication_event` rows per 60-second window (S0008).
+    66	
+    67	## UX / Screens
+    68	
+    69	| Screen | Purpose | Key Actions |
+    70	|--------|---------|-------------|
+    71	| Sign-in redirect / callback | Start and complete the OIDC flow; show a sign-in failure without creating a session | Continue to IdP; retry sign-in |
+    72	| Shell frame + Home | Show who is signed in, the session state, current memberships and the active knowledge base | Switch active knowledge base; sign out; open a mounted route |
+    73	| Session-expired dialog | Re-authenticate without leaving the page; list any blocked action as not submitted | Sign in again (popup); discard and sign out |
+    74	| Blocked-action re-confirmation | Ask the user to confirm a mutation that was blocked by session expiry | Re-submit (re-checked); cancel |
+    75	| Signed-out page | Confirm sign-out and state whether upstream revocation succeeded | Sign in again |
+    76	| Access denied / not found | Explain a denied or unavailable resource without disclosing that it exists | Return home |
+    77	| Review Panel (rehosted) | The existing F0001-S0004 proof panel at a session-backed route | Existing panel actions only |
+    78	| Too many attempts | Explain throttling after repeated rejected credentials | Wait and retry |
+    79	
+    80	## Screen Layouts (ASCII)
+    81	
+    82	**Shell + Home — Desktop (≥ 1024 px)**
+    83	
+    84	```
+    85	+----------------------------------------------------------------------------------+
+    86	| NEBULA  Insurance Brain        [KB: Tenant A / GL Pilot  v]   Rosa M.  [Sign out] |
+    87	+---------------+------------------------------------------------------------------+
+    88	| Home          |  Welcome, Rosa M.                                                |
+    89	| Reviews       |  Signed in via authentik  ·  session active (idle limit 30 min)  |
+    90	| (flagged      |                                                                  |
+    91	|  routes only  |  Your access                                                     |
+    92	|  when on)     |  +------------+----------------+-----------+                     |
+    93	|               |  | Tenant     | Knowledge base | Role      |                     |
+    94	|               |  | Tenant A   | GL Pilot       | Reviewer  |  <- active          |
+    95	|               |  | Tenant A   | Property Pilot | Member    |                     |
+    96	|               |  +------------+----------------+-----------+                     |
+    97	|               |  Switching the active knowledge base clears loaded data.         |
+    98	+---------------+------------------------------------------------------------------+
+    99	| status bar: [Session expires in 2:00 — Stay signed in]  (shown at 28 min idle)    |
+   100	+----------------------------------------------------------------------------------+
+   101	```
+   102	
+   103	**Shell + Home — Narrow (360–767 px)**
+   104	
+   105	```
+   106	+------------------------------------+
+   107	| [=] NEBULA            Rosa M. [⎋]  |
+   108	+------------------------------------+
+   109	| KB: [Tenant A / GL Pilot       v]  |
+   110	+------------------------------------+
+   111	| Welcome, Rosa M.                   |
+   112	| Session active                     |
+   113	|                                    |
+   114	| Your access                        |
+   115	|  Tenant A · GL Pilot · Reviewer *  |
+   116	|  Tenant A · Property Pilot · Member|
+   117	+------------------------------------+
+   118	| [=] opens: Home / Reviews          |
+   119	+------------------------------------+
+   120	```
+   121	
+   122	**Session-expired dialog with a blocked action — Desktop (narrow: full-screen sheet, same content)**
+   123	
+   124	```
+   125	+-------------------------------------------------------------+
+   126	|  Your session has expired                                   |
+   127	|                                                             |
+   128	|  Your work on this page is still here. Sign in again to     |
+   129	|  continue.                                                  |
+   130	|                                                             |
+   131	|  NOT SUBMITTED:  Review decision for item 7f3c… (2 fields)  |
+   132	|  You will be asked to confirm it again after signing in.    |
+   133	|                                                             |
+   134	|        [ Sign in again ]          [ Discard and sign out ]  |
+   135	|                                                             |
+   136	|  Pop-up blocked? [Sign in on this page] (unsaved input will |
+   137	|  be lost; you return to this page)                          |
+   138	+-------------------------------------------------------------+
+   139	```
+   140	
+   141	**Blocked-action re-confirmation**
+   142	
+   143	```
+   144	+-------------------------------------------------------------+
+   145	|  Confirm action                                             |
+   146	|  "Review decision for item 7f3c…" was not submitted because |
+   147	|  your session expired. It will be checked again against the |
+   148	|  current item and your current access.                      |
+   149	|              [ Submit now ]              [ Cancel ]         |
+   150	+-------------------------------------------------------------+
+   151	```
+   152	
+   153	**Signed-out page (desktop and narrow share one centered column)**
+   154	
+   155	```
+   156	+------------------------------------------+
+   157	|  You are signed out of Nebula.           |
+   158	|  (!) We could not confirm sign-out at    |
+   159	|      the identity provider. Close the    |
+   160	|      browser or contact your admin.      |   <- only when revocation failed
+   161	|              [ Sign in again ]           |
+   162	+------------------------------------------+
+   163	```
+   164	
+   165	## Data Requirements
+   166	
+   167	**Core Entities:**
+   168	- **Browser session** (new, server-side): opaque session identifier (cookie value), stable principal ID, issuer, display name, server-held access/refresh/ID tokens, created-at, last-activity-at, absolute expiry, idle expiry, CSRF secret, active knowledge base, grant revision seen. Storage, encryption at rest and table design are Phase B decisions.
+   169	- **Principal / Membership** (existing, F0002): read-only here. Memberships carry tenant, knowledge base, role and grant revision.
+   170	- **AuthenticationEvent** (existing, F0001/F0002): gains new reason codes for session and throttling outcomes (`rate_limited`, session expiry and revocation-failure reasons); exact codes are Phase B.
+     1	# F0021-S0003 — Renew once and bound session lifetime
+     2	
+     3	**Story ID:** F0021-S0003
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Renew once and bound session lifetime
+     6	**Priority:** Critical
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** business reviewer (Rosa)
+    13	**I want** my session renewed quietly on the server while I keep working, and ended by the server when I stop
+    14	**So that** I am not interrupted every few minutes, and a session I walked away from cannot be used.
+    15	
+    16	## Context & Background
+    17	
+    18	ADR-0051 D1 places renewal on the server; D3 keeps a single coalesced renewal path. §120.5 and §119.5 require timeouts and revocation in the session control plane; an idle-warning modal is UX, not the boundary. Operator decision D1 (2026-11-27): 30-minute idle, 8-hour absolute, warning 2 minutes before idle expiry.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** When the server-held access token is expired or within its renewal margin, the next request triggers a server-side refresh-token grant and then proceeds under the renewed token; the browser sees no redirect and no new cookie value other than an unchanged session identifier.
+    23	- [ ] **AC2:** For one session, any number of concurrent requests arriving while renewal is needed cause exactly one upstream refresh call; the other requests wait for its result and then proceed (on success) or all receive `401 session_expired` (on failure). This holds across BFF worker processes.
+    24	- [ ] **AC3:** When the IdP returns a rotated refresh token, the new one replaces the old one atomically; a renewal that fails (revoked, expired or invalid refresh token, or IdP unavailable after the bounded retry defined in Phase B) ends the session server-side and records the renewal failure in the authentication audit; further requests are rejected with HTTP 401 `session_expired`.
+    25	- [ ] **AC4:** A session with no user-initiated request for 30 minutes is ended by the server; background session-status checks do not extend it (PM assumption A5). A request after that gets `401 session_expired` even if the cookie is still present.
+    26	- [ ] **AC5:** A session is ended by the server 8 hours after sign-in regardless of activity or successful renewals; continuing requires a full IdP authentication (S0004), never a silent renewal.
+    27	- [ ] **AC6:** At 28 minutes of idle time the shell shows a non-blocking warning with a countdown and a "Stay signed in" action that sends one user-initiated request; dismissing or ignoring the warning does not change the server's idle deadline.
+    28	
+    29	## Edge Cases & Error Scenarios
+    30	
+    31	Clock skew between BFF and IdP: renewal margin and token expiry checks tolerate skew within the verifier's existing leeway. A renewal racing a logout: logout wins and the renewed tokens are discarded and revoked (S0005). A principal disabled after sign-in: the next request is refused as in F0002 (`unauthenticated`), and the session is ended.
+    32	
+    33	## Interaction Contract
+    34	
+    35	Entry: any authenticated request. No user action is needed for renewal. Idle-warning action: "Stay signed in" sends one request; result is the extended idle deadline shown in the status bar. Persistence evidence: session record timestamps (last activity, idle deadline, absolute deadline) observed before and after. Audit: renewal failures and server-ended sessions are recorded (event shape is Phase B).
+    36	
+    37	## Data Requirements
+    38	
+    39	Session last-activity, idle deadline, absolute deadline, renewal lock or equivalent; refresh-token rotation timestamp. Exact mechanisms are Phase B decisions.
+    40	
+    41	## Role-Based Visibility
+    42	
+    43	Applies to every human session equally; no role-specific timeouts in v0.1.
+    44	
+    45	## Non-Functional Expectations
+    46	
+    47	Renewal adds at most one IdP round trip per burst (AC2). Timeouts are configuration values with the D1 defaults. At least 80% changed executable-code coverage in the later feature run.
+    48	
+    49	## Dependencies
+    50	
+    51	S0001 (session), S0004 (what the user sees after `session_expired`), S0005 (logout race).
+    52	
+    53	## Out of Scope
+    54	
+    55	Role- or tenant-specific timeouts; step-up authentication; device binding.
+    56	
+    57	## Questions & Assumptions
+    58	
+    59	No open business-rule question. Operator decision D1 and PM assumption A5 are in the [PRD](PRD.md#risks--assumptions). Renewal margin, lock mechanism and retry bound are Phase B decisions.
+    60	
+    61	## Definition of Done
+    62	
+    63	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    64	- [ ] A concurrency test with at least 20 parallel requests proving one upstream refresh (AC2), shared with S0009.
+    65	- [ ] Time-controlled tests for idle and absolute expiry (AC4, AC5).
+    66	- [ ] Documentation and tracker state reflect observed results.
+    67	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+     1	# F0021-S0005 — Log out with upstream revocation and cache hygiene
+     2	
+     3	**Story ID:** F0021-S0005
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Log out with upstream revocation and cache hygiene
+     6	**Priority:** Critical
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** security administrator (Noor)
+    13	**I want** sign-out to revoke the session at the identity provider, end it in Nebula, clear what the browser loaded, and tell the user if revocation failed
+    14	**So that** "signed out" is true, and nothing from one user's session is shown to the next.
+    15	
+    16	## Context & Background
+    17	
+    18	ADR-0051 D4: logout revokes the server-held refresh token at the IdP and ends the server session; a failure is reported, not hidden by clearing the cookie. D6: query caches and in-flight work are cleared on logout, principal change, tenant switch and relevant grant revision. §119.3 found the CRM revoking a token its browser flow never set.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** "Sign out" sends a CSRF-protected request authenticated by the session cookie; the BFF revokes the session's refresh token at authentik's revocation endpoint (RFC 7009), ends the server session, and clears the session cookie (expired `Set-Cookie` with the same attributes).
+    23	- [ ] **AC2:** The token revoked is the one the session actually holds after any rotation (S0003 AC3); after logout, a refresh-token grant with that token fails at authentik.
+    24	- [ ] **AC3:** If revocation fails (IdP unreachable, non-2xx, timeout), the server session is still ended and its tokens discarded, the failure is recorded durably in the audit log with the principal and reason, and the signed-out page shows the revocation-failed warning. The response never reports success for a failed revocation.
+    25	- [ ] **AC4:** After logout, the old session identifier is rejected with HTTP 401 `unauthenticated` for every route, including when replayed from another client.
+    26	- [ ] **AC5:** On logout, principal change (S0001 AC7, S0004 AC5), active knowledge-base switch (S0006 AC4) or a change in the principal's grant revision reported by the session endpoint, the shell aborts in-flight requests and clears all query caches and in-memory resource data before rendering anything for the new state.
+    27	- [ ] **AC6:** Other open tabs of the same browser show the signed-out state on their next server call and within 60 seconds of the logout (PM assumption A8), without showing data loaded before the logout.
+    28	- [ ] **AC7:** After revocation, the BFF ends the user's IdP session through authentik's end-session endpoint, so the next "Sign in" asks for credentials; if that step fails it is reported the same way as AC3.
+    29	
+    30	## Edge Cases & Error Scenarios
+    31	
+    32	Logout while a renewal is in flight: logout wins and any newly issued tokens are revoked (S0003). Logout with an already-expired session: cookie cleared, signed-out page shown, no revocation attempted for discarded tokens, and the outcome says so. Double-click on "Sign out": one revocation attempt.
+    33	
+    34	## Interaction Contract
+    35	
+    36	Entry: "Sign out" in the shell header or the session-expired dialog's "Discard and sign out". Result: signed-out page with the revocation outcome. Persistence evidence: session record ended; revocation outcome recorded; authentik rejects the revoked refresh token. Audit: a durable record of every logout outcome, including failures (event shape is Phase B).
+    37	
+    38	## Data Requirements
+    39	
+    40	Logout outcome record: principal, session reference (not the cookie value), revocation result, end-session result, timestamp. Grant revision exposed by the session endpoint (S0006).
+    41	
+    42	## Role-Based Visibility
+    43	
+    44	Every signed-in principal can sign out. No data is shown after logout.
+    45	
+    46	## Non-Functional Expectations
+    47	
+    48	Revocation timeout is bounded (Phase B value) so sign-out never hangs. At least 80% changed executable-code coverage in the later feature run.
+    49	
+    50	## Dependencies
+    51	
+    52	S0001, S0003, S0006; authentik revocation and end-session endpoints.
+    53	
+    54	## Out of Scope
+    55	
+    56	Administrator-initiated session termination screens; back-channel logout from the IdP (later hardening, F0026).
+    57	
+    58	## Questions & Assumptions
+    59	
+    60	No open business-rule question. PM assumption A8 is in the [PRD](PRD.md#risks--assumptions). The cross-tab signal mechanism and grant-revision polling interval are Phase B decisions.
+    61	
+    62	## Definition of Done
+    63	
+    64	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    65	- [ ] Forced upstream-failure test for AC3 (shared with S0009).
+    66	- [ ] Cache-clearing tests for each AC5 trigger.
+    67	- [ ] Documentation and tracker state reflect observed results.
+    68	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:18:ADR-0051 chose a same-origin backend-for-frontend (BFF) with an opaque cookie, server-held tokens, CSRF and origin checks, coalesced renewal, upstream revocation and cache hygiene. It is accepted only when master blueprint section 121.2 items 8 and 9 pass against the real flow. F0021 Phase A (nine stories, 55 ACs) fixed the business rules: 30-minute idle and 8-hour absolute limits (D1), the shell scope with the rehosted Review Panel (D2), popup re-authentication with explicit re-confirmation (D3), and 20 rejected credentials per client per 60 seconds (D4). The engine today has one credential path: a bearer token verified by `OidcJwksVerifier`, resolved by the F0002 `PrincipalResolver`, with rejections written to `authentication_event`. The authentik dev provider `brain` is a public client, and the experience app is a proof page that takes a token in its URL.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:25:- One public origin serves the shell at `/` and the API under `/api/`. The front strips `/api` before the engine: the Vite dev server and `vite preview` proxy locally; the production ingress is F0026. Engine routes keep their current paths (`/reviews/*`, `/content/*`, `/facts/*`, `/health`). New BFF routes: `GET /auth/login`, `GET /auth/callback`, `POST /auth/logout`, `GET /session`, `PUT /session/active-knowledge-base`.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:38:- `browser_session`: session reference (UUID, never the cookie), cookie digest (unique SHA-256 of the cookie secret), principal, issuer and subject, display name, created, last activity, idle and absolute deadlines, access-token expiry, encrypted token bundle and key ID, renewal count, CSRF digest, active tenant and knowledge base (composite FK to `knowledge_base(id, tenant_id)`), ended timestamp and end reason.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:39:- `session_event` (append-only, same trigger pattern as migration 0007): session created, replaced, renewed, renewal failed, ended (idle, absolute, principal change, principal disabled), logout with revocation and end-session outcomes, active knowledge-base change.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:47:- Login-binding cookie `__Host-nebula_login`: same attributes, `Max-Age=600`; its digest is stored on the login attempt and must match at the callback (login CSRF and fixation defence). It is cleared at the callback.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:48:- `SameSite=Lax`, not `Strict`: the callback is a top-level navigation from authentik, and `Strict` drops the binding cookie there and the session cookie on the first navigation after it. CSRF is enforced by D5, not by `SameSite`.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:51:### D5. Cookie request path and CSRF
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:58:4. Unsafe methods (`POST`, `PUT`, `PATCH`, `DELETE`): reject with `403 csrf_rejected` when `Sec-Fetch-Site: cross-site`; when `Origin` is present and is not `BRAIN_PUBLIC_ORIGIN`; when `Origin` is absent and the `Referer` origin is missing or different; or when `X-CSRF-Token` is missing or its SHA-256 differs from the session's digest (constant-time). The cause goes to `authentication_event` (`csrf_rejected`). No handler or write runs.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:63:The CSRF token is 256 random bits per session, created with the session, returned only in the `GET /session` body and held in page memory. A new session (sign-in or re-authentication) gets a new token. Responses to cookie requests and all `/auth` and `/session` responses carry `Cache-Control: no-store` and `Vary: Cookie`; no CORS headers are added.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:65:Stable outcomes: `401 unauthenticated`, `401 session_expired`, `403 csrf_rejected`, `400 ambiguous_credentials`, `429 rate_limited`, and the engine's existing non-disclosing `404` for denials. New `AuthenticationReason` values: `session_unknown`, `session_expired`, `renewal_failed`, `principal_mismatch`, `state_invalid`, `binding_mismatch`, `nonce_mismatch`, `idp_error`, `code_exchange_failed`, `csrf_rejected`, `ambiguous_credentials`, `rate_limited`.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:73:- Logout takes the same lock, so logout and renewal serialize: a renewal that finds the session ended stops; a logout after a renewal revokes the rotated token.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:77:- `POST /auth/logout` (D5 checks; an ended session's CSRF digest still validates). Under the row lock: end the session (`logout`), revoke the current refresh token at the revocation endpoint (RFC 7009, `token_type_hint=refresh_token`, client authentication, 5 s timeout, no retry), set the token ciphertext to NULL, record `logout` with the outcome, and clear the cookie.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:78:- Response `logout-result-v1`: `revocation` = `succeeded` | `failed` (with a non-secret reason) | `not_attempted` (no live tokens), plus `end_session_url`, or `null` with `end_session` = `unavailable` when discovery has no end-session endpoint. Revocation failure is never reported as success.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:79:- The end-session URL carries `client_id`, `post_logout_redirect_uri` (`/signed-out`) and `state`, and **no `id_token_hint`**, so no token appears in a URL. The shell keeps the outcome in `sessionStorage` under `nebula.signout` (outcome only, no token), then navigates top-level to the URL. The signed-out page reads and deletes it.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:92:- Each rejected credential (bearer rejection, unknown or ended session cookie, callback failure) runs `INSERT … ON CONFLICT (client_key, window_start) DO UPDATE SET rejected_count = rejected_count + 1 RETURNING rejected_count`, which is atomic across workers. Count ≤ 20: today's response and event. Count = 21: one `rate_limited` event, then `429`. Count > 21: `429 rate_limited` with `Retry-After` (seconds to window end), no event. Bound: 21 rows per client per window.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:97:- `GET /session` returns `browser-session-v1`: principal (ID, display name, kind, issuer), session deadlines and server time, CSRF token, current memberships with tenant and knowledge-base display names and role, `grant_revision`, active knowledge base, and flags. `grant_revision` is an opaque digest of the sorted current memberships (ID, grant revision); any grant, revocation or revision change changes it. It returns no token.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:109:- One `apiClient` wrapper is the only `fetch` caller. It uses `credentials: "same-origin"`, adds `X-CSRF-Token` on unsafe methods, registers each request with the hygiene abort registry, maps the D5 outcomes, never sets `Authorization`, and never retries an unsafe method. ESLint rules forbid `localStorage`, `indexedDB`, `caches`, and `sessionStorage` outside the sign-out outcome key.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:110:- Hygiene triggers (logout, principal change, active knowledge-base change, `grant_revision` change) abort every registered request, call `queryClient.clear()`, reset resource stores, and only then render the new state.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:130:- **`SameSite=Strict`:** breaks the IdP callback and the first post-login navigation. Rejected; CSRF is enforced by D5.
+planning-mds/architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md:132:- **CSRF double-submit cookie:** needs a script-readable cookie. Rejected in favour of a synchronizer token in the session body.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md:1:# F0021-S0002 — Protect cookie-authenticated calls with CSRF and origin checks
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md:5:**Title:** Protect cookie-authenticated calls with CSRF and origin checks
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md:18:ADR-0051 D2 requires CSRF and origin checks on every state-changing cookie-authenticated request. D3 keeps distinct outcomes for unauthenticated, expired-recoverable and denied requests. §120.5: UI guards are convenience only and the backend rejects direct requests; resource existence must not leak where policy requires. ADR-0049's verify-before-read ordering stays.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md:23:- [ ] **AC2:** A state-changing request (`POST`, `PUT`, `PATCH`, `DELETE`) authenticated by the session cookie is rejected with HTTP 403 and a stable `csrf_rejected` problem code, before any route handler or storage write runs (the rejection and its cause are recorded in the security audit log), when the CSRF token is missing or does not match the session, or when `Origin` (or `Referer` when `Origin` is absent) is not the shell's own origin, or `Sec-Fetch-Site` is `cross-site`.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md:24:- [ ] **AC3:** Safe methods (`GET`, `HEAD`) never change state and are not CSRF-checked; a cookie-authenticated `GET` from a cross-site context is still answered under normal authorization and the response cannot be read cross-origin (no permissive CORS headers are added).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md:31:A CSRF token from an earlier session is rejected after re-authentication (tokens are bound to the session). A login-CSRF attempt (attacker-initiated callback) fails S0001 AC4 because the state is not the browser's own. A missing `Origin` and `Referer` on a state-changing request is refused.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md:35:Entry: any shell screen calling the engine. Read requests carry the cookie; state-changing requests also carry the CSRF token the shell obtains from the session endpoint. Refusal result: a problem-details response the shell maps to sign-in, the session-expired dialog, an in-context denied message, or not-found. No editable state. Audit: the existing authorization decision audit for engine routes; CSRF refusals are recorded (event shape is Phase B).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md:39:Per-session CSRF secret; the shell's allowed origin as configuration. Token format and delivery are Phase B decisions.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md:26:- [ ] **AC5:** The rule applies equally to bearer-API requests, cookie-authenticated requests with an unknown or ended session, and sign-in callback failures (S0001 AC4). The client address is the immediate peer, or a forwarded address only from a configured trusted proxy (PM assumption A6).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml:48:- name: logout-result-v1
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml:50:  id: https://nebula.local/schemas/logout-result-v1.schema.json
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml:51:  source: planning-mds/schemas/logout-result-v1.schema.json
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml:63:  - path: engine/apps/api/tests/test_auth_logout.py
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/contract-inventory.yaml:67:  version_selector: contract is the constant logout-result/v1.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:18:- **Metric:** master blueprint §121.2 items 8 (session transport) and 9 (mutation continuity) pass against the real authentik issuance, storage, renewal and logout flow, including an upstream revocation failure. These are ADR-0051's formal acceptance conditions.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:19:- **Baseline:** today the proof-scope Review Panel (F0001-S0004) takes a bearer token from the URL or a text field. No session, renewal, logout, CSRF protection or shell exists.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:24:- **Current State:** the only UI is a proof page that asks for a raw bearer token. The CRM reference mixes an HttpOnly-cookie model with browser-direct renewal that writes tokens to `sessionStorage`, and its logout revokes a refresh token the browser never set (§119.3). Since F0002, every rejected credential writes one durable `authentication_event` row with no edge throttle (F0002 security review, medium).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:32:- Cookie-authenticated calls to the existing engine routes with CSRF and origin checks on every state-changing request, and distinct unauthenticated / session-expired / denied / not-found outcomes (S0002).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:35:- Logout that revokes the server-held refresh token upstream, ends the server session and reports an upstream failure; cache and in-flight-work clearing on logout, principal change, active knowledge-base switch and grant-revision change (S0005).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:59:- [ ] Every state-changing cookie-authenticated request without a valid CSRF token or with a foreign origin is refused before any engine handler runs (S0002).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:63:- [ ] Query caches and in-flight work are cleared on logout, principal change, active knowledge-base switch and grant-revision change (S0005, S0006).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:168:- **Browser session** (new, server-side): opaque session identifier (cookie value), stable principal ID, issuer, display name, server-held access/refresh/ID tokens, created-at, last-activity-at, absolute expiry, idle expiry, CSRF secret, active knowledge base, grant revision seen. Storage, encryption at rest and table design are Phase B decisions.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:217:- **A8 — Other tabs:** after logout or session end in one tab, other tabs of the same browser show the signed-out state on their next server call and within 60 seconds.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/PRD.md:236:| [F0021-S0002](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:18:ADR-0051 D4: logout revokes the server-held refresh token at the IdP and ends the server session; a failure is reported, not hidden by clearing the cookie. D6: query caches and in-flight work are cleared on logout, principal change, tenant switch and relevant grant revision. §119.3 found the CRM revoking a token its browser flow never set.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:22:- [ ] **AC1:** "Sign out" sends a CSRF-protected request authenticated by the session cookie; the BFF revokes the session's refresh token at authentik's revocation endpoint (RFC 7009), ends the server session, and clears the session cookie (expired `Set-Cookie` with the same attributes).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:23:- [ ] **AC2:** The token revoked is the one the session actually holds after any rotation (S0003 AC3); after logout, a refresh-token grant with that token fails at authentik.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:25:- [ ] **AC4:** After logout, the old session identifier is rejected with HTTP 401 `unauthenticated` for every route, including when replayed from another client.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:26:- [ ] **AC5:** On logout, principal change (S0001 AC7, S0004 AC5), active knowledge-base switch (S0006 AC4) or a change in the principal's grant revision reported by the session endpoint, the shell aborts in-flight requests and clears all query caches and in-memory resource data before rendering anything for the new state.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:27:- [ ] **AC6:** Other open tabs of the same browser show the signed-out state on their next server call and within 60 seconds of the logout (PM assumption A8), without showing data loaded before the logout.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:32:Logout while a renewal is in flight: logout wins and any newly issued tokens are revoked (S0003). Logout with an already-expired session: cookie cleared, signed-out page shown, no revocation attempted for discarded tokens, and the outcome says so. Double-click on "Sign out": one revocation attempt.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:36:Entry: "Sign out" in the shell header or the session-expired dialog's "Discard and sign out". Result: signed-out page with the revocation outcome. Persistence evidence: session record ended; revocation outcome recorded; authentik rejects the revoked refresh token. Audit: a durable record of every logout outcome, including failures (event shape is Phase B).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:44:Every signed-in principal can sign out. No data is shown after logout.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md:56:Administrator-initiated session termination screens; back-channel logout from the IdP (later hardening, F0026).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:12:Add a backend-for-frontend (BFF) to the engine API process. It handles sign-in, the session cookie, CSRF and origin checks, coalesced renewal, logout with upstream revocation, a session endpoint, and a rejected-credential throttle.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:29:- Three design schemas under `planning-mds/schemas/`: `browser-session-v1`, `active-knowledge-base-update-v1` and `logout-result-v1`.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:35:| R1 | **S0002 AC4 says "an authorization denial → `403`".** No engine route returns 403 for a denial. Every denial is the non-disclosing 404 (`brain-api.yaml` `Forbidden`: "user denials are reported as 404"; master blueprint section 118.2). | The design keeps the engine unchanged. 403 is used only for `csrf_rejected`, and a denial stays the existing 404 with the session kept (never 401). The AC4 proof shows each outcome is distinct and the session survives a denial. **Proposed PM wording correction at feature G0:** "an authorization denial → the engine's existing non-disclosing `404`, with the session kept". Confirmed by the operator with `approve-phase-b` (2026-11-27). |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:37:| R3 | S0005 AC7 depends on authentik's end-session behavior. | The provider's invalidation flow becomes `default-invalidation-flow` (ADR-0082 D2). The end-session URL carries `client_id` and `post_logout_redirect_uri`, with no `id_token_hint`. The signed-out page's "Sign in" sends `prompt=login`. Feature G0 verifies both against authentik 2026.2 before S0005 is built. |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:50:| 4 | Cookie request path, CSRF, ambiguity, throttle | S0002, S0008 | Step 3 |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:66:| `engine/packages/brain-persistence/src/brain_persistence/identity.py` | Authentication-event sink accepts a payload (session reference, CSRF cause, client key for `rate_limited`) |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:68:| `docker/authentik/blueprints/nebula-brain-dev.yaml` | `brain` provider: `client_type: confidential`, dev-only `client_secret`, redirect URIs `http://localhost:5173/api/auth/callback` and `http://localhost:4173/api/auth/callback` (stale `:8100` removed), `invalidation_flow: default-invalidation-flow`, `post_logout_redirect_uris` (or authentik's equivalent field) for `/signed-out` on both origins |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:80:  - `pkce.py`, `cookies.py`, `csrf.py`, `return_routes.py`, `token_crypto.py` (AES-256-GCM key ring), `client_key.py` (trusted-proxy resolution).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:88:  - `engine/apps/api/tests/test_auth_login_callback.py`, `test_auth_logout.py`, `test_session_routes.py`, `test_cookie_request_path.py`, `test_credential_throttle.py`
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:126:- Blueprint changes are as listed above. Feature G0 records the authentik 2026.2 field names for post-logout redirect URIs and refresh-token rotation, and confirms that `default-invalidation-flow` ends the authentik session (R3).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:152:## Step 4 — Cookie Request Path, CSRF, Throttle (S0002, S0008)
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:154:- Implement the ADR-0082 D5 order in `current_principal`. CSRF and origin checks run in the dependency, before any route handler.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:173:- The outcome is recorded in `session_event` `logout`, and the response follows `logout-result-v1`.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:203:- `403 csrf_rejected`: refetch the session to refresh the CSRF token, then show an inline error. No retry.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:271:| S0002 AC2 | 4 | Matrix: missing or wrong token, foreign Origin, missing Origin and Referer, Referer fallback, `Sec-Fetch-Site: cross-site` → 403 `csrf_rejected`; handler spy not called; zero writes; event cause recorded |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:273:| S0002 AC4 | 4, 5 | Distinct codes: unauthenticated, session_expired (idle, absolute, renewal), denial = existing 404 with the session still valid afterwards (R1), csrf 403 |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:285:| S0004 AC4 | 7, 8 | Re-confirmed request carries the new CSRF token; stale or revoked variant → engine 404 or 409 shown in context, no retry; engine audit row present |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:289:| S0005 AC1 | 6 | Logout: CSRF required; revoke called; session ended; expired cookie with identical attributes |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:324:- **F0026:** production ingress (same origin, `/api` mount, CSP, HSTS), secret store for the client secret and session keys, `authentication_event` and `session_event` retention, back-channel logout, administrator session termination.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:330:2. After Step 4: cookie path and CSRF matrix green; bearer suite unchanged.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:337:   - security review of the cookie, CSRF, renewal, throttle and popup messaging;
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md:344:| authentik 2026.2 field names or behavior for post-logout redirect, rotation and invalidation differ | Feature G0 verification (R3) before Step 6; the `prompt=login` fallback keeps AC7's user-visible rule |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/STATUS.md:15:| F0021-S0002 | [Protect cookie-authenticated calls with CSRF and origin checks](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Not Started |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/STATUS.md:43:- [ ] CSRF/origin checks and outcome taxonomy (S0002)
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/acceptance-criteria-checklist.md:14:| [F0021-S0002 AC1](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/acceptance-criteria-checklist.md:15:| [F0021-S0002 AC2](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/acceptance-criteria-checklist.md:16:| [F0021-S0002 AC3](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/acceptance-criteria-checklist.md:17:| [F0021-S0002 AC4](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/acceptance-criteria-checklist.md:18:| [F0021-S0002 AC5](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/acceptance-criteria-checklist.md:19:| [F0021-S0002 AC6](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/GETTING-STARTED.md:30:- **Denial responses (R1):** engine denials stay the non-disclosing 404. Only `csrf_rejected` uses 403.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/GETTING-STARTED.md:32:- **authentik G0 check (R3):** before building S0005, verify the 2026.2 field names for post-logout redirect URIs and refresh-token rotation, and that `default-invalidation-flow` ends the authentik session.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md:25:- [ ] **AC4:** A re-confirmed request is a new request: it carries the new session's CSRF token and the engine re-checks current authority and current resource revision; a stale item or a lost grant is rejected with the engine's existing denied or not found response, which the shell shows in context without retrying; the engine's existing audit records the re-confirmed request like any other.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md:18:ADR-0051's formal acceptance needs master blueprint §121.2 items 8 (session transport) and 9 (mutation continuity) to pass against the real issuance, storage, renewal and logout flow, including an upstream revocation failure. §119.3: test logout with actual issuance, storage and renewal, not only a cookie-clear response. ADR-0049 leaves items 8 and 9 open for F0021.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md:22:- [ ] **AC1:** An end-to-end suite runs a real browser against the local stack (authentik from the dev blueprint, PostgreSQL, engine, BFF, built shell) and, after sign-in, renewal and logout, inspects cookies, `localStorage`, `sessionStorage`, IndexedDB, Cache Storage, URLs and response bodies: no access, refresh or ID token appears, and the session cookie has the S0001 AC2 attributes.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md:23:- [ ] **AC2:** The suite forces access-token expiry and fires at least 20 parallel requests; authentik observes exactly one refresh grant for the session, and the rotated refresh token is the one later revoked at logout.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml:79:  /auth/logout:
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml:95:              schema: {$ref: 'https://nebula.local/schemas/logout-result-v1.schema.json'}
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml:104:      summary: Current session, identity, memberships, CSRF token and flags (S0006 AC1/AC6, S0007 AC4)
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml:162:      description: Opaque 256-bit session identifier set by the BFF (Secure, HttpOnly, SameSite=Lax, Path=/, no Domain). Unsafe methods also require X-CSRF-Token and a same-origin Origin/Referer.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml:165:      name: X-CSRF-Token
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml:168:      description: The csrf_token from GET /session (browser-session-v1).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml:188:      description: '`unauthenticated` (no, unknown or ended session; principal mismatch or disabled) or `session_expired` (idle, absolute or failed renewal; recoverable by re-authentication). The internal reason is recorded only in authentication_event.'
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/bff-api-design.yaml:193:      description: '`csrf_rejected`: cross-site fetch metadata, foreign or missing Origin/Referer, or a missing or mismatched CSRF token. The session is kept; no handler or write ran.'
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md:31:Clock skew between BFF and IdP: renewal margin and token expiry checks tolerate skew within the verifier's existing leeway. A renewal racing a logout: logout wins and the renewed tokens are discarded and revoked (S0005). A principal disabled after sign-in: the next request is refused as in F0002 (`unauthenticated`), and the session is ended.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md:35:Entry: any authenticated request. No user action is needed for renewal. Idle-warning action: "Stay signed in" sends one request; result is the extended idle deadline shown in the status bar. Persistence evidence: session record timestamps (last activity, idle deadline, absolute deadline) observed before and after. Audit: renewal failures and server-ended sessions are recorded (event shape is Phase B).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md:51:S0001 (session), S0004 (what the user sees after `session_expired`), S0005 (logout race).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:46:    token_ciphertext           bytea       NULL,
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:49:    csrf_digest                bytea       NOT NULL CHECK (length(csrf_digest) = 32),
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:54:                                   'logout', 'idle_timeout', 'absolute_timeout', 'renewal_failed',
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:60:    CHECK ((token_ciphertext IS NULL) = (key_id IS NULL)),
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:61:    CHECK (ended_at IS NULL OR token_ciphertext IS NULL),          -- an ended session holds no tokens
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:62:    CHECK (ended_at IS NOT NULL OR token_ciphertext IS NOT NULL),  -- a live session always holds tokens
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:68:-- Append-only session lifecycle audit (F0021-S0003 AC3 renewal record, S0005 AC3/AC7 logout outcome, S0006 AC4).
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:78:                                   'logout', 'active_knowledge_base_changed')),
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:81:    -- logout payload: {"revocation": {"status", "reason"?}, "end_session": {"status"}}; never a token or cookie value.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/migration-design.sql:82:    CHECK (event_type <> 'logout' OR (payload ? 'revocation' AND payload ? 'end_session'))
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md:22:- [ ] **AC1:** A signed-in session can read a session endpoint that returns the principal's display name, principal kind, issuer, session idle and absolute deadlines, the CSRF token for state-changing calls, the principal's current (unrevoked) memberships as tenant, knowledge base and role with display names, the current grant revision, and the active knowledge base. It returns no token and no other principal's data.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md:25:- [ ] **AC4:** Choosing another membership in the selector updates the active knowledge base through a CSRF-protected request, clears caches and in-flight work (S0005 AC5) before rendering, and persists across reload within the session (PM assumption A7). A requested knowledge base that is not a current membership is rejected and the active value is unchanged.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md:35:Entry: Home (`/`) and the header selector on every shell route. Editable state: only the active knowledge base. Action: select a membership → CSRF-protected update → caches cleared → views reload. Persistence evidence: the value survives reload and is returned by the session endpoint. Read-only: identity and membership list. Validation failure: a non-member knowledge base is refused with a message, value unchanged. Audit: the active-context change is a session preference, not an authorization event; whether it is recorded is a Phase B decision.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/personas.md:9:| [Noor — Security Administrator](../../examples/personas/security-administrator.md) | Operates authentik, sessions and grants; investigates rejected credentials | No browser-held token; logout that revokes upstream and reports failure; bounded audit growth under attack | S0002, S0005, S0008, S0009 |
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/README.md:18:- ADR-0051 decision recorded 2026-11-08 - same-origin BFF with an opaque HttpOnly session cookie, server-held tokens and renewal, CSRF and origin checks, and upstream revocation on logout. No browser token storage. Formal acceptance needs section 121.2 items 8 and 9.
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/README.md:37:| [F0021-S0002](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks | Not Started |

@@ -1,0 +1,242 @@
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** For one client address, the first 20 rejected credentials within a 60-second window are answered and recorded exactly as today (generic `401`, one `authentication_event` each).
+    23	- [ ] **AC2:** From the 21st rejected credential in that window, the client receives `429` with a `Retry-After` header and a stable `rate_limited` problem code; no credential verification runs and no per-request `authentication_event` row is written. Exactly one `rate_limited` event is recorded for that client and window.
+    24	- [ ] **AC3:** A burst of 1,000 rejected credentials from one client within 60 seconds writes at most 21 `authentication_event` rows for that window.
+    25	- [ ] **AC4:** While a client is throttled, a request from it with a valid credential or session is still served normally; the throttle counts only rejected credentials, and requests from other clients are unaffected.
+    26	- [ ] **AC5:** The rule applies equally to bearer-API requests, cookie-authenticated requests with an unknown or ended session, and sign-in callback failures (S0001 AC4). The client address is the immediate peer, or a forwarded address only from a configured trusted proxy (PM assumption A6).
+    27	
+    28	## Edge Cases & Error Scenarios
+    29	
+    30	A window boundary mid-burst starts a new allowance of 20 plus one summary event. Counter state lost on restart: the allowance resets, which keeps the bound per window. Spoofed `X-Forwarded-For` from an untrusted peer is ignored. The "Too many attempts" page shows for browser sign-in throttling with the wait time.
+    31	
+    32	## Interaction Contract
+    33	
+    34	Entry: any request with a rejected credential. No user action; the result is `429` with `Retry-After`. Persistence evidence: `authentication_event` row counts per window. Audit: per-request events up to the limit, then one `rate_limited` event per client per window.
+    35	
+    36	## Data Requirements
+    37	
+    38	A new `rate_limited` authentication reason (schema change is Phase B); per-client counters with 60-second windows. Counter storage is a Phase B decision.
+    39	
+    40	## Role-Based Visibility
+    41	
+    42	Not role-dependent; applies before principal resolution.
+    43	
+    44	## Non-Functional Expectations
+    45	
+    46	Limit and window are configuration values with D4 defaults. The throttle check adds no database write for throttled requests. At least 80% changed executable-code coverage in the later feature run.
+    47	
+    48	## Dependencies
+    49	
+    50	F0002 `authentication_event` and reasons; S0001, S0002.
+     1	# Authorization Review — Nebula Insurance Brain
+     2	
+     3	Status: Baseline (F0002 bounded scope implemented; F0018, F0021, F0022 and F0026 extend it)
+     4	**Date:** 2026-09-05; status normalized 2026-11-08 for the strict security audit (SEC-02)
+     5	**Owner:** Security role (completes during Phase B of F0002 and F0018)
+     6	
+     7	## Scope
+     8	
+     9	This review seeds the Brain's authorization model from the master blueprint (sections 65, 66, 110, and 118 to 122). F0002 delivered the Casbin model and policy files under `policies/`, the verified principal and scope kernel, and its AuthX cases (EX-AUTHX-001–018). The remaining section 121.2 carryover cases are owned by F0018, F0021, F0022 and F0026; this review is updated as each lands.
+    10	
+    11	## Identity and principals
+    12	
+    13	- Identity provider: authentik OIDC. Verified `(issuer, subject)` maps to a stable internal principal through a governed registry contract (proposed ADR-0049).
+    14	- Principal kinds: UserPrincipal, ServicePrincipal, AgentPrincipal; Membership, Role, Permission, ResourceScope are first-class (section 66).
+    15	- Reviewer identity: the reviewer is the authenticated session principal in the native Review Panel, so there is no callback to trust and no second directory to map (ADR-0057); annotation permission remains separate from adjudication and canonical approval authority (sections 75, 111.2, 125; proposed ADR-0044 and ADR-0052).
+    16	
+    17	## Policy evaluation
+    18	
+    19	- Native Casbin adapter behind an AuthorizationService; typed, server-hydrated resource attributes; cross-runtime behavior fixtures to prove parity with the CRM reference (proposed ADR-0050).
+    20	- Decision = current tenant and knowledge-base membership AND permitted action AND actual resource or parent scope AND classification and source restrictions AND delegation limits (section 66).
+    21	- Structural tenancy (`tenant_id`, `knowledge_base_id`) is resolved from verified identity and trusted grants, separately from broker, distribution, account, policy, and evidence scope; request filters may only narrow (section 65, ADR-0030).
+    22	
+    23	## Enforcement points
+    24	
+    25	API, commit services, search, vector retrieval, AGE traversal, evidence access, ontology access, conversation context assembly, MCP, and the execution gate. Security filters participate during retrieval, never after (section 66). Historical business query dates cannot reinstate revoked permissions (proposed ADR-0053).
+    26	
+    27	## CRM gaps that must not be copied (section 119)
+    28	
+    29	1. Unverified identity selecting Neuron-owned records (high).
+    30	2. Document parent attributes not enforced by the Casbin adapter (high).
+    31	3. Token storage and logout not forming one contract (high design inconsistency); the Brain proposes a same-origin BFF with server-held tokens (proposed ADR-0051).
+    32	4. Policy parity drift between catalog, matrix, and runtime (medium); the Brain tests all three together.
+    33	
+    34	## Audit
+    35	
+    36	Every authorization decision records policy version or hash, grant revision, actor and delegate, resource and action, decision and reason codes, and trace ID. Baseline enforcement and audit are v0.1 obligations (sections 66, 89).
+    37	
+    38	## Required evidence before acceptance
+    39	
+    40	- Carryover test matrix from section 121.2 implemented and passing for the affected boundaries.
+    41	- Isolation, revocation, graph, vector, export, and chat leakage suite passing (section 115.2 Authorization gate).
+    42	- Permission catalog and review boundaries documented per section 120.2, with policy files under `policies/`.
+    43	
+    44	## Governed retrieval carry-in (2026-11-06)
+    45	
+    46	**Status:** Requirements and threat-model inputs only; no security acceptance or runtime proof. Applies to F0033–F0036, F0067 replay and conditional F0068 under Proposed [ADR-0076](../architecture/decisions/ADR-0076-governed-graph-assisted-evidence-retrieval.md). Security owns D9 concrete cache-key, invalidation and replay authorization rules in F0035 Phase B. [Design](../architecture/governed-evidence-retrieval-design.md); [EX-RET-002/004/006](../examples/governed-evidence-retrieval.md); handoff §8.
+    47	
+    48	Assets include immutable evidence, source/canonical bindings, typed paths, scores/counts, versioned retrieval and numerical artifacts, caches and traces. Actors are verified knowledge workers, reviewers, bounded service/agent principals and adversarial callers. Trust boundaries run from caller filters to engine-resolved scope/current authority, from canonical/content stores to derived projections, from retrieval to model context, and from recorded traces/caches to replay consumers. Client filters narrow scope; server-resolved basis fields never create grants.
+    49	
+    50	| STRIDE concern | Concrete risk / required control | Required proof owner |
+    51	|---|---|---|
+    52	| Spoofing | Caller forges principal, root or authorization-basis reference; resolve identity/current grants server side using existing AuthX | Backend + Security, F0035 |
+    53	| Tampering | Mixed artifact generations or altered node maps/weights change scores; checksums, coherent input versions and atomic publication; derived records cannot write canonical state | Architect + Backend, F0033/F0034; AI Engineer, F0068 |
+    54	| Repudiation | Selection is falsely reported as answer use, or replay omits effective fallback; record basis/actual versions, completeness and grounded answer attribution | Backend + QE, F0035/F0036 |
+    55	| Information disclosure | Restricted intermediaries, future topology, spectral bases, counts, caches or timing influence output; constrain the complete eligible domain before scoring/logging and require exact compatibility | Security + QE, RET-35-03 and RET-68-02 |
+    56	| Denial of service | Unbounded traversal or numerical work exhausts resources; cap hops, candidates, fan-out, edge types, time and per-tenant cost; no normal-path global per-query decomposition | Backend + AI Engineer, F0035/F0068 |
+    57	| Elevation of privilege | Broader grants widen a requested root, stale decisions revive access, or different grant slices are combined; root narrowing, conjunctive dependency checks, final reauthorization and current-authority replay | Backend + Security, F0035/F0036/F0067 |
+    58	
+    59	Authorize seeds, intermediate vertices, edges and evidence dependencies before they affect ranks, visible counts/facets or logs. Endpoint visibility alone does not authorize a relationship. Reuse the execution facade and source/dependency restrictions; do not assemble authority from unrelated grant slices. Missing or incompatible backends can use compatible authorized lexical/hybrid retrieval, otherwise a gap. Current-only topology cannot answer a historical request.
+    60	
+    61	For F0068, matching tenant IDs or filtering final rows is insufficient: the complete influence domain, root, requested scope, mode, snapshot, valid/known coordinates and precision, ontology/content/model/edge profile and authorization revisions must match. Never slice a restricted global eigenbasis and claim isolation. Any relaxation needs a reviewed equivalence/non-influence proof. Projection manifests record build authority but grant no access. Read caches, artifacts and replay under current grants/restrictions; rollback is subject to the same compatibility checks.
+    62	
+    63	Sanitized non-blocking traces contain operation facts and authorized references, not source excerpts, model chain-of-thought or public internal fingerprints/topology summaries. Enforce existing retention/deletion policy on source-bearing derivatives. Trace failure marks incompleteness; it does not manufacture evidence or fail an otherwise authorized answer. F0067 remains read-only and follows answer access.
+    64	
+    65	Acceptance requires non-influence, tenant/root isolation, revocation, historical and source/canonical proofs, negative counts/facets/log/cache/replay tests and assessment of timing channels. With admissible inputs unchanged, mutate/revoke an unauthorized node/edge and compare returned IDs, paths, scores, selected context and visible counts. Any unresolved influence leak blocks that scoring path; spectral quality gains cannot waive it. The feature plan must turn this input into its reviewed threat model and executable proof matrix before approval.
+354:- Prefer a same-origin BFF with server-held tokens as a proposed session transport; settle that ADR explicitly. The CRM's current browser OIDC storage and cookie logout assumptions conflict and must not be copied as one working contract.
+4043:The first release also implements `CredentialVerifier`, `PrincipalResolver`, `ResourceScopeResolver`, `AuthorizationService`, `EvidenceAccessService`, and minimum authorization-decision audit. Include tested parent/classification conjunction, current grant revision, stable reviewer identity, and the selected session transport. These are concrete behavior requirements, not empty schema placeholders; full agent delegation administration can follow when background/agent operations are introduced.
+4836:| Browser session transport | 119.3, 120.5 | F0021 | ADR-0051 |
+5507:## 119.5 Additional adaptations before reuse
+5600:## 120.5 Session and UI behavior
+5622:The .NET integration suite, browser session flow, actual IdP, PostgreSQL deployment, review round trip, and production ingress were not executed. Test files demonstrating intended audience, role, and distribution-scope behavior serve as design/coverage evidence only. No production data, tokens, or remote service state were changed.
+5624:## 121.2 Required carryover test matrix
+5647:| ADR-0051 — Browser Session and Revocation Contract | Proposed; decision recorded 2026-11-08 (BFF chosen), proof in F0021 | Prefer same-origin BFF with server-held tokens; resolve SPA/cookie design drift before implementation |
+id: feature:F0021
+name: Native React semantic shell + OIDC/session contract and safe re-auth behavior
+path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session
+status: planned
+registry_section: Planned
+affects:
+- capability:browser-session-bff
+- capability:credential-rejection-throttle
+- capability:shell-route-seam
+- capability:credential-verification-and-principal-resolution
+- capability:evidence-review-round-trip
+- entity:browser-session
+- entity:session-event
+- entity:principal
+phase: v0.1B
+roadmap_section: Now
+roadmap_order: 4
+rationale: 'Now (2026-11-20 roadmap review): takes the Now slot freed by F0008, as the 2026-11-10 review promised; its only
+  dependency, F0002, is done and the ADR-0051 session-transport decision is recorded. An independent UI lane, de-risking F0022
+  (native review round trip, a section 115.4 pre-build proof) and F0023. The native React semantic shell with the OIDC session
+  contract and safe re-auth behavior is the first user-facing surface (section 3, 120.5).'
+validation_gate: F0002 complete; plan action Phase A and Phase B approved and plan-review READY (or High findings accepted
+  with owner and date); feature run closes G0–G8 with the OIDC session contract and safe re-auth behavior proven.
+depends_on:
+- feature:F0002
+governed_by:
+- adr:0036
+- adr:0049
+- adr:0051
+- adr:0072
+- adr:0082
+notes:
+- Provide the route, feature-flag and lazy-load seam that F0067 uses; app-wide state, caching and styling choices are made here, not in F0067.
+- Requirement-ownership amendment 2026-11-08 - ADR-0051 decision recorded 2026-11-08 - same-origin BFF
+  with an opaque HttpOnly session cookie, server-held tokens and renewal, CSRF and origin checks, and
+  upstream revocation on logout. No browser token storage. Formal acceptance needs section 121.2 items
+  8 and 9.
+- 'Plan run 2026-11-27-6cda122a G1 operator decisions D1-D4: 30m idle / 8h absolute server-enforced; shell + Home/memberships
+  + narrowing active-KB selector + route/flag/lazy seam + Review Panel rehosted behind the cookie; popup re-auth with
+  explicit re-confirmation; 20 rejected credentials per client per 60 s then 429.'
+- 'Phase A approved 2026-11-27 (nine stories, 55 ACs). Phase B drafted 2026-11-27: ADR-0082 (Proposed) refines ADR-0051;
+  assembly plan, bff-api-design.yaml, migration-design.sql (0018), contract-inventory.yaml and three design schemas.
+  Phase B approved 2026-11-27 with exact operator token approve-phase-b, confirming R1 (denials stay 404) and R2 (local verification while throttled).'
+uses_schema:
+- schema:browser-session-v1
+- schema:active-knowledge-base-update-v1
+- schema:logout-result-v1
+- schema:problem-details
+story_mappings:
+- id: story:F0021-S0001
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md
+  affects:
+  - capability:browser-session-bff
+  - capability:credential-verification-and-principal-resolution
+  - entity:browser-session
+  governed_by:
+  - adr:0082
+  - adr:0051
+  - adr:0049
+- id: story:F0021-S0002
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md
+  affects:
+  - capability:browser-session-bff
+  - capability:credential-verification-and-principal-resolution
+  governed_by:
+  - adr:0082
+  - adr:0051
+  uses_schema:
+  - schema:problem-details
+- id: story:F0021-S0003
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0003-renew-once-and-bound-session-lifetime.md
+  affects:
+  - capability:browser-session-bff
+  - entity:browser-session
+  - entity:session-event
+  governed_by:
+  - adr:0082
+  - adr:0051
+- id: story:F0021-S0004
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md
+  affects:
+  - capability:browser-session-bff
+  - capability:evidence-review-round-trip
+  governed_by:
+  - adr:0082
+  - adr:0051
+  uses_schema:
+  - schema:browser-session-v1
+- id: story:F0021-S0005
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md
+  affects:
+  - capability:browser-session-bff
+  - entity:session-event
+  governed_by:
+  - adr:0082
+  - adr:0051
+  uses_schema:
+  - schema:logout-result-v1
+- id: story:F0021-S0006
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md
+  affects:
+  - capability:browser-session-bff
+  - entity:principal
+  governed_by:
+  - adr:0082
+  - adr:0051
+  uses_schema:
+  - schema:browser-session-v1
+  - schema:active-knowledge-base-update-v1
+- id: story:F0021-S0007
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md
+  affects:
+  - capability:shell-route-seam
+  - capability:evidence-review-round-trip
+  governed_by:
+  - adr:0082
+  - adr:0072
+  - adr:0036
+  uses_schema:
+  - schema:browser-session-v1
+- id: story:F0021-S0008
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0008-throttle-rejected-credentials.md
+  affects:
+  - capability:credential-rejection-throttle
+  - capability:credential-verification-and-principal-resolution
+  governed_by:
+  - adr:0082
+  - adr:0049
+  uses_schema:
+  - schema:problem-details
+- id: story:F0021-S0009
+  path: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md
+  affects:
+  - capability:browser-session-bff
+  - capability:evidence-review-round-trip
+  governed_by:
+  - adr:0082
+  - adr:0051

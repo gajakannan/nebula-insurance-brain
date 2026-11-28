@@ -1,0 +1,173 @@
+     1	# ADR-0082: BFF Session Runtime and Shell Foundation
+     2	
+     3	## Status
+     4	
+     5	- [x] Proposed
+     6	- [ ] Accepted
+     7	- [ ] Superseded
+     8	- [ ] Rejected
+     9	
+    10	**Date:** 2026-11-27
+    11	**Deciders:** Architect (F0021 plan run `2026-11-27-6cda122a`); operator decisions D1–D4 at G1 and Phase A approval `approve-phase-a` (2026-11-27)
+    12	**Refines:** [ADR-0051](ADR-0051-browser-session-and-revocation-contract.md) (Proposed; decision recorded 2026-11-08). ADR-0051 D1–D6 are unchanged; this record fixes the runtime choices ADR-0051 leaves to F0021. Uses [ADR-0049](ADR-0049-shared-identity-and-verified-principal-boundary.md) for verification and principal resolution and [ADR-0072](ADR-0072-observatory-is-a-read-only-projection.md) for the route seam F0067 inherits.
+    13	**Plan approval:** Phase B approved 2026-11-27 by operator token `approve-phase-b` (approves the plan, not formal ADR acceptance).
+    14	**Feature:** [F0021](../../features/F0021-native-react-semantic-shell-and-oidc-session/README.md); [assembly plan](../../features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md).
+    15	
+    16	## Context
+    17	
+    18	ADR-0051 chose a same-origin backend-for-frontend (BFF) with an opaque cookie, server-held tokens, CSRF and origin checks, coalesced renewal, upstream revocation and cache hygiene. It is accepted only when master blueprint section 121.2 items 8 and 9 pass against the real flow. F0021 Phase A (nine stories, 55 ACs) fixed the business rules: 30-minute idle and 8-hour absolute limits (D1), the shell scope with the rehosted Review Panel (D2), popup re-authentication with explicit re-confirmation (D3), and 20 rejected credentials per client per 60 seconds (D4). The engine today has one credential path: a bearer token verified by `OidcJwksVerifier`, resolved by the F0002 `PrincipalResolver`, with rejections written to `authentication_event`. The authentik dev provider `brain` is a public client, and the experience app is a proof page that takes a token in its URL.
+    19	
+    20	## Decision
+    21	
+    22	### D1. Placement: inside the engine API process, behind one public origin
+    23	
+    24	- The BFF is a module of `brain_api` (routes `auth.py`, `session.py`) and `brain_security.bff`, not a separate service. It reuses the verifier, principal resolver, authentication-event sink and authorization composition, and tokens never cross a process boundary.
+    25	- One public origin serves the shell at `/` and the API under `/api/`. The front strips `/api` before the engine: the Vite dev server and `vite preview` proxy locally; the production ingress is F0026. Engine routes keep their current paths (`/reviews/*`, `/content/*`, `/facts/*`, `/health`). New BFF routes: `GET /auth/login`, `GET /auth/callback`, `POST /auth/logout`, `GET /session`, `PUT /session/active-knowledge-base`.
+    26	- Settings: `BRAIN_PUBLIC_ORIGIN` (exact scheme://host[:port]), `BRAIN_PUBLIC_API_PREFIX` (default `/api`), `BRAIN_OIDC_CLIENT_SECRET` (required to enable the BFF; no default), `BRAIN_OIDC_BACKCHANNEL_URL` (optional base URL for server-to-IdP calls; defaults to the issuer's origin), `BRAIN_SESSION_KEYS` (key ring, D3), `BRAIN_TRUSTED_PROXIES` (CIDR list, D9). Without `BRAIN_OIDC_CLIENT_SECRET` and `BRAIN_SESSION_KEYS` the BFF routes are not mounted and the cookie path is off; the bearer path is unchanged either way.
+    27	
+    28	### D2. One confidential OIDC client
+    29	
+    30	- The authentik provider `brain` becomes **confidential** (client authentication `client_secret_basic`), keeping issuer `http://localhost:9010/application/o/brain/`, audience `brain`, `sub_mode: user_username` and the identity profile's `human_clients: [brain]`. One issuer and audience keep one principal per person across the bearer path and the shell.
+    31	- Redirect URIs (strict): `http://localhost:5173/api/auth/callback` (dev) and `http://localhost:4173/api/auth/callback` (built shell for S0009). The stale `http://localhost:8100/auth/callback` is removed. The invalidation flow becomes `default-invalidation-flow` so end-session ends the authentik session. Access tokens stay at 5 minutes; refresh tokens are rotated on every refresh grant (verified at feature G0 against authentik 2026.2).
+    32	- The dev client secret is a dev-only value in the dev blueprint, like the existing dev passwords; dev ROPC helpers (`scripts/dev/seed_principals.py`, test token fixtures) send it. Production secrets come from the deployment secret store (F0026).
+    33	- Authorization requests use code flow, `response_type=code`, PKCE `S256` (43-byte-entropy verifier), 256-bit `state`, 256-bit `nonce`, scopes `openid profile email offline_access tenant_id`.
+    34	
+    35	### D3. Server-side session store in PostgreSQL (migration 0018)
+    36	
+    37	- `browser_login_attempt`: state digest (unique), browser-binding digest, encrypted PKCE verifier, nonce digest, mode (`redirect`/`popup`), popup correlation reference, sanitized return route, `prompt_login`, created/expires (10 minutes)/consumed timestamps. Consumption is one conditional `UPDATE … WHERE consumed_at IS NULL AND expires_at > now() RETURNING`, so a state is single-use across workers.
+    38	- `browser_session`: session reference (UUID, never the cookie), cookie digest (unique SHA-256 of the cookie secret), principal, issuer and subject, display name, created, last activity, idle and absolute deadlines, access-token expiry, encrypted token bundle and key ID, renewal count, CSRF digest, active tenant and knowledge base (composite FK to `knowledge_base(id, tenant_id)`), ended timestamp and end reason.
+    39	- `session_event` (append-only, same trigger pattern as migration 0007): session created, replaced, renewed, renewal failed, ended (idle, absolute, principal change, principal disabled), logout with revocation and end-session outcomes, active knowledge-base change.
+    40	- `credential_rejection_window` (mutable counter rows, D9).
+    41	- `tenant.display_name` and `knowledge_base.display_name` (nullable text, expand-only) give the shell server-owned names.
+    42	- Tokens and the PKCE verifier are encrypted with AES-256-GCM; additional data = row ID + key ID. `BRAIN_SESSION_KEYS` is an ordered `kid:base64key` list; the first key encrypts, all keys decrypt, so keys rotate without ending sessions. Ending a session sets the token ciphertext to NULL.
+    43	
+    44	### D4. Cookies
+    45	
+    46	- Session cookie `__Host-nebula_session`: 256-bit random value (base64url), `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, no `Max-Age` (the server enforces lifetime). Only its SHA-256 digest is stored.
+    47	- Login-binding cookie `__Host-nebula_login`: same attributes, `Max-Age=600`; its digest is stored on the login attempt and must match at the callback (login CSRF and fixation defence). It is cleared at the callback.
+    48	- `SameSite=Lax`, not `Strict`: the callback is a top-level navigation from authentik, and `Strict` drops the binding cookie there and the session cookie on the first navigation after it. CSRF is enforced by D5, not by `SameSite`.
+    49	- Local development relies on `http://localhost` being a secure context, where Chromium and Firefox accept `Secure` cookies; S0009 runs in Chromium. Safari needs the optional HTTPS profile (Vite `server.https` with a locally trusted certificate and `BRAIN_PUBLIC_ORIGIN=https://localhost:5173`). There is no insecure-cookie switch.
+    50	
+    51	### D5. Cookie request path and CSRF
+    52	
+    53	For every request to an engine or BFF route, in order:
+    54	
+    55	1. A session cookie together with an `Authorization` header → `400 ambiguous_credentials`; nothing else runs.
+    56	2. Bearer only → today's path, unchanged.
+    57	3. Cookie: look up the cookie digest in `browser_session` (the only read before verification). Unknown or ended → `401 unauthenticated`; past idle or absolute deadline → end the session, `401 session_expired`.
+    58	4. Unsafe methods (`POST`, `PUT`, `PATCH`, `DELETE`): reject with `403 csrf_rejected` when `Sec-Fetch-Site: cross-site`; when `Origin` is present and is not `BRAIN_PUBLIC_ORIGIN`; when `Origin` is absent and the `Referer` origin is missing or different; or when `X-CSRF-Token` is missing or its SHA-256 differs from the session's digest (constant-time). The cause goes to `authentication_event` (`csrf_rejected`). No handler or write runs.
+    59	5. Renewal when needed (D6).
+    60	6. Verify the access token with the existing verifier and resolve the principal with the existing resolver. A principal different from the session's, or disabled, ends the session and returns `401 unauthenticated`.
+    61	7. Unless the request carries `X-Nebula-Activity: background`, extend the idle deadline (written at most once per 30 seconds).
+    62	
+    63	The CSRF token is 256 random bits per session, created with the session, returned only in the `GET /session` body and held in page memory. A new session (sign-in or re-authentication) gets a new token. Responses to cookie requests and all `/auth` and `/session` responses carry `Cache-Control: no-store` and `Vary: Cookie`; no CORS headers are added.
+    64	
+    65	Stable outcomes: `401 unauthenticated`, `401 session_expired`, `403 csrf_rejected`, `400 ambiguous_credentials`, `429 rate_limited`, and the engine's existing non-disclosing `404` for denials. New `AuthenticationReason` values: `session_unknown`, `session_expired`, `renewal_failed`, `principal_mismatch`, `state_invalid`, `binding_mismatch`, `nonce_mismatch`, `idp_error`, `code_exchange_failed`, `csrf_rejected`, `ambiguous_credentials`, `rate_limited`.
+    66	
+    67	### D6. Coalesced renewal with a row lock
+    68	
+    69	- Renewal margin: 60 seconds before the access token expires, within the verifier's existing leeway for clock skew.
+    70	- The renewing request opens a separate short transaction, `SELECT … FOR UPDATE` on the session row (`lock_timeout` 15 s), and re-reads the expiry after acquiring the lock. If another request already renewed, it proceeds; otherwise it makes the refresh-token grant (5 s timeout, one retry after 500 ms for network errors or 5xx only), stores the returned tokens (a rotated refresh token replaces the old one in the same update), records `renewed`, and commits. One upstream call per burst follows from the lock, across workers.
+    71	- `invalid_grant`, other 4xx, or an exhausted retry ends the session (`renewal_failed`), writes `authentication_event` `renewal_failed` with the session reference in the payload, and every waiter gets `401 session_expired`.
+    72	- Renewal never extends the absolute deadline, and no renewal is attempted at or after it. Renewal does not count as user activity.
+    73	- Logout takes the same lock, so logout and renewal serialize: a renewal that finds the session ended stops; a logout after a renewal revokes the rotated token.
+    74	
+    75	### D7. Logout, revocation and end-session
+    76	
+    77	- `POST /auth/logout` (D5 checks; an ended session's CSRF digest still validates). Under the row lock: end the session (`logout`), revoke the current refresh token at the revocation endpoint (RFC 7009, `token_type_hint=refresh_token`, client authentication, 5 s timeout, no retry), set the token ciphertext to NULL, record `logout` with the outcome, and clear the cookie.
+    78	- Response `logout-result-v1`: `revocation` = `succeeded` | `failed` (with a non-secret reason) | `not_attempted` (no live tokens), plus `end_session_url`, or `null` with `end_session` = `unavailable` when discovery has no end-session endpoint. Revocation failure is never reported as success.
+    79	- The end-session URL carries `client_id`, `post_logout_redirect_uri` (`/signed-out`) and `state`, and **no `id_token_hint`**, so no token appears in a URL. The shell keeps the outcome in `sessionStorage` under `nebula.signout` (outcome only, no token), then navigates top-level to the URL. The signed-out page reads and deletes it.
+    80	- The signed-out page's "Sign in" link uses `/api/auth/login?prompt=login`, so the IdP asks for credentials even if its session survived.
+    81	
+    82	### D8. Re-authentication and cross-tab signals
+    83	
+    84	- The shell opens `/api/auth/login?mode=popup&reauth=<ref>&return_to=<route>` in a named popup. `ref` is 128 random bits held in page memory.
+    85	- On success the callback creates a new session (the old one ends `replaced`, or `principal_changed` for a different principal) and returns a minimal HTML page (`Content-Security-Policy: default-src 'none'; script-src 'nonce-…'`). The page posts `{type: "nebula.reauth", ref}` on `BroadcastChannel("nebula-session")` and to `window.opener` with the exact public origin, then closes. BroadcastChannel is same-origin only and survives an opener cut by the IdP's opener policy. On failure no message is sent.
+    86	- The shell accepts the signal only from its own origin with the pending `ref`, then reads `GET /session`. Same principal: GETs retry once, and blocked mutations go to re-confirmation. Different principal: discard everything, run hygiene, go to Home. If the popup is blocked or closed (checked every 500 ms), the dialog offers the redirect fallback.
+    87	- Cross-tab: `signed-out` and `principal-changed` messages on the same channel, plus a background `GET /session` every 30 seconds while the page is visible and on focus. This keeps the 60-second bound (A8) and detects grant-revision changes.
+    88	
+    89	### D9. Rejected-credential throttle in PostgreSQL
+    90	
+    91	- Fixed 60-second windows aligned to the minute. The client key is the immediate peer address, or the rightmost untrusted `X-Forwarded-For` entry when the peer is in `BRAIN_TRUSTED_PROXIES` (dev: `127.0.0.1/32` for the Vite proxy).
+    92	- Each rejected credential (bearer rejection, unknown or ended session cookie, callback failure) runs `INSERT … ON CONFLICT (client_key, window_start) DO UPDATE SET rejected_count = rejected_count + 1 RETURNING rejected_count`, which is atomic across workers. Count ≤ 20: today's response and event. Count = 21: one `rate_limited` event, then `429`. Count > 21: `429 rate_limited` with `Retry-After` (seconds to window end), no event. Bound: 21 rows per client per window.
+    93	- While throttled, verification still runs locally (cached JWKS, session lookup), so a valid credential is served (S0008 AC4). A throttled rejection makes no upstream IdP call and no JWKS refetch. Windows older than 10 minutes are deleted by the same statement path. Losing counters on restart only resets the allowance.
+    94	
+    95	### D10. Session endpoint, active knowledge base and flags
+    96	
+    97	- `GET /session` returns `browser-session-v1`: principal (ID, display name, kind, issuer), session deadlines and server time, CSRF token, current memberships with tenant and knowledge-base display names and role, `grant_revision`, active knowledge base, and flags. `grant_revision` is an opaque digest of the sorted current memberships (ID, grant revision); any grant, revocation or revision change changes it. It returns no token.
+    98	- `PUT /session/active-knowledge-base` (`active-knowledge-base-update-v1`) checks the requested pair against current memberships in the same request. Otherwise `422 knowledge_base_not_available` and the value is unchanged. A change records `session_event` `active_knowledge_base_changed`; it is a session preference, not an authorization event. Engine authorization never reads it.
+    99	- Flags come from committed `config/experience-flags.yaml`, re-read when its modification time changes, so changing a flag needs no rebuild or restart. Unknown keys are off in the shell.
+   100	- Display name: ID-token `name`, then `preferred_username`, otherwise null (the shell shows the localized "Signed-in user"). The subject is never shown.
+   101	
+   102	### D11. Return routes
+   103	
+   104	The server accepts `return_to` only when it is a relative path matching an allowlist in `config/experience-routes.yaml` (anchored patterns for `/` and `/reviews/{uuid}`), after percent-decoding and rejecting `\`, `//`, control characters and schemes. Anything else becomes `/`. A shell unit test keeps the allowlist and the client route registry in step.
+   105	
+   106	### D12. Shell stack and route seam (BLUEPRINT section 2.1 confirmed)
+   107	
+   108	- React 18.3 and TypeScript 5.7 (the existing `experience/` app), Vite 6, React Router 7 data router with route-level `lazy`, TanStack Query 5 for server state, Zustand 5 for session and UI state (in memory only; no `persist` middleware), Tailwind CSS 4 with shadcn/ui (Radix) components, react-i18next with en-US resources, Vitest 5 with Testing Library, Playwright with `@axe-core/playwright` for end-to-end, real-browser and accessibility proof.
+   109	- One `apiClient` wrapper is the only `fetch` caller. It uses `credentials: "same-origin"`, adds `X-CSRF-Token` on unsafe methods, registers each request with the hygiene abort registry, maps the D5 outcomes, never sets `Authorization`, and never retries an unsafe method. ESLint rules forbid `localStorage`, `indexedDB`, `caches`, and `sessionStorage` outside the sign-out outcome key.
+   110	- Hygiene triggers (logout, principal change, active knowledge-base change, `grant_revision` change) abort every registered request, call `queryClient.clear()`, reset resource stores, and only then render the new state.
+   111	- Route registry: one module lists `{path, flag, lazy}` entries. Routes: `/` Home, `/reviews/:reviewItemId` (flag `review-panel`), `/signed-out`, `/sign-in-failed`, `/too-many-attempts`, and not-found. Each lazy route builds to its own chunk; `pdfjs-dist` and `fflate` stay out of the entry chunk.
+   112	- Entry-chunk budget: **180 kB gzip** of initial JavaScript, checked in CI by `experience/scripts/check-bundle-budget.mjs` against the Vite manifest.
+   113	
+   114	## Consequences
+   115	
+   116	- One deployable; the cookie path shares verification and audit with the bearer path, so S0002 AC6 regression is a direct test.
+   117	- PostgreSQL holds sessions and counters; no new infrastructure. Each cookie request makes one indexed session read, and idle writes happen at most every 30 seconds.
+   118	- A renewal holds a row lock for up to about 11 seconds in the worst case; only requests of the same session wait.
+   119	- Dev tooling that obtains ROPC tokens must send the client secret.
+   120	- `tenant` and `knowledge_base` gain nullable display names; dev seed data sets them.
+   121	- F0022, F0023 and F0067 add routes through the registry and inherit D12 without touching session code.
+   122	- Formal acceptance of ADR-0051 and of this record waits for S0009.
+   123	
+   124	## Alternatives Considered
+   125	
+   126	- **Separate BFF service:** an extra hop that carries tokens or a shared secret to the engine and duplicates verification. Rejected.
+   127	- **New confidential provider `brain-web`:** authentik issues per-provider issuers, so the same person would resolve to a second principal without grants. Rejected in favour of making `brain` confidential.
+   128	- **Redis or in-process session and counter stores:** no Redis in the stack, and in-process state breaks single renewal and the throttle bound across workers. Rejected.
+   129	- **Signed (stateless) session cookie:** cannot be revoked server-side and would carry state in the browser. Rejected by ADR-0051 D1.
+   130	- **`SameSite=Strict`:** breaks the IdP callback and the first post-login navigation. Rejected; CSRF is enforced by D5.
+   131	- **`id_token_hint` on end-session:** puts a token in a URL. Rejected; `client_id` is used.
+   132	- **CSRF double-submit cookie:** needs a script-readable cookie. Rejected in favour of a synchronizer token in the session body.
+   133	
+   134	## Acceptance (separate from Phase B approval)
+   135	
+   136	Proposed until F0021-S0009 passes against authentik, PostgreSQL, the engine and the built shell: no token in browser-visible state, one refresh grant per burst, rotated-token revocation, forced revocation failure reported, principal-change isolation, malicious return routes, and mutation continuity with re-confirmation (master blueprint section 121.2 items 8 and 9). ADR-0051 is accepted in the same step.
+   137	
+   138	## References
+   139	
+   140	- [ADR-0051](ADR-0051-browser-session-and-revocation-contract.md), [ADR-0049](ADR-0049-shared-identity-and-verified-principal-boundary.md), [ADR-0072](ADR-0072-observatory-is-a-read-only-projection.md)
+   141	- `planning-mds/architecture/master-blueprint.md` sections 119.3, 119.5, 120.5, 121.2
+   142	- RFC 7636 (PKCE), RFC 7009 (revocation), OpenID Connect RP-Initiated Logout 1.0, RFC 6265bis (cookie prefixes, SameSite)
+usage: risk.py [-h] [--file FILE_PATH] [--symbol SYMBOL_NAME]
+               [--node SYMBOL_NODE] [--months MONTHS] [--reason]
+               [--run-id RUN_ID] [--telemetry-file TELEMETRY_FILE]
+               [target]
+
+Aggregate KG signals into a 0-10 risk score for a canonical node, file, or
+symbol. Pre-flight check; raw artifacts remain authoritative per solution-
+ontology.yaml.authority.precedence.
+
+positional arguments:
+  target                Canonical node id (entity:submission), feature/story
+                        id (F0007 / F0007-S0003), or symbol id (symbol:...).
+
+options:
+  -h, --help            show this help message and exit
+  --file FILE_PATH      Repo file path; resolves to one or more bound
+                        canonical nodes.
+  --symbol SYMBOL_NAME  Symbol name (e.g. TransitionAsync); requires symbol-
+                        index.yaml.
+  --node SYMBOL_NODE    Scope --symbol lookups to one canonical node id.
+  --months MONTHS       Look back N months for hotspot/cochange signals
+                        (default: 12).
+  --reason              Emit a human-readable narrative instead of JSON.
+  --run-id RUN_ID
+  --telemetry-file TELEMETRY_FILE
+[KG] engine/apps/api/src/brain_api/deps.py -> capability:runtime-roots-and-toolchain
+  Features: feature:F0001
+  Stories: story:F0001-S0001
+  Symbols: current_principal:L163, get_authentication_event_sink:L133, get_authorization_execution:L193, get_casbin_adapter:L116, get_content_store:L214, get_credential_verifier:L108, get_db_session:L99, get_identity_profile:L112, get_predicate_registry:L127, get_provenance_reader:L204 (+7 more)
+  Risk: capability:runtime-roots-and-toolchain: bus-factor ⚠ gajapathi.kannan@live.com
+  Tip: `python3 scripts/kg/blast.py --file <path>` for full blast radius

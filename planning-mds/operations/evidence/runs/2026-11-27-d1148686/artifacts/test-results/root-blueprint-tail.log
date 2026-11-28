@@ -1,0 +1,159 @@
+- **F0005** ([compatibility evidence](features/archive/F0005-one-time-docling-ingestion/compatibility-evidence.md)): closed on its rejection branch. Fenced document jobs (migration 0004, reasons in 0009–0010) run under the accepted ADR-0074 controls. The direct-baseline client is the v0.1 extraction path.
+
+Every recipient of the ADR-0077/ADR-0078 handoffs (F0009, F0010, F0012, F0013, F0016–F0020, F0022, F0023, F0025, F0026, F0065, F0069) carries a "Shipped contract carry-in" note in its README. F0011's plan already binds them. Their Phase B binds to the as-built contract, not to the original section 13/14 sketch.
+
+---
+
+### 4.18 F0009 provenance and correction lineage (Phase B approved 2026-11-24; implemented and archived 2026-11-25)
+
+Plan run `2026-11-24-bfdbbf04`; Phase A explicitly approved by operator token `approve-phase-a`, six stories and 41 ACs (all Done 2026-11-25). The [assembly plan](features/archive/F0009-provenance-and-human-correction-lineage/feature-assembly-plan.md) and proposed [ADR-0080](architecture/decisions/ADR-0080-bounded-provenance-and-correction-reservations.md) define an internal metadata-first reader over exact assertion/version lineage, current READ of every linked source/review/ending/attestation resource, two append-only tables for future-learning reservations and non-applied submission attribution, and a nullable server-owned new-decision marker. Legacy rows are not backfilled; canonical writes remain with the shipped commit service and full orchestration remains F0018.
+
+The four design schemas use F0011 delivery in the later feature action; no runtime bundle, route, grant, UI, deployable, parse or learning producer is added by plan. A losing batch keeps its existing 422 after protected audit-only persistence, and a new effective CORRECT receives one reference atomically. G4 and all seven ordered G5 pre-approval checks passed; the operator approved Phase B with exact token `approve-phase-b` on 2026-11-24. The same run’s G5 journal/manifest records post-approval regeneration, checks and final publication. ADR-0080 is Proposed until its runtime proofs and separate acceptance.
+
+Feature run `2026-11-24-08701e37` implemented the design, with operator G4 approval on 2026-11-25. It delivers `brain_domain.provenance`, the `brain-provenance` reader (exported, not routed), the opt-in `prepare_reads` authorization hook, review-boundary preflight with refused-attempt attribution and an atomic learning reservation, and migration 0016. All 41 ACs and EX-PROV-001–005 are proven on PostgreSQL 18 (changed-line coverage 94.4%; 1392/1392 shared conformance results). G2 recorded five design corrections, among them a nullable `fact_change.from_version_id` and attempt authorization bound by `audit_event.decision_id` (see the run reports). ADR-0080 runtime proofs are met; the ADR stays Proposed pending operator acceptance. Evidence: [PM closeout](operations/evidence/runs/2026-11-24-08701e37/pm-closeout.md). F0010 owns retraction semantics; F0020/F0022/F0023 own exposure and F0041/F0026 own learning/benchmark governance.
+
+
+### 4.19 F0012 foundation ontology (Phase B approved 2026-11-25; implemented and archived 2026-11-26)
+
+Plan run `2026-11-25-120320e9`; Phase A approved by operator token `approve-phase-a` (seven stories, 46 ACs; G1 decisions D1–D8). The [assembly plan](features/archive/F0012-foundation-ontology/feature-assembly-plan.md) and proposed [ADR-0081](architecture/decisions/ADR-0081-foundation-ontology-authoring-and-release-runtime.md) define: YAML modules under `ontology/` validated by `ontology-module-authoring/v1` (`parents:` only; inference `subClassOf`/`subPropertyOf`/`inverseOf`; validation-only domain/range/disjoint/cardinality with execution context; other constructs refused); `urn:nebula:ont:` IRIs with reuse/collision refusal and change records; a deterministic compiler producing content-addressed releases (`ontrel:sha256-…`) with exact locks, projection mapping and RDF/JSON-LD export; migration 0017 with eight append-only, tenant/KB-owned release tables; a release-backed predicate registry (`fnd` namespace, 15 foundation predicates) and ETERNAL/EVENT activation over the ADR-0078 D10 shapes without DDL; an impact report and reviewed, audited activation/rollback under a new `ontology_release` resource and `OntologySteward` role. The foundation module carries the section 22 classes and the ADR-0070 party/account/ownership/role vocabulary; Policy/Submission/Program stay with F0013. Canonical-admission constraints are declared for F0017/F0018. No HTTP route, screen, parse or model call. ADR-0045/0070/0081 remain Proposed. The operator approved Phase B with `approve-phase-b` on 2026-11-25. As built (feature run `2026-11-26-54387a08`, archived 2026-11-26; no plan-review ran, and the operator chose G0 reconciliation): foundation@1 is committed under `ontology/releases/foundation/1` (`ontrel:sha256-3602b71f…`). The `ontology_release` authorization resource is the KB's ontology scope with a required trusted `resource_access` row, and migration 0017 widens `ck_resource_access_type`. `fact-version-read-v1` `valid_start` is nullable for ETERNAL versions. RDF exports domain/range as `nebula:validationDomain`/`validationRange`. Reports require the steward's `review` grant.
+
+### 4.20 F0021 native React shell and BFF session (Phase B approved 2026-11-27)
+
+Plan run `2026-11-27-6cda122a`. Phase A was approved on 2026-11-27 with nine stories and 55 ACs. G1 decisions:
+
+- D1: 30-minute idle and 8-hour absolute session limits;
+- D2: the shell includes the rehosted Review Panel;
+- D3: re-authentication in a popup, with explicit re-confirmation of blocked actions;
+- D4: 20 rejected credentials per client per 60 seconds, then 429.
+
+The [assembly plan](features/F0021-native-react-semantic-shell-and-oidc-session/feature-assembly-plan.md) and proposed [ADR-0082](architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md) fix the runtime choices that ADR-0051 leaves to F0021:
+
+- **BFF placement and origin:** the BFF runs inside the engine API process. One public origin serves the shell at `/` and the engine under a stripped `/api` mount; contract paths stay at the root.
+- **Identity client:** the authentik `brain` client becomes confidential, keeping the same issuer, audience and principals.
+- **Session store:** migration 0018 adds:
+  - `browser_login_attempt`;
+  - `browser_session`, with AES-256-GCM token ciphertext under a key ring;
+  - append-only `session_event`;
+  - `credential_rejection_window`;
+  - nullable tenant and knowledge-base display names.
+- **Cookies:** `__Host-nebula_session` and `__Host-nebula_login` are 256-bit, `Secure`, `HttpOnly`, `SameSite=Lax`.
+- **CSRF:** a synchronizer token from `GET /session`, plus `Origin`, `Referer` and `Sec-Fetch-Site` checks. Sending both a cookie and a bearer token is refused.
+- **Renewal:** one upstream refresh per burst, coalesced by a PostgreSQL row lock (60-second margin, one bounded retry).
+- **Logout:** RFC 7009 revocation with a truthful outcome, and an end-session URL without `id_token_hint`.
+- **Re-authentication and other tabs:** the popup signals completion over BroadcastChannel and `postMessage`. Tabs learn about sign-out through BroadcastChannel and a 30-second background session poll.
+- **Throttle:** an atomic per-client window counter in PostgreSQL, bounded at 21 events per window.
+- **Session endpoint:** `browser-session-v1` carries memberships, an opaque `grant_revision`, the active knowledge base and server-side flags. The active knowledge base never authorizes anything.
+- **Return routes:** a server-side allowlist.
+- **Shell:** the section 2.1 stack. It has a route, flag and lazy-loading registry with a 180 kB gzip entry-chunk budget, one API client, and hygiene triggers.
+- **Real-browser proof:** Playwright with a test-only IdP recorder that counts refresh grants and injects revocation failures.
+
+The operator approved Phase B with `approve-phase-b` on 2026-11-27, confirming reconciliations R1 and R2 (wording fixes to two Phase A ACs, made by the PM at feature G0):
+
+- R1: engine denials stay the non-disclosing 404;
+- R2: verification stays local while a client is throttled.
+
+ADR-0051 and ADR-0082 remain Proposed until S0009 passes.
+
+---
+
+## 5) Phase C — Implementation Plan (locked order)
+
+Sequence per master blueprint sections 115.3 and 124; original identifiers F0001 to F0063 are preserved. F0065 is the bounded v0.1 assessment addition; F0064 is repository tooling.
+
+1. Archived F0001 supplies the measured foundation contracts. Archived F0005 supplies the checkpoint/reuse, recovery and execution-control proof (ADR-0074); its Docling-Graph candidate was rejected (ADR-0060 Rejected 2026-11-08; sections 115.4, 126).
+2. v0.1A — F0002 to F0017: typed domain contracts, durable ingestion, immutable evidence, assertion extraction
+3. v0.1B — F0018 to F0023 establish authorized commits, temporal reads, evidence review, and minimal 360 views; F0065 adds bounded on-demand GL guideline assessment; F0024/F0025 prove real interpretation-to-assessment and temporal reassessment end to end
+4. v0.1C — F0069 (constrained policy question, added 2026-11-08) then F0026: recovery, deletion and revocation minimum, audit, independent frozen evaluation, constrained policy question, and F0065 assessment/lineage/freshness/access challenge cases
+5. v0.2A — F0033 to F0040 and F0044 to F0047; v0.2B — F0027 to F0032, F0066 (open-statement alignment, ADR-0063), F0041 to F0043, and F0067 (Graph Observatory, ADR-0071/ADR-0072)
+6. v0.3 and later — F0048 to F0063: full process, generalized reasoning, automatic derivation propagation, decision replay, and advanced semantics; F0065 is already in v0.1B
+7. v0.4+ conditional — F0068 spectral graph retrieval experiments, only after the F0035/F0036 baseline is measured and its own experiment scope/scheduling/cost decision is recorded. Baseline delivery does not depend on this branch.
+
+Baseline authenticated writes, approval checks, source restrictions, and audit are v0.1 obligations even though the full Execution Gate and Decision Ledger come later (section 89).
+
+---
+
+## 6) Next Step Guidance
+
+Current position (2026-11-20): F0001 to F0008 are done and archived; ADR-0078 was accepted on 2026-11-19 (F0008 second remediation run `2026-11-19-8cfcd0ff`, approved 2026-11-19). F0007 review remediation completed in approved run `2026-11-09-81798e61`: all seven findings resolved, fresh868 engine/27 Neuron tests and current independent reviews pass. Prior completion remains superseded history; ADR-0077 accepted 2026-11-10; remediation merged as PR #44. No production rollout or new ontology/producer/permission scope.
+
+1. Now (2026-11-20 roadmap review, after F0008 closed): four lanes.
+   - **F0011** (JSON Schema contract system) completed 2026-11-23 in feature run `2026-11-22-885e8734` (no migration added).
+   - **F0009** (provenance + human-correction lineage) completed 2026-11-25 in feature run `2026-11-24-08701e37` (migration 0016); F0010 → F0018 continue the temporal/commit path.
+   - **F0012** (foundation ontology) completed 2026-11-26 in feature run `2026-11-26-54387a08` (migration 0017); F0013 composes its GL modules on foundation@1.
+   - **F0021** (React shell + OIDC/session) takes the Now slot freed by F0008, as the 2026-11-10 review promised.
+
+   Next is reordered by dependency readiness: F0010, F0013, F0014, F0017, F0015, F0016. Each lane runs `plan-review` before its feature action.
+2. Carry ADR-0070 (account, party and role model, Proposed) into F0012/F0013 Phase B. The operator aligns the data contracts and CRM separately, following the [cross-repository plan](architecture/account-model-cross-repo-plan.md).
+3. F0012 is done (2026-11-26); F0013 plans against the shipped foundation release, as described in the [ontology planning handoff](architecture/ontology-planning-handoff.md) and the [commercial P&C handoff](architecture/commercial-pc-example-handoff.md).
+4. Once per clone: `git config core.hooksPath .githooks`, and `pip install -e '.[test,semantic-rdf]'` so the `semantic_rdf` gate runs instead of skipping.
+
+
+### F0007 review remediation
+
+F0007 remediation is complete and archived in run `2026-11-09-81798e61`, with explicit operator G4 approval. All seven independent findings were resolved and revalidated; original completion/audits remain historical. No new route, producer, permission or formal ADR acceptance.
+
+
+--- docs/agent-instructions.md (sha256:a7645e80a39f2aca95b31f01b711353754630c1e62fd47812dba0fe5ed9aaae2) ---
+# Working in Nebula Insurance Brain
+
+Read `planning-mds/BLUEPRINT.md` for process, scope, technology, and phase status. Architectural intent comes from `planning-mds/architecture/master-blueprint.md` and its governing ADRs. Feature-specific accepted requirements live in their feature folders. Report conflicts between these sources; do not invent product rules.
+
+## Repository boundaries
+
+- Keep product requirements, insurance terminology, review criteria, and validation scripts here. Generic framework mechanisms belong in the sibling `nebula-agents` repository.
+- Framework sessions start in that sibling repository. Always pass this repository's absolute path as `--product-root`, or set `NEBULA_PRODUCT_ROOT` explicitly. Do not rely on a default product or the shell's current directory.
+- `BOUNDARY-POLICY.md` in the framework describes the separation of framework and product content. It is not an insurance regulatory policy.
+- Runtime directories and proof harnesses named in a plan may not exist yet. Distinguish a proposed implementation path from a required existing planning artifact.
+
+## Planning and knowledge graph
+
+- Keep the blueprint, feature status, and trackers aligned under `planning-mds/features/TRACKER-GOVERNANCE.md`.
+- Edit `planning-mds/kg-source/**` as the authored graph source. Generate projections and tracker tables with `scripts/kg/compile.py`; do not hand-edit generated regions.
+- Use KG lookup for routing. Inspect the source planning artifacts before making readiness judgments.
+- KG coverage means a feature has retrieval mappings, including planning-only stubs. It does not imply a PRD, completed Phase B, approval, or implementation; read status and mapping notes before making readiness claims.
+- Honor `.agentignore` for broad searches. Read exact evidence references when a review requires them.
+- Proposed ADRs stay proposed until their stated proof and acceptance conditions are met. Structural readiness checks do not settle them.
+
+## Local validation
+
+From this repository, run:
+
+```bash
+python3 scripts/validation/validate_plan_readiness.py --plan-scope feature --target F0001
+python3 scripts/validation/validate_plan_readiness.py --plan-scope project --target project
+python3 scripts/run-lifecycle-gates.py
+```
+
+The readiness validator emits JSON and exits 0 for a structurally valid plan, 1 for failed checks, and 2 for invalid invocation. Architectural adequacy remains a reviewer decision. During `plan-review`, also read `docs/plan-review-checklist.md` and cite actual planning evidence for findings.
+
+## Semantic examples
+
+For each introduced or changed concept, maintain its glossary definition, worked example, boundary case, and owning feature/story/contract links in `planning-mds/examples/README.md`. Reuse the continuing EX-GL-001 case where it fits. Label synthetic/illustrative outputs and future delivery phases explicitly. Validate structured examples; runtime delivery must add actual reproduction evidence and keep development examples outside the frozen holdout.
+
+
+--- docs/plan-review-checklist.md (sha256:88b118f1baf91c8aad4b3f8b302a254c3c1caab7f507c268ed84672ab8ba7fac) ---
+# Brain plan review checklist
+
+These are product review criteria for `plan-review`. The script validates the structure and source references in this checklist and the target planning package. Reviewers judge whether the referenced plan addresses the criteria adequately; a script pass does not mean approval or regulatory compliance.
+
+For each target, record each applicable rule's outcome and a feature-specific planning evidence reference in the review report. If a rule does not apply, record the reason explicitly. The governing references below orient the reviewer; they do not assert that every target already satisfies each rule.
+
+| Rule ID | Owner | Criterion | Governing source | Planning evidence to inspect |
+|---|---|---|---|---|
+| BRAIN-SCOPE | product-manager | Requirements, exclusions, and acceptance criteria are explicit. | planning-mds/BLUEPRINT.md | Target PRD.md and story acceptance criteria |
+| BRAIN-AUTHORITY | architect | Accepted requirements and proposed decisions remain distinguishable. | planning-mds/architecture/master-blueprint.md | Target dependencies, design decisions, and referenced ADR status |
+| BRAIN-EVIDENCE | architect | Assertion and canonical fact authority are tied to evidence or derivation lineage. | planning-mds/architecture/decisions/ADR-0010-provenance-is-mandatory.md | Target data requirements and proof/evidence plan; or an explicit scope exclusion |
+| BRAIN-PARSE-ONCE | architect | Reinterpretation preserves the accepted content artifact. | planning-mds/architecture/decisions/ADR-0003-one-time-content-extraction.md | Target ingestion/interpretation requirements; or an explicit scope exclusion |
+| BRAIN-TEMPORAL | architect | Changes preserve the valid-time and recorded-time contract. | planning-mds/architecture/decisions/ADR-0007-full-bitemporality.md | Target persistence requirements and planned tests; or an explicit scope exclusion |
+| BRAIN-AUTHORIZATION | security | Protected reads and writes establish identity and enforce resource scope. | planning-mds/security/authorization-review.md | Target permission requirements and negative test plan; or an explicit scope exclusion |
+| BRAIN-BUILDABILITY | code-reviewer | Ownership, prerequisites, interfaces, and planned validation let implementation begin without invented rules. | planning-mds/features/TRACKER-GOVERNANCE.md | Target stories, dependencies, planning artifacts, and required signoff roles |
+| BRAIN-EXAMPLES | architect | Each introduced/changed semantic concept has a definition, worked example, boundary example, and owning feature/story/contract links; structured examples validate, phases/provenance are labeled, and runtime reproduction/holdout separation are planned. | planning-mds/examples/README.md | Target example coverage, schema/reference checks, story acceptance, and actual reproduction evidence when implemented; or an explicit no-semantic-change rationale |
+
+## Evidence boundary
+
+Required planning artifacts must exist and contain substantive sections. Runtime paths explicitly described as future deliverables are allowed to be absent. Do not require completed runtime proof results merely to review the plan for conducting those proofs.
+
+Record review findings in the action's base evidence package. Preserve its normal PR0–PR4 ownership and readiness rules. A failing required local check blocks completion; a passing check supplies validation evidence for reviewer judgment.
+
+
+Required project checks: plan-readiness

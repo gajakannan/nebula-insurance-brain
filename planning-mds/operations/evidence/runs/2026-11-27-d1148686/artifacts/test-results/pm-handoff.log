@@ -1,0 +1,267 @@
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/README.md
+   1: # F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+   2: 
+   3: **Status:** Planned — Phase A approved 2026-11-27 (plan run `2026-11-27-6cda122a`); Phase B approved 2026-11-27 (`approve-phase-b`); next: plan-review
+   4: **Phase:** v0.1B
+   5: **Roadmap:** Now (2026-11-20 roadmap review; pulled forward from Later on 2026-11-10)
+   6: 
+   7: ## Overview
+   8: 
+   9: The native React semantic shell with the OIDC session contract and safe re-auth behavior is the first user-facing surface (section 3, 120.5).
+  10: 
+  11: Source: `planning-mds/architecture/master-blueprint.md` section 95 (epic roadmap) and section 115.3 (sequencing). Governing ADRs: [ADR-0036](../../architecture/decisions/ADR-0036-nebula-keeps-a-native-semantic-ux-onyx-is-a-reference-implementation.md), [ADR-0049](../../architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md), [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md).
+  12: 
+  13: ## Requirement-ownership amendment (2026-11-08)
+  14: 
+  15: The 2026-11-08 review of the master blueprint against the feature portfolio assigned these requirements to this feature (master blueprint section 106.3). Carry them into the PRD and stories when the feature is planned; the feature status is unchanged.
+  16: 
+  17: - **Dependencies:** F0002 (previously F0001).
+  18: - ADR-0051 decision recorded 2026-11-08 - same-origin BFF with an opaque HttpOnly session cookie, server-held tokens and renewal, CSRF and origin checks, and upstream revocation on logout. No browser token storage. Formal acceptance needs section 121.2 items 8 and 9.
+  19: 
+  20: ## Documents
+  21: 
+  22: - [PRD](PRD.md) — scope, operator decisions D1–D4, PM assumptions A1–A8, screens
+  23: - [Personas](personas.md)
+  24: - [Acceptance criteria checklist](acceptance-criteria-checklist.md) — 55 ACs
+  25: - [STATUS](STATUS.md)
+  26: - [Feature assembly plan](feature-assembly-plan.md) — build order, reconciliation R1–R7, AC-to-proof map
+  27: - [GETTING-STARTED](GETTING-STARTED.md)
+  28: - [BFF API design](bff-api-design.yaml), [migration design](migration-design.sql), [contract inventory](contract-inventory.yaml)
+  29: - Governing design: proposed [ADR-0082](../../architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md), refining [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md)
+  30: - The feature shard is `planning-mds/kg-source/features/F0021.yaml`.
+  31: 
+  32: ## Stories
+  33: 
+  34: | ID | Title | Status |
+  35: |----|-------|--------|
+  36: | [F0021-S0001](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) | Sign in through the BFF with an opaque session | Not Started |
+  37: | [F0021-S0002](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Protect cookie-authenticated calls with CSRF and origin checks | Not Started |
+  38: | [F0021-S0003](F0021-S0003-renew-once-and-bound-session-lifetime.md) | Renew once and bound session lifetime | Not Started |
+  39: | [F0021-S0004](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) | Re-authenticate without losing work or replaying mutations | Not Started |
+  40: | [F0021-S0005](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) | Log out with upstream revocation and cache hygiene | Not Started |
+  41: | [F0021-S0006](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) | Show identity and knowledge-base context in the shell | Not Started |
+  42: | [F0021-S0007](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) | Provide the route seam and rehost the review panel | Not Started |
+  43: | [F0021-S0008](F0021-S0008-throttle-rejected-credentials.md) | Throttle rejected credentials | Not Started |
+  44: | [F0021-S0009](F0021-S0009-prove-session-transport-and-mutation-continuity.md) | Prove session transport and mutation continuity | Not Started |
+  45: 
+  46: **Total Stories:** 9
+  47: 
+  48: ## F0002 closeout carry-in (2026-09-28)
+  49: 
+  50: F0002 (tenancy-aware AuthX kernel) closed with one recommendation assigned to this feature. It is recorded in the [F0002 security review](../../operations/evidence/runs/2026-09-27-bb7c8d1d/security-review-report.md) and accepted as deferred in the [F0002 PM closeout](../../operations/evidence/runs/2026-09-27-bb7c8d1d/pm-closeout.md). Carry it into this feature's PRD and stories when the feature is planned. The feature status is unchanged.
+  51: 
+  52: - **[medium] Rate-limit rejected credentials at the BFF/edge.** Since F0002, every unauthenticated or rejected-credential request writes one durable `authentication_event` row (null principal, route template, reason, no token). Without edge rate limiting, this lets an attacker amplify storage. The session/BFF boundary this feature introduces must throttle rejected-credential traffic before it reaches the engine. Acceptance evidence is a negative test showing that a burst of bad credentials produces bounded `authentication_event` growth. Retention of those rows belongs to F0026.
+  53: 
+  54: ## Graph Observatory carry-in (2026-10-13)
+  55: 
+  56: [ADR-0072](../../architecture/decisions/ADR-0072-observatory-is-a-read-only-projection.md) (Proposed) governs this planned work. Carry these requirements into the PRD; the feature status is unchanged. Design: [design note section 10](../../architecture/graph-observatory-design.md#10-delivery-approach-carry-the-contract-in-now-land-the-observatory-in-v02b). The scoped Observatory is [F0067](../F0067-graph-observatory/README.md).
+  57: 
+  58: - Provide a route-level feature flag and lazy-loading seam, so a heavy view such as F0067 can load on demand without growing the base bundle.
+  59: - State management, server-state caching and styling are app-wide choices made here; F0067 inherits them and adds only rendering dependencies.
+  60: - **No new v0.1 scope** beyond the seam: no Observatory dependency enters v0.1.
+
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/STATUS.md
+   1: # F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior — Status
+   2: 
+   3: **Overall Status:** Planned — Phase A and Phase B approved; plan-review next
+   4: **Last Updated:** 2026-11-27
+   5: **Plan Run:** `2026-11-27-6cda122a` (A+B, new)
+   6: **Phase A:** Approved 2026-11-27 (`approve-phase-a`)
+   7: **Phase B:** Approved 2026-11-27 (`approve-phase-b`, confirming R1 and R2); design in [assembly plan](feature-assembly-plan.md) and proposed [ADR-0082](../../architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md)
+   8: **Implementation:** Not started
+   9: 
+  10: ## Story Checklist
+  11: 
+  12: | Story | Title | Status |
+  13: |---|---|---|
+  14: | F0021-S0001 | [Sign in through the BFF with an opaque session](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md) | Not Started |
+  15: | F0021-S0002 | [Protect cookie-authenticated calls with CSRF and origin checks](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md) | Not Started |
+  16: | F0021-S0003 | [Renew once and bound session lifetime](F0021-S0003-renew-once-and-bound-session-lifetime.md) | Not Started |
+  17: | F0021-S0004 | [Re-authenticate without losing work or replaying mutations](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md) | Not Started |
+  18: | F0021-S0005 | [Log out with upstream revocation and cache hygiene](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md) | Not Started |
+  19: | F0021-S0006 | [Show identity and knowledge-base context in the shell](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md) | Not Started |
+  20: | F0021-S0007 | [Provide the route seam and rehost the review panel](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md) | Not Started |
+  21: | F0021-S0008 | [Throttle rejected credentials](F0021-S0008-throttle-rejected-credentials.md) | Not Started |
+  22: | F0021-S0009 | [Prove session transport and mutation continuity](F0021-S0009-prove-session-transport-and-mutation-continuity.md) | Not Started |
+  23: 
+  24: ## Story × Role Progress
+  25: 
+  26: Cells: not-started / in-progress / done / not-in-scope; review columns resolve to PASS/FAIL in the feature action. No AI/model scope.
+  27: 
+  28: | Story | Backend | Frontend | AI | QA | Code Review | Security | DevOps | Overall |
+  29: |---|---|---|---|---|---|---|---|---|
+  30: | F0021-S0001 | not-started | not-started | not-in-scope | not-started | - | - | not-started | Not Started |
+  31: | F0021-S0002 | not-started | not-started | not-in-scope | not-started | - | - | not-in-scope | Not Started |
+  32: | F0021-S0003 | not-started | not-started | not-in-scope | not-started | - | - | not-in-scope | Not Started |
+  33: | F0021-S0004 | not-in-scope | not-started | not-in-scope | not-started | - | - | not-in-scope | Not Started |
+  34: | F0021-S0005 | not-started | not-started | not-in-scope | not-started | - | - | not-in-scope | Not Started |
+  35: | F0021-S0006 | not-started | not-started | not-in-scope | not-started | - | - | not-in-scope | Not Started |
+  36: | F0021-S0007 | not-in-scope | not-started | not-in-scope | not-started | - | - | not-started | Not Started |
+  37: | F0021-S0008 | not-started | not-started | not-in-scope | not-started | - | - | not-in-scope | Not Started |
+  38: | F0021-S0009 | not-started | not-started | not-in-scope | not-started | - | - | not-started | Not Started |
+  39: 
+  40: ## Backend Progress
+  41: 
+  42: - [ ] BFF sign-in, session store and cookie (S0001)
+  43: - [ ] CSRF/origin checks and outcome taxonomy (S0002)
+  44: - [ ] Coalesced renewal and server-enforced session bounds (S0003)
+  45: - [ ] Logout with upstream revocation and end-session (S0005)
+  46: - [ ] Session endpoint with memberships, active knowledge base and flags (S0006, S0007)
+  47: - [ ] Rejected-credential throttling (S0008)
+  48: 
+  49: ## Frontend Progress
+  50: 
+  51: - [ ] Shell frame, Home, selector and error screens (S0006)
+  52: - [ ] Session-expired dialog, popup re-auth and re-confirmation (S0004)
+  53: - [ ] Cache hygiene on every trigger (S0005)
+  54: - [ ] Route/flag/lazy-load seam and rehosted Review Panel (S0007)
+  55: 
+  56: ## Cross-Cutting
+  57: 
+  58: - [ ] Real-browser proof of §121.2 items 8 and 9 (S0009)
+  59: - [ ] WCAG 2.2 AA, zero serious/critical axe violations (A2)
+  60: - [ ] At least 80% changed executable-code coverage
+  61: 
+  62: ## Required Signoff Roles
+  63: 
+  64: Quality Engineer, Code Reviewer, Security Reviewer, DevOps, Architect (set at feature G0).
+  65: 
+  66: ## Story Signoff Provenance
+  67: 
+  68: Appended by the feature action. Append-only.
+  69: 
+  70: | Story | Role | Verdict | Run | Date |
+  71: |---|---|---|---|---|
+
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/GETTING-STARTED.md
+   1: # F0021 — Getting Started
+   2: 
+   3: Implementation guide for the feature run. Phase A and Phase B are approved (2026-11-27); the feature run has not started.
+   4: 
+   5: ## Planning resume
+   6: 
+   7: Canonical `NEBULA_PRODUCT_ROOT`: `/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain`.
+   8: The plan run is `2026-11-27-6cda122a` (action plan, phase A+B, feature mode new). Keep this run ID across sessions.
+   9: 
+  10: From `/home/gajap/uSandbox/repos/nebula/nebula-agents`:
+  11: 
+  12: ```bash
+  13: python3 agents/scripts/resume-brief.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --run-id 2026-11-27-6cda122a
+  14: python3 agents/scripts/project_context.py --product-root /home/gajap/uSandbox/repos/nebula/nebula-insurance-brain --action plan
+  15: ```
+  16: 
+  17: Read these before starting:
+  18: 
+  19: - the [PRD](PRD.md), [STATUS](STATUS.md) and the nine stories;
+  20: - the [assembly plan](feature-assembly-plan.md) and its R1–R7 reconciliation;
+  21: - proposed [ADR-0082](../../architecture/decisions/ADR-0082-bff-session-runtime-and-shell-foundation.md) and [ADR-0051](../../architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md);
+  22: - the [BFF API design](bff-api-design.yaml), [migration design](migration-design.sql) and [contract inventory](contract-inventory.yaml);
+  23: - the run's [gate decisions](../../operations/evidence/runs/2026-11-27-6cda122a/gate-decisions.md).
+  24: 
+  25: Run the independent plan-review action before implementation.
+  26: 
+  27: ## Carry-ins and gotchas
+  28: 
+  29: - **Contract paths:** paths stay at the root (no `/api` prefix in the contract; SOLUTION-PATTERNS section 3). `/api` is a public mount stripped by the Vite proxy locally and by the F0026 ingress in production.
+  30: - **Denial responses (R1):** engine denials stay the non-disclosing 404. Only `csrf_rejected` uses 403.
+  31: - **Throttled verification (R2):** while a client is throttled, verification still runs locally; a throttled rejection writes no event and makes no IdP call.
+  32: - **authentik G0 check (R3):** before building S0005, verify the 2026.2 field names for post-logout redirect URIs and refresh-token rotation, and that `default-invalidation-flow` ends the authentik session.
+  33: - **Confidential client:** making `brain` confidential breaks any ROPC helper that omits the client secret. Update `scripts/dev/seed_principals.py` and the engine token fixtures in the same change, and run the bearer regression suite before anything else.
+  34: - **Append-only trigger:** reuse `brain_append_only()` from migration 0007 for `session_event`; do not create a second function.
+  35: - **Composite FKs:** declare the `knowledge_base(id, tenant_id)` composite FK targets in the ORM models (F0009 lesson).
+  36: - **New files and the KG:** KG wildcard bindings resolve only git-tracked files. Bind new engine and `experience/` files with literal paths until they are committed, `git add` new planning files, then rerun `validate.py --write-coverage-report`.
+  37: - **GPU:** never run GPU-using tests during live lanes. None are expected here: there is no parse or model call.
+  38: 
+  39: ## Local stack (planned)
+  40: 
+  41: 1. `docker compose up -d postgres authentik-server authentik-worker`. The dev blueprint provisions the confidential `brain` client.
+  42: 2. Start the engine with:
+  43:    - `BRAIN_PUBLIC_ORIGIN=http://localhost:5173`
+  44:    - `BRAIN_OIDC_CLIENT_SECRET=<dev value from the blueprint>`
+  45:    - `BRAIN_SESSION_KEYS=dev1:<base64 32 bytes>`
+  46:    - `BRAIN_TRUSTED_PROXIES=127.0.0.1/32`
+  47: 3. `pnpm --dir experience dev`, then open `http://localhost:5173/`. Sign in as `alice.tenant-a` or `bob.tenant-b` with the dev password.
+  48: 4. Real-browser proof: `docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d`, then `pnpm --dir experience e2e`.
+
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/personas.md
+   1: # F0021 personas
+   2: 
+   3: Three existing product personas and one new one ([Noor — Security Administrator](../../examples/personas/security-administrator.md), from BLUEPRINT §1.2 "platform operators and security administrators"). No research is invented and no runtime role is added.
+   4: 
+   5: | Persona | Job in F0021 | Pain / required outcome | Story ownership |
+   6: |---|---|---|---|
+   7: | [Rosa — Business Reviewer](../../examples/personas/business-reviewer.md) | Signs in and works in the Review Panel for long sessions | A session that expires mid-review must not lose unsaved input or submit a decision that was not re-confirmed | S0001, S0003, S0004, S0007 |
+   8: | [Priya — GL Underwriter](../../examples/personas/gl-underwriter.md) | Daily knowledge worker who will use Entity 360 and Document 360 inside this shell | Needs one sign-in, a clear view of the active tenant and knowledge base, and no stale data after switching | S0001, S0005, S0006 |
+   9: | [Noor — Security Administrator](../../examples/personas/security-administrator.md) | Operates authentik, sessions and grants; investigates rejected credentials | No browser-held token; logout that revokes upstream and reports failure; bounded audit growth under attack | S0002, S0005, S0008, S0009 |
+  10: | [Dana — Platform Engineer](../../examples/personas/platform-engineer.md) | Runs the local stack and the proof harness; wires later routes into the shell | A route seam that keeps heavy views out of the base bundle; a reproducible real-IdP proof | S0007, S0009 |
+  11: 
+  12: Success means every acceptance criterion later has observed proof, no persona's tokens reach browser storage, and no persona gains authority through the shell. Administration screens for Noor are out of scope; their evidence is audit rows and logs.
+
+
+FILE: planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/acceptance-criteria-checklist.md
+   1: # F0021 acceptance criteria checklist
+   2: 
+   3: 55 independently reviewable ACs across nine stories. Each row needs observed proof in the later feature run; the AC-to-test map is written at feature G0.
+   4: 
+   5: | Story / AC | Required observed proof | Status |
+   6: |---|---|---|
+   7: | [F0021-S0001 AC1](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+   8: | [F0021-S0001 AC2](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+   9: | [F0021-S0001 AC3](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+  10: | [F0021-S0001 AC4](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+  11: | [F0021-S0001 AC5](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+  12: | [F0021-S0001 AC6](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+  13: | [F0021-S0001 AC7](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+  14: | [F0021-S0002 AC1](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+  15: | [F0021-S0002 AC2](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+  16: | [F0021-S0002 AC3](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+  17: | [F0021-S0002 AC4](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+  18: | [F0021-S0002 AC5](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+  19: | [F0021-S0002 AC6](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+  20: | [F0021-S0003 AC1](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+  21: | [F0021-S0003 AC2](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+  22: | [F0021-S0003 AC3](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+  23: | [F0021-S0003 AC4](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+  24: | [F0021-S0003 AC5](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+  25: | [F0021-S0003 AC6](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+  26: | [F0021-S0004 AC1](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+  27: | [F0021-S0004 AC2](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+  28: | [F0021-S0004 AC3](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+  29: | [F0021-S0004 AC4](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+  30: | [F0021-S0004 AC5](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+  31: | [F0021-S0004 AC6](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+  32: | [F0021-S0004 AC7](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+  33: | [F0021-S0005 AC1](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+  34: | [F0021-S0005 AC2](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+  35: | [F0021-S0005 AC3](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+  36: | [F0021-S0005 AC4](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+  37: | [F0021-S0005 AC5](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+  38: | [F0021-S0005 AC6](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+  39: | [F0021-S0005 AC7](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+  40: | [F0021-S0006 AC1](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+  41: | [F0021-S0006 AC2](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+  42: | [F0021-S0006 AC3](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+  43: | [F0021-S0006 AC4](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+  44: | [F0021-S0006 AC5](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+  45: | [F0021-S0006 AC6](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+  46: | [F0021-S0007 AC1](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+  47: | [F0021-S0007 AC2](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+  48: | [F0021-S0007 AC3](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+  49: | [F0021-S0007 AC4](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+  50: | [F0021-S0007 AC5](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+  51: | [F0021-S0007 AC6](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+  52: | [F0021-S0008 AC1](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+  53: | [F0021-S0008 AC2](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+  54: | [F0021-S0008 AC3](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+  55: | [F0021-S0008 AC4](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+  56: | [F0021-S0008 AC5](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+  57: | [F0021-S0009 AC1](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+  58: | [F0021-S0009 AC2](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+  59: | [F0021-S0009 AC3](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+  60: | [F0021-S0009 AC4](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+  61: | [F0021-S0009 AC5](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+

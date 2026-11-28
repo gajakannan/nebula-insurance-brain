@@ -1,0 +1,213 @@
+Top-level keys: ['action', 'contract_version', 'project_context', 'run_id', 'schema_version', 'stages']
+{
+  "action": "plan-review",
+  "contract_version": "2026-07-11",
+  "project_context": {
+    "action": "plan-review",
+    "manifest_hash": "dedbcb948fd89e3e2dce365347f322db03bcd479b5d5823095e2ef2773c3e089",
+    "product_root": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+    "scope": {
+      "features": [
+        {
+          "id": "F0021",
+          "path": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session"
+        }
+      ],
+      "plan_scope": "feature",
+      "target": "F0021"
+    }
+  },
+  "run_id": "2026-11-27-d1148686",
+  "schema_version": 1,
+  "stages": {
+    "PR0": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "PR1": {
+      "attestations": [],
+      "completed_operations": [],
+      "pending_checkpoint": null,
+      "project_checks": {},
+      "status": "completed"
+    },
+    "PR2": {
+      "attestations": [],
+      "completed_operations": [
+        "pr2-check-plan-approvals",
+        "pr2-validate-stories",
+        "pr2-validate-trackers",
+        "pr2-kg-validate",
+        "pr2-kg-check-drift",
+        "pr2-validate-templates"
+      ],
+      "pending_checkpoint": null,
+      "project_checks": {
+        "plan-readiness": {
+          "action": "plan-review",
+          "argv": [
+            "/usr/bin/python3",
+            "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/validation/validate_plan_readiness.py",
+            "--product-root",
+            "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+            "--plan-scope",
+            "feature",
+            "--target",
+            "F0021"
+          ],
+          "artifacts": [
+            "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-27-d1148686/artifacts/project-checks/PR2-plan-readiness-75b6d5791c6f4905bf567031c613dbab.stdout.json",
+            "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-27-d1148686/artifacts/project-checks/PR2-plan-readiness-75b6d5791c6f4905bf567031c613dbab.stderr.txt",
+            "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/planning-mds/operations/evidence/runs/2026-11-27-d1148686/artifacts/project-checks/PR2-plan-readiness-75b6d5791c6f4905bf567031c613dbab.result.json"
+          ],
+          "check_id": "plan-readiness",
+          "cwd": "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+          "duration_seconds": 0.0,
+          "ended_at": "2026-11-27T23:37:20-05:00",
+          "error": null,
+          "evidence": [
+            {
+              "path": "artifacts/project-checks/PR2-plan-readiness-75b6d5791c6f4905bf567031c613dbab.stdout.json",
+              "sha256": "dea6456482fc9f92d5ceea3c420e5c26b6a1b7d3b9c3688134ac8516d0e5aef9"
+            },
+            {
+              "path": "artifacts/project-checks/PR2-plan-readiness-75b6d5791c6f4905bf567031c613dbab.stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "path": "artifacts/project-checks/PR2-plan-readiness-75b6d5791c6f4905bf567031c613dbab.result.json",
+              "sha256": "ebdb3d7a9686633abffe7a645371ea483d628ec51ff6d62c06379a3ec6fb169d"
+            }
+          ],
+          "exit_code": 0,
+          "fingerprint": "9ce97855b36d1af72c31b21827f4b45536d42719e6448b3325fd66c615315a57",
+          "identity": {
+            "argv": [
+              "/usr/bin/python3",
+              "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain/scripts/validation/validate_plan_readiness.py",
+              "--product-root",
+              "/home/gajap/uSandbox/repos/nebula/nebula-insurance-brain",
+              "--plan-scope",
+              "feature",
+              "--target",
+              "F0021"
+            ],
+            "check": {
+              "action": "plan-review",
+              "argv": [
+                "python3",
+                "{NEBULA_PRODUCT_ROOT}/scripts/validation/validate_plan_readiness.py",
+                "--product-root",
+                "{NEBULA_PRODUCT_ROOT}",
+                "--plan-scope",
+                "{PLAN_SCOPE}",
+                "--target",
+                "{TARGET}"
+              ],
+              "cwd": "product",
+              "event": "before_stage_complete",
+              "id": "plan-readiness",
+              "inputs": [
+                "planning-mds/BLUEPRINT.md",
+                "planning-mds/architecture/*.md",
+                "planning-mds/architecture/decisions/*.md",
+                "planning-mds/security/*.md",
+                "planning-mds/api/**/*",
+                "planning-mds/schemas/**/*",
+                "planning-mds/features/**/*.md",
+                "planning-mds/examples/**/*",
+                "planning-mds/domain/glossary.md",
+                "docs/agent-instructions.md",
+                "docs/plan-review-checklist.md",
+                "scripts/validation/**/*.py"
+              ],
+              "stage": "PR2",
+              "timeout_seconds": 60
+            },
+            "framework": {
+              "_contract.yaml": "bf133b2be7fc6afbe7a60a55c2ab5872bcb947a6331a0cb3e2f3f6c812df6eb6",
+              "action-spec.schema.json": "51dacc33dac264bd2fe247094464f9147d66d89135bf837718b337160d036d09",
+              "gate_runtime.py": "f68490017c69d92f76ab5951c557a1a5be9090bc1310fe86e65f06e108f0fbbf",
+              "plan-review.yaml": "2b7e2210e13a57974d8045613683dc4487b1f9ace7adb57384207ae9c8813644",
+              "project.schema.json": "4b6b428fd45f39339ce291e9a41465e55294a05f30caf66a54b753d229ea5529",
+              "project_checks.py": "14c3921085a653131bbd5cdabcb5b85c35fb3f01dd7be569e0e7e5e085c1ad3c",
+              "project_context.py": "74ea2ae84c3d2cd33bba5e5f22d4e6b1569d2ac3fe1a320b5588116de4f315c1",
+              "run-gate.py": "c0146924296b282d1edc206bad69ba1ff57510fc3955c50c163473d0fe7e072e",
+              "validate_action_specs.py": "fca48d8fdbd798efebc289f9464e138be550c8a7aefb3afb5234343feeffd694"
+            },
+            "framework_revision": "840e724b72fdbaf8157dacfee579488252e1a193",
+            "inputs": {
+              "docs/agent-instructions.md": "a7645e80a39f2aca95b31f01b711353754630c1e62fd47812dba0fe5ed9aaae2",
+              "docs/plan-review-checklist.md": "88b118f1baf91c8aad4b3f8b302a254c3c1caab7f507c268ed84672ab8ba7fac",
+              "planning-mds/BLUEPRINT.md": "2858d5e5a24aba33e64afc17c72294de99fdadc70a80ef48322784c501cea04a",
+              "planning-mds/api/brain-api.yaml": "be5f1c636e44c9a54b79cc9b596bdd3abbe3ce19a1c96e7bd046e96cf2d79181",
+              "planning-mds/architecture/SOLUTION-PATTERNS.md": "e015ba18f21b0c062449e04c7af77581f4997632f86215e71d1f54d855c73d5c",
+              "planning-mds/architecture/account-model-cross-repo-plan.md": "f51d905f5c9fb624bff94d64ff962b8ec8c40de6e0c3affc48ff266952ee973e",
+              "planning-mds/architecture/c4-container.md": "3c0dfde9b5ad2736f1681aab7007d2d6d2b489b4304ab5aa1d6685279ba99d7e",
+              "planning-mds/architecture/c4-context.md": "83eb089c1e80ba269c8f1fac2dcac56e4366fe85cc267639f3fa997f970b8ea7",
+              "planning-mds/architecture/commercial-pc-example-handoff.md": "5e93ece6a0798ceb30a18df22adac152fb3a04e448313f03be6fa4173fb3eac2",
+              "planning-mds/architecture/data-model.md": "69c9dfb5a4d16c0ef28272b6d8bb1410e1a535fdca5794f98aa85ccef437d993",
+              "planning-mds/architecture/decisions/ADR-0001-the-brain-owns-semantics.md": "3c017ba848fdf8b7210ed730c16682e18b3fa175af8b4e1b3c03a7bf3745a919",
+              "planning-mds/architecture/decisions/ADR-0002-postgresql-is-the-authoritative-runtime-store.md": "984acd29ea30ef6233188f6e77d94cf23564c64975878b4d8ba2984f201ad1bd",
+              "planning-mds/architecture/decisions/ADR-0003-one-time-content-extraction.md": "062e225fbdc2a565c1e0a080589d882128ee8b170db9879bcc80edc19a295360",
+              "planning-mds/architecture/decisions/ADR-0004-source-content-artifact-and-interpretation-are-separately-versioned.md": "9f5240f6688b679789c6d2649010a47c472bd1edc92eecfe14f6fc9f3a80e7bc",
+              "planning-mds/architecture/decisions/ADR-0005-three-plane-knowledge-model.md": "cc37339b548866037a6d44d5b3c84829f23aaa3a3ceda73b3a838a3852faebeb",
+              "planning-mds/architecture/decisions/ADR-0006-factslot-defines-canonical-semantic-identity.md": "cd3d018b2e38c0ae21a4cd086ab69613fcc703bf8e834b6fb1938f7213253e03",
+              "planning-mds/architecture/decisions/ADR-0007-full-bitemporality.md": "a808e75d8b9ae004132d131c9f8c913635c5a5641aedd378d9e13c255d252418",
+              "planning-mds/architecture/decisions/ADR-0008-database-level-temporal-integrity.md": "ea6b54d3adb0c86da5ff66087459c224e7fed7c3be835e29f990f4f8574a6e7b",
+              "planning-mds/architecture/decisions/ADR-0009-explicit-change-semantics.md": "53ba6a22c7d1ed3a430a018d6e4ae16fd08a61cb4c70980baa17ffb3da2a6d09",
+              "planning-mds/architecture/decisions/ADR-0010-provenance-is-mandatory.md": "085a0207a11f0ace3ee7916acb896653e40716c106e0b2b6ecc771f51f5f9cab",
+              "planning-mds/architecture/decisions/ADR-0011-ontology-is-versioned-and-modular.md": "1df07fbdfe62895dc365cc522bb42e40d3d326e00ded65e84468966a34d4c0b6",
+              "planning-mds/architecture/decisions/ADR-0012-flexible-authoring-normalized-runtime.md": "3f28a63409e011445b748090dda45449de77751212c8a0189d08c497c43ba4c6",
+              "planning-mds/architecture/decisions/ADR-0013-json-schema-is-the-structural-contract.md": "367e2a10a69c6afcb5b2f258b968ad1cc8dbe1c8fe844ac30f4f5aed728b66ae",
+              "planning-mds/architecture/decisions/ADR-0014-document-profiles-drive-interpretation.md": "d667560dcb923caae08a1c3a01039a6d9bf834da5295936a33c29abc34a99794",
+              "planning-mds/architecture/decisions/ADR-0015-extraction-profiles-are-composable.md": "95f651e72bd8fc3b6ca6ce392b4e76066b0c7e56a0be4117cb502a3bc3dfbe42",
+              "planning-mds/architecture/decisions/ADR-0016-semantic-reinterpretation-is-incremental.md": "69a50730d9cbd5d1ee1c93c210428413963e570a77fc91d2141dfa9dfd6427e6",
+              "planning-mds/architecture/decisions/ADR-0017-knowledge-evolution-is-first-class.md": "4b468b19ea9d6645ec9edd1c4508209cd97884fdf685e07ab55b0ec4f6dfbb69",
+              "planning-mds/architecture/decisions/ADR-0018-conversation-is-knowledge-producing.md": "88984a80a583e3f8c99104498acadf92dca5e913975a7c06fa8d87acc7e42ae6",
+              "planning-mds/architecture/decisions/ADR-0019-conversation-knowledge-is-not-canonical-by-default.md": "d02bf75b154d8311b4bb9bbd4dcffcafc56fb552b8a0e6e1c60bd6b18387f286",
+              "planning-mds/architecture/decisions/ADR-0020-learning-plane-is-separate-from-canonical-truth.md": "295ba0d7ee1cc1619fb65a35f440fc468cd75cc855771717bac857e9675b0f37",
+              "planning-mds/architecture/decisions/ADR-0021-learned-knowledge-requires-provenance.md": "8238acca8b4efd2760f0f64ff8ee297ec53e1b0cd27207096f424f371b66b8b8",
+              "planning-mds/architecture/decisions/ADR-0022-apache-age-is-the-graph-projection.md": "f99e0ee8f1895fe14c2458ff3d0e4de8f338c5131236537e584a9f1f11d6fbf1",
+              "planning-mds/architecture/decisions/ADR-0023-pgvector-is-a-retrieval-projection.md": "d9ee2e87d282cf940acd84b9fedd37e64f00e5ec7db6e941c7a91cf116abdb4c",
+              "planning-mds/architecture/decisions/ADR-0024-search-is-multi-modal.md": "9c1e0edd42567762784470aa8d2403dcfe2028d9fa760c61c4d7cb905c6f1938",
+              "planning-mds/architecture/decisions/ADR-0025-deterministic-er-ships-before-probabilistic-er.md": "e58d56b64ef1762a0ded12cb7486007174eb5d66883b926cf66528623d6f2094",
+              "planning-mds/architecture/decisions/ADR-0026-derived-facts-have-dependency-lineage.md": "990f10ab16151ae6f70a659a77dd719a5bd7b8cb3e9ec5c03a3445c8ead6d75d",
+              "planning-mds/architecture/decisions/ADR-0027-normative-and-hypothetical-semantics-are-not-fact-modes.md": "c9950c0a8141346ed56a4bccdc0d0203726b7b91f9fffbcb4ce55e6dbaf56657",
+              "planning-mds/architecture/decisions/ADR-0028-temporal-owns-execution-brain-owns-semantic-state.md": "ade8e0365038bf9e4a55b1c4ace773e9ea72f8a3210ee7501fa6ac2c23aba2b3",
+              "planning-mds/architecture/decisions/ADR-0029-process-dsl-is-future.md": "419f6dad0ab3ec7de86d6c2749bc00c7e0454730facf9600a09466b17be66757",
+              "planning-mds/architecture/decisions/ADR-0030-tenancy-is-structural.md": "154048c066ab5f4c6a0aaceccc4bcbe36d6e86c26f586644e592cc62533e5fc3",
+              "planning-mds/architecture/decisions/ADR-0031-agent-memory-is-separate.md": "161fdc97693309b923118343721e3d01c89dba3bda9c7529b1257fd0297329aa",
+              "planning-mds/architecture/decisions/ADR-0032-decision-replay-uses-recorded-time-state.md": "e5d027d1abd08c8bdde83534084f4129ef7c7ff2b531b0e7ed85016f4f711737",
+              "planning-mds/architecture/decisions/ADR-0033-qdrant-is-optional.md": "06401270b5d67e68d689f60a7f9f5ec5616f071d7a19be1b0ed5c4f4dcbd5cf1",
+              "planning-mds/architecture/decisions/ADR-0034-label-studio-is-the-human-evidence-adjudication-engine.md": "39525066d05f13526d551117b6f090d82b0da668477393e01e308f5761cb6547",
+              "planning-mds/architecture/decisions/ADR-0035-interpretation-basis-is-first-class.md": "a574acb61d83519c952062ea23d0891ff8a78f04065a9aa30834b6e93782d3ac",
+              "planning-mds/architecture/decisions/ADR-0036-nebula-keeps-a-native-semantic-ux-onyx-is-a-reference-implementation.md": "455b42723408b809b08e0e35dbe01aa62cb165999ef571008f650a7904ce047a",
+              "planning-mds/architecture/decisions/ADR-0037-human-corrections-append-they-do-not-rewrite-evidence.md": "99abda0fbd36bf7f6305853912b5e6b721c93bd6c9148f7eb114611f14d93fec",
+              "planning-mds/architecture/decisions/ADR-0038-semantic-authority-and-source-ownership.md": "0198d4ede6fd1760dba4af1b19e6f2795677b8e1de9c781862ea5cc48d05aee0",
+              "planning-mds/architecture/decisions/ADR-0039-typed-insurance-values-and-completeness.md": "f43a4c7c2c1d11afe6b49d2f48494ff9aa7cc4521969b7bcd7de28239f3192b6",
+              "planning-mds/architecture/decisions/ADR-0040-lossless-content-and-evidence-contract.md": "e55a4b415d0106d1d2b68a5ed565de647776231c3102ae93907a82cc7cbf64dd",
+              "planning-mds/architecture/decisions/ADR-0041-atomic-semantic-commit-and-projection-delivery.md": "2f65041b2b74a41aba2b995c9014535b4a47b652e3962405fc2bb886b5c5d647",
+              "planning-mds/architecture/decisions/ADR-0042-resource-and-derivation-authorization.md": "6c6cc42cd9461b4fb28e8828512ea0deda7daa2bbec7938c4278e48ea8e050c7",
+              "planning-mds/architecture/decisions/ADR-0043-retention-and-revocation-lifecycle.md": "5671048c80b94ea96fc454b642fb0d7b1f62fbf49772f19bf2edeb39296efac9",
+              "planning-mds/architecture/decisions/ADR-0044-review-surface-and-approval-contract.md": "e9bd440abaa8b639a5d031178ad06fb0f2cb45ec6b42d8cab515d38da2a891ba",
+              "planning-mds/architecture/decisions/ADR-0045-ontology-release-compatibility.md": "d9b5fba3c6c8bb84d751197b94b32ca48640a6b5bc3e0c1d13918c8555d0e30e",
+              "planning-mds/architecture/decisions/ADR-0046-grounded-answer-and-analytic-query-contract.md": "f9e3ea8c779c8c1452a406c476d519d963f284ee1a7b8f83de7bda21abc6874a",
+              "planning-mds/architecture/decisions/ADR-0047-controlled-learning-and-reinterpretation.md": "2d2cca3d656168605f52d90dbe49d6297d95fbb40ada9488ce53b114e2761d1d",
+              "planning-mds/architecture/decisions/ADR-0048-pilot-evidence-and-operational-readiness.md": "e483d4f53bd81a965cc50b9f921e00515ef22ae7f22b077b6a2b3a8f05923aa3",
+              "planning-mds/architecture/decisions/ADR-0049-shared-identity-and-verified-principal-boundary.md": "c0280f46918529be2642a409709bf4f6e2b9d2336b43206fcd1994c0e3cdf92f",
+              "planning-mds/architecture/decisions/ADR-0050-native-policy-evaluation-and-resource-scope.md": "3d0c8c8311c04152ec4c5fe8ecb0cd4c1a6de8e27edc69925cf0853cae086b7f",
+              "planning-mds/architecture/decisions/ADR-0051-browser-session-and-revocation-contract.md": "791410329cdb686535f8d6f5c534dba06d7a454a6df624566ceac635cd12802f",
+              "planning-mds/architecture/decisions/ADR-0052-delegated-agents-and-review-authority.md": "101095b6cf4521479b2047c62c2e1a754ce906d4dbdae87b1e6b235031837625",
+              "planning-mds/architecture/decisions/ADR-0053-permission-safe-retrieval-and-historical-access.md": "a25524f4241fff690d146542019f4924dd7f975b0a9774bee7eb050cace28eaa",
+              "planning-mds/architecture/decisions/ADR-0054-repository-layout-runtime-roots-and-local-topology.md": "261013605ab4b3fcd48592e1f8f57e589ba108d7019afca2e3bf4c6154a656bd",
+              "planning-mds/architecture/decisions/ADR-0055-local-inference-profile-phi-4-mini-on-vllm.md": "29dd31e3815149e4b3bec65c2edbdd8c2c95004ac579e9e2faa1c24de5230234",
+              "planning-mds/architecture/decisions/ADR-0056-bounded-neurosymbolic-assessment.md": "335bc2ff96ae211b8395a6e22b4b17ebd223f9ffa97432f654d25c605e3b3b28",
+              "planning-mds/architecture/decisions/ADR-0057-nebula-owns-the-native-evidence-review-panel.md": "e1ec4535487e3dbd19e316ee93f653022839cf0a7997cb31c3fbed117cc3578d",
+              "planning-mds/architecture/decisions/ADR-0058-evidence-anchoring-and-selector-contract.md": "b219647449104e15ae3c3a05d043ad020bffa5703b3559ece9b9fc4d81479146",
+              "planning-mds/architecture/decisions/ADR-0059-provider-neutral-content-artifact-storage.md": "d0d37cfcc1bc9d63fce0a2ba8f6a40e43e5487eb1ce9a0cf117b7ec9a331c7d3",
+              "planning-mds/architecture/decisions/ADR-0060-docling-graph-document-pipeline-orchestration.md": "46faaca43e2c08cb7ba736e93c9c6def9b8663c799876dcd0168ca9000d9434f",
+              "planning-mds/architecture/decisions/ADR-0061-tenant-identity-and-structural-ownership.md": "6be70464da57313f0d873ef91525

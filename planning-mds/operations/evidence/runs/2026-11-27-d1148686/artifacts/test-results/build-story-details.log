@@ -1,0 +1,264 @@
+     1	# F0021-S0004 — Re-authenticate without losing work or replaying mutations
+     2	
+     3	**Story ID:** F0021-S0004
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Re-authenticate without losing work or replaying mutations
+     6	**Priority:** Critical
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** business reviewer (Rosa)
+    13	**I want** to sign in again in place when my session ends, keep what I was doing, and decide myself whether a blocked decision is sent
+    14	**So that** an expired session never costs me my work and never submits a decision on my behalf.
+    15	
+    16	## Context & Background
+    17	
+    18	ADR-0051 D3 keeps work-restoration UX and forbids automatic replay of approve, promote, retract, publish or external actions after renewal. §121.2 item 9: a re-confirmed request checks the current fact revision and authority. §119.5: restores are keyed by principal and tenant/KB context; browser storage does not protect drafts. Operator decision D3 (2026-11-27): popup re-authentication keeps in-memory work; redirect fallback restores only the sanitized route.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** When any call returns `401 session_expired`, the shell keeps the current page and its unsaved in-memory input, shows the session-expired dialog, and lists each blocked state-changing request by a human-readable label as "not submitted". No state-changing request is retried.
+    23	- [ ] **AC2:** "Sign in again" opens the IdP sign-in in a popup through the BFF (S0001 flow). On success the popup closes, the page receives only a completion signal (never a token or code), and the dialog closes with the page and its input unchanged.
+    24	- [ ] **AC3:** After re-authentication, a blocked read (`GET`) is retried once automatically; each blocked state-changing request is shown in the re-confirmation dialog and is sent only when the user chooses "Submit now". "Cancel" discards it and keeps the page input.
+    25	- [ ] **AC4:** A re-confirmed request is a new request: it carries the new session's CSRF token and the engine re-checks current authority and current resource revision; a stale item or a lost grant is rejected with the engine's existing denied or not found response, which the shell shows in context without retrying; the engine's existing audit records the re-confirmed request like any other.
+    26	- [ ] **AC5:** If the re-authenticated principal differs from the one that owned the page, the shell discards all in-memory work and blocked requests, clears caches (S0005 AC5) and lands on Home; nothing from the previous principal is shown or sent.
+    27	- [ ] **AC6:** If the popup is blocked or closed without completing, the dialog offers "Sign in on this page", which performs a full redirect sign-in and returns to the sanitized current route (S0001 AC5); the dialog states beforehand that unsaved input will be lost, and no input is written to browser storage.
+    28	- [ ] **AC7:** The popup completion signal is accepted only from the shell's own origin and only for the pending re-authentication it started; any other message is ignored.
+    29	
+    30	## Edge Cases & Error Scenarios
+    31	
+    32	Several tabs expired at once: each tab shows its own dialog; completing sign-in in one tab lets the others continue after their own "Sign in again" or on their next call (the session cookie is shared). The user dismisses the dialog: the page stays read-only for engine calls until signed in. Absolute-lifetime expiry (S0003 AC5) uses the same dialog.
+    33	
+    34	## Interaction Contract
+    35	
+    36	Entry: any `401 session_expired` response while on a shell page. Actions: "Sign in again" (popup), "Sign in on this page" (redirect), "Discard and sign out", then per blocked mutation "Submit now" or "Cancel". Result: page resumes with input intact, or a sanitized-route reload. Persistence evidence: the re-confirmed mutation's engine response and its existing audit row; the blocked attempt has no engine-side effect. Read-only behavior: blocked reads retry once; blocked mutations never retry without the explicit action. Audit: the re-confirmed request is audited as a normal request.
+    37	
+    38	## Data Requirements
+    39	
+    40	In-memory list of blocked requests with label, method, route and body, held only in page memory. No browser storage.
+    41	
+    42	## Role-Based Visibility
+    43	
+    44	Applies to every signed-in principal; the engine's existing authority decides the re-confirmed request.
+    45	
+    46	## Non-Functional Expectations
+    47	
+    48	No automatic replay of any state-changing request under any timing. At least 80% changed executable-code coverage in the later feature run; component and end-to-end tests cover AC1–AC7.
+    49	
+    50	## Dependencies
+    51	
+    52	S0001, S0002, S0003; S0007 (the Review Panel decision submission is the reference mutation); S0009 proves AC3–AC5 against real authentik.
+    53	
+    54	## Out of Scope
+    55	
+    56	An idempotent command protocol for controlled retry (§120.5 later work); draft persistence across reloads.
+    57	
+    58	## Questions & Assumptions
+    59	
+    60	No open business-rule question. Operator decision D3 is in the [PRD](PRD.md#risks--assumptions). The popup messaging mechanism and blocked-request queue design are Phase B decisions.
+    61	
+    62	## Definition of Done
+    63	
+    64	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    65	- [ ] Negative test proving zero engine-side effects from a blocked mutation until "Submit now".
+    66	- [ ] Principal-change test (AC5) and popup-blocked fallback test (AC6).
+    67	- [ ] Documentation and tracker state reflect observed results.
+    68	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+     1	# F0021-S0005 — Log out with upstream revocation and cache hygiene
+     2	
+     3	**Story ID:** F0021-S0005
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Log out with upstream revocation and cache hygiene
+     6	**Priority:** Critical
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** security administrator (Noor)
+    13	**I want** sign-out to revoke the session at the identity provider, end it in Nebula, clear what the browser loaded, and tell the user if revocation failed
+    14	**So that** "signed out" is true, and nothing from one user's session is shown to the next.
+    15	
+    16	## Context & Background
+    17	
+    18	ADR-0051 D4: logout revokes the server-held refresh token at the IdP and ends the server session; a failure is reported, not hidden by clearing the cookie. D6: query caches and in-flight work are cleared on logout, principal change, tenant switch and relevant grant revision. §119.3 found the CRM revoking a token its browser flow never set.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** "Sign out" sends a CSRF-protected request authenticated by the session cookie; the BFF revokes the session's refresh token at authentik's revocation endpoint (RFC 7009), ends the server session, and clears the session cookie (expired `Set-Cookie` with the same attributes).
+    23	- [ ] **AC2:** The token revoked is the one the session actually holds after any rotation (S0003 AC3); after logout, a refresh-token grant with that token fails at authentik.
+    24	- [ ] **AC3:** If revocation fails (IdP unreachable, non-2xx, timeout), the server session is still ended and its tokens discarded, the failure is recorded durably in the audit log with the principal and reason, and the signed-out page shows the revocation-failed warning. The response never reports success for a failed revocation.
+    25	- [ ] **AC4:** After logout, the old session identifier is rejected with HTTP 401 `unauthenticated` for every route, including when replayed from another client.
+    26	- [ ] **AC5:** On logout, principal change (S0001 AC7, S0004 AC5), active knowledge-base switch (S0006 AC4) or a change in the principal's grant revision reported by the session endpoint, the shell aborts in-flight requests and clears all query caches and in-memory resource data before rendering anything for the new state.
+    27	- [ ] **AC6:** Other open tabs of the same browser show the signed-out state on their next server call and within 60 seconds of the logout (PM assumption A8), without showing data loaded before the logout.
+    28	- [ ] **AC7:** After revocation, the BFF ends the user's IdP session through authentik's end-session endpoint, so the next "Sign in" asks for credentials; if that step fails it is reported the same way as AC3.
+    29	
+    30	## Edge Cases & Error Scenarios
+    31	
+    32	Logout while a renewal is in flight: logout wins and any newly issued tokens are revoked (S0003). Logout with an already-expired session: cookie cleared, signed-out page shown, no revocation attempted for discarded tokens, and the outcome says so. Double-click on "Sign out": one revocation attempt.
+    33	
+    34	## Interaction Contract
+    35	
+    36	Entry: "Sign out" in the shell header or the session-expired dialog's "Discard and sign out". Result: signed-out page with the revocation outcome. Persistence evidence: session record ended; revocation outcome recorded; authentik rejects the revoked refresh token. Audit: a durable record of every logout outcome, including failures (event shape is Phase B).
+    37	
+    38	## Data Requirements
+    39	
+    40	Logout outcome record: principal, session reference (not the cookie value), revocation result, end-session result, timestamp. Grant revision exposed by the session endpoint (S0006).
+    41	
+    42	## Role-Based Visibility
+    43	
+    44	Every signed-in principal can sign out. No data is shown after logout.
+    45	
+    46	## Non-Functional Expectations
+    47	
+    48	Revocation timeout is bounded (Phase B value) so sign-out never hangs. At least 80% changed executable-code coverage in the later feature run.
+    49	
+    50	## Dependencies
+    51	
+    52	S0001, S0003, S0006; authentik revocation and end-session endpoints.
+    53	
+    54	## Out of Scope
+    55	
+    56	Administrator-initiated session termination screens; back-channel logout from the IdP (later hardening, F0026).
+    57	
+    58	## Questions & Assumptions
+    59	
+    60	No open business-rule question. PM assumption A8 is in the [PRD](PRD.md#risks--assumptions). The cross-tab signal mechanism and grant-revision polling interval are Phase B decisions.
+    61	
+    62	## Definition of Done
+    63	
+    64	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    65	- [ ] Forced upstream-failure test for AC3 (shared with S0009).
+    66	- [ ] Cache-clearing tests for each AC5 trigger.
+    67	- [ ] Documentation and tracker state reflect observed results.
+    68	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+     1	# F0021-S0006 — Show identity and knowledge-base context in the shell
+     2	
+     3	**Story ID:** F0021-S0006
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Show identity and knowledge-base context in the shell
+     6	**Priority:** High
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** GL underwriter (Priya)
+    13	**I want** the shell to show who I am signed in as, which tenants and knowledge bases I can work in, and which one is active
+    14	**So that** I always know whose data I am looking at, and switching context never shows me stale data.
+    15	
+    16	## Context & Background
+    17	
+    18	Operator decision D2 (2026-11-27) puts a Home page with identity and current memberships, and an active knowledge-base selector that only narrows, into F0021. F0002 memberships carry tenant, knowledge base, role and grant revision; authorization stays resource-based in the engine. ADR-0051 D6 requires cache clearing on tenant switch and relevant grant revision.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** A signed-in session can read a session endpoint that returns the principal's display name, principal kind, issuer, session idle and absolute deadlines, the CSRF token for state-changing calls, the principal's current (unrevoked) memberships as tenant, knowledge base and role with display names, the current grant revision, and the active knowledge base. It returns no token and no other principal's data.
+    23	- [ ] **AC2:** Home shows the display name, the session state, and the membership list with the active knowledge base marked. The shell header shows the display name, the active knowledge-base selector and "Sign out" on every shell route.
+    24	- [ ] **AC3:** A principal with no current membership sees Home with a "no access yet" message naming no tenant or knowledge base, an empty selector and "Sign out"; no engine data route is called.
+    25	- [ ] **AC4:** Choosing another membership in the selector updates the active knowledge base through a CSRF-protected request, clears caches and in-flight work (S0005 AC5) before rendering, and persists across reload within the session (PM assumption A7). A requested knowledge base that is not a current membership is rejected and the active value is unchanged.
+    26	- [ ] **AC5:** The active knowledge base only narrows what the shell asks for. A direct engine request for a resource in another knowledge base that the principal may read is still decided by the engine's existing authorization policy; the selector never grants or denies access by itself.
+    27	- [ ] **AC6:** If a membership is revoked while the session is active (the revocation itself is audited by F0002), the next session-endpoint read shows the new grant revision and membership list; if the active knowledge base was revoked, it resets to none and caches are cleared.
+    28	
+    29	## Edge Cases & Error Scenarios
+    30	
+    31	A display name missing from the ID token falls back to the preferred username, then to "Signed-in user"; the subject identifier is never shown as a name. Tenant and knowledge-base display names come from server data, never from token claims. Session endpoint failure: the shell shows a retryable error state, not a signed-out state.
+    32	
+    33	## Interaction Contract
+    34	
+    35	Entry: Home (`/`) and the header selector on every shell route. Editable state: only the active knowledge base. Action: select a membership → CSRF-protected update → caches cleared → views reload. Persistence evidence: the value survives reload and is returned by the session endpoint. Read-only: identity and membership list. Validation failure: a non-member knowledge base is refused with a message, value unchanged. Audit: the active-context change is a session preference, not an authorization event; whether it is recorded is a Phase B decision.
+    36	
+    37	## Data Requirements
+    38	
+    39	Session endpoint response shape (Phase B schema); active knowledge base stored with the session.
+    40	
+    41	## Role-Based Visibility
+    42	
+    43	A principal sees only its own memberships. No role sees another principal's memberships.
+    44	
+    45	## Non-Functional Expectations
+    46	
+    47	WCAG 2.2 AA with zero serious or critical axe violations (A2); desktop and 360-px layouts per the [PRD screen layouts](PRD.md#screen-layouts-ascii); all strings from translation resources (A3). At least 80% changed executable-code coverage in the later feature run.
+    48	
+    49	## Dependencies
+    50	
+    51	S0001, S0005; F0002 membership store.
+    52	
+    53	## Out of Scope
+    54	
+    55	Membership administration, tenant creation, role requests; lists of documents or entities (F0022, F0023).
+    56	
+    57	## Questions & Assumptions
+    58	
+    59	No open business-rule question. Operator decision D2 and PM assumptions A2, A3 and A7 are in the [PRD](PRD.md#risks--assumptions). The session endpoint path and schema are Phase B decisions.
+    60	
+    61	## Definition of Done
+    62	
+    63	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    64	- [ ] Component tests for the empty-membership state, selector switch and revocation reset.
+    65	- [ ] axe results for Home at desktop and 360-px widths.
+    66	- [ ] Documentation and tracker state reflect observed results.
+    67	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+     1	# F0021 acceptance criteria checklist
+     2	
+     3	55 independently reviewable ACs across nine stories. Each row needs observed proof in the later feature run; the AC-to-test map is written at feature G0.
+     4	
+     5	| Story / AC | Required observed proof | Status |
+     6	|---|---|---|
+     7	| [F0021-S0001 AC1](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+     8	| [F0021-S0001 AC2](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+     9	| [F0021-S0001 AC3](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    10	| [F0021-S0001 AC4](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    11	| [F0021-S0001 AC5](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    12	| [F0021-S0001 AC6](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    13	| [F0021-S0001 AC7](F0021-S0001-sign-in-through-the-bff-with-an-opaque-session.md#acceptance-criteria) | Integration tests against authentik for the flow, cookie attributes and each refusal/return-route variant; browser storage inspection. | [ ] Not started |
+    14	| [F0021-S0002 AC1](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    15	| [F0021-S0002 AC2](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    16	| [F0021-S0002 AC3](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    17	| [F0021-S0002 AC4](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    18	| [F0021-S0002 AC5](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    19	| [F0021-S0002 AC6](F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md#acceptance-criteria) | BFF integration tests per refusal cause proving no handler ran and no row written; unchanged bearer regression suite. | [ ] Not started |
+    20	| [F0021-S0003 AC1](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    21	| [F0021-S0003 AC2](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    22	| [F0021-S0003 AC3](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    23	| [F0021-S0003 AC4](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    24	| [F0021-S0003 AC5](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    25	| [F0021-S0003 AC6](F0021-S0003-renew-once-and-bound-session-lifetime.md#acceptance-criteria) | Concurrency and time-controlled tests: one upstream refresh per burst, rotation, idle and absolute expiry enforced server-side. | [ ] Not started |
+    26	| [F0021-S0004 AC1](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    27	| [F0021-S0004 AC2](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    28	| [F0021-S0004 AC3](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    29	| [F0021-S0004 AC4](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    30	| [F0021-S0004 AC5](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    31	| [F0021-S0004 AC6](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    32	| [F0021-S0004 AC7](F0021-S0004-re-authenticate-without-losing-work-or-replaying-mutations.md#acceptance-criteria) | Component and end-to-end tests: in-memory work kept, zero engine effects before explicit re-confirmation, principal-change discard, popup fallback. | [ ] Not started |
+    33	| [F0021-S0005 AC1](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    34	| [F0021-S0005 AC2](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    35	| [F0021-S0005 AC3](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    36	| [F0021-S0005 AC4](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    37	| [F0021-S0005 AC5](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    38	| [F0021-S0005 AC6](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    39	| [F0021-S0005 AC7](F0021-S0005-log-out-with-upstream-revocation-and-cache-hygiene.md#acceptance-criteria) | Integration and end-to-end tests: authentik rejects the revoked token, forced revocation failure reported, cache clearing per trigger. | [ ] Not started |
+    40	| [F0021-S0006 AC1](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    41	| [F0021-S0006 AC2](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    42	| [F0021-S0006 AC3](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    43	| [F0021-S0006 AC4](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    44	| [F0021-S0006 AC5](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    45	| [F0021-S0006 AC6](F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md#acceptance-criteria) | Session endpoint contract tests and component/axe tests for Home, empty state, selector switch and revocation reset. | [ ] Not started |
+    46	| [F0021-S0007 AC1](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    47	| [F0021-S0007 AC2](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    48	| [F0021-S0007 AC3](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    49	| [F0021-S0007 AC4](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    50	| [F0021-S0007 AC5](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    51	| [F0021-S0007 AC6](F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md#acceptance-criteria) | Build report showing isolated chunks, flag on/off route tests, rehosted Review Panel tests, token parameter ignored. | [ ] Not started |
+    52	| [F0021-S0008 AC1](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    53	| [F0021-S0008 AC2](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    54	| [F0021-S0008 AC3](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    55	| [F0021-S0008 AC4](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    56	| [F0021-S0008 AC5](F0021-S0008-throttle-rejected-credentials.md#acceptance-criteria) | PostgreSQL burst test counting authentication_event rows per window; trusted-proxy and valid-credential pass-through tests. | [ ] Not started |
+    57	| [F0021-S0009 AC1](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+    58	| [F0021-S0009 AC2](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+    59	| [F0021-S0009 AC3](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+    60	| [F0021-S0009 AC4](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |
+    61	| [F0021-S0009 AC5](F0021-S0009-prove-session-transport-and-mutation-continuity.md#acceptance-criteria) | Real-browser end-to-end evidence against local authentik/PostgreSQL: storage dumps, IdP observations and audit rows. | [ ] Not started |

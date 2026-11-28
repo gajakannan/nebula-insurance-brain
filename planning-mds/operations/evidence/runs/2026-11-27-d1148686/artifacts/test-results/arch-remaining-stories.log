@@ -1,0 +1,334 @@
+
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0002-protect-cookie-authenticated-calls-with-csrf-and-origin-checks.md
+     1	# F0021-S0002 — Protect cookie-authenticated calls with CSRF and origin checks
+     2	
+     3	**Story ID:** F0021-S0002
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Protect cookie-authenticated calls with CSRF and origin checks
+     6	**Priority:** Critical
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** security administrator (Noor)
+    13	**I want** every browser call to the engine to be authenticated by the session and every state-changing call to prove it came from the Nebula page
+    14	**So that** another site cannot make a signed-in user's browser change anything, and the engine still decides authorization itself.
+    15	
+    16	## Context & Background
+    17	
+    18	ADR-0051 D2 requires CSRF and origin checks on every state-changing cookie-authenticated request. D3 keeps distinct outcomes for unauthenticated, expired-recoverable and denied requests. §120.5: UI guards are convenience only and the backend rejects direct requests; resource existence must not leak where policy requires. ADR-0049's verify-before-read ordering stays.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** A shell call to an existing engine route (`/reviews/*`, `/content/*`, `/facts/*`) with a valid session cookie reaches the route under the session's principal, after the same credential verification and principal resolution as a bearer call; the route handler and its authorization are unchanged.
+    23	- [ ] **AC2:** A state-changing request (`POST`, `PUT`, `PATCH`, `DELETE`) authenticated by the session cookie is rejected with HTTP 403 and a stable `csrf_rejected` problem code, before any route handler or storage write runs (the rejection and its cause are recorded in the security audit log), when the CSRF token is missing or does not match the session, or when `Origin` (or `Referer` when `Origin` is absent) is not the shell's own origin, or `Sec-Fetch-Site` is `cross-site`.
+    24	- [ ] **AC3:** Safe methods (`GET`, `HEAD`) never change state and are not CSRF-checked; a cookie-authenticated `GET` from a cross-site context is still answered under normal authorization and the response cannot be read cross-origin (no permissive CORS headers are added).
+    25	- [ ] **AC4:** Outcomes are distinct and stable: no or unknown session → `401 unauthenticated`; a session past idle or absolute expiry, or whose refresh failed → `401 session_expired` (recoverable through S0004); an authorization denial → `403` with the session kept; a resource the policy hides → the existing non-disclosing `404`. None carries the internal reason.
+    26	- [ ] **AC5:** A request that carries both a session cookie and an `Authorization` header is refused with `400 ambiguous_credentials` and no route runs; the shell never sends a bearer token (PM assumption A4).
+    27	- [ ] **AC6:** The bearer-token path for non-browser callers behaves exactly as before for every existing route (regression suite unchanged and passing).
+    28	
+    29	## Edge Cases & Error Scenarios
+    30	
+    31	A CSRF token from an earlier session is rejected after re-authentication (tokens are bound to the session). A login-CSRF attempt (attacker-initiated callback) fails S0001 AC4 because the state is not the browser's own. A missing `Origin` and `Referer` on a state-changing request is refused.
+    32	
+    33	## Interaction Contract
+    34	
+    35	Entry: any shell screen calling the engine. Read requests carry the cookie; state-changing requests also carry the CSRF token the shell obtains from the session endpoint. Refusal result: a problem-details response the shell maps to sign-in, the session-expired dialog, an in-context denied message, or not-found. No editable state. Audit: the existing authorization decision audit for engine routes; CSRF refusals are recorded (event shape is Phase B).
+    36	
+    37	## Data Requirements
+    38	
+    39	Per-session CSRF secret; the shell's allowed origin as configuration. Token format and delivery are Phase B decisions.
+    40	
+    41	## Role-Based Visibility
+    42	
+    43	No role change. The engine's existing policy decides every outcome; the BFF adds only authentication and request-integrity checks.
+    44	
+    45	## Non-Functional Expectations
+    46	
+    47	Checks add no extra round trip to the IdP. At least 80% changed executable-code coverage in the later feature run.
+    48	
+    49	## Dependencies
+    50	
+    51	S0001 (session); existing engine routes and problem-details handlers.
+    52	
+    53	## Out of Scope
+    54	
+    55	New routes or grants; CORS for third-party origins; API gateway products.
+    56	
+    57	## Questions & Assumptions
+    58	
+    59	No open business-rule question. Whether the BFF runs in the engine process or as a separate same-origin service is a Phase B decision. PM assumption A4 applies.
+    60	
+    61	## Definition of Done
+    62	
+    63	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    64	- [ ] One negative test per AC2 refusal cause, proving no handler ran and no row was written.
+    65	- [ ] Existing bearer-path regression suite passes unchanged (AC6).
+    66	- [ ] Documentation and tracker state reflect observed results.
+    67	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0006-show-identity-and-knowledge-base-context-in-the-shell.md
+     1	# F0021-S0006 — Show identity and knowledge-base context in the shell
+     2	
+     3	**Story ID:** F0021-S0006
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Show identity and knowledge-base context in the shell
+     6	**Priority:** High
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** GL underwriter (Priya)
+    13	**I want** the shell to show who I am signed in as, which tenants and knowledge bases I can work in, and which one is active
+    14	**So that** I always know whose data I am looking at, and switching context never shows me stale data.
+    15	
+    16	## Context & Background
+    17	
+    18	Operator decision D2 (2026-11-27) puts a Home page with identity and current memberships, and an active knowledge-base selector that only narrows, into F0021. F0002 memberships carry tenant, knowledge base, role and grant revision; authorization stays resource-based in the engine. ADR-0051 D6 requires cache clearing on tenant switch and relevant grant revision.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** A signed-in session can read a session endpoint that returns the principal's display name, principal kind, issuer, session idle and absolute deadlines, the CSRF token for state-changing calls, the principal's current (unrevoked) memberships as tenant, knowledge base and role with display names, the current grant revision, and the active knowledge base. It returns no token and no other principal's data.
+    23	- [ ] **AC2:** Home shows the display name, the session state, and the membership list with the active knowledge base marked. The shell header shows the display name, the active knowledge-base selector and "Sign out" on every shell route.
+    24	- [ ] **AC3:** A principal with no current membership sees Home with a "no access yet" message naming no tenant or knowledge base, an empty selector and "Sign out"; no engine data route is called.
+    25	- [ ] **AC4:** Choosing another membership in the selector updates the active knowledge base through a CSRF-protected request, clears caches and in-flight work (S0005 AC5) before rendering, and persists across reload within the session (PM assumption A7). A requested knowledge base that is not a current membership is rejected and the active value is unchanged.
+    26	- [ ] **AC5:** The active knowledge base only narrows what the shell asks for. A direct engine request for a resource in another knowledge base that the principal may read is still decided by the engine's existing authorization policy; the selector never grants or denies access by itself.
+    27	- [ ] **AC6:** If a membership is revoked while the session is active (the revocation itself is audited by F0002), the next session-endpoint read shows the new grant revision and membership list; if the active knowledge base was revoked, it resets to none and caches are cleared.
+    28	
+    29	## Edge Cases & Error Scenarios
+    30	
+    31	A display name missing from the ID token falls back to the preferred username, then to "Signed-in user"; the subject identifier is never shown as a name. Tenant and knowledge-base display names come from server data, never from token claims. Session endpoint failure: the shell shows a retryable error state, not a signed-out state.
+    32	
+    33	## Interaction Contract
+    34	
+    35	Entry: Home (`/`) and the header selector on every shell route. Editable state: only the active knowledge base. Action: select a membership → CSRF-protected update → caches cleared → views reload. Persistence evidence: the value survives reload and is returned by the session endpoint. Read-only: identity and membership list. Validation failure: a non-member knowledge base is refused with a message, value unchanged. Audit: the active-context change is a session preference, not an authorization event; whether it is recorded is a Phase B decision.
+    36	
+    37	## Data Requirements
+    38	
+    39	Session endpoint response shape (Phase B schema); active knowledge base stored with the session.
+    40	
+    41	## Role-Based Visibility
+    42	
+    43	A principal sees only its own memberships. No role sees another principal's memberships.
+    44	
+    45	## Non-Functional Expectations
+    46	
+    47	WCAG 2.2 AA with zero serious or critical axe violations (A2); desktop and 360-px layouts per the [PRD screen layouts](PRD.md#screen-layouts-ascii); all strings from translation resources (A3). At least 80% changed executable-code coverage in the later feature run.
+    48	
+    49	## Dependencies
+    50	
+    51	S0001, S0005; F0002 membership store.
+    52	
+    53	## Out of Scope
+    54	
+    55	Membership administration, tenant creation, role requests; lists of documents or entities (F0022, F0023).
+    56	
+    57	## Questions & Assumptions
+    58	
+    59	No open business-rule question. Operator decision D2 and PM assumptions A2, A3 and A7 are in the [PRD](PRD.md#risks--assumptions). The session endpoint path and schema are Phase B decisions.
+    60	
+    61	## Definition of Done
+    62	
+    63	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    64	- [ ] Component tests for the empty-membership state, selector switch and revocation reset.
+    65	- [ ] axe results for Home at desktop and 360-px widths.
+    66	- [ ] Documentation and tracker state reflect observed results.
+    67	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0007-provide-the-route-seam-and-rehost-the-review-panel.md
+     1	# F0021-S0007 — Provide the route seam and rehost the review panel
+     2	
+     3	**Story ID:** F0021-S0007
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Provide the route seam and rehost the review panel
+     6	**Priority:** High
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** platform engineer (Dana)
+    13	**I want** one place where later screens register a route, a feature flag and a lazily loaded module, and the existing Review Panel moved onto it behind the session
+    14	**So that** F0022, F0023 and F0067 add screens without growing the base bundle or touching session code, and reviewers stop pasting tokens into URLs.
+    15	
+    16	## Context & Background
+    17	
+    18	Graph Observatory carry-in (2026-10-13, ADR-0072, design note §10): F0021 provides a route-level feature flag and lazy-loading seam, and makes the app-wide state, server-state caching and styling choices that F0067 inherits; no Observatory dependency enters v0.1. Operator decision D2 (2026-11-27): rehost the F0001-S0004 proof Review Panel behind the cookie session and remove the token-in-URL entry. BLUEPRINT §2.1 names the frontend stack; Phase B confirms it.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** A route is registered in one place with its path, a feature-flag key and a lazily imported module. With the flag off, the route renders the not-found screen, its module is never requested, and it does not appear in navigation.
+    23	- [ ] **AC2:** With the flag on, the module loads on first navigation and renders inside the shell frame; a failed module load shows a retryable error screen and leaves the shell usable.
+    24	- [ ] **AC3:** A production build places each lazily registered route's code in its own chunk; the base entry chunk contains none of it, shown by a build report kept as evidence. A size budget for the base entry chunk is recorded at Phase B and checked in CI.
+    25	- [ ] **AC4:** Flag values come from server configuration through the session endpoint (no build-time-only switch), so a flag can change without a rebuild; an unknown flag key is treated as off.
+    26	- [ ] **AC5:** The Review Panel is reachable at a shell route taking the review item identifier as a path parameter, behind the session. Its reads and decision submission go through the cookie session (S0002) with the panel's existing behavior and engine routes unchanged: the engine's decision receipt and audit row are produced as today, and an item the principal is denied shows not found.
+    27	- [ ] **AC6:** The proof-scope launch form and the `?token=` / bearer text-field entry are removed; a URL carrying a `token` query parameter is not read, and the shell strips it from the address bar without sending it anywhere.
+    28	
+    29	## Edge Cases & Error Scenarios
+    30	
+    31	Navigating directly to a flagged-off route URL shows not-found without fetching the chunk. Toggling a flag off while the route is open takes effect on the next navigation. A review item the principal may not read shows the engine's non-disclosing not-found.
+    32	
+    33	## Interaction Contract
+    34	
+    35	Entry: shell navigation or a direct URL. The route seam is configuration, not a user mutation. The rehosted panel keeps its existing decision submission (entry: panel → decide → submit; persistence evidence: the engine's existing decision receipt and audit row; role: Reviewer under existing policy; validation failures: the engine's existing problem responses). Re-authentication during a submission follows S0004.
+    36	
+    37	## Data Requirements
+    38	
+    39	Route registry entries (path, flag key, module); flag values in the session endpoint response (Phase B schema).
+    40	
+    41	## Role-Based Visibility
+    42	
+    43	Flags control visibility only; they never authorize. The Review Panel's data and decisions are authorized by the engine as today.
+    44	
+    45	## Non-Functional Expectations
+    46	
+    47	App-wide choices made here are recorded in Phase B (router, server-state cache, client state, styling, component library, test stack) and inherited by F0022, F0023 and F0067. WCAG 2.2 AA for the shell frame and error screens (A2). At least 80% changed executable-code coverage in the later feature run.
+    48	
+    49	## Dependencies
+    50	
+    51	S0001, S0002, S0004, S0006; F0001-S0004 Review Panel and its routes; F0011 generated contracts.
+    52	
+    53	## Out of Scope
+    54	
+    55	Changes to the panel's renderers, batching or reviewer authority (F0022); the Observatory and its rendering dependencies (F0067); a remote flag service.
+    56	
+    57	## Questions & Assumptions
+    58	
+    59	No open business-rule question. Operator decision D2 is in the [PRD](PRD.md#risks--assumptions). Route paths, flag configuration source, chunk budget and the stack confirmation are Phase B decisions.
+    60	
+    61	## Definition of Done
+    62	
+    63	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    64	- [ ] Build report showing the base chunk free of flagged-route code (AC3).
+    65	- [ ] Existing Review Panel component tests pass under the rehosted route.
+    66	- [ ] Documentation and tracker state reflect observed results.
+    67	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+
+planning-mds/features/F0021-native-react-semantic-shell-and-oidc-session/F0021-S0009-prove-session-transport-and-mutation-continuity.md
+     1	# F0021-S0009 — Prove session transport and mutation continuity
+     2	
+     3	**Story ID:** F0021-S0009
+     4	**Feature:** F0021 — Native React semantic shell + OIDC/session contract and safe re-auth behavior
+     5	**Title:** Prove session transport and mutation continuity
+     6	**Priority:** Critical
+     7	**Phase:** MVP — v0.1B
+     8	**Status:** Not Started
+     9	
+    10	## User Story
+    11	
+    12	**As a** security administrator (Noor)
+    13	**I want** the session contract proven in a real browser against the real identity provider, including the failure cases
+    14	**So that** ADR-0051 is accepted on observed evidence rather than on assertions that a cookie was cleared.
+    15	
+    16	## Context & Background
+    17	
+    18	ADR-0051's formal acceptance needs master blueprint §121.2 items 8 (session transport) and 9 (mutation continuity) to pass against the real issuance, storage, renewal and logout flow, including an upstream revocation failure. §119.3: test logout with actual issuance, storage and renewal, not only a cookie-clear response. ADR-0049 leaves items 8 and 9 open for F0021.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** An end-to-end suite runs a real browser against the local stack (authentik from the dev blueprint, PostgreSQL, engine, BFF, built shell) and, after sign-in, renewal and logout, inspects cookies, `localStorage`, `sessionStorage`, IndexedDB, Cache Storage, URLs and response bodies: no access, refresh or ID token appears, and the session cookie has the S0001 AC2 attributes.
+    23	- [ ] **AC2:** The suite forces access-token expiry and fires at least 20 parallel requests; authentik observes exactly one refresh grant for the session, and the rotated refresh token is the one later revoked at logout.
+    24	- [ ] **AC3:** The suite forces an upstream revocation failure (IdP revocation endpoint unreachable or erroring) and observes the server session ended, the failure recorded, and the revocation-failed warning shown; with revocation available, it observes the revoked refresh token rejected by authentik afterwards.
+    25	- [ ] **AC4:** In one browser, principal A signs out and principal B signs in (and separately, principal B completes a popup re-authentication on A's page): no data, cache entry or blocked request from A is shown to or sent for B; and every tested malicious return route lands on `/`.
+    26	- [ ] **AC5:** Mutation continuity with the rehosted Review Panel: the session is expired while a reviewer has an unsent decision; the decision is not received by the engine until "Submit now"; after re-confirmation the engine checks current item state and authority, and a variant where the item became stale or the grant was revoked during the gap is refused without retry.
+    27	
+    28	## Edge Cases & Error Scenarios
+    29	
+    30	The suite runs from a clean volume and is repeatable; a flaky IdP start is a harness failure, not a pass. Results record authentik and browser versions.
+    31	
+    32	## Interaction Contract
+    33	
+    34	Entry: the proof harness command run by a developer or CI job. Result: a pass/fail report with per-check evidence (storage dumps, IdP event logs, engine audit rows) stored in the feature run's evidence. No product state is changed beyond the disposable local stack.
+    35	
+    36	## Data Requirements
+    37	
+    38	Synthetic principals and review fixtures from the dev blueprint and seed scripts; no real tenant data.
+    39	
+    40	## Role-Based Visibility
+    41	
+    42	Uses synthetic TenantMember and Reviewer principals in two tenants (existing dev blueprint principals plus any Phase B additions).
+    43	
+    44	## Non-Functional Expectations
+    45	
+    46	Deterministic and repeatable from a clean environment; total runtime recorded. Browser matrix for this proof: at least Chromium and Firefox (A1 covers the full support list).
+    47	
+    48	## Dependencies
+    49	
+    50	S0001–S0008; dev authentik blueprint; existing review fixtures (F0001-S0004, F0002).
+    51	
+    52	## Out of Scope
+    53	
+    54	§121.2 items 1–7 and 10–12 beyond what F0001/F0002 already proved (F0018, F0022, F0026); production ingress.
+    55	
+    56	## Questions & Assumptions
+    57	
+    58	No open business-rule question. The end-to-end tool (Playwright is proposed in BLUEPRINT §2.1), how the upstream failure is injected, and how IdP-side refresh grants are counted are Phase B decisions.
+    59	
+    60	## Definition of Done
+    61	
+    62	- [ ] Every AC above has a concrete observed proof in the later feature run.
+    63	- [ ] Evidence package contains storage inspections, IdP-side observations and audit rows for each AC.
+    64	- [ ] ADR-0051 acceptance is presented to the operator with this evidence (acceptance itself is a separate operator decision).
+    65	- [ ] Documentation and tracker state reflect observed results.
+    66	- [ ] Required story-level review provenance is appended to STATUS.md in the feature action.
+  5507	## 119.5 Additional adaptations before reuse
+  5508	
+  5509	- **Development bypass:** The CRM's Development JWT branch disables key, issuer, audience, and lifetime checks. The local Compose file selects Development. Keep synthetic identity limited to isolated development/testing; require a production startup/deployment guard and negative tests against the real validator. A frontend build guard cannot secure a backend accidentally deployed in Development.
+  5510	- **Freshness and account status:** The shown principal mapper provisions by `(iss, sub)` but does not itself reject an inactive profile. Define disabled-user, role-change, grant-revocation, and bounded revocation-latency enforcement. A JWT failure labeled “revoked” is not proof that active revocation detection exists.
+  5511	- **Policy lifecycle:** The native Casbin adapter loads embedded policy once at construction. That is a deployment-time policy model, not dynamic policy distribution. Add policy version/hash to decisions; specify refresh/invalidation if runtime policy updates are introduced.
+  5512	- **Role combination:** The current role helper allows when any role allows. For Brain, tenant isolation, classification, explicit restrictions, and delegation ceilings must not be bypassed by adding another permissive role. Test mixed internal/external roles explicitly.
+  5513	- **Time semantics:** Distribution scope currently accepts an `asOf` date. The Brain must distinguish historical business relationships from authorization now: a historical query must not restore a revoked user's permission. Historical authorization reconstruction is a separate privileged audit operation.
+  5514	- **Session restoration:** The CRM keys drafts by a user identifier and bounds them by size/TTL. Brain restores should use stable principal + tenant/KB context and a field allowlist. Browser storage and a user-scoped key do not encrypt sensitive drafts or shield them from scripts running in that origin.
+  5515	- **Service identity:** Forwarded user credentials work for interactive delegated calls only within their audience and scope. Background reinterpretation needs a separate service/agent principal, bounded job grant, expiration, and revocation; never retain a user's refresh token in a job payload.
+  5516	
+  5517	# 120. Concrete AuthX Contract for Insurance Brain
+  5518	
+  5519	## 120.1 Principal and policy services
+  5520	
+  5521	Introduce interfaces inside `brain-security`, not additional mandatory microservices:
+  5522	
+  5523	| Interface | Responsibility |
+  5524	| --- | --- |
+  5600	## 120.5 Session and UI behavior
+  5601	
+  5602	Retain distinct outcomes: unauthenticated/invalid credentials trigger sign-in; expired recoverable credentials may renew once through a bounded coalesced path; authorization denial preserves session and displays an in-context message. Suppress resource-existence leakage where policy requires it.
+  5603	
+  5604	Retain no automatic replay of approve, promote, retract, publish, or external business actions after renewal. An independently designed idempotent command protocol can support controlled retry later, with the same command identity and authority checked again.
+  5605	
+  5606	UI route guards and hidden controls are convenience only. The backend must reject direct requests. Clear or scope query caches and in-flight work on logout, principal change, tenant switch, or relevant grant revision. Enforce session timeouts and revocation in the session/token control plane; an idle-warning modal is UX, not the security boundary.
+  5607	
+  5608	# 121. Validation Evidence and Required Tests
+  5609	
+  5610	## 121.1 Checks executed during source and implementation validation
+  5611	
+  5612	| Check | Result | What it establishes |
+  5613	| --- | --- | --- |
+  5614	| Repository metadata and pinned commit | Recorded full commit and complete file-tree listing | Evidence is tied to a specific source snapshot |
+  5615	| Existing `neuron/tests/test_auth.py` | 3 tests passed | Existing decoder behavior works as written; these tests do not establish credential verification |
+  5616	| Synthetic identity/repository reproduction | Unverified selected subject accessed synthetic owner's thread; other owner was denied | Credential trust is missing before otherwise-working ownership filtering |
+  5617	| Same subject, different issuer reproduction | Same owner string returned | Raw-sub ownership lacks issuer namespace |
+  5618	| Existing `scripts/check-policy-parity.py` | Failed with 7 mismatches | BrokerUser matrix-section/policy synchronization is incomplete |
+  5619	| Locked OIDC dependency source inspection | 3.4.1 serializes token-bearing user state to configured store | The memory-only comment conflicts with `sessionStorage` configuration |
+  5620	| Parent resolver → Casbin adapter → document-service trace | Parent attributes are not part of the active object/matcher contract | The inspected parent-access path does not implement record-specific parent authorization |
+  5621	
+  5622	The .NET integration suite, browser session flow, actual IdP, PostgreSQL deployment, review round trip, and production ingress were not executed. Test files demonstrating intended audience, role, and distribution-scope behavior serve as design/coverage evidence only. No production data, tokens, or remote service state were changed.
+  5623	
+  5624	## 121.2 Required carryover test matrix
+  5625	
+  5626	1. **Credential verification:** wrong signature, issuer/audience, expiry/not-before, key rotation, invalid token type, empty/malformed bearer, disabled principal, and service-specific audience.
+  5627	2. **Principal mapping:** repeated login, concurrent provisioning, same subject at different issuers, IdP migration, linked identity approval, and stable audit ownership.
+  5628	3. **Scope:** two tenants, two KBs, two broker relationships, hierarchical siblings, expired membership, mixed roles, and explicit filters outside authority.
+  5629	4. **Parent/classification conjunction:** entitled parent with denied classification; permitted classification with denied parent; document versions, binary download, and declassification.
+  5630	5. **Projection leakage:** rows, counts, facets, snippets, titles, graph edges/path existence, embeddings, analytic aggregates, exports, and shared entity references.
+  5631	6. **Conversation access:** list/history/mutation by owner and non-owner, forged identity, tenant switch, evidence revoked after creation, and unauthorized sharing.
+  5632	7. **Review authority:** annotation versus adjudication, forged/duplicate callbacks, stale tasks, changed reviewer entitlement, and approval of a critical canonical change.
+  5633	8. **Session transport:** actual storage contents, cookie/CSRF configuration when applicable, refresh burst/rotation, true logout/revocation, same-browser principal change, cache clearing, and sanitized return routes.
+  5634	9. **Mutation continuity:** expired session while correcting/promoting a fact never silently replays the mutation; re-confirmed request checks current fact revision and authority.
+  5635	10. **Delegation:** constrained agent acting for a user, revoked grant during a job, service credential with no human delegate, excessive tool requests, and attempted direct canonical writes.
+  5636	11. **Policy parity:** catalog-to-matrix-to-runtime fixtures across all relevant roles/resources/actions, denial conditions, missing attributes, and Python/.NET expression semantics.
+  5637	12. **Temporal separation:** querying a prior policy period cannot recover a revoked access grant; privileged audit can reconstruct prior decisions without executing them.
+  5638	
+  5639	# 122. Blueprint Integration and Proposed AuthX ADRs
+  5640	

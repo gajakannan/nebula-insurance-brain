@@ -1,0 +1,19 @@
+Risk score: 5/10 (elevated) for capability:runtime-roots-and-toolchain
+
+Signals (weighted contribution to score):
+  - blast_count              0.05 × 2.0 = 0.10
+  - hotspot_score            0.02 × 3.0 = 0.06
+  - cochange_density         0.90 × 1.5 = 1.35
+  - ownership_concentration  1.00 × 1.5 = 1.50
+  - test_gap                 1.00 × 2.0 = 2.00
+
+Raw inputs:
+  - blast: direct=1 neighbor=0 files=6
+  - hotspot_rank=23 owner=gajapathi.kannan@live.com pct=100% bus_factor=True
+  - cochange: density=0.9 partners=36 node_commits=13
+  - tests: 0 test / 6 impl
+
+Reviewer recommendations:
+  - Bus-factor: loop in gajapathi.kannan@live.com for explicit PR acknowledgement (primary_owner_pct=100).
+  - Test gap: 0 test file(s) vs 6 impl file(s) — add coverage before merge.
+  - Hidden coupling: co-change density 0.90; inspect partners: capability:versioned-assertion-semantics (11×), capability:project-check-ci-enforcement (10×), capability:assertion-eligibility-guards (8×).

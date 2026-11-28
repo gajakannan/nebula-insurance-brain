@@ -1,0 +1,341 @@
+    35	| R1 | **S0002 AC4 says "an authorization denial → `403`".** No engine route returns 403 for a denial. Every denial is the non-disclosing 404 (`brain-api.yaml` `Forbidden`: "user denials are reported as 404"; master blueprint section 118.2). | The design keeps the engine unchanged. 403 is used only for `csrf_rejected`, and a denial stays the existing 404 with the session kept (never 401). The AC4 proof shows each outcome is distinct and the session survives a denial. **Proposed PM wording correction at feature G0:** "an authorization denial → the engine's existing non-disclosing `404`, with the session kept". Confirmed by the operator with `approve-phase-b` (2026-11-27). |
+    36	| R2 | **S0008 AC2 says "no credential verification runs"**, but AC4 requires a valid credential from a throttled client to be served, which needs verification. | Verification stays local while throttled: cached JWKS, session lookup, no JWKS refetch, no IdP call. A rejected credential then gets 429 with no event row. AC2 is proven as "no per-request `authentication_event`, no upstream IdP call". **Proposed PM wording correction at feature G0.** Confirmed by the operator with `approve-phase-b` (2026-11-27). |
+    37	| R3 | S0005 AC7 depends on authentik's end-session behavior. | The provider's invalidation flow becomes `default-invalidation-flow` (ADR-0082 D2). The end-session URL carries `client_id` and `post_logout_redirect_uri`, with no `id_token_hint`. The signed-out page's "Sign in" sends `prompt=login`. Feature G0 verifies both against authentik 2026.2 before S0005 is built. |
+    38	| R4 | S0006 AC1 needs tenant and knowledge-base display names; `tenant` and `knowledge_base` have no name column. | Migration 0018 adds nullable `display_name` (expand-only). Null names show a localized "Unnamed knowledge base" with a short ID suffix. Dev seed data sets names. |
+    39	| R5 | `/reviews/{id}` is both an engine path and the natural shell route. | One public origin: the shell at `/`, the engine under `/api/`, with the prefix stripped by the front. The OpenAPI paths stay at the root (SOLUTION-PATTERNS section 3: no `/api` prefix in the contract). The shell route is `/reviews/:reviewItemId`. |
+    40	| R6 | ADR-0051 says "tenant switch". | Implemented as the active knowledge-base selector (Phase A reconciliation 3). A change of tenant is a change of selected membership. |
+    41	| R7 | BLUEPRINT section 2.1 still calls the session transport "proposed direction (ADR-0051, open)" and leaves the frontend test stack to Phase B. | Updated in this run: ADR-0051 decision recorded, ADR-0082 runtime, stack confirmed (ADR-0082 D12). |
+    42	
+    43	## Build Order
+    44	
+    45	| Step | Scope | Stories | Depends on |
+    46	|---|---|---|---|
+    47	| 1 | Settings, key ring, migration 0018, stores, new reason codes | S0001–S0003, S0005, S0006, S0008 (persistence) | F0002 |
+    48	| 2 | authentik confidential client and dev tooling | S0001, S0009 harness | — |
+    49	| 3 | OIDC client, sign-in and callback, cookies, return routes | S0001 | Steps 1–2 |
+    50	| 4 | Cookie request path, CSRF, ambiguity, throttle | S0002, S0008 | Step 3 |
+    51	| 5 | Renewal and lifetime limits | S0003 | Step 4 |
+    52	| 6 | Logout, revocation, end-session; session endpoint and active knowledge base | S0005 (server), S0006 (server) | Steps 4–5 |
+    53	| 7 | Shell: stack, route registry, API client, hygiene, Home, header, re-authentication, sign-out, Review Panel rehost | S0003 AC6, S0004, S0005 AC5/AC6, S0006, S0007 | Step 6 |
+    54	| 8 | Real-browser proof and IdP recorder harness | S0009 | Steps 1–7 |
+    55	
+    56	## Existing Code (Must Be Modified)
+    57	
+    58	| Path | Change |
+    59	|---|---|
+    60	| `engine/apps/api/src/brain_api/config.py` | Add `public_origin`, `public_api_prefix`, `oidc_client_secret`, `oidc_backchannel_url`, `session_keys`, `trusted_proxies`, `experience_flags_path`, `experience_routes_path`; the BFF is enabled only when the secret and key ring are present |
+    61	| `engine/apps/api/src/brain_api/deps.py` | `current_principal` becomes the ADR-0082 D5 pipeline: ambiguity check, bearer path unchanged, cookie path; the throttle wraps `_reject`; compose the session store and OIDC client |
+    62	| `engine/apps/api/src/brain_api/app.py` | Mount `auth` and `session` routers when the BFF is enabled; add a `Cache-Control: no-store` / `Vary: Cookie` middleware for cookie requests |
+    63	| `engine/apps/api/src/brain_api/errors.py` | `SessionExpiredError` (401 `session_expired`), `CsrfRejectedError` (403), `AmbiguousCredentialsError` (400), `RateLimitedError` (429 with `Retry-After`), `KnowledgeBaseNotAvailableError` (422), `IdpUnavailableError` (503) |
+    64	| `engine/packages/brain-domain/src/brain_domain/authx.py` | Twelve new `AuthenticationReason` values (ADR-0082 D5) |
+    65	| `engine/packages/brain-persistence/src/brain_persistence/models.py` | ORM models for the four tables; `display_name` on `Tenant` and `KnowledgeBase`; composite FK targets declared (F0009 lesson) |
+    66	| `engine/packages/brain-persistence/src/brain_persistence/identity.py` | Authentication-event sink accepts a payload (session reference, CSRF cause, client key for `rate_limited`) |
+    67	| `config/authx-identity-profile.yaml` | Unchanged (issuer, audience and `human_clients: [brain]` stay); comment notes that the client is confidential |
+    68	| `docker/authentik/blueprints/nebula-brain-dev.yaml` | `brain` provider: `client_type: confidential`, dev-only `client_secret`, redirect URIs `http://localhost:5173/api/auth/callback` and `http://localhost:4173/api/auth/callback` (stale `:8100` removed), `invalidation_flow: default-invalidation-flow`, `post_logout_redirect_uris` (or authentik's equivalent field) for `/signed-out` on both origins |
+    69	| `scripts/dev/seed_principals.py` and engine test token fixtures | Send the dev client secret on ROPC token requests; seed tenant and knowledge-base display names |
+    70	| `experience/vite.config.ts` | Replace the `/reviews` and `/health` proxies with one `/api` proxy (prefix rewrite, `xfwd: true`); same proxy for `vite preview` on 4173; manual chunks for `pdfjs-dist`/`fflate` |
+    71	| `experience/package.json` | Add `react-router` 7, `@tanstack/react-query` 5, `zustand` 5, `tailwindcss` 4 with `@tailwindcss/vite`, shadcn/ui primitives (`@radix-ui/*`, `class-variance-authority`, `clsx`, `tailwind-merge`), `i18next` with `react-i18next`, `@playwright/test`, `@axe-core/playwright`; scripts `e2e`, `budget`; description updated |
+    72	| `experience/src/App.tsx`, `main.tsx` | Proof launch form and `?token=` entry removed; `main.tsx` mounts the router, the QueryClient, i18n and the session bootstrap |
+    73	| `experience/src/review-panel/**` | Moved to `src/features/review-panel/`; `api.ts` uses the shared `apiClient` (no token parameter); existing component tests kept |
+    74	| `engine/tests/**` bearer regression | Unchanged and must pass (S0002 AC6) |
+    75	
+    76	## New Files
+    77	
+    78	- **Engine (`brain_security.bff`):** `engine/packages/brain-security/src/brain_security/bff/`
+    79	  - `oidc_client.py`: discovery cache, authorize URL, code exchange, refresh, revoke and end-session URL, all over the backchannel base URL with bounded timeouts.
+    80	  - `pkce.py`, `cookies.py`, `csrf.py`, `return_routes.py`, `token_crypto.py` (AES-256-GCM key ring), `client_key.py` (trusted-proxy resolution).
+    81	  - Tests for each module.
+    82	- **Engine persistence and API:**
+    83	  - `engine/packages/brain-persistence/src/brain_persistence/browser_sessions.py`: login attempts, sessions, row-lock renewal, session events.
+    84	  - `engine/packages/brain-persistence/src/brain_persistence/credential_throttle.py`
+    85	  - `engine/apps/api/src/brain_api/routes/auth.py`, `routes/session.py`; `engine/apps/api/src/brain_api/bff_pages.py` (popup-completion and failure HTML with a CSP nonce).
+    86	  - `engine/migrations/versions/0018_f0021_browser_sessions.py`
+    87	- **Engine tests:**
+    88	  - `engine/apps/api/tests/test_auth_login_callback.py`, `test_auth_logout.py`, `test_session_routes.py`, `test_cookie_request_path.py`, `test_credential_throttle.py`
+    89	  - `engine/tests/integration/test_browser_session_renewal.py`: concurrent workers on PostgreSQL.
+    90	- **Config:** `config/experience-flags.yaml` (`review-panel: true`), `config/experience-routes.yaml` (return-route allowlist).
+    91	- **Shell (`experience/src/shell/`):**
+    92	  - `router.tsx`, `routes/registry.ts`
+    93	  - `api/client.ts`, `api/hygiene.ts`
+    94	  - `session/sessionStore.ts`, `session/bootstrap.ts`, `session/signOut.ts`, `session/reauth.ts`, `session/blockedQueue.ts`, `session/crossTab.ts`, `session/idleWarning.tsx`
+    95	  - `pages/Home.tsx`, `pages/SignedOut.tsx`, `pages/SignInFailed.tsx`, `pages/TooManyAttempts.tsx`, `pages/NotFound.tsx`, `pages/RouteLoadError.tsx`
+    96	  - `layout/ShellFrame.tsx`, `layout/Header.tsx`, `layout/KnowledgeBaseSelector.tsx`
+    97	  - `dialogs/SessionExpiredDialog.tsx`, `dialogs/ReconfirmDialog.tsx`
+    98	  - `i18n/en-US.json`
+    99	  - Tests for each.
+   100	- **Shell styling and tooling:**
+   101	  - `experience/src/components/ui/**`: shadcn/ui primitives in use.
+   102	  - `experience/src/styles/tokens.css`: semantic theme tokens.
+   103	  - `experience/scripts/check-bundle-budget.mjs`
+   104	  - `experience/eslint.config.js`: storage-API and `Authorization` header bans.
+   105	- **Real-browser suite:**
+   106	  - `experience/e2e/**`: Playwright suite with `session-transport.spec.ts`, `mutation-continuity.spec.ts`, `principal-isolation.spec.ts`, `return-routes.spec.ts` and `a11y.spec.ts`.
+   107	  - `experience/e2e/harness/idp-recorder/`: test-only HTTP proxy between the BFF and authentik. It counts refresh grants and injects revocation failures.
+   108	  - `docker-compose.e2e.yml`
+   109	
+   110	## Step 1 — Persistence and Settings
+   111	
+   112	- Migration 0018 follows [migration-design.sql](migration-design.sql). `down_revision` is `0017_f0012_ontology_releases`.
+   113	  - The `session_event` append-only trigger reuses `brain_append_only()` from migration 0007.
+   114	  - The downgrade refuses when sessions or session events exist.
+   115	- `BrowserSessionStore` operations:
+   116	  - `start_attempt` and `consume_attempt` (single use);
+   117	  - `create_session`: ends the old session as `replaced` or `principal_changed`, in the same transaction;
+   118	  - `lookup(cookie_digest)`;
+   119	  - `touch`, at most once every 30 s;
+   120	  - `renew_locked`: separate transaction, `FOR UPDATE`, `lock_timeout` 15 s;
+   121	  - `end` and `record_event`.
+   122	- Key ring parsing refuses an empty ring, duplicate key IDs and any key that is not 32 bytes.
+   123	
+   124	## Step 2 — Identity Provider Client
+   125	
+   126	- Blueprint changes are as listed above. Feature G0 records the authentik 2026.2 field names for post-logout redirect URIs and refresh-token rotation, and confirms that `default-invalidation-flow` ends the authentik session (R3).
+   127	- Dev tooling sends the client secret. The bearer regression suite must pass before Step 3 starts.
+   128	
+   129	## Step 3 — Sign-in and Callback (S0001)
+   130	
+   131	**`GET /auth/login`**
+   132	
+   133	1. Validate `return_to` (ADR-0082 D11), `mode`, `reauth` and `prompt`.
+   134	2. Create the attempt with the PKCE verifier, state, nonce and binding.
+   135	3. Set `__Host-nebula_login` and redirect to authentik. Discovery failure → 503 `idp_unavailable`.
+   136	
+   137	**`GET /auth/callback`** — each check fails closed to `/sign-in-failed`, or to the popup failure page.
+   138	
+   139	1. Throttle check on failure (S0008 AC5).
+   140	2. IdP `error` → `idp_error`.
+   141	3. State missing, unknown, expired or used → `state_invalid`.
+   142	4. Binding cookie digest mismatch → `binding_mismatch`.
+   143	5. Code exchange: `client_secret_basic` with the verifier. Failure → `code_exchange_failed`.
+   144	6. ID token: signature, issuer, audience, expiry and `nonce` digest. Mismatch → `nonce_mismatch`.
+   145	7. Access token through the existing `OidcJwksVerifier`.
+   146	8. `PrincipalResolver`: a non-human client or a DISABLED principal is refused with its F0002 reason.
+   147	9. Create the session, set the session cookie and clear the login cookie.
+   148	10. Redirect to the sanitized route, or render the popup completion page.
+   149	
+   150	Every failure writes exactly one `authentication_event` and sets no session cookie.
+   151	
+   152	## Step 4 — Cookie Request Path, CSRF, Throttle (S0002, S0008)
+   153	
+   154	- Implement the ADR-0082 D5 order in `current_principal`. CSRF and origin checks run in the dependency, before any route handler.
+   155	- The throttle (D9) wraps every rejection point: bearer, cookie and callback. The 21st rejection in a window writes one `rate_limited` event; later ones return 429 with `Retry-After` and write nothing.
+   156	- Every response to a cookie request carries `Cache-Control: no-store` and `Vary: Cookie`. No CORS middleware is added.
+   157	
+   158	## Step 5 — Renewal and Lifetime (S0003)
+   159	
+   160	- Renewal margin is 60 s.
+   161	- The lock is a row lock, and the lock owner re-checks the expiry after acquiring it.
+   162	- One retry after 500 ms, for network errors and 5xx only. `invalid_grant` ends the session immediately.
+   163	- Idle limit 30 min and absolute limit 8 h, enforced at lookup. The absolute limit is never extended.
+   164	- `X-Nebula-Activity: background` does not touch the idle deadline.
+   165	- Disabled principal or principal mismatch ends the session and returns `401 unauthenticated`.
+   166	
+   167	## Step 6 — Logout and Session Endpoint (S0005, S0006 server)
+   168	
+   169	**Logout (ADR-0082 D7)**
+   170	
+   171	- Takes the same row lock as renewal.
+   172	- Revocation uses RFC 7009 with a 5 s timeout and no retry.
+   173	- The outcome is recorded in `session_event` `logout`, and the response follows `logout-result-v1`.
+   174	- An expired session gives `not_attempted` (`no_live_tokens`).
+   175	- A double submit: the second request finds the session ended and returns `not_attempted` (`session_already_ended`), so only one revocation is attempted.
+   176	
+   177	**Session endpoint and active knowledge base (ADR-0082 D10)**
+   178	
+   179	- `GET /session` and `PUT /session/active-knowledge-base`.
+   180	- `grant_revision` is SHA-256 over the sorted current `(membership_id, grant_revision)` pairs; revoked and expired memberships are excluded.
+   181	- Flags are read from `config/experience-flags.yaml`, with an mtime cache.
+   182	
+   183	## Step 7 — Shell (S0003 AC6, S0004, S0005 AC5/AC6, S0006, S0007)
+   184	
+   185	**Stack and layout**
+   186	
+   187	- Stack as ADR-0082 D12.
+   188	- Feature-slice folders (SOLUTION-PATTERNS section 5): `src/shell/` for the frame and session, `src/features/review-panel/` for the rehosted panel.
+   189	
+   190	**Bootstrap**
+   191	
+   192	1. `GET /api/session`.
+   193	2. On 401, `location.assign('/api/auth/login?return_to=' + current route)`.
+   194	3. On 200, validate the body with the generated AJV validator and store it in the Zustand session store, in memory.
+   195	
+   196	**API client**
+   197	
+   198	- One `apiClient` handles every request. It maps the D5 outcomes and never retries an unsafe method.
+   199	- `401 session_expired`:
+   200	  - unsafe request → push it to the blocked queue (label, method, route, body; memory only);
+   201	  - GET → mark it for one retry;
+   202	  - then open `SessionExpiredDialog`.
+   203	- `403 csrf_rejected`: refetch the session to refresh the CSRF token, then show an inline error. No retry.
+   204	
+   205	**Re-authentication (ADR-0082 D8)**
+   206	
+   207	- Popup with a `ref`. The completion signal is accepted from BroadcastChannel or `postMessage`, only from the shell's own origin and only with the pending `ref`.
+   208	- After the signal, `GET /session`:
+   209	  - same principal → retry blocked GETs once, then `ReconfirmDialog` with "Submit now" or "Cancel" for each blocked mutation;
+   210	  - different principal → discard the work, run hygiene, go to Home.
+   211	- A blocked popup, or one closed without completing, offers "Sign in on this page", with the lost-input warning.
+   212	
+   213	**Hygiene and cross-tab**
+   214	
+   215	- `hygiene.reset()`:
+   216	  - aborts every registered request;
+   217	  - calls `queryClient.clear()`;
+   218	  - resets resource stores;
+   219	  - is awaited before rendering the new state.
+   220	- Triggers: sign-out, principal change, active knowledge-base change, `grant_revision` change.
+   221	- Cross-tab: BroadcastChannel messages, plus a background session poll every 30 s while the page is visible and on focus.
+   222	
+   223	**Idle warning**
+   224	
+   225	- Shown from `idle_expires_at − idle_warning_seconds`, against server time.
+   226	- "Stay signed in" sends one user-initiated `GET /api/session` without the background header.
+   227	
+   228	**Route registry and Review Panel**
+   229	
+   230	- Registry entries are `{path, flagKey, lazy}`.
+   231	  - Flag off or unknown: not-found screen, no module request, not shown in navigation.
+   232	  - Module load failure: `RouteLoadError` with a retry.
+   233	- The Review Panel route is `/reviews/:reviewItemId`. Engine paths, behavior and receipts are unchanged.
+   234	- A `token` query parameter is removed with `history.replaceState` before anything else runs, and its value is never read or sent anywhere.
+   235	
+   236	**Accessibility, language and budget**
+   237	
+   238	- WCAG 2.2 AA with semantic theme tokens. All strings come from `en-US.json`.
+   239	- Budget script: the entry chunk's initial JavaScript must be at most 180 kB gzip, measured from the Vite manifest.
+   240	
+   241	## Step 8 — Real-Browser Proof (S0009)
+   242	
+   243	**Stack and run conditions**
+   244	
+   245	- `docker-compose.e2e.yml` starts:
+   246	  - PostgreSQL and authentik from the dev blueprint;
+   247	  - the engine, with `BRAIN_OIDC_BACKCHANNEL_URL` pointing at `idp-recorder`;
+   248	  - the built shell under `vite preview` on 4173.
+   249	- Runs start from a clean volume. Results record the authentik, Chromium and Playwright versions.
+   250	
+   251	**Proofs**
+   252	
+   253	- **Token absence (S0009 AC1):** inspect cookies, every storage API, every URL, and every response body and header.
+   254	- **Single refresh (AC2):** the recorder counts refresh grants per refresh-token family while 20 parallel requests run against an expired access token. The test-only `BRAIN_TEST_ACCESS_SKEW` setting is absent outside the e2e composition, and startup refuses it when `BRAIN_PUBLIC_ORIGIN` is not localhost.
+   255	- **Revocation failure (AC3):** the recorder injects a 503 or a drop on `/revoke`. A follow-up refresh grant with the revoked token is refused by authentik.
+   256	- **Principal isolation (AC4):** alice and bob; a list of malicious return routes.
+   257	- **Mutation continuity (AC5):** a Review Panel decision is blocked by an expired session, is not received (the engine decision count is unchanged), and is sent only on "Submit now". A stale or revoked variant is refused without retry.
+   258	
+   259	## Acceptance Criteria to Implementation / Proof Map
+   260	
+   261	| Story / AC | Step | Proof |
+   262	|---|---|---|
+   263	| S0001 AC1 | 3 | Login redirect carries `code_challenge_method=S256`, state and nonce; attempt row holds digests and ciphertext only; no verifier or nonce in any response |
+   264	| S0001 AC2 | 3 | Callback success test: cookie attributes asserted (`__Host-`, Secure, HttpOnly, Lax, Path=/, no Domain, 256-bit value); session row with the resolved principal |
+   265	| S0001 AC3 | 3, 8 | API tests scan bodies and headers; e2e storage, cookie and URL scan |
+   266	| S0001 AC4 | 3 | One fixture for each failure reason; zero sessions; no session cookie; one `authentication_event` each; failure page text has no reason |
+   267	| S0001 AC5 | 3, 8 | `return_routes` unit table (absolute, `//`, backslash, encoded, unregistered → `/`); e2e malicious list |
+   268	| S0001 AC6 | 3 | Non-human `azp` and DISABLED principal fixtures → failure page, reason recorded |
+   269	| S0001 AC7 | 3, 7 | Same principal: old cookie → 401 at once. Different principal: old session `principal_changed` and the shell hygiene test |
+   270	| S0002 AC1 | 4 | Cookie request to `/reviews`, `/content` and `/facts` reaches the handler under the session principal; verifier and resolver call order asserted |
+     1	-- F0021 migration design: 0018_f0021_browser_sessions (ADR-0082 D3, D9; Proposed).
+     2	-- Design input for the feature run; Alembic revision down_revision = 0017_f0012_ontology_releases.
+     3	-- Expand-only: four new tables, two nullable columns, one append-only trigger.
+     4	-- The 8-hour and 30-minute CHECKs encode operator decision D1; changing D1 needs a new migration.
+     5	-- Downgrade drops the four tables and two columns only when browser_session and session_event are empty;
+     6	-- otherwise it refuses (sessions are live security state; session_event is audit).
+     7	
+     8	-- Server-owned display names for the shell (F0021-S0006 AC1). Nullable; dev seed sets them.
+     9	ALTER TABLE tenant         ADD COLUMN display_name text NULL CHECK (display_name IS NULL OR length(display_name) BETWEEN 1 AND 200);
+    10	ALTER TABLE knowledge_base ADD COLUMN display_name text NULL CHECK (display_name IS NULL OR length(display_name) BETWEEN 1 AND 200);
+    11	
+    12	-- One row per started sign-in (F0021-S0001 AC1/AC4). Single use by conditional UPDATE … RETURNING.
+    13	CREATE TABLE browser_login_attempt (
+    14	    id                         uuid        PRIMARY KEY,
+    15	    state_digest               bytea       NOT NULL UNIQUE CHECK (length(state_digest) = 32),
+    16	    binding_digest             bytea       NOT NULL CHECK (length(binding_digest) = 32),
+    17	    nonce_digest               bytea       NOT NULL CHECK (length(nonce_digest) = 32),
+    18	    code_verifier_ciphertext   bytea       NOT NULL,
+    19	    key_id                     text        NOT NULL CHECK (key_id ~ '^[a-z0-9-]{1,32}$'),
+    20	    mode                       text        NOT NULL CHECK (mode IN ('redirect', 'popup')),
+    21	    reauth_ref                 text        NULL CHECK (reauth_ref IS NULL OR reauth_ref ~ '^[A-Za-z0-9_-]{22}$'),
+    22	    return_to                  text        NOT NULL CHECK (left(return_to, 1) = '/' AND length(return_to) <= 512),
+    23	    prompt_login               boolean     NOT NULL DEFAULT false,
+    24	    created_at                 timestamptz NOT NULL,
+    25	    expires_at                 timestamptz NOT NULL,
+    26	    consumed_at                timestamptz NULL,
+    27	    CHECK (expires_at = created_at + interval '10 minutes'),
+    28	    CHECK ((mode = 'popup') = (reauth_ref IS NOT NULL)),
+    29	    CHECK (consumed_at IS NULL OR consumed_at >= created_at)
+    30	);
+    31	CREATE INDEX ix_browser_login_attempt_expires ON browser_login_attempt (expires_at);
+    32	
+    33	-- Server-side session (ADR-0051 D1, ADR-0082 D3). The cookie value is never stored; only its SHA-256.
+    34	CREATE TABLE browser_session (
+    35	    id                         uuid        PRIMARY KEY,
+    36	    cookie_digest              bytea       NOT NULL UNIQUE CHECK (length(cookie_digest) = 32),
+    37	    principal_id               uuid        NOT NULL REFERENCES principal (id),
+    38	    issuer                     text        NOT NULL,
+    39	    subject                    text        NOT NULL,
+    40	    display_name               text        NULL CHECK (display_name IS NULL OR length(display_name) BETWEEN 1 AND 200),
+    41	    created_at                 timestamptz NOT NULL,
+    42	    last_activity_at           timestamptz NOT NULL,
+    43	    idle_expires_at            timestamptz NOT NULL,
+    44	    absolute_expires_at        timestamptz NOT NULL,
+    45	    access_expires_at          timestamptz NULL,
+    46	    token_ciphertext           bytea       NULL,
+    47	    key_id                     text        NULL CHECK (key_id IS NULL OR key_id ~ '^[a-z0-9-]{1,32}$'),
+    48	    renewal_count              integer     NOT NULL DEFAULT 0 CHECK (renewal_count >= 0),
+    49	    csrf_digest                bytea       NOT NULL CHECK (length(csrf_digest) = 32),
+    50	    active_tenant_id           uuid        NULL,
+    51	    active_knowledge_base_id   uuid        NULL,
+    52	    ended_at                   timestamptz NULL,
+    53	    end_reason                 text        NULL CHECK (end_reason IS NULL OR end_reason IN (
+    54	                                   'logout', 'idle_timeout', 'absolute_timeout', 'renewal_failed',
+    55	                                   'replaced', 'principal_changed', 'principal_disabled', 'principal_mismatch')),
+    56	    CHECK (absolute_expires_at = created_at + interval '8 hours'),
+    57	    CHECK (idle_expires_at <= absolute_expires_at),
+    58	    CHECK (idle_expires_at = last_activity_at + interval '30 minutes' OR idle_expires_at = absolute_expires_at),
+    59	    CHECK ((ended_at IS NULL) = (end_reason IS NULL)),
+    60	    CHECK ((token_ciphertext IS NULL) = (key_id IS NULL)),
+    61	    CHECK (ended_at IS NULL OR token_ciphertext IS NULL),          -- an ended session holds no tokens
+    62	    CHECK (ended_at IS NOT NULL OR token_ciphertext IS NOT NULL),  -- a live session always holds tokens
+    63	    CHECK ((active_tenant_id IS NULL) = (active_knowledge_base_id IS NULL)),
+    64	    FOREIGN KEY (active_knowledge_base_id, active_tenant_id) REFERENCES knowledge_base (id, tenant_id)
+    65	);
+    66	CREATE INDEX ix_browser_session_principal_live ON browser_session (principal_id) WHERE ended_at IS NULL;
+    67	
+    68	-- Append-only session lifecycle audit (F0021-S0003 AC3 renewal record, S0005 AC3/AC7 logout outcome, S0006 AC4).
+    69	CREATE TABLE session_event (
+    70	    event_id                   uuid        PRIMARY KEY,
+    71	    occurred_at                timestamptz NOT NULL,
+    72	    session_id                 uuid        NOT NULL REFERENCES browser_session (id),
+    73	    principal_id               uuid        NOT NULL REFERENCES principal (id),
+    74	    event_type                 text        NOT NULL CHECK (event_type IN (
+    75	                                   'session_created', 'session_replaced', 'renewed', 'renewal_failed',
+    76	                                   'ended_idle', 'ended_absolute', 'ended_principal_changed',
+    77	                                   'ended_principal_disabled', 'ended_principal_mismatch',
+    78	                                   'logout', 'active_knowledge_base_changed')),
+    79	    trace_id                   text        NOT NULL,
+    80	    payload                    jsonb       NOT NULL DEFAULT '{}'::jsonb,
+    81	    -- logout payload: {"revocation": {"status", "reason"?}, "end_session": {"status"}}; never a token or cookie value.
+    82	    CHECK (event_type <> 'logout' OR (payload ? 'revocation' AND payload ? 'end_session'))
+    83	);
+    84	CREATE INDEX ix_session_event_session ON session_event (session_id, occurred_at);
+    85	-- Reuse the migration 0007 append-only trigger function brain_append_only(): UPDATE and DELETE are refused,
+    86	-- exactly as for audit_event and authentication_event.
+    87	CREATE TRIGGER trg_session_event_append_only
+    88	    BEFORE UPDATE OR DELETE ON session_event
+    89	    FOR EACH ROW EXECUTE FUNCTION brain_append_only();
+    90	
+    91	-- Rejected-credential counters (F0021-S0008, ADR-0082 D9). Mutable; not audit.
+    92	CREATE TABLE credential_rejection_window (
+    93	    client_key                 text        NOT NULL CHECK (length(client_key) BETWEEN 1 AND 64),
+    94	    window_start               timestamptz NOT NULL CHECK (date_trunc('minute', window_start) = window_start),
+    95	    rejected_count             integer     NOT NULL CHECK (rejected_count >= 1),
+    96	    PRIMARY KEY (client_key, window_start)
+    97	);
+    98	CREATE INDEX ix_credential_rejection_window_start ON credential_rejection_window (window_start);
+    99	
+   100	-- Counting statement (one round trip, atomic across workers):
+   101	--   INSERT INTO credential_rejection_window (client_key, window_start, rejected_count)
+   102	--   VALUES ($1, date_trunc('minute', now()), 1)
+   103	--   ON CONFLICT (client_key, window_start) DO UPDATE SET rejected_count = credential_rejection_window.rejected_count + 1
+   104	--   RETURNING rejected_count;
+   105	-- Pruning: DELETE FROM credential_rejection_window WHERE window_start < now() - interval '10 minutes'

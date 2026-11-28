@@ -1,0 +1,758 @@
+   205	**Re-authentication (ADR-0082 D8)**
+   206	
+   207	- Popup with a `ref`. The completion signal is accepted from BroadcastChannel or `postMessage`, only from the shell's own origin and only with the pending `ref`.
+   208	- After the signal, `GET /session`:
+   209	  - same principal → retry blocked GETs once, then `ReconfirmDialog` with "Submit now" or "Cancel" for each blocked mutation;
+   210	  - different principal → discard the work, run hygiene, go to Home.
+   211	- A blocked popup, or one closed without completing, offers "Sign in on this page", with the lost-input warning.
+   212	
+   213	**Hygiene and cross-tab**
+   214	
+   215	- `hygiene.reset()`:
+   216	  - aborts every registered request;
+   217	  - calls `queryClient.clear()`;
+   218	  - resets resource stores;
+   219	  - is awaited before rendering the new state.
+   220	- Triggers: sign-out, principal change, active knowledge-base change, `grant_revision` change.
+   221	- Cross-tab: BroadcastChannel messages, plus a background session poll every 30 s while the page is visible and on focus.
+   222	
+   223	**Idle warning**
+   224	
+   225	- Shown from `idle_expires_at − idle_warning_seconds`, against server time.
+   226	- "Stay signed in" sends one user-initiated `GET /api/session` without the background header.
+   227	
+   228	**Route registry and Review Panel**
+   229	
+   230	- Registry entries are `{path, flagKey, lazy}`.
+   231	  - Flag off or unknown: not-found screen, no module request, not shown in navigation.
+   232	  - Module load failure: `RouteLoadError` with a retry.
+   233	- The Review Panel route is `/reviews/:reviewItemId`. Engine paths, behavior and receipts are unchanged.
+   234	- A `token` query parameter is removed with `history.replaceState` before anything else runs, and its value is never read or sent anywhere.
+   235	
+   236	**Accessibility, language and budget**
+   237	
+   238	- WCAG 2.2 AA with semantic theme tokens. All strings come from `en-US.json`.
+   239	- Budget script: the entry chunk's initial JavaScript must be at most 180 kB gzip, measured from the Vite manifest.
+   240	
+   241	## Step 8 — Real-Browser Proof (S0009)
+   242	
+   243	**Stack and run conditions**
+   244	
+   245	- `docker-compose.e2e.yml` starts:
+   246	  - PostgreSQL and authentik from the dev blueprint;
+   247	  - the engine, with `BRAIN_OIDC_BACKCHANNEL_URL` pointing at `idp-recorder`;
+   248	  - the built shell under `vite preview` on 4173.
+   249	- Runs start from a clean volume. Results record the authentik, Chromium and Playwright versions.
+   250	
+   251	**Proofs**
+   252	
+   253	- **Token absence (S0009 AC1):** inspect cookies, every storage API, every URL, and every response body and header.
+   254	- **Single refresh (AC2):** the recorder counts refresh grants per refresh-token family while 20 parallel requests run against an expired access token. The test-only `BRAIN_TEST_ACCESS_SKEW` setting is absent outside the e2e composition, and startup refuses it when `BRAIN_PUBLIC_ORIGIN` is not localhost.
+   255	- **Revocation failure (AC3):** the recorder injects a 503 or a drop on `/revoke`. A follow-up refresh grant with the revoked token is refused by authentik.
+   256	- **Principal isolation (AC4):** alice and bob; a list of malicious return routes.
+   257	- **Mutation continuity (AC5):** a Review Panel decision is blocked by an expired session, is not received (the engine decision count is unchanged), and is sent only on "Submit now". A stale or revoked variant is refused without retry.
+   258	
+   259	## Acceptance Criteria to Implementation / Proof Map
+   260	
+   261	| Story / AC | Step | Proof |
+   262	|---|---|---|
+   263	| S0001 AC1 | 3 | Login redirect carries `code_challenge_method=S256`, state and nonce; attempt row holds digests and ciphertext only; no verifier or nonce in any response |
+   264	| S0001 AC2 | 3 | Callback success test: cookie attributes asserted (`__Host-`, Secure, HttpOnly, Lax, Path=/, no Domain, 256-bit value); session row with the resolved principal |
+   265	| S0001 AC3 | 3, 8 | API tests scan bodies and headers; e2e storage, cookie and URL scan |
+   266	| S0001 AC4 | 3 | One fixture for each failure reason; zero sessions; no session cookie; one `authentication_event` each; failure page text has no reason |
+   267	| S0001 AC5 | 3, 8 | `return_routes` unit table (absolute, `//`, backslash, encoded, unregistered → `/`); e2e malicious list |
+   268	| S0001 AC6 | 3 | Non-human `azp` and DISABLED principal fixtures → failure page, reason recorded |
+   269	| S0001 AC7 | 3, 7 | Same principal: old cookie → 401 at once. Different principal: old session `principal_changed` and the shell hygiene test |
+   270	| S0002 AC1 | 4 | Cookie request to `/reviews`, `/content` and `/facts` reaches the handler under the session principal; verifier and resolver call order asserted |
+   271	| S0002 AC2 | 4 | Matrix: missing or wrong token, foreign Origin, missing Origin and Referer, Referer fallback, `Sec-Fetch-Site: cross-site` → 403 `csrf_rejected`; handler spy not called; zero writes; event cause recorded |
+   272	| S0002 AC3 | 4 | Cross-site GET answered under normal authorization; no `Access-Control-*` headers |
+   273	| S0002 AC4 | 4, 5 | Distinct codes: unauthenticated, session_expired (idle, absolute, renewal), denial = existing 404 with the session still valid afterwards (R1), csrf 403 |
+   274	| S0002 AC5 | 4, 7 | Cookie plus `Authorization` → 400 `ambiguous_credentials`; shell lint rule and client test confirm no `Authorization` header |
+   275	| S0002 AC6 | 4 | Existing bearer suites pass unchanged |
+   276	| S0003 AC1 | 5 | Expired access token → one refresh, request served, `Set-Cookie` absent |
+   277	| S0003 AC2 | 5, 8 | Two-worker PostgreSQL test with N concurrent requests → one token-endpoint call (stub) and all succeed or all `session_expired`; e2e recorder count = 1 |
+   278	| S0003 AC3 | 5, 8 | Rotated refresh token stored atomically; each failure kind ends the session, writes `renewal_failed` and returns 401 |
+   279	| S0003 AC4 | 5 | Frozen-clock idle test; background header does not extend the deadline |
+   280	| S0003 AC5 | 5 | 8 h absolute limit despite activity and renewals; no renewal attempted after it |
+   281	| S0003 AC6 | 7 | Component test: warning at 28 min (server time), countdown, "Stay signed in" sends one request, dismissing changes nothing |
+   282	| S0004 AC1 | 7 | Client test: page and input kept; dialog lists blocked mutations as "not submitted"; zero retries |
+   283	| S0004 AC2 | 7, 8 | Popup flow; completion signal carries only `ref`; dialog closes with input intact |
+   284	| S0004 AC3 | 7, 8 | GET retried once; mutation sent only on "Submit now"; "Cancel" discards it |
+   285	| S0004 AC4 | 7, 8 | Re-confirmed request carries the new CSRF token; stale or revoked variant → engine 404 or 409 shown in context, no retry; engine audit row present |
+   286	| S0004 AC5 | 7, 8 | Different principal → work and queue discarded, hygiene, Home; e2e principal isolation |
+   287	| S0004 AC6 | 7 | Blocked popup → "Sign in on this page" with the warning; storage spy shows no input written |
+   288	| S0004 AC7 | 7 | Messages from a foreign origin, a wrong `ref` or an unexpected source are ignored |
+   289	| S0005 AC1 | 6 | Logout: CSRF required; revoke called; session ended; expired cookie with identical attributes |
+   290	| S0005 AC2 | 6, 8 | Revoked token = the token held after rotation; authentik refuses a refresh grant with it |
+   291	| S0005 AC3 | 6, 8 | Each injected failure (unreachable, non-2xx, timeout): session ended, tokens NULL, `session_event` with reason, response `failed`, signed-out page warning |
+   292	| S0005 AC4 | 6 | Old cookie → 401 from every route, including when replayed from another client |
+   293	| S0005 AC5 | 7 | One hygiene test per trigger: requests aborted, cache empty before the new render |
+   294	| S0005 AC6 | 7, 8 | BroadcastChannel and a 30 s poll; e2e second tab shows signed-out within 60 s without old data |
+   295	| S0005 AC7 | 6, 8 | End-session URL has no `id_token_hint`; e2e next sign-in asks for credentials; discovery without end-session → `unavailable` warning |
+   296	| S0006 AC1 | 6 | Schema-validated response; no token; only the caller's memberships; display-name fallbacks |
+   297	| S0006 AC2 | 7 | Home and header component tests; axe at desktop and 360 px |
+   298	| S0006 AC3 | 7 | No-membership principal: "no access yet", empty selector, zero engine data calls |
+   299	| S0006 AC4 | 6, 7 | Member switch persists across reload; non-member → 422 and value unchanged; hygiene runs before render |
+   300	| S0006 AC5 | 6 | Engine request for another readable knowledge base still decided by policy; authorization code never reads the active value |
+   301	| S0006 AC6 | 6, 7 | Membership revoked mid-session → new `grant_revision` and list; active value reset; caches cleared |
+   302	| S0007 AC1 | 7 | Flag off or unknown: not-found, no chunk request (network spy), absent from navigation |
+   303	| S0007 AC2 | 7 | Flag on: lazy load inside the frame; forced import failure → retry screen, shell usable |
+   304	| S0007 AC3 | 7 | Build report: lazy route chunks separate; entry chunk free of them; budget script passes in CI |
+   305	| S0007 AC4 | 6, 7 | Flag file change reflected in the next `GET /session` without a rebuild |
+   306	| S0007 AC5 | 7, 8 | Review Panel at `/reviews/:id` through the cookie; receipt and audit row as before; denied item → not found |
+   307	| S0007 AC6 | 7 | Launch form and token field gone; `?token=` stripped and never sent (network spy) |
+   308	| S0008 AC1 | 4 | First 20 rejections: generic 401 and one event each |
+   309	| S0008 AC2 | 4 | 21st: 429, `Retry-After`, one `rate_limited` event; later: 429 and no event (R2) |
+   310	| S0008 AC3 | 4 | 1,000 rejections across two workers → at most 21 rows in the window |
+   311	| S0008 AC4 | 4 | Throttled client with a valid bearer or session is served; other clients unaffected |
+   312	| S0008 AC5 | 3, 4 | Bearer, unknown cookie and callback failures all count; spoofed `X-Forwarded-For` from an untrusted peer ignored; trusted proxy honored |
+   313	| S0009 AC1 | 8 | `session-transport.spec.ts` |
+   314	| S0009 AC2 | 8 | Recorder refresh count = 1 for 20 parallel requests; revoked token = rotated token |
+   315	| S0009 AC3 | 8 | Injected revocation failure; then the success path with authentik refusing the revoked token |
+   316	| S0009 AC4 | 8 | `principal-isolation.spec.ts`, `return-routes.spec.ts` |
+   317	| S0009 AC5 | 8 | `mutation-continuity.spec.ts` (fresh, stale and revoked variants) |
+   318	
+   319	## Scope Breakdown and Handoffs
+   320	
+   321	- **F0022:** Review Panel functional changes, renderers and batching on top of the rehosted route.
+   322	- **F0023:** Entity 360 routes registered through the seam.
+   323	- **F0067:** Observatory route behind a flag; inherits the D12 stack.
+   324	- **F0026:** production ingress (same origin, `/api` mount, CSP, HSTS), secret store for the client secret and session keys, `authentication_event` and `session_event` retention, back-channel logout, administrator session termination.
+   325	- **Later hardening (section 120.5):** idempotent command protocol for controlled retry.
+   326	
+   327	## Integration Checkpoints and Completion Criteria
+   328	
+   329	1. After Step 2: bearer regression green with the confidential client.
+   330	2. After Step 4: cookie path and CSRF matrix green; bearer suite unchanged.
+   331	3. After Step 5: two-worker renewal test green on PostgreSQL 18.
+   332	4. After Step 7: Vitest suites, axe checks and budget green; old Review Panel tests pass under the new route.
+   333	5. Feature complete:
+   334	   - all 55 ACs have observed proof;
+   335	   - S0009 is green from a clean volume;
+   336	   - at least 80% changed-line coverage;
+   337	   - security review of the cookie, CSRF, renewal, throttle and popup messaging;
+   338	   - ADR-0051 and ADR-0082 acceptance evidence recorded.
+   339	
+   340	## Risks and Blockers
+   341	
+   342	| Risk | Mitigation |
+   343	|---|---|
+   344	| authentik 2026.2 field names or behavior for post-logout redirect, rotation and invalidation differ | Feature G0 verification (R3) before Step 6; the `prompt=login` fallback keeps AC7's user-visible rule |
+   345	| IdP opener policy severs `window.opener` | BroadcastChannel is the primary completion signal (D8) |
+   346	| Safari rejects `Secure` cookies on `http://localhost` | Chromium is the proof browser; the optional HTTPS profile covers Safari (D4) |
+   347	| A renewal holds the row lock while calling the IdP | Bounded at about 11 s; per session only; separate transaction |
+   348	| Bundle growth from Radix and Tailwind | 180 kB gzip budget enforced in CI; lazy routes |
+   349	| Test-only access-token skew could leak into production | Absent outside the e2e composition; startup refuses it on non-localhost origins |
+   350	
+   351	## DI Registration / Runtime Deployment
+   352	
+   353	- `deps.py` composes these once at startup:
+   354	  - `OidcClient` (discovery cached for 1 h; backchannel base URL);
+   355	  - `TokenCipher` (key ring);
+   356	  - `BrowserSessionStore` and `CredentialThrottle` factories over the session factory;
+   357	  - `ReturnRouteAllowlist` and `FlagSource` (mtime-cached files).
+   358	- New environment variables: `BRAIN_PUBLIC_ORIGIN`, `BRAIN_PUBLIC_API_PREFIX`, `BRAIN_OIDC_CLIENT_SECRET`, `BRAIN_OIDC_BACKCHANNEL_URL`, `BRAIN_SESSION_KEYS`, `BRAIN_TRUSTED_PROXIES`.
+   359	- Committed non-secret configuration: `config/experience-flags.yaml`, `config/experience-routes.yaml`.
+   360	- Secrets are never committed except the dev-only client secret in the dev blueprint, which follows the existing dev-password pattern.
+   361	
+   362	## Planning Status and Follow-ups
+   363	
+   364	- Phase B approved 2026-11-27 with `approve-phase-b`; R1 and R2 confirmed (PM wording fixes at feature G0).
+   365	- Run the independent plan-review action before the feature run.
+   366	- ADR-0051 and ADR-0082 stay Proposed until S0009 passes.
+     1	# F0021 BFF API design (ADR-0082, Proposed). OpenAPI 3.1 fragment.
+     2	# The feature run merges these paths, the sessionCookie scheme and the responses into
+     3	# planning-mds/api/brain-api.yaml (version 0.7.0) and regenerates the contract snapshot with the
+     4	# F0011 toolchain. It is kept out of brain-api.yaml during planning so the shipped snapshot stays
+     5	# consistent with the running engine.
+     6	#
+     7	# Paths are engine paths. The browser reaches them under BRAIN_PUBLIC_API_PREFIX (/api), which the
+     8	# same-origin front strips. Every response here carries Cache-Control: no-store and Vary: Cookie.
+     9	openapi: 3.1.0
+    10	info:
+    11	  title: Nebula Insurance Brain API — F0021 BFF additions
+    12	  version: 0.7.0-design
+    13	paths:
+    14	  /auth/login:
+    15	    get:
+    16	      tags: [Session]
+    17	      operationId: startSignIn
+    18	      summary: Start an OIDC authorization-code + PKCE sign-in (S0001 AC1, S0004 AC2/AC6)
+    19	      security: []
+    20	      parameters:
+    21	      - name: return_to
+    22	        in: query
+    23	        required: false
+    24	        description: Relative shell route; validated against config/experience-routes.yaml (ADR-0082 D11). Invalid values become /.
+    25	        schema: {type: string, maxLength: 512}
+    26	      - name: mode
+    27	        in: query
+    28	        required: false
+    29	        schema: {type: string, enum: [redirect, popup], default: redirect}
+    30	      - name: reauth
+    31	        in: query
+    32	        required: false
+    33	        description: Popup correlation reference (128 random bits, base64url). Required when mode=popup, refused otherwise.
+    34	        schema: {type: string, pattern: '^[A-Za-z0-9_-]{22}$'}
+    35	      - name: prompt
+    36	        in: query
+    37	        required: false
+    38	        description: Only `login` is accepted; forwarded to the IdP (used after an explicit sign-out, ADR-0082 D7).
+    39	        schema: {type: string, enum: [login]}
+    40	      responses:
+    41	        '302':
+    42	          description: Redirect to the IdP authorization endpoint. Sets __Host-nebula_login (Max-Age=600). No token, verifier or nonce in any cookie or body.
+    43	          headers:
+    44	            Location: {schema: {type: string, format: uri}}
+    45	            Set-Cookie: {schema: {type: string}}
+    46	        '400':
+    47	          $ref: '#/components/responses/BadRequest'
+    48	        '429':
+    49	          $ref: '#/components/responses/RateLimited'
+    50	        '503':
+    51	          description: IdP discovery unavailable (`idp_unavailable`); the shell shows "sign-in unavailable".
+    52	          content:
+    53	            application/problem+json:
+    54	              schema: {$ref: '#/components/schemas/ProblemDetails'}
+    55	  /auth/callback:
+    56	    get:
+    57	      tags: [Session]
+    58	      operationId: completeSignIn
+    59	      summary: OIDC redirect target (S0001 AC2/AC4/AC6/AC7, S0004 AC2/AC7)
+    60	      security: []
+    61	      parameters:
+    62	      - {name: code, in: query, required: false, schema: {type: string, maxLength: 2048}}
+    63	      - {name: state, in: query, required: false, schema: {type: string, maxLength: 128}}
+    64	      - {name: error, in: query, required: false, schema: {type: string, maxLength: 128}}
+    65	      responses:
+    66	        '302':
+    67	          description: >-
+    68	            Redirect mode. Success → sanitized return route with the new __Host-nebula_session cookie and the
+    69	            login cookie cleared. Any failure (state missing/unknown/expired/used, binding or nonce mismatch, IdP
+    70	            error, code-exchange failure, non-human client, disabled principal) → /sign-in-failed with no session,
+    71	            no session cookie, one authentication_event with the internal reason. A throttled client → /too-many-attempts.
+    72	        '200':
+    73	          description: >-
+    74	            Popup mode success: minimal HTML (CSP default-src 'none'; script-src 'nonce-…') that posts
+    75	            {type: "nebula.reauth", ref} on BroadcastChannel("nebula-session") and to window.opener with the exact
+    76	            public origin, then closes. Popup-mode failure renders the failure page and posts nothing.
+    77	          content:
+    78	            text/html: {schema: {type: string}}
+    79	  /auth/logout:
+    80	    post:
+    81	      tags: [Session]
+    82	      operationId: signOut
+    83	      summary: End the session, revoke upstream, clear the cookie (S0005 AC1–AC4, AC7)
+    84	      security:
+    85	      - sessionCookie: []
+    86	      parameters:
+    87	      - $ref: '#/components/parameters/CsrfToken'
+    88	      responses:
+    89	        '200':
+    90	          description: Session ended and cookie cleared in every case; the body reports the revocation and end-session outcomes truthfully.
+    91	          headers:
+    92	            Set-Cookie: {schema: {type: string}, description: Expired __Host-nebula_session with the same attributes}
+    93	          content:
+    94	            application/json:
+    95	              schema: {$ref: 'https://nebula.local/schemas/logout-result-v1.schema.json'}
+    96	        '400':
+    97	          $ref: '#/components/responses/AmbiguousCredentials'
+    98	        '403':
+    99	          $ref: '#/components/responses/CsrfRejected'
+   100	  /session:
+   101	    get:
+   102	      tags: [Session]
+   103	      operationId: getSession
+   104	      summary: Current session, identity, memberships, CSRF token and flags (S0006 AC1/AC6, S0007 AC4)
+   105	      security:
+   106	      - sessionCookie: []
+   107	      parameters:
+   108	      - $ref: '#/components/parameters/ActivityHint'
+   109	      responses:
+   110	        '200':
+   111	          description: The session snapshot. Never contains an access, refresh or ID token.
+   112	          content:
+   113	            application/json:
+   114	              schema: {$ref: 'https://nebula.local/schemas/browser-session-v1.schema.json'}
+   115	        '400':
+   116	          $ref: '#/components/responses/AmbiguousCredentials'
+   117	        '401':
+   118	          $ref: '#/components/responses/SessionUnauthenticated'
+   119	        '429':
+   120	          $ref: '#/components/responses/RateLimited'
+   121	  /session/active-knowledge-base:
+   122	    put:
+   123	      tags: [Session]
+   124	      operationId: setActiveKnowledgeBase
+   125	      summary: Change the active knowledge base; narrows shell requests only (S0006 AC4/AC5)
+   126	      security:
+   127	      - sessionCookie: []
+   128	      parameters:
+   129	      - $ref: '#/components/parameters/CsrfToken'
+   130	      requestBody:
+   131	        required: true
+   132	        content:
+   133	          application/json:
+   134	            schema: {$ref: 'https://nebula.local/schemas/active-knowledge-base-update-v1.schema.json'}
+   135	      responses:
+   136	        '200':
+   137	          description: Updated session snapshot.
+   138	          content:
+   139	            application/json:
+   140	              schema: {$ref: 'https://nebula.local/schemas/browser-session-v1.schema.json'}
+   141	        '400':
+   142	          $ref: '#/components/responses/AmbiguousCredentials'
+   143	        '401':
+   144	          $ref: '#/components/responses/SessionUnauthenticated'
+   145	        '403':
+   146	          $ref: '#/components/responses/CsrfRejected'
+   147	        '422':
+   148	          description: '`knowledge_base_not_available`: the pair is not a current membership; the active value is unchanged.'
+   149	          content:
+   150	            application/problem+json:
+   151	              schema: {$ref: '#/components/schemas/ProblemDetails'}
+   152	# Existing engine paths (/reviews/*, /content/*, /facts/*) gain `sessionCookie` as an alternative to
+   153	# `bearerAuth` (security: [{bearerAuth: []}, {sessionCookie: []}]) and the responses below where they apply:
+   154	# 400 AmbiguousCredentials, 401 SessionUnauthenticated (adds session_expired), 403 CsrfRejected on unsafe
+   155	# methods, 429 RateLimited. Route handlers, bodies and the non-disclosing 404 are unchanged.
+   156	components:
+   157	  securitySchemes:
+   158	    sessionCookie:
+   159	      type: apiKey
+   160	      in: cookie
+   161	      name: __Host-nebula_session
+   162	      description: Opaque 256-bit session identifier set by the BFF (Secure, HttpOnly, SameSite=Lax, Path=/, no Domain). Unsafe methods also require X-CSRF-Token and a same-origin Origin/Referer.
+   163	  parameters:
+   164	    CsrfToken:
+   165	      name: X-CSRF-Token
+   166	      in: header
+   167	      required: true
+   168	      description: The csrf_token from GET /session (browser-session-v1).
+   169	      schema: {type: string, pattern: '^[A-Za-z0-9_-]{43}$'}
+   170	    ActivityHint:
+   171	      name: X-Nebula-Activity
+   172	      in: header
+   173	      required: false
+   174	      description: '`background` marks a status check that must not extend the idle deadline (PM assumption A5).'
+   175	      schema: {type: string, enum: [background]}
+   176	  responses:
+   177	    BadRequest:
+   178	      description: Validation failure
+   179	      content:
+   180	        application/problem+json:
+   181	          schema: {$ref: '#/components/schemas/ProblemDetails'}
+   182	    AmbiguousCredentials:
+   183	      description: '`ambiguous_credentials`: both a session cookie and an Authorization header were sent; nothing ran.'
+   184	      content:
+   185	        application/problem+json:
+   186	          schema: {$ref: '#/components/schemas/ProblemDetails'}
+   187	    SessionUnauthenticated:
+   188	      description: '`unauthenticated` (no, unknown or ended session; principal mismatch or disabled) or `session_expired` (idle, absolute or failed renewal; recoverable by re-authentication). The internal reason is recorded only in authentication_event.'
+   189	      content:
+   190	        application/problem+json:
+   191	          schema: {$ref: '#/components/schemas/ProblemDetails'}
+   192	    CsrfRejected:
+   193	      description: '`csrf_rejected`: cross-site fetch metadata, foreign or missing Origin/Referer, or a missing or mismatched CSRF token. The session is kept; no handler or write ran.'
+   194	      content:
+   195	        application/problem+json:
+   196	          schema: {$ref: '#/components/schemas/ProblemDetails'}
+   197	    RateLimited:
+   198	      description: '`rate_limited`: more than 20 rejected credentials from this client in the current 60-second window.'
+   199	      headers:
+   200	        Retry-After: {schema: {type: integer, minimum: 1, maximum: 60}}
+   201	      content:
+   202	        application/problem+json:
+   203	          schema: {$ref: '#/components/schemas/ProblemDetails'}
+   204	  schemas:
+   205	    ProblemDetails:
+   206	      $ref: ../../api/brain-api.yaml#/components/schemas/ProblemDetails
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/browser-session-v1.schema.json",
+  "title": "Browser session v1",
+  "description": "GET /session response for the same-origin BFF (ADR-0082 D10, F0021-S0006). Carries the CSRF token for state-changing calls; never carries an access, refresh or ID token.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "principal",
+    "session",
+    "csrf_token",
+    "memberships",
+    "grant_revision",
+    "active_knowledge_base",
+    "flags"
+  ],
+  "properties": {
+    "contract": {
+      "const": "browser-session/v1"
+    },
+    "principal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "display_name",
+        "kind",
+        "issuer"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "display_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "ID-token name, then preferred_username, else null; never the subject."
+        },
+        "kind": {
+          "enum": [
+            "USER"
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idle_expires_at",
+        "absolute_expires_at",
+        "idle_warning_seconds",
+        "server_time"
+      ],
+      "properties": {
+        "idle_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "absolute_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "idle_warning_seconds": {
+          "type": "integer",
+          "const": 120
+        },
+        "server_time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "csrf_token": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "description": "256-bit synchronizer token, base64url without padding; held in page memory only."
+    },
+    "memberships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/membership"
+      }
+    },
+    "grant_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Opaque digest of the principal's current memberships; changes on any grant, revocation or revision change."
+    },
+    "active_knowledge_base": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/kb_ref"
+        }
+      ]
+    },
+    "flags": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]{0,63}$"
+      },
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    }
+  },
+  "$defs": {
+    "kb_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "knowledge_base_id"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
+    },
+    "membership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenant_id",
+        "tenant_name",
+        "knowledge_base_id",
+        "knowledge_base_name",
+        "role"
+      ],
+      "properties": {
+        "tenant_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "tenant_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "knowledge_base_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    }
+  }
+}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/active-knowledge-base-update-v1.schema.json",
+  "title": "Active knowledge-base update v1",
+  "description": "PUT /session/active-knowledge-base request (ADR-0082 D10, F0021-S0006 AC4). The pair must be a current membership of the session principal; null clears the selection. The value only narrows what the shell requests and never authorizes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "active_knowledge_base"
+  ],
+  "properties": {
+    "contract": {
+      "const": "active-knowledge-base-update/v1"
+    },
+    "active_knowledge_base": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tenant_id",
+            "knowledge_base_id"
+          ],
+          "properties": {
+            "tenant_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "knowledge_base_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nebula.local/schemas/logout-result-v1.schema.json",
+  "title": "Logout result v1",
+  "description": "POST /auth/logout response (ADR-0082 D7, F0021-S0005). Reports the upstream revocation outcome truthfully; a failed revocation is never reported as success. The end-session URL carries client_id, post_logout_redirect_uri and state only (no id_token_hint).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract",
+    "signed_out",
+    "revocation",
+    "end_session"
+  ],
+  "properties": {
+    "contract": {
+      "const": "logout-result/v1"
+    },
+    "signed_out": {
+      "const": true,
+      "description": "The server session is ended and its tokens discarded in every case."
+    },
+    "revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "succeeded",
+            "failed",
+            "not_attempted"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "idp_unreachable",
+            "idp_timeout",
+            "idp_rejected",
+            "no_live_tokens",
+            "session_already_ended"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "failed"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "enum": [
+                  "idp_unreachable",
+                  "idp_timeout",
+                  "idp_rejected"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "not_attempted"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "reason"
+            ],
+            "properties": {
+              "reason": {
+                "enum": [
+                  "no_live_tokens",
+                  "session_already_ended"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "succeeded"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "reason"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "end_session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "url"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "redirect",
+            "unavailable"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "redirect"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unavailable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "url": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

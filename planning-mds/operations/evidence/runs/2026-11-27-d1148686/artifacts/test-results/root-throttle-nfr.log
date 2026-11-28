@@ -1,0 +1,113 @@
+    15	
+    16	## Context & Background
+    17	
+    18	F0002 closeout carry-in (2026-09-28, medium): every unauthenticated or rejected-credential request writes one durable `authentication_event` row; the session/BFF boundary must throttle rejected-credential traffic, proven by a negative test showing bounded growth. Retention is F0026. Operator decision D4 (2026-11-27): 20 per client per 60 s, then `429` with `Retry-After`, no per-request row, one `rate_limited` event per client per window, on both the bearer API and the BFF cookie path.
+    19	
+    20	## Acceptance Criteria
+    21	
+    22	- [ ] **AC1:** For one client address, the first 20 rejected credentials within a 60-second window are answered and recorded exactly as today (generic `401`, one `authentication_event` each).
+    23	- [ ] **AC2:** From the 21st rejected credential in that window, the client receives `429` with a `Retry-After` header and a stable `rate_limited` problem code; no credential verification runs and no per-request `authentication_event` row is written. Exactly one `rate_limited` event is recorded for that client and window.
+    24	- [ ] **AC3:** A burst of 1,000 rejected credentials from one client within 60 seconds writes at most 21 `authentication_event` rows for that window.
+    25	- [ ] **AC4:** While a client is throttled, a request from it with a valid credential or session is still served normally; the throttle counts only rejected credentials, and requests from other clients are unaffected.
+    26	- [ ] **AC5:** The rule applies equally to bearer-API requests, cookie-authenticated requests with an unknown or ended session, and sign-in callback failures (S0001 AC4). The client address is the immediate peer, or a forwarded address only from a configured trusted proxy (PM assumption A6).
+    27	
+    28	## Edge Cases & Error Scenarios
+    29	
+    30	A window boundary mid-burst starts a new allowance of 20 plus one summary event. Counter state lost on restart: the allowance resets, which keeps the bound per window. Spoofed `X-Forwarded-For` from an untrusted peer is ignored. The "Too many attempts" page shows for browser sign-in throttling with the wait time.
+    31	
+    32	## Interaction Contract
+    33	
+    34	Entry: any request with a rejected credential. No user action; the result is `429` with `Retry-After`. Persistence evidence: `authentication_event` row counts per window. Audit: per-request events up to the limit, then one `rate_limited` event per client per window.
+    35	
+    36	## Data Requirements
+    37	
+    38	A new `rate_limited` authentication reason (schema change is Phase B); per-client counters with 60-second windows. Counter storage is a Phase B decision.
+    39	
+    40	## Role-Based Visibility
+    41	
+    42	Not role-dependent; applies before principal resolution.
+    43	
+    44	## Non-Functional Expectations
+    45	
+    46	Limit and window are configuration values with D4 defaults. The throttle check adds no database write for throttled requests. At least 80% changed executable-code coverage in the later feature run.
+    47	
+    48	## Dependencies
+    49	
+    50	F0002 `authentication_event` and reasons; S0001, S0002.
+    51	
+    52	## Out of Scope
+    53	
+    54	Retention of `authentication_event` rows (F0026); a global cap across clients; IdP-side lockout policy.
+    55	
+   295	| S0005 AC7 | 6, 8 | End-session URL has no `id_token_hint`; e2e next sign-in asks for credentials; discovery without end-session → `unavailable` warning |
+   296	| S0006 AC1 | 6 | Schema-validated response; no token; only the caller's memberships; display-name fallbacks |
+   297	| S0006 AC2 | 7 | Home and header component tests; axe at desktop and 360 px |
+   298	| S0006 AC3 | 7 | No-membership principal: "no access yet", empty selector, zero engine data calls |
+   299	| S0006 AC4 | 6, 7 | Member switch persists across reload; non-member → 422 and value unchanged; hygiene runs before render |
+   300	| S0006 AC5 | 6 | Engine request for another readable knowledge base still decided by policy; authorization code never reads the active value |
+   301	| S0006 AC6 | 6, 7 | Membership revoked mid-session → new `grant_revision` and list; active value reset; caches cleared |
+   302	| S0007 AC1 | 7 | Flag off or unknown: not-found, no chunk request (network spy), absent from navigation |
+   303	| S0007 AC2 | 7 | Flag on: lazy load inside the frame; forced import failure → retry screen, shell usable |
+   304	| S0007 AC3 | 7 | Build report: lazy route chunks separate; entry chunk free of them; budget script passes in CI |
+   305	| S0007 AC4 | 6, 7 | Flag file change reflected in the next `GET /session` without a rebuild |
+   306	| S0007 AC5 | 7, 8 | Review Panel at `/reviews/:id` through the cookie; receipt and audit row as before; denied item → not found |
+   307	| S0007 AC6 | 7 | Launch form and token field gone; `?token=` stripped and never sent (network spy) |
+   308	| S0008 AC1 | 4 | First 20 rejections: generic 401 and one event each |
+   309	| S0008 AC2 | 4 | 21st: 429, `Retry-After`, one `rate_limited` event; later: 429 and no event (R2) |
+   310	| S0008 AC3 | 4 | 1,000 rejections across two workers → at most 21 rows in the window |
+   311	| S0008 AC4 | 4 | Throttled client with a valid bearer or session is served; other clients unaffected |
+   312	| S0008 AC5 | 3, 4 | Bearer, unknown cookie and callback failures all count; spoofed `X-Forwarded-For` from an untrusted peer ignored; trusted proxy honored |
+   313	| S0009 AC1 | 8 | `session-transport.spec.ts` |
+   314	| S0009 AC2 | 8 | Recorder refresh count = 1 for 20 parallel requests; revoked token = rotated token |
+   315	| S0009 AC3 | 8 | Injected revocation failure; then the success path with authentik refusing the revoked token |
+   316	| S0009 AC4 | 8 | `principal-isolation.spec.ts`, `return-routes.spec.ts` |
+   317	| S0009 AC5 | 8 | `mutation-continuity.spec.ts` (fresh, stale and revoked variants) |
+   318	
+   319	## Scope Breakdown and Handoffs
+   320	
+   321	- **F0022:** Review Panel functional changes, renderers and batching on top of the rehosted route.
+   322	- **F0023:** Entity 360 routes registered through the seam.
+   323	- **F0067:** Observatory route behind a flag; inherits the D12 stack.
+   324	- **F0026:** production ingress (same origin, `/api` mount, CSP, HSTS), secret store for the client secret and session keys, `authentication_event` and `session_event` retention, back-channel logout, administrator session termination.
+   325	- **Later hardening (section 120.5):** idempotent command protocol for controlled retry.
+   326	
+   327	## Integration Checkpoints and Completion Criteria
+   328	
+   329	1. After Step 2: bearer regression green with the confidential client.
+   330	2. After Step 4: cookie path and CSRF matrix green; bearer suite unchanged.
+   331	3. After Step 5: two-worker renewal test green on PostgreSQL 18.
+   332	4. After Step 7: Vitest suites, axe checks and budget green; old Review Panel tests pass under the new route.
+   333	5. Feature complete:
+   334	   - all 55 ACs have observed proof;
+   335	   - S0009 is green from a clean volume;
+   336	   - at least 80% changed-line coverage;
+   337	   - security review of the cookie, CSRF, renewal, throttle and popup messaging;
+   338	   - ADR-0051 and ADR-0082 acceptance evidence recorded.
+   339	
+   340	## Risks and Blockers
+   341	
+   342	| Risk | Mitigation |
+   343	|---|---|
+   344	| authentik 2026.2 field names or behavior for post-logout redirect, rotation and invalidation differ | Feature G0 verification (R3) before Step 6; the `prompt=login` fallback keeps AC7's user-visible rule |
+   345	| IdP opener policy severs `window.opener` | BroadcastChannel is the primary completion signal (D8) |
+   346	| Safari rejects `Secure` cookies on `http://localhost` | Chromium is the proof browser; the optional HTTPS profile covers Safari (D4) |
+   347	| A renewal holds the row lock while calling the IdP | Bounded at about 11 s; per session only; separate transaction |
+   348	| Bundle growth from Radix and Tailwind | 180 kB gzip budget enforced in CI; lazy routes |
+   349	| Test-only access-token skew could leak into production | Absent outside the e2e composition; startup refuses it on non-localhost origins |
+   350	
+   351	## DI Registration / Runtime Deployment
+   352	
+   353	- `deps.py` composes these once at startup:
+   354	  - `OidcClient` (discovery cached for 1 h; backchannel base URL);
+   355	  - `TokenCipher` (key ring);
+   356	  - `BrowserSessionStore` and `CredentialThrottle` factories over the session factory;
+   357	  - `ReturnRouteAllowlist` and `FlagSource` (mtime-cached files).
+   358	- New environment variables: `BRAIN_PUBLIC_ORIGIN`, `BRAIN_PUBLIC_API_PREFIX`, `BRAIN_OIDC_CLIENT_SECRET`, `BRAIN_OIDC_BACKCHANNEL_URL`, `BRAIN_SESSION_KEYS`, `BRAIN_TRUSTED_PROXIES`.
+   359	- Committed non-secret configuration: `config/experience-flags.yaml`, `config/experience-routes.yaml`.
+   360	- Secrets are never committed except the dev-only client secret in the dev blueprint, which follows the existing dev-password pattern.
+   361	
+   362	## Planning Status and Follow-ups
+   363	
+   364	- Phase B approved 2026-11-27 with `approve-phase-b`; R1 and R2 confirmed (PM wording fixes at feature G0).
+   365	- Run the independent plan-review action before the feature run.
+   366	- ADR-0051 and ADR-0082 stay Proposed until S0009 passes.
